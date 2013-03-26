@@ -1,0 +1,7 @@
+*.o
+*.log
+bill.conf
+bill.pro.user
+Makefile
+/libs/boost/
+/libs/gtest/

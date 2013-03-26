@@ -1,0 +1,23 @@
+[main]
+test_mode = false
+web_port = 8032
+
+[db]
+main =  host=host dbname=dbname user=user password=password
+rad =   host=host dbname=dbname user=user password=password
+calls = host=host dbname=dbname user=user password=password
+ast =   host=host dbname=dbname user=user password=password
+
+[geo]
+region = 99
+local_region_ids = 7495,7495499
+local_city_codes = 7495,7498,7499
+
+[udp]
+host = host
+port = port
+
+[billing]
+dc_break = 126
+free_seconds = 5
+
