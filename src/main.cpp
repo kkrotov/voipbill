@@ -14,6 +14,7 @@
 
 #include <boost/thread.hpp>
 #include <boost/interprocess/sync/posix/mutex.hpp>
+#include <signal.h>
 
 void SetPidFile()
 {
@@ -72,8 +73,6 @@ void posix_death_signal(int signum)
 
     exit(3);
 }
-
-#include "BlackList.h"
 
 int main(int argc, char* argv[]) {
 

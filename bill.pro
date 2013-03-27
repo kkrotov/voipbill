@@ -47,7 +47,6 @@ SOURCES += \
     src/tasks/TaskCurrentCalls.cpp \
     src/tasks/TaskAsteriskInfo.cpp \
     src/tasks/Task.cpp \
-    src/main.cpp \
     src/common.cpp \
     src/Log.cpp \
     src/BDb.cpp \
@@ -94,9 +93,13 @@ SOURCES += \
     src/CallsSaver.cpp \
     src/BlackList.cpp \
     src/UdpControlClient.cpp \
-    src/lists/UsageRawList.cpp \
-    src/lists/PhoneList.cpp \
-    src/lists/OperatorList.cpp
+    src/lists/OperatorList.cpp \
+    src/tasks/TaskBillRuntime.cpp \
+    src/tasks/TaskBlacklist.cpp \
+    src/tasks/TaskCheckStartTable.cpp \
+    src/tasks/TaskLimitControl.cpp \
+    src/tasks/TaskSaveCounters.cpp \
+    src/main.cpp
 
 
 
@@ -155,8 +158,6 @@ HEADERS += \
     src/BlackList.h \
     src/tasks/TaskBlacklist.h \
     src/tasks/TaskSaveCounters.h \
-    src/lists/UsageRawList.h \
-    src/lists/PhoneList.h \
     src/lists/OperatorList.h
 
 OTHER_FILES +=

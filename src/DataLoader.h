@@ -3,7 +3,6 @@
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 using boost::interprocess::interprocess_mutex;
 
-#include "lists/UsageRawList.h"
 #include "lists/PhoneList.h"
 #include "lists/ClientObjList.h"
 #include "lists/DestObjList.h"
@@ -37,11 +36,9 @@ public:
     Loader<UsageObjList> usage;
     Loader<PriceObjList> price;
 
-    //shared_ptr<UsageRawList> usage_raw;
     shared_ptr<ClientObjList> client;
     shared_ptr<DestObjList> dest;
     shared_ptr<OperatorList> oper;
-    //shared_ptr<PhoneList> phones;
 
 
 

@@ -43,7 +43,6 @@ void TaskLoader::run()
         ClientObjList * client = 0;
         DestObjList * dest = 0;
         OperatorList * oper = 0;
-        //UsageRawList * usage_raw = 0;
         UsageObjList * usage = 0;
         PriceObjList * price = 0;
 
@@ -90,9 +89,6 @@ void TaskLoader::run()
                     usage = new UsageObjList();
                     usage->load(&db_calls, tday);
 
-                    //usage_raw = new UsageRawList();
-                    //usage_raw->load(&db_calls);
-
                 }else
                 if (event == "price"){
 
@@ -128,12 +124,7 @@ void TaskLoader::run()
                 if (oper->loaded) loader->oper = shared_ptr<OperatorList>(oper); else delete oper;
                 oper = 0;
             }
-            /*
-            if (usage_raw != 0){
-                if (usage_raw->loaded) loader->usage_raw = shared_ptr<UsageRawList>(usage_raw); else delete usage_raw;
-                usage_raw = 0;
-            }
-            */
+
             if (usage != 0){
                 if (usage->loaded) loader->usage.addlist(usage->dt, usage); else delete usage;
                 usage = 0;
@@ -174,22 +165,16 @@ void TaskLoader::htmlfull(stringstream &html){
     if (ol != 0) html << "Client: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize/1024 << " K / " << ol->count << " rows </b><br/>\n";
 
     ol = loader->dest.get();
-    if (ol != 0) html << "Dest: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize/1024 << " K / " << ol->count << " rows </b><br/>\n";
+    if (ol != 0) html << "Prefix: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize/1024 << " K / " << ol->count << " rows </b><br/>\n";
 
     ol = loader->oper.get();
     if (ol != 0) html << "Operator: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize/1024 << " K / " << ol->count << " rows </b><br/>\n";
-
-    //ol = loader->usage_raw.get();
-    //if (ol != 0) html << "Usage raw: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize/1024 << " K / " << ol->count << " rows </b><br/>\n";
 
     ol = loader->usage.get(tday).get();
     if (ol != 0) html << "Usage: <b>" << loader->usage.datamap.size() << " / " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize/1024 << " K / " << ol->count << " rows </b><br/>\n";
 
     ol = loader->price.get(tday).get();
     if (ol != 0) html << "Price: <b>" << loader->price.datamap.size() << " / " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize/1024 << " K / " << ol->count << " rows </b><br/>\n";
-
-    //ol = loader->phones.get();
-    //if (ol != 0) html << "Phones: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ((PhoneList*)ol)->list.size() << " rows </b><br/>\n";
 
     loader->rwlock.unlock();
     //locker.unlock();
@@ -217,13 +202,11 @@ bool TaskLoader::do_load_data(){
     bool success = true;
     time_t tday = get_tday();
 
-    //UsageRawList * usage_raw = new UsageRawList();
     ClientObjList * client = new ClientObjList();
     DestObjList * dest = new DestObjList();
     OperatorList * oper = new OperatorList();
     UsageObjList * usage = new UsageObjList();
     PriceObjList * price = new PriceObjList();
-    //PhoneList * phones = new PhoneList();
 
     try{
         client->load(&db_calls);
@@ -232,13 +215,9 @@ bool TaskLoader::do_load_data(){
 
         oper->load(&db_calls);
 
-        //usage_raw->load(&db_calls);
-
         usage->load(&db_calls, tday);
 
         price->load(&db_calls, tday);
-
-        //phones->load(&db_calls, tday);
 
     }catch( DbException &e ){
         Log::er(e.what());
@@ -246,12 +225,7 @@ bool TaskLoader::do_load_data(){
     }
 
     loader->rwlock.lock();
-/*
-    if (usage_raw->loaded)
-        loader->usage_raw = shared_ptr<UsageRawList>(usage_raw);
-    else
-        delete usage_raw;
-*/
+
     if (client->loaded)
         loader->client = shared_ptr<ClientObjList>(client);
     else
@@ -266,12 +240,7 @@ bool TaskLoader::do_load_data(){
         loader->oper = shared_ptr<OperatorList>(oper);
     else
         delete oper;
-/*
-    if (phones->loaded)
-        loader->phones = shared_ptr<PhoneList>(phones);
-    else
-        delete phones;
-*/
+
     if (usage->loaded)
         loader->usage.addlist(tday, usage);
     else
