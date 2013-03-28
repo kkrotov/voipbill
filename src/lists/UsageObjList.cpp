@@ -6,7 +6,7 @@ size_t UsageObjList::item_size(){	return sizeof(UsageObj);	}
 
 string UsageObjList::sql(BDb * db){
     string time = string_date(dt);
-    string region = lexical_cast<string>(app.conf.geo_region);
+    string region = app.conf.str_region_id;
     return	"      select  u.phone_num, u.id, u.client_id, u.region, " \
             "           t1.freemin*60* case t1.freemin_for_number when true then 1 else u.no_of_lines end, " \
             "           t1.paid_redirect, " \

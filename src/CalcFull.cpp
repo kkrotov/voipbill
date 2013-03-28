@@ -42,7 +42,7 @@ void CalcFull::calc_item(pCallObj call){
     }
 
     // call from other regions is not calc by client price
-    if (call->region >= 80 && call->region < 100 && call->region != app.conf.geo_region) return;
+    if (call->region >= 80 && call->region < 100 && call->region != app.conf.region_id) return;
 
     pUsageObj usage_item;
     if (call->region < 100)

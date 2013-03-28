@@ -5,7 +5,7 @@
 size_t OperatorList::item_size(){	return sizeof(Operator);	}
 
 string OperatorList::sql(BDb * db){
-    string region = lexical_cast<string>(app.conf.geo_region);
+    string region = app.conf.str_region_id;
     return	"   select  id, default_pricelist_id, term_in_cost, term_out_cost, term_out_local_cost " \
             "   from billing.operator " \
             "   where region = " + region +

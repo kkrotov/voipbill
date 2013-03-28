@@ -24,7 +24,7 @@ void CurrentCallsObjList::parse_item(BDbResult &row, void * obj){
         item->region = row.get_i(7);
     }
     item->operator_id = row.get_i(5);
-    if (item->region == 0) item->region = app.conf.geo_region;
+    if (item->region == 0) item->region = app.conf.region_id;
     item->kill_call_reason = 0;
 }
 long long int CurrentCallsObjList::key(void *obj){

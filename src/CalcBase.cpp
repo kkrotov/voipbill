@@ -99,7 +99,7 @@ void CalcBase::calc_limit(CurrentCallsObjList *list){
     for(int i = 0; i < list->count; i++) {
         pCallObj call = list->get(i);
         // clients-operators or this region
-        if (call->usage_id == 0 && (call->region >= 100 || call->region == app.conf.geo_region)){
+        if (call->usage_id == 0 && (call->region >= 100 || call->region == app.conf.region_id)){
             call->kill_call_reason = 1000;
             continue;
         }

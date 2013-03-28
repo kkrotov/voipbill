@@ -48,7 +48,7 @@ void TaskBillRuntime::parse_item(BDbResult &row, void * obj){
         item->operator_id = row.get_i(6);
     }
     item->redirect = row.get_b(8);
-    if (item->region == 0) item->region = app.conf.geo_region;
+    if (item->region == 0) item->region = app.conf.region_id;
     item->kill_call_reason = 0;
 }
 

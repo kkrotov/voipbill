@@ -27,7 +27,8 @@ public:
     string db_calls;
     string db_ast;
 
-    unsigned short geo_region;
+    unsigned short region_id;
+    string str_region_id;
 
     string udp_host;
     unsigned short udp_port;

@@ -12,7 +12,7 @@ string DestObjList::sql(BDb * db){
                               "     substring(cast(region_id as varchar) from 2 for char_length(cast(region_id as varchar))-2), " \
                               "     replace(substring(cast(city_prefix as varchar) from 2 for char_length(cast(city_prefix as varchar))-2), ',', '|') " \
                               " from billing.instance_settings " \
-                              " where id = " + lexical_cast<string>(app.conf.geo_region));
+                              " where id = " + app.conf.str_region_id);
     if (res.next()){
         region_id_list = res.get_s(0);
         city_prefix_list = res.get_s(1);

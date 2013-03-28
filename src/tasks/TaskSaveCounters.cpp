@@ -73,7 +73,7 @@ bool TaskSaveCounters::save_client_counters(bool clear){
         }
         q.append(   string_fmt("(%d,'%d','%s',%d,'%s',%d,%d, %s)",
                                   i->first,
-                                  app.conf.geo_region,
+                                  app.conf.region_id,
                                   string_date(value->amount_month).c_str(),
                                   value->sum_month,
                                   string_date(value->amount_day).c_str(),
@@ -91,7 +91,7 @@ bool TaskSaveCounters::save_client_counters(bool clear){
             if (clear)
             {
                 db_main.exec("BEGIN");
-                db_main.exec("DELETE FROM billing.clients_counters WHERE region_id="+lexical_cast<string>(app.conf.geo_region));
+                db_main.exec("DELETE FROM billing.clients_counters WHERE region_id="+app.conf.str_region_id);
             }
             db_main.exec(q);
             if (clear)
@@ -123,14 +123,14 @@ bool TaskSaveCounters::save_client_counters(bool clear){
 bool TaskSaveCounters::save_calls(){
 
     try{
-        BDbResult res = db_main.query("select max(id) from billing.calls_"+lexical_cast<string>(app.conf.geo_region));
+        BDbResult res = db_main.query("select max(id) from billing.calls_"+app.conf.str_region_id);
         res.next();
         long long int max_id = res.get_ll(0);
 
-        BDb::copy("billing.calls_"+lexical_cast<string>(app.conf.geo_region),
+        BDb::copy("billing.calls_"+app.conf.str_region_id,
                   "",
                   "       id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, srv_region_id",
-                  "select id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, "+lexical_cast<string>(app.conf.geo_region)+"::smallint from billing.calls where id>"+lexical_cast<string>(max_id)+" order by id limit 100000",
+                  "select id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, "+app.conf.str_region_id+"::smallint from billing.calls where id>"+lexical_cast<string>(max_id)+" order by id limit 100000",
                   &db_calls, &db_main);
 
     }catch( DbException &e ){

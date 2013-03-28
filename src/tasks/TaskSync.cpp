@@ -36,19 +36,19 @@ struct qsync{
             ++n;
          }
         if (full){
-            ifs = "select rnd from billing.sync z where z.region='"+lexical_cast<string>(app.conf.geo_region)+"' and z.table='"+label+"' and z.obj=0";
+            ifs = "select rnd from billing.sync z where z.region='"+app.conf.str_region_id+"' and z.table='"+label+"' and z.obj=0";
             del = "delete from "+t_to;
-            fix = "delete from billing.sync z where z.region='"+lexical_cast<string>(app.conf.geo_region)+"' and z.table='"+label+"' and z.rnd<=%s ";
+            fix = "delete from billing.sync z where z.region='"+app.conf.str_region_id+"' and z.table='"+label+"' and z.rnd<=%s ";
         }else{
             sel =   "select "+sfrom+", z.rnd " \
                     "from billing.sync z " \
                     "left join "+t_from+" x on z.obj=x.id " \
-                    "where z.region='"+lexical_cast<string>(app.conf.geo_region)+"' and z.table='"+label+"' " \
+                    "where z.region='"+app.conf.str_region_id+"' and z.table='"+label+"' " \
                     "order by z.rnd ";
                     //"limit 100";
             ins = "insert into "+t_to+"("+sto+") VALUES ";
             del = "delete from "+t_to+" where id in (%s)";
-            fix = "delete from billing.sync z where z.region='"+lexical_cast<string>(app.conf.geo_region)+"' and z.table='"+label+"' and z.rnd<=%s ";
+            fix = "delete from billing.sync z where z.region='"+app.conf.str_region_id+"' and z.table='"+label+"' and z.rnd<=%s ";
         }
         count = 0;
 
@@ -192,7 +192,7 @@ void TaskSync::htmlfull(stringstream &html){
     html << "loops: <b>" << t.count << "</b><br/>\n";
     html << "<br/>\n";
 
-    html << "Region: <b>" << app.conf.geo_region << "</b><br/>\n";
+    html << "Region: <b>" << app.conf.region_id << "</b><br/>\n";
     html << "Errors count: <b>" << errors << "</b><br/>\n";
     html << "<br/>\n";
 

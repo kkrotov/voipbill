@@ -69,7 +69,8 @@ bool Conf::parse_config_file()
         db_calls = pt.get<string>("db.calls");
         db_ast = pt.get<string>("db.ast", "");
 
-        geo_region = pt.get<unsigned short>("geo.region");
+        region_id = pt.get<unsigned short>("geo.region");
+        //str_region_id = le
 
         udp_host = pt.get<string>("udp.host","");
         udp_port = pt.get<unsigned short>("udp.port", 0);
