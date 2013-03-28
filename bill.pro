@@ -48,13 +48,13 @@ SOURCES += \
     src/tasks/TaskAsteriskInfo.cpp \
     src/tasks/Task.cpp \
     src/common.cpp \
-    src/Log.cpp \
-    src/BDb.cpp \
+    src/classes/Log.cpp \
+    src/classes/BDb.cpp \
     src/tasks/TaskLoader.cpp \
     src/tests/Test.cpp \
     src/tests/TestLibs.cpp \
     libs/gtest/src/gtest-all.cc \
-    src/Conf.cpp \
+    src/classes/Conf.cpp \
     libs/boost/libs/regex/src/winstances.cpp \
     libs/boost/libs/regex/src/wide_posix_api.cpp \
     libs/boost/libs/regex/src/wc_regex_traits.cpp \
@@ -74,7 +74,7 @@ SOURCES += \
     libs/boost/libs/regex/src/cpp_regex_traits.cpp \
     src/tasks/TaskYotaQoS.cpp \
     src/tasks/TaskSync.cpp \
-    src/App.cpp \
+    src/classes/App.cpp \
     src/tasks/TaskWeb.cpp \
     src/tests/TestLoader.cpp \
     src/lists/DestObjList.cpp \
@@ -86,13 +86,13 @@ SOURCES += \
     src/lists/FminCounter.cpp \
     src/lists/CurrentCallsObjList.cpp \
     src/lists/AsteriskNumberObjList.cpp \
-    src/DataLoader.cpp \
-    src/CalcBase.cpp \
+    src/classes/DataLoader.cpp \
+    src/classes/CalcBase.cpp \
     src/lists/PriceObjList.cpp \
-    src/CalcFull.cpp \
-    src/CallsSaver.cpp \
-    src/BlackList.cpp \
-    src/UdpControlClient.cpp \
+    src/classes/CalcFull.cpp \
+    src/classes/CallsSaver.cpp \
+    src/classes/BlackList.cpp \
+    src/classes/UdpControlClient.cpp \
     src/lists/OperatorList.cpp \
     src/tasks/TaskBillRuntime.cpp \
     src/tasks/TaskBlacklist.cpp \
@@ -105,27 +105,27 @@ SOURCES += \
 
 
 HEADERS += \
-    src/BDb.h \
+    src/classes/BDb.h \
     src/lists/UsageObjList.h \
     src/lists/PriceObjList.h \
     src/lists/ObjList.h \
     src/lists/Obj.h \
-    src/Log.h \
+    src/classes/Log.h \
     src/lists/DestObjList.h \
-    src/DataLoader.h \
+    src/classes/DataLoader.h \
     src/lists/ClientObjList.h \
-    src/CallsSaver.h \
+    src/classes/CallsSaver.h \
     src/lists/CallsObjList.h \
-    src/CalcFull.h \
-    src/CalcBase.h \
+    src/classes/CalcFull.h \
+    src/classes/CalcBase.h \
     src/lists/ClientCounter.h \
-    src/CounterLoader.h \
+    src/classes/CounterLoader.h \
     src/lists/FminCounter.h \
-    src/KillCalls.h \
-    src/UdpControlClient.h \
+    src/classes/KillCalls.h \
+    src/classes/UdpControlClient.h \
     libs/boost/libs/filesystem/src/windows_file_codecvt.hpp \
     libs/boost/libs/system/src/local_free_on_destruction.hpp \
-    src/Timer.h \
+    src/classes/Timer.h \
     src/lists/AsteriskNumberObjList.h \
     src/lists/CurrentCallsObjList.h \
     src/common.h \
@@ -139,7 +139,7 @@ HEADERS += \
     src/http/header.hpp \
     src/http/file_handler.hpp \
     src/http/coroutine.hpp \
-    src/App.h \
+    src/classes/App.h \
     src/tasks/TaskYotaQoS.h \
     src/tasks/TaskWeb.h \
     src/tasks/TaskSync.h \
@@ -150,12 +150,12 @@ HEADERS += \
     src/tasks/TaskBillRuntime.h \
     src/tasks/TaskAsteriskInfo.h \
     src/tasks/Task.h \
-    src/DbException.h \
+    src/classes/DbException.h \
     src/tests/Test.h \
-    src/Conf.h \
+    src/classes/Conf.h \
     libs/boost/libs/regex/src/internals.hpp \
-    src/Loader.h \
-    src/BlackList.h \
+    src/classes/Loader.h \
+    src/classes/BlackList.h \
     src/tasks/TaskBlacklist.h \
     src/tasks/TaskSaveCounters.h \
     src/lists/OperatorList.h
