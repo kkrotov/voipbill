@@ -1,5 +1,5 @@
 #include "DestObjList.h"
-#include "../App.h"
+#include "../classes/App.h"
 
 #include <boost/algorithm/string/join.hpp>
 

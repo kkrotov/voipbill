@@ -1,6 +1,6 @@
 #include "UsageObjList.h"
 #include <stdlib.h>
-#include "../App.h"
+#include "../classes/App.h"
 
 size_t UsageObjList::item_size(){	return sizeof(UsageObj);	}
 

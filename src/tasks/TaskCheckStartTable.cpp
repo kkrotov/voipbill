@@ -1,7 +1,7 @@
 
 #include "TaskCheckStartTable.h"
-#include "../BDb.h"
-#include "../UdpControlClient.h"
+#include "../classes/BDb.h"
+#include "../classes/UdpControlClient.h"
 
 
 TaskCheckStartTable::TaskCheckStartTable() {

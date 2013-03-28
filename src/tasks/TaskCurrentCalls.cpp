@@ -1,6 +1,6 @@
 #include "TaskCurrentCalls.h"
-#include "../DataLoader.h"
-#include "../CalcFull.h"
+#include "../classes/DataLoader.h"
+#include "../classes/CalcFull.h"
 
 shared_ptr<CurrentCallsObjList> TaskCurrentCalls::list(new CurrentCallsObjList());
 boost::detail::spinlock TaskCurrentCalls::lock;

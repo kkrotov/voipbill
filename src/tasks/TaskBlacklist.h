@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Task.h"
-#include "../DataLoader.h"
-#include "../BlackList.h"
+#include "../classes/DataLoader.h"
+#include "../classes/BlackList.h"
 
 class TaskBlacklist : public Task
 {

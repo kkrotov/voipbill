@@ -1,9 +1,9 @@
 #include "Test.h"
 
-#include "../App.h"
+#include "../classes/App.h"
 #include "../lists/ClientCounter.h"
 #include "../lists/FminCounter.h"
-#include "../Loader.h"
+#include "../classes/Loader.h"
 
 
 TEST(Loader,ClientCounter) {

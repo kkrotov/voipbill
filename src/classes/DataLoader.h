@@ -3,14 +3,13 @@
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 using boost::interprocess::interprocess_mutex;
 
-#include "lists/PhoneList.h"
-#include "lists/ClientObjList.h"
-#include "lists/DestObjList.h"
-#include "lists/OperatorList.h"
-#include "lists/UsageObjList.h"
-#include "lists/PriceObjList.h"
-#include "lists/ClientCounter.h"
-#include "lists/FminCounter.h"
+#include "../lists/ClientObjList.h"
+#include "../lists/DestObjList.h"
+#include "../lists/OperatorList.h"
+#include "../lists/UsageObjList.h"
+#include "../lists/PriceObjList.h"
+#include "../lists/ClientCounter.h"
+#include "../lists/FminCounter.h"
 
 
 #include "Loader.h"

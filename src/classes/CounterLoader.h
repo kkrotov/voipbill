@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Loader.h"
-#include "lists/ClientCounter.h"
-#include "lists/FminCounter.h"
+#include "../lists/ClientCounter.h"
+#include "../lists/FminCounter.h"
 
 class CounterLoader
 {

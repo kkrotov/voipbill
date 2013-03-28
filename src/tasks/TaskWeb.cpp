@@ -7,9 +7,9 @@
 #include "Task.h"
 #include "TaskCurrentCalls.h"
 
-#include "../DataLoader.h"
-#include "../CalcFull.h"
-#include "../BlackList.h"
+#include "../classes/DataLoader.h"
+#include "../classes/CalcFull.h"
+#include "../classes/BlackList.h"
 
 
 void TaskWeb::operator()()

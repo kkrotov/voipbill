@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../BDb.h"
-#include "../Timer.h"
-#include "../DbException.h"
+#include "../classes/BDb.h"
+#include "../classes/Timer.h"
+#include "../classes/DbException.h"
 
 string string_fmt(const string &fmt, ...);
 

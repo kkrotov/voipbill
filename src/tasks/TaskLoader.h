@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../BDb.h"
+#include "../classes/BDb.h"
 #include "Task.h"
-#include "../DataLoader.h"
-#include "../Timer.h"
+#include "../classes/DataLoader.h"
+#include "../classes/Timer.h"
 
 
 

@@ -1,7 +1,7 @@
 #include "TaskLimitControl.h"
 
-#include "../CallsSaver.h"
-#include "../KillCalls.h"
+#include "../classes/CallsSaver.h"
+#include "../classes/KillCalls.h"
 #include "../lists/CurrentCallsObjList.h"
 #include "TaskCurrentCalls.h"
 

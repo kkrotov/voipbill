@@ -1,6 +1,6 @@
 #include "OperatorList.h"
 
-#include "../App.h"
+#include "../classes/App.h"
 
 size_t OperatorList::item_size(){	return sizeof(Operator);	}
 

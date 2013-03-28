@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Task.h"
-#include "../BDb.h"
+#include "../classes/BDb.h"
 #include <list>
 
-#include "../Timer.h"
+#include "../classes/Timer.h"
 
 struct qsync;
 

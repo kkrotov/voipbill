@@ -1,8 +1,8 @@
 #pragma once
 
 #include "DataLoader.h"
-#include "lists/CallsObjList.h"
-#include "lists/CurrentCallsObjList.h"
+#include "../lists/CallsObjList.h"
+#include "../lists/CurrentCallsObjList.h"
 
 class CalcBase
 {

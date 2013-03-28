@@ -1,5 +1,5 @@
 #include "App.h"
-#include "tasks/Task.h"
+#include "../tasks/Task.h"
 
 App::App()
 {

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "../common.h"
-#include "../DbException.h"
-#include "../Timer.h"
-#include "../Log.h"
-#include "../App.h"
+#include "../classes/DbException.h"
+#include "../classes/Timer.h"
+#include "../classes/Log.h"
+#include "../classes/App.h"
 
 class Task
 {

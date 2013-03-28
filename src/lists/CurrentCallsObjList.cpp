@@ -1,5 +1,5 @@
 #include "CurrentCallsObjList.h"
-#include "../App.h"
+#include "../classes/App.h"
 
 size_t CurrentCallsObjList::item_size(){	return sizeof(CallObj);	}
 string CurrentCallsObjList::sql(BDb * db){
