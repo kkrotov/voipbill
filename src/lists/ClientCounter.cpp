@@ -97,10 +97,6 @@ void ClientCounter::reload(BDb * db) {
                 "   from billing.reget_amounts() ");
     loadtime = time(NULL);
     while(res.next()){
-        struct tm ttt;
-        ttt.tm_isdst = 0; ttt.tm_wday = 0; ttt.tm_yday = 0;
-        ttt.tm_hour = 0; ttt.tm_min = 0; ttt.tm_sec = 0;
-
         ClientCounterObj &cc = this->get(res.get_i(0));
         cc.sum = res.get_i(1);
         cc.updated = 1;
