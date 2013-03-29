@@ -19,9 +19,9 @@ public:
 
     static void ssleep(long seconds);
 
-    virtual void wait(){}
+    virtual void wait();
 
-    virtual void prepare(){}
+    virtual void prepare();
 
     virtual void run() = 0;
 

@@ -18,6 +18,14 @@ void Task::ssleep(long seconds)
     sleep(seconds);
 }
 
+void Task::wait()
+{
+}
+
+void Task::prepare()
+{
+}
+
 void Task::operator()()
 {
 

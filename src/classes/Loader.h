@@ -6,9 +6,6 @@ using namespace std;
 #include "../lists/ObjList.h"
 #include "../lists/ClientObjList.h"
 
-#include <boost/shared_ptr.hpp>
-using boost::shared_ptr;
-
 template <class TypeObjList>
 class Loader  {
 public:

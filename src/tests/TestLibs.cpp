@@ -23,8 +23,9 @@ TEST(libs,lexical_cast) {
     EXPECT_EQ( boost::lexical_cast<long long int>("9223372036854775807"), 9223372036854775807 );
 }
 
+/*
 #include <boost/regex.hpp>
-TEST(libs,regex) {
+TEST(libs,regexp) {
     boost::regex exp(".*\"sfId\":\"([\\w\\d\\.-]+)\".*");
     boost::smatch res;
 
@@ -37,6 +38,7 @@ TEST(libs,regex) {
     EXPECT_EQ( boost::regex_match(str1, res, exp), true );
     EXPECT_EQ( string(res[1]), "yota.ru.msk.lte.05712857-cd45-4163-a41f-39178ce9cc67" );
 }
+*/
 
 #include <boost/algorithm/string/split.hpp>
 TEST(libs,split) {

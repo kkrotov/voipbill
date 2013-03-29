@@ -6,6 +6,7 @@
 
 class TaskYotaQoS : public Task
 {
+/*
 protected:
     Timer t;
     Timer t_api;
@@ -24,6 +25,6 @@ public:
     void run();
 
     void htmlfull(stringstream &html);
-
+*/
 };
 

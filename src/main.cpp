@@ -9,10 +9,9 @@
 #include "tasks/TaskCheckStartTable.h"
 #include "tasks/TaskAsteriskInfo.h"
 #include "tasks/TaskCurrentCalls.h"
-#include "tasks/TaskYotaQoS.h"
 #include "tasks/TaskWeb.h"
 
-#include <boost/thread.hpp>
+//#include <thread>
 #include <boost/interprocess/sync/posix/mutex.hpp>
 #include <signal.h>
 
@@ -74,6 +73,8 @@ void posix_death_signal(int signum)
     exit(3);
 }
 
+#include <boost/thread.hpp>
+
 int main(int argc, char* argv[]) {
 
     signal(SIGSEGV, posix_death_signal);
@@ -94,7 +95,6 @@ int main(int argc, char* argv[]) {
 
     boost::thread web_thread(web);
 
-
     TaskSync * task_sync = new TaskSync();
     TaskLoader * task_loader = new TaskLoader();
     TaskSaveCounters * task_savecounters = new TaskSaveCounters();
@@ -104,7 +104,6 @@ int main(int argc, char* argv[]) {
     TaskCheckStartTable * task_checkstarttable = new TaskCheckStartTable();
     TaskAsteriskInfo * task_asteriskinfo = new TaskAsteriskInfo();
     TaskCurrentCalls * task_currentcalls = new TaskCurrentCalls();
-    TaskYotaQoS * task_yotaqos = new TaskYotaQoS();
 
 
     task_sync->start();
@@ -116,13 +115,9 @@ int main(int argc, char* argv[]) {
     task_asteriskinfo->start();
     task_currentcalls->start();
     task_checkstarttable->start();
-    task_yotaqos->start();
 
+    web_thread.join();
 
-    while(true)
-    {
-        sleep(3600);
-    }
     return 0;
 
 }

@@ -53,6 +53,7 @@ bool Conf::parse_cmd_line(int argc, char* argv[])
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
+#include <boost/lexical_cast.hpp>
 
 bool Conf::parse_config_file()
 {
@@ -70,7 +71,7 @@ bool Conf::parse_config_file()
         db_ast = pt.get<string>("db.ast", "");
 
         region_id = pt.get<unsigned short>("geo.region");
-        //str_region_id = le
+        str_region_id = boost::lexical_cast<string>(region_id);
 
         udp_host = pt.get<string>("udp.host","");
         udp_port = pt.get<unsigned short>("udp.port", 0);
@@ -85,7 +86,6 @@ bool Conf::parse_config_file()
     return true;
 }
 
-#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
 bool Conf::prepare()

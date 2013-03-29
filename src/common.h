@@ -21,10 +21,6 @@ using namespace std;
 #include <boost/lexical_cast.hpp>
 using boost::lexical_cast;
 
-#include <boost/regex.hpp>
-
-#include <boost/shared_ptr.hpp>
-using boost::shared_ptr;
 
 string string_fmt(const string &fmt, ...);
 

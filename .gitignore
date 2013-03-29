@@ -1,7 +1,6 @@
-*.o
-*.log
-bill.conf
-bill.pro.user
-Makefile
+/voipbill.depend
+/voipbill.layout
+/bin
+/obj
 /libs/boost/
 /libs/gtest/

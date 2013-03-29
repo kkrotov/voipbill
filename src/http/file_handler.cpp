@@ -19,6 +19,7 @@
 
 #include "../tasks/TaskWeb.h"
 #include "../common.h"
+#include "../classes/Log.h"
 
 namespace http {
 namespace server4 {
