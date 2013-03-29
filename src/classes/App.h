@@ -24,6 +24,7 @@ public:
     App();
 
     bool init(int argc, char* argv[]);
+    void run();
 
     void register_task(Task * task);
     void unregister_task(Task * task);

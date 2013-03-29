@@ -1,6 +1,21 @@
 #include "App.h"
 #include "../tasks/Task.h"
 
+#include "../tasks/TaskBlacklist.h"
+#include "../tasks/TaskBillRuntime.h"
+#include "../tasks/TaskLimitControl.h"
+#include "../tasks/TaskLoader.h"
+#include "../tasks/TaskSync.h"
+#include "../tasks/TaskSaveCounters.h"
+#include "../tasks/TaskCheckStartTable.h"
+#include "../tasks/TaskAsteriskInfo.h"
+#include "../tasks/TaskCurrentCalls.h"
+#include "../tasks/TaskWeb.h"
+
+#include "Daemon.h"
+
+#include <boost/thread.hpp>
+
 App::App()
 {
     init_sync_done = false;
@@ -10,9 +25,47 @@ App::App()
 }
 
 bool App::init(int argc, char* argv[]){
+
+    srand(time(0));
+
     if (!conf.init(argc, argv))
         return false;
+
     return true;
+}
+
+void App::run()
+{
+    Daemoin::setPidFile();
+    Daemoin::initSignalHandler();
+
+
+    TaskWeb web;
+
+    boost::thread web_thread(web);
+
+    TaskSync * task_sync = new TaskSync();
+    TaskLoader * task_loader = new TaskLoader();
+    TaskSaveCounters * task_savecounters = new TaskSaveCounters();
+    TaskBlacklist * task_blacklist = new TaskBlacklist();
+    TaskLimitControl * task_limitcontrol = new TaskLimitControl();
+    TaskBillRuntime * task_billruntime = new TaskBillRuntime();
+    TaskCheckStartTable * task_checkstarttable = new TaskCheckStartTable();
+    TaskAsteriskInfo * task_asteriskinfo = new TaskAsteriskInfo();
+    TaskCurrentCalls * task_currentcalls = new TaskCurrentCalls();
+
+
+    task_sync->start();
+    task_loader->start();
+    task_billruntime->start();
+    task_limitcontrol->start();
+    task_blacklist->start();
+    task_savecounters->start();
+    task_asteriskinfo->start();
+    task_currentcalls->start();
+    task_checkstarttable->start();
+
+    web_thread.join();
 }
 
 void App::register_task(Task * task)

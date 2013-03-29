@@ -93,6 +93,8 @@
 		<Unit filename="src/classes/Conf.cpp" />
 		<Unit filename="src/classes/Conf.h" />
 		<Unit filename="src/classes/CounterLoader.h" />
+		<Unit filename="src/classes/Daemon.cpp" />
+		<Unit filename="src/classes/Daemon.h" />
 		<Unit filename="src/classes/DataLoader.cpp" />
 		<Unit filename="src/classes/DataLoader.h" />
 		<Unit filename="src/classes/DbException.h" />
