@@ -109,8 +109,8 @@ TEST(Loader,Loader) {
     EXPECT_EQ(1, ll->get(0, 1000));
     EXPECT_EQ(1, ll->get(0, 1004));
 
-    EXPECT_EQ(false, k2.get(0) == 0);
-    EXPECT_EQ(true, k2.get(1234) == 0);
+    EXPECT_FALSE(k2.get(0) == 0);
+    EXPECT_TRUE(k2.get(1234) == 0);
 
     EXPECT_EQ(3, (int)k1.datamap.size());
     EXPECT_EQ(2, (int)k2.datamap.size());

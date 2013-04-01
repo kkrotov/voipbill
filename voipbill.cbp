@@ -71,7 +71,6 @@
 		<Unit filename="src/classes/BDb.h" />
 		<Unit filename="src/classes/BlackList.cpp" />
 		<Unit filename="src/classes/BlackList.h" />
-		<Unit filename="src/classes/BlackListFull.h" />
 		<Unit filename="src/classes/BlackListGlobal.h" />
 		<Unit filename="src/classes/BlackListLocal.h" />
 		<Unit filename="src/classes/CalcBase.cpp" />

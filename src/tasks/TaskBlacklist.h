@@ -2,7 +2,6 @@
 
 #include "Task.h"
 #include "../classes/DataLoader.h"
-#include "../classes/BlackListFull.h"
 #include "../classes/BlackListLocal.h"
 #include "../classes/BlackListGlobal.h"
 
@@ -10,7 +9,6 @@ class TaskBlacklist : public Task
 {
     Timer t;
     DataLoader *loader;
-    BlackListFull *blacklist;
     BlackListLocal *blacklist_local;
     BlackListGlobal *blacklist_global;
 

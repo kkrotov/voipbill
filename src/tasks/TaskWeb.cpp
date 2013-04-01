@@ -9,7 +9,7 @@
 
 #include "../classes/DataLoader.h"
 #include "../classes/CalcFull.h"
-#include "../classes/BlackListFull.h"
+#include "../classes/BlackListLocal.h"
 #include "../classes/BlackListGlobal.h"
 
 
@@ -224,7 +224,8 @@ void TaskWeb::handlerClient(stringstream &html, map<string,string> &parameters)
 
     html << "<br/>\n";
 
-    BlackListFull *bl = BlackListFull::instance();
+    BlackList *bl;
+    bl = BlackListLocal::instance();
     bl->lock.lock();
     {
         map<long long int,time_t>::iterator i = bl->blacklist.begin();
@@ -232,7 +233,24 @@ void TaskWeb::handlerClient(stringstream &html, map<string,string> &parameters)
             pUsageObj usage = usages->find(i->first);
             if (usage != 0 && usage->client_id == client_id)
             {
-                html << "Locked number&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
+                html << "Locked Local <b>number</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
+                html << lexical_cast<string>(i->first);
+                html << "</b><br/>\n";
+            }
+            ++i;
+        }
+    }
+    bl->lock.unlock();
+
+    bl = BlackListGlobal::instance();
+    bl->lock.lock();
+    {
+        map<long long int,time_t>::iterator i = bl->blacklist.begin();
+        while (i != bl->blacklist.end()) {
+            pUsageObj usage = usages->find(i->first);
+            if (usage != 0 && usage->client_id == client_id)
+            {
+                html << "Locked Gobal <b>number</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
                 html << lexical_cast<string>(i->first);
                 html << "</b><br/>\n";
             }

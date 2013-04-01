@@ -80,14 +80,6 @@ bool UdpControlClient::kill(string &phones, string &ids){
     return sendrecv(msg, res);
 }
 
-bool UdpControlClient::blacklist(vector<string> &list){
-    string msg("READ_BLACKLIST");
-    string res;
-    if (sendrecv(msg, res) == false || res == "0") return false;
-    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","));
-    return true;
-}
-
 bool UdpControlClient::blacklist_local(vector<string> &list){
     string msg("READ_BLACKLIST_LOCAL");
     string res;
@@ -104,14 +96,6 @@ bool UdpControlClient::blacklist_global(vector<string> &list){
     return true;
 }
 
-// Zablokirovat nomera na oborudovanii
-bool UdpControlClient::lock(string &phones){
-    string msg("LOCK " + phones);
-    string res;
-    return sendrecv(msg, res) && res == "1";
-}
-
-
 bool UdpControlClient::lock_local(string &phones){
     string msg("LOCK_LOCAL " + phones);
     string res;
@@ -120,13 +104,6 @@ bool UdpControlClient::lock_local(string &phones){
 
 bool UdpControlClient::lock_global(string &phones){
     string msg("LOCK_GLOBAL " + phones);
-    string res;
-    return sendrecv(msg, res) && res == "1";
-}
-
-// Razablokirovat nomera na oborudovanii
-bool UdpControlClient::unlock(string &phones){
-    string msg("UNLOCK " + phones);
     string res;
     return sendrecv(msg, res) && res == "1";
 }

@@ -6,7 +6,6 @@ TaskBlacklist::TaskBlacklist()
     name = "Blacklist";
 
     loader = DataLoader::instance();
-    blacklist = BlackListFull::instance();
     blacklist_global = BlackListGlobal::instance();
     blacklist_local = BlackListLocal::instance();
 
@@ -27,11 +26,6 @@ void TaskBlacklist::wait()
 
 void TaskBlacklist::prepare()
 {
-    while(blacklist->fetch() == false)
-    {
-        ssleep(10);
-    }
-
     while(blacklist_local->fetch() == false)
     {
         ssleep(10);
@@ -71,7 +65,6 @@ void TaskBlacklist::sync_once_per_day()
 
     last_sync_from_openca_time = time(NULL);
 
-    blacklist->fetch();
     blacklist_local->fetch();
     blacklist_global->fetch();
 
@@ -94,14 +87,6 @@ void TaskBlacklist::sync_blacklist()
 
 
     map<long long int,time_t>::iterator i;
-    i = blacklist->blacklist.begin();
-    while (i != blacklist->blacklist.end()) {
-        if (usages->find(i->first) == 0)
-        {
-            blacklist->del(i->first);
-        }
-        ++i;
-    }
 
     i = blacklist_local->blacklist.begin();
     while (i != blacklist_local->blacklist.end()) {
@@ -121,7 +106,6 @@ void TaskBlacklist::sync_blacklist()
         ++i;
     }
 
-    blacklist->push();
     blacklist_local->push();
     blacklist_global->push();
 }
@@ -153,7 +137,6 @@ void TaskBlacklist::update_voip_auto_disabled(){
 
     for(int j=0;j<usages->count;j++)
     {
-        bool need_lock_full = false;
         bool need_lock_local = false;
         bool need_lock_global = false;
 
@@ -174,7 +157,6 @@ void TaskBlacklist::update_voip_auto_disabled(){
                     (client->disabled)
             ){
                 need_lock_global = true;
-                //need_lock_full = true;
             }
 
         }
@@ -189,16 +171,6 @@ void TaskBlacklist::update_voip_auto_disabled(){
         {
             cc.disabled_local = need_lock_local;
             cc.updated = 1;
-        }
-
-        if (blacklist->is_locked(usage->phone_num) != need_lock_full)
-        {
-            if (need_lock_full)
-            {
-                blacklist->add(usage->phone_num);
-            }else{
-                blacklist->del(usage->phone_num);
-            }
         }
 
         if (blacklist_local->is_locked(usage->phone_num) != need_lock_local)
@@ -224,7 +196,6 @@ void TaskBlacklist::update_voip_auto_disabled(){
     }
     loader->counter_rwlock.unlock();
 
-    blacklist->push();
     blacklist_local->push();
     blacklist_global->push();
 }
@@ -242,57 +213,9 @@ void TaskBlacklist::htmlfull(stringstream &html){
     loader->rwlock.lock();
 
     shared_ptr<UsageObjList> usages = loader->usage.get(get_tday());
+    pUsageObj usage;
 
     loader->rwlock.unlock();
-
-
-    blacklist->lock.lock();
-
-    if (blacklist->blacklist.size() > 0)
-    {
-        html << "BlackListFull: <b>" << blacklist->blacklist.size() << "</b><br/>\n";
-        map<long long int,time_t>::iterator i = blacklist->blacklist.begin();
-        while (i != blacklist->blacklist.end()) {
-            html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-            html << lexical_cast<string>(i->first);
-            if (usages && usages->find(i->first) == 0)
-                html << " -- del";
-            html << "<br/>\n";
-            ++i;
-        }
-    }
-
-    if (blacklist->list_to_add.size() > 0)
-    {
-        html << "BlackListFull to Add: <b>" << blacklist->list_to_add.size() << "</b><br/>\n";
-        map<long long int,bool>::iterator i = blacklist->list_to_add.begin();
-        while (i != blacklist->list_to_add.end()) {
-            html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-            html << lexical_cast<string>(i->first);
-            if (usages && usages->find(i->first) == 0)
-                html << " -- del";
-            html << "<br/>\n";
-            ++i;
-        }
-    }
-
-    if (blacklist->list_to_del.size() > 0)
-    {
-        html << "BlackListFull to Del: <b>" << blacklist->list_to_del.size() << "</b><br/>\n";
-        map<long long int,bool>::iterator i = blacklist->list_to_del.begin();
-        while (i != blacklist->list_to_del.end()) {
-            html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-            html << lexical_cast<string>(i->first);
-            if (usages && usages->find(i->first) == 0)
-                html << " -- del";
-            html << "<br/>\n";
-            ++i;
-        }
-    }
-
-    html << "<br/>\n";
-    blacklist->lock.unlock();
-
 
 
     blacklist_local->lock.lock();
@@ -303,9 +226,9 @@ void TaskBlacklist::htmlfull(stringstream &html){
         map<long long int,time_t>::iterator i = blacklist_local->blacklist.begin();
         while (i != blacklist_local->blacklist.end()) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-            html << lexical_cast<string>(i->first);
-            if (usages && usages->find(i->first) == 0)
-                html << " -- del";
+            html << "<b>" << lexical_cast<string>(i->first) << "</b>";
+            if (usages != 0 && (usage = usages->find(i->first)) != 0)
+                html << " / " << usage->client_id;
             html << "<br/>\n";
             ++i;
         }
@@ -317,9 +240,9 @@ void TaskBlacklist::htmlfull(stringstream &html){
         map<long long int,bool>::iterator i = blacklist_local->list_to_add.begin();
         while (i != blacklist_local->list_to_add.end()) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-            html << lexical_cast<string>(i->first);
-            if (usages && usages->find(i->first) == 0)
-                html << " -- del";
+            html << "<b>" << lexical_cast<string>(i->first) << "</b>";
+            if (usages != 0 && (usage = usages->find(i->first)) != 0)
+                html << " / " << usage->client_id;
             html << "<br/>\n";
             ++i;
         }
@@ -331,9 +254,9 @@ void TaskBlacklist::htmlfull(stringstream &html){
         map<long long int,bool>::iterator i = blacklist_local->list_to_del.begin();
         while (i != blacklist_local->list_to_del.end()) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-            html << lexical_cast<string>(i->first);
-            if (usages && usages->find(i->first) == 0)
-                html << " -- del";
+            html << "<b>" << lexical_cast<string>(i->first) << "</b>";
+            if (usages != 0 && (usage = usages->find(i->first)) != 0)
+                html << " / " << usage->client_id;
             html << "<br/>\n";
             ++i;
         }
@@ -352,9 +275,9 @@ void TaskBlacklist::htmlfull(stringstream &html){
         map<long long int,time_t>::iterator i = blacklist_global->blacklist.begin();
         while (i != blacklist_global->blacklist.end()) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-            html << lexical_cast<string>(i->first);
-            if (usages && usages->find(i->first) == 0)
-                html << " -- del";
+            html << "<b>" << lexical_cast<string>(i->first) << "</b>";
+            if (usages != 0 && (usage = usages->find(i->first)) != 0)
+                html << " / " << usage->client_id;
             html << "<br/>\n";
             ++i;
         }
@@ -366,9 +289,9 @@ void TaskBlacklist::htmlfull(stringstream &html){
         map<long long int,bool>::iterator i = blacklist_global->list_to_add.begin();
         while (i != blacklist_global->list_to_add.end()) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-            html << lexical_cast<string>(i->first);
-            if (usages && usages->find(i->first) == 0)
-                html << " -- del";
+            html << "<b>" << lexical_cast<string>(i->first) << "</b>";
+            if (usages != 0 && (usage = usages->find(i->first)) != 0)
+                html << " / " << usage->client_id;
             html << "<br/>\n";
             ++i;
         }
@@ -380,9 +303,9 @@ void TaskBlacklist::htmlfull(stringstream &html){
         map<long long int,bool>::iterator i = blacklist_global->list_to_del.begin();
         while (i != blacklist_global->list_to_del.end()) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-            html << lexical_cast<string>(i->first);
-            if (usages && usages->find(i->first) == 0)
-                html << " -- del";
+            html << "<b>" << lexical_cast<string>(i->first) << "</b>";
+            if (usages != 0 && (usage = usages->find(i->first)) != 0)
+                html << " / " << usage->client_id;
             html << "<br/>\n";
             ++i;
         }

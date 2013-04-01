@@ -3,11 +3,10 @@
 #include <time.h>
 #include <map>
 #include <string>
+#include <mutex>
+#include <vector>
+
 using namespace std;
-
-#include <boost/interprocess/sync/interprocess_mutex.hpp>
-using boost::interprocess::interprocess_mutex;
-
 
 class BlackList
 {
@@ -24,7 +23,7 @@ public:
     map<long long int,bool> list_to_add;
     map<long long int,bool> list_to_del;
 
-    interprocess_mutex lock;
+    mutex lock;
 
     BlackList();
 

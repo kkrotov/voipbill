@@ -5,7 +5,6 @@
 #include "DataLoader.h"
 #include "../common.h"
 
-
 BlackList::BlackList()
 {
 }
