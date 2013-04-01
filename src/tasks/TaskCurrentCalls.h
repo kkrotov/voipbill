@@ -2,6 +2,7 @@
 
 #include "../tasks/Task.h"
 #include "../lists/CurrentCallsObjList.h"
+#include <boost/smart_ptr/detail/spinlock.hpp>
 
 class TaskCurrentCalls : public Task
 {

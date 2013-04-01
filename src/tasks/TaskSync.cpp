@@ -234,6 +234,7 @@ TaskSync::TaskSync(){
     s1.add_field("balance");
     s1.add_field("credit");
     s1.add_field("amount_date");
+    s1.add_field("last_payed_month");
     s1.prepare();
     syncs.push_back(s1);
 

@@ -1,7 +1,6 @@
 #pragma once
 
-#include <boost/interprocess/sync/interprocess_mutex.hpp>
-using boost::interprocess::interprocess_mutex;
+#include <mutex>
 
 #include "../lists/ClientObjList.h"
 #include "../lists/DestObjList.h"
@@ -31,7 +30,7 @@ struct curr_data{
 class DataLoader
 {
 public:
-    interprocess_mutex rwlock;
+    mutex rwlock;
     Loader<UsageObjList> usage;
     Loader<PriceObjList> price;
 
@@ -41,7 +40,7 @@ public:
 
 
 
-    interprocess_mutex counter_rwlock;
+    mutex counter_rwlock;
     shared_ptr<ClientCounter> counter_client;
     Loader<FminCounter> counter_fmin;
 

@@ -1,3 +1,4 @@
+/*
 #include "TaskAsteriskInfo.h"
 
 shared_ptr<AsteriskNumberObjList> TaskAsteriskInfo::list(new AsteriskNumberObjList());
@@ -56,3 +57,4 @@ TaskAsteriskInfo::TaskAsteriskInfo() {
     id = "asterisk";
     name = "Asterisk Info";
 }
+*/

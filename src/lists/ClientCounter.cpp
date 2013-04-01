@@ -52,7 +52,7 @@ void ClientCounter::load(BDb * db, time_t dt) {
     counter.clear();
 
     BDbResult res = db->query(
-                "   select r_client_id, m_date, m_sum, d_date, d_sum, a_sum, disabled  " \
+                "   select r_client_id, m_date, m_sum, d_date, d_sum, a_sum, disabled, disabled_local  " \
                 "   from billing.get_amounts() "    );
     loadtime = time(NULL);
     last_use = loadtime;
@@ -75,7 +75,8 @@ void ClientCounter::load(BDb * db, time_t dt) {
 
         cc.sum = res.get_i(5);
 
-        cc.disabled = res.get_b(6);
+        cc.disabled_global = res.get_b(6);
+        cc.disabled_local = res.get_b(7);
 
         cc.updated = 1;
         counter[res.get_i(0)] = cc;

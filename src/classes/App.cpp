@@ -8,13 +8,10 @@
 #include "../tasks/TaskSync.h"
 #include "../tasks/TaskSaveCounters.h"
 #include "../tasks/TaskCheckStartTable.h"
-#include "../tasks/TaskAsteriskInfo.h"
 #include "../tasks/TaskCurrentCalls.h"
 #include "../tasks/TaskWeb.h"
 
 #include "Daemon.h"
-
-#include <boost/thread.hpp>
 
 App::App()
 {
@@ -42,7 +39,7 @@ void App::run()
 
     TaskWeb web;
 
-    boost::thread web_thread(web);
+    std::thread web_thread(web);
 
     TaskSync * task_sync = new TaskSync();
     TaskLoader * task_loader = new TaskLoader();
@@ -51,7 +48,6 @@ void App::run()
     TaskLimitControl * task_limitcontrol = new TaskLimitControl();
     TaskBillRuntime * task_billruntime = new TaskBillRuntime();
     TaskCheckStartTable * task_checkstarttable = new TaskCheckStartTable();
-    TaskAsteriskInfo * task_asteriskinfo = new TaskAsteriskInfo();
     TaskCurrentCalls * task_currentcalls = new TaskCurrentCalls();
 
 
@@ -61,7 +57,6 @@ void App::run()
     task_limitcontrol->start();
     task_blacklist->start();
     task_savecounters->start();
-    task_asteriskinfo->start();
     task_currentcalls->start();
     task_checkstarttable->start();
 

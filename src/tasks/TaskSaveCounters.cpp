@@ -67,11 +67,11 @@ bool TaskSaveCounters::save_client_counters(bool clear){
         if (value->updated == 0) continue;
 
         if (q == ""){
-            q.append("INSERT INTO billing.clients_counters(client_id,region_id,amount_month,amount_month_sum,amount_day,amount_day_sum,amount_sum,voip_auto_disabled)VALUES");
+            q.append("INSERT INTO billing.clients_counters(client_id,region_id,amount_month,amount_month_sum,amount_day,amount_day_sum,amount_sum,voip_auto_disabled,voip_auto_disabled_local)VALUES");
         }else{
             q.append(",");
         }
-        q.append(   string_fmt("(%d,'%d','%s',%d,'%s',%d,%d, %s)",
+        q.append(   string_fmt("(%d,'%d','%s',%d,'%s',%d,%d,%s,%s)",
                                   i->first,
                                   app.conf.region_id,
                                   string_date(value->amount_month).c_str(),
@@ -79,7 +79,8 @@ bool TaskSaveCounters::save_client_counters(bool clear){
                                   string_date(value->amount_day).c_str(),
                                   value->sum_day,
                                   value->sum,
-                                  (value->disabled ? "true" : "false") ) );
+                                  (value->disabled_global ? "true" : "false"),
+                                  (value->disabled_local ? "true" : "false") ) );
         value->updated = 2;
 
     }

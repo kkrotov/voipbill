@@ -12,11 +12,12 @@ using boost::interprocess::interprocess_mutex;
 class BlackList
 {
 protected:
-
-    time_t last_fetch_from_openca_time;
-
     void log_lock_phone(string &phone);
     void log_unlock_phone(string &phone);
+
+    virtual bool udp_blacklist(vector<string> &list) = 0;
+    virtual bool udp_lock(string &phones) = 0;
+    virtual bool udp_unlock(string &phones) = 0;
 
 public:
     map<long long int,time_t> blacklist;
@@ -27,17 +28,11 @@ public:
 
     BlackList();
 
-    static BlackList * instance(){
-        static BlackList inst;
-        return &inst;
-    }
-
     void add(long long int phone);
     void del(long long int phone);
 
     bool is_locked(long long int phone);
 
     bool fetch();
-    bool fetch_once_per_day();
     void push();
 };

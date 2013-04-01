@@ -8,7 +8,6 @@
 
 BlackList::BlackList()
 {
-    last_fetch_from_openca_time = 0;
 }
 
 void BlackList::add(long long int phone)
@@ -39,26 +38,16 @@ void BlackList::del(long long int phone)
     lock.unlock();
 }
 
-bool BlackList::fetch_once_per_day()
-{
-    if (last_fetch_from_openca_time + 86400 < time(NULL))
-    {
-        return fetch();
-    }else{
-        return true;
-    }
-}
-
 bool BlackList::fetch()
 {
     vector<string> curr_list;
-    if (UdpControlClient::blacklist(curr_list) == false)
+    if (udp_blacklist(curr_list) == false)
     {
         Log::er("Can not fetch black list from opanca");
         return false;
     }
 
-    last_fetch_from_openca_time = time(NULL);
+    time_t current_time = time(NULL);
 
     lock.lock();
 
@@ -66,7 +55,7 @@ bool BlackList::fetch()
         vector<string>::iterator i = curr_list.begin();
         while (i != curr_list.end()) {
             long long int phone = atoll(((string)*i).c_str());
-            blacklist[phone] = last_fetch_from_openca_time;
+            blacklist[phone] = current_time;
             ++i;
         }
     }
@@ -74,7 +63,7 @@ bool BlackList::fetch()
     {
         map<long long int,time_t>::iterator i = blacklist.begin();
         while (i != blacklist.end()) {
-            if (i->second != last_fetch_from_openca_time)
+            if (i->second != current_time)
             {
                 blacklist.erase(i++);
             }else
@@ -124,7 +113,7 @@ void BlackList::push()
         vector<long long int>::iterator ii = list.begin();
         while (ii != list.end()) {
             string phone = lexical_cast<string>(*ii);
-            if (UdpControlClient::lock(phone) == false){
+            if (udp_lock(phone) == false){
                 Log::er("Can not lock phone "+phone);
                 ++ii;
                 continue;
@@ -159,7 +148,7 @@ void BlackList::push()
         vector<long long int>::iterator ii = list.begin();
         while (ii != list.end()) {
             string phone = lexical_cast<string>(*ii);
-            if (UdpControlClient::unlock(phone) == false){
+            if (udp_unlock(phone) == false){
                 Log::er("Can not unlock phone "+phone);
                 ++ii;
                 continue;

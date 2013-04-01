@@ -5,6 +5,7 @@
 #include "../classes/Timer.h"
 #include "../classes/Log.h"
 #include "../classes/App.h"
+#include <thread>
 
 class Task
 {
@@ -12,6 +13,8 @@ public:
     string id;
     string name;
     string status;
+
+    std::thread task_thread;
 
     Task();
 

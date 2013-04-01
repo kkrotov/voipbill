@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "App.h"
 
-interprocess_mutex Log::mutex;
+mutex Log::log_mutex;
 
 void Log::pr(const string &text){
     Log::pr(text.c_str());
@@ -15,11 +15,11 @@ void Log::er(const string &text){
 }
 
 void Log::pr(const char * text){
-    mutex.lock();
+    log_mutex.lock();
 
     printf("%s", text);
 
-    mutex.unlock();
+    log_mutex.unlock();
 }
 
 
@@ -31,7 +31,7 @@ void Log::wr(const char * text){
     timeinfo = localtime ( &rawtime );
     strftime (stime,30,"[%d.%m.%Y %H:%M:%S]",timeinfo);
 
-    mutex.lock();
+    log_mutex.lock();
 
     printf("%s %s\n", pstime, text);
 
@@ -42,7 +42,7 @@ void Log::wr(const char * text){
         fclose(f);
     }
 
-    mutex.unlock();
+    log_mutex.unlock();
 }
 void Log::er(const char * text){
     time_t rawtime;
@@ -52,7 +52,7 @@ void Log::er(const char * text){
     timeinfo = localtime ( &rawtime );
     strftime (stime,30,"[%d.%m.%Y %H:%M:%S]",timeinfo);
 
-    mutex.lock();
+    log_mutex.lock();
 
     printf("%s %s\n", pstime, text);
 
@@ -70,5 +70,5 @@ void Log::er(const char * text){
         fclose(f2);
     }
 
-    mutex.unlock();
+    log_mutex.unlock();
 }

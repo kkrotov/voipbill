@@ -52,14 +52,6 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="libs/boost/libs/filesystem/src/codecvt_error_category.cpp" />
-		<Unit filename="libs/boost/libs/filesystem/src/operations.cpp" />
-		<Unit filename="libs/boost/libs/filesystem/src/path.cpp" />
-		<Unit filename="libs/boost/libs/filesystem/src/path_traits.cpp" />
-		<Unit filename="libs/boost/libs/filesystem/src/portability.cpp" />
-		<Unit filename="libs/boost/libs/filesystem/src/unique_path.cpp" />
-		<Unit filename="libs/boost/libs/filesystem/src/utf8_codecvt_facet.cpp" />
-		<Unit filename="libs/boost/libs/filesystem/src/windows_file_codecvt.cpp" />
 		<Unit filename="libs/boost/libs/program_options/src/cmdline.cpp" />
 		<Unit filename="libs/boost/libs/program_options/src/config_file.cpp" />
 		<Unit filename="libs/boost/libs/program_options/src/convert.cpp" />
@@ -72,11 +64,6 @@
 		<Unit filename="libs/boost/libs/program_options/src/variables_map.cpp" />
 		<Unit filename="libs/boost/libs/program_options/src/winmain.cpp" />
 		<Unit filename="libs/boost/libs/system/src/error_code.cpp" />
-		<Unit filename="libs/boost/libs/system/src/local_free_on_destruction.hpp" />
-		<Unit filename="libs/boost/libs/thread/src/future.cpp" />
-		<Unit filename="libs/boost/libs/thread/src/pthread/once.cpp" />
-		<Unit filename="libs/boost/libs/thread/src/pthread/thread.cpp" />
-		<Unit filename="libs/boost/libs/thread/src/tss_null.cpp" />
 		<Unit filename="libs/gtest/src/gtest-all.cc" />
 		<Unit filename="src/classes/App.cpp" />
 		<Unit filename="src/classes/App.h" />
@@ -84,6 +71,9 @@
 		<Unit filename="src/classes/BDb.h" />
 		<Unit filename="src/classes/BlackList.cpp" />
 		<Unit filename="src/classes/BlackList.h" />
+		<Unit filename="src/classes/BlackListFull.h" />
+		<Unit filename="src/classes/BlackListGlobal.h" />
+		<Unit filename="src/classes/BlackListLocal.h" />
 		<Unit filename="src/classes/CalcBase.cpp" />
 		<Unit filename="src/classes/CalcBase.h" />
 		<Unit filename="src/classes/CalcFull.cpp" />

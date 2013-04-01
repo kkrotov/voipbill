@@ -79,6 +79,7 @@ typedef struct _ClientObj
     double   balance;
     bool    disabled;
     time_t  amount_date;
+    time_t  last_payed_month;
 } ClientObj, *pClientObj;
 
 typedef struct _ClientCounterObj
@@ -89,7 +90,8 @@ typedef struct _ClientCounterObj
     int		sum_month;
     time_t  amount_month;
     time_t  amount_day;
-    bool    disabled;
+    bool    disabled_local;
+    bool    disabled_global;
     unsigned char    updated;
     double sumDay(){
         if (amount_day == get_tday())

@@ -1,9 +1,8 @@
 #pragma once
 
 #include <list>
+#include <mutex>
 using namespace std;
-
-#include <boost/interprocess/sync/interprocess_mutex.hpp>
 
 #include "Conf.h"
 
@@ -13,7 +12,7 @@ class App
 {
 public:
     Conf conf;
-    boost::interprocess::interprocess_mutex tasks_mutex;
+    mutex tasks_mutex;
     list<Task*> tasks;
 
     bool init_sync_done;

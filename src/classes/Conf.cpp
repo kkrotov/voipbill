@@ -68,7 +68,6 @@ bool Conf::parse_config_file()
         db_main = pt.get<string>("db.main");
         db_rad = pt.get<string>("db.rad");
         db_calls = pt.get<string>("db.calls");
-        db_ast = pt.get<string>("db.ast", "");
 
         region_id = pt.get<unsigned short>("geo.region");
         str_region_id = boost::lexical_cast<string>(region_id);
@@ -93,12 +92,14 @@ bool Conf::prepare()
     return true;
 }
 
-#include <boost/filesystem.hpp>
-
 bool Conf::init(int argc, char* argv[]) {
-    boost::filesystem::path path(argv[0]);
-    app_directory = path.parent_path().string();
-    app_name = path.filename().string();
+    string path(argv[0]);
+    vector<string> mpath;
+    boost::algorithm::split(mpath, path, boost::algorithm::is_any_of("/"));
+
+    app_name = mpath[mpath.size()-1];
+    mpath.erase(mpath.end()-1);
+    app_directory = boost::algorithm::join(mpath, "/");
 
     err_log_file =  app_directory + "/" + app_name + ".err.log";
     log_file =      app_directory + "/" + app_name + ".log";

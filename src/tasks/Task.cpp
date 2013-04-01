@@ -1,7 +1,6 @@
 #include "../common.h"
 #include "Task.h"
 
-#include <boost/thread.hpp>
 
 Task::Task(){
     id = string_fmt("%d", rand());
@@ -10,7 +9,8 @@ Task::Task(){
 }
 
 void Task::start(){
-    boost::thread thread(&Task::operator(), this);
+    std::thread t(&Task::operator(), this);
+    std::swap(task_thread, t);
 }
 
 void Task::ssleep(long seconds)

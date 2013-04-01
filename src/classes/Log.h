@@ -1,14 +1,12 @@
 #pragma once
 
-#include <boost/interprocess/sync/interprocess_mutex.hpp>
-using namespace boost::interprocess;
-
+#include <mutex>
 #include <string>
 using namespace std;
 
 class Log {
 protected:
-    static interprocess_mutex mutex;
+    static mutex log_mutex;
 
 public:
     static void pr(const string &text);

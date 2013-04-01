@@ -9,7 +9,8 @@
 
 #include "../classes/DataLoader.h"
 #include "../classes/CalcFull.h"
-#include "../classes/BlackList.h"
+#include "../classes/BlackListFull.h"
+#include "../classes/BlackListGlobal.h"
 
 
 void TaskWeb::operator()()
@@ -68,7 +69,6 @@ void TaskWeb::handlerConfig(stringstream &html)
     html << "db.main: " << app.conf.db_main << "<br/>\n";
     html << "db.rad: " << app.conf.db_rad << "<br/>\n";
     html << "db.calls: " << app.conf.db_calls << "<br/>\n";
-    html << "db.ast: " << app.conf.db_ast << "<br/>\n";
     html << "<br/>\n";
     html << "udp.host: " << app.conf.udp_host << "<br/>\n";
     html << "udp.port: " << app.conf.udp_port << "<br/>\n";
@@ -189,7 +189,7 @@ void TaskWeb::handlerClient(stringstream &html, map<string,string> &parameters)
     ClientObj client = *p_client;
 
     double sum_month, sum_day, sum_balance;
-    bool client_disabled;
+    bool client_disabled_global, client_disabled_local;
     {
         loader->counter_rwlock.lock(); //.lockForRead();
         shared_ptr<ClientCounter> clients_counters = loader->counter_client;
@@ -197,7 +197,8 @@ void TaskWeb::handlerClient(stringstream &html, map<string,string> &parameters)
         sum_month = client_counter.sumMonth();
         sum_day = client_counter.sumDay();
         sum_balance = client_counter.sumBalance();
-        client_disabled = client_counter.disabled;
+        client_disabled_global = client_counter.disabled_global;
+        client_disabled_local = client_counter.disabled_local;
         loader->counter_rwlock.unlock();
     }
 
@@ -215,10 +216,15 @@ void TaskWeb::handlerClient(stringstream &html, map<string,string> &parameters)
     html << "Client Id: <b>" << client.id << "</b><br/>\n";
     html << "<br/>\n";
 
-    if (client_disabled)
-        html << "Client disabled<br/>\n";
+    if (client_disabled_local)
+        html << "Client disabled LOCAL<br/>\n";
 
-    BlackList *bl = BlackList::instance();
+    if (client_disabled_global)
+        html << "Client disabled GLOBAL<br/>\n";
+
+    html << "<br/>\n";
+
+    BlackListFull *bl = BlackListFull::instance();
     bl->lock.lock();
     {
         map<long long int,time_t>::iterator i = bl->blacklist.begin();
@@ -235,6 +241,7 @@ void TaskWeb::handlerClient(stringstream &html, map<string,string> &parameters)
     }
     bl->lock.unlock();
 
+    html << "<br/>\n";
 
     if (client.credit >= 0)
         html << "Balance avaiable: <b>" << string_fmt("%.2f",client.balance + client.credit - sum_balance) << "</b><br/>\n";
@@ -256,6 +263,11 @@ void TaskWeb::handlerClient(stringstream &html, map<string,string> &parameters)
         html << "Credit limit: <b>" << client.credit << "</b><br/>\n";
     if (client.disabled)
         html << "Voip disabled: <b>" << "true" << "</b><br/>\n";
+    html << "<br/>\n";
+
+    html << "Last account date: <b>" << string_time(client.amount_date) << "</b><br/>\n";
+    html << "Last payed month: <b>" << string_date(client.last_payed_month) << "</b><br/>\n";
+
     html << "<br/>\n";
 
     html << "Sum from account: <b>" << string_fmt("%.2f",sum_balance) << "</b><br/>\n";

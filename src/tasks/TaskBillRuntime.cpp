@@ -64,6 +64,7 @@ void TaskBillRuntime::wait()
 
 void TaskBillRuntime::run()
 {
+    Log::wr("Running...");
     db_rad.setCS(app.conf.db_rad);
     db_calls.setCS(app.conf.db_calls);
 

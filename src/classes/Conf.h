@@ -25,7 +25,6 @@ public:
     string db_main;
     string db_rad;
     string db_calls;
-    string db_ast;
 
     unsigned short region_id;
     string str_region_id;

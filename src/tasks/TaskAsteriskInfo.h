@@ -6,6 +6,7 @@
 
 class TaskAsteriskInfo : public Task
 {
+/*
 public:
     static shared_ptr<AsteriskNumberObjList> getList();
 private:
@@ -19,5 +20,6 @@ private:
     void htmlfull(stringstream &html);
 public:
     TaskAsteriskInfo();
+*/
 };
 
