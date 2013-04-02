@@ -17,10 +17,13 @@ public:
     std::thread task_thread;
 
     Task();
+    virtual ~Task();
 
     void start();
 
-    static void ssleep(long seconds);
+    static void ssleep(unsigned int seconds);
+
+    static void usleep(unsigned int milliseconds);
 
     virtual void wait();
 
