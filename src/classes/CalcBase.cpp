@@ -105,35 +105,52 @@ void CalcBase::calc_limit(CurrentCallsObjList *list){
         }
         if (call->out == false) continue;
 
-        pClientObj cl = data.client->find(call->client_id);
-        if (cl == 0) continue;
-        if (cl->limit_m == 0 && cl->limit_d == 0 && cl->credit < 0 && !cl->disabled) continue;
-
-        if (cl->disabled)
-        {
-            call->kill_call_reason = 2000;
+        pClientObj client = data.client->find(call->client_id);
+        if (client == 0) {
+            call->kill_call_reason = 1010;
             continue;
         }
-
 
         ClientCounterObj &c0 = data.counter_client->get(call->client_id);
         ClientCounterObj &c2 = client_counter2->get(call->client_id);
 
-        if (cl->credit  >= 0 && cl->balance + cl->credit - c0.sumBalance() - c2.sumBalance() < 0)
+        if (call->dest < 0)
         {
-            call->kill_call_reason = 3000;
-            continue;
+            if (client->credit  >= 0 && client->balance + client->credit - c0.sumBalance() - c2.sumBalance() < 0
+                && client->last_payed_month < get_tmonth())
+            {
+                call->kill_call_reason = 3000;
+                continue;
+            }
         }
-        if (cl->limit_d != 0 && cl->limit_d - c0.sumDay() - c2.sumDay() < 0)
+        else
         {
-            call->kill_call_reason = 3010;
-            continue;
+            if (client->disabled)
+            {
+                call->kill_call_reason = 2000;
+                continue;
+            }
+
+            if (client->credit  >= 0 && client->balance + client->credit - c0.sumBalance() - c2.sumBalance() < 0)
+            {
+                call->kill_call_reason = 3000;
+                continue;
+            }
+            if (client->limit_d != 0 && client->limit_d - c0.sumDay() - c2.sumDay() < 0)
+            {
+                call->kill_call_reason = 3010;
+                continue;
+            }
+            if (client->limit_m != 0 && client->limit_m - c0.sumMonth() - c2.sumMonth() < 0)
+            {
+                call->kill_call_reason = 3020;
+                continue;
+            }
         }
-        if (cl->limit_m != 0 && cl->limit_m - c0.sumMonth() - c2.sumMonth() < 0)
-        {
-            call->kill_call_reason = 3020;
-            continue;
-        }
+
+
+
+
     }
 }
 

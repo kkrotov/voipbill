@@ -35,6 +35,8 @@ public:
                 string reason;
                 if (call->kill_call_reason == 1000)
                     reason = "Unknown number";
+                else if (call->kill_call_reason == 1010)
+                    reason = "Unknown client";
                 else if (call->kill_call_reason == 2000)
                     reason = "Void disabled";
                 else if (call->kill_call_reason == 3000)
