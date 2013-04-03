@@ -17,7 +17,7 @@
 #include "reply.hpp"
 #include "request.hpp"
 
-#include "../tasks/TaskWeb.h"
+#include "../threads/ThreadWeb.h"
 #include "../common.h"
 #include "../classes/Log.h"
 
@@ -73,15 +73,15 @@ void file_handler::operator()(const request& req, reply& rep)
   stringstream html;
   if (request_path == "/")
   {
-      TaskWeb::handlerHome(html);
+      ThreadWeb::handlerHome(html);
   }
   else if (request_path == "/config")
   {
-      TaskWeb::handlerConfig(html);
+      ThreadWeb::handlerConfig(html);
   }
   else if (request_path == "/task")
   {
-      if (!TaskWeb::handlerTask(html, parameters))
+      if (!ThreadWeb::handlerTask(html, parameters))
       {
           rep = reply::stock_reply(reply::not_found);
           return;
@@ -89,11 +89,11 @@ void file_handler::operator()(const request& req, reply& rep)
   }
   else if (request_path == "/counters")
   {
-      TaskWeb::handlerCounters(html);
+      ThreadWeb::handlerCounters(html);
   }
   else if (request_path == "/client")
   {
-      TaskWeb::handlerClient(html, parameters);
+      ThreadWeb::handlerClient(html, parameters);
   }
   else{
     rep = reply::stock_reply(reply::not_found);

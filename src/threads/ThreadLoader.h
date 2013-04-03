@@ -1,13 +1,13 @@
 #pragma once
 
 #include "../classes/BDb.h"
-#include "Task.h"
+#include "Thread.h"
 #include "../classes/DataLoader.h"
 #include "../classes/Timer.h"
 
 
 
-class TaskLoader : public Task
+class ThreadLoader : public Thread
 {
     Timer t;
     DataLoader * loader;
@@ -26,5 +26,5 @@ public:
 
     bool do_load_counters();
 
-    TaskLoader();
+    ThreadLoader();
 };

@@ -1,10 +1,10 @@
 #pragma once
-#include "Task.h"
+#include "Thread.h"
 #include "../classes/Timer.h"
 
 #include <map>
 
-class TaskYotaQoS : public Task
+class ThreadYotaQoS : public Thread
 {
 /*
 protected:
@@ -20,7 +20,7 @@ protected:
 
 public:
 
-    TaskYotaQoS();
+    ThreadYotaQoS();
 
     void run();
 

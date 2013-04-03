@@ -1,15 +1,15 @@
 
-#include "TaskCheckStartTable.h"
+#include "ThreadCheckStartTable.h"
 #include "../classes/BDb.h"
 #include "../classes/UdpControlClient.h"
 
 
-TaskCheckStartTable::TaskCheckStartTable() {
+ThreadCheckStartTable::ThreadCheckStartTable() {
     id = "checkstarttable";
     name = "Check Start Table";
 }
 
-void TaskCheckStartTable::run()
+void ThreadCheckStartTable::run()
 {
     if (UdpControlClient::ready() == false) return;
 
@@ -70,7 +70,7 @@ void TaskCheckStartTable::run()
 }
 
 
-void TaskCheckStartTable::htmlfull(stringstream &html){
+void ThreadCheckStartTable::htmlfull(stringstream &html){
     this->html(html);
 
     html << "Time loop: <b>" << t.sloop() << "</b><br/>\n";

@@ -1,11 +1,11 @@
-#include "TaskTasks.h"
+#include "ThreadTasks.h"
 
-TaskTasks::TaskTasks() {
+ThreadTasks::ThreadTasks() {
     id = "tasks";
     name = "Tasks";
 }
 
-void TaskTasks::run()
+void ThreadTasks::run()
 {
     BDb db_main(app.conf.db_main);
 
@@ -42,7 +42,7 @@ void TaskTasks::run()
 }
 
 
-void TaskTasks::htmlfull(stringstream &html){
+void ThreadTasks::htmlfull(stringstream &html){
     this->html(html);
 
     html << "Time loop: <b>" << t.sloop() + "</b><br/>\n";

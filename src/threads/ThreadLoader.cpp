@@ -1,6 +1,6 @@
-#include "TaskLoader.h"
+#include "ThreadLoader.h"
 
-void TaskLoader::wait()
+void ThreadLoader::wait()
 {
     while(app.init_sync_done == false)
     {
@@ -8,7 +8,7 @@ void TaskLoader::wait()
     }
 }
 
-void TaskLoader::prepare()
+void ThreadLoader::prepare()
 {
     while(app.init_load_data_done == false)
     {
@@ -33,7 +33,7 @@ void TaskLoader::prepare()
     }
 }
 
-void TaskLoader::run()
+void ThreadLoader::run()
 {
     bool counter_locked = false;
 
@@ -143,7 +143,7 @@ void TaskLoader::run()
 }
 
 
-void TaskLoader::htmlfull(stringstream &html){
+void ThreadLoader::htmlfull(stringstream &html){
     this->html(html);
 
     html << "Time loop: <b>" << t.sloop() + "</b><br/>\n";
@@ -198,7 +198,7 @@ void TaskLoader::htmlfull(stringstream &html){
     html << "Loader errors count: <b>" << errors << "</b><br/>\n";
 }
 
-bool TaskLoader::do_load_data(){
+bool ThreadLoader::do_load_data(){
     bool success = true;
     time_t tday = get_tday();
 
@@ -256,7 +256,7 @@ bool TaskLoader::do_load_data(){
     return success;
 }
 
-bool TaskLoader::do_load_counters(){
+bool ThreadLoader::do_load_counters(){
     bool success = true;
     ClientCounter * counter_client = new ClientCounter();
     FminCounter * counter_fmin = new FminCounter();
@@ -289,7 +289,7 @@ bool TaskLoader::do_load_counters(){
     return success;
 }
 
-TaskLoader::TaskLoader()
+ThreadLoader::ThreadLoader()
 {
     id = "loader";
     name = "Loader";

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Task.h"
+#include "Thread.h"
 #include "../classes/DataLoader.h"
 
-class TaskSaveCounters : public Task
+class ThreadSaveCounters : public Thread
 {
     Timer t;
     DataLoader *loader;
@@ -22,5 +22,5 @@ class TaskSaveCounters : public Task
 
     void htmlfull(stringstream &html);
 public:
-    TaskSaveCounters();
+    ThreadSaveCounters();
 };

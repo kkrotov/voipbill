@@ -1,4 +1,4 @@
-#include "TaskSync.h"
+#include "ThreadSync.h"
 
 typedef pair<string,string> fpair;
 
@@ -66,7 +66,7 @@ struct qsync{
     }
 };
 
-bool TaskSync::sync_full(qsync &s){
+bool ThreadSync::sync_full(qsync &s){
     bool trans_calls = false;
     try{
         //ifs
@@ -99,7 +99,7 @@ bool TaskSync::sync_full(qsync &s){
 
 
 
-bool TaskSync::sync_notfull(qsync &s){
+bool ThreadSync::sync_notfull(qsync &s){
     int size;
     try{
         BDbResult res = db_main.query(s.sel);
@@ -147,7 +147,7 @@ bool TaskSync::sync_notfull(qsync &s){
     return true;
 }
 
-void TaskSync::prepare()
+void ThreadSync::prepare()
 {
     while(app.init_sync_done == false)
     {
@@ -161,7 +161,7 @@ void TaskSync::prepare()
     }
 }
 
-void TaskSync::run()
+void ThreadSync::run()
 {
     while(true){
 
@@ -184,7 +184,7 @@ void TaskSync::run()
 }
 
 
-void TaskSync::htmlfull(stringstream &html){
+void ThreadSync::htmlfull(stringstream &html){
     this->html(html);
 
     html << "Time loop: <b>" << t.sloop() << "</b><br/>\n";
@@ -203,7 +203,7 @@ void TaskSync::htmlfull(stringstream &html){
 }
 
 
-bool TaskSync::do_sync(){
+bool ThreadSync::do_sync(){
     for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s){
         if ((*s).full){
             if (sync_full(*s) == false) return false;
@@ -214,7 +214,7 @@ bool TaskSync::do_sync(){
     return true;
 }
 
-TaskSync::TaskSync(){
+ThreadSync::ThreadSync(){
     id = "sync";
     name = "Sync";
 

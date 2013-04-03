@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Task.h"
+#include "Thread.h"
 #include "../classes/BDb.h"
 #include <list>
 
@@ -8,7 +8,7 @@
 
 struct qsync;
 
-class TaskSync : public Task
+class ThreadSync : public Thread
 {
     Timer t;
     BDb db_main;
@@ -29,7 +29,7 @@ class TaskSync : public Task
     void htmlfull(stringstream &html);
 public:
 
-    TaskSync();
+    ThreadSync();
 
     bool do_sync();
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Task.h"
+#include "Thread.h"
 #include "../classes/CalcFull.h"
 
-class TaskBillRuntime : public Task, public CallsObjList
+class ThreadBillRuntime : public Thread, public CallsObjList
 {
 protected:
     BDb db_rad;
@@ -27,6 +27,6 @@ public:
 
     void htmlfull(stringstream &html);
 public:
-    TaskBillRuntime();
+    ThreadBillRuntime();
 };
 

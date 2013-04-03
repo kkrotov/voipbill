@@ -1,6 +1,6 @@
-#include "TaskBlacklist.h"
+#include "ThreadBlacklist.h"
 
-TaskBlacklist::TaskBlacklist()
+ThreadBlacklist::ThreadBlacklist()
 {
     id = "blacklist";
     name = "Blacklist";
@@ -12,7 +12,7 @@ TaskBlacklist::TaskBlacklist()
     last_sync_from_openca_time = 0;
 }
 
-void TaskBlacklist::wait()
+void ThreadBlacklist::wait()
 {
     while(app.init_sync_done == false ||
           app.init_load_data_done == false ||
@@ -24,7 +24,7 @@ void TaskBlacklist::wait()
     }
 }
 
-void TaskBlacklist::prepare()
+void ThreadBlacklist::prepare()
 {
     while(blacklist_local->fetch() == false)
     {
@@ -41,7 +41,7 @@ void TaskBlacklist::prepare()
     sync_blacklist();
 }
 
-void TaskBlacklist::run()
+void ThreadBlacklist::run()
 {
     while(true){
 
@@ -58,7 +58,7 @@ void TaskBlacklist::run()
     }
 }
 
-void TaskBlacklist::sync_once_per_day()
+void ThreadBlacklist::sync_once_per_day()
 {
     if (last_sync_from_openca_time + 86400 >= time(NULL))
         return;
@@ -72,7 +72,7 @@ void TaskBlacklist::sync_once_per_day()
 }
 
 
-void TaskBlacklist::sync_blacklist()
+void ThreadBlacklist::sync_blacklist()
 {
     loader->rwlock.lock();
 
@@ -112,7 +112,7 @@ void TaskBlacklist::sync_blacklist()
 
 
 
-void TaskBlacklist::update_voip_auto_disabled(){
+void ThreadBlacklist::update_voip_auto_disabled(){
 
     loader->rwlock.lock();
 
@@ -201,7 +201,7 @@ void TaskBlacklist::update_voip_auto_disabled(){
 }
 
 
-void TaskBlacklist::htmlfull(stringstream &html){
+void ThreadBlacklist::htmlfull(stringstream &html){
     this->html(html);
 
     html << "Time loop: <b>" << t.sloop() << "</b><br/>\n";

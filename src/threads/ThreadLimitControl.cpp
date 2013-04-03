@@ -1,17 +1,17 @@
-#include "TaskLimitControl.h"
+#include "ThreadLimitControl.h"
 
 #include "../classes/CallsSaver.h"
 #include "../classes/KillCalls.h"
 #include "../lists/CurrentCallsObjList.h"
-#include "TaskCurrentCalls.h"
+#include "ThreadCurrentCalls.h"
 
 
-TaskLimitControl::TaskLimitControl() {
+ThreadLimitControl::ThreadLimitControl() {
     id = "limitcontrol";
     name = "Limit control";
 }
 
-void TaskLimitControl::wait()
+void ThreadLimitControl::wait()
 {
     while(app.init_sync_done == false ||
           app.init_load_data_done == false ||
@@ -22,7 +22,7 @@ void TaskLimitControl::wait()
     }
 }
 
-void TaskLimitControl::run()
+void ThreadLimitControl::run()
 {
     BDb db_calls(app.conf.db_calls);
     calculator.setDb(&db_calls);
@@ -30,7 +30,7 @@ void TaskLimitControl::run()
     while(true){
         ssleep(1);
 
-        shared_ptr<CurrentCallsObjList> splist = TaskCurrentCalls::getList();
+        shared_ptr<CurrentCallsObjList> splist = ThreadCurrentCalls::getList();
         CurrentCallsObjList * list = splist.get();
 
         t.start();
@@ -60,7 +60,7 @@ void TaskLimitControl::run()
     }
 }
 
-void TaskLimitControl::htmlfull(stringstream &html){
+void ThreadLimitControl::htmlfull(stringstream &html){
     this->html(html);
 
     html << "Time calc: <b>" << t_calc.sloop() + "</b><br/>\n";

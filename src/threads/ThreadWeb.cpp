@@ -1,11 +1,11 @@
-#include "TaskWeb.h"
+#include "ThreadWeb.h"
 
 #include "../http/server.hpp"
 #include "../http/file_handler.hpp"
 
 #include "../common.h"
-#include "Task.h"
-#include "TaskCurrentCalls.h"
+#include "Thread.h"
+#include "ThreadCurrentCalls.h"
 
 #include "../classes/DataLoader.h"
 #include "../classes/CalcFull.h"
@@ -13,7 +13,7 @@
 #include "../classes/BlackListGlobal.h"
 
 
-void TaskWeb::operator()()
+void ThreadWeb::operator()()
 {
     if (app.conf.web_port == 0) return;
 
@@ -25,7 +25,7 @@ void TaskWeb::operator()()
 
 }
 
-void TaskWeb::handlerHeader(stringstream &html)
+void ThreadWeb::handlerHeader(stringstream &html)
 {
     html << "<style>\n";
     html << "* {font-family:monospace !important;}\n";
@@ -38,21 +38,21 @@ void TaskWeb::handlerHeader(stringstream &html)
     html << " <hr/> ";
 }
 
-void TaskWeb::handlerHome(stringstream &html)
+void ThreadWeb::handlerHome(stringstream &html)
 {
     handlerHeader(html);
 
-    app.tasks_mutex.lock();
-    for(list<Task*>::iterator i = app.tasks.begin(); i != app.tasks.end(); i++)
+    app.threads_mutex.lock();
+    for(list<Thread*>::iterator i = app.threads.begin(); i != app.threads.end(); i++)
     {
-        Task * task = *i;
-        task->html(html);
+        Thread * thread = *i;
+        thread->html(html);
         html << "<hr>\n";
     }
-    app.tasks_mutex.unlock();
+    app.threads_mutex.unlock();
 }
 
-void TaskWeb::handlerConfig(stringstream &html)
+void ThreadWeb::handlerConfig(stringstream &html)
 {
     handlerHeader(html);
 
@@ -77,35 +77,35 @@ void TaskWeb::handlerConfig(stringstream &html)
     html << "billing.dc_break: " << app.conf.billing_dc_break << "<br/>\n";
 }
 
-bool TaskWeb::handlerTask(stringstream &html, map<string,string> &parameters)
+bool ThreadWeb::handlerTask(stringstream &html, map<string,string> &parameters)
 {
     string task_id;
     if (parameters.find("id") != parameters.end())
         task_id = parameters["id"];
-    Task * task = 0;
-    app.tasks_mutex.lock();
-    for(list<Task*>::iterator i = app.tasks.begin(); i != app.tasks.end(); i++)
+    Thread * thread = 0;
+    app.threads_mutex.lock();
+    for(list<Thread*>::iterator i = app.threads.begin(); i != app.threads.end(); i++)
     {
-        task = *i;
-        if (task->id == task_id)
+        thread = *i;
+        if (thread->id == task_id)
             break;
         else
-            task = 0;
+            thread = 0;
     }
-    app.tasks_mutex.unlock();
+    app.threads_mutex.unlock();
 
-    if (task == 0){
+    if (thread == 0){
         return false;
     }
 
     handlerHeader(html);
 
-    task->htmlfull(html);
+    thread->htmlfull(html);
 
     return true;
 }
 
-void TaskWeb::handlerCounters(stringstream &html)
+void ThreadWeb::handlerCounters(stringstream &html)
 {
     handlerHeader(html);
 
@@ -156,7 +156,7 @@ void TaskWeb::handlerCounters(stringstream &html)
 
 
 
-void TaskWeb::handlerClient(stringstream &html, map<string,string> &parameters)
+void ThreadWeb::handlerClient(stringstream &html, map<string,string> &parameters)
 {
     handlerHeader(html);
 
@@ -202,7 +202,7 @@ void TaskWeb::handlerClient(stringstream &html, map<string,string> &parameters)
         loader->counter_rwlock.unlock();
     }
 
-    shared_ptr<CurrentCallsObjList> current_calls_list = TaskCurrentCalls::getList();
+    shared_ptr<CurrentCallsObjList> current_calls_list = ThreadCurrentCalls::getList();
     CurrentCallsObjList * calls_list = current_calls_list.get();
 
     CalcFull calculator;

@@ -1,11 +1,11 @@
-#include "TaskCurrentCalls.h"
+#include "ThreadCurrentCalls.h"
 #include "../classes/DataLoader.h"
 #include "../classes/CalcFull.h"
 
-shared_ptr<CurrentCallsObjList> TaskCurrentCalls::list(new CurrentCallsObjList());
-boost::detail::spinlock TaskCurrentCalls::lock;
+shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::list(new CurrentCallsObjList());
+boost::detail::spinlock ThreadCurrentCalls::lock;
 
-shared_ptr<CurrentCallsObjList> TaskCurrentCalls::getList()
+shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::getList()
 {
     lock.lock();
     shared_ptr<CurrentCallsObjList> plist = list;
@@ -14,7 +14,7 @@ shared_ptr<CurrentCallsObjList> TaskCurrentCalls::getList()
 }
 
 
-void TaskCurrentCalls::run()
+void ThreadCurrentCalls::run()
 {
     BDb db_rad(app.conf.db_rad);
 
@@ -29,7 +29,7 @@ void TaskCurrentCalls::run()
             l->load(&db_rad, 0);
 
             lock.lock();
-            TaskCurrentCalls::list = l;
+            ThreadCurrentCalls::list = l;
             lock.unlock();
 
         }catch( DbException &e ){
@@ -43,11 +43,11 @@ void TaskCurrentCalls::run()
 }
 
 
-void TaskCurrentCalls::htmlfull(stringstream &html){
+void ThreadCurrentCalls::htmlfull(stringstream &html){
 
     this->html(html);
 
-    shared_ptr<CurrentCallsObjList> l = TaskCurrentCalls::getList();
+    shared_ptr<CurrentCallsObjList> l = ThreadCurrentCalls::getList();
 
     CalcFull calculator;
     calculator.calc_limit(l.get());
@@ -97,7 +97,7 @@ void TaskCurrentCalls::htmlfull(stringstream &html){
     html << "</table>\n";
 }
 
-TaskCurrentCalls::TaskCurrentCalls() {
+ThreadCurrentCalls::ThreadCurrentCalls() {
     id = "currentcalls";
     name = "Current Calls";
 }

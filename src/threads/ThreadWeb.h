@@ -4,7 +4,7 @@
 #include <string>
 using namespace std;
 
-class TaskWeb
+class ThreadWeb
 {
 public:
 

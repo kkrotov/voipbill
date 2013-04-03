@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Task.h"
+#include "Thread.h"
 #include "../classes/DataLoader.h"
 #include "../classes/BlackListLocal.h"
 #include "../classes/BlackListGlobal.h"
 
-class TaskBlacklist : public Task
+class ThreadBlacklist : public Thread
 {
     Timer t;
     DataLoader *loader;
@@ -27,5 +27,5 @@ class TaskBlacklist : public Task
 
     void htmlfull(stringstream &html);
 public:
-    TaskBlacklist();
+    ThreadBlacklist();
 };

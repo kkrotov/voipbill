@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Task.h"
+#include "Thread.h"
 #include "../classes/CalcFull.h"
 
-class TaskLimitControl : public Task
+class ThreadLimitControl : public Thread
 {
 protected:
     Timer t;
@@ -18,6 +18,6 @@ protected:
     void htmlfull(stringstream &html);
 
 public:
-    TaskLimitControl();
+    ThreadLimitControl();
 };
 

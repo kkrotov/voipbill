@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Task.h"
+#include "Thread.h"
 
-class TaskCheckStartTable : public Task
+class ThreadCheckStartTable : public Thread
 {
     Timer t;
 
@@ -11,6 +11,6 @@ class TaskCheckStartTable : public Task
     void htmlfull(stringstream &html);
 
 public:
-    TaskCheckStartTable();
+    ThreadCheckStartTable();
 };
 

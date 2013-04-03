@@ -1,29 +1,29 @@
 #include "../common.h"
-#include "Task.h"
+#include "Thread.h"
 
 
-Task::Task(){
+Thread::Thread(){
     id = string_fmt("%d", rand());
     name = id;
     status = "created";
 }
 
 
-Task::~Task(){
-    app.unregister_task(this);
+Thread::~Thread(){
+    app.unregister_thread(this);
 }
 
-void Task::start(){
-    std::thread t(&Task::operator(), this);
+void Thread::start(){
+    std::thread t(&Thread::operator(), this);
     std::swap(task_thread, t);
 }
 
-void Task::ssleep(unsigned int seconds)
+void Thread::ssleep(unsigned int seconds)
 {
     sleep(seconds);
 }
 
-void Task::usleep(unsigned int milliseconds)
+void Thread::usleep(unsigned int milliseconds)
 {
     struct timespec req;
 
@@ -39,18 +39,18 @@ void Task::usleep(unsigned int milliseconds)
     clock_nanosleep(CLOCK_MONOTONIC, 0, &req, NULL);
 }
 
-void Task::wait()
+void Thread::wait()
 {
 }
 
-void Task::prepare()
+void Thread::prepare()
 {
 }
 
-void Task::operator()()
+void Thread::operator()()
 {
 
-    app.register_task(this);
+    app.register_thread(this);
 
     try
     {
@@ -69,7 +69,7 @@ void Task::operator()()
     catch( ... ){
         Log::er("ERROR");
     }
-    app.unregister_task(this);
+    app.unregister_thread(this);
 
     delete this;
 }

@@ -1,10 +1,10 @@
 /*
-#include "TaskAsteriskInfo.h"
+#include "ThreadAsteriskInfo.h"
 
-shared_ptr<AsteriskNumberObjList> TaskAsteriskInfo::list(new AsteriskNumberObjList());
-boost::detail::spinlock TaskAsteriskInfo::lock;
+shared_ptr<AsteriskNumberObjList> ThreadAsteriskInfo::list(new AsteriskNumberObjList());
+boost::detail::spinlock ThreadAsteriskInfo::lock;
 
-shared_ptr<AsteriskNumberObjList> TaskAsteriskInfo::getList()
+shared_ptr<AsteriskNumberObjList> ThreadAsteriskInfo::getList()
 {
     lock.lock();
     shared_ptr<AsteriskNumberObjList> plist = list;
@@ -12,7 +12,7 @@ shared_ptr<AsteriskNumberObjList> TaskAsteriskInfo::getList()
     return plist;
 }
 
-void TaskAsteriskInfo::run()
+void ThreadAsteriskInfo::run()
 {
     if (app.conf.db_ast == "") return;
 
@@ -29,7 +29,7 @@ void TaskAsteriskInfo::run()
             l->load(&db_ast, 0);
 
             lock.lock();
-            TaskAsteriskInfo::list = l;
+            ThreadAsteriskInfo::list = l;
             lock.unlock();
 
         }catch( DbException &e ){
@@ -42,7 +42,7 @@ void TaskAsteriskInfo::run()
     }
 }
 
-void TaskAsteriskInfo::htmlfull(stringstream &html){
+void ThreadAsteriskInfo::htmlfull(stringstream &html){
     this->html(html);
 
     html << "Time loop: <b>" << this->t.sloop() << "</b><br/>\n";
@@ -50,10 +50,10 @@ void TaskAsteriskInfo::htmlfull(stringstream &html){
     html << "loops: <b>" << t.count << "</b><br/>\n";
     html << "<br/>\n";
 
-    html << "Count yota numbers: <b>" << TaskAsteriskInfo::list->count << "</b><br/>\n";
+    html << "Count yota numbers: <b>" << ThreadAsteriskInfo::list->count << "</b><br/>\n";
 }
 
-TaskAsteriskInfo::TaskAsteriskInfo() {
+ThreadAsteriskInfo::ThreadAsteriskInfo() {
     id = "asterisk";
     name = "Asterisk Info";
 }

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../tasks/Task.h"
+#include "../threads/Thread.h"
 #include "../lists/CurrentCallsObjList.h"
 #include <boost/smart_ptr/detail/spinlock.hpp>
 
-class TaskCurrentCalls : public Task
+class ThreadCurrentCalls : public Thread
 {
 public:
     static shared_ptr<CurrentCallsObjList> getList();
@@ -21,6 +21,6 @@ private:
     void htmlfull(stringstream &html);
 
 public:
-    TaskCurrentCalls();
+    ThreadCurrentCalls();
 };
 

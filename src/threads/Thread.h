@@ -7,7 +7,7 @@
 #include "../classes/App.h"
 #include <thread>
 
-class Task
+class Thread
 {
 public:
     string id;
@@ -16,8 +16,8 @@ public:
 
     std::thread task_thread;
 
-    Task();
-    virtual ~Task();
+    Thread();
+    virtual ~Thread();
 
     void start();
 

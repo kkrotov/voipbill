@@ -1,15 +1,15 @@
 /*
-#include "TaskYotaQoS.h"
+#include "ThreadYotaQoS.h"
 
-#include "TaskCurrentCalls.h"
-#include "TaskAsteriskInfo.h"
+#include "ThreadCurrentCalls.h"
+#include "ThreadAsteriskInfo.h"
 
 #include <execinfo.h>
 #include <inttypes.h>
 
 #include <boost/regex.hpp>
 
-TaskYotaQoS::TaskYotaQoS() {
+ThreadYotaQoS::ThreadYotaQoS() {
     id = "yotaqos";
     name = "Yota QoS";
 }
@@ -128,7 +128,7 @@ bool remove_qos(string session_id, string &error)
 }
 
 
-void TaskYotaQoS::run()
+void ThreadYotaQoS::run()
 {
     if (app.conf.db_ast == "") return;
 
@@ -140,8 +140,8 @@ void TaskYotaQoS::run()
         t.start();
         try{
 
-            shared_ptr<CurrentCallsObjList> calls = TaskCurrentCalls::getList();
-            shared_ptr<AsteriskNumberObjList> ast_list = TaskAsteriskInfo::getList();
+            shared_ptr<CurrentCallsObjList> calls = ThreadCurrentCalls::getList();
+            shared_ptr<AsteriskNumberObjList> ast_list = ThreadAsteriskInfo::getList();
 
 
             sessions_count = sessions.size();
@@ -235,11 +235,11 @@ void TaskYotaQoS::run()
     }
 }
 
-void TaskYotaQoS::htmlfull(stringstream &html){
+void ThreadYotaQoS::htmlfull(stringstream &html){
     this->html(html);
 
-    shared_ptr<CurrentCallsObjList> l1 = TaskCurrentCalls::getList();
-    shared_ptr<AsteriskNumberObjList> l2 = TaskAsteriskInfo::getList();
+    shared_ptr<CurrentCallsObjList> l1 = ThreadCurrentCalls::getList();
+    shared_ptr<AsteriskNumberObjList> l2 = ThreadAsteriskInfo::getList();
 
     html << "Time api: <b>" << t_api.sloop() << "</b><br/>\n";
     html << "Time loop: <b>" << t.sloop() << "</b><br/>\n";

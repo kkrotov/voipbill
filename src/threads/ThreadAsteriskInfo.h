@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../tasks/Task.h"
+#include "../threads/Thread.h"
 #include "../lists/AsteriskNumberObjList.h"
 #include <boost/smart_ptr/detail/spinlock.hpp>
 
-class TaskAsteriskInfo : public Task
+class ThreadAsteriskInfo : public Thread
 {
 /*
 public:
@@ -19,7 +19,7 @@ private:
 
     void htmlfull(stringstream &html);
 public:
-    TaskAsteriskInfo();
+    ThreadAsteriskInfo();
 */
 };
 

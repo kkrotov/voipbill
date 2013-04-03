@@ -1,13 +1,13 @@
-#include "TaskBillRuntime.h"
+#include "ThreadBillRuntime.h"
 
 #include "../classes/CallsSaver.h"
 
-TaskBillRuntime::TaskBillRuntime() {
+ThreadBillRuntime::ThreadBillRuntime() {
     id = "runtime";
     name = "Bill Runtime";
 }
 
-string TaskBillRuntime::sql(BDb * db){
+string ThreadBillRuntime::sql(BDb * db){
     if (last_id == 0){
         BDbResult res = db_calls.query("select max(id) from billing.calls");
         if(res.next()){
@@ -28,7 +28,7 @@ string TaskBillRuntime::sql(BDb * db){
                     "	limit " + lexical_cast<string>(nrows);
 }
 
-void TaskBillRuntime::parse_item(BDbResult &row, void * obj){
+void ThreadBillRuntime::parse_item(BDbResult &row, void * obj){
     pCallObj item = (pCallObj)obj;
     strncpy((char*)item->id, row.get(0), 20);
     item->id_num = row.get_ll(0);
@@ -52,7 +52,7 @@ void TaskBillRuntime::parse_item(BDbResult &row, void * obj){
     item->kill_call_reason = 0;
 }
 
-void TaskBillRuntime::wait()
+void ThreadBillRuntime::wait()
 {
     while(app.init_sync_done == false ||
           app.init_load_data_done == false ||
@@ -62,7 +62,7 @@ void TaskBillRuntime::wait()
     }
 }
 
-void TaskBillRuntime::run()
+void ThreadBillRuntime::run()
 {
     Log::wr("Running...");
     db_rad.setCS(app.conf.db_rad);
@@ -121,7 +121,7 @@ void TaskBillRuntime::run()
 }
 
 
-void TaskBillRuntime::htmlfull(stringstream &html){
+void ThreadBillRuntime::htmlfull(stringstream &html){
     this->html(html);
 
     html << "radacctid><b>" << last_id << "</b> and disconnectcause != <b>" << app.conf.billing_dc_break << "</b><br/>\n";

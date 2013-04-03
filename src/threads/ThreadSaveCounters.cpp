@@ -1,8 +1,8 @@
-#include "TaskSaveCounters.h"
+#include "ThreadSaveCounters.h"
 
 #include "../classes/KillCalls.h"
 
-TaskSaveCounters::TaskSaveCounters()
+ThreadSaveCounters::ThreadSaveCounters()
 {
     id = "savecounters";
     name = "Save counters";
@@ -13,7 +13,7 @@ TaskSaveCounters::TaskSaveCounters()
     db_calls.setCS(app.conf.db_calls);
 }
 
-void TaskSaveCounters::wait()
+void ThreadSaveCounters::wait()
 {
     while(app.init_sync_done == false ||
           app.init_load_data_done == false ||
@@ -24,7 +24,7 @@ void TaskSaveCounters::wait()
     }
 }
 
-void TaskSaveCounters::prepare()
+void ThreadSaveCounters::prepare()
 {
     while(save_client_counters(true) == false)
     {
@@ -32,7 +32,7 @@ void TaskSaveCounters::prepare()
     }
 }
 
-void TaskSaveCounters::run()
+void ThreadSaveCounters::run()
 {
 
 
@@ -51,7 +51,7 @@ void TaskSaveCounters::run()
     }
 }
 
-bool TaskSaveCounters::save_client_counters(bool clear){
+bool ThreadSaveCounters::save_client_counters(bool clear){
 
     loader->counter_rwlock.lock();
 
@@ -121,7 +121,7 @@ bool TaskSaveCounters::save_client_counters(bool clear){
 }
 
 
-bool TaskSaveCounters::save_calls(){
+bool ThreadSaveCounters::save_calls(){
 
     try{
         BDbResult res = db_main.query("select max(id) from billing.calls_"+app.conf.str_region_id);
@@ -141,7 +141,7 @@ bool TaskSaveCounters::save_calls(){
     return true;
 }
 
-void TaskSaveCounters::htmlfull(stringstream &html){
+void ThreadSaveCounters::htmlfull(stringstream &html){
     this->html(html);
 
     html << "Time loop: <b>" << t.sloop() << "</b><br/>\n";
