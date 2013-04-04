@@ -1,11 +1,11 @@
 #include "CallsObjList.h"
 #include <boost/lexical_cast.hpp>
 
-size_t CallsObjList::item_size(){	return sizeof(CallObj);	}
-void CallsObjList::init(time_t from, time_t to, int rows_count){
-    d_from = from;	d_to = to;	nrows = rows_count;
+CallsObjList::CallsObjList(){
     last_id = 0;	new_last_id = 0;
 }
+
+size_t CallsObjList::item_size(){	return sizeof(CallObj);	}
 bool CallsObjList::loaddata(BDb *db){
     ObjList::load(db, 0);
     if (count > 0){

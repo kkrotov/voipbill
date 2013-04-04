@@ -198,9 +198,13 @@ void ThreadLoader::htmlfull(stringstream &html){
     html << "Loader errors count: <b>" << errors << "</b><br/>\n";
 }
 
-bool ThreadLoader::do_load_data(){
+bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader){
     bool success = true;
     time_t tday = get_tday();
+
+    if (loader == 0) loader = this->loader;
+    if (db == 0) db = &db_calls;
+
 
     ClientObjList * client = new ClientObjList();
     DestObjList * dest = new DestObjList();
@@ -209,15 +213,15 @@ bool ThreadLoader::do_load_data(){
     PriceObjList * price = new PriceObjList();
 
     try{
-        client->load(&db_calls);
+        client->load(db);
 
-        dest->load(&db_calls);
+        dest->load(db);
 
-        oper->load(&db_calls);
+        oper->load(db);
 
-        usage->load(&db_calls, tday);
+        usage->load(db, tday);
 
-        price->load(&db_calls, tday);
+        price->load(db, tday);
 
     }catch( DbException &e ){
         Log::er(e.what());
@@ -256,16 +260,20 @@ bool ThreadLoader::do_load_data(){
     return success;
 }
 
-bool ThreadLoader::do_load_counters(){
+bool ThreadLoader::do_load_counters(BDb *db, DataLoader *loader){
     bool success = true;
+
+    if (loader == 0) loader = this->loader;
+    if (db == 0) db = &db_calls;
+
     ClientCounter * counter_client = new ClientCounter();
     FminCounter * counter_fmin = new FminCounter();
     time_t t_month = get_tmonth();
     try{
 
-        counter_client->load(&db_calls, 0);
+        counter_client->load(db, 0);
 
-        counter_fmin->load(&db_calls, t_month);
+        counter_fmin->load(db, t_month);
 
     }catch( DbException &e ){
         Log::er(e.what());

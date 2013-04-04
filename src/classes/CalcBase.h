@@ -27,6 +27,7 @@ public:
     virtual ~CalcBase();
 
     void setDb(BDb *db);
+    void setDataLoader(DataLoader *data_loader);
 
 
     void prepare(DT & dt);

@@ -14,6 +14,11 @@ void CalcBase::setDb(BDb *db){
     this->db = db;
 }
 
+void CalcBase::setDataLoader(DataLoader *data_loader){
+    this->data_global = data_loader;
+}
+
+
 void CalcBase::prepare(DT & dt){
 
     if (data.day == dt.day) return;
@@ -25,7 +30,7 @@ void CalcBase::prepare(DT & dt){
 
         if (!data_global->load(db, dt, data)){
 
-            data_global->counter_rwlock.lock(); // lockForRead();
+            data_global->counter_rwlock.lock();
             throw DbException("cant load data");
 
         }
@@ -33,7 +38,7 @@ void CalcBase::prepare(DT & dt){
 
     }
 
-    data_global->counter_rwlock.lock(); // lockForRead();
+    data_global->counter_rwlock.lock();
 
     client_counter2 =   counter_local.client;
     fmin_counter2 =     counter_local.fmin.get_or_load(db, dt.month, dt.month);
@@ -45,7 +50,6 @@ void CalcBase::calc(CallsObjList *list){
 
     counter_local.clear();
 
-    //QReadLocker counter_read_locker(&data_global->counter_rwlock);
     data_global->counter_rwlock.lock();
     try
     {
@@ -64,7 +68,6 @@ void CalcBase::calc(CallsObjList *list){
         throw e;
     }
     data_global->counter_rwlock.unlock();
-    //counter_read_locker.unlock();
 }
 
 void CalcBase::calc_limit(CurrentCallsObjList *list){
@@ -72,7 +75,6 @@ void CalcBase::calc_limit(CurrentCallsObjList *list){
 
     counter_local.clear();
 
-    //QReadLocker counter_read_locker(&data_global->counter_rwlock);
     data_global->counter_rwlock.lock();
     try
     {
@@ -94,7 +96,6 @@ void CalcBase::calc_limit(CurrentCallsObjList *list){
         throw e;
     }
     data_global->counter_rwlock.unlock();
-    //counter_read_locker.unlock();
 
     for(int i = 0; i < list->count; i++) {
         pCallObj call = list->get(i);

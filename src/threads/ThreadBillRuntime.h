@@ -2,13 +2,17 @@
 
 #include "Thread.h"
 #include "../classes/CalcFull.h"
+#include "../lists/RuntimeCallsObjList.h"
 
-class ThreadBillRuntime : public Thread, public CallsObjList
+class ThreadBillRuntime : public Thread
 {
 protected:
     BDb db_rad;
     BDb db_calls;
     CalcFull calculator;
+
+    RuntimeCallsObjList calls_list;
+
     int calc_calls_loop;
     int calc_calls_full;
 
@@ -16,10 +20,8 @@ protected:
     Timer t_calc;
     Timer t_save;
 
-    string sql(BDb * db);
-    void parse_item(BDbResult &row, void * obj);
-
 public:
+    static bool need_refresh_current_id;
 
     void wait();
 

@@ -22,9 +22,9 @@ class ThreadLoader : public Thread
 
 public:
 
-    bool do_load_data();
+    bool do_load_data(BDb *db = 0, DataLoader *loader = 0);
 
-    bool do_load_counters();
+    bool do_load_counters(BDb *db = 0, DataLoader *loader = 0);
 
     ThreadLoader();
 };

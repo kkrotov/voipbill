@@ -132,9 +132,15 @@
 		<Unit filename="src/lists/OperatorList.h" />
 		<Unit filename="src/lists/PriceObjList.cpp" />
 		<Unit filename="src/lists/PriceObjList.h" />
+		<Unit filename="src/lists/RuntimeCallsObjList.cpp" />
+		<Unit filename="src/lists/RuntimeCallsObjList.h" />
 		<Unit filename="src/lists/UsageObjList.cpp" />
 		<Unit filename="src/lists/UsageObjList.h" />
 		<Unit filename="src/main.cpp" />
+		<Unit filename="src/tasks/Task.cpp" />
+		<Unit filename="src/tasks/Task.h" />
+		<Unit filename="src/tasks/TaskRecalc.cpp" />
+		<Unit filename="src/tasks/TaskRecalc.h" />
 		<Unit filename="src/tests/Test.cpp" />
 		<Unit filename="src/tests/Test.h" />
 		<Unit filename="src/tests/TestLibs.cpp" />
