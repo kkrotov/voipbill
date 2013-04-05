@@ -80,6 +80,8 @@ void TaskRecalc::run()
 
             calls_list.next();
 
+            setStatus("5. calc " + lexical_cast<string>(calc_calls_full) + " " + string_time(calculator.last_call_time));
+
             if (calls_list.count >= calls_list.nrows) continue;
         }
 

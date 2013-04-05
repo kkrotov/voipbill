@@ -15,13 +15,13 @@ public:
 protected:
     BDb *db;
 
-    time_t last_call_time;
-
     curr_data data;
 
 	virtual void calc_item(pCallObj call) = 0;
 
 public:
+    time_t last_call_time;
+
     CalcBase();
 
     virtual ~CalcBase();
