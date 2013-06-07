@@ -22,7 +22,11 @@ string DestObjList::sql(BDb * db){
                 "                -1 " \
                 "            else " \
                 "                case when region in ("+region_id_list+") then " \
-                "                    0 " \
+                "                    case when mob then "\
+                "                        0 "\
+                "                    else "\
+                "                        1 "\
+                "                    end " \
                 "                else " \
                 "                    dest " \
                 "                end " \
