@@ -5,6 +5,8 @@ CalcBase::CalcBase(){
     last_call_time = 0;
     this->db = 0;
     this->data_global = DataLoader::instance();
+    
+    client_counter2 =   counter_local.client;
 }
 
 CalcBase::~CalcBase(){

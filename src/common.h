@@ -19,12 +19,25 @@ using namespace std;
 #include <boost/lexical_cast.hpp>
 using boost::lexical_cast;
 
+typedef struct _DT
+{
+    time_t	time;
+	time_t	day;
+	time_t	month;
+} DT, *pDT;
+
 
 string string_fmt(const string &fmt, ...);
 
 string string_date(const time_t dt);
 
 string string_time(const time_t dt);
+
+time_t parseDate(char * str);
+
+time_t parseDateTime(char * str);
+
+bool parseDateTime(char * str, DT &dt);
 
 time_t get_tday();
 

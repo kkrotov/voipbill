@@ -1,6 +1,5 @@
-/voipbill.depend
-/voipbill.layout
-/bin
-/obj
-/libs/boost/
-/libs/gtest/
+build
+dist
+.dep.inc
+libs
+nbproject

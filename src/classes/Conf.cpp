@@ -95,7 +95,7 @@ bool Conf::prepare()
 bool Conf::init(int argc, char* argv[]) {
     string path(argv[0]);
     vector<string> mpath;
-    boost::algorithm::split(mpath, path, boost::algorithm::is_any_of("/"));
+    boost::algorithm::split(mpath, path, boost::algorithm::is_any_of("/\\"));
 
     app_name = mpath[mpath.size()-1];
     mpath.erase(mpath.end()-1);
