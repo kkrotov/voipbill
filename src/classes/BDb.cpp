@@ -89,7 +89,7 @@ bool BDb::connect() {
     conn = PQconnectdb(connstr.c_str());
     if (PQstatus(conn) != CONNECTION_OK) {
         DbException e(conn);
-        conn = 0;
+        disconnect();
         throw e;
     }
 
