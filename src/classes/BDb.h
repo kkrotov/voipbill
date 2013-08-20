@@ -46,8 +46,6 @@ public:
 
     void disconnect();
 
-    bool reconnect();
-
     void listen(const string name);
     list<string> notifies();
 

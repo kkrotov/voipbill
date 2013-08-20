@@ -89,7 +89,7 @@ bool BDb::connect() {
     conn = PQconnectdb(connstr.c_str());
     if (PQstatus(conn) != CONNECTION_OK) {
         DbException e(conn);
-        conn = 0;
+        disconnect();
         throw e;
     }
 
@@ -115,11 +115,6 @@ void BDb::disconnect() {
         PQfinish(conn);
         conn = 0;
     }
-}
-
-bool BDb::reconnect() {
-    disconnect();
-    return connect();
 }
 
 void BDb::listen(const string name) {
