@@ -3,47 +3,40 @@
 
 #include <chrono>
 
-Thread::Thread(){
+Thread::Thread() {
     id = string_fmt("%d", rand());
     name = id;
     status = "created";
 }
 
-
-Thread::~Thread(){
+Thread::~Thread() {
     app.unregister_thread(this);
 }
 
-void Thread::start(){
+void Thread::start() {
     std::thread t(&Thread::operator(), this);
     std::swap(task_thread, t);
 }
 
-void Thread::ssleep(unsigned int seconds)
-{
+void Thread::ssleep(unsigned int seconds) {
     std::this_thread::sleep_for(std::chrono::seconds(seconds));
 }
 
-void Thread::usleep(unsigned int milliseconds)
-{
+void Thread::usleep(unsigned int milliseconds) {
     std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
 }
 
-void Thread::wait()
-{
+void Thread::wait() {
 }
 
-void Thread::prepare()
-{
+void Thread::prepare() {
 }
 
-void Thread::operator()()
-{
+void Thread::operator()() {
 
     app.register_thread(this);
 
-    try
-    {
+    try {
         status = "waiting";
         this->wait();
 
@@ -52,13 +45,11 @@ void Thread::operator()()
 
         status = "running";
         this->run();
+    } catch (std::exception &e) {
+        Log::error("Thread::operator: " + string(e.what()));
+    } catch (...) {
+        Log::error("Thread::ERROR");
     }
-    catch( std::exception &e ){
-        Log::er(e.what());
-    }
-    catch( ... ){
-        Log::er("ERROR");
-    }
-	
+
     app.unregister_thread(this);
 }

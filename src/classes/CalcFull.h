@@ -2,8 +2,7 @@
 
 #include "CalcBase.h"
 
-class CalcFull : public CalcBase
-{
+class CalcFull : public CalcBase {
 protected:
     void calc_item(pCallObj call);
 

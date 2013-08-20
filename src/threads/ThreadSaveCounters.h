@@ -3,8 +3,7 @@
 #include "Thread.h"
 #include "../classes/DataLoader.h"
 
-class ThreadSaveCounters : public Thread
-{
+class ThreadSaveCounters : public Thread {
     Timer t;
     DataLoader *loader;
     BDb db_main;

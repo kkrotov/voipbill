@@ -3,8 +3,7 @@
 #include "Thread.h"
 #include "../classes/CalcFull.h"
 
-class ThreadLimitControl : public Thread
-{
+class ThreadLimitControl : public Thread {
 protected:
     Timer t;
     Timer t_calc;

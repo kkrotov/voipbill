@@ -8,8 +8,7 @@
 
 using namespace std;
 
-class BlackList
-{
+class BlackList {
 protected:
     void log_lock_phone(string &phone);
     void log_unlock_phone(string &phone);
@@ -19,9 +18,9 @@ protected:
     virtual bool udp_unlock(string &phones) = 0;
 
 public:
-    map<long long int,time_t> blacklist;
-    map<long long int,bool> list_to_add;
-    map<long long int,bool> list_to_del;
+    map<long long int, time_t> blacklist;
+    map<long long int, bool> list_to_add;
+    map<long long int, bool> list_to_del;
 
     mutex lock;
 

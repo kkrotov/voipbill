@@ -8,8 +8,7 @@
 
 using namespace std;
 
-class Task
-{
+class Task {
 protected:
     BDb *db_main;
     string id;

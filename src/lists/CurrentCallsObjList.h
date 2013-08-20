@@ -11,5 +11,5 @@ protected:
     long long int key(void *obj);
 public:
     pCallObj get(size_t i);
-    pCallObj find(long long int value) ;
+    pCallObj find(long long int value);
 };

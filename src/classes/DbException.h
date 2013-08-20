@@ -1,20 +1,38 @@
 #pragma once
 
-#include <string>
-#include <cstring>
+#include "Exception.h"
+#include "BDb.h"
 
-class DbException : public std::exception
-{
-    char message[1024];
+using namespace std;
+
+class DbException : public Exception {
 public:
-    explicit DbException(const char * _what){
-        strncpy(message, _what, sizeof(message));
+
+    DbException() {
     }
-    explicit DbException(const std::string &_what){
-        strncpy(message, _what.c_str(), sizeof(message));
+
+    DbException(PGconn * conn) {
+        char error_message[1024];
+        strncpy(error_message, PQerrorMessage(conn), sizeof (error_message) - 1);
+        message = error_message;
     }
-    virtual const char* what() const throw()
-    {
-        return (char*)&message;
+
+    DbException(PGconn * conn, const string &_trace) {
+        char error_message[1024];
+        strncpy(error_message, PQerrorMessage(conn), sizeof (error_message) - 1);
+        message = error_message;
+        addTrace(_trace);
+    }
+
+    DbException(const string &_what) : Exception(_what) {
+    }
+
+    DbException(const char * _what) : Exception(_what) {
+    }
+
+    DbException(const string &_what, const string &_trace) : Exception(_what, _trace) {
+    }
+
+    DbException(const char * _what, const char * _trace) : Exception(_what, _trace) {
     }
 };

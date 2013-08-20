@@ -4,38 +4,37 @@
 #include <stdarg.h>
 
 #ifdef _WIN32
-  #define atoll(S) _atoi64(S)
+#define atoll(S) _atoi64(S)
 #endif
 
 #ifdef _WIN64
-  #define atoll(S) _atoi64(S)
+#define atoll(S) _atoi64(S)
 #endif
 
 string string_fmt(const string &fmt, ...) {
-    int size=100;
+    int size = 100;
     string str;
     va_list ap;
     while (1) {
         str.resize(size);
         va_start(ap, fmt);
-        int n = vsnprintf((char *)str.c_str(), size, fmt.c_str(), ap);
+        int n = vsnprintf((char *) str.c_str(), size, fmt.c_str(), ap);
         va_end(ap);
         if (n > -1 && n < size) {
             str.resize(n);
             return str;
         }
         if (n > -1)
-            size=n+1;
+            size = n + 1;
         else
-            size*=2;
+            size *= 2;
     }
 }
 
 string string_date(const time_t dt) {
     char buff[20];
     struct tm * timeinfo = localtime(&dt);
-    if (timeinfo->tm_year < 0 || timeinfo->tm_year > 1000)
-    {
+    if (timeinfo->tm_year < 0 || timeinfo->tm_year > 1000) {
         timeinfo->tm_year = 0;
         timeinfo->tm_mon = 0;
         timeinfo->tm_mday = 1;
@@ -47,8 +46,7 @@ string string_date(const time_t dt) {
 string string_time(const time_t dt) {
     char buff[40];
     struct tm * timeinfo = localtime(&dt);
-    if (timeinfo->tm_year < 0 || timeinfo->tm_year > 1000)
-    {
+    if (timeinfo->tm_year < 0 || timeinfo->tm_year > 1000) {
         timeinfo->tm_year = 0;
         timeinfo->tm_mon = 0;
         timeinfo->tm_mday = 1;
@@ -61,66 +59,77 @@ string string_time(const time_t dt) {
 }
 
 time_t parseDate(char * str) {
-	struct tm ttt;
-	if (sscanf(str, "%d-%d-%d", 
-			&ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday) > 0
-	) {
-		ttt.tm_year -= 1900; ttt.tm_mon -= 1;
-		ttt.tm_hour = 0; ttt.tm_min = 0; ttt.tm_sec = 0;
-		ttt.tm_isdst = 0; ttt.tm_yday = 0;
-		return mktime(&ttt);
-	}
-	return 0;
+    struct tm ttt;
+    if (sscanf(str, "%d-%d-%d",
+            &ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday) > 0
+            ) {
+        ttt.tm_year -= 1900;
+        ttt.tm_mon -= 1;
+        ttt.tm_hour = 0;
+        ttt.tm_min = 0;
+        ttt.tm_sec = 0;
+        ttt.tm_isdst = 0;
+        ttt.tm_yday = 0;
+        return mktime(&ttt);
+    }
+    return 0;
 }
 
 time_t parseDateTime(char * str) {
-	struct tm ttt;
-	if (sscanf(str, "%d-%d-%d %d:%d:%d", 
-			&ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday, 
-			&ttt.tm_hour, &ttt.tm_min, &ttt.tm_sec) > 0
-	) {
-		ttt.tm_year -= 1900; ttt.tm_mon -= 1;
-		ttt.tm_isdst = 0; ttt.tm_yday = 0;
-		return mktime(&ttt);
-	}
-	return 0;
+    struct tm ttt;
+    if (sscanf(str, "%d-%d-%d %d:%d:%d",
+            &ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday,
+            &ttt.tm_hour, &ttt.tm_min, &ttt.tm_sec) > 0
+            ) {
+        ttt.tm_year -= 1900;
+        ttt.tm_mon -= 1;
+        ttt.tm_isdst = 0;
+        ttt.tm_yday = 0;
+        return mktime(&ttt);
+    }
+    return 0;
 }
 
 bool parseDateTime(char * str, DT &dt) {
-	struct tm ttt;
-	if (sscanf(str, "%d-%d-%d %d:%d:%d", 
-			&ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday, 
-			&ttt.tm_hour, &ttt.tm_min, &ttt.tm_sec) > 0
-	) {
-		ttt.tm_year -= 1900; ttt.tm_mon -= 1;
-		ttt.tm_isdst = 0; ttt.tm_yday = 0;
-		dt.time = mktime(&ttt);
-	    dt.day = dt.time - ttt.tm_hour*3600 - ttt.tm_min*60 - ttt.tm_sec;
-		dt.month = dt.day - (ttt.tm_mday-1)*86400;
-		return true;
-	} else {
-		dt.time = 0;
-	    dt.day = 0;
-		dt.month = 0;
-		return false;
-	}
+    struct tm ttt;
+    if (sscanf(str, "%d-%d-%d %d:%d:%d",
+            &ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday,
+            &ttt.tm_hour, &ttt.tm_min, &ttt.tm_sec) > 0
+            ) {
+        ttt.tm_year -= 1900;
+        ttt.tm_mon -= 1;
+        ttt.tm_isdst = 0;
+        ttt.tm_yday = 0;
+        dt.time = mktime(&ttt);
+        dt.day = dt.time - ttt.tm_hour * 3600 - ttt.tm_min * 60 - ttt.tm_sec;
+        dt.month = dt.day - (ttt.tm_mday - 1)*86400;
+        return true;
+    } else {
+        dt.time = 0;
+        dt.day = 0;
+        dt.month = 0;
+        return false;
+    }
 }
 
 time_t t_day_start = 0;
 time_t t_day_end = 0;
 
-time_t get_tday(){
+time_t get_tday() {
     time_t rawtime = time(NULL);
 
-    if (rawtime>=t_day_start && rawtime<=t_day_end)
-    {
+    if (rawtime >= t_day_start && rawtime <= t_day_end) {
         return t_day_start;
     }
 
     struct tm *ttt;
     ttt = localtime(&rawtime);
-    ttt->tm_isdst = 0; ttt->tm_wday = 0; ttt->tm_yday = 0;
-    ttt->tm_hour = 0; ttt->tm_min = 0; ttt->tm_sec = 0;
+    ttt->tm_isdst = 0;
+    ttt->tm_wday = 0;
+    ttt->tm_yday = 0;
+    ttt->tm_hour = 0;
+    ttt->tm_min = 0;
+    ttt->tm_sec = 0;
     t_day_start = mktime(ttt);
     t_day_end = t_day_start + 86400 - 1;
     return t_day_start;
@@ -129,22 +138,25 @@ time_t get_tday(){
 time_t t_month_start = 0;
 time_t t_month_end = 0;
 
-time_t get_tmonth(){
+time_t get_tmonth() {
     time_t rawtime = time(NULL);
 
-    if (rawtime>=t_month_start && rawtime<=t_month_end)
-    {
+    if (rawtime >= t_month_start && rawtime <= t_month_end) {
         return t_month_start;
     }
 
     struct tm *ttt;
     ttt = localtime(&rawtime);
     ttt->tm_mday = 1;
-    ttt->tm_isdst = 0; ttt->tm_wday = 0; ttt->tm_yday = 0;
-    ttt->tm_hour = 0; ttt->tm_min = 0; ttt->tm_sec = 0;
+    ttt->tm_isdst = 0;
+    ttt->tm_wday = 0;
+    ttt->tm_yday = 0;
+    ttt->tm_hour = 0;
+    ttt->tm_min = 0;
+    ttt->tm_sec = 0;
     t_month_start = mktime(ttt);
 
-    if (++ttt->tm_mon == 12){
+    if (++ttt->tm_mon == 12) {
         ttt->tm_mon = 0;
         ttt->tm_year++;
     }
@@ -152,7 +164,7 @@ time_t get_tmonth(){
     return t_month_start;
 }
 
-time_t get_tmonth_end(){
+time_t get_tmonth_end() {
     get_tmonth();
     return t_month_end;
 }

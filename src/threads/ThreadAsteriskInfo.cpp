@@ -32,8 +32,9 @@ void ThreadAsteriskInfo::run()
             ThreadAsteriskInfo::list = l;
             lock.unlock();
 
-        }catch( DbException &e ){
-            Log::er(e.what());
+        }catch( Exception &e ){
+            e.addTrace("ThreadAsteriskInfo::run");
+            Log::exception(e);
         }
 
         this->t.stop();
@@ -57,4 +58,4 @@ ThreadAsteriskInfo::ThreadAsteriskInfo() {
     id = "asterisk";
     name = "Asterisk Info";
 }
-*/
+ */

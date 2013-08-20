@@ -8,59 +8,59 @@ ThreadTasks::ThreadTasks() {
     tasks_count = 0;
 }
 
-void ThreadTasks::wait()
-{
-    while(app.init_sync_done == false ||
-          app.init_load_data_done == false ||
-          app.init_load_counters_done == false ||
-          app.init_bill_runtime_started == false
-          )
-    {
+void ThreadTasks::wait() {
+    while (app.init_sync_done == false ||
+            app.init_load_data_done == false ||
+            app.init_load_counters_done == false ||
+            app.init_bill_runtime_started == false
+            ) {
         ssleep(1);
     }
 }
 
-void ThreadTasks::run()
-{
+void ThreadTasks::run() {
     BDb db_main(app.conf.db_main);
 
 
-    while(true){
+    while (true) {
         t.start();
-        try{
-            BDbResult res = db_main.query("select id, task, params from billing.tasks where region_id="+app.conf.str_region_id+" order by created desc limit 1");
-            if(res.next())
-            {
+        try {
+            BDbResult res = db_main.query("select id, task, params from billing.tasks where region_id=" + app.conf.str_region_id + " order by created desc limit 1");
+            if (res.next()) {
                 string task_id = res.get(0);
                 string task_name = res.get(1);
                 string task_params = res.get(2);
 
-                if (task_name == "recalc_current_month")
-                {
+                if (task_name == "recalc_current_month") {
                     time_t rawtime = time(NULL);
                     struct tm *ttt;
                     ttt = localtime(&rawtime);
                     ttt->tm_mday = 1;
-                    ttt->tm_isdst = 0; ttt->tm_wday = 0; ttt->tm_yday = 0;
-                    ttt->tm_hour = 0; ttt->tm_min = 0; ttt->tm_sec = 0;
+                    ttt->tm_isdst = 0;
+                    ttt->tm_wday = 0;
+                    ttt->tm_yday = 0;
+                    ttt->tm_hour = 0;
+                    ttt->tm_min = 0;
+                    ttt->tm_sec = 0;
 
                     TaskRecalc *task = new TaskRecalc(mktime(ttt));
                     task->initTask(db_main, task_id, task_params);
                     current_task.reset(task);
                     task->run();
-                }
-                else
-                if (task_name == "recalc_last_month")
-                {
+                } else
+                    if (task_name == "recalc_last_month") {
                     time_t rawtime = time(NULL);
                     struct tm *ttt;
                     ttt = localtime(&rawtime);
                     ttt->tm_mday = 1;
-                    ttt->tm_isdst = 0; ttt->tm_wday = 0; ttt->tm_yday = 0;
-                    ttt->tm_hour = 0; ttt->tm_min = 0; ttt->tm_sec = 0;
+                    ttt->tm_isdst = 0;
+                    ttt->tm_wday = 0;
+                    ttt->tm_yday = 0;
+                    ttt->tm_hour = 0;
+                    ttt->tm_min = 0;
+                    ttt->tm_sec = 0;
 
-                    if (--ttt->tm_mon < 0)
-                    {
+                    if (--ttt->tm_mon < 0) {
                         ttt->tm_mon = 11;
                         ttt->tm_year--;
                     }
@@ -71,12 +71,13 @@ void ThreadTasks::run()
                     task->run();
                 }
 
-                db_main.exec("delete from billing.tasks where region_id="+app.conf.str_region_id+" and id="+task_id);
+                db_main.exec("delete from billing.tasks where region_id=" + app.conf.str_region_id + " and id=" + task_id);
 
                 tasks_count++;
             }
-        }catch( DbException &e ){
-            Log::er(e.what());
+        } catch (Exception &e) {
+            e.addTrace("ThreadTasks::run");
+            Log::exception(e);
         }
         t.stop();
 
@@ -86,8 +87,7 @@ void ThreadTasks::run()
     }
 }
 
-
-void ThreadTasks::htmlfull(stringstream &html){
+void ThreadTasks::htmlfull(stringstream &html) {
     this->html(html);
 
     html << "Time loop: <b>" << t.sloop() + "</b><br/>\n";
@@ -97,8 +97,7 @@ void ThreadTasks::htmlfull(stringstream &html){
     html << "Tasks count: <b>" << lexical_cast<string>(tasks_count) << "</b><br/>\n";
     html << "<br/>\n";
 
-    if (current_task != 0)
-    {
+    if (current_task != 0) {
         html << "Task: <b>" + current_task->getName() + "</b><br/>\n";
         html << "Status: <b>" + current_task->getStatus() + "</b><br/>\n";
         html << "<br/>\n";

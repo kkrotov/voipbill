@@ -4,22 +4,21 @@
 #include "../lists/AsteriskNumberObjList.h"
 #include <boost/smart_ptr/detail/spinlock.hpp>
 
-class ThreadAsteriskInfo : public Thread
-{
-/*
-public:
-    static shared_ptr<AsteriskNumberObjList> getList();
-private:
-    static shared_ptr<AsteriskNumberObjList> list;
-    static boost::detail::spinlock lock;
+class ThreadAsteriskInfo : public Thread {
+    /*
+    public:
+        static shared_ptr<AsteriskNumberObjList> getList();
+    private:
+        static shared_ptr<AsteriskNumberObjList> list;
+        static boost::detail::spinlock lock;
 
-    Timer t;
+        Timer t;
 
-    void run();
+        void run();
 
-    void htmlfull(stringstream &html);
-public:
-    ThreadAsteriskInfo();
-*/
+        void htmlfull(stringstream &html);
+    public:
+        ThreadAsteriskInfo();
+     */
 };
 

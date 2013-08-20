@@ -7,24 +7,21 @@ using namespace std;
 #include "../lists/ClientObjList.h"
 
 template <class TypeObjList>
-class Loader  {
+class Loader {
 public:
     bool need_load;
-    map<time_t,shared_ptr<TypeObjList> > datamap;
+    map<time_t, shared_ptr<TypeObjList> > datamap;
 
-    Loader()
-    {
+    Loader() {
         need_load = true;
     }
 
-    void clear()
-    {
+    void clear() {
         datamap.clear();
     }
 
-    shared_ptr<TypeObjList> get(time_t dt){
-        if (datamap.find(dt) != datamap.end())
-        {
+    shared_ptr<TypeObjList> get(time_t dt) {
+        if (datamap.find(dt) != datamap.end()) {
             shared_ptr<TypeObjList> res = datamap[dt];
             res->last_use = time(NULL);
             return res;
@@ -33,16 +30,15 @@ public:
         return sp_empty;
     }
 
-    virtual shared_ptr<TypeObjList> load(BDb * db, time_t dt, time_t ntime = 0){
+    virtual shared_ptr<TypeObjList> load(BDb * db, time_t dt, time_t ntime = 0) {
         if (ntime == 0) ntime = dt;
         TypeObjList * new_item = new TypeObjList();
         if (need_load)
-            try{
+            try {
                 new_item->load(db, ntime);
-            }catch( DbException &e ){
+            } catch (Exception &e) {
                 delete new_item;
-                if (datamap.find(dt) != datamap.end())
-                {
+                if (datamap.find(dt) != datamap.end()) {
                     return datamap[dt];
                 }
                 throw e;
@@ -55,14 +51,13 @@ public:
         return sp_new_item;
     }
 
-    virtual void addlist(time_t dt, TypeObjList * new_item){
+    virtual void addlist(time_t dt, TypeObjList * new_item) {
         shared_ptr<TypeObjList> sp_new_item(new_item);
         datamap[dt] = sp_new_item;
     }
 
-    shared_ptr<TypeObjList> get_or_load(BDb * db, time_t dt, time_t ntime = 0){
-        if (datamap.find(dt) != datamap.end())
-        {
+    shared_ptr<TypeObjList> get_or_load(BDb * db, time_t dt, time_t ntime = 0) {
+        if (datamap.find(dt) != datamap.end()) {
             shared_ptr<TypeObjList> res = datamap[dt];
             res->last_use = time(NULL);
             return res;
@@ -70,15 +65,13 @@ public:
         return load(db, dt, ntime);
     }
 
-    void append(Loader<TypeObjList> & loader2){
-        typename map<time_t,shared_ptr<TypeObjList> >::iterator i;
-        typename map<time_t,shared_ptr<TypeObjList> >::iterator e;
-        for (i = loader2.datamap.begin(), e = loader2.datamap.end() ; i != e; )
-        {
+    void append(Loader<TypeObjList> & loader2) {
+        typename map<time_t, shared_ptr<TypeObjList> >::iterator i;
+        typename map<time_t, shared_ptr<TypeObjList> >::iterator e;
+        for (i = loader2.datamap.begin(), e = loader2.datamap.end(); i != e;) {
             TypeObjList * list2 = i->second.get();
             TypeObjList * list = datamap[i->first].get();
-            if (list == 0)
-            {
+            if (list == 0) {
                 shared_ptr<TypeObjList> sp_empty(new TypeObjList);
                 datamap[i->first] = sp_empty;
                 list = sp_empty.get();
@@ -88,18 +81,14 @@ public:
         }
     }
 
-
-    static bool timeMoreThen(const time_t &t1, const time_t &t2)
-    {
+    static bool timeMoreThen(const time_t &t1, const time_t &t2) {
         return t1 > t2;
     }
 
-    void gc()
-    {
+    void gc() {
         list<time_t> keys;
-        typename map<time_t,shared_ptr<TypeObjList> >::iterator k;
-        for(k = datamap.begin(); k!=datamap.end();k++)
-        {
+        typename map<time_t, shared_ptr<TypeObjList> >::iterator k;
+        for (k = datamap.begin(); k != datamap.end(); k++) {
             keys.push_back(k->first);
         }
         keys.sort(Loader::timeMoreThen);
@@ -107,13 +96,13 @@ public:
         time_t tcurr = time(NULL);
         int i = 0;
         list<time_t>::iterator j = keys.begin();
-        while (j != keys.end()){
-            if (i == 0)         timelimit = 3600*2;
-            else if (i == 1)    timelimit = 30;
-            else                timelimit = 5;
+        while (j != keys.end()) {
+            if (i == 0) timelimit = 3600 * 2;
+            else if (i == 1) timelimit = 30;
+            else timelimit = 5;
 
             shared_ptr<TypeObjList> item = datamap[*j];
-            if ( item->last_use + timelimit < tcurr ){
+            if (item->last_use + timelimit < tcurr) {
                 datamap.erase(*j);
             }
             i++;

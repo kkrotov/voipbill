@@ -5,26 +5,23 @@
 shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::list(new CurrentCallsObjList());
 boost::detail::spinlock ThreadCurrentCalls::lock;
 
-shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::getList()
-{
+shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::getList() {
     lock.lock();
     shared_ptr<CurrentCallsObjList> plist = list;
     lock.unlock();
     return plist;
 }
 
-
-void ThreadCurrentCalls::run()
-{
+void ThreadCurrentCalls::run() {
     BDb db_rad(app.conf.db_rad);
 
-    while(true){
+    while (true) {
 
         t.start();
 
         shared_ptr<CurrentCallsObjList> l(new CurrentCallsObjList());
 
-        try{
+        try {
 
             l->load(&db_rad, 0);
 
@@ -32,8 +29,9 @@ void ThreadCurrentCalls::run()
             ThreadCurrentCalls::list = l;
             lock.unlock();
 
-        }catch( DbException &e ){
-            Log::er(e.what());
+        } catch (Exception &e) {
+            e.addTrace("ThreadCurrentCalls::run");
+            Log::exception(e);
         }
 
         t.stop();
@@ -42,8 +40,7 @@ void ThreadCurrentCalls::run()
     }
 }
 
-
-void ThreadCurrentCalls::htmlfull(stringstream &html){
+void ThreadCurrentCalls::htmlfull(stringstream &html) {
 
     this->html(html);
 
@@ -75,7 +72,7 @@ void ThreadCurrentCalls::htmlfull(stringstream &html){
     html << "<th>price_op</th>";
     html << "<th>geo_id</th>";
     html << "</tr>\n";
-    for(int i=0; i<l->count;i++){
+    for (int i = 0; i < l->count; i++) {
         pCallObj call = l->get(i);
 
         html << "<tr>";
@@ -85,12 +82,12 @@ void ThreadCurrentCalls::htmlfull(stringstream &html){
         html << "<td><b>" << (call->out ? "out" : "in") << "</b></td>";
         html << "<td>" << call->phone << "</td>";
         html << "<td><b>" << call->len << "</b></td>";
-        html << "<td><b>" << (call->pricelist_id != 0 || call->amount != 0 ? (call->freemin_group_id==0 ? string_fmt("%.2f",call->amount/100.0) : "free") : "&nbsp;") << "</b></td>";
-        html << "<td>" << (call->pricelist_id != 0 || call->price != 0 ? string_fmt("%.2f",call->price/10000.0) : "&nbsp;") << "</td>";
+        html << "<td><b>" << (call->pricelist_id != 0 || call->amount != 0 ? (call->freemin_group_id == 0 ? string_fmt("%.2f", call->amount / 100.0) : "free") : "&nbsp;") << "</b></td>";
+        html << "<td>" << (call->pricelist_id != 0 || call->price != 0 ? string_fmt("%.2f", call->price / 10000.0) : "&nbsp;") << "</td>";
         html << "<td>" << (call->pricelist_id != 0 ? lexical_cast<string>(call->pricelist_id) : "&nbsp;") << "</td>";
-        html << "<td>" << call->operator_id << (call->pricelist_op_id != 0 ? " / "+lexical_cast<string>(call->pricelist_op_id) : "&nbsp;") << "</td>";
-        html << "<td>" << (call->pricelist_op_id != 0 || call->amount_op != 0 ? string_fmt("%.2f",call->amount_op/100.0) : "&nbsp;") << "</td>";
-        html << "<td>" << (call->pricelist_op_id != 0 || call->price_op != 0 ? string_fmt("%.2f",call->price_op/10000.0) : "&nbsp;") << "</td>";
+        html << "<td>" << call->operator_id << (call->pricelist_op_id != 0 ? " / " + lexical_cast<string>(call->pricelist_op_id) : "&nbsp;") << "</td>";
+        html << "<td>" << (call->pricelist_op_id != 0 || call->amount_op != 0 ? string_fmt("%.2f", call->amount_op / 100.0) : "&nbsp;") << "</td>";
+        html << "<td>" << (call->pricelist_op_id != 0 || call->price_op != 0 ? string_fmt("%.2f", call->price_op / 10000.0) : "&nbsp;") << "</td>";
         html << "<td>" << (call->geo_id != 0 ? lexical_cast<string>(call->geo_id) : "&nbsp;") << "</td>";
         html << "</tr>\n";
     }

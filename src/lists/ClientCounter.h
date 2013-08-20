@@ -6,9 +6,8 @@
 
 using namespace std;
 
-
 class ClientCounter : public ObjList {
-protected:    
+protected:
     virtual size_t item_size();
     virtual string sql(BDb * db);
     virtual void parse_item(BDbResult &row, void * obj);

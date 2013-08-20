@@ -4,8 +4,7 @@
 #include <vector>
 using namespace std;
 
-class Conf
-{
+class Conf {
     bool parse_cmd_line(int argc, char* argv[]);
     bool parse_config_file();
     bool prepare();

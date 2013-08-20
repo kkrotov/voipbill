@@ -3,7 +3,6 @@
 #include "Obj.h"
 #include "ObjList.h"
 
-
 class CallsObjList : public ObjList {
 protected:
     size_t item_size();

@@ -193,11 +193,11 @@ void ThreadYotaQoS::run()
 
                     if (apply_qos(v->srv_ip, v->usr_ip, session_id, error))
                     {
-                        Log::wr("Add QoS: " + session_id + " " + string(v->usr_ip) + " " + string(v->srv_ip) + " " + lexical_cast<string>(v->usr_num));
+                        Log::info("Add QoS: " + session_id + " " + string(v->usr_ip) + " " + string(v->srv_ip) + " " + lexical_cast<string>(v->usr_num));
                         sessions[i->first] = session_id;
                         new_sessions.erase(i++);
                     }else{
-                        Log::er("Not Add QoS:" + string(v->usr_ip) + " / " + error);
+                        Log::error("Not Add QoS:" + string(v->usr_ip) + " / " + error);
                         ++i;
                     }
                 }
@@ -210,9 +210,9 @@ void ThreadYotaQoS::run()
                     string error;
                     if (remove_qos(session_id, error))
                     {
-                        Log::wr("Rem QoS: " + session_id);
+                        Log::info("Rem QoS: " + session_id);
                     }else{
-                        Log::er("Not Rem QoS: " + session_id + " / " + error);
+                        Log::error("Not Rem QoS: " + session_id + " / " + error);
                     }
 
                     if (true)
@@ -228,8 +228,9 @@ void ThreadYotaQoS::run()
             t_api.stop();
 
 
-        }catch( DbException &e ){
-            Log::er(e.what());
+        }catch( Exception &e ){
+            e.addTrace("ThreadYotaQoS::run");
+            Log::exception(e);
         }
         t.stop();
     }
@@ -255,4 +256,4 @@ void ThreadYotaQoS::htmlfull(stringstream &html){
     html << "Terminationg sessions: <b>" << old_sessions_count << "</b><br/>\n";
     html << "Deleted sessions: <b>" << deleted_sessions_count << "</b><br/>\n";
 }
-*/
+ */

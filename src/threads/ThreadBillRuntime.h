@@ -4,8 +4,7 @@
 #include "../classes/CalcFull.h"
 #include "../lists/RuntimeCallsObjList.h"
 
-class ThreadBillRuntime : public Thread
-{
+class ThreadBillRuntime : public Thread {
 protected:
     BDb db_rad;
     BDb db_calls;

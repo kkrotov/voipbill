@@ -13,40 +13,36 @@ ThreadBillRuntime::ThreadBillRuntime() {
     calc_calls_loop = 0;
 }
 
-void ThreadBillRuntime::wait()
-{
-    while(app.init_sync_done == false ||
-          app.init_load_data_done == false ||
-          app.init_load_counters_done == false)
-    {
+void ThreadBillRuntime::wait() {
+    while (app.init_sync_done == false ||
+            app.init_load_data_done == false ||
+            app.init_load_counters_done == false) {
         ssleep(1);
     }
 }
 
-void ThreadBillRuntime::run()
-{
-    Log::wr("Running...");
+void ThreadBillRuntime::run() {
+    Log::info("Running...");
     db_rad.setCS(app.conf.db_rad);
     db_calls.setCS(app.conf.db_calls);
 
     CallsSaver sv(&db_calls);
     calculator.setDb(&db_calls);
 
-    while(true){
+    while (true) {
 
         {
 
             lock_guard<mutex> lk(app.bill_runnning_mutex);
 
-            if (need_refresh_current_id)
-            {
+            if (need_refresh_current_id) {
                 calls_list.refresh_current_id();
                 need_refresh_current_id = false;
             }
 
             t.start();
 
-            try{
+            try {
 
                 if (calls_list.loaddata(&db_rad)) {
 
@@ -71,14 +67,15 @@ void ThreadBillRuntime::run()
                     calls_list.next();
 
                     if (calls_list.count >= calls_list.nrows) continue;
-                }else{
+                } else {
                     calc_calls_loop = 0;
                 }
 
                 app.init_bill_runtime_started = true;
 
-            }catch( DbException &e ){
-                Log::er(e.what());
+            } catch (Exception &e) {
+                e.addTrace("ThreadBillRuntime::run");
+                Log::exception(e);
             }
 
             t.stop();
@@ -90,8 +87,7 @@ void ThreadBillRuntime::run()
 
 }
 
-
-void ThreadBillRuntime::htmlfull(stringstream &html){
+void ThreadBillRuntime::htmlfull(stringstream &html) {
     this->html(html);
 
     html << "radacctid><b>" << calls_list.last_id << "</b> and disconnectcause != <b>" << app.conf.billing_dc_break << "</b><br/>\n";
