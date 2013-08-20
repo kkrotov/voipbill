@@ -42,7 +42,7 @@ bool BlackList::fetch()
     vector<string> curr_list;
     if (udp_blacklist(curr_list) == false)
     {
-        Log::er("Can not fetch black list from opanca");
+        Log::error("Can not fetch black list from opanca");
         return false;
     }
 
@@ -113,7 +113,7 @@ void BlackList::push()
         while (ii != list.end()) {
             string phone = lexical_cast<string>(*ii);
             if (udp_lock(phone) == false){
-                Log::er("Can not lock phone "+phone);
+                Log::error("Can not lock phone "+phone);
                 ++ii;
                 continue;
             }
@@ -148,7 +148,7 @@ void BlackList::push()
         while (ii != list.end()) {
             string phone = lexical_cast<string>(*ii);
             if (udp_unlock(phone) == false){
-                Log::er("Can not unlock phone "+phone);
+                Log::error("Can not unlock phone "+phone);
                 ++ii;
                 continue;
             }
@@ -262,7 +262,7 @@ void BlackList::log_lock_phone(string &phone)
         }
     }
 
-    Log::wr(str);
+    Log::info(str);
 }
 
 void BlackList::log_unlock_phone(string &phone)
@@ -284,5 +284,5 @@ void BlackList::log_unlock_phone(string &phone)
         }
     }
 
-    Log::wr(str);
+    Log::info(str);
 }

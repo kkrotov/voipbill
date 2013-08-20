@@ -1,6 +1,6 @@
 #include "Obj.h"
 #include "ObjList.h"
-#include "../classes/DbException.h"
+#include "../classes/Exception.h"
 #include <stdlib.h>
 
 void _CallObj::make_dt() {

@@ -41,7 +41,7 @@ bool UdpControlClient::sendrecv(string &msg, string &res){
     }
     catch (exception& e)
     {
-        Log::er(e.what());
+        Log::error(e.what());
 		s.close();
 		return false;
     }

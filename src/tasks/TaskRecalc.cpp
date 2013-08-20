@@ -42,12 +42,12 @@ void TaskRecalc::run()
     setStatus("3. recalc temp data");
     if (!t_loader.do_load_data(&db_calls, &data_loader))
     {
-        throw DbException("Can not load temp data");
+        throw Exception("Can not load temp data");
     }
     setStatus("4. recalc temp counters");
     if (!t_loader.do_load_counters(&db_calls, &data_loader))
     {
-        throw DbException("Can not load temp counters");
+        throw Exception("Can not load temp counters");
     }
 
     calculator.setDb(&db_calls);
@@ -92,7 +92,7 @@ void TaskRecalc::run()
 
     if (!t_loader.do_load_counters(&db_calls))
     {
-        throw DbException("Can not load counters");
+        throw Exception("Can not load counters");
     }
 
     ThreadBillRuntime::need_refresh_current_id = true;

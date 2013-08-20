@@ -39,7 +39,7 @@ public:
         if (need_load)
             try{
                 new_item->load(db, ntime);
-            }catch( DbException &e ){
+            }catch( Exception &e ){
                 delete new_item;
                 if (datamap.find(dt) != datamap.end())
                 {

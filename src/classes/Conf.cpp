@@ -45,7 +45,7 @@ bool Conf::parse_cmd_line(int argc, char* argv[])
 
     }
     catch(exception& e) {
-        Log::er(string("Parse cmd line: ").append(e.what()));
+        Log::error(string("Parse cmd line: ").append(e.what()));
         return false;
     }
     return true;
@@ -79,7 +79,7 @@ bool Conf::parse_config_file()
         billing_free_seconds = pt.get<unsigned short>("billing.free_seconds", billing_free_seconds);
 
     }catch(exception& e) {
-        Log::er(string("Parse config file: ").append(e.what()));
+        Log::error(string("Parse config file: ").append(e.what()));
         return false;
     }
     return true;

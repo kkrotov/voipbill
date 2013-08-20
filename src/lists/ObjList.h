@@ -3,7 +3,7 @@
 #include "../common.h"
 #include "../classes/BDb.h"
 #include "../classes/Timer.h"
-#include "../classes/DbException.h"
+#include "../classes/Exception.h"
 
 string string_fmt(const string &fmt, ...);
 

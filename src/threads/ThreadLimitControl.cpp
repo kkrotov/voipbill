@@ -5,39 +5,34 @@
 #include "../lists/CurrentCallsObjList.h"
 #include "ThreadCurrentCalls.h"
 
-
 ThreadLimitControl::ThreadLimitControl() {
     id = "limitcontrol";
     name = "Limit control";
 }
 
-void ThreadLimitControl::wait()
-{
-    while(app.init_sync_done == false ||
-          app.init_load_data_done == false ||
-          app.init_load_counters_done == false ||
-          app.init_bill_runtime_started == false)
-    {
+void ThreadLimitControl::wait() {
+    while (app.init_sync_done == false ||
+            app.init_load_data_done == false ||
+            app.init_load_counters_done == false ||
+            app.init_bill_runtime_started == false) {
         ssleep(1);
     }
 }
 
-void ThreadLimitControl::run()
-{
+void ThreadLimitControl::run() {
     BDb db_calls(app.conf.db_calls);
     calculator.setDb(&db_calls);
 
-    while(true){
+    while (true) {
         ssleep(1);
 
         shared_ptr<CurrentCallsObjList> splist = ThreadCurrentCalls::getList();
         CurrentCallsObjList * list = splist.get();
 
         t.start();
-        try{
+        try {
 
-            if (list->loadtime + 60 >= time(NULL))
-            {
+            if (list->loadtime + 60 >= time(NULL)) {
                 t_calc.start();
 
                 calculator.calc_limit(list);
@@ -53,14 +48,15 @@ void ThreadLimitControl::run()
             }
 
 
-        }catch( DbException &e ){
-            Log::er(e.what());
+        } catch (Exception &e) {
+            e.addTrace("ThreadLimitControl::run");
+            Log::exception(e);
         }
         t.stop();
     }
 }
 
-void ThreadLimitControl::htmlfull(stringstream &html){
+void ThreadLimitControl::htmlfull(stringstream &html) {
     this->html(html);
 
     html << "Time calc: <b>" << t_calc.sloop() + "</b><br/>\n";

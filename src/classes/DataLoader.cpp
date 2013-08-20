@@ -37,9 +37,9 @@ bool DataLoader::load(BDb *db, DT & dt, curr_data & data){
     try{
         data.counter_fmin =     counter_fmin.get_or_load(db, dt.month, dt.month);
         data.counter_client =   counter_client;
-    }catch( DbException &e ){
+    }catch( Exception &e ){
         counter_rwlock.unlock();
-        Log::er(e.what());
+        Log::error(e.what());
         return false;
     }
     counter_rwlock.unlock();
@@ -52,9 +52,9 @@ bool DataLoader::load(BDb *db, DT & dt, curr_data & data){
         data.oper =     oper;
         data.usage =    usage.get_or_load(db, dt.day);
         data.price =    price.get_or_load(db, dt.day);
-    }catch( DbException &e ){
+    }catch( Exception &e ){
         rwlock.unlock();
-        Log::er(e.what());
+        Log::error(e.what());
         return false;
     }
     rwlock.unlock();

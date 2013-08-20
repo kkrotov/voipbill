@@ -33,7 +33,7 @@ void CalcBase::prepare(DT & dt){
         if (!data_global->load(db, dt, data)){
 
             data_global->counter_rwlock.lock();
-            throw DbException("cant load data");
+            throw Exception("cant load data");
 
         }
 

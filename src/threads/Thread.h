@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../common.h"
-#include "../classes/DbException.h"
+#include "../classes/Exception.h"
 #include "../classes/Timer.h"
 #include "../classes/Log.h"
 #include "../classes/App.h"

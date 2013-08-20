@@ -62,7 +62,7 @@ CallsSaver::CallsSaver(BDb *db){
 void CallsSaver::save(CallsObjList *list){
     try {
         db->exec( ins_str(list) );
-    }catch ( DbException &e ) {
+    }catch ( Exception &e ) {
         throw e;
     }
 }

@@ -9,9 +9,9 @@ using namespace std;
 
 class BDbResult {
 protected:
-	PGresult * res;
-	int count;
-	int index;
+    PGresult * res;
+    int count;
+    int index;
 public:
     BDbResult(PGresult * res);
     ~BDbResult();
@@ -28,12 +28,10 @@ public:
 };
 
 class BDb {
-
 protected:
     PGconn * conn;
     string connstr;
-    char error[1024];
-    map<string,bool> listener;
+    map<string, bool> listener;
 public:
     BDb();
     BDb(const string &connstr);

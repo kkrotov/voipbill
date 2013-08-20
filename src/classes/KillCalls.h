@@ -49,7 +49,7 @@ public:
                     reason = "Reason" + lexical_cast<string>(call->kill_call_reason);
 
 
-                Log::wr("KILL " + string(call->id) + " / " + string(call->usage) + " / " + reason);
+                Log::info("KILL " + string(call->id) + " / " + string(call->usage) + " / " + reason);
             }
         }
 
