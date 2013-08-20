@@ -6,33 +6,29 @@
 #include "../threads/ThreadLoader.h"
 #include "../threads/ThreadBillRuntime.h"
 
-
-TaskRecalc::TaskRecalc(time_t date_from)
-{
+TaskRecalc::TaskRecalc(time_t date_from) {
     this->date_from = date_from;
     calc_calls_loop = 0;
     calc_calls_full = 0;
-    name = "Recalc from "+string_time(date_from);
+    name = "Recalc from " + string_time(date_from);
 }
 
-void TaskRecalc::run()
-{
+void TaskRecalc::run() {
     lock_guard<mutex> lk(app.bill_runnning_mutex);
 
     setStatus("1. getting min id");
 
     BDb db_rad(app.conf.db_rad);
     BDb db_calls(app.conf.db_calls);
-    BDbResult res = db_calls.query("select min(id) from billing.calls where time>='"+string_time(date_from)+"'");
+    BDbResult res = db_calls.query("select min(id) from billing.calls where time>='" + string_time(date_from) + "'");
 
     long long int current_call_id = 0;
-    if (res.next())
-    {
+    if (res.next()) {
         current_call_id = res.get_ll(0);
     }
 
-    setStatus("2. delete calls from id "+lexical_cast<string>(current_call_id));
-    db_calls.exec("delete from billing.calls where id>="+lexical_cast<string>(current_call_id));
+    setStatus("2. delete calls from id " + lexical_cast<string>(current_call_id));
+    db_calls.exec("delete from billing.calls where id>=" + lexical_cast<string>(current_call_id));
 
     CallsSaver sv(&db_calls);
 
@@ -40,13 +36,11 @@ void TaskRecalc::run()
     ThreadLoader t_loader;
 
     setStatus("3. recalc temp data");
-    if (!t_loader.do_load_data(&db_calls, &data_loader))
-    {
+    if (!t_loader.do_load_data(&db_calls, &data_loader)) {
         throw Exception("Can not load temp data");
     }
     setStatus("4. recalc temp counters");
-    if (!t_loader.do_load_counters(&db_calls, &data_loader))
-    {
+    if (!t_loader.do_load_counters(&db_calls, &data_loader)) {
         throw Exception("Can not load temp counters");
     }
 
@@ -55,7 +49,7 @@ void TaskRecalc::run()
 
     setStatus("5. calc");
 
-    while(true){
+    while (true) {
 
 
         if (calls_list.loaddata(&db_rad)) {
@@ -90,20 +84,18 @@ void TaskRecalc::run()
 
     setStatus("6. recalc counters");
 
-    if (!t_loader.do_load_counters(&db_calls))
-    {
+    if (!t_loader.do_load_counters(&db_calls)) {
         throw Exception("Can not load counters");
     }
 
     ThreadBillRuntime::need_refresh_current_id = true;
 
     setStatus("7. delete calls from main");
-    db_main->exec("delete from billing.calls_"+app.conf.str_region_id+" where id>="+lexical_cast<string>(current_call_id));
+    db_main->exec("delete from billing.calls_" + app.conf.str_region_id + " where id>=" + lexical_cast<string>(current_call_id));
 
 }
 
-void TaskRecalc::html(stringstream &html)
-{
+void TaskRecalc::html(stringstream &html) {
     html << "Count loop: <b>" << calc_calls_loop << "</b><br/>\n";
     html << "Count full: <b>" << calc_calls_full << "</b><br/>\n";
     calculator.html(html);

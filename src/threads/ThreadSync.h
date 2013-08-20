@@ -8,8 +8,7 @@
 
 struct qsync;
 
-class ThreadSync : public Thread
-{
+class ThreadSync : public Thread {
     Timer t;
     BDb db_main;
     BDb db_calls;

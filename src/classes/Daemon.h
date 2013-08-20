@@ -1,7 +1,6 @@
 #pragma once
 
-class Daemoin
-{
+class Daemoin {
 public:
     static void setPidFile();
     static void initSignalHandler();

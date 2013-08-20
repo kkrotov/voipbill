@@ -12,21 +12,18 @@
 #include "../classes/BlackListLocal.h"
 #include "../classes/BlackListGlobal.h"
 
-
-void ThreadWeb::operator()()
-{
+void ThreadWeb::operator()() {
     if (app.conf.web_port == 0) return;
 
     boost::asio::io_service io_service;
     http::server4::server(io_service, "0.0.0.0",
-                          string_fmt("%d",app.conf.web_port),
-                          http::server4::file_handler())();
+            string_fmt("%d", app.conf.web_port),
+            http::server4::file_handler())();
     io_service.run();
 
 }
 
-void ThreadWeb::handlerHeader(stringstream &html)
-{
+void ThreadWeb::handlerHeader(stringstream &html) {
     html << "<style>\n";
     html << "* {font-family:monospace !important;}\n";
     html << "td { text-align: center }\n";
@@ -38,13 +35,11 @@ void ThreadWeb::handlerHeader(stringstream &html)
     html << " <hr/> ";
 }
 
-void ThreadWeb::handlerHome(stringstream &html)
-{
+void ThreadWeb::handlerHome(stringstream &html) {
     handlerHeader(html);
 
     app.threads_mutex.lock();
-    for(list<Thread*>::iterator i = app.threads.begin(); i != app.threads.end(); i++)
-    {
+    for (list<Thread*>::iterator i = app.threads.begin(); i != app.threads.end(); i++) {
         Thread * thread = *i;
         thread->html(html);
         html << "<hr>\n";
@@ -52,8 +47,7 @@ void ThreadWeb::handlerHome(stringstream &html)
     app.threads_mutex.unlock();
 }
 
-void ThreadWeb::handlerConfig(stringstream &html)
-{
+void ThreadWeb::handlerConfig(stringstream &html) {
     handlerHeader(html);
 
     html << "<h2>Config</h2>\n";
@@ -63,8 +57,8 @@ void ThreadWeb::handlerConfig(stringstream &html)
     html << "err_log_file: " << app.conf.err_log_file << "<br/>\n";
     html << "pid_file: " << app.conf.pid_file << "<br/>\n";
     html << "<br/>\n";
-    html << "main.web_port: " <<  app.conf.web_port << "<br/>\n";
-    html << "main.test_mode: " <<  app.conf.test_mode << "<br/>\n";
+    html << "main.web_port: " << app.conf.web_port << "<br/>\n";
+    html << "main.test_mode: " << app.conf.test_mode << "<br/>\n";
     html << "<br/>\n";
     html << "db.main: " << app.conf.db_main << "<br/>\n";
     html << "db.rad: " << app.conf.db_rad << "<br/>\n";
@@ -77,15 +71,13 @@ void ThreadWeb::handlerConfig(stringstream &html)
     html << "billing.dc_break: " << app.conf.billing_dc_break << "<br/>\n";
 }
 
-bool ThreadWeb::handlerTask(stringstream &html, map<string,string> &parameters)
-{
+bool ThreadWeb::handlerTask(stringstream &html, map<string, string> &parameters) {
     string task_id;
     if (parameters.find("id") != parameters.end())
         task_id = parameters["id"];
     Thread * thread = 0;
     app.threads_mutex.lock();
-    for(list<Thread*>::iterator i = app.threads.begin(); i != app.threads.end(); i++)
-    {
+    for (list<Thread*>::iterator i = app.threads.begin(); i != app.threads.end(); i++) {
         thread = *i;
         if (thread->id == task_id)
             break;
@@ -94,7 +86,7 @@ bool ThreadWeb::handlerTask(stringstream &html, map<string,string> &parameters)
     }
     app.threads_mutex.unlock();
 
-    if (thread == 0){
+    if (thread == 0) {
         return false;
     }
 
@@ -105,8 +97,7 @@ bool ThreadWeb::handlerTask(stringstream &html, map<string,string> &parameters)
     return true;
 }
 
-void ThreadWeb::handlerCounters(stringstream &html)
-{
+void ThreadWeb::handlerCounters(stringstream &html) {
     handlerHeader(html);
 
     DataLoader *loader = DataLoader::instance();
@@ -116,14 +107,13 @@ void ThreadWeb::handlerCounters(stringstream &html)
 
     loader->counter_rwlock.lock();
     shared_ptr<ClientCounter> cl = loader->counter_client;
-    if (cl == 0)
-    {
+    if (cl == 0) {
         loader->counter_rwlock.unlock();
         return;
     }
     html << "<table><tr><th>client</th><th>month</th><th>month sum</th><th>day</th><th>day sum</th><th>date</th><th>sum</th></tr>";
     map<int, ClientCounterObj>::iterator i;
-    for (i = cl->counter.begin(); i != cl->counter.end(); ++i){
+    for (i = cl->counter.begin(); i != cl->counter.end(); ++i) {
         int key = i->first;
         ClientCounterObj value = i->second;
         double sum_month = value.sumMonth();
@@ -131,33 +121,28 @@ void ThreadWeb::handlerCounters(stringstream &html)
         double sum_balance = value.sumBalance();
 
         time_t amount_date = 0;
-        if (c != 0)
-        {
+        if (c != 0) {
             pClientObj client = c->find(value.client_id);
-            if (client != 0)
-            {
+            if (client != 0) {
                 amount_date = client->amount_date;
             }
         }
 
         if (sum_month == 0 && sum_day == 0 && sum_balance == 0) continue;
         html << "<tr><td>"
-                    << key << "</td><td>"
-                    << string_date(value.amount_month) << "</td><td>"
-                    << sum_month << "</td><td>"
-                    << string_date(value.amount_day) << "</td><td>"
-                    << sum_day << "</td><td>"
-                    << string_time(amount_date) << "</td><td>"
-                    << sum_balance << "</td></tr>";
+                << key << "</td><td>"
+                << string_date(value.amount_month) << "</td><td>"
+                << sum_month << "</td><td>"
+                << string_date(value.amount_day) << "</td><td>"
+                << sum_day << "</td><td>"
+                << string_time(amount_date) << "</td><td>"
+                << sum_balance << "</td></tr>";
     }
     html << "</table>";
     loader->counter_rwlock.unlock();
 }
 
-
-
-void ThreadWeb::handlerClient(stringstream &html, map<string,string> &parameters)
-{
+void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameters) {
     handlerHeader(html);
 
     int client_id = atoi(parameters["id"].c_str());
@@ -166,20 +151,17 @@ void ThreadWeb::handlerClient(stringstream &html, map<string,string> &parameters
 
     loader->rwlock.lock();
     shared_ptr<ClientObjList> clients = loader->client;
-    if (clients == 0)
-    {
+    if (clients == 0) {
         loader->rwlock.unlock();
         return;
     }
     shared_ptr<UsageObjList> usages = loader->usage.get(get_tday());
-    if (usages == 0)
-    {
+    if (usages == 0) {
         loader->rwlock.unlock();
         return;
     }
     pClientObj p_client = clients->find(client_id);
-    if (p_client == 0)
-    {
+    if (p_client == 0) {
         loader->rwlock.unlock();
         html << "Client " << client_id << " not found";
         return;
@@ -193,10 +175,9 @@ void ThreadWeb::handlerClient(stringstream &html, map<string,string> &parameters
     {
         loader->counter_rwlock.lock(); //.lockForRead();
         shared_ptr<ClientCounter> cl = loader->counter_client;
-        if (cl == 0)
-        {
-                loader->counter_rwlock.unlock();
-                return;
+        if (cl == 0) {
+            loader->counter_rwlock.unlock();
+            return;
         }
         ClientCounterObj &client_counter = cl->get(client_id);
         sum_month = client_counter.sumMonth();
@@ -233,11 +214,10 @@ void ThreadWeb::handlerClient(stringstream &html, map<string,string> &parameters
     bl = BlackListLocal::instance();
     bl->lock.lock();
     {
-        map<long long int,time_t>::iterator i = bl->blacklist.begin();
+        map<long long int, time_t>::iterator i = bl->blacklist.begin();
         while (i != bl->blacklist.end()) {
             pUsageObj usage = usages->find(i->first);
-            if (usage != 0 && usage->client_id == client_id)
-            {
+            if (usage != 0 && usage->client_id == client_id) {
                 html << "Locked Local <b>number</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
                 html << lexical_cast<string>(i->first);
                 html << "</b><br/>\n";
@@ -250,11 +230,10 @@ void ThreadWeb::handlerClient(stringstream &html, map<string,string> &parameters
     bl = BlackListGlobal::instance();
     bl->lock.lock();
     {
-        map<long long int,time_t>::iterator i = bl->blacklist.begin();
+        map<long long int, time_t>::iterator i = bl->blacklist.begin();
         while (i != bl->blacklist.end()) {
             pUsageObj usage = usages->find(i->first);
-            if (usage != 0 && usage->client_id == client_id)
-            {
+            if (usage != 0 && usage->client_id == client_id) {
                 html << "Locked Gobal <b>number</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
                 html << lexical_cast<string>(i->first);
                 html << "</b><br/>\n";
@@ -267,17 +246,17 @@ void ThreadWeb::handlerClient(stringstream &html, map<string,string> &parameters
     html << "<br/>\n";
 
     if (client.credit >= 0)
-        html << "Balance avaiable: <b>" << string_fmt("%.2f",client.balance + client.credit - sum_balance) << "</b><br/>\n";
+        html << "Balance avaiable: <b>" << string_fmt("%.2f", client.balance + client.credit - sum_balance) << "</b><br/>\n";
 
     if (client.limit_d != 0)
-        html << "Daily avaiable: <b>" << string_fmt("%.2f",client.limit_d - sum_day) << "</b><br/>\n";
+        html << "Daily avaiable: <b>" << string_fmt("%.2f", client.limit_d - sum_day) << "</b><br/>\n";
 
     if (client.limit_m != 0)
-        html << "Monthly avaiable: <b>" << string_fmt("%.2f",client.limit_m - sum_month) << "</b><br/>\n";
+        html << "Monthly avaiable: <b>" << string_fmt("%.2f", client.limit_m - sum_month) << "</b><br/>\n";
 
     html << "<br/>\n";
 
-    html << "Balance accounts: <b>" << string_fmt("%.2f",client.balance) << "</b><br/>\n";
+    html << "Balance accounts: <b>" << string_fmt("%.2f", client.balance) << "</b><br/>\n";
     if (client.limit_d != 0)
         html << "Daily limit: <b>" << client.limit_d << "</b><br/>\n";
     if (client.limit_m != 0)
@@ -293,14 +272,14 @@ void ThreadWeb::handlerClient(stringstream &html, map<string,string> &parameters
 
     html << "<br/>\n";
 
-    html << "Sum from account: <b>" << string_fmt("%.2f",sum_balance) << "</b><br/>\n";
-    html << "Sum Day: <b>" << string_fmt("%.2f",sum_day) << "</b><br/>\n";
-    html << "Sum Month: <b>" << string_fmt("%.2f",sum_month) << "</b><br/>\n";
+    html << "Sum from account: <b>" << string_fmt("%.2f", sum_balance) << "</b><br/>\n";
+    html << "Sum Day: <b>" << string_fmt("%.2f", sum_day) << "</b><br/>\n";
+    html << "Sum Month: <b>" << string_fmt("%.2f", sum_month) << "</b><br/>\n";
     html << "<br/>\n";
 
 
     int calls_count = 0;
-    for(int i=0; i<calls_list->count;i++){
+    for (int i = 0; i < calls_list->count; i++) {
         pCallObj call = calls_list->get(i);
         if (call->client_id != client_id) continue;
 
@@ -310,8 +289,7 @@ void ThreadWeb::handlerClient(stringstream &html, map<string,string> &parameters
     html << "Current calls: <b>" << calls_count << "</b><br/>\n";
     html << "<br/>\n";
 
-    if (calls_count > 0)
-    {
+    if (calls_count > 0) {
         html << "<table width=100% border=1 cellspacing=0>\n";
         html << "<tr>";
         html << "<th>time</td>";
@@ -327,7 +305,7 @@ void ThreadWeb::handlerClient(stringstream &html, map<string,string> &parameters
         html << "<th>price_op</th>";
         html << "<th>geo_id</th>";
         html << "</tr>\n";
-        for(int i=0; i<calls_list->count;i++){
+        for (int i = 0; i < calls_list->count; i++) {
             pCallObj call = calls_list->get(i);
             if (call->client_id != client_id) continue;
 
@@ -337,12 +315,12 @@ void ThreadWeb::handlerClient(stringstream &html, map<string,string> &parameters
             html << "<td><b>" << (call->out ? "out" : "in") << "</b></td>";
             html << "<td>" << call->phone << "</td>";
             html << "<td><b>" << call->len << "</b></td>";
-            html << "<td><b>" << string_fmt("%.2f",call->amount/100.0) << "</b></td>";
-            html << "<td>" << string_fmt("%.2f",call->price/10000.0) << "</td>";
+            html << "<td><b>" << string_fmt("%.2f", call->amount / 100.0) << "</b></td>";
+            html << "<td>" << string_fmt("%.2f", call->price / 10000.0) << "</td>";
             html << "<td>" << call->pricelist_id << "</td>";
             html << "<td>" << call->operator_id << "</td>";
-            html << "<td>" << string_fmt("%.2f",call->amount_op/100.0) << "</td>";
-            html << "<td>" << string_fmt("%.2f",call->price_op/10000.0) << "</td>";
+            html << "<td>" << string_fmt("%.2f", call->amount_op / 100.0) << "</td>";
+            html << "<td>" << string_fmt("%.2f", call->price_op / 10000.0) << "</td>";
             html << "<td>" << call->geo_id << "</td>";
             html << "</tr>\n";
         }

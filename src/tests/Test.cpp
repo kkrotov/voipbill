@@ -1,7 +1,6 @@
 #include "Test.h"
 
-int main_test(int argc, char** argv)
-{
+int main_test(int argc, char** argv) {
     InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

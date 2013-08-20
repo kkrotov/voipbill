@@ -14,15 +14,14 @@
 
 #include "Daemon.h"
 
-App::App()
-{
+App::App() {
     init_sync_done = false;
     init_load_counters_done = false;
     init_load_data_done = false;
     init_bill_runtime_started = false;
 }
 
-bool App::init(int argc, char* argv[]){
+bool App::init(int argc, char* argv[]) {
 
     srand(time(0));
 
@@ -32,8 +31,7 @@ bool App::init(int argc, char* argv[]){
     return true;
 }
 
-void App::run()
-{
+void App::run() {
     Daemoin::setPidFile();
     Daemoin::initSignalHandler();
 
@@ -66,15 +64,13 @@ void App::run()
     web_thread.join();
 }
 
-void App::register_thread(Thread * thread)
-{
+void App::register_thread(Thread * thread) {
     threads_mutex.lock();
     list<Thread*>::iterator it = threads.begin();
-    while(it != threads.end()){
+    while (it != threads.end()) {
         Thread * tmp = *it;
-        if (tmp->id == thread->id){
-            if (tmp == thread)
-            {
+        if (tmp->id == thread->id) {
+            if (tmp == thread) {
                 threads_mutex.unlock();
                 return;
             }
@@ -87,13 +83,11 @@ void App::register_thread(Thread * thread)
     threads_mutex.unlock();
 }
 
-void App::unregister_thread(Thread * thread)
-{
+void App::unregister_thread(Thread * thread) {
     threads_mutex.lock();
     list<Thread*>::iterator it = threads.begin();
-    while(it != threads.end()){
-        if (*it == thread)
-        {
+    while (it != threads.end()) {
+        if (*it == thread) {
             threads.erase(it);
             break;
         }

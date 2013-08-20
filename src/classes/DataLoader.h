@@ -14,7 +14,7 @@
 #include "Loader.h"
 #include "CounterLoader.h"
 
-struct curr_data{
+struct curr_data {
     time_t day;
 
     shared_ptr<ClientObjList> client;
@@ -27,8 +27,7 @@ struct curr_data{
     shared_ptr<FminCounter> counter_fmin;
 };
 
-class DataLoader
-{
+class DataLoader {
 public:
     mutex rwlock;
     Loader<UsageObjList> usage;
@@ -46,8 +45,7 @@ public:
 
     DataLoader();
 
-    static DataLoader * instance()
-    {
+    static DataLoader * instance() {
         static DataLoader inst;
         return &inst;
     }

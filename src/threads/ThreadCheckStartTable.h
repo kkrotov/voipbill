@@ -2,8 +2,7 @@
 
 #include "Thread.h"
 
-class ThreadCheckStartTable : public Thread
-{
+class ThreadCheckStartTable : public Thread {
     Timer t;
 
     void run();

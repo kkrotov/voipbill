@@ -229,7 +229,6 @@ BDbResult BDb::query(const char * squery) {
     int attemps_count = connected() ? 2 : 1;
 
     string errors;
-    int i = 1;
 
     while (attemps_count-- > 0) {
         try {
@@ -251,7 +250,6 @@ BDbResult BDb::query(const char * squery) {
             }
         } catch (DbException &e) {
             errors += e.what() + "\n";
-            i++;
         }
     }
 

@@ -6,11 +6,9 @@
 #include <string.h>
 #include <unistd.h>
 
-void Daemoin::setPidFile()
-{
+void Daemoin::setPidFile() {
     FILE* f = fopen(app.conf.pid_file.c_str(), "w+");
-    if (f)
-    {
+    if (f) {
         fprintf(f, "%u", getpid());
         fclose(f);
     }
@@ -20,10 +18,8 @@ void Daemoin::setPidFile()
 #include <execinfo.h>
 #include <inttypes.h>
 
-static void full_write(int fd, const char *buf, size_t len)
-{
-    while (len > 0)
-    {
+static void full_write(int fd, const char *buf, size_t len) {
+    while (len > 0) {
         ssize_t ret = write(fd, buf, len);
 
         if ((ret == -1) && (errno != EINTR))
@@ -34,8 +30,7 @@ static void full_write(int fd, const char *buf, size_t len)
     }
 }
 
-void posix_death_signal(int signum)
-{
+void posix_death_signal(int signum) {
     static const char start[] = "BACKTRACE ------------\n";
     static const char end[] = "----------------------\n";
 
@@ -47,8 +42,7 @@ void posix_death_signal(int signum)
     bt_size = backtrace(bt, 1024);
     bt_syms = backtrace_symbols(bt, bt_size);
     full_write(STDERR_FILENO, start, strlen(start));
-    for (i = 1; i < bt_size; i++)
-    {
+    for (i = 1; i < bt_size; i++) {
         size_t len = strlen(bt_syms[i]);
         full_write(STDERR_FILENO, bt_syms[i], len);
         full_write(STDERR_FILENO, "\n", 1);
@@ -59,7 +53,6 @@ void posix_death_signal(int signum)
     exit(3);
 }
 
-void Daemoin::initSignalHandler()
-{
+void Daemoin::initSignalHandler() {
     signal(SIGSEGV, posix_death_signal);
 }

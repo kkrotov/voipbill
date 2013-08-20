@@ -6,7 +6,6 @@
 using boost::asio::ip::udp;
 
 class UdpControlClient {
-
 protected:
 
     static bool sendrecv(string &msg, string &res);

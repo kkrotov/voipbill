@@ -4,18 +4,17 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-bool Conf::parse_cmd_line(int argc, char* argv[])
-{
+bool Conf::parse_cmd_line(int argc, char* argv[]) {
     try {
         po::options_description desc("Allowed options");
         desc.add_options()
-            ("help,h", "produce help message")
-            ("config-file,c", po::value<string>(), "path to config file")
-            ("err-log-file,l", po::value<string>(), "path to error log file")
-            ("log-file,L", po::value<string>(), "path to log file")
-            ("pid-file,p", po::value<string>(), "path to pid file")
-            ("test,t", "run tests")
-        ;
+                ("help,h", "produce help message")
+                ("config-file,c", po::value<string>(), "path to config file")
+                ("err-log-file,l", po::value<string>(), "path to error log file")
+                ("log-file,L", po::value<string>(), "path to log file")
+                ("pid-file,p", po::value<string>(), "path to pid file")
+                ("test,t", "run tests")
+                ;
 
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -24,8 +23,8 @@ bool Conf::parse_cmd_line(int argc, char* argv[])
 
         if (vm.count("test")) {
             test_mode = true;
-        }else
-        if (vm.count("help")) {
+        } else
+            if (vm.count("help")) {
             cout << desc << "\n";
             return false;
         }
@@ -43,8 +42,7 @@ bool Conf::parse_cmd_line(int argc, char* argv[])
             pid_file = vm["pid-file"].as<string>();
 
 
-    }
-    catch(exception& e) {
+    }    catch (exception& e) {
         Log::error(string("Parse cmd line: ").append(e.what()));
         return false;
     }
@@ -55,10 +53,8 @@ bool Conf::parse_cmd_line(int argc, char* argv[])
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/lexical_cast.hpp>
 
-bool Conf::parse_config_file()
-{
-    try
-    {
+bool Conf::parse_config_file() {
+    try {
         boost::property_tree::ptree pt;
         boost::property_tree::ini_parser::read_ini(config_file, pt);
 
@@ -72,13 +68,13 @@ bool Conf::parse_config_file()
         region_id = pt.get<unsigned short>("geo.region");
         str_region_id = boost::lexical_cast<string>(region_id);
 
-        udp_host = pt.get<string>("udp.host","");
+        udp_host = pt.get<string>("udp.host", "");
         udp_port = pt.get<unsigned short>("udp.port", 0);
 
         billing_dc_break = pt.get<unsigned short>("billing.dc_break", billing_dc_break);
         billing_free_seconds = pt.get<unsigned short>("billing.free_seconds", billing_free_seconds);
 
-    }catch(exception& e) {
+    } catch (exception& e) {
         Log::error(string("Parse config file: ").append(e.what()));
         return false;
     }
@@ -87,8 +83,7 @@ bool Conf::parse_config_file()
 
 #include <boost/algorithm/string.hpp>
 
-bool Conf::prepare()
-{
+bool Conf::prepare() {
     return true;
 }
 
@@ -97,14 +92,14 @@ bool Conf::init(int argc, char* argv[]) {
     vector<string> mpath;
     boost::algorithm::split(mpath, path, boost::algorithm::is_any_of("/\\"));
 
-    app_name = mpath[mpath.size()-1];
-    mpath.erase(mpath.end()-1);
+    app_name = mpath[mpath.size() - 1];
+    mpath.erase(mpath.end() - 1);
     app_directory = boost::algorithm::join(mpath, "/");
 
-    err_log_file =  app_directory + "/" + app_name + ".err.log";
-    log_file =      app_directory + "/" + app_name + ".log";
-    config_file =   app_directory + "/" + app_name + ".conf";
-    pid_file =      "/var/run/" + app_name + ".pid";
+    err_log_file = app_directory + "/" + app_name + ".err.log";
+    log_file = app_directory + "/" + app_name + ".log";
+    config_file = app_directory + "/" + app_name + ".conf";
+    pid_file = "/var/run/" + app_name + ".pid";
 
     test_mode = false;
     web_port = 8032;

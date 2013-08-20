@@ -8,12 +8,12 @@
 class KillCalls {
 public:
 
-    static void kill(CurrentCallsObjList *calls){
+    static void kill(CurrentCallsObjList *calls) {
         if (UdpControlClient::ready() == false) return;
 
         string phones;
         string ids;
-        for(int i = 0; i < calls->count; i++) {
+        for (int i = 0; i < calls->count; i++) {
             pCallObj call = calls->get(i);
             if (call->kill_call_reason == 0) continue;
 
@@ -26,9 +26,8 @@ public:
 
         if (phones.empty()) return;
 
-        if (UdpControlClient::kill(phones, ids))
-        {
-            for(int i = 0; i < calls->count; i++) {
+        if (UdpControlClient::kill(phones, ids)) {
+            for (int i = 0; i < calls->count; i++) {
                 pCallObj call = calls->get(i);
                 if (call->kill_call_reason == 0) continue;
 
@@ -54,26 +53,27 @@ public:
         }
 
     }
-    static bool set_disable_status(map<string,bool> &phone_nums){
+
+    static bool set_disable_status(map<string, bool> &phone_nums) {
         if (UdpControlClient::ready() == false) return false;
 
         string lock_phones;
         string unlock_phones;
-        for (map<string, bool>::iterator i = phone_nums.begin(); i != phone_nums.end(); ++i){
-            if (i->second){
+        for (map < string, bool>::iterator i = phone_nums.begin(); i != phone_nums.end(); ++i) {
+            if (i->second) {
                 if (lock_phones != "") lock_phones += ",";
                 lock_phones += i->first;
-            }else{
+            } else {
                 if (unlock_phones != "") unlock_phones += ",";
                 unlock_phones += i->first;
             }
         }
 
-        if (lock_phones.size() > 0){
+        if (lock_phones.size() > 0) {
             if (UdpControlClient::lock(lock_phones) == false) return false;
         }
 
-        if (unlock_phones.size() > 0){
+        if (unlock_phones.size() > 0) {
             if (UdpControlClient::unlock(unlock_phones) == false) return false;
         }
         return true;

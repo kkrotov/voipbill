@@ -4,8 +4,7 @@
 #include "../tasks/Task.h"
 #include "../classes/CalcFull.h"
 
-class ThreadTasks : public Thread
-{
+class ThreadTasks : public Thread {
 protected:
     Timer t;
 

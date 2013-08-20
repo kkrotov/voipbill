@@ -1,7 +1,6 @@
 #include "ThreadBlacklist.h"
 
-ThreadBlacklist::ThreadBlacklist()
-{
+ThreadBlacklist::ThreadBlacklist() {
     id = "blacklist";
     name = "Blacklist";
 
@@ -12,27 +11,22 @@ ThreadBlacklist::ThreadBlacklist()
     last_sync_from_openca_time = 0;
 }
 
-void ThreadBlacklist::wait()
-{
-    while(app.init_sync_done == false ||
-          app.init_load_data_done == false ||
-          app.init_load_counters_done == false ||
-          app.init_bill_runtime_started == false
-          )
-    {
+void ThreadBlacklist::wait() {
+    while (app.init_sync_done == false ||
+            app.init_load_data_done == false ||
+            app.init_load_counters_done == false ||
+            app.init_bill_runtime_started == false
+            ) {
         ssleep(1);
     }
 }
 
-void ThreadBlacklist::prepare()
-{
-    while(blacklist_local->fetch() == false)
-    {
+void ThreadBlacklist::prepare() {
+    while (blacklist_local->fetch() == false) {
         ssleep(10);
     }
 
-    while(blacklist_global->fetch() == false)
-    {
+    while (blacklist_global->fetch() == false) {
         ssleep(10);
     }
 
@@ -41,9 +35,8 @@ void ThreadBlacklist::prepare()
     sync_blacklist();
 }
 
-void ThreadBlacklist::run()
-{
-    while(true){
+void ThreadBlacklist::run() {
+    while (true) {
 
         t.start();
 
@@ -58,8 +51,7 @@ void ThreadBlacklist::run()
     }
 }
 
-void ThreadBlacklist::sync_once_per_day()
-{
+void ThreadBlacklist::sync_once_per_day() {
     if (last_sync_from_openca_time + 86400 >= time(NULL))
         return;
 
@@ -71,14 +63,11 @@ void ThreadBlacklist::sync_once_per_day()
     sync_blacklist();
 }
 
-
-void ThreadBlacklist::sync_blacklist()
-{
+void ThreadBlacklist::sync_blacklist() {
     loader->rwlock.lock();
 
     shared_ptr<UsageObjList> usages = loader->usage.get(get_tday());
-    if (usages == 0)
-    {
+    if (usages == 0) {
         loader->rwlock.unlock();
         return;
     }
@@ -86,12 +75,11 @@ void ThreadBlacklist::sync_blacklist()
     loader->rwlock.unlock();
 
 
-    map<long long int,time_t>::iterator i;
+    map<long long int, time_t>::iterator i;
 
     i = blacklist_local->blacklist.begin();
     while (i != blacklist_local->blacklist.end()) {
-        if (usages->find(i->first) == 0)
-        {
+        if (usages->find(i->first) == 0) {
             blacklist_local->del(i->first);
         }
         ++i;
@@ -99,8 +87,7 @@ void ThreadBlacklist::sync_blacklist()
 
     i = blacklist_global->blacklist.begin();
     while (i != blacklist_global->blacklist.end()) {
-        if (usages->find(i->first) == 0)
-        {
+        if (usages->find(i->first) == 0) {
             blacklist_global->del(i->first);
         }
         ++i;
@@ -110,17 +97,14 @@ void ThreadBlacklist::sync_blacklist()
     blacklist_global->push();
 }
 
-
-
-void ThreadBlacklist::update_voip_auto_disabled(){
+void ThreadBlacklist::update_voip_auto_disabled() {
 
     loader->rwlock.lock();
 
     shared_ptr<ClientObjList> clients = loader->client;
 
     shared_ptr<UsageObjList> usages = loader->usage.get(get_tday());
-    if (usages == 0)
-    {
+    if (usages == 0) {
         loader->rwlock.unlock();
         return;
     }
@@ -129,66 +113,57 @@ void ThreadBlacklist::update_voip_auto_disabled(){
 
     loader->counter_rwlock.lock();
     shared_ptr<ClientCounter> counters_clients = loader->counter_client;
-    if (counters_clients == 0)
-    {
+    if (counters_clients == 0) {
         loader->counter_rwlock.unlock();
         return;
     }
 
-    for(int j=0;j<usages->count;j++)
-    {
+    for (int j = 0; j < usages->count; j++) {
         bool need_lock_local = false;
         bool need_lock_global = false;
 
-        pUsageObj usage = (pUsageObj)usages->_get(j);
+        pUsageObj usage = (pUsageObj) usages->_get(j);
         pClientObj client = clients->find(usage->client_id);
         ClientCounterObj &cc = counters_clients->get(usage->client_id);
-        if (client != 0)
-        {
-            if (    (client->credit >= 0 && client->balance + client->credit - cc.sumBalance() < 0) &&
+        if (client != 0) {
+            if ((client->credit >= 0 && client->balance + client->credit - cc.sumBalance() < 0) &&
                     (client->last_payed_month < get_tmonth())
-            ){
+                    ) {
                 need_lock_local = true;
             }
 
-            if (    (client->credit >= 0 && client->balance + client->credit - cc.sumBalance() < 0) ||
+            if ((client->credit >= 0 && client->balance + client->credit - cc.sumBalance() < 0) ||
                     (client->limit_d != 0 && client->limit_d - cc.sumDay() < 0) ||
                     (client->limit_m != 0 && client->limit_m - cc.sumMonth() < 0) ||
                     (client->disabled)
-            ){
+                    ) {
                 need_lock_global = true;
             }
 
         }
 
-        if (cc.disabled_global != need_lock_global)
-        {
+        if (cc.disabled_global != need_lock_global) {
             cc.disabled_global = need_lock_global;
             cc.updated = 1;
         }
 
-        if (cc.disabled_local != need_lock_local)
-        {
+        if (cc.disabled_local != need_lock_local) {
             cc.disabled_local = need_lock_local;
             cc.updated = 1;
         }
 
-        if (blacklist_local->is_locked(usage->phone_num) != need_lock_local)
-        {
-            if (need_lock_local)
-            {
+        if (blacklist_local->is_locked(usage->phone_num) != need_lock_local) {
+            if (need_lock_local) {
                 blacklist_local->add(usage->phone_num);
-            }else{
+            } else {
                 blacklist_local->del(usage->phone_num);
             }
         }
 
-        if (blacklist_global->is_locked(usage->phone_num) != need_lock_global)
-        {
-            if (need_lock_global)
-            {
+        if (blacklist_global->is_locked(usage->phone_num) != need_lock_global) {
+            if (need_lock_global) {
                 blacklist_global->add(usage->phone_num);
-            }else{
+            } else {
                 blacklist_global->del(usage->phone_num);
             }
         }
@@ -200,12 +175,11 @@ void ThreadBlacklist::update_voip_auto_disabled(){
     blacklist_global->push();
 }
 
-
-void ThreadBlacklist::htmlfull(stringstream &html){
+void ThreadBlacklist::htmlfull(stringstream &html) {
     this->html(html);
 
     html << "Time loop: <b>" << t.sloop() << "</b><br/>\n";
-    html << "Time full loop: <b>" << t.sfull() <<  "</b><br/>\n";
+    html << "Time full loop: <b>" << t.sfull() << "</b><br/>\n";
     html << "loops: <b>" << t.count << "</b><br/>\n";
     html << "<br/>\n";
 
@@ -220,10 +194,9 @@ void ThreadBlacklist::htmlfull(stringstream &html){
 
     blacklist_local->lock.lock();
 
-    if (blacklist_local->blacklist.size() > 0)
-    {
+    if (blacklist_local->blacklist.size() > 0) {
         html << "BlackListLocal: <b>" << blacklist_local->blacklist.size() << "</b><br/>\n";
-        map<long long int,time_t>::iterator i = blacklist_local->blacklist.begin();
+        map<long long int, time_t>::iterator i = blacklist_local->blacklist.begin();
         while (i != blacklist_local->blacklist.end()) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             html << "<b>" << lexical_cast<string>(i->first) << "</b>";
@@ -234,10 +207,9 @@ void ThreadBlacklist::htmlfull(stringstream &html){
         }
     }
 
-    if (blacklist_local->list_to_add.size() > 0)
-    {
+    if (blacklist_local->list_to_add.size() > 0) {
         html << "BlackListLocal to Add: <b>" << blacklist_local->list_to_add.size() << "</b><br/>\n";
-        map<long long int,bool>::iterator i = blacklist_local->list_to_add.begin();
+        map<long long int, bool>::iterator i = blacklist_local->list_to_add.begin();
         while (i != blacklist_local->list_to_add.end()) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             html << "<b>" << lexical_cast<string>(i->first) << "</b>";
@@ -248,10 +220,9 @@ void ThreadBlacklist::htmlfull(stringstream &html){
         }
     }
 
-    if (blacklist_local->list_to_del.size() > 0)
-    {
+    if (blacklist_local->list_to_del.size() > 0) {
         html << "BlackListLocal to Del: <b>" << blacklist_local->list_to_del.size() << "</b><br/>\n";
-        map<long long int,bool>::iterator i = blacklist_local->list_to_del.begin();
+        map<long long int, bool>::iterator i = blacklist_local->list_to_del.begin();
         while (i != blacklist_local->list_to_del.end()) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             html << "<b>" << lexical_cast<string>(i->first) << "</b>";
@@ -269,10 +240,9 @@ void ThreadBlacklist::htmlfull(stringstream &html){
 
     blacklist_global->lock.lock();
 
-    if (blacklist_global->blacklist.size() > 0)
-    {
+    if (blacklist_global->blacklist.size() > 0) {
         html << "BlackListGlobal: <b>" << blacklist_global->blacklist.size() << "</b><br/>\n";
-        map<long long int,time_t>::iterator i = blacklist_global->blacklist.begin();
+        map<long long int, time_t>::iterator i = blacklist_global->blacklist.begin();
         while (i != blacklist_global->blacklist.end()) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             html << "<b>" << lexical_cast<string>(i->first) << "</b>";
@@ -283,10 +253,9 @@ void ThreadBlacklist::htmlfull(stringstream &html){
         }
     }
 
-    if (blacklist_global->list_to_add.size() > 0)
-    {
+    if (blacklist_global->list_to_add.size() > 0) {
         html << "BlackListGlobal to Add: <b>" << blacklist_global->list_to_add.size() << "</b><br/>\n";
-        map<long long int,bool>::iterator i = blacklist_global->list_to_add.begin();
+        map<long long int, bool>::iterator i = blacklist_global->list_to_add.begin();
         while (i != blacklist_global->list_to_add.end()) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             html << "<b>" << lexical_cast<string>(i->first) << "</b>";
@@ -297,10 +266,9 @@ void ThreadBlacklist::htmlfull(stringstream &html){
         }
     }
 
-    if (blacklist_global->list_to_del.size() > 0)
-    {
+    if (blacklist_global->list_to_del.size() > 0) {
         html << "BlackListGlobal to Del: <b>" << blacklist_global->list_to_del.size() << "</b><br/>\n";
-        map<long long int,bool>::iterator i = blacklist_global->list_to_del.begin();
+        map<long long int, bool>::iterator i = blacklist_global->list_to_del.begin();
         while (i != blacklist_global->list_to_del.end()) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             html << "<b>" << lexical_cast<string>(i->first) << "</b>";

@@ -2,8 +2,7 @@
 
 #include "../lists/CallsObjList.h"
 
-class CallsSaver
-{
+class CallsSaver {
 protected:
     BDb * db;
 

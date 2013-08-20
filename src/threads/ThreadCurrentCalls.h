@@ -4,8 +4,7 @@
 #include "../lists/CurrentCallsObjList.h"
 #include <boost/smart_ptr/detail/spinlock.hpp>
 
-class ThreadCurrentCalls : public Thread
-{
+class ThreadCurrentCalls : public Thread {
 public:
     static shared_ptr<CurrentCallsObjList> getList();
 private:

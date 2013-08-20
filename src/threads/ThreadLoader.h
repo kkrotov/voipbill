@@ -5,10 +5,7 @@
 #include "../classes/DataLoader.h"
 #include "../classes/Timer.h"
 
-
-
-class ThreadLoader : public Thread
-{
+class ThreadLoader : public Thread {
     Timer t;
     DataLoader * loader;
     BDb db_calls;

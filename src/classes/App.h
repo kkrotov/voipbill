@@ -8,8 +8,7 @@ using namespace std;
 
 class Thread;
 
-class App
-{
+class App {
 public:
     Conf conf;
     mutex threads_mutex;
