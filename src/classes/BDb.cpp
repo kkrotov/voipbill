@@ -117,11 +117,6 @@ void BDb::disconnect() {
     }
 }
 
-bool BDb::reconnect() {
-    disconnect();
-    return connect();
-}
-
 void BDb::listen(const string name) {
     const string qlisten = "LISTEN " + name;
 
