@@ -65,12 +65,11 @@ void ClientCounter::load(BDb * db, time_t dt) {
 
         cc.client_id = res.get_i(0);
 
-        sscanf(res.get(1), "%d-%d-%d", &ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday); ttt.tm_year -= 1900; ttt.tm_mon -= 1;
-        cc.amount_month = mktime(&ttt);
+		
+        cc.amount_month = parseDate(res.get(1));
         cc.sum_month = res.get_i(2);
 
-        sscanf(res.get(3), "%d-%d-%d", &ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday); ttt.tm_year -= 1900; ttt.tm_mon -= 1;
-        cc.amount_day = mktime(&ttt);
+        cc.amount_day = parseDate(res.get(3));
         cc.sum_day = res.get_i(4);
 
         cc.sum = res.get_i(5);

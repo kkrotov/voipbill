@@ -1,15 +1,6 @@
 #pragma once
 
-#include <ctime>
 #include "../common.h"
-
-typedef struct _DT
-{
-    time_t	time;
-	time_t	day;
-	time_t	month;
-} DT, *pDT;
-
 
 typedef struct _DestObj
 {

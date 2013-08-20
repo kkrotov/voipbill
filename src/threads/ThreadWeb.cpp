@@ -192,8 +192,13 @@ void ThreadWeb::handlerClient(stringstream &html, map<string,string> &parameters
     bool client_disabled_global, client_disabled_local;
     {
         loader->counter_rwlock.lock(); //.lockForRead();
-        shared_ptr<ClientCounter> clients_counters = loader->counter_client;
-        ClientCounterObj &client_counter = clients_counters->get(client_id);
+        shared_ptr<ClientCounter> cl = loader->counter_client;
+        if (cl == 0)
+        {
+                loader->counter_rwlock.unlock();
+                return;
+        }
+        ClientCounterObj &client_counter = cl->get(client_id);
         sum_month = client_counter.sumMonth();
         sum_day = client_counter.sumDay();
         sum_balance = client_counter.sumBalance();

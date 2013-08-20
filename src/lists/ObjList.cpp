@@ -4,16 +4,7 @@
 #include <stdlib.h>
 
 void _CallObj::make_dt() {
-    struct tm ttt;
-    ttt.tm_isdst = 0; ttt.tm_yday = 0;
-
-    sscanf((char*)&time, "%d-%d-%d %d:%d:%d", &ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday, &ttt.tm_hour, &ttt.tm_min, &ttt.tm_sec);
-    ttt.tm_year -= 1900; ttt.tm_mon -= 1;
-
-    dt.time = mktime(&ttt);
-
-    dt.day = dt.time - ttt.tm_hour*3600 - ttt.tm_min*60 - ttt.tm_sec;
-    dt.month = dt.day - (ttt.tm_mday-1)*86400;
+	parseDateTime((char*)&time, dt);
 }
 
 ObjList::ObjList(){

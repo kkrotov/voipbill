@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../common.h"
 #include "../classes/BDb.h"
 #include "../classes/Timer.h"
 #include "../classes/DbException.h"

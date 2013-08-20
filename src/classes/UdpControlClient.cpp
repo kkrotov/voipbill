@@ -3,62 +3,48 @@
 #include "App.h"
 #include "Log.h"
 
-void UdpControlClient::handle_receive(const boost::system::error_code& error, size_t bytes_recvd, size_t *nread)
-{
-    if (error)
-    {
-        Log::er(error.message());
-        return;
-    }
-    if (nread != 0)
-        *nread = bytes_recvd;
-}
-
 bool UdpControlClient::sendrecv(string &msg, string &res){
+	boost::asio::io_service io_service;
+	udp::socket s(io_service);
+	
     try {
+		#ifdef _WIN32
+			int32_t timeout = 1000;
+			setsockopt(s.native(), SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+			setsockopt(s.native(), SOL_SOCKET, SO_SNDTIMEO, (const char*)&timeout, sizeof(timeout));
+		#else
+			struct timeval tv;
+			tv.tv_sec  = 1;
+			tv.tv_usec = 0;
+			setsockopt(s.native(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+			setsockopt(s.native(), SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+		#endif
+
         boost::asio::ip::address addr = boost::asio::ip::address::from_string(app.conf.udp_host);
-
         udp::endpoint endpoint(addr, app.conf.udp_port);
-
-        boost::asio::io_service io_service;
-        udp::socket s(io_service);
         s.open(udp::v4());
-
+		
         // send
-        if (msg.size() != s.send_to(boost::asio::buffer(msg.data(), msg.size()), endpoint)) return false;
+        if (msg.size() != s.send_to(boost::asio::buffer(msg.data(), msg.size()), endpoint)) {
+			s.close();
+			return false;
+		}
 
         // receive
-        size_t nread = 0xFFFF;
         char recvdata[1024*20];
+		size_t nread = s.receive(boost::asio::buffer(recvdata, sizeof(recvdata)));
+		if (nread > 0)
+			res.append(&recvdata[0], nread);
 
-        boost::asio::deadline_timer timer(io_service);
-        timer.expires_from_now(boost::posix_time::seconds(3));
-        timer.async_wait(boost::bind(UdpControlClient::handle_receive,
-                                     boost::asio::placeholders::error, 0, (size_t *)0));
-
-
-        s.async_receive(boost::asio::buffer(recvdata, sizeof(recvdata)),
-                        boost::bind(UdpControlClient::handle_receive,
-                                  boost::asio::placeholders::error,
-                                  boost::asio::placeholders::bytes_transferred, &nread));
-
-        io_service.reset();
-        io_service.run_one();
-        timer.cancel();
-        s.cancel();
-
-        if (nread == 0xFFFF) return false;
-
-        if (nread > 0)
-            res.append(&recvdata[0], nread);
-
+		s.close();
         return true;
     }
     catch (exception& e)
     {
         Log::er(e.what());
+		s.close();
+		return false;
     }
-    return false;
 }
 
 bool UdpControlClient::ready(){

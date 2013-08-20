@@ -1,6 +1,7 @@
 #include "../common.h"
 #include "Thread.h"
 
+#include <chrono>
 
 Thread::Thread(){
     id = string_fmt("%d", rand());
@@ -20,23 +21,12 @@ void Thread::start(){
 
 void Thread::ssleep(unsigned int seconds)
 {
-    sleep(seconds);
+    std::this_thread::sleep_for(std::chrono::seconds(seconds));
 }
 
 void Thread::usleep(unsigned int milliseconds)
 {
-    struct timespec req;
-
-    if (milliseconds >= 1000)
-    {
-        req.tv_sec = milliseconds / 1000;
-        req.tv_nsec = (milliseconds % 1000) * 1000000L;
-    }else{
-        req.tv_sec = 0;
-        req.tv_nsec = milliseconds;
-    }
-
-    clock_nanosleep(CLOCK_MONOTONIC, 0, &req, NULL);
+    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
 }
 
 void Thread::wait()
@@ -69,7 +59,6 @@ void Thread::operator()()
     catch( ... ){
         Log::er("ERROR");
     }
+	
     app.unregister_thread(this);
-
-    delete this;
 }

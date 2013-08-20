@@ -9,8 +9,6 @@ class UdpControlClient {
 
 protected:
 
-    static void handle_receive(const boost::system::error_code& error, size_t bytes_recvd, size_t *nread);
-
     static bool sendrecv(string &msg, string &res);
 
 public:

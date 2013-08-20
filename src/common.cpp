@@ -1,5 +1,5 @@
-#include <string>
-using namespace std;
+#include "common.h"
+
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -58,6 +58,52 @@ string string_time(const time_t dt) {
     }
     strftime(buff, 40, "%Y-%m-%d %H:%M:%S", timeinfo);
     return string(buff);
+}
+
+time_t parseDate(char * str) {
+	struct tm ttt;
+	if (sscanf(str, "%d-%d-%d", 
+			&ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday) > 0
+	) {
+		ttt.tm_year -= 1900; ttt.tm_mon -= 1;
+		ttt.tm_hour = 0; ttt.tm_min = 0; ttt.tm_sec = 0;
+		ttt.tm_isdst = 0; ttt.tm_yday = 0;
+		return mktime(&ttt);
+	}
+	return 0;
+}
+
+time_t parseDateTime(char * str) {
+	struct tm ttt;
+	if (sscanf(str, "%d-%d-%d %d:%d:%d", 
+			&ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday, 
+			&ttt.tm_hour, &ttt.tm_min, &ttt.tm_sec) > 0
+	) {
+		ttt.tm_year -= 1900; ttt.tm_mon -= 1;
+		ttt.tm_isdst = 0; ttt.tm_yday = 0;
+		return mktime(&ttt);
+	}
+	return 0;
+}
+
+bool parseDateTime(char * str, DT &dt) {
+	struct tm ttt;
+	if (sscanf(str, "%d-%d-%d %d:%d:%d", 
+			&ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday, 
+			&ttt.tm_hour, &ttt.tm_min, &ttt.tm_sec) > 0
+	) {
+		ttt.tm_year -= 1900; ttt.tm_mon -= 1;
+		ttt.tm_isdst = 0; ttt.tm_yday = 0;
+		dt.time = mktime(&ttt);
+	    dt.day = dt.time - ttt.tm_hour*3600 - ttt.tm_min*60 - ttt.tm_sec;
+		dt.month = dt.day - (ttt.tm_mday-1)*86400;
+		return true;
+	} else {
+		dt.time = 0;
+	    dt.day = 0;
+		dt.month = 0;
+		return false;
+	}
 }
 
 time_t t_day_start = 0;
