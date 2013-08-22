@@ -3,53 +3,69 @@
 #include "App.h"
 #include "Log.h"
 
+void UdpControlClient::handle_receive(const boost::system::error_code& error, size_t bytes_recvd, size_t *nread) {
+    if (error) {
+        Log::error(error.message());
+        return;
+    }
+    if (nread != 0)
+        *nread = bytes_recvd;
+}
+
 bool UdpControlClient::sendrecv(string &msg, string &res) {
     boost::asio::io_service io_service;
     udp::socket s(io_service);
 
     try {
-#ifdef _WIN32
-        int32_t timeout = 1000;
-        setsockopt(s.native(), SOL_SOCKET, SO_RCVTIMEO, (const char*) &timeout, sizeof (timeout));
-        setsockopt(s.native(), SOL_SOCKET, SO_SNDTIMEO, (const char*) &timeout, sizeof (timeout));
-#else
-        struct timeval tv;
-        tv.tv_sec = 1;
-        tv.tv_usec = 0;
-        setsockopt(s.native(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof (tv));
-        setsockopt(s.native(), SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof (tv));
-#endif
+        boost::asio::ip::address addr = boost::asio::ip::address::from_string("127.0.0.1");
+        udp::endpoint endpoint(addr, 9999);
 
-        boost::asio::ip::address addr = boost::asio::ip::address::from_string(app.conf.udp_host);
-        udp::endpoint endpoint(addr, app.conf.udp_port);
         s.open(udp::v4());
+        s.connect(endpoint);
 
         // send
-        if (msg.size() != s.send_to(boost::asio::buffer(msg.data(), msg.size()), endpoint)) {
+        if (msg.size() != s.send(boost::asio::buffer(msg.data(), msg.size()))) {
             s.close();
             return false;
         }
 
-        // receive
-        char recvdata[1024 * 20];
-        size_t nread = s.receive(boost::asio::buffer(recvdata, sizeof (recvdata)));
-        if (nread > 0)
-            res.append(&recvdata[0], nread);
+        fcntl(s.native(), F_SETFL, O_NONBLOCK);
 
-        s.close();
-        return true;
-    }    catch (exception& e) {
+        fd_set readset;
+        FD_ZERO(&readset);
+        FD_SET(s.native(), &readset);
+
+        timeval timeout;
+        timeout.tv_sec = 2;
+        timeout.tv_usec = 0;
+
+        select(s.native() + 1, &readset, NULL, NULL, &timeout);
+
+        if (FD_ISSET(s.native(), &readset)) {
+            char recvdata[1024 * 20];
+            int bytes_read = recv(s.native(), recvdata, sizeof (recvdata), 0);
+
+            if (bytes_read > 0) {
+                res.append(&recvdata[0], bytes_read);
+                Log::error(res);
+                s.close();
+                return true;
+            }
+        }
+
+    } catch (exception& e) {
         Log::error(e.what());
-        s.close();
-        return false;
     }
+
+    s.close();
+    return false;
 }
 
 bool UdpControlClient::ready() {
     return app.conf.udp_host != "" && app.conf.udp_port != 0;
 }
 
-bool UdpControlClient::select(vector<string> &list) {
+bool UdpControlClient::select_calls(vector<string> &list) {
     string msg("SELECT");
     string res;
     if (sendrecv(msg, res) == false) return false;
