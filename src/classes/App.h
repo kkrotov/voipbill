@@ -31,6 +31,7 @@ public:
     bool init(int argc, char* argv[]);
     void run();
 
+    void runThread(Thread * thread);
     void register_thread(Thread * thread);
     void unregister_thread(Thread * thread);
 

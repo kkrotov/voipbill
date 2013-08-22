@@ -11,6 +11,7 @@
 #include "../threads/ThreadCurrentCalls.h"
 #include "../threads/ThreadWeb.h"
 #include "../threads/ThreadTasks.h"
+#include "../threads/ThreadLog.h"
 
 #include "Daemon.h"
 
@@ -40,28 +41,22 @@ void App::run() {
 
     std::thread web_thread(web);
 
-    ThreadSync * thread_sync = new ThreadSync();
-    ThreadLoader * thread_loader = new ThreadLoader();
-    ThreadSaveCounters * thread_savecounters = new ThreadSaveCounters();
-    ThreadBlacklist * thread_blacklist = new ThreadBlacklist();
-    ThreadLimitControl * thread_limitcontrol = new ThreadLimitControl();
-    ThreadBillRuntime * thread_billruntime = new ThreadBillRuntime();
-    ThreadCheckStartTable * thread_checkstarttable = new ThreadCheckStartTable();
-    ThreadCurrentCalls * thread_currentcalls = new ThreadCurrentCalls();
-    ThreadTasks * thread_tasks = new ThreadTasks();
-
-
-    thread_sync->start();
-    thread_loader->start();
-    thread_billruntime->start();
-    thread_limitcontrol->start();
-    thread_blacklist->start();
-    thread_savecounters->start();
-    thread_currentcalls->start();
-    thread_checkstarttable->start();
-    thread_tasks->start();
+    runThread(new ThreadLog());
+    runThread(new ThreadSync());
+    runThread(new ThreadLoader());
+    runThread(new ThreadSaveCounters());
+    runThread(new ThreadBlacklist());
+    runThread(new ThreadLimitControl());
+    runThread(new ThreadBillRuntime());
+    runThread(new ThreadCheckStartTable());
+    runThread(new ThreadCurrentCalls());
+    runThread(new ThreadTasks());
 
     web_thread.join();
+}
+
+void App::runThread(Thread * thread) {
+    thread->start();
 }
 
 void App::register_thread(Thread * thread) {
