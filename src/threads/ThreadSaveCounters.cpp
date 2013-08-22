@@ -9,6 +9,8 @@ ThreadSaveCounters::ThreadSaveCounters() {
     loader = DataLoader::instance();
 
     db_main.setCS(app.conf.db_main);
+    db_main.needAdvisoryLock(app.conf.region_id);
+
     db_calls.setCS(app.conf.db_calls);
 }
 
@@ -22,7 +24,12 @@ void ThreadSaveCounters::wait() {
 }
 
 void ThreadSaveCounters::prepare() {
+
     while (save_client_counters(true) == false) {
+        ssleep(10);
+    }
+
+    while (db_main.ping() == false) {
         ssleep(10);
     }
 }
