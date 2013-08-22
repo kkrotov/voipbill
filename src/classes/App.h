@@ -5,6 +5,7 @@
 using namespace std;
 
 #include "Conf.h"
+#include "Logger.h"
 
 class Thread;
 
@@ -13,6 +14,7 @@ public:
     Conf conf;
     mutex threads_mutex;
     list<Thread*> threads;
+    Logger logger;
 
     // флаг устанавливается когда первоначальное получение данных с центрального сервера завершено
     bool init_sync_done;
