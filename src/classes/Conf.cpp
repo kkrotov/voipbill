@@ -42,7 +42,7 @@ bool Conf::parse_cmd_line(int argc, char* argv[]) {
             pid_file = vm["pid-file"].as<string>();
 
 
-    }    catch (exception& e) {
+    } catch (exception& e) {
         Log::error(string("Parse cmd line: ").append(e.what()));
         return false;
     }
@@ -60,6 +60,8 @@ bool Conf::parse_config_file() {
 
         test_mode = pt.get<bool>("main.test_mode", test_mode);
         web_port = pt.get<unsigned short>("main.web_port", web_port);
+
+        log_grouping_interval = pt.get<unsigned short>("log.grouping_interval", 60);
 
         db_main = pt.get<string>("db.main");
         db_rad = pt.get<string>("db.rad");

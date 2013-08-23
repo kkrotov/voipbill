@@ -23,8 +23,11 @@ void ThreadBillRuntime::wait() {
 
 void ThreadBillRuntime::run() {
     Log::info("Running...");
+
     db_rad.setCS(app.conf.db_rad);
+
     db_calls.setCS(app.conf.db_calls);
+    db_calls.needAdvisoryLock(app.conf.region_id);
 
     CallsSaver sv(&db_calls);
     calculator.setDb(&db_calls);

@@ -31,13 +31,14 @@ void ThreadCheckStartTable::run() {
 
             if (slist.size() == 0) {
                 last_t = curr_t;
+                t.stop();
                 continue;
             }
 
             ssleep(1);
 
             vector<string> rlist;
-            if (UdpControlClient::select(rlist) == false) continue;
+            if (UdpControlClient::select_calls(rlist) == false) continue;
 
             map<string, bool> rlist_map;
             for (vector<string>::iterator it = rlist.begin(); it != rlist.end(); ++it) {

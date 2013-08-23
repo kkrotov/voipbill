@@ -201,7 +201,7 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             html << "<b>" << lexical_cast<string>(i->first) << "</b>";
             if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                html << " / " << usage->client_id;
+                html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
             html << "<br/>\n";
             ++i;
         }
@@ -214,7 +214,7 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             html << "<b>" << lexical_cast<string>(i->first) << "</b>";
             if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                html << " / " << usage->client_id;
+                html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
             html << "<br/>\n";
             ++i;
         }
@@ -227,7 +227,7 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             html << "<b>" << lexical_cast<string>(i->first) << "</b>";
             if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                html << " / " << usage->client_id;
+                html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
             html << "<br/>\n";
             ++i;
         }
@@ -247,7 +247,7 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             html << "<b>" << lexical_cast<string>(i->first) << "</b>";
             if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                html << " / " << usage->client_id;
+                html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
             html << "<br/>\n";
             ++i;
         }
@@ -260,7 +260,7 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             html << "<b>" << lexical_cast<string>(i->first) << "</b>";
             if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                html << " / " << usage->client_id;
+                html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
             html << "<br/>\n";
             ++i;
         }
@@ -273,7 +273,7 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
             html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
             html << "<b>" << lexical_cast<string>(i->first) << "</b>";
             if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                html << " / " << usage->client_id;
+                html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
             html << "<br/>\n";
             ++i;
         }

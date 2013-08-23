@@ -5,71 +5,15 @@
 #include "Log.h"
 #include "../common.h"
 
-BDbResult::BDbResult(PGresult * res) {
-    this->res = res;
-    this->index = -1;
-    this->count = PQntuples(res);
-}
-
-BDbResult::~BDbResult() {
-    if (res != 0)
-        PQclear(res);
-}
-
-int BDbResult::size() {
-    return count;
-}
-
-char * BDbResult::get(int r, int f) {
-    return PQgetvalue(res, r, f);
-}
-
-char * BDbResult::get(int f) {
-    return PQgetvalue(res, index, f);
-}
-
-int BDbResult::get_i(int f) {
-    return atoi(PQgetvalue(res, index, f));
-}
-
-double BDbResult::get_d(int f) {
-    return atof(PQgetvalue(res, index, f));
-}
-
-long long int BDbResult::get_ll(int f) {
-    return atoll(PQgetvalue(res, index, f));
-}
-
-bool BDbResult::get_b(int f) {
-    return 't' == *PQgetvalue(res, index, f);
-}
-
-string BDbResult::get_s(int f) {
-    return PQgetvalue(res, index, f);
-}
-
-bool BDbResult::next() {
-    index++;
-    if (count > 0 && index < count) {
-        return true;
-    } else
-        return false;
-}
-
-void BDbResult::force_free() {
-    if (res != 0) {
-        PQclear(res);
-        res = 0;
-    }
-}
-
 BDb::BDb() {
     this->conn = 0;
+    this->need_advisory_lock = 0;
 }
 
 BDb::BDb(const string &connstr) {
     this->conn = 0;
     this->connstr = connstr;
+    this->need_advisory_lock = 0;
 }
 
 BDb::~BDb() {
@@ -93,16 +37,25 @@ bool BDb::connect() {
         throw e;
     }
 
-    for (map < string, bool>::iterator i = listener.begin(); i != listener.end(); ++i) {
-        PGresult *res = PQexec(conn, i->first.c_str());
-        if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-            DbException e(conn, "BDb::connect:listen");
+
+
+    if (need_advisory_lock != 0) {
+        string query = "select pg_try_advisory_lock(" + lexical_cast<string>(need_advisory_lock) + ") as locked";
+        PGresult *res = PQexec(conn, query.c_str());
+        if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+            DbException e(conn, "BDb::try_advisory_lock");
             PQclear(res);
             disconnect();
             throw e;
         }
+        if ('t' != *PQgetvalue(res, 0, 0)) {
+            PQclear(res);
+            disconnect();
+            throw Exception("Can not lock key" + lexical_cast<string>(need_advisory_lock), "BDb::try_advisory_lock");
+        }
         PQclear(res);
     }
+
     return true;
 }
 
@@ -117,66 +70,8 @@ void BDb::disconnect() {
     }
 }
 
-void BDb::listen(const string name) {
-    const string qlisten = "LISTEN " + name;
-
-    if (listener.find(qlisten) != listener.end()) return;
-
-    listener[qlisten] = true;
-
-    exec(qlisten);
-}
-
-list<string> BDb::notifies() {
-
-    connect();
-
-    int sock = PQsocket(conn);
-    if (sock < 0) {
-        throw DbException("Could not create PQsocket", "BDb::notifies");
-    }
-
-    map<string, bool> m;
-    list<string> list;
-    PGnotify *notify;
-
-    PQconsumeInput(conn);
-    while ((notify = PQnotifies(conn)) != NULL) {
-        string n = string(notify->relname);
-        if (*notify->extra != 0) n += "|" + string(notify->extra);
-
-        map<string, bool>::iterator it = m.find(n);
-        if (it == m.end()) {
-            m[n] = true;
-            list.push_back(n);
-        }
-        PQfreemem(notify);
-    }
-    if (list.size() > 0) return list;
-
-    fd_set input_mask;
-    FD_ZERO(&input_mask);
-    FD_SET(sock, &input_mask);
-
-    if (select(sock + 1, &input_mask, NULL, NULL, NULL) < 0) {
-        disconnect();
-        throw DbException(strerror(errno), "BDb::notifies: select()");
-    }
-
-    PQconsumeInput(conn);
-    while ((notify = PQnotifies(conn)) != NULL) {
-        string n = string(notify->relname);
-        if (*notify->extra != 0) n += "|" + string(notify->extra);
-
-        map<string, bool>::iterator it = m.find(n);
-        if (it == m.end()) {
-            m[n] = true;
-            list.push_back(n);
-        }
-        PQfreemem(notify);
-    }
-
-    return list;
+void BDb::needAdvisoryLock(int key) {
+    need_advisory_lock = key;
 }
 
 void BDb::exec(const char * squery) {

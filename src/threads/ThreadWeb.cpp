@@ -60,6 +60,8 @@ void ThreadWeb::handlerConfig(stringstream &html) {
     html << "main.web_port: " << app.conf.web_port << "<br/>\n";
     html << "main.test_mode: " << app.conf.test_mode << "<br/>\n";
     html << "<br/>\n";
+    html << "log.grouping_interval: " << app.conf.log_grouping_interval << "<br/>\n";
+    html << "<br/>\n";
     html << "db.main: " << app.conf.db_main << "<br/>\n";
     html << "db.rad: " << app.conf.db_rad << "<br/>\n";
     html << "db.calls: " << app.conf.db_calls << "<br/>\n";
@@ -130,7 +132,7 @@ void ThreadWeb::handlerCounters(stringstream &html) {
 
         if (sum_month == 0 && sum_day == 0 && sum_balance == 0) continue;
         html << "<tr><td>"
-                << key << "</td><td>"
+                << "<a href='/client?id=" << key << "'>" << key << "</a></td><td>"
                 << string_date(value.amount_month) << "</td><td>"
                 << sum_month << "</td><td>"
                 << string_date(value.amount_day) << "</td><td>"

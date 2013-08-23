@@ -17,6 +17,7 @@ public:
     string pid_file;
     string log_file;
     string err_log_file;
+    unsigned short log_grouping_interval;
 
     bool test_mode;
     unsigned short web_port;
