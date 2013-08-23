@@ -10,7 +10,6 @@ Thread::Thread() {
 }
 
 Thread::~Thread() {
-    app.unregister_thread(this);
 }
 
 void Thread::start() {
@@ -34,7 +33,7 @@ void Thread::prepare() {
 
 void Thread::operator()() {
 
-    app.register_thread(this);
+    onStarted(this);
 
     try {
         status = "waiting";
@@ -51,5 +50,5 @@ void Thread::operator()() {
         Log::error("Thread::ERROR");
     }
 
-    app.unregister_thread(this);
+    onFinished(this);
 }
