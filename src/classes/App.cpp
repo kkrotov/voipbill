@@ -15,6 +15,9 @@
 
 #include "Daemon.h"
 
+#include "LogWriterScreen.h"
+#include "LogWriterFile.h"
+
 App::App() {
     init_sync_done = false;
     init_load_counters_done = false;
@@ -33,6 +36,12 @@ bool App::init(int argc, char* argv[]) {
 }
 
 void App::run() {
+
+    logger.setLogGroupingInterval(conf.log_grouping_interval);
+    logger.addLogWriter(pLogWriter(new LogWriterScreen()));
+    logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file, LogLevel::DEBUG, LogLevel::WARNING)));
+    logger.addLogWriter(pLogWriter(new LogWriterFile(conf.err_log_file, LogLevel::ERROR, LogLevel::CRITICAL)));
+
     Daemoin::setPidFile();
     Daemoin::initSignalHandler();
 

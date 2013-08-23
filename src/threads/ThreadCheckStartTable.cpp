@@ -31,6 +31,7 @@ void ThreadCheckStartTable::run() {
 
             if (slist.size() == 0) {
                 last_t = curr_t;
+                t.stop();
                 continue;
             }
 

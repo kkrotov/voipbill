@@ -56,6 +56,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/libs/gtest/src/gtest.o \
 	${OBJECTDIR}/src/classes/App.o \
 	${OBJECTDIR}/src/classes/BDb.o \
+	${OBJECTDIR}/src/classes/BDbResult.o \
+	${OBJECTDIR}/src/classes/BaseLogWriter.o \
 	${OBJECTDIR}/src/classes/BlackList.o \
 	${OBJECTDIR}/src/classes/CalcBase.o \
 	${OBJECTDIR}/src/classes/CalcFull.o \
@@ -64,6 +66,9 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/classes/Daemon.o \
 	${OBJECTDIR}/src/classes/DataLoader.o \
 	${OBJECTDIR}/src/classes/Log.o \
+	${OBJECTDIR}/src/classes/LogWriterFile.o \
+	${OBJECTDIR}/src/classes/LogWriterScreen.o \
+	${OBJECTDIR}/src/classes/Logger.o \
 	${OBJECTDIR}/src/classes/UdpControlClient.o \
 	${OBJECTDIR}/src/common.o \
 	${OBJECTDIR}/src/http/file_handler.o \
@@ -90,18 +95,17 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/tests/TestLibs.o \
 	${OBJECTDIR}/src/tests/TestLoader.o \
 	${OBJECTDIR}/src/threads/Thread.o \
-	${OBJECTDIR}/src/threads/ThreadAsteriskInfo.o \
 	${OBJECTDIR}/src/threads/ThreadBillRuntime.o \
 	${OBJECTDIR}/src/threads/ThreadBlacklist.o \
 	${OBJECTDIR}/src/threads/ThreadCheckStartTable.o \
 	${OBJECTDIR}/src/threads/ThreadCurrentCalls.o \
 	${OBJECTDIR}/src/threads/ThreadLimitControl.o \
 	${OBJECTDIR}/src/threads/ThreadLoader.o \
+	${OBJECTDIR}/src/threads/ThreadLog.o \
 	${OBJECTDIR}/src/threads/ThreadSaveCounters.o \
 	${OBJECTDIR}/src/threads/ThreadSync.o \
 	${OBJECTDIR}/src/threads/ThreadTasks.o \
-	${OBJECTDIR}/src/threads/ThreadWeb.o \
-	${OBJECTDIR}/src/threads/ThreadYotaQoS.o
+	${OBJECTDIR}/src/threads/ThreadWeb.o
 
 
 # C Compiler Flags
@@ -233,6 +237,16 @@ ${OBJECTDIR}/src/classes/BDb.o: src/classes/BDb.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/classes/BDb.o src/classes/BDb.cpp
 
+${OBJECTDIR}/src/classes/BDbResult.o: src/classes/BDbResult.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/classes
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/classes/BDbResult.o src/classes/BDbResult.cpp
+
+${OBJECTDIR}/src/classes/BaseLogWriter.o: src/classes/BaseLogWriter.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/classes
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/classes/BaseLogWriter.o src/classes/BaseLogWriter.cpp
+
 ${OBJECTDIR}/src/classes/BlackList.o: src/classes/BlackList.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/classes
 	${RM} $@.d
@@ -272,6 +286,21 @@ ${OBJECTDIR}/src/classes/Log.o: src/classes/Log.cpp
 	${MKDIR} -p ${OBJECTDIR}/src/classes
 	${RM} $@.d
 	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/classes/Log.o src/classes/Log.cpp
+
+${OBJECTDIR}/src/classes/LogWriterFile.o: src/classes/LogWriterFile.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/classes
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/classes/LogWriterFile.o src/classes/LogWriterFile.cpp
+
+${OBJECTDIR}/src/classes/LogWriterScreen.o: src/classes/LogWriterScreen.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/classes
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/classes/LogWriterScreen.o src/classes/LogWriterScreen.cpp
+
+${OBJECTDIR}/src/classes/Logger.o: src/classes/Logger.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/classes
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/classes/Logger.o src/classes/Logger.cpp
 
 ${OBJECTDIR}/src/classes/UdpControlClient.o: src/classes/UdpControlClient.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/classes
@@ -403,11 +432,6 @@ ${OBJECTDIR}/src/threads/Thread.o: src/threads/Thread.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/threads/Thread.o src/threads/Thread.cpp
 
-${OBJECTDIR}/src/threads/ThreadAsteriskInfo.o: src/threads/ThreadAsteriskInfo.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src/threads
-	${RM} $@.d
-	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/threads/ThreadAsteriskInfo.o src/threads/ThreadAsteriskInfo.cpp
-
 ${OBJECTDIR}/src/threads/ThreadBillRuntime.o: src/threads/ThreadBillRuntime.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/threads
 	${RM} $@.d
@@ -438,6 +462,11 @@ ${OBJECTDIR}/src/threads/ThreadLoader.o: src/threads/ThreadLoader.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/threads/ThreadLoader.o src/threads/ThreadLoader.cpp
 
+${OBJECTDIR}/src/threads/ThreadLog.o: src/threads/ThreadLog.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/threads
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/threads/ThreadLog.o src/threads/ThreadLog.cpp
+
 ${OBJECTDIR}/src/threads/ThreadSaveCounters.o: src/threads/ThreadSaveCounters.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/threads
 	${RM} $@.d
@@ -457,11 +486,6 @@ ${OBJECTDIR}/src/threads/ThreadWeb.o: src/threads/ThreadWeb.cpp
 	${MKDIR} -p ${OBJECTDIR}/src/threads
 	${RM} $@.d
 	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/threads/ThreadWeb.o src/threads/ThreadWeb.cpp
-
-${OBJECTDIR}/src/threads/ThreadYotaQoS.o: src/threads/ThreadYotaQoS.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src/threads
-	${RM} $@.d
-	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/threads/ThreadYotaQoS.o src/threads/ThreadYotaQoS.cpp
 
 # Subprojects
 .build-subprojects:

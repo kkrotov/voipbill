@@ -17,13 +17,44 @@ void Logger::logMessage(pLogMessage message) {
     pLogMessage history_message = history[message->message];
     if (history_message.get() == 0) {
         message->time = time(NULL);
+        message->timeInGroup = getPeriod();
         message->count = 1;
+        message->countInGroup = 0;
         history[message->message] = message;
 
         queue.push(message);
     } else {
-        history_message->count++;
+        history_message->countInGroup++;
     }
+}
+
+void Logger::addLogWriter(pLogWriter writer) {
+    writers.push_back(writer);
+}
+
+void Logger::setLogGroupingInterval(unsigned short grouping_interval) {
+    this->grouping_interval = grouping_interval;
+}
+
+void Logger::processLogQueue() {
+
+    list<pLogMessage> messages;
+
+    {
+        lock_guard<std::mutex> lock(mutex);
+
+        processGroupingMessages();
+
+        while (!queue.empty()) {
+            messages.push_back(queue.front());
+            queue.pop();
+        }
+    }
+
+    for (auto it = writers.begin(); it != writers.end(); ++it) {
+        (*it)->massPublish(messages);
+    }
+
 }
 
 void Logger::processGroupingMessages() {
@@ -31,27 +62,32 @@ void Logger::processGroupingMessages() {
     time_t period = getPeriod();
     if (period > grouping_period) {
 
-        typename map<string, pLogMessage>::iterator i;
-        typename map<string, pLogMessage>::iterator e;
-        for (i = history.begin(), e = history.end(); i != e;) {
-            pLogMessage message = i->second;
-            if (message->count > 1) {
-                message->time = grouping_period;
+        auto it = history.begin();
+        while (it != history.end()) {
+            pLogMessage message = it->second;
+
+            if (message->countInGroup > 0) {
+                message->time = message->timeInGroup;
+                message->count = message->countInGroup;
+                message->timeInGroup = period;
+                message->countInGroup = 0;
                 queue.push(message);
             }
-            i++;
+
+            if (message->timeInGroup < grouping_period)
+                history.erase(it++);
+            else
+                it++;
+
         }
 
-        history.clear();
         grouping_period = period;
     }
 }
 
 time_t Logger::getPeriod() {
-    int group_interval_seconds = 60;
-
     time_t t = time(NULL);
-    return t - t % group_interval_seconds + group_interval_seconds;
+    return t - t % grouping_interval + grouping_interval;
 }
 
 list<pLogMessage> Logger::getHistory() {
@@ -71,19 +107,4 @@ list<pLogMessage> Logger::getHistory() {
 int Logger::getQueueLength() {
     lock_guard<std::mutex> lock(mutex);
     return queue.size();
-}
-
-bool Logger::isQueueEmpty() {
-    lock_guard<std::mutex> lock(mutex);
-    return queue.empty();
-}
-
-pLogMessage Logger::getQueueFront() {
-    lock_guard<std::mutex> lock(mutex);
-    return queue.front();
-}
-
-void Logger::queuePop() {
-    lock_guard<std::mutex> lock(mutex);
-    return queue.pop();
 }

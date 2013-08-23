@@ -36,6 +36,10 @@
         <itemPath>src/classes/App.h</itemPath>
         <itemPath>src/classes/BDb.cpp</itemPath>
         <itemPath>src/classes/BDb.h</itemPath>
+        <itemPath>src/classes/BDbResult.cpp</itemPath>
+        <itemPath>src/classes/BDbResult.h</itemPath>
+        <itemPath>src/classes/BaseLogWriter.cpp</itemPath>
+        <itemPath>src/classes/BaseLogWriter.h</itemPath>
         <itemPath>src/classes/BlackList.cpp</itemPath>
         <itemPath>src/classes/BlackList.h</itemPath>
         <itemPath>src/classes/BlackListGlobal.h</itemPath>
@@ -59,6 +63,12 @@
         <itemPath>src/classes/Loader.h</itemPath>
         <itemPath>src/classes/Log.cpp</itemPath>
         <itemPath>src/classes/Log.h</itemPath>
+        <itemPath>src/classes/LogWriterFile.cpp</itemPath>
+        <itemPath>src/classes/LogWriterFile.h</itemPath>
+        <itemPath>src/classes/LogWriterScreen.cpp</itemPath>
+        <itemPath>src/classes/LogWriterScreen.h</itemPath>
+        <itemPath>src/classes/Logger.cpp</itemPath>
+        <itemPath>src/classes/Logger.h</itemPath>
         <itemPath>src/classes/Timer.h</itemPath>
         <itemPath>src/classes/UdpControlClient.cpp</itemPath>
         <itemPath>src/classes/UdpControlClient.h</itemPath>
@@ -122,8 +132,6 @@
       <logicalFolder name="threads" displayName="threads" projectFiles="true">
         <itemPath>src/threads/Thread.cpp</itemPath>
         <itemPath>src/threads/Thread.h</itemPath>
-        <itemPath>src/threads/ThreadAsteriskInfo.cpp</itemPath>
-        <itemPath>src/threads/ThreadAsteriskInfo.h</itemPath>
         <itemPath>src/threads/ThreadBillRuntime.cpp</itemPath>
         <itemPath>src/threads/ThreadBillRuntime.h</itemPath>
         <itemPath>src/threads/ThreadBlacklist.cpp</itemPath>
@@ -136,6 +144,8 @@
         <itemPath>src/threads/ThreadLimitControl.h</itemPath>
         <itemPath>src/threads/ThreadLoader.cpp</itemPath>
         <itemPath>src/threads/ThreadLoader.h</itemPath>
+        <itemPath>src/threads/ThreadLog.cpp</itemPath>
+        <itemPath>src/threads/ThreadLog.h</itemPath>
         <itemPath>src/threads/ThreadSaveCounters.cpp</itemPath>
         <itemPath>src/threads/ThreadSaveCounters.h</itemPath>
         <itemPath>src/threads/ThreadSync.cpp</itemPath>
@@ -144,8 +154,6 @@
         <itemPath>src/threads/ThreadTasks.h</itemPath>
         <itemPath>src/threads/ThreadWeb.cpp</itemPath>
         <itemPath>src/threads/ThreadWeb.h</itemPath>
-        <itemPath>src/threads/ThreadYotaQoS.cpp</itemPath>
-        <itemPath>src/threads/ThreadYotaQoS.h</itemPath>
       </logicalFolder>
       <itemPath>src/common.cpp</itemPath>
       <itemPath>src/common.h</itemPath>
@@ -283,6 +291,14 @@
       </item>
       <item path="src/classes/BDb.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/classes/BDbResult.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/BDbResult.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/classes/BaseLogWriter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/BaseLogWriter.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/classes/BlackList.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/classes/BlackList.h" ex="false" tool="3" flavor2="0">
@@ -328,6 +344,18 @@
       <item path="src/classes/Log.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/classes/Log.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/classes/LogWriterFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/LogWriterFile.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/classes/LogWriterScreen.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/LogWriterScreen.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/classes/Logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/Logger.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/classes/Timer.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -444,10 +472,6 @@
       </item>
       <item path="src/threads/Thread.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src/threads/ThreadAsteriskInfo.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src/threads/ThreadAsteriskInfo.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="src/threads/ThreadBillRuntime.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/threads/ThreadBillRuntime.h" ex="false" tool="3" flavor2="0">
@@ -478,6 +502,10 @@
       </item>
       <item path="src/threads/ThreadLoader.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/threads/ThreadLog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/threads/ThreadSaveCounters.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/threads/ThreadSaveCounters.h" ex="false" tool="3" flavor2="0">
@@ -493,10 +521,6 @@
       <item path="src/threads/ThreadWeb.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/threads/ThreadWeb.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src/threads/ThreadYotaQoS.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src/threads/ThreadYotaQoS.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -602,6 +626,14 @@
       </item>
       <item path="src/classes/BDb.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/classes/BDbResult.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/BDbResult.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/classes/BaseLogWriter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/BaseLogWriter.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/classes/BlackList.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/classes/BlackList.h" ex="false" tool="3" flavor2="0">
@@ -647,6 +679,18 @@
       <item path="src/classes/Log.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/classes/Log.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/classes/LogWriterFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/LogWriterFile.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/classes/LogWriterScreen.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/LogWriterScreen.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/classes/Logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/Logger.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/classes/Timer.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -763,10 +807,6 @@
       </item>
       <item path="src/threads/Thread.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src/threads/ThreadAsteriskInfo.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src/threads/ThreadAsteriskInfo.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="src/threads/ThreadBillRuntime.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/threads/ThreadBillRuntime.h" ex="false" tool="3" flavor2="0">
@@ -797,6 +837,10 @@
       </item>
       <item path="src/threads/ThreadLoader.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/threads/ThreadLog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/threads/ThreadSaveCounters.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/threads/ThreadSaveCounters.h" ex="false" tool="3" flavor2="0">
@@ -812,10 +856,6 @@
       <item path="src/threads/ThreadWeb.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/threads/ThreadWeb.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src/threads/ThreadYotaQoS.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src/threads/ThreadYotaQoS.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

@@ -77,7 +77,7 @@ void ThreadCurrentCalls::htmlfull(stringstream &html) {
 
         html << "<tr>";
         html << "<td>" << call->time << "</td>";
-        html << "<td>" << (call->client_id ? lexical_cast<string>(call->client_id) : "") << "</td>";
+        html << "<td>" << "<a href='/client?id=" << call->client_id << "'>" << (call->client_id ? lexical_cast<string>(call->client_id) : "") << "</a>" << "</td>";
         html << "<td>" << call->usage << "</td>";
         html << "<td><b>" << (call->out ? "out" : "in") << "</b></td>";
         html << "<td>" << call->phone << "</td>";

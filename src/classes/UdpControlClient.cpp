@@ -17,8 +17,8 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
     udp::socket s(io_service);
 
     try {
-        boost::asio::ip::address addr = boost::asio::ip::address::from_string("127.0.0.1");
-        udp::endpoint endpoint(addr, 9999);
+        boost::asio::ip::address addr = boost::asio::ip::address::from_string(app.conf.udp_host);
+        udp::endpoint endpoint(addr, app.conf.udp_port);
 
         s.open(udp::v4());
         s.connect(endpoint);
@@ -47,7 +47,6 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
 
             if (bytes_read > 0) {
                 res.append(&recvdata[0], bytes_read);
-                Log::error(res);
                 s.close();
                 return true;
             }
