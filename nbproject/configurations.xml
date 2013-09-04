@@ -67,8 +67,12 @@
         <itemPath>src/classes/LogWriterFile.h</itemPath>
         <itemPath>src/classes/LogWriterScreen.cpp</itemPath>
         <itemPath>src/classes/LogWriterScreen.h</itemPath>
+        <itemPath>src/classes/LogWriterSyslog.cpp</itemPath>
+        <itemPath>src/classes/LogWriterSyslog.h</itemPath>
         <itemPath>src/classes/Logger.cpp</itemPath>
         <itemPath>src/classes/Logger.h</itemPath>
+        <itemPath>src/classes/ThreadPool.cpp</itemPath>
+        <itemPath>src/classes/ThreadPool.h</itemPath>
         <itemPath>src/classes/Timer.h</itemPath>
         <itemPath>src/classes/UdpControlClient.cpp</itemPath>
         <itemPath>src/classes/UdpControlClient.h</itemPath>
@@ -353,9 +357,17 @@
       </item>
       <item path="src/classes/LogWriterScreen.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/classes/LogWriterSyslog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/LogWriterSyslog.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/classes/Logger.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/classes/Logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/classes/ThreadPool.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/ThreadPool.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/classes/Timer.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -688,9 +700,17 @@
       </item>
       <item path="src/classes/LogWriterScreen.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/classes/LogWriterSyslog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/LogWriterSyslog.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/classes/Logger.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/classes/Logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/classes/ThreadPool.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/classes/ThreadPool.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/classes/Timer.h" ex="false" tool="3" flavor2="0">
       </item>

@@ -17,6 +17,7 @@
 
 #include "LogWriterScreen.h"
 #include "LogWriterFile.h"
+#include "LogWriterSyslog.h"
 
 App::App() {
     init_sync_done = false;
@@ -41,6 +42,7 @@ void App::run() {
     logger.addLogWriter(pLogWriter(new LogWriterScreen()));
     logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file, LogLevel::DEBUG, LogLevel::WARNING)));
     logger.addLogWriter(pLogWriter(new LogWriterFile(conf.err_log_file, LogLevel::ERROR, LogLevel::CRITICAL)));
+    logger.addLogWriter(pLogWriter(new LogWriterSyslog("voipbill", LogLevel::DEBUG, LogLevel::CRITICAL)));
 
     Daemoin::setPidFile();
     Daemoin::initSignalHandler();
