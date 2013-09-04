@@ -7,7 +7,7 @@ LogWriterSyslog::LogWriterSyslog(string ident, LogLevel minLevel, LogLevel maxLe
 
 bool LogWriterSyslog::beforePublish() {
 
-    openlog(ident.c_str(), 0, LOG_SYSLOG);
+    openlog(ident.c_str(), LOG_PID, LOG_LOCAL0);
 
 }
 
