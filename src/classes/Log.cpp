@@ -5,24 +5,30 @@
 #include "Loader.h"
 
 void Log::info(const string &text) {
-    Log::info(text.c_str());
-}
-
-void Log::error(const string &text) {
-    Log::error(text.c_str());
-}
-
-void Log::info(const char * text) {
     pLogMessage message(new LogMessage);
     message->level = LogLevel::INFO;
-    message->message = string(text);
+    message->message = text;
     app.logger.logMessage(message);
 }
 
-void Log::error(const char * text) {
+void Log::error(const string &text) {
     pLogMessage message(new LogMessage);
     message->level = LogLevel::ERROR;
-    message->message = string(text);
+    message->message = text;
+    app.logger.logMessage(message);
+}
+
+void Log::notice(const string &text) {
+    pLogMessage message(new LogMessage);
+    message->level = LogLevel::NOTICE;
+    message->message = text;
+    app.logger.logMessage(message);
+}
+
+void Log::warning(const string &text) {
+    pLogMessage message(new LogMessage);
+    message->level = LogLevel::WARNING;
+    message->message = text;
     app.logger.logMessage(message);
 }
 

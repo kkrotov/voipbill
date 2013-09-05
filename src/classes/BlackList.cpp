@@ -233,7 +233,7 @@ void BlackList::log_lock_phone(string &phone) {
         }
     }
 
-    Log::info(str);
+    Log::notice(str);
 }
 
 void BlackList::log_unlock_phone(string &phone) {
@@ -252,5 +252,5 @@ void BlackList::log_unlock_phone(string &phone) {
         }
     }
 
-    Log::info(str);
+    Log::notice(str);
 }

@@ -9,9 +9,8 @@ class Log {
 public:
     static void info(const string &text);
     static void error(const string &text);
-
-    static void info(const char * text);
-    static void error(const char * text);
+    static void notice(const string &text);
+    static void warning(const string &text);
 
     static void exception(Exception &e);
 };
