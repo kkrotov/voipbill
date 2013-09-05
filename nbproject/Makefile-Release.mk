@@ -68,7 +68,9 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/classes/Log.o \
 	${OBJECTDIR}/src/classes/LogWriterFile.o \
 	${OBJECTDIR}/src/classes/LogWriterScreen.o \
+	${OBJECTDIR}/src/classes/LogWriterSyslog.o \
 	${OBJECTDIR}/src/classes/Logger.o \
+	${OBJECTDIR}/src/classes/ThreadPool.o \
 	${OBJECTDIR}/src/classes/UdpControlClient.o \
 	${OBJECTDIR}/src/common.o \
 	${OBJECTDIR}/src/http/file_handler.o \
@@ -297,10 +299,20 @@ ${OBJECTDIR}/src/classes/LogWriterScreen.o: src/classes/LogWriterScreen.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/classes/LogWriterScreen.o src/classes/LogWriterScreen.cpp
 
+${OBJECTDIR}/src/classes/LogWriterSyslog.o: src/classes/LogWriterSyslog.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/classes
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/classes/LogWriterSyslog.o src/classes/LogWriterSyslog.cpp
+
 ${OBJECTDIR}/src/classes/Logger.o: src/classes/Logger.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/classes
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/classes/Logger.o src/classes/Logger.cpp
+
+${OBJECTDIR}/src/classes/ThreadPool.o: src/classes/ThreadPool.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/classes
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/classes/ThreadPool.o src/classes/ThreadPool.cpp
 
 ${OBJECTDIR}/src/classes/UdpControlClient.o: src/classes/UdpControlClient.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/classes

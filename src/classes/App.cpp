@@ -17,6 +17,7 @@
 
 #include "LogWriterScreen.h"
 #include "LogWriterFile.h"
+#include "LogWriterSyslog.h"
 
 App::App() {
     init_sync_done = false;
@@ -41,6 +42,7 @@ void App::run() {
     logger.addLogWriter(pLogWriter(new LogWriterScreen()));
     logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file, LogLevel::DEBUG, LogLevel::WARNING)));
     logger.addLogWriter(pLogWriter(new LogWriterFile(conf.err_log_file, LogLevel::ERROR, LogLevel::CRITICAL)));
+    logger.addLogWriter(pLogWriter(new LogWriterSyslog("voipbill", LogLevel::DEBUG, LogLevel::CRITICAL)));
 
     Daemoin::setPidFile();
     Daemoin::initSignalHandler();
@@ -50,52 +52,16 @@ void App::run() {
 
     std::thread web_thread(web);
 
-    runThread(new ThreadLog());
-    runThread(new ThreadSync());
-    runThread(new ThreadLoader());
-    runThread(new ThreadSaveCounters());
-    runThread(new ThreadBlacklist());
-    runThread(new ThreadLimitControl());
-    runThread(new ThreadBillRuntime());
-    runThread(new ThreadCheckStartTable());
-    runThread(new ThreadCurrentCalls());
-    runThread(new ThreadTasks());
+    threads.run(new ThreadLog());
+    threads.run(new ThreadSync());
+    threads.run(new ThreadLoader());
+    threads.run(new ThreadSaveCounters());
+    threads.run(new ThreadBlacklist());
+    threads.run(new ThreadLimitControl());
+    threads.run(new ThreadBillRuntime());
+    threads.run(new ThreadCheckStartTable());
+    threads.run(new ThreadCurrentCalls());
+    threads.run(new ThreadTasks());
 
     web_thread.join();
-}
-
-void App::runThread(Thread * thread) {
-    thread->start();
-}
-
-void App::register_thread(Thread * thread) {
-    threads_mutex.lock();
-    list<Thread*>::iterator it = threads.begin();
-    while (it != threads.end()) {
-        Thread * tmp = *it;
-        if (tmp->id == thread->id) {
-            if (tmp == thread) {
-                threads_mutex.unlock();
-                return;
-            }
-            thread->id = thread->id + string_fmt("%d", rand());
-            break;
-        }
-        ++it;
-    }
-    threads.push_back(thread);
-    threads_mutex.unlock();
-}
-
-void App::unregister_thread(Thread * thread) {
-    threads_mutex.lock();
-    list<Thread*>::iterator it = threads.begin();
-    while (it != threads.end()) {
-        if (*it == thread) {
-            threads.erase(it);
-            break;
-        }
-        ++it;
-    }
-    threads_mutex.unlock();
 }

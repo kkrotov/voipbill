@@ -38,13 +38,13 @@ void ThreadWeb::handlerHeader(stringstream &html) {
 void ThreadWeb::handlerHome(stringstream &html) {
     handlerHeader(html);
 
-    app.threads_mutex.lock();
-    for (list<Thread*>::iterator i = app.threads.begin(); i != app.threads.end(); i++) {
+    app.threads.mutex.lock();
+    for (auto i = app.threads.threads.begin(); i != app.threads.threads.end(); i++) {
         Thread * thread = *i;
         thread->html(html);
         html << "<hr>\n";
     }
-    app.threads_mutex.unlock();
+    app.threads.mutex.unlock();
 }
 
 void ThreadWeb::handlerConfig(stringstream &html) {
@@ -78,15 +78,15 @@ bool ThreadWeb::handlerTask(stringstream &html, map<string, string> &parameters)
     if (parameters.find("id") != parameters.end())
         task_id = parameters["id"];
     Thread * thread = 0;
-    app.threads_mutex.lock();
-    for (list<Thread*>::iterator i = app.threads.begin(); i != app.threads.end(); i++) {
+    app.threads.mutex.lock();
+    for (list<Thread*>::iterator i = app.threads.threads.begin(); i != app.threads.threads.end(); i++) {
         thread = *i;
         if (thread->id == task_id)
             break;
         else
             thread = 0;
     }
-    app.threads_mutex.unlock();
+    app.threads.mutex.unlock();
 
     if (thread == 0) {
         return false;

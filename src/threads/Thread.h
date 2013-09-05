@@ -6,6 +6,7 @@
 #include "../classes/Log.h"
 #include "../classes/App.h"
 #include <thread>
+#include <boost/signals2.hpp>
 
 class Thread {
 public:
@@ -14,6 +15,8 @@ public:
     string status;
 
     std::thread task_thread;
+    boost::signals2::signal<void(Thread *) > onStarted;
+    boost::signals2::signal<void(Thread *) > onFinished;
 
     Thread();
     virtual ~Thread();
@@ -41,3 +44,4 @@ public:
     }
 };
 
+typedef shared_ptr<Thread> pThread;
