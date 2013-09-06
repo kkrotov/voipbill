@@ -38,11 +38,7 @@ bool App::init(int argc, char* argv[]) {
 
 void App::run() {
 
-    logger.setLogGroupingInterval(conf.log_grouping_interval);
-    logger.addLogWriter(pLogWriter(new LogWriterScreen()));
-    logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file, LogLevel::DEBUG, LogLevel::WARNING)));
-    logger.addLogWriter(pLogWriter(new LogWriterFile(conf.err_log_file, LogLevel::ERROR, LogLevel::CRITICAL)));
-    logger.addLogWriter(pLogWriter(new LogWriterSyslog("voipbill", LogLevel::DEBUG, LogLevel::CRITICAL)));
+    initLogger();
 
     Daemoin::setPidFile();
     Daemoin::initSignalHandler();
@@ -64,4 +60,21 @@ void App::run() {
     threads.run(new ThreadTasks());
 
     web_thread.join();
+}
+
+void App::initLogger() {
+
+    logger.setLogGroupingInterval(conf.log_grouping_interval);
+
+    logger.addLogWriter(pLogWriter(new LogWriterScreen()));
+
+    if (!conf.log_file_filename.empty())
+        logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file_filename, conf.log_file_min_level, conf.log_file_max_level)));
+
+    if (!conf.log_file2_filename.empty())
+        logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file2_filename, conf.log_file2_min_level, conf.log_file2_max_level)));
+
+    if (!conf.log_syslog_ident.empty())
+        logger.addLogWriter(pLogWriter(new LogWriterSyslog(conf.log_syslog_ident, conf.log_syslog_min_level, conf.log_syslog_max_level)));
+
 }

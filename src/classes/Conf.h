@@ -4,6 +4,8 @@
 #include <vector>
 using namespace std;
 
+#include "BaseLogWriter.h"
+
 class Conf {
     bool parse_cmd_line(int argc, char* argv[]);
     bool parse_config_file();
@@ -15,8 +17,19 @@ public:
 
     string config_file;
     string pid_file;
-    string log_file;
-    string err_log_file;
+
+    string log_file_filename;
+    LogLevel log_file_min_level;
+    LogLevel log_file_max_level;
+
+    string log_file2_filename;
+    LogLevel log_file2_min_level;
+    LogLevel log_file2_max_level;
+
+    string log_syslog_ident;
+    LogLevel log_syslog_min_level;
+    LogLevel log_syslog_max_level;
+
     unsigned short log_grouping_interval;
 
     bool test_mode;

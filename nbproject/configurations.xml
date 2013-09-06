@@ -173,6 +173,7 @@
                    projectFiles="false"
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
+      <itemPath>conf.sample</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

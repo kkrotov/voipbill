@@ -26,7 +26,8 @@ public:
 
     bool init(int argc, char* argv[]);
     void run();
-
+protected:
+    void initLogger();
 };
 
 extern App app;
