@@ -13,7 +13,7 @@ class ThreadBlacklist : public Thread {
 
     time_t last_sync_from_openca_time;
 
-    void wait();
+    bool ready();
     void prepare();
 
     void run();

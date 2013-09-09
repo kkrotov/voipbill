@@ -22,7 +22,7 @@ protected:
 public:
     static bool need_refresh_current_id;
 
-    void wait();
+    bool ready();
 
     void run();
 

@@ -10,13 +10,11 @@ ThreadLimitControl::ThreadLimitControl() {
     name = "Limit control";
 }
 
-void ThreadLimitControl::wait() {
-    while (app.init_sync_done == false ||
-            app.init_load_data_done == false ||
-            app.init_load_counters_done == false ||
-            app.init_bill_runtime_started == false) {
-        ssleep(1);
-    }
+bool ThreadLimitControl::ready() {
+    return app.init_sync_done &&
+            app.init_load_data_done &&
+            app.init_load_counters_done &&
+            app.init_bill_runtime_started;
 }
 
 void ThreadLimitControl::run() {

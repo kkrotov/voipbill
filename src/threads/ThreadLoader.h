@@ -11,7 +11,7 @@ class ThreadLoader : public Thread {
     BDb db_calls;
     int errors;
 
-    void wait();
+    bool ready();
     void prepare();
     void run();
 

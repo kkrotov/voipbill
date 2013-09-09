@@ -11,14 +11,11 @@ ThreadBlacklist::ThreadBlacklist() {
     last_sync_from_openca_time = 0;
 }
 
-void ThreadBlacklist::wait() {
-    while (app.init_sync_done == false ||
-            app.init_load_data_done == false ||
-            app.init_load_counters_done == false ||
-            app.init_bill_runtime_started == false
-            ) {
-        ssleep(1);
-    }
+bool ThreadBlacklist::ready() {
+    return app.init_sync_done &&
+            app.init_load_data_done &&
+            app.init_load_counters_done &&
+            app.init_bill_runtime_started;
 }
 
 void ThreadBlacklist::prepare() {

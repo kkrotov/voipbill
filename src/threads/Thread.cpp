@@ -23,10 +23,12 @@ void Thread::usleep(unsigned int milliseconds) {
     boost::this_thread::sleep_for(boost::chrono::milliseconds(milliseconds));
 }
 
-void Thread::wait() {
+bool Thread::ready() {
+    return true;
 }
 
 void Thread::prepare() {
+
 }
 
 void Thread::operator()() {
@@ -35,7 +37,9 @@ void Thread::operator()() {
 
     try {
         status = "waiting";
-        this->wait();
+        while (!this->ready()) {
+            ssleep(1);
+        }
 
         status = "preparing";
         this->prepare();

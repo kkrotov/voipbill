@@ -1,9 +1,7 @@
 #include "ThreadLoader.h"
 
-void ThreadLoader::wait() {
-    while (app.init_sync_done == false) {
-        ssleep(1);
-    }
+bool ThreadLoader::ready() {
+    return app.init_sync_done;
 }
 
 void ThreadLoader::prepare() {

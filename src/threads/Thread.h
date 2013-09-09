@@ -27,7 +27,7 @@ public:
 
     static void usleep(unsigned int milliseconds);
 
-    virtual void wait();
+    virtual bool ready();
 
     virtual void prepare();
 

@@ -8,14 +8,11 @@ ThreadTasks::ThreadTasks() {
     tasks_count = 0;
 }
 
-void ThreadTasks::wait() {
-    while (app.init_sync_done == false ||
-            app.init_load_data_done == false ||
-            app.init_load_counters_done == false ||
-            app.init_bill_runtime_started == false
-            ) {
-        ssleep(1);
-    }
+bool ThreadTasks::ready() {
+    return app.init_sync_done &&
+            app.init_load_data_done &&
+            app.init_load_counters_done &&
+            app.init_bill_runtime_started;
 }
 
 void ThreadTasks::run() {

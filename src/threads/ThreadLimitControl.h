@@ -10,7 +10,7 @@ protected:
     Timer t_kill;
     CalcFull calculator;
 
-    void wait();
+    bool ready();
 
     void run();
 

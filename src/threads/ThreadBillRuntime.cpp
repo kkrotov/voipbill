@@ -13,12 +13,10 @@ ThreadBillRuntime::ThreadBillRuntime() {
     calc_calls_loop = 0;
 }
 
-void ThreadBillRuntime::wait() {
-    while (app.init_sync_done == false ||
-            app.init_load_data_done == false ||
-            app.init_load_counters_done == false) {
-        ssleep(1);
-    }
+bool ThreadBillRuntime::ready() {
+    return app.init_sync_done &&
+            app.init_load_data_done &&
+            app.init_load_counters_done;
 }
 
 void ThreadBillRuntime::run() {

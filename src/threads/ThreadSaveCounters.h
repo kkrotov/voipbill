@@ -9,7 +9,7 @@ class ThreadSaveCounters : public Thread {
     BDb db_main;
     BDb db_calls;
 
-    void wait();
+    bool ready();
 
     void prepare();
 
