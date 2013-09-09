@@ -46,7 +46,7 @@ void App::run() {
 
     ThreadWeb web;
 
-    std::thread web_thread(web);
+    boost::thread web_thread(web);
 
     threads.run(new ThreadLog());
     threads.run(new ThreadSync());

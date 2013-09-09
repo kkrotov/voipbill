@@ -5,7 +5,7 @@
 #include "../classes/Timer.h"
 #include "../classes/Log.h"
 #include "../classes/App.h"
-#include <thread>
+#include <boost/thread.hpp>
 #include <boost/signals2.hpp>
 
 class Thread {
@@ -14,7 +14,7 @@ public:
     string name;
     string status;
 
-    std::thread task_thread;
+    boost::thread task_thread;
     boost::signals2::signal<void(Thread *) > onStarted;
     boost::signals2::signal<void(Thread *) > onFinished;
 

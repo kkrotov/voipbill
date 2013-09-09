@@ -1,8 +1,6 @@
 #include "../common.h"
 #include "Thread.h"
 
-#include <chrono>
-
 Thread::Thread() {
     id = string_fmt("%d", rand());
     name = id;
@@ -13,16 +11,16 @@ Thread::~Thread() {
 }
 
 void Thread::start() {
-    std::thread t(&Thread::operator(), this);
+    boost::thread t(&Thread::operator(), this);
     std::swap(task_thread, t);
 }
 
 void Thread::ssleep(unsigned int seconds) {
-    std::this_thread::sleep_for(std::chrono::seconds(seconds));
+    boost::this_thread::sleep_for(boost::chrono::seconds(seconds));
 }
 
 void Thread::usleep(unsigned int milliseconds) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(milliseconds));
 }
 
 void Thread::wait() {

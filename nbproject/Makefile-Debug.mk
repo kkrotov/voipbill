@@ -35,6 +35,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/1996375920/once_atomic.o \
+	${OBJECTDIR}/_ext/1996375920/thread.o \
 	${OBJECTDIR}/libs/boost/libs/program_options/src/cmdline.o \
 	${OBJECTDIR}/libs/boost/libs/program_options/src/config_file.o \
 	${OBJECTDIR}/libs/boost/libs/program_options/src/convert.o \
@@ -133,6 +135,16 @@ LDLIBSOPTIONS=-L/usr/pgsql-9.1/lib -lpq -lrt -lstdc++
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/voip: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/voip ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/_ext/1996375920/once_atomic.o: ../boost/libs/thread/src/pthread/once_atomic.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1996375920
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1996375920/once_atomic.o ../boost/libs/thread/src/pthread/once_atomic.cpp
+
+${OBJECTDIR}/_ext/1996375920/thread.o: ../boost/libs/thread/src/pthread/thread.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1996375920
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1996375920/thread.o ../boost/libs/thread/src/pthread/thread.cpp
 
 ${OBJECTDIR}/libs/boost/libs/program_options/src/cmdline.o: libs/boost/libs/program_options/src/cmdline.cpp 
 	${MKDIR} -p ${OBJECTDIR}/libs/boost/libs/program_options/src

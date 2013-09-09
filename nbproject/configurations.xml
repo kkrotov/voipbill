@@ -20,6 +20,12 @@
       <logicalFolder name="f1" displayName="boost_system" projectFiles="true">
         <itemPath>libs/boost/libs/system/src/error_code.cpp</itemPath>
       </logicalFolder>
+      <logicalFolder name="f4" displayName="boost_thread" projectFiles="true">
+        <logicalFolder name="f1" displayName="pthread" projectFiles="true">
+          <itemPath>../boost/libs/thread/src/pthread/once_atomic.cpp</itemPath>
+          <itemPath>../boost/libs/thread/src/pthread/thread.cpp</itemPath>
+        </logicalFolder>
+      </logicalFolder>
       <logicalFolder name="f3" displayName="gtest" projectFiles="true">
         <itemPath>libs/gtest/src/gtest-death-test.cc</itemPath>
         <itemPath>libs/gtest/src/gtest-filepath.cc</itemPath>
@@ -214,6 +220,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="../boost/libs/thread/src/pthread/once_atomic.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../boost/libs/thread/src/pthread/thread.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="libs/boost/libs/program_options/src/cmdline.cpp"
             ex="false"
             tool="1"
@@ -557,6 +573,16 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="../boost/libs/thread/src/pthread/once_atomic.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../boost/libs/thread/src/pthread/thread.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="libs/boost/libs/program_options/src/cmdline.cpp"
             ex="false"
             tool="1"
