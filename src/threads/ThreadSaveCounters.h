@@ -11,7 +11,7 @@ class ThreadSaveCounters : public Thread {
 
     bool ready();
 
-    void prepare();
+    bool prepare();
 
     void run();
 

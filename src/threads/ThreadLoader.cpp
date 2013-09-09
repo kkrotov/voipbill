@@ -4,24 +4,24 @@ bool ThreadLoader::ready() {
     return app.init_sync_done;
 }
 
-void ThreadLoader::prepare() {
-    while (app.init_load_data_done == false) {
+bool ThreadLoader::prepare() {
+    if (!app.init_load_data_done) {
         Log::info("Loading data...");
-        if (this->do_load_data() == false) {
-            ssleep(10);
-            continue;
+        if (!this->do_load_data()) {
+            return false;
         }
         app.init_load_data_done = true;
     }
 
-    while (app.init_load_counters_done == false) {
+    if (!app.init_load_counters_done) {
         Log::info("Loading counters...");
-        if (this->do_load_counters() == false) {
-            ssleep(10);
-            continue;
+        if (!this->do_load_counters()) {
+            return false;
         }
         app.init_load_counters_done = true;
     }
+
+    return true;
 }
 
 void ThreadLoader::run() {

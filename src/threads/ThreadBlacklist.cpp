@@ -18,18 +18,20 @@ bool ThreadBlacklist::ready() {
             app.init_bill_runtime_started;
 }
 
-void ThreadBlacklist::prepare() {
-    while (blacklist_local->fetch() == false) {
-        ssleep(10);
+bool ThreadBlacklist::prepare() {
+    if (!blacklist_local->fetch()) {
+        return false;
     }
 
-    while (blacklist_global->fetch() == false) {
-        ssleep(10);
+    if (!blacklist_global->fetch()) {
+        return false;
     }
 
     last_sync_from_openca_time = time(NULL);
 
     sync_blacklist();
+
+    return true;
 }
 
 void ThreadBlacklist::run() {

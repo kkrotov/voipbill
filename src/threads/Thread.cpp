@@ -27,8 +27,8 @@ bool Thread::ready() {
     return true;
 }
 
-void Thread::prepare() {
-
+bool Thread::prepare() {
+    return true;
 }
 
 void Thread::operator()() {
@@ -42,7 +42,9 @@ void Thread::operator()() {
         }
 
         status = "preparing";
-        this->prepare();
+        while (!this->prepare()) {
+            ssleep(1);
+        }
 
         status = "running";
         this->run();

@@ -12,7 +12,7 @@ class ThreadLoader : public Thread {
     int errors;
 
     bool ready();
-    void prepare();
+    bool prepare();
     void run();
 
     void htmlfull(stringstream &html);

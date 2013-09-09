@@ -152,15 +152,15 @@ bool ThreadSync::sync_notfull(qsync &s) {
     return true;
 }
 
-void ThreadSync::prepare() {
-    while (app.init_sync_done == false) {
+bool ThreadSync::prepare() {
+    if (!app.init_sync_done) {
         Log::info("Sync...");
-        if (this->do_sync() == false) {
-            ssleep(10);
-            continue;
+        if (!this->do_sync()) {
+            return false;
         }
         app.init_sync_done = true;
     }
+    return true;
 }
 
 void ThreadSync::run() {

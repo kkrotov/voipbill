@@ -22,7 +22,7 @@ class ThreadSync : public Thread {
 
     bool sync_notfull(qsync &s);
 
-    void prepare();
+    bool prepare();
     void run();
 
     void htmlfull(stringstream &html);

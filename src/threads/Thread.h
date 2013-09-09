@@ -29,7 +29,7 @@ public:
 
     virtual bool ready();
 
-    virtual void prepare();
+    virtual bool prepare();
 
     virtual void run() = 0;
 

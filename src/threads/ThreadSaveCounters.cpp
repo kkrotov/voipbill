@@ -21,15 +21,13 @@ bool ThreadSaveCounters::ready() {
             app.init_bill_runtime_started;
 }
 
-void ThreadSaveCounters::prepare() {
+bool ThreadSaveCounters::prepare() {
 
-    while (save_client_counters(true) == false) {
-        ssleep(10);
+    if (!save_client_counters(true)) {
+        return false;
     }
 
-    while (db_main.ping() == false) {
-        ssleep(10);
-    }
+    return true;
 }
 
 void ThreadSaveCounters::run() {
