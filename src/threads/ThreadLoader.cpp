@@ -36,112 +36,113 @@ void ThreadLoader::run() {
         UsageObjList * usage = 0;
         PriceObjList * price = 0;
 
-        t.start();
+        {
+            TimerScope ts1(t);
 
-        try {
-            BDbResult res = db_calls.query("SELECT event from billing.events");
-            while (res.next()) {
+            try {
+                BDbResult res = db_calls.query("SELECT event from billing.events");
+                while (res.next()) {
 
-                event = res.get_s(0);
+                    event = res.get_s(0);
 
-                time_t tday = get_tday();
+                    time_t tday = get_tday();
 
-                db_calls.exec("DELETE from billing.events WHERE event='" + event + "'");
+                    db_calls.exec("DELETE from billing.events WHERE event='" + event + "'");
 
 
-                if (event == "clients") {
+                    if (event == "clients") {
 
-                    client = new ClientObjList();
-                    client->load(&db_calls, 0);
+                        client = new ClientObjList();
+                        client->load(&db_calls, 0);
 
-                    if (!counter_locked) {
-                        counter_locked = true;
-                        loader->counter_rwlock.lock(); // .lockForWrite();
+                        if (!counter_locked) {
+                            counter_locked = true;
+                            loader->counter_rwlock.lock(); // .lockForWrite();
+                        }
+
+                        shared_ptr<ClientCounter> cc = loader->counter_client;
+                        if (cc != 0) cc->reload(&db_calls);
+
+                    } else
+                        if (event == "dest") {
+
+                        dest = new DestObjList();
+                        dest->load(&db_calls, 0);
+
+                    } else
+                        if (event == "operator") {
+
+                        oper = new OperatorList();
+                        oper->load(&db_calls, 0);
+
+                    } else
+                        if (event == "usage") {
+
+                        usage = new UsageObjList();
+                        usage->load(&db_calls, tday);
+
+                    } else
+                        if (event == "price") {
+
+                        price = new PriceObjList();
+                        price->load(&db_calls, tday);
+
                     }
 
-                    shared_ptr<ClientCounter> cc = loader->counter_client;
-                    if (cc != 0) cc->reload(&db_calls);
-
-                } else
-                    if (event == "dest") {
-
-                    dest = new DestObjList();
-                    dest->load(&db_calls, 0);
-
-                } else
-                    if (event == "operator") {
-
-                    oper = new OperatorList();
-                    oper->load(&db_calls, 0);
-
-                } else
-                    if (event == "usage") {
-
-                    usage = new UsageObjList();
-                    usage->load(&db_calls, tday);
-
-                } else
-                    if (event == "price") {
-
-                    price = new PriceObjList();
-                    price->load(&db_calls, tday);
-
+                    if (counter_locked) {
+                        counter_locked = false;
+                        loader->counter_rwlock.unlock();
+                    }
                 }
-
+            } catch (Exception &e) {
                 if (counter_locked) {
                     counter_locked = false;
                     loader->counter_rwlock.unlock();
                 }
-            }
-        } catch (Exception &e) {
-            if (counter_locked) {
-                counter_locked = false;
-                loader->counter_rwlock.unlock();
-            }
-            e.addTrace("Loader::run");
-            Log::exception(e);
-            errors++;
-            if (event.length() > 0) {
-                try {
-                    db_calls.exec("INSERT INTO billing.events(event)VALUES('" + event + "')");
-                } catch (...) {
+                e.addTrace("Loader::run");
+                Log::exception(e);
+                errors++;
+                if (event.length() > 0) {
+                    try {
+                        db_calls.exec("INSERT INTO billing.events(event)VALUES('" + event + "')");
+                    } catch (...) {
+                    }
+                    event.clear();
                 }
-                event.clear();
             }
+            if (client != 0 || dest != 0 || oper != 0 || /*usage_raw != 0 ||*/ usage != 0 || price != 0) {
+                loader->rwlock.lock(); // .lockForWrite();
+                if (client != 0) {
+                    if (client->loaded) loader->client = shared_ptr<ClientObjList>(client);
+                    else delete client;
+                    client = 0;
+                }
+                if (dest != 0) {
+                    if (dest->loaded) loader->dest = shared_ptr<DestObjList>(dest);
+                    else delete dest;
+                    dest = 0;
+                }
+                if (oper != 0) {
+                    if (oper->loaded) loader->oper = shared_ptr<OperatorList>(oper);
+                    else delete oper;
+                    oper = 0;
+                }
+
+                if (usage != 0) {
+                    if (usage->loaded) loader->usage.addlist(usage->dt, usage);
+                    else delete usage;
+                    usage = 0;
+                }
+                if (price != 0) {
+                    if (price->loaded) loader->price.addlist(price->dt, price);
+                    else delete price;
+                    price = 0;
+                }
+                loader->rwlock.unlock();
+            }
+
+
         }
-        if (client != 0 || dest != 0 || oper != 0 || /*usage_raw != 0 ||*/ usage != 0 || price != 0) {
-            loader->rwlock.lock(); // .lockForWrite();
-            if (client != 0) {
-                if (client->loaded) loader->client = shared_ptr<ClientObjList>(client);
-                else delete client;
-                client = 0;
-            }
-            if (dest != 0) {
-                if (dest->loaded) loader->dest = shared_ptr<DestObjList>(dest);
-                else delete dest;
-                dest = 0;
-            }
-            if (oper != 0) {
-                if (oper->loaded) loader->oper = shared_ptr<OperatorList>(oper);
-                else delete oper;
-                oper = 0;
-            }
-
-            if (usage != 0) {
-                if (usage->loaded) loader->usage.addlist(usage->dt, usage);
-                else delete usage;
-                usage = 0;
-            }
-            if (price != 0) {
-                if (price->loaded) loader->price.addlist(price->dt, price);
-                else delete price;
-                price = 0;
-            }
-            loader->rwlock.unlock();
-        }
-
-        t.stop();
-
         ssleep(1);
     }
 }

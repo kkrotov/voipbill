@@ -45,7 +45,13 @@ void Thread::operator()() {
         while (!this->prepare()) {
             ssleep(1);
         }
+    } catch (std::exception &e) {
+        Log::error("Thread::operator: " + string(e.what()));
+    } catch (...) {
+        Log::error("Thread::ERROR");
+    }
 
+    try {
         status = "running";
         this->run();
     } catch (std::exception &e) {

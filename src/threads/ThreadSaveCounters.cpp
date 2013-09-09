@@ -35,13 +35,13 @@ void ThreadSaveCounters::run() {
 
     while (true) {
 
-        t.start();
+        {
+            TimerScope ts1(t);
 
-        save_client_counters();
+            save_client_counters();
 
-        save_calls();
-
-        t.stop();
+            save_calls();
+        }
 
         ssleep(1);
 

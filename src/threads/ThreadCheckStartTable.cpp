@@ -18,56 +18,56 @@ void ThreadCheckStartTable::run() {
 
         ssleep(10);
 
-        t.start();
+        {
+            TimerScope ts1(t);
 
-        try {
+            try {
 
-            map<string, string> slist;
-            time_t curr_t = time(NULL);
-            BDbResult res = db_rad.query("select acctsessionid, acctuniqueid from radacct_voip_start");
-            while (res.next()) {
-                slist[res.get_s(0)] = res.get_s(1);
-            }
+                map<string, string> slist;
+                time_t curr_t = time(NULL);
+                BDbResult res = db_rad.query("select acctsessionid, acctuniqueid from radacct_voip_start");
+                while (res.next()) {
+                    slist[res.get_s(0)] = res.get_s(1);
+                }
 
-            if (slist.size() == 0) {
+                if (slist.size() == 0) {
+                    last_t = curr_t;
+                    continue;
+                }
+
+                ssleep(1);
+
+                vector<string> rlist;
+                if (UdpControlClient::select_calls(rlist) == false) continue;
+
+                map<string, bool> rlist_map;
+                for (vector<string>::iterator it = rlist.begin(); it != rlist.end(); ++it) {
+                    rlist_map[*it] = true;
+                }
+
+                for (map<string, string>::iterator it = slist.begin(); it != slist.end(); ++it) {
+
+                    if (rlist_map.find(it->first) != rlist_map.end()) continue;
+
+                    bool deleted = false;
+                    BDbResult res =
+                            db_rad.query(
+                            "select force_finish_call('" + it->first + "','" + lexical_cast<string>(curr_t - last_t) + "')");
+                    if (res.next()) deleted = res.get_b(0);
+
+                    if (deleted) Log::error("Force finish call " + it->second);
+
+                }
+
                 last_t = curr_t;
-                t.stop();
-                continue;
+
+
+            } catch (Exception &e) {
+                e.addTrace("ThreadCheckStartTable::run");
+                Log::exception(e);
             }
-
-            ssleep(1);
-
-            vector<string> rlist;
-            if (UdpControlClient::select_calls(rlist) == false) continue;
-
-            map<string, bool> rlist_map;
-            for (vector<string>::iterator it = rlist.begin(); it != rlist.end(); ++it) {
-                rlist_map[*it] = true;
-            }
-
-            for (map<string, string>::iterator it = slist.begin(); it != slist.end(); ++it) {
-
-                if (rlist_map.find(it->first) != rlist_map.end()) continue;
-
-                bool deleted = false;
-                BDbResult res =
-                        db_rad.query(
-                        "select force_finish_call('" + it->first + "','" + lexical_cast<string>(curr_t - last_t) + "')");
-                if (res.next()) deleted = res.get_b(0);
-
-                if (deleted) Log::error("Force finish call " + it->second);
-
-            }
-
-            last_t = curr_t;
-
-
-        } catch (Exception &e) {
-            e.addTrace("ThreadCheckStartTable::run");
-            Log::exception(e);
         }
 
-        t.stop();
 
     }
 }

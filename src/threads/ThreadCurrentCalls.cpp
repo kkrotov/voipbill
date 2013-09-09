@@ -17,24 +17,25 @@ void ThreadCurrentCalls::run() {
 
     while (true) {
 
-        t.start();
+        {
+            TimerScope ts1(t);
 
-        shared_ptr<CurrentCallsObjList> l(new CurrentCallsObjList());
+            shared_ptr<CurrentCallsObjList> l(new CurrentCallsObjList());
 
-        try {
+            try {
 
-            l->load(&db_rad, 0);
+                l->load(&db_rad, 0);
 
-            lock.lock();
-            ThreadCurrentCalls::list = l;
-            lock.unlock();
+                lock.lock();
+                ThreadCurrentCalls::list = l;
+                lock.unlock();
 
-        } catch (Exception &e) {
-            e.addTrace("ThreadCurrentCalls::run");
-            Log::exception(e);
+            } catch (Exception &e) {
+                e.addTrace("ThreadCurrentCalls::run");
+                Log::exception(e);
+            }
+
         }
-
-        t.stop();
 
         ssleep(1);
     }

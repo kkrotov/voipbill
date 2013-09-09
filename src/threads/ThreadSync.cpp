@@ -168,17 +168,18 @@ void ThreadSync::run() {
 
         bool err = false;
 
-        t.start();
+        {
+            TimerScope ts1(t);
 
-        for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s) {
-            if ((*s).full) {
-                if (sync_full(*s) == false) err = true;
-            } else {
-                if (sync_notfull(*s) == false) err = true;
+            for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s) {
+                if ((*s).full) {
+                    if (sync_full(*s) == false) err = true;
+                } else {
+                    if (sync_notfull(*s) == false) err = true;
+                }
             }
-        }
 
-        t.stop();
+        }
 
         ssleep(err ? 60 : 1);
     }

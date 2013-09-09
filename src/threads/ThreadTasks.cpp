@@ -18,65 +18,66 @@ bool ThreadTasks::ready() {
 void ThreadTasks::run() {
     BDb db_main(app.conf.db_main);
 
-
     while (true) {
-        t.start();
-        try {
-            BDbResult res = db_main.query("select id, task, params from billing.tasks where region_id=" + app.conf.str_region_id + " order by created desc limit 1");
-            if (res.next()) {
-                string task_id = res.get(0);
-                string task_name = res.get(1);
-                string task_params = res.get(2);
+        {
+            TimerScope ts1(t);
 
-                if (task_name == "recalc_current_month") {
-                    time_t rawtime = time(NULL);
-                    struct tm *ttt;
-                    ttt = localtime(&rawtime);
-                    ttt->tm_mday = 1;
-                    ttt->tm_isdst = 0;
-                    ttt->tm_wday = 0;
-                    ttt->tm_yday = 0;
-                    ttt->tm_hour = 0;
-                    ttt->tm_min = 0;
-                    ttt->tm_sec = 0;
+            try {
+                BDbResult res = db_main.query("select id, task, params from billing.tasks where region_id=" + app.conf.str_region_id + " order by created desc limit 1");
+                if (res.next()) {
+                    string task_id = res.get(0);
+                    string task_name = res.get(1);
+                    string task_params = res.get(2);
 
-                    TaskRecalc *task = new TaskRecalc(mktime(ttt));
-                    task->initTask(db_main, task_id, task_params);
-                    current_task.reset(task);
-                    task->run();
-                } else
-                    if (task_name == "recalc_last_month") {
-                    time_t rawtime = time(NULL);
-                    struct tm *ttt;
-                    ttt = localtime(&rawtime);
-                    ttt->tm_mday = 1;
-                    ttt->tm_isdst = 0;
-                    ttt->tm_wday = 0;
-                    ttt->tm_yday = 0;
-                    ttt->tm_hour = 0;
-                    ttt->tm_min = 0;
-                    ttt->tm_sec = 0;
+                    if (task_name == "recalc_current_month") {
+                        time_t rawtime = time(NULL);
+                        struct tm *ttt;
+                        ttt = localtime(&rawtime);
+                        ttt->tm_mday = 1;
+                        ttt->tm_isdst = 0;
+                        ttt->tm_wday = 0;
+                        ttt->tm_yday = 0;
+                        ttt->tm_hour = 0;
+                        ttt->tm_min = 0;
+                        ttt->tm_sec = 0;
 
-                    if (--ttt->tm_mon < 0) {
-                        ttt->tm_mon = 11;
-                        ttt->tm_year--;
+                        TaskRecalc *task = new TaskRecalc(mktime(ttt));
+                        task->initTask(db_main, task_id, task_params);
+                        current_task.reset(task);
+                        task->run();
+                    } else
+                        if (task_name == "recalc_last_month") {
+                        time_t rawtime = time(NULL);
+                        struct tm *ttt;
+                        ttt = localtime(&rawtime);
+                        ttt->tm_mday = 1;
+                        ttt->tm_isdst = 0;
+                        ttt->tm_wday = 0;
+                        ttt->tm_yday = 0;
+                        ttt->tm_hour = 0;
+                        ttt->tm_min = 0;
+                        ttt->tm_sec = 0;
+
+                        if (--ttt->tm_mon < 0) {
+                            ttt->tm_mon = 11;
+                            ttt->tm_year--;
+                        }
+
+                        TaskRecalc *task = new TaskRecalc(mktime(ttt));
+                        task->initTask(db_main, task_id, task_params);
+                        current_task.reset(task);
+                        task->run();
                     }
 
-                    TaskRecalc *task = new TaskRecalc(mktime(ttt));
-                    task->initTask(db_main, task_id, task_params);
-                    current_task.reset(task);
-                    task->run();
+                    db_main.exec("delete from billing.tasks where region_id=" + app.conf.str_region_id + " and id=" + task_id);
+
+                    tasks_count++;
                 }
-
-                db_main.exec("delete from billing.tasks where region_id=" + app.conf.str_region_id + " and id=" + task_id);
-
-                tasks_count++;
+            } catch (Exception &e) {
+                e.addTrace("ThreadTasks::run");
+                Log::exception(e);
             }
-        } catch (Exception &e) {
-            e.addTrace("ThreadTasks::run");
-            Log::exception(e);
         }
-        t.stop();
 
         current_task.reset();
 

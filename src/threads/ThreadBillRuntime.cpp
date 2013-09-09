@@ -41,25 +41,24 @@ void ThreadBillRuntime::run() {
                 need_refresh_current_id = false;
             }
 
-            t.start();
+            TimerScope ts1(t);
 
             try {
 
                 if (calls_list.loaddata(&db_rad)) {
 
-                    t_calc.start();
+                    {
+                        TimerScope ts2(t_calc);
 
-                    calculator.calc(&calls_list);
+                        calculator.calc(&calls_list);
+                    }
 
-                    t_calc.stop();
+                    {
+                        TimerScope ts3(t_save);
 
-                    t_save.start();
-
-                    sv.save(&calls_list);
-
-                    calculator.save();
-
-                    t_save.stop();
+                        sv.save(&calls_list);
+                        calculator.save();
+                    }
 
 
                     calc_calls_loop = calls_list.count;
@@ -78,8 +77,6 @@ void ThreadBillRuntime::run() {
                 e.addTrace("ThreadBillRuntime::run");
                 Log::exception(e);
             }
-
-            t.stop();
 
         }
 

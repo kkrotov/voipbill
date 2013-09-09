@@ -37,13 +37,13 @@ bool ThreadBlacklist::prepare() {
 void ThreadBlacklist::run() {
     while (true) {
 
-        t.start();
+        {
+            TimerScope ts1(t);
 
-        sync_once_per_day();
+            sync_once_per_day();
 
-        update_voip_auto_disabled();
-
-        t.stop();
+            update_voip_auto_disabled();
+        }
 
         ssleep(1);
 

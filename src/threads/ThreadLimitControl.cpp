@@ -27,30 +27,33 @@ void ThreadLimitControl::run() {
         shared_ptr<CurrentCallsObjList> splist = ThreadCurrentCalls::getList();
         CurrentCallsObjList * list = splist.get();
 
-        t.start();
-        try {
+        {
+            TimerScope ts1(t);
 
-            if (list->loadtime + 60 >= time(NULL)) {
-                t_calc.start();
+            try {
 
-                calculator.calc_limit(list);
+                if (list->loadtime + 60 >= time(NULL)) {
 
-                t_calc.stop();
+                    {
+                        TimerScope ts2(t_calc);
 
-                t_kill.start();
+                        calculator.calc_limit(list);
+                    }
 
-                KillCalls::kill(list);
+                    {
+                        TimerScope ts3(t_kill);
 
-                t_kill.stop();
+                        KillCalls::kill(list);
+                    }
+                }
 
+
+            } catch (Exception &e) {
+                e.addTrace("ThreadLimitControl::run");
+                Log::exception(e);
             }
 
-
-        } catch (Exception &e) {
-            e.addTrace("ThreadLimitControl::run");
-            Log::exception(e);
         }
-        t.stop();
     }
 }
 
