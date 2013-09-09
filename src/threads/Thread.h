@@ -42,6 +42,8 @@ public:
     virtual void htmlfull(stringstream &html) {
         this->html(html);
     }
+protected:
+    Timer t;
 };
 
 typedef shared_ptr<Thread> pThread;

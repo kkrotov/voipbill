@@ -48,6 +48,9 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
             if (bytes_read > 0) {
                 res.append(&recvdata[0], bytes_read);
                 s.close();
+            }
+
+            if (bytes_read >= 0) {
                 return true;
             }
         }

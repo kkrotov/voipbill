@@ -6,7 +6,7 @@
 
 class ThreadTasks : public Thread {
 protected:
-    Timer t;
+    BDb db_main;
 
     int tasks_count;
 

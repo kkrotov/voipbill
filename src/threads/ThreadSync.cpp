@@ -164,25 +164,17 @@ bool ThreadSync::prepare() {
 }
 
 void ThreadSync::run() {
-    while (true) {
 
-        bool err = false;
-
-        {
-            TimerScope ts1(t);
-
-            for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s) {
-                if ((*s).full) {
-                    if (sync_full(*s) == false) err = true;
-                } else {
-                    if (sync_notfull(*s) == false) err = true;
-                }
-            }
-
+    for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s) {
+        if ((*s).full) {
+            sync_full(*s);
+        } else {
+            sync_notfull(*s);
         }
 
-        ssleep(err ? 60 : 1);
+        boost::this_thread::interruption_point();
     }
+
 }
 
 void ThreadSync::htmlfull(stringstream &html) {

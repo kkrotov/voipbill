@@ -8,6 +8,8 @@
 ThreadLimitControl::ThreadLimitControl() {
     id = "limitcontrol";
     name = "Limit control";
+    db_calls.setCS(app.conf.db_calls);
+    calculator.setDb(&db_calls);
 }
 
 bool ThreadLimitControl::ready() {
@@ -18,43 +20,25 @@ bool ThreadLimitControl::ready() {
 }
 
 void ThreadLimitControl::run() {
-    BDb db_calls(app.conf.db_calls);
-    calculator.setDb(&db_calls);
 
-    while (true) {
-        ssleep(1);
+    shared_ptr<CurrentCallsObjList> splist = ThreadCurrentCalls::getList();
+    CurrentCallsObjList * list = splist.get();
 
-        shared_ptr<CurrentCallsObjList> splist = ThreadCurrentCalls::getList();
-        CurrentCallsObjList * list = splist.get();
+    if (list->loadtime + 60 >= time(NULL)) {
 
         {
-            TimerScope ts1(t);
+            TimerScope ts2(t_calc);
 
-            try {
+            calculator.calc_limit(list);
+        }
 
-                if (list->loadtime + 60 >= time(NULL)) {
+        {
+            TimerScope ts3(t_kill);
 
-                    {
-                        TimerScope ts2(t_calc);
-
-                        calculator.calc_limit(list);
-                    }
-
-                    {
-                        TimerScope ts3(t_kill);
-
-                        KillCalls::kill(list);
-                    }
-                }
-
-
-            } catch (Exception &e) {
-                e.addTrace("ThreadLimitControl::run");
-                Log::exception(e);
-            }
-
+            KillCalls::kill(list);
         }
     }
+
 }
 
 void ThreadLimitControl::htmlfull(stringstream &html) {

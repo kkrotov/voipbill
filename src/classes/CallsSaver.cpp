@@ -95,7 +95,15 @@ string ins_str(CallsObjList *list) {
     return q;
 }
 
+CallsSaver::CallsSaver() {
+    this->db = 0;
+}
+
 CallsSaver::CallsSaver(BDb *db) {
+    this->db = db;
+}
+
+void CallsSaver::setDb(BDb *db) {
     this->db = db;
 }
 

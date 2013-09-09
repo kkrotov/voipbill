@@ -1,7 +1,6 @@
 #include "ThreadBillRuntime.h"
 
 #include "../lists/RuntimeCallsObjList.h"
-#include "../classes/CallsSaver.h"
 
 bool ThreadBillRuntime::need_refresh_current_id = false;
 
@@ -11,6 +10,13 @@ ThreadBillRuntime::ThreadBillRuntime() {
 
     calc_calls_full = 0;
     calc_calls_loop = 0;
+
+
+    db_rad.setCS(app.conf.db_rad);
+    db_calls.setCS(app.conf.db_calls);
+    db_calls.needAdvisoryLock(app.conf.region_id);
+    calls_saver.setDb(&db_calls);
+    calculator.setDb(&db_calls);
 }
 
 bool ThreadBillRuntime::ready() {
@@ -20,69 +26,52 @@ bool ThreadBillRuntime::ready() {
 }
 
 void ThreadBillRuntime::run() {
-    Log::info("Running...");
 
-    db_rad.setCS(app.conf.db_rad);
+    lock_guard<mutex> lk(app.bill_runnning_mutex);
 
-    db_calls.setCS(app.conf.db_calls);
-    db_calls.needAdvisoryLock(app.conf.region_id);
+repeat:
 
-    CallsSaver sv(&db_calls);
-    calculator.setDb(&db_calls);
-
-    while (true) {
-
-        {
-
-            lock_guard<mutex> lk(app.bill_runnning_mutex);
-
-            if (need_refresh_current_id) {
-                calls_list.refresh_current_id();
-                need_refresh_current_id = false;
-            }
-
-            TimerScope ts1(t);
-
-            try {
-
-                if (calls_list.loaddata(&db_rad)) {
-
-                    {
-                        TimerScope ts2(t_calc);
-
-                        calculator.calc(&calls_list);
-                    }
-
-                    {
-                        TimerScope ts3(t_save);
-
-                        sv.save(&calls_list);
-                        calculator.save();
-                    }
-
-
-                    calc_calls_loop = calls_list.count;
-                    calc_calls_full = calc_calls_full + calls_list.count;
-
-                    calls_list.next();
-
-                    if (calls_list.count >= calls_list.nrows) continue;
-                } else {
-                    calc_calls_loop = 0;
-                }
-
-                app.init_bill_runtime_started = true;
-
-            } catch (Exception &e) {
-                e.addTrace("ThreadBillRuntime::run");
-                Log::exception(e);
-            }
-
-        }
-
-        ssleep(1);
+    if (need_refresh_current_id) {
+        calls_list.refresh_current_id();
+        need_refresh_current_id = false;
     }
 
+    TimerScope ts1(t);
+
+    if (calls_list.loaddata(&db_rad)) {
+
+        boost::this_thread::interruption_point();
+
+        {
+            TimerScope ts2(t_calc);
+
+            calculator.calc(&calls_list);
+        }
+
+        boost::this_thread::interruption_point();
+
+        {
+            TimerScope ts3(t_save);
+
+            calls_saver.save(&calls_list);
+            calculator.save();
+        }
+
+        boost::this_thread::interruption_point();
+
+        calc_calls_loop = calls_list.count;
+        calc_calls_full = calc_calls_full + calls_list.count;
+
+        calls_list.next();
+
+        if (calls_list.count >= calls_list.nrows)
+            goto repeat;
+
+    } else {
+        calc_calls_loop = 0;
+    }
+
+    app.init_bill_runtime_started = true;
 }
 
 void ThreadBillRuntime::htmlfull(stringstream &html) {

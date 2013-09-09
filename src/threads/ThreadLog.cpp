@@ -2,17 +2,8 @@
 
 void ThreadLog::run() {
 
-    while (true) {
+    app.logger.processLogQueue();
 
-        ssleep(1);
-
-        {
-            TimerScope ts1(t);
-
-            app.logger.processLogQueue();
-        }
-
-    }
 }
 
 void ThreadLog::htmlfull(stringstream & html) {

@@ -35,19 +35,11 @@ bool ThreadBlacklist::prepare() {
 }
 
 void ThreadBlacklist::run() {
-    while (true) {
 
-        {
-            TimerScope ts1(t);
+    sync_once_per_day();
 
-            sync_once_per_day();
+    update_voip_auto_disabled();
 
-            update_voip_auto_disabled();
-        }
-
-        ssleep(1);
-
-    }
 }
 
 void ThreadBlacklist::sync_once_per_day() {

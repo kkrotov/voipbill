@@ -11,8 +11,7 @@ private:
     static shared_ptr<CurrentCallsObjList> list;
     static boost::detail::spinlock lock;
 
-    Timer t;
-
+    BDb db_rad;
 
     void run();
 

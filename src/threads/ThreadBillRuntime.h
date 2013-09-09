@@ -2,6 +2,7 @@
 
 #include "Thread.h"
 #include "../classes/CalcFull.h"
+#include "../classes/CallsSaver.h"
 #include "../lists/RuntimeCallsObjList.h"
 
 class ThreadBillRuntime : public Thread {
@@ -9,13 +10,13 @@ protected:
     BDb db_rad;
     BDb db_calls;
     CalcFull calculator;
+    CallsSaver calls_saver;
 
     RuntimeCallsObjList calls_list;
 
     int calc_calls_loop;
     int calc_calls_full;
 
-    Timer t;
     Timer t_calc;
     Timer t_save;
 

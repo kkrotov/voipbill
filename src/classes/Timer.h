@@ -25,6 +25,8 @@ public:
     }
 
     void start() {
+        if (started) return;
+
         clock_gettime(CLOCK_MONOTONIC, &ts_start);
         started = true;
     }
@@ -51,13 +53,13 @@ public:
 
     string sloop() {
         char buf[50];
-        sprintf(buf, "%f", this->time / 1.0e9);
+        sprintf(buf, "%f", tloop());
         return string(buf);
     }
 
     string sfull() {
         char buf[50];
-        sprintf(buf, "%f", this->full_time / 1.0e9);
+        sprintf(buf, "%f", tfull());
         return string(buf);
     }
 };

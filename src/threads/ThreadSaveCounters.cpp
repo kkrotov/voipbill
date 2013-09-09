@@ -32,20 +32,12 @@ bool ThreadSaveCounters::prepare() {
 
 void ThreadSaveCounters::run() {
 
+    save_client_counters();
 
-    while (true) {
+    boost::this_thread::interruption_point();
 
-        {
-            TimerScope ts1(t);
+    save_calls();
 
-            save_client_counters();
-
-            save_calls();
-        }
-
-        ssleep(1);
-
-    }
 }
 
 bool ThreadSaveCounters::save_client_counters(bool clear) {

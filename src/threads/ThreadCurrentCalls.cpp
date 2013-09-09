@@ -13,32 +13,15 @@ shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::getList() {
 }
 
 void ThreadCurrentCalls::run() {
-    BDb db_rad(app.conf.db_rad);
 
-    while (true) {
+    shared_ptr<CurrentCallsObjList> l(new CurrentCallsObjList());
 
-        {
-            TimerScope ts1(t);
+    l->load(&db_rad, 0);
 
-            shared_ptr<CurrentCallsObjList> l(new CurrentCallsObjList());
+    lock.lock();
+    ThreadCurrentCalls::list = l;
+    lock.unlock();
 
-            try {
-
-                l->load(&db_rad, 0);
-
-                lock.lock();
-                ThreadCurrentCalls::list = l;
-                lock.unlock();
-
-            } catch (Exception &e) {
-                e.addTrace("ThreadCurrentCalls::run");
-                Log::exception(e);
-            }
-
-        }
-
-        ssleep(1);
-    }
 }
 
 void ThreadCurrentCalls::htmlfull(stringstream &html) {
@@ -98,6 +81,7 @@ void ThreadCurrentCalls::htmlfull(stringstream &html) {
 ThreadCurrentCalls::ThreadCurrentCalls() {
     id = "currentcalls";
     name = "Current Calls";
+    db_rad.setCS(app.conf.db_rad);
 }
 
 

@@ -6,7 +6,6 @@
 #include "../classes/BlackListGlobal.h"
 
 class ThreadBlacklist : public Thread {
-    Timer t;
     DataLoader *loader;
     BlackListLocal *blacklist_local;
     BlackListGlobal *blacklist_global;

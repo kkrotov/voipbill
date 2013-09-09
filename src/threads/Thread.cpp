@@ -51,13 +51,20 @@ void Thread::operator()() {
         Log::error("Thread::ERROR");
     }
 
-    try {
-        status = "running";
-        this->run();
-    } catch (std::exception &e) {
-        Log::error("Thread::operator: " + string(e.what()));
-    } catch (...) {
-        Log::error("Thread::ERROR");
+    while (true) {
+        try {
+            status = "running";
+            TimerScope ts(t);
+            this->run();
+        } catch (Exception &e) {
+            e.addTrace("Thread(" + name + "): ");
+            Log::exception(e);
+        } catch (std::exception &e) {
+            Log::error("Thread(" + name + "): " + string(e.what()));
+        } catch (...) {
+            Log::error("Thread(" + name + "): ERROR");
+        }
+        ssleep(1);
     }
 
     onFinished(this);

@@ -27,6 +27,8 @@ void TaskRecalc::run() {
         current_call_id = res.get_ll(0);
     }
 
+    boost::this_thread::interruption_point();
+
     setStatus("2. delete calls from id " + lexical_cast<string>(current_call_id));
     db_calls.exec("delete from billing.calls where id>=" + lexical_cast<string>(current_call_id));
 
@@ -35,10 +37,15 @@ void TaskRecalc::run() {
     DataLoader data_loader;
     ThreadLoader t_loader;
 
+    boost::this_thread::interruption_point();
+
     setStatus("3. recalc temp data");
     if (!t_loader.do_load_data(&db_calls, &data_loader)) {
         throw Exception("Can not load temp data");
     }
+
+    boost::this_thread::interruption_point();
+
     setStatus("4. recalc temp counters");
     if (!t_loader.do_load_counters(&db_calls, &data_loader)) {
         throw Exception("Can not load temp counters");
@@ -47,6 +54,8 @@ void TaskRecalc::run() {
     calculator.setDb(&db_calls);
     calculator.setDataLoader(&data_loader);
 
+    boost::this_thread::interruption_point();
+
     setStatus("5. calc");
 
     while (true) {
@@ -54,25 +63,26 @@ void TaskRecalc::run() {
 
         if (calls_list.loaddata(&db_rad)) {
 
-            t_calc.start();
+            {
+                TimerScope ts1(t_calc);
 
-            calculator.calc(&calls_list);
+                calculator.calc(&calls_list);
+            }
 
-            t_calc.stop();
+            {
+                TimerScope ts2(t_save);
 
-            t_save.start();
+                sv.save(&calls_list);
 
-            sv.save(&calls_list);
-
-            calculator.save();
-
-            t_save.stop();
-
+                calculator.save();
+            }
 
             calc_calls_loop = calls_list.count;
             calc_calls_full = calc_calls_full + calls_list.count;
 
             calls_list.next();
+
+            boost::this_thread::interruption_point();
 
             setStatus("5. calc " + lexical_cast<string>(calc_calls_full) + " " + string_time(calculator.last_call_time));
 
@@ -82,6 +92,8 @@ void TaskRecalc::run() {
         break;
     }
 
+    boost::this_thread::interruption_point();
+
     setStatus("6. recalc counters");
 
     if (!t_loader.do_load_counters(&db_calls)) {
@@ -89,6 +101,8 @@ void TaskRecalc::run() {
     }
 
     ThreadBillRuntime::need_refresh_current_id = true;
+
+    boost::this_thread::interruption_point();
 
     setStatus("7. delete calls from main");
     db_main->exec("delete from billing.calls_" + app.conf.str_region_id + " where id>=" + lexical_cast<string>(current_call_id));
