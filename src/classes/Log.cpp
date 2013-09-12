@@ -32,6 +32,13 @@ void Log::warning(const string &text) {
     app.logger.logMessage(message);
 }
 
+void Log::debug(const string &text) {
+    pLogMessage message(new LogMessage);
+    message->level = LogLevel::DEBUG;
+    message->message = text;
+    app.logger.logMessage(message);
+}
+
 void Log::exception(Exception &e) {
 
     string message = "";

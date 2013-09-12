@@ -11,6 +11,7 @@ public:
     static void error(const string &text);
     static void notice(const string &text);
     static void warning(const string &text);
+    static void debug(const string &text);
 
     static void exception(Exception &e);
 };
