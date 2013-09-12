@@ -25,7 +25,7 @@ void ThreadCheckStartTable::run() {
         return;
     }
 
-    ssleep(1);
+    ssleep(app.conf.billing_wait_stop_package_seconds);
 
     vector<string> rlist;
     if (UdpControlClient::select_calls(rlist) == false) return;

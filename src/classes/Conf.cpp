@@ -80,6 +80,7 @@ bool Conf::parse_config_file() {
 
         billing_dc_break = pt.get<unsigned short>("billing.dc_break", billing_dc_break);
         billing_free_seconds = pt.get<unsigned short>("billing.free_seconds", billing_free_seconds);
+        billing_wait_stop_package_seconds = pt.get<unsigned short>("billing.wait_stop_package_seconds", billing_wait_stop_package_seconds);
 
     } catch (exception& e) {
         cout << "ERROR: Parse config file: " << e.what() << endl;
@@ -111,6 +112,7 @@ bool Conf::init(int argc, char* argv[]) {
 
     billing_dc_break = 126;
     billing_free_seconds = 5;
+    billing_wait_stop_package_seconds = 5;
 
     if (!parse_cmd_line(argc, argv)) return false;
 

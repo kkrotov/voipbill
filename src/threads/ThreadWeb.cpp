@@ -80,6 +80,7 @@ void ThreadWeb::handlerConfig(stringstream &html) {
     html << "<br/>\n";
     html << "billing.free_seconds: " << app.conf.billing_free_seconds << "<br/>\n";
     html << "billing.dc_break: " << app.conf.billing_dc_break << "<br/>\n";
+    html << "billing.wait_stop_package_seconds: " << app.conf.billing_wait_stop_package_seconds << "<br/>\n";
 }
 
 bool ThreadWeb::handlerTask(stringstream &html, map<string, string> &parameters) {
