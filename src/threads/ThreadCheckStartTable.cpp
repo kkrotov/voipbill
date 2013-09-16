@@ -1,5 +1,6 @@
 
 #include "ThreadCheckStartTable.h"
+#include "../classes/App.h"
 #include "../classes/UdpControlClient.h"
 
 ThreadCheckStartTable::ThreadCheckStartTable() {
@@ -8,48 +9,88 @@ ThreadCheckStartTable::ThreadCheckStartTable() {
     db_rad.setCS(app.conf.db_rad);
 
     last_t = 0;
+    countWaitingForFinishCalls = 0;
+    countForceFinishedCalls = 0;
 }
 
 void ThreadCheckStartTable::run() {
     if (UdpControlClient::ready() == false) return;
 
-    map<string, string> slist;
-    time_t curr_t = time(NULL);
-    BDbResult res = db_rad.query("select acctsessionid, acctuniqueid from radacct_voip_start");
-    while (res.next()) {
-        slist[res.get_s(0)] = res.get_s(1);
+    readRadacctCalls();
+
+    for (auto it = waitingForFinishCalls.begin(); it != waitingForFinishCalls.end(); ++it) {
+
+        // if found
+        if (radacctCalls.find(it->first) != radacctCalls.end()) {
+
+            forceFinishCall(it->first, it->second);
+
+        }
+
     }
 
-    if (slist.size() == 0) {
-        last_t = curr_t;
+    waitingForFinishCalls.clear();
+
+    if (radacctCalls.size() == 0) {
+        last_t = time(NULL);
         return;
     }
 
-    ssleep(app.conf.billing_wait_stop_package_seconds);
+    readOpencaCalls();
 
-    vector<string> rlist;
-    if (UdpControlClient::select_calls(rlist) == false) return;
+    for (auto it = radacctCalls.begin(); it != radacctCalls.end(); ++it) {
 
-    map<string, bool> rlist_map;
-    for (vector<string>::iterator it = rlist.begin(); it != rlist.end(); ++it) {
-        rlist_map[*it] = true;
-    }
+        // if not found
+        if (opencaCalls.find(it->first) == opencaCalls.end()) {
 
-    for (map<string, string>::iterator it = slist.begin(); it != slist.end(); ++it) {
+            waitingForFinishCalls[it->first] = it->second;
+            countWaitingForFinishCalls = waitingForFinishCalls.size();
 
-        if (rlist_map.find(it->first) != rlist_map.end()) continue;
-
-        bool deleted = false;
-        BDbResult res =
-                db_rad.query(
-                "select force_finish_call('" + it->first + "','" + lexical_cast<string>(curr_t - last_t) + "')");
-        if (res.next()) deleted = res.get_b(0);
-
-        if (deleted) Log::error("Force finish call " + it->second);
+        }
 
     }
 
-    last_t = curr_t;
+    last_t = time(NULL);
+}
+
+void ThreadCheckStartTable::readRadacctCalls() {
+
+    radacctCalls.clear();
+    BDbResult res = db_rad.query("select acctsessionid, acctuniqueid from radacct_voip_start");
+    while (res.next()) {
+        radacctCalls[res.get_s(0)] = res.get_s(1);
+    }
+
+
+}
+
+void ThreadCheckStartTable::readOpencaCalls() {
+
+    vector<string> openca_calls;
+    if (UdpControlClient::select_calls(openca_calls) == false) {
+        throw Exception("Can't receive current calls list", "ThreadCheckStartTable::readOpencaCalls");
+    }
+
+    opencaCalls.clear();
+    for (auto it = openca_calls.begin(); it != openca_calls.end(); ++it) {
+        opencaCalls[*it] = true;
+    }
+}
+
+void ThreadCheckStartTable::forceFinishCall(string acctSessionId, string acctUniqueId) {
+
+    bool deleted = false;
+    BDbResult res =
+            db_rad.query(
+            "select force_finish_call('" + acctSessionId + "','" + lexical_cast<string>(time(NULL) - last_t) + "')");
+    if (res.next())
+        deleted = res.get_b(0);
+
+    if (deleted) {
+        Log::error("Force finish call " + acctUniqueId);
+        countForceFinishedCalls++;
+    }
+
 }
 
 void ThreadCheckStartTable::htmlfull(stringstream &html) {
@@ -59,5 +100,7 @@ void ThreadCheckStartTable::htmlfull(stringstream &html) {
     html << "Time full loop: <b>" << t.sfull() << "</b><br/>\n";
     html << "loops: <b>" << t.count << "</b><br/>\n";
     html << "<br/>\n";
+    html << "countWaitingForFinishCalls: <b>" << countWaitingForFinishCalls << "</b><br/>\n";
+    html << "countForceFinishedCalls: <b>" << countForceFinishedCalls << "</b><br/>\n";
 }
 
