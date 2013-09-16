@@ -1,4 +1,5 @@
 #include "ThreadLog.h"
+#include "../classes/App.h"
 
 void ThreadLog::run() {
 

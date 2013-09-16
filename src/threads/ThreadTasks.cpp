@@ -1,5 +1,5 @@
 #include "ThreadTasks.h"
-
+#include "../classes/App.h"
 #include "../tasks/TaskRecalc.h"
 
 ThreadTasks::ThreadTasks() {

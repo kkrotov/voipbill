@@ -168,6 +168,7 @@
       <itemPath>src/common.cpp</itemPath>
       <itemPath>src/common.h</itemPath>
       <itemPath>src/main.cpp</itemPath>
+      <itemPath>src/version.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -551,6 +552,8 @@
       </item>
       <item path="src/threads/ThreadWeb.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/version.cpp" ex="false" tool="1" flavor2="0">
+      </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
@@ -903,6 +906,8 @@
       <item path="src/threads/ThreadWeb.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/threads/ThreadWeb.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/version.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>

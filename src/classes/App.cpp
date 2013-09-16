@@ -24,6 +24,12 @@ App::App() {
     init_load_counters_done = false;
     init_load_data_done = false;
     init_bill_runtime_started = false;
+
+    onStatusChanged.connect(boost::bind(&ThreadPool::app_status_changed, &threads));
+    onRealStatusChanged.connect(boost::bind(&ThreadPool::app_real_status_changed, &threads));
+
+    status = AppStatus::APP_RUNNING;
+    setRealStatus(AppStatus::APP_STARTED);
 }
 
 bool App::init(int argc, char* argv[]) {
@@ -32,6 +38,8 @@ bool App::init(int argc, char* argv[]) {
 
     if (!conf.init(argc, argv))
         return false;
+
+    setRealStatus(AppStatus::APP_INITIALIZING);
 
     return true;
 }
@@ -77,4 +85,22 @@ void App::initLogger() {
     if (!conf.log_syslog_ident.empty())
         logger.addLogWriter(pLogWriter(new LogWriterSyslog(conf.log_syslog_ident, conf.log_syslog_min_level, conf.log_syslog_max_level)));
 
+}
+
+void App::setStatus(AppStatus status) {
+    this->status = status;
+    onStatusChanged();
+}
+
+void App::setRealStatus(AppStatus real_status) {
+    this->real_status = real_status;
+    onRealStatusChanged();
+}
+
+AppStatus App::getStatus() {
+    return status;
+}
+
+AppStatus App::getRealStatus() {
+    return real_status;
 }

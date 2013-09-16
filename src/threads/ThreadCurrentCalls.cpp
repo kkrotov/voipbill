@@ -1,4 +1,5 @@
 #include "ThreadCurrentCalls.h"
+#include "../classes/App.h"
 #include "../classes/DataLoader.h"
 #include "../classes/CalcFull.h"
 

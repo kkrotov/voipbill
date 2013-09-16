@@ -30,7 +30,7 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
         // send
         if (msg.size() != s.send(boost::asio::buffer(msg.data(), msg.size()))) {
             s.close();
-            Log::debug(debug_msg + "ERROR");
+            Log::error(debug_msg + "Send error");
             return false;
         }
 
@@ -66,7 +66,7 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
     }
 
     s.close();
-    Log::debug(debug_msg + "ERROR");
+    Log::error(debug_msg + "Receive error");
     return false;
 }
 

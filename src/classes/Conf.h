@@ -47,7 +47,6 @@ public:
 
     unsigned short billing_dc_break;
     unsigned short billing_free_seconds;
-    unsigned short billing_wait_stop_package_seconds;
 
     bool init(int argc, char* argv[]);
 

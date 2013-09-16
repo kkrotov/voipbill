@@ -1,4 +1,5 @@
 #include "ThreadSync.h"
+#include "../classes/App.h"
 
 typedef pair<string, string> fpair;
 

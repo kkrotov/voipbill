@@ -34,5 +34,3 @@ port = port
 [billing]
 dc_break = 126
 free_seconds = 5
-wait_stop_package_seconds = 5
-

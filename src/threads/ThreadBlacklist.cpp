@@ -1,4 +1,5 @@
 #include "ThreadBlacklist.h"
+#include "../classes/App.h"
 
 ThreadBlacklist::ThreadBlacklist() {
     id = "blacklist";

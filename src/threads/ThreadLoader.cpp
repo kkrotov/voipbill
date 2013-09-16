@@ -1,4 +1,5 @@
 #include "ThreadLoader.h"
+#include "../classes/App.h"
 
 bool ThreadLoader::ready() {
     return app.init_sync_done;

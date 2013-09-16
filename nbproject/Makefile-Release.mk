@@ -109,7 +109,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/threads/ThreadSaveCounters.o \
 	${OBJECTDIR}/src/threads/ThreadSync.o \
 	${OBJECTDIR}/src/threads/ThreadTasks.o \
-	${OBJECTDIR}/src/threads/ThreadWeb.o
+	${OBJECTDIR}/src/threads/ThreadWeb.o \
+	${OBJECTDIR}/src/version.o
 
 
 # C Compiler Flags
@@ -510,6 +511,11 @@ ${OBJECTDIR}/src/threads/ThreadWeb.o: src/threads/ThreadWeb.cpp
 	${MKDIR} -p ${OBJECTDIR}/src/threads
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/threads/ThreadWeb.o src/threads/ThreadWeb.cpp
+
+${OBJECTDIR}/src/version.o: src/version.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/version.o src/version.cpp
 
 # Subprojects
 .build-subprojects:

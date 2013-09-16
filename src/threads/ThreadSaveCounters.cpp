@@ -1,5 +1,5 @@
 #include "ThreadSaveCounters.h"
-
+#include "../classes/App.h"
 #include "../classes/KillCalls.h"
 
 ThreadSaveCounters::ThreadSaveCounters() {

@@ -1,5 +1,5 @@
 #include "ThreadBillRuntime.h"
-
+#include "../classes/App.h"
 #include "../lists/RuntimeCallsObjList.h"
 
 bool ThreadBillRuntime::need_refresh_current_id = false;

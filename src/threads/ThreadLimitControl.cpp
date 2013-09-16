@@ -1,5 +1,5 @@
 #include "ThreadLimitControl.h"
-
+#include "../classes/App.h"
 #include "../classes/CallsSaver.h"
 #include "../classes/KillCalls.h"
 #include "../lists/CurrentCallsObjList.h"
