@@ -1,4 +1,3 @@
-
 #include "ThreadCheckStartTable.h"
 #include "../classes/App.h"
 #include "../classes/UdpControlClient.h"
@@ -11,25 +10,14 @@ ThreadCheckStartTable::ThreadCheckStartTable() {
     last_t = 0;
     countWaitingForFinishCalls = 0;
     countForceFinishedCalls = 0;
+
+    threadSleepSeconds = app.conf.udp_openca_select_interval;
 }
 
 void ThreadCheckStartTable::run() {
     if (UdpControlClient::ready() == false) return;
 
     readRadacctCalls();
-
-    for (auto it = waitingForFinishCalls.begin(); it != waitingForFinishCalls.end(); ++it) {
-
-        // if found
-        if (radacctCalls.find(it->first) != radacctCalls.end()) {
-
-            forceFinishCall(it->first, it->second);
-
-        }
-
-    }
-
-    waitingForFinishCalls.clear();
 
     if (radacctCalls.size() == 0) {
         last_t = time(NULL);
@@ -38,19 +26,40 @@ void ThreadCheckStartTable::run() {
 
     readOpencaCalls();
 
+
     for (auto it = radacctCalls.begin(); it != radacctCalls.end(); ++it) {
 
         // if not found
         if (opencaCalls.find(it->first) == opencaCalls.end()) {
 
             waitingForFinishCalls[it->first] = it->second;
-            countWaitingForFinishCalls = waitingForFinishCalls.size();
+            countWaitingForFinishCalls++;
 
         }
 
     }
 
     last_t = time(NULL);
+
+    if (waitingForFinishCalls.size() > 0) {
+
+        ssleep(app.conf.udp_force_finish_call_interval);
+
+        readRadacctCalls();
+
+        for (auto it = waitingForFinishCalls.begin(); it != waitingForFinishCalls.end(); ++it) {
+
+            // if found
+            if (radacctCalls.find(it->first) != radacctCalls.end()) {
+
+                forceFinishCall(it->first, it->second);
+
+            }
+
+        }
+
+        waitingForFinishCalls.clear();
+    }
 }
 
 void ThreadCheckStartTable::readRadacctCalls() {
@@ -93,7 +102,7 @@ void ThreadCheckStartTable::forceFinishCall(string acctSessionId, string acctUni
 
 }
 
-void ThreadCheckStartTable::htmlfull(stringstream &html) {
+void ThreadCheckStartTable::htmlfull(stringstream & html) {
     this->html(html);
 
     html << "Time loop: <b>" << t.sloop() << "</b><br/>\n";

@@ -3,14 +3,14 @@
 #include "../common.h"
 
 typedef struct _DestObj {
-    char prefix[21];
+    char prefix[20];
     int dest;
     int geo_id;
     bool mob;
 } DestObj, *pDestObj;
 
 typedef struct _MobObj {
-    char prefix[21];
+    char prefix[20];
 } MobObj, *pMobObj;
 
 typedef struct _UsageObj {
@@ -48,7 +48,7 @@ typedef struct _PriceObj {
     int pricelist_id;
     time_t date_to;
     time_t date_from;
-    char prefix[21];
+    char prefix[20];
     unsigned int price; // x4
 } PriceObj, *pPriceObj;
 
@@ -99,8 +99,13 @@ typedef struct _CallObj {
     char id[20];
     char time[25];
     bool out;
+
     char usage[20];
     char phone[20];
+
+    char prefix_geo[20];
+    char prefix_mcn[20];
+    char prefix_op[20];
 
     long long int id_num;
 
@@ -111,6 +116,7 @@ typedef struct _CallObj {
     int client_id;
     int region;
     int len;
+    int len_mcn;
     int price; // x4
     int price_op; // x4
     int amount; // x2
@@ -125,10 +131,5 @@ typedef struct _CallObj {
 
     DT dt;
     void make_dt();
+    void cleanupCalculatedFields();
 } CallObj, *pCallObj;
-
-typedef struct _AsteriskNumberObj {
-    long long int usr_num;
-    char srv_ip[20];
-    char usr_ip[20];
-} AsteriskNumberObj, *pAsteriskNumberObj;

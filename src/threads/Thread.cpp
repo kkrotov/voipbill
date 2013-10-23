@@ -5,6 +5,8 @@ Thread::Thread() {
     id = string_fmt("%d", rand());
     name = id;
 
+    threadSleepSeconds = 1;
+
     status = ThreadStatus::THREAD_CREATED;
     setRealStatus(ThreadStatus::THREAD_CREATED);
 
@@ -74,7 +76,7 @@ void Thread::operator()() {
             }
 
 
-            ssleep(1);
+            ssleep(threadSleepSeconds);
             continue;
 
         } catch (boost::thread_interrupted const& e) {
@@ -89,7 +91,7 @@ void Thread::operator()() {
         }
 
         try {
-            ssleep(1);
+            ssleep(threadSleepSeconds);
         } catch (boost::thread_interrupted const& e) {
             continue;
         }

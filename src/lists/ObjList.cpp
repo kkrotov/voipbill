@@ -7,6 +7,32 @@ void _CallObj::make_dt() {
     parseDateTime((char*) &time, dt);
 }
 
+void _CallObj::cleanupCalculatedFields() {
+    usage_id = 0;
+    client_id = 0;
+
+    price = 0;
+    price_op = 0;
+
+    amount = 0;
+    amount_op = 0;
+
+    freemin_group_id = 0;
+
+    pricelist_id = 0;
+    pricelist_op_id = 0;
+
+    prefix_geo[0] = 0;
+    prefix_mcn[0] = 0;
+    prefix_op[0] = 0;
+
+    mob = false;
+    dest = 2;
+    geo_id = 0;
+
+    len_mcn = len;
+}
+
 ObjList::ObjList() {
     this->data = 0;
     this->count = 0;

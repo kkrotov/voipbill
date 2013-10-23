@@ -101,8 +101,6 @@
         <itemPath>src/http/yield.hpp</itemPath>
       </logicalFolder>
       <logicalFolder name="lists" displayName="lists" projectFiles="true">
-        <itemPath>src/lists/AsteriskNumberObjList.cpp</itemPath>
-        <itemPath>src/lists/AsteriskNumberObjList.h</itemPath>
         <itemPath>src/lists/CallsObjList.cpp</itemPath>
         <itemPath>src/lists/CallsObjList.h</itemPath>
         <itemPath>src/lists/ClientCounter.cpp</itemPath>
@@ -184,8 +182,8 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>src</Elem>
-    <Elem>libs/boost/libs/system/src</Elem>
+    <Elem>/home/ivanov/project/voip/src</Elem>
+    <Elem>/home/ivanov/project/voip/libs/boost/libs/system/src</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -199,6 +197,9 @@
       <compileType>
         <cTool>
           <architecture>2</architecture>
+          <incDir>
+            <pElem>/usr/pgsql-9.1/include</pElem>
+          </incDir>
         </cTool>
         <ccTool>
           <architecture>2</architecture>
@@ -426,13 +427,6 @@
       <item path="src/http/unyield.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/http/yield.hpp" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src/lists/AsteriskNumberObjList.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="src/lists/AsteriskNumberObjList.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/lists/CallsObjList.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -781,13 +775,6 @@
       <item path="src/http/unyield.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/http/yield.hpp" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src/lists/AsteriskNumberObjList.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="src/lists/AsteriskNumberObjList.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/lists/CallsObjList.cpp" ex="false" tool="1" flavor2="0">
       </item>

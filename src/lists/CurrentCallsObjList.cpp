@@ -17,6 +17,8 @@ void CurrentCallsObjList::parse_item(BDbResult &row, void * obj) {
     item->id_num = row.get_ll(0);
     strncpy((char*) item->time, row.get(1), 25);
     item->make_dt();
+    item->len = 0;
+    item->len_mcn = 0;
     item->out = (strcmp(row.get(2), "out") == 0);
     if (item->out) {
         strcpy((char*) &item->usage, row.get(3));
@@ -30,6 +32,9 @@ void CurrentCallsObjList::parse_item(BDbResult &row, void * obj) {
     item->operator_id = row.get_i(5);
     if (item->region == 0) item->region = app.conf.region_id;
     item->kill_call_reason = 0;
+    item->prefix_geo[0] = 0;
+    item->prefix_mcn[0] = 0;
+    item->prefix_op[0] = 0;
 }
 
 long long int CurrentCallsObjList::key(void *obj) {

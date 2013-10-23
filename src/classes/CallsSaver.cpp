@@ -8,9 +8,9 @@ string ins_str(CallsObjList *list) {
     char num[50];
 
     q.append("INSERT INTO billing.calls(" \
-                "time,id,direction_out,len,client_id,usage_id,usage_num, phone_num," \
+                "time,id,direction_out,len,len_mcn,client_id,usage_id,usage_num, phone_num," \
                 "amount,pricelist_mcn_id,amount_op,operator_id,free_min_groups_id,mob,redirect," \
-                "dest,month,day,region,geo_id,pricelist_op_id,price,price_op" \
+                "dest,month,day,region,geo_id,pricelist_op_id,price,price_op,prefix_geo,prefix_mcn,prefix_op" \
              ")VALUES\n");
 
     for (int i = 0; i < list->count; i++) {
@@ -30,6 +30,9 @@ string ins_str(CallsObjList *list) {
         q.append(call->out ? "true" : "false");
         q.append(",");
         sprintf(num, "%d", call->len);
+        q.append(num);
+        q.append(",");
+        sprintf(num, "%d", call->len_mcn);
         q.append(num);
         q.append(",");
         sprintf(num, "%d", call->client_id);
@@ -89,6 +92,12 @@ string ins_str(CallsObjList *list) {
         q.append(",");
         sprintf(num, "%d", call->price_op);
         q.append(call->pricelist_op_id != 0 ? num : "NULL");
+        q.append(",");
+        q.append(call->prefix_geo[0] != 0 ? call->prefix_geo : "NULL");
+        q.append(",");
+        q.append(call->prefix_mcn[0] != 0 ? call->prefix_mcn : "NULL");
+        q.append(",");
+        q.append(call->prefix_op[0] != 0 ? call->prefix_op : "NULL");
 
         q.append(")\n");
     }

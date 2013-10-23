@@ -77,6 +77,9 @@ bool Conf::parse_config_file() {
 
         udp_host = pt.get<string>("udp.host", "");
         udp_port = pt.get<unsigned short>("udp.port", 0);
+        udp_openca_select_interval = pt.get<unsigned short>("udp.openca_select_interval", 10);
+        udp_force_finish_call_interval = pt.get<unsigned short>("udp.force_finish_call_interval", 3);
+
 
         billing_dc_break = pt.get<unsigned short>("billing.dc_break", billing_dc_break);
         billing_free_seconds = pt.get<unsigned short>("billing.free_seconds", billing_free_seconds);

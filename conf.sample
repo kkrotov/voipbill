@@ -30,6 +30,8 @@ local_city_codes = 7495,7498,7499
 [udp]
 host = host
 port = port
+#openca_select_interval = 10
+#force_finish_call_interval = 3
 
 [billing]
 dc_break = 126

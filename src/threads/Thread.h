@@ -31,6 +31,8 @@ public:
     boost::signals2::signal<void(Thread *) > onStatusChanged;
     boost::signals2::signal<void(Thread *) > onRealStatusChanged;
 
+    int threadSleepSeconds;
+
     Thread();
     virtual ~Thread();
 

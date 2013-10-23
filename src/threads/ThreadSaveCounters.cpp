@@ -124,8 +124,8 @@ bool ThreadSaveCounters::save_calls() {
     try {
         BDb::copy("billing.calls_" + app.conf.str_region_id,
                 "",
-                "       id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, srv_region_id",
-                "select id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, " + app.conf.str_region_id + "::smallint from billing.calls where id>" + lexical_cast<string>(last_id) + " order by id limit 100000",
+                "       id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, len_mcn, prefix_geo, prefix_mcn, prefix_op, srv_region_id",
+                "select id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, len_mcn, prefix_geo, prefix_mcn, prefix_op, " + app.conf.str_region_id + "::smallint from billing.calls where id>" + lexical_cast<string>(last_id) + " order by id limit 100000",
                 &db_calls, &db_main);
 
     } catch (Exception &e) {

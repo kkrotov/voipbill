@@ -83,6 +83,7 @@ void CalcBase::calc_limit(CurrentCallsObjList *list) {
 
             call->len = current_time - call->dt.time;
             if (call->len < 0) call->len = 0;
+            call->len_mcn = call->len;
 
             prepare(call->dt);
 

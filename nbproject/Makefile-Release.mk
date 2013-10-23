@@ -80,7 +80,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/http/reply.o \
 	${OBJECTDIR}/src/http/request_parser.o \
 	${OBJECTDIR}/src/http/server.o \
-	${OBJECTDIR}/src/lists/AsteriskNumberObjList.o \
 	${OBJECTDIR}/src/lists/CallsObjList.o \
 	${OBJECTDIR}/src/lists/ClientCounter.o \
 	${OBJECTDIR}/src/lists/ClientObjList.o \
@@ -361,11 +360,6 @@ ${OBJECTDIR}/src/http/server.o: src/http/server.cpp
 	${MKDIR} -p ${OBJECTDIR}/src/http
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/http/server.o src/http/server.cpp
-
-${OBJECTDIR}/src/lists/AsteriskNumberObjList.o: src/lists/AsteriskNumberObjList.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src/lists
-	${RM} $@.d
-	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/lists/AsteriskNumberObjList.o src/lists/AsteriskNumberObjList.cpp
 
 ${OBJECTDIR}/src/lists/CallsObjList.o: src/lists/CallsObjList.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/lists
