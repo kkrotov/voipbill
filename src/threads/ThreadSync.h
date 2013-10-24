@@ -9,7 +9,6 @@
 struct qsync;
 
 class ThreadSync : public Thread {
-    Timer t;
     BDb db_main;
     BDb db_calls;
     list<qsync> syncs;
@@ -22,7 +21,7 @@ class ThreadSync : public Thread {
 
     bool sync_notfull(qsync &s);
 
-    void prepare();
+    bool prepare();
     void run();
 
     void htmlfull(stringstream &html);

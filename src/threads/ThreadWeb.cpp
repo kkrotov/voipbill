@@ -6,7 +6,7 @@
 #include "../common.h"
 #include "Thread.h"
 #include "ThreadCurrentCalls.h"
-
+#include "../classes/App.h"
 #include "../classes/DataLoader.h"
 #include "../classes/CalcFull.h"
 #include "../classes/BlackListLocal.h"
@@ -31,7 +31,15 @@ void ThreadWeb::handlerHeader(stringstream &html) {
 
     html << " <a href='/'>home</a> ";
     html << " <a href='/config'>config</a> ";
-    html << string_time(time(NULL));
+    html << string_time(time(NULL)) << " ";
+
+    AppStatus status = app.getStatus();
+    AppStatus real_status = app.getRealStatus();
+    html << "<b>" << AppStatusNames[real_status] << "</b>";
+    if (status != real_status) {
+        html << " (" << AppStatusNames[status] << ")";
+    }
+
     html << " <hr/> ";
 }
 
@@ -51,11 +59,20 @@ void ThreadWeb::handlerConfig(stringstream &html) {
     handlerHeader(html);
 
     html << "<h2>Config</h2>\n";
-    html << "<hr>\n";
+    html << "build date: <b>" << build_date() << " " << build_time() << "</b><br/>\n";
     html << "config_file: " << app.conf.config_file << "<br/>\n";
-    html << "log_file: " << app.conf.log_file << "<br/>\n";
-    html << "err_log_file: " << app.conf.err_log_file << "<br/>\n";
     html << "pid_file: " << app.conf.pid_file << "<br/>\n";
+    html << "<hr>\n";
+    html << "log_file_filename: " << app.conf.log_file_filename << "<br/>\n";
+    html << "log_file_min_level: " << app.conf.log_file_min_level << "<br/>\n";
+    html << "log_file_max_level: " << app.conf.log_file_max_level << "<br/>\n";
+    html << "log_file2_filename: " << app.conf.log_file2_filename << "<br/>\n";
+    html << "log_file2_min_level: " << app.conf.log_file2_min_level << "<br/>\n";
+    html << "log_file2_max_level: " << app.conf.log_file2_max_level << "<br/>\n";
+    html << "log_syslog_ident: " << app.conf.log_syslog_ident << "<br/>\n";
+    html << "log_syslog_min_level: " << app.conf.log_syslog_min_level << "<br/>\n";
+    html << "log_syslog_max_level: " << app.conf.log_syslog_max_level << "<br/>\n";
+
     html << "<br/>\n";
     html << "main.web_port: " << app.conf.web_port << "<br/>\n";
     html << "main.test_mode: " << app.conf.test_mode << "<br/>\n";

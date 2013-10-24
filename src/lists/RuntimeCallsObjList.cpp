@@ -41,6 +41,7 @@ void RuntimeCallsObjList::parse_item(BDbResult &row, void * obj) {
     strncpy((char*) item->time, row.get(1), 25);
     item->make_dt();
     item->len = row.get_i(2);
+    item->len_mcn = item->len;
     item->out = (strcmp(row.get(3), "out") == 0);
     if (item->out) {
         strcpy((char*) &item->usage, row.get(4));
@@ -56,5 +57,8 @@ void RuntimeCallsObjList::parse_item(BDbResult &row, void * obj) {
     item->redirect = row.get_b(8);
     if (item->region == 0) item->region = app.conf.region_id;
     item->kill_call_reason = 0;
+    item->prefix_geo[0] = 0;
+    item->prefix_mcn[0] = 0;
+    item->prefix_op[0] = 0;
 }
 

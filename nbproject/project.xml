@@ -13,8 +13,8 @@
             </formatting>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>src</sourceRootElem>
-                <sourceRootElem>libs/boost/libs/system/src</sourceRootElem>
+                <sourceRootElem>/home/ivanov/project/voip/src</sourceRootElem>
+                <sourceRootElem>/home/ivanov/project/voip/libs/boost/libs/system/src</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

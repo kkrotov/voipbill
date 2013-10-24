@@ -1,4 +1,5 @@
 #include "ThreadBlacklist.h"
+#include "../classes/App.h"
 
 ThreadBlacklist::ThreadBlacklist() {
     id = "blacklist";
@@ -11,44 +12,35 @@ ThreadBlacklist::ThreadBlacklist() {
     last_sync_from_openca_time = 0;
 }
 
-void ThreadBlacklist::wait() {
-    while (app.init_sync_done == false ||
-            app.init_load_data_done == false ||
-            app.init_load_counters_done == false ||
-            app.init_bill_runtime_started == false
-            ) {
-        ssleep(1);
-    }
+bool ThreadBlacklist::ready() {
+    return app.init_sync_done &&
+            app.init_load_data_done &&
+            app.init_load_counters_done &&
+            app.init_bill_runtime_started;
 }
 
-void ThreadBlacklist::prepare() {
-    while (blacklist_local->fetch() == false) {
-        ssleep(10);
+bool ThreadBlacklist::prepare() {
+    if (!blacklist_local->fetch()) {
+        return false;
     }
 
-    while (blacklist_global->fetch() == false) {
-        ssleep(10);
+    if (!blacklist_global->fetch()) {
+        return false;
     }
 
     last_sync_from_openca_time = time(NULL);
 
     sync_blacklist();
+
+    return true;
 }
 
 void ThreadBlacklist::run() {
-    while (true) {
 
-        t.start();
+    sync_once_per_day();
 
-        sync_once_per_day();
+    update_voip_auto_disabled();
 
-        update_voip_auto_disabled();
-
-        t.stop();
-
-        ssleep(1);
-
-    }
 }
 
 void ThreadBlacklist::sync_once_per_day() {

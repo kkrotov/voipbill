@@ -6,15 +6,14 @@
 #include "../classes/BlackListGlobal.h"
 
 class ThreadBlacklist : public Thread {
-    Timer t;
     DataLoader *loader;
     BlackListLocal *blacklist_local;
     BlackListGlobal *blacklist_global;
 
     time_t last_sync_from_openca_time;
 
-    void wait();
-    void prepare();
+    bool ready();
+    bool prepare();
 
     void run();
 

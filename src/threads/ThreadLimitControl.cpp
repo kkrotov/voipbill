@@ -1,5 +1,5 @@
 #include "ThreadLimitControl.h"
-
+#include "../classes/App.h"
 #include "../classes/CallsSaver.h"
 #include "../classes/KillCalls.h"
 #include "../lists/CurrentCallsObjList.h"
@@ -8,52 +8,37 @@
 ThreadLimitControl::ThreadLimitControl() {
     id = "limitcontrol";
     name = "Limit control";
+    db_calls.setCS(app.conf.db_calls);
+    calculator.setDb(&db_calls);
 }
 
-void ThreadLimitControl::wait() {
-    while (app.init_sync_done == false ||
-            app.init_load_data_done == false ||
-            app.init_load_counters_done == false ||
-            app.init_bill_runtime_started == false) {
-        ssleep(1);
-    }
+bool ThreadLimitControl::ready() {
+    return app.init_sync_done &&
+            app.init_load_data_done &&
+            app.init_load_counters_done &&
+            app.init_bill_runtime_started;
 }
 
 void ThreadLimitControl::run() {
-    BDb db_calls(app.conf.db_calls);
-    calculator.setDb(&db_calls);
 
-    while (true) {
-        ssleep(1);
+    shared_ptr<CurrentCallsObjList> splist = ThreadCurrentCalls::getList();
+    CurrentCallsObjList * list = splist.get();
 
-        shared_ptr<CurrentCallsObjList> splist = ThreadCurrentCalls::getList();
-        CurrentCallsObjList * list = splist.get();
+    if (list->loadtime + 60 >= time(NULL)) {
 
-        t.start();
-        try {
+        {
+            TimerScope ts2(t_calc);
 
-            if (list->loadtime + 60 >= time(NULL)) {
-                t_calc.start();
-
-                calculator.calc_limit(list);
-
-                t_calc.stop();
-
-                t_kill.start();
-
-                KillCalls::kill(list);
-
-                t_kill.stop();
-
-            }
-
-
-        } catch (Exception &e) {
-            e.addTrace("ThreadLimitControl::run");
-            Log::exception(e);
+            calculator.calc_limit(list);
         }
-        t.stop();
+
+        {
+            TimerScope ts3(t_kill);
+
+            KillCalls::kill(list);
+        }
     }
+
 }
 
 void ThreadLimitControl::htmlfull(stringstream &html) {

@@ -1,5 +1,5 @@
 #include "ThreadSaveCounters.h"
-
+#include "../classes/App.h"
 #include "../classes/KillCalls.h"
 
 ThreadSaveCounters::ThreadSaveCounters() {
@@ -14,42 +14,30 @@ ThreadSaveCounters::ThreadSaveCounters() {
     db_calls.setCS(app.conf.db_calls);
 }
 
-void ThreadSaveCounters::wait() {
-    while (app.init_sync_done == false ||
-            app.init_load_data_done == false ||
-            app.init_load_counters_done == false ||
-            app.init_bill_runtime_started == false) {
-        ssleep(1);
-    }
+bool ThreadSaveCounters::ready() {
+    return app.init_sync_done &&
+            app.init_load_data_done &&
+            app.init_load_counters_done &&
+            app.init_bill_runtime_started;
 }
 
-void ThreadSaveCounters::prepare() {
+bool ThreadSaveCounters::prepare() {
 
-    while (save_client_counters(true) == false) {
-        ssleep(10);
+    if (!save_client_counters(true)) {
+        return false;
     }
 
-    while (db_main.ping() == false) {
-        ssleep(10);
-    }
+    return true;
 }
 
 void ThreadSaveCounters::run() {
 
+    save_client_counters();
 
-    while (true) {
+    boost::this_thread::interruption_point();
 
-        t.start();
+    save_calls();
 
-        save_client_counters();
-
-        save_calls();
-
-        t.stop();
-
-        ssleep(1);
-
-    }
 }
 
 bool ThreadSaveCounters::save_client_counters(bool clear) {
@@ -136,8 +124,8 @@ bool ThreadSaveCounters::save_calls() {
     try {
         BDb::copy("billing.calls_" + app.conf.str_region_id,
                 "",
-                "       id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, srv_region_id",
-                "select id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, " + app.conf.str_region_id + "::smallint from billing.calls where id>" + lexical_cast<string>(last_id) + " order by id limit 100000",
+                "       id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, len_mcn, prefix_geo, prefix_mcn, prefix_op, srv_region_id",
+                "select id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, len_mcn, prefix_geo, prefix_mcn, prefix_op, " + app.conf.str_region_id + "::smallint from billing.calls where id>" + lexical_cast<string>(last_id) + " order by id limit 100000",
                 &db_calls, &db_main);
 
     } catch (Exception &e) {

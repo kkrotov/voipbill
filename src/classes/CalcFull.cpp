@@ -3,6 +3,8 @@
 
 void CalcFull::calc_item(pCallObj call) {
 
+    call->cleanupCalculatedFields();
+
     pDestObj dest = data.dest->find(call->phone);
     pOperator oper = data.oper->find(call->operator_id);
 
@@ -10,29 +12,19 @@ void CalcFull::calc_item(pCallObj call) {
         call->mob = dest->mob;
         call->dest = dest->dest;
         call->geo_id = dest->geo_id;
-    } else {
-        call->mob = false;
-        call->dest = 2;
-        call->geo_id = 0;
+        strcpy(call->prefix_geo, dest->prefix);
     }
-
-
-    call->price = 0;
-    call->amount = 0;
-    call->price_op = 0;
-    call->amount_op = 0;
-    call->freemin_group_id = 0;
-    call->pricelist_id = 0;
-    call->usage_id = 0;
-    call->client_id = 0;
-
 
     call->pricelist_op_id = oper != 0 ? oper->pricelist_id : 0;
 
     if (call->pricelist_op_id != 0) {
         if (call->out) {
             pPriceObj price_op = data.price->find(call->pricelist_op_id, call->phone);
-            call->price_op = price_op != 0 ? price_op->price : 0;
+            if (price_op != 0) {
+                call->price_op = price_op->price;
+                strcpy(call->prefix_op, price_op->prefix);
+            }
+
         } else {
             call->price_op = -oper->term_in_cost;
         }
@@ -50,7 +42,9 @@ void CalcFull::calc_item(pCallObj call) {
         sprintf(fake_a_number, "%d", call->region);
         usage_item = data.usage->find(fake_a_number);
     }
+
     if (usage_item == 0) return;
+
     call->usage_id = usage_item->id;
     call->client_id = usage_item->client_id;
 
@@ -65,15 +59,15 @@ void CalcFull::calc_item(pCallObj call) {
     else if (call->dest == 3)
         call->pricelist_id = usage_item->pl_sng_id;
 
-    int len_min;
-    if (call->len > 60) len_min = call->len;
-    else if (call->len > app.conf.billing_free_seconds) len_min = 60;
-    else len_min = 0;
+    if (call->len > 60) call->len_mcn = call->len;
+    else if (call->len > app.conf.billing_free_seconds) call->len_mcn = 60;
+    else call->len_mcn = 0;
 
     pPriceObj price_mcn = data.price->find(call->pricelist_id, call->phone);
     if (price_mcn != 0) {
         call->price = price_mcn->price;
-        call->amount = floor((float) (len_min * call->price) / (60 * 100) + 0.5);
+        call->amount = floor((float) (call->len_mcn * call->price) / (60 * 100) + 0.5);
+        strcpy(call->prefix_mcn, price_mcn->prefix);
     }
 
 
@@ -84,8 +78,8 @@ void CalcFull::calc_item(pCallObj call) {
             ) {
         int fm_len = data.counter_fmin->get(call->usage_id, 1);
         int fm_len2 = fmin_counter2->get(call->usage_id, 1);
-        if (fm_len + fm_len2 + len_min <= usage_item->freemin) {
-            fmin_counter2->set(call->usage_id, 1, fm_len2 + len_min);
+        if (fm_len + fm_len2 + call->len_mcn <= usage_item->freemin) {
+            fmin_counter2->set(call->usage_id, 1, fm_len2 + call->len_mcn);
             call->freemin_group_id = 1;
             call->amount = 0;
         }

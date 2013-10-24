@@ -24,6 +24,12 @@ App::App() {
     init_load_counters_done = false;
     init_load_data_done = false;
     init_bill_runtime_started = false;
+
+    onStatusChanged.connect(boost::bind(&ThreadPool::app_status_changed, &threads));
+    onRealStatusChanged.connect(boost::bind(&ThreadPool::app_real_status_changed, &threads));
+
+    status = AppStatus::APP_RUNNING;
+    setRealStatus(AppStatus::APP_STARTED);
 }
 
 bool App::init(int argc, char* argv[]) {
@@ -33,16 +39,14 @@ bool App::init(int argc, char* argv[]) {
     if (!conf.init(argc, argv))
         return false;
 
+    setRealStatus(AppStatus::APP_INITIALIZING);
+
     return true;
 }
 
 void App::run() {
 
-    logger.setLogGroupingInterval(conf.log_grouping_interval);
-    logger.addLogWriter(pLogWriter(new LogWriterScreen()));
-    logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file, LogLevel::DEBUG, LogLevel::WARNING)));
-    logger.addLogWriter(pLogWriter(new LogWriterFile(conf.err_log_file, LogLevel::ERROR, LogLevel::CRITICAL)));
-    logger.addLogWriter(pLogWriter(new LogWriterSyslog("voipbill", LogLevel::DEBUG, LogLevel::CRITICAL)));
+    initLogger();
 
     Daemoin::setPidFile();
     Daemoin::initSignalHandler();
@@ -50,7 +54,7 @@ void App::run() {
 
     ThreadWeb web;
 
-    std::thread web_thread(web);
+    boost::thread web_thread(web);
 
     threads.run(new ThreadLog());
     threads.run(new ThreadSync());
@@ -64,4 +68,39 @@ void App::run() {
     threads.run(new ThreadTasks());
 
     web_thread.join();
+}
+
+void App::initLogger() {
+
+    logger.setLogGroupingInterval(conf.log_grouping_interval);
+
+    logger.addLogWriter(pLogWriter(new LogWriterScreen()));
+
+    if (!conf.log_file_filename.empty())
+        logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file_filename, conf.log_file_min_level, conf.log_file_max_level)));
+
+    if (!conf.log_file2_filename.empty())
+        logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file2_filename, conf.log_file2_min_level, conf.log_file2_max_level)));
+
+    if (!conf.log_syslog_ident.empty())
+        logger.addLogWriter(pLogWriter(new LogWriterSyslog(conf.log_syslog_ident, conf.log_syslog_min_level, conf.log_syslog_max_level)));
+
+}
+
+void App::setStatus(AppStatus status) {
+    this->status = status;
+    onStatusChanged();
+}
+
+void App::setRealStatus(AppStatus real_status) {
+    this->real_status = real_status;
+    onRealStatusChanged();
+}
+
+AppStatus App::getStatus() {
+    return status;
+}
+
+AppStatus App::getRealStatus() {
+    return real_status;
 }

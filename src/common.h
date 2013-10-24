@@ -43,3 +43,7 @@ time_t get_tday();
 time_t get_tmonth();
 
 time_t get_tmonth_end();
+
+
+char const * build_date();
+char const * build_time();

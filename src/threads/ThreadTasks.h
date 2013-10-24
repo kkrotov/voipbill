@@ -6,13 +6,13 @@
 
 class ThreadTasks : public Thread {
 protected:
-    Timer t;
+    BDb db_main;
 
     int tasks_count;
 
     shared_ptr<Task> current_task;
 
-    void wait();
+    bool ready();
 
     void run();
 

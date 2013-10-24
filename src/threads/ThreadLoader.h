@@ -6,13 +6,12 @@
 #include "../classes/Timer.h"
 
 class ThreadLoader : public Thread {
-    Timer t;
     DataLoader * loader;
     BDb db_calls;
     int errors;
 
-    void wait();
-    void prepare();
+    bool ready();
+    bool prepare();
     void run();
 
     void htmlfull(stringstream &html);

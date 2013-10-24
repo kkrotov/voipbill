@@ -35,6 +35,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/1996375920/once_atomic.o \
+	${OBJECTDIR}/_ext/1996375920/thread.o \
 	${OBJECTDIR}/libs/boost/libs/program_options/src/cmdline.o \
 	${OBJECTDIR}/libs/boost/libs/program_options/src/config_file.o \
 	${OBJECTDIR}/libs/boost/libs/program_options/src/convert.o \
@@ -78,7 +80,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/http/reply.o \
 	${OBJECTDIR}/src/http/request_parser.o \
 	${OBJECTDIR}/src/http/server.o \
-	${OBJECTDIR}/src/lists/AsteriskNumberObjList.o \
 	${OBJECTDIR}/src/lists/CallsObjList.o \
 	${OBJECTDIR}/src/lists/ClientCounter.o \
 	${OBJECTDIR}/src/lists/ClientObjList.o \
@@ -107,7 +108,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/threads/ThreadSaveCounters.o \
 	${OBJECTDIR}/src/threads/ThreadSync.o \
 	${OBJECTDIR}/src/threads/ThreadTasks.o \
-	${OBJECTDIR}/src/threads/ThreadWeb.o
+	${OBJECTDIR}/src/threads/ThreadWeb.o \
+	${OBJECTDIR}/src/version.o
 
 
 # C Compiler Flags
@@ -133,6 +135,16 @@ LDLIBSOPTIONS=-L/usr/pgsql-9.1/lib -lpq -lrt -lstdc++
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/voip: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/voip ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/_ext/1996375920/once_atomic.o: ../boost/libs/thread/src/pthread/once_atomic.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1996375920
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1996375920/once_atomic.o ../boost/libs/thread/src/pthread/once_atomic.cpp
+
+${OBJECTDIR}/_ext/1996375920/thread.o: ../boost/libs/thread/src/pthread/thread.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1996375920
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1996375920/thread.o ../boost/libs/thread/src/pthread/thread.cpp
 
 ${OBJECTDIR}/libs/boost/libs/program_options/src/cmdline.o: libs/boost/libs/program_options/src/cmdline.cpp 
 	${MKDIR} -p ${OBJECTDIR}/libs/boost/libs/program_options/src
@@ -349,11 +361,6 @@ ${OBJECTDIR}/src/http/server.o: src/http/server.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/http/server.o src/http/server.cpp
 
-${OBJECTDIR}/src/lists/AsteriskNumberObjList.o: src/lists/AsteriskNumberObjList.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src/lists
-	${RM} $@.d
-	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/lists/AsteriskNumberObjList.o src/lists/AsteriskNumberObjList.cpp
-
 ${OBJECTDIR}/src/lists/CallsObjList.o: src/lists/CallsObjList.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/lists
 	${RM} $@.d
@@ -498,6 +505,11 @@ ${OBJECTDIR}/src/threads/ThreadWeb.o: src/threads/ThreadWeb.cpp
 	${MKDIR} -p ${OBJECTDIR}/src/threads
 	${RM} $@.d
 	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/threads/ThreadWeb.o src/threads/ThreadWeb.cpp
+
+${OBJECTDIR}/src/version.o: src/version.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src
+	${RM} $@.d
+	$(COMPILE.cc) -g -I/usr/pgsql-9.1/include -I../boost -Ilibs/gtest/include -std=c++11 -static-libgcc -L./libs -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/version.o src/version.cpp
 
 # Subprojects
 .build-subprojects:

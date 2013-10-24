@@ -4,6 +4,7 @@
 #include "../lists/Obj.h"
 #include "UdpControlClient.h"
 #include "../common.h"
+#include "Log.h"
 
 class KillCalls {
 public:
@@ -48,7 +49,7 @@ public:
                     reason = "Reason" + lexical_cast<string>(call->kill_call_reason);
 
 
-                Log::info("KILL " + string(call->id) + " / " + string(call->usage) + " / " + reason);
+                Log::notice("KILL " + string(call->id) + " / " + string(call->usage) + " / " + reason);
             }
         }
 

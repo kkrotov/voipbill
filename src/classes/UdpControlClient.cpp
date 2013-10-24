@@ -16,6 +16,8 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
     boost::asio::io_service io_service;
     udp::socket s(io_service);
 
+    string debug_msg = "OpenCA: ";
+
     try {
         boost::asio::ip::address addr = boost::asio::ip::address::from_string(app.conf.udp_host);
         udp::endpoint endpoint(addr, app.conf.udp_port);
@@ -23,9 +25,12 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
         s.open(udp::v4());
         s.connect(endpoint);
 
+        debug_msg += msg + ": ";
+
         // send
         if (msg.size() != s.send(boost::asio::buffer(msg.data(), msg.size()))) {
             s.close();
+            Log::error(debug_msg + "Send error");
             return false;
         }
 
@@ -48,6 +53,10 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
             if (bytes_read > 0) {
                 res.append(&recvdata[0], bytes_read);
                 s.close();
+            }
+
+            if (bytes_read >= 0) {
+                Log::debug(debug_msg + res);
                 return true;
             }
         }
@@ -57,6 +66,7 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
     }
 
     s.close();
+    Log::error(debug_msg + "Receive error");
     return false;
 }
 
@@ -68,8 +78,11 @@ bool UdpControlClient::select_calls(vector<string> &list) {
     string msg("SELECT");
     string res;
     if (sendrecv(msg, res) == false) return false;
-
-    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","));
+    if (res == "") {
+        list.empty();
+        return true;
+    }
+    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","), boost::token_compress_on);
     return true;
 }
 
@@ -83,7 +96,11 @@ bool UdpControlClient::blacklist_local(vector<string> &list) {
     string msg("READ_BLACKLIST_LOCAL");
     string res;
     if (sendrecv(msg, res) == false || res == "0") return false;
-    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","));
+    if (res == "") {
+        list.empty();
+        return true;
+    }
+    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","), boost::token_compress_on);
     return true;
 }
 
@@ -91,7 +108,11 @@ bool UdpControlClient::blacklist_global(vector<string> &list) {
     string msg("READ_BLACKLIST_GLOBAL");
     string res;
     if (sendrecv(msg, res) == false || res == "0") return false;
-    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","));
+    if (res == "") {
+        list.empty();
+        return true;
+    }
+    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","), boost::token_compress_on);
     return true;
 }
 

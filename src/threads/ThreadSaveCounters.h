@@ -4,14 +4,13 @@
 #include "../classes/DataLoader.h"
 
 class ThreadSaveCounters : public Thread {
-    Timer t;
     DataLoader *loader;
     BDb db_main;
     BDb db_calls;
 
-    void wait();
+    bool ready();
 
-    void prepare();
+    bool prepare();
 
     void run();
 

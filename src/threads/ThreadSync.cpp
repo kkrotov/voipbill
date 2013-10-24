@@ -1,4 +1,5 @@
 #include "ThreadSync.h"
+#include "../classes/App.h"
 
 typedef pair<string, string> fpair;
 
@@ -152,36 +153,29 @@ bool ThreadSync::sync_notfull(qsync &s) {
     return true;
 }
 
-void ThreadSync::prepare() {
-    while (app.init_sync_done == false) {
+bool ThreadSync::prepare() {
+    if (!app.init_sync_done) {
         Log::info("Sync...");
-        if (this->do_sync() == false) {
-            ssleep(10);
-            continue;
+        if (!this->do_sync()) {
+            return false;
         }
         app.init_sync_done = true;
     }
+    return true;
 }
 
 void ThreadSync::run() {
-    while (true) {
 
-        bool err = false;
-
-        t.start();
-
-        for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s) {
-            if ((*s).full) {
-                if (sync_full(*s) == false) err = true;
-            } else {
-                if (sync_notfull(*s) == false) err = true;
-            }
+    for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s) {
+        if ((*s).full) {
+            sync_full(*s);
+        } else {
+            sync_notfull(*s);
         }
 
-        t.stop();
-
-        ssleep(err ? 60 : 1);
+        boost::this_thread::interruption_point();
     }
+
 }
 
 void ThreadSync::htmlfull(stringstream &html) {
