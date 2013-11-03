@@ -20,7 +20,6 @@ web_port = 8032
 main =  host=host dbname=dbname user=user password=password
 rad =   host=host dbname=dbname user=user password=password
 calls = host=host dbname=dbname user=user password=password
-ast =   host=host dbname=dbname user=user password=password
 
 [geo]
 region = 99
