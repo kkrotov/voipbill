@@ -63,7 +63,7 @@ void ClientCounter::load(BDb * db, time_t dt) {
 
     BDbResult res = db->query(
             "   select r_client_id, m_date, m_sum, d_date, d_sum, a_sum, disabled, disabled_local  " \
-                "   from billing.get_amounts() ");
+                "   from calls.get_amounts() ");
     loadtime = time(NULL);
     last_use = loadtime;
     while (res.next()) {
@@ -109,7 +109,7 @@ void ClientCounter::reload(BDb * db) {
 
     BDbResult res = db->query(
             "   select r_client_id, a_sum  " \
-                "   from billing.reget_amounts() ");
+                "   from calls.reget_amounts() ");
     loadtime = time(NULL);
     while (res.next()) {
         ClientCounterObj &cc = this->get(res.get_i(0));

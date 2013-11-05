@@ -18,6 +18,8 @@ class ThreadSaveCounters : public Thread {
 
     bool save_calls();
 
+    bool save_calls_old();
+
     void htmlfull(stringstream &html);
 public:
     ThreadSaveCounters();

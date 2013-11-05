@@ -20,7 +20,7 @@ void TaskRecalc::run() {
 
     BDb db_rad(app.conf.db_rad);
     BDb db_calls(app.conf.db_calls);
-    BDbResult res = db_calls.query("select min(id) from billing.calls where time>='" + string_time(date_from) + "'");
+    BDbResult res = db_calls.query("select min(id) from calls.calls where time>='" + string_time(date_from) + "'");
 
     long long int current_call_id = 0;
     if (res.next()) {
@@ -30,7 +30,7 @@ void TaskRecalc::run() {
     boost::this_thread::interruption_point();
 
     setStatus("2. delete calls from id " + lexical_cast<string>(current_call_id));
-    db_calls.exec("delete from billing.calls where id>=" + lexical_cast<string>(current_call_id));
+    db_calls.exec("delete from calls.calls where id>=" + lexical_cast<string>(current_call_id));
 
     CallsSaver sv(&db_calls);
 

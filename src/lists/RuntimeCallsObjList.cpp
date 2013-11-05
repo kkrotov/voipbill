@@ -15,7 +15,7 @@ void RuntimeCallsObjList::refresh_current_id() {
 string RuntimeCallsObjList::sql(BDb * db) {
     if (last_id == 0) {
         BDb db_calls(app.conf.db_calls);
-        BDbResult res = db_calls.query("select max(id) from billing.calls");
+        BDbResult res = db_calls.query("select max(id) from calls.calls");
         if (res.next()) {
             last_id = res.get_ll(0);
         } else {
