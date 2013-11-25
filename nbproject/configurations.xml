@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="89">
+<configurationDescriptor version="90">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="f1" displayName="libs" projectFiles="true">
       <logicalFolder name="f2"
@@ -120,6 +120,8 @@
         <itemPath>src/lists/OperatorList.h</itemPath>
         <itemPath>src/lists/PriceObjList.cpp</itemPath>
         <itemPath>src/lists/PriceObjList.h</itemPath>
+        <itemPath>src/lists/PricelistList.cpp</itemPath>
+        <itemPath>src/lists/PricelistList.h</itemPath>
         <itemPath>src/lists/RuntimeCallsObjList.cpp</itemPath>
         <itemPath>src/lists/RuntimeCallsObjList.h</itemPath>
         <itemPath>src/lists/UsageObjList.cpp</itemPath>
@@ -182,14 +184,13 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>/home/ivanov/project/voip/src</Elem>
-    <Elem>/home/ivanov/project/voip/libs/boost/libs/system/src</Elem>
+    <Elem>src</Elem>
+    <Elem>libs/boost/libs/system/src</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Debug" type="1">
       <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>default</compilerSet>
         <dependencyChecking>true</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
@@ -205,15 +206,15 @@
           <architecture>2</architecture>
           <standard>8</standard>
           <incDir>
-            <pElem>/usr/pgsql-9.1/include</pElem>
-            <pElem>../boost</pElem>
+            <pElem>libs/boost</pElem>
             <pElem>libs/gtest/include</pElem>
+            <pElem>/usr/pgsql-9.1/include</pElem>
           </incDir>
-          <commandLine>-static-libgcc -L./libs</commandLine>
         </ccTool>
         <linkerTool>
           <linkerAddLib>
             <pElem>/usr/pgsql-9.1/lib</pElem>
+            <pElem>libs</pElem>
           </linkerAddLib>
           <linkerLibItems>
             <linkerOptionItem>-lpq</linkerOptionItem>
@@ -466,6 +467,10 @@
       </item>
       <item path="src/lists/PriceObjList.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/lists/PricelistList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/lists/PricelistList.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/lists/RuntimeCallsObjList.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/lists/RuntimeCallsObjList.h" ex="false" tool="3" flavor2="0">
@@ -551,7 +556,6 @@
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>default</compilerSet>
         <dependencyChecking>true</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
@@ -559,9 +563,20 @@
       <compileType>
         <cTool>
           <developmentMode>5</developmentMode>
+          <architecture>2</architecture>
+          <incDir>
+            <pElem>/usr/pgsql-9.1/include</pElem>
+          </incDir>
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
+          <architecture>2</architecture>
+          <standard>8</standard>
+          <incDir>
+            <pElem>libs/boost</pElem>
+            <pElem>libs/gtest/include</pElem>
+            <pElem>/usr/pgsql-9.1/include</pElem>
+          </incDir>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
@@ -569,6 +584,17 @@
         <asmTool>
           <developmentMode>5</developmentMode>
         </asmTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/usr/pgsql-9.1/lib</pElem>
+            <pElem>libs</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerOptionItem>-lpq</linkerOptionItem>
+            <linkerOptionItem>-lrt</linkerOptionItem>
+            <linkerOptionItem>-lstdc++</linkerOptionItem>
+          </linkerLibItems>
+        </linkerTool>
       </compileType>
       <item path="../boost/libs/thread/src/pthread/once_atomic.cpp"
             ex="false"
@@ -813,6 +839,10 @@
       <item path="src/lists/PriceObjList.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/lists/PriceObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/lists/PricelistList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/lists/PricelistList.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/lists/RuntimeCallsObjList.cpp" ex="false" tool="1" flavor2="0">
       </item>

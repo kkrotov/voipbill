@@ -7,32 +7,6 @@ void _CallObj::make_dt() {
     parseDateTime((char*) &time, dt);
 }
 
-void _CallObj::cleanupCalculatedFields() {
-    usage_id = 0;
-    client_id = 0;
-
-    price = 0;
-    price_op = 0;
-
-    amount = 0;
-    amount_op = 0;
-
-    freemin_group_id = 0;
-
-    pricelist_id = 0;
-    pricelist_op_id = 0;
-
-    prefix_geo[0] = 0;
-    prefix_mcn[0] = 0;
-    prefix_op[0] = 0;
-
-    mob = false;
-    dest = 2;
-    geo_id = 0;
-
-    len_mcn = len;
-}
-
 ObjList::ObjList() {
     this->data = 0;
     this->count = 0;
@@ -100,7 +74,7 @@ void * ObjList::_get(size_t i) {
     return (char *) data + i*i_size;
 }
 
-void * ObjListByPrefix::_find(char * prefix) {
+void * ObjListByPrefix::_find(const char * prefix) {
     int lowlow = 0, highhigh = count - 1;
 
     void * res_item = 0;
@@ -144,7 +118,7 @@ void * ObjListByPrefix::_find(char * prefix) {
 
 }
 
-void * ObjListByIntPrefix::_find(int value0, char * prefix) {
+void * ObjListByIntPrefix::_find(const int value0, const char * prefix) {
     int lowlow = 0, highhigh = count - 1;
 
     void * res_item = 0;
@@ -200,7 +174,7 @@ void * ObjListByIntPrefix::_find(int value0, char * prefix) {
 
 }
 
-void * ObjListByInt::_find(int value) {
+void * ObjListByInt::_find(const int value) {
     int low = 0, high = count - 1;
     while (low <= high) {
         int mid = (low + high) / 2;

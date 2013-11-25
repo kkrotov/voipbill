@@ -15,11 +15,12 @@ bool DataLoader::get(DT & dt, curr_data & data) {
     data.client = client;
     data.dest = dest;
     data.oper = oper;
+    data.pricelist = pricelist;
     data.usage = usage.get(dt.day);
     data.price = price.get(dt.day);
     rwlock.unlock();
 
-    if (data.client == 0 || data.dest == 0 || data.oper == 0 ||
+    if (data.client == 0 || data.dest == 0 || data.oper == 0 || data.pricelist == 0 ||
             data.usage == 0 ||
             data.price == 0 ||
             data.counter_fmin == 0 ||
@@ -50,6 +51,7 @@ bool DataLoader::load(BDb *db, DT & dt, curr_data & data) {
         data.client = client;
         data.dest = dest;
         data.oper = oper;
+        data.pricelist = pricelist;
         data.usage = usage.get_or_load(db, dt.day);
         data.price = price.get_or_load(db, dt.day);
     } catch (Exception &e) {

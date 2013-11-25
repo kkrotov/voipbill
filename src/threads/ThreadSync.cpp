@@ -273,6 +273,9 @@ ThreadSync::ThreadSync() {
     s7.add_field("freemin_for_number");
     s7.add_field("pricelist_id");
     s7.add_field("paid_redirect");
+    s7.add_field("tariffication_by_minutes");
+    s7.add_field("tariffication_full_first_minute");
+    s7.add_field("tariffication_free_first_seconds");
     s7.prepare();
     syncs.push_back(s7);
 
@@ -321,11 +324,25 @@ ThreadSync::ThreadSync() {
     s11.t_to = "billing.operator";
     s11.add_field("region");
     s11.add_field("id");
+    s11.add_field("pricelist_id");
     s11.add_field("term_in_cost");
-    s11.add_field("term_out_cost");
-    s11.add_field("term_out_local_cost");
-    s11.add_field("default_pricelist_id");
+    s11.add_field("local_network_id");
+    s11.add_field("local_network_pricelist_id");
+    s11.add_field("client_7800_pricelist_id");
     s11.prepare();
     syncs.push_back(s11);
+
+    qsync s12;
+    s12.label = "pricelist";
+    s12.full = true;
+    s12.t_from = "voip.pricelist";
+    s12.t_to = "billing.pricelist";
+    s12.add_field("id");
+    s12.add_field("region");
+    s12.add_field("operator_id");
+    s12.add_field("tariffication_by_minutes");
+    s12.add_field("tariffication_full_first_minute");
+    s12.prepare();
+    syncs.push_back(s12);
 
 }

@@ -12,6 +12,7 @@ string UsageObjList::sql(BDb * db) {
     return "      select  u.phone_num, u.id, u.client_id, u.region, " \
             "           t1.freemin*60* case t1.freemin_for_number when true then 1 else u.no_of_lines end, " \
             "           t1.paid_redirect, " \
+            "           t1.tariffication_by_minutes, t1.tariffication_full_first_minute, t1.tariffication_free_first_seconds, " \
             "           t1.pricelist_id, t2.pricelist_id, t3.pricelist_id, t4.pricelist_id, t5.pricelist_id " \
             "       from billing.usage u " \
             "       left join ( " \
@@ -39,14 +40,17 @@ void UsageObjList::parse_item(BDbResult &row, void * obj) {
     item->region = row.get_i(3);
     item->freemin = row.get_i(4);
     item->paid_redirect = row.get_b(5);
-    item->pl_local_id = row.get_i(6);
-    item->pl_local_mob_id = row.get_i(7);
-    item->pl_russia_id = row.get_i(8);
-    item->pl_intern_id = row.get_i(9);
-    item->pl_sng_id = row.get_i(10);
+    item->tariffication_by_minutes = row.get_b(6);
+    item->tariffication_full_first_minute = row.get_b(7);
+    item->tariffication_free_first_seconds = row.get_b(8);
+    item->pl_local_id = row.get_i(9);
+    item->pl_local_mob_id = row.get_i(10);
+    item->pl_russia_id = row.get_i(11);
+    item->pl_intern_id = row.get_i(12);
+    item->pl_sng_id = row.get_i(13);
 }
 
-long long int UsageObjList::key(void *obj) {
+long long int UsageObjList::key(const void *obj) {
     return ((pUsageObj) obj)->phone_num;
 }
 

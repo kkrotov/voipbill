@@ -38,10 +38,6 @@ void ThreadSaveCounters::run() {
 
     save_calls();
 
-    boost::this_thread::interruption_point();
-
-    save_calls_old();
-
 }
 
 bool ThreadSaveCounters::save_client_counters(bool clear) {
@@ -145,35 +141,6 @@ bool ThreadSaveCounters::save_calls() {
 
     } catch (Exception &e) {
         e.addTrace("ThreadSaveCounters::save_calls::copy(main_last_id:" + lexical_cast<string>(main_last_id) + ")");
-        Log::exception(e);
-        return false;
-    }
-    return true;
-}
-
-bool ThreadSaveCounters::save_calls_old() {
-
-    long long int last_id;
-
-    try {
-        BDbResult res = db_main.query("select max(id) from billing.calls_" + app.conf.str_region_id);
-        res.next();
-        last_id = res.get_ll(0);
-    } catch (Exception &e) {
-        e.addTrace("ThreadSaveCounters::save_calls_old::get_last_id");
-        Log::exception(e);
-        return false;
-    }
-
-    try {
-        BDb::copy("billing.calls_" + app.conf.str_region_id,
-                "",
-                "       id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, len_mcn, prefix_geo, prefix_mcn, prefix_op, srv_region_id",
-                "select id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, len_mcn, prefix_geo, prefix_mcn, prefix_op, " + app.conf.str_region_id + "::smallint from calls.calls where id>" + lexical_cast<string>(last_id) + " order by id limit 100000",
-                &db_calls, &db_main);
-
-    } catch (Exception &e) {
-        e.addTrace("ThreadSaveCounters::save_calls_old::copy(last_id:" + lexical_cast<string>(last_id) + ")");
         Log::exception(e);
         return false;
     }

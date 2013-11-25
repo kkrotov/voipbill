@@ -67,9 +67,9 @@ void ThreadCurrentCalls::htmlfull(stringstream &html) {
         html << "<td><b>" << (call->out ? "out" : "in") << "</b></td>";
         html << "<td>" << call->phone << "</td>";
         html << "<td><b>" << call->len << "</b></td>";
-        html << "<td><b>" << (call->pricelist_id != 0 || call->amount != 0 ? (call->freemin_group_id == 0 ? string_fmt("%.2f", call->amount / 100.0) : "free") : "&nbsp;") << "</b></td>";
-        html << "<td>" << (call->pricelist_id != 0 || call->price != 0 ? string_fmt("%.2f", call->price / 10000.0) : "&nbsp;") << "</td>";
-        html << "<td>" << (call->pricelist_id != 0 ? lexical_cast<string>(call->pricelist_id) : "&nbsp;") << "</td>";
+        html << "<td><b>" << (call->pricelist_mcn_id != 0 || call->amount_mcn != 0 ? (call->freemin_group_id == 0 ? string_fmt("%.2f", call->amount_mcn / 100.0) : "free") : "&nbsp;") << "</b></td>";
+        html << "<td>" << (call->pricelist_mcn_id != 0 || call->price_mcn != 0 ? string_fmt("%.2f", call->price_mcn / 10000.0) : "&nbsp;") << "</td>";
+        html << "<td>" << (call->pricelist_mcn_id != 0 ? lexical_cast<string>(call->pricelist_mcn_id) : "&nbsp;") << "</td>";
         html << "<td>" << call->operator_id << (call->pricelist_op_id != 0 ? " / " + lexical_cast<string>(call->pricelist_op_id) : "&nbsp;") << "</td>";
         html << "<td>" << (call->pricelist_op_id != 0 || call->amount_op != 0 ? string_fmt("%.2f", call->amount_op / 100.0) : "&nbsp;") << "</td>";
         html << "<td>" << (call->pricelist_op_id != 0 || call->price_op != 0 ? string_fmt("%.2f", call->price_op / 10000.0) : "&nbsp;") << "</td>";

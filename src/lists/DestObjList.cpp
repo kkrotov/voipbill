@@ -47,10 +47,10 @@ void DestObjList::parse_item(BDbResult &row, void * obj) {
     item->mob = row.get_b(3);
 }
 
-char * DestObjList::key(void *obj) {
+char * DestObjList::key(const void *obj) {
     return ( (pDestObj) obj)->prefix;
 }
 
-pDestObj DestObjList::find(char * prefix) {
+pDestObj DestObjList::find(const char * prefix) {
     return (pDestObj) _find(prefix);
 }

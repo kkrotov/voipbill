@@ -8,13 +8,10 @@
             <cpp-extensions>cc,cpp</cpp-extensions>
             <header-extensions>h,hpp</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
-            <formatting>
-                <project-formatting-style>false</project-formatting-style>
-            </formatting>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>/home/ivanov/project/voip/src</sourceRootElem>
-                <sourceRootElem>/home/ivanov/project/voip/libs/boost/libs/system/src</sourceRootElem>
+                <sourceRootElem>src</sourceRootElem>
+                <sourceRootElem>libs/boost/libs/system/src</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
@@ -26,6 +23,9 @@
                     <type>1</type>
                 </confElem>
             </confList>
+            <formatting>
+                <project-formatting-style>false</project-formatting-style>
+            </formatting>
         </data>
     </configuration>
 </project>

@@ -18,15 +18,15 @@ void PriceObjList::parse_item(BDbResult &row, void * obj) {
     item->price = row.get_i(2);
 }
 
-int PriceObjList::key0(void *obj) {
+int PriceObjList::key0(const void *obj) {
     return ( (pPriceObj) obj)->pricelist_id;
 }
 
-char * PriceObjList::key(void *obj) {
+char * PriceObjList::key(const void *obj) {
     return ( (pPriceObj) obj)->prefix;
 }
 
-pPriceObj PriceObjList::find(int pricelist_id, char * prefix) {
+pPriceObj PriceObjList::find(const int pricelist_id, const char * prefix) {
     return (pPriceObj) _find(pricelist_id, prefix);
 }
 

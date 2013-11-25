@@ -20,6 +20,9 @@ void insert_row(pCallObj call, string *q) {
     sprintf(num, "%d", call->len_mcn);
     q->append(num);
     q->append(",");
+    sprintf(num, "%d", call->len_op);
+    q->append(num);
+    q->append(",");
     sprintf(num, "%d", call->client_id);
     q->append(call->client_id != 0 ? num : "NULL");
     q->append(",");
@@ -33,11 +36,11 @@ void insert_row(pCallObj call, string *q) {
     q->append(call->phone);
     q->append("',");
 
-    sprintf(num, "%d", call->amount);
+    sprintf(num, "%d", call->amount_mcn);
     q->append(num);
     q->append(",");
-    sprintf(num, "%d", call->pricelist_id);
-    q->append(call->pricelist_id != 0 ? num : "NULL");
+    sprintf(num, "%d", call->pricelist_mcn_id);
+    q->append(call->pricelist_mcn_id != 0 ? num : "NULL");
     q->append(",");
     sprintf(num, "%d", call->amount_op);
     q->append(num);
@@ -72,8 +75,8 @@ void insert_row(pCallObj call, string *q) {
     sprintf(num, "%d", call->pricelist_op_id);
     q->append(call->pricelist_op_id != 0 ? num : "NULL");
     q->append(",");
-    sprintf(num, "%d", call->price);
-    q->append(call->pricelist_id != 0 ? num : "NULL");
+    sprintf(num, "%d", call->price_mcn);
+    q->append(call->pricelist_mcn_id != 0 ? num : "NULL");
     q->append(",");
     sprintf(num, "%d", call->price_op);
     q->append(call->pricelist_op_id != 0 ? num : "NULL");
@@ -96,18 +99,18 @@ void make_insert_queries(map<time_t, string> &queryPerMonth, CallsObjList *list)
 
         if (queryPerMonth.find(call->dt.month) == queryPerMonth.end()) {
             char buff[20];
-            time_t month = call->dt.month;
-            struct tm * timeinfo = localtime(&month);
+            struct tm * timeinfo = localtime(&call->dt.month);
             strftime(buff, 20, "%Y%m", timeinfo);
 
-            q = &queryPerMonth[month];
+            q = &queryPerMonth[call->dt.month];
             q->reserve(300 + list->count * 300);
             q->append("INSERT INTO calls.calls_" + string(buff) + "(" \
-                        "time,id,direction_out,len,len_mcn,client_id,usage_id,usage_num, phone_num," \
+                        "time,id,direction_out,len,len_mcn,len_op,client_id,usage_id,usage_num, phone_num," \
                         "amount,pricelist_mcn_id,amount_op,operator_id,free_min_groups_id,mob,redirect," \
                         "dest,month,day,region,geo_id,pricelist_op_id,price,price_op,prefix_geo,prefix_mcn,prefix_op" \
                      ")VALUES\n");
         } else {
+            q = &queryPerMonth[call->dt.month];
             q->append(",");
         }
 

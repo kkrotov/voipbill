@@ -43,29 +43,29 @@ public:
 
 class ObjListByPrefix : public ObjList {
 protected:
-    virtual char * key(void * obj) = 0;
+    virtual char * key(const void * obj) = 0;
 public:
-    virtual void * _find(char * prefix);
+    virtual void * _find(const char * prefix);
 };
 
 class ObjListByIntPrefix : public ObjList {
 protected:
-    virtual int key0(void * obj) = 0;
-    virtual char * key(void * obj) = 0;
+    virtual int key0(const void * obj) = 0;
+    virtual char * key(const void * obj) = 0;
 public:
-    virtual void * _find(int value0, char * prefix);
+    virtual void * _find(const int value0, const char * prefix);
 };
 
 class ObjListByInt : public ObjList {
 protected:
-    virtual int key(void * obj) = 0;
+    virtual int key(const void * obj) = 0;
 public:
-    virtual void * _find(int value);
+    virtual void * _find(const int value);
 };
 
 class ObjListBy2Long : public ObjList {
 protected:
-    virtual long long int key(void * obj) = 0;
+    virtual long long int key(const void * obj) = 0;
 public:
-    virtual void * _find(long long int value);
+    virtual void * _find(const long long int value);
 };

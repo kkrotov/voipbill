@@ -37,7 +37,7 @@ void CurrentCallsObjList::parse_item(BDbResult &row, void * obj) {
     item->prefix_op[0] = 0;
 }
 
-long long int CurrentCallsObjList::key(void *obj) {
+long long int CurrentCallsObjList::key(const void *obj) {
     return ((pCallObj) obj)->id_num;
 }
 
@@ -45,7 +45,7 @@ pCallObj CurrentCallsObjList::get(size_t i) {
     return (pCallObj) _get(i);
 }
 
-pCallObj CurrentCallsObjList::find(long long int value) {
+pCallObj CurrentCallsObjList::find(const long long int value) {
     return (pCallObj) _find(value);
 }
 
