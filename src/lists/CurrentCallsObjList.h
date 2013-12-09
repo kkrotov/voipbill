@@ -8,8 +8,8 @@ protected:
     size_t item_size();
     string sql(BDb * db);
     void parse_item(BDbResult &row, void * obj);
-    long long int key(void *obj);
+    long long int key(const void *obj);
 public:
     pCallObj get(size_t i);
-    pCallObj find(long long int value);
+    pCallObj find(const long long int value);
 };

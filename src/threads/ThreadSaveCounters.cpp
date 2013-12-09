@@ -9,7 +9,7 @@ ThreadSaveCounters::ThreadSaveCounters() {
     loader = DataLoader::instance();
 
     db_main.setCS(app.conf.db_main);
-    db_main.needAdvisoryLock(app.conf.region_id);
+    db_main.needAdvisoryLock(app.conf.instance_id);
 
     db_calls.setCS(app.conf.db_calls);
 }
@@ -38,10 +38,6 @@ void ThreadSaveCounters::run() {
 
     save_calls();
 
-    boost::this_thread::interruption_point();
-
-    save_calls_old();
-
 }
 
 bool ThreadSaveCounters::save_client_counters(bool clear) {
@@ -66,7 +62,7 @@ bool ThreadSaveCounters::save_client_counters(bool clear) {
         }
         q.append(string_fmt("(%d,'%d','%s',%d,'%s',%d,%d,%s,%s)",
                 i->first,
-                app.conf.region_id,
+                app.conf.instance_id,
                 string_date(value->amount_month).c_str(),
                 value->sum_month,
                 string_date(value->amount_day).c_str(),
@@ -83,7 +79,7 @@ bool ThreadSaveCounters::save_client_counters(bool clear) {
         try {
             if (clear) {
                 db_main.exec("BEGIN");
-                db_main.exec("DELETE FROM billing.clients_counters WHERE region_id=" + app.conf.str_region_id);
+                db_main.exec("DELETE FROM billing.clients_counters WHERE region_id=" + app.conf.str_instance_id);
             }
             db_main.exec(q);
             if (clear) {
@@ -115,7 +111,7 @@ bool ThreadSaveCounters::save_calls() {
 
     long long int main_last_id;
     try {
-        BDbResult res = db_main.query("select max(id) from calls.calls_" + app.conf.str_region_id);
+        BDbResult res = db_main.query("select max(id) from calls.calls_" + app.conf.str_instance_id);
         main_last_id = res.next() ? res.get_ll(0) : 0;
     } catch (Exception &e) {
         e.addTrace("ThreadSaveCounters::save_calls::get_main_last_id");
@@ -137,43 +133,14 @@ bool ThreadSaveCounters::save_calls() {
     }
 
     try {
-        BDb::copy("calls.calls_" + app.conf.str_region_id + "_" + local_sync_month,
+        BDb::copy("calls.calls_" + app.conf.str_instance_id + "_" + local_sync_month,
                 "",
-                "       id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, len_mcn, prefix_geo, prefix_mcn, prefix_op, srv_region_id",
-                "select id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, len_mcn, prefix_geo, prefix_mcn, prefix_op, " + app.conf.str_region_id + "::smallint from calls.calls_" + local_sync_month + " where id>" + lexical_cast<string>(main_last_id) + " order by id limit 100000",
+                "       id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, len_mcn, len_op, prefix_geo, prefix_mcn, prefix_op, srv_region_id",
+                "select id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, len_mcn, len_op, prefix_geo, prefix_mcn, prefix_op, " + app.conf.str_instance_id + "::smallint from calls.calls_" + local_sync_month + " where id>" + lexical_cast<string>(main_last_id) + " order by id limit 100000",
                 &db_calls, &db_main);
 
     } catch (Exception &e) {
         e.addTrace("ThreadSaveCounters::save_calls::copy(main_last_id:" + lexical_cast<string>(main_last_id) + ")");
-        Log::exception(e);
-        return false;
-    }
-    return true;
-}
-
-bool ThreadSaveCounters::save_calls_old() {
-
-    long long int last_id;
-
-    try {
-        BDbResult res = db_main.query("select max(id) from billing.calls_" + app.conf.str_region_id);
-        res.next();
-        last_id = res.get_ll(0);
-    } catch (Exception &e) {
-        e.addTrace("ThreadSaveCounters::save_calls_old::get_last_id");
-        Log::exception(e);
-        return false;
-    }
-
-    try {
-        BDb::copy("billing.calls_" + app.conf.str_region_id,
-                "",
-                "       id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, len_mcn, prefix_geo, prefix_mcn, prefix_op, srv_region_id",
-                "select id, time, direction_out, usage_num, phone_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, redirect, month, day, amount, amount_op, client_id, region, geo_id, pricelist_op_id, price, price_op, len_mcn, prefix_geo, prefix_mcn, prefix_op, " + app.conf.str_region_id + "::smallint from calls.calls where id>" + lexical_cast<string>(last_id) + " order by id limit 100000",
-                &db_calls, &db_main);
-
-    } catch (Exception &e) {
-        e.addTrace("ThreadSaveCounters::save_calls_old::copy(last_id:" + lexical_cast<string>(last_id) + ")");
         Log::exception(e);
         return false;
     }

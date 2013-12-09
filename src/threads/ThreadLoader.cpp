@@ -33,6 +33,7 @@ void ThreadLoader::run() {
     ClientObjList * client = 0;
     DestObjList * dest = 0;
     OperatorList * oper = 0;
+    PricelistList * pricelist = 0;
     UsageObjList * usage = 0;
     PriceObjList * price = 0;
 
@@ -70,6 +71,12 @@ void ThreadLoader::run() {
                 oper->load(&db_calls, 0);
 
             } else
+                if (event == "pricelist") {
+
+                pricelist = new PricelistList();
+                pricelist->load(&db_calls, 0);
+
+            } else
                 if (event == "usage") {
 
                 usage = new UsageObjList();
@@ -104,7 +111,7 @@ void ThreadLoader::run() {
     if (counter_lock.owns_lock())
         counter_lock.unlock();
 
-    if (client != 0 || dest != 0 || oper != 0 || usage != 0 || price != 0) {
+    if (client != 0 || dest != 0 || oper != 0 || pricelist != 0 || usage != 0 || price != 0) {
         unique_lock<mutex> loader_lock(loader->rwlock);
 
         if (client != 0) {
@@ -122,6 +129,13 @@ void ThreadLoader::run() {
             else delete oper;
             oper = 0;
         }
+
+        if (pricelist != 0) {
+            if (pricelist->loaded) loader->pricelist = shared_ptr<PricelistList>(pricelist);
+            else delete pricelist;
+            pricelist = 0;
+        }
+
 
         if (usage != 0) {
             if (usage->loaded) loader->usage.addlist(usage->dt, usage);
@@ -164,6 +178,9 @@ void ThreadLoader::htmlfull(stringstream &html) {
     ol = loader->oper.get();
     if (ol != 0) html << "Operator: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
 
+    ol = loader->pricelist.get();
+    if (ol != 0) html << "Pricelist: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+
     ol = loader->usage.get(tday).get();
     if (ol != 0) html << "Usage: <b>" << loader->usage.datamap.size() << " / " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
 
@@ -203,6 +220,7 @@ bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader) {
     ClientObjList * client = new ClientObjList();
     DestObjList * dest = new DestObjList();
     OperatorList * oper = new OperatorList();
+    PricelistList * pricelist = new PricelistList();
     UsageObjList * usage = new UsageObjList();
     PriceObjList * price = new PriceObjList();
 
@@ -212,6 +230,8 @@ bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader) {
         dest->load(db);
 
         oper->load(db);
+
+        pricelist->load(db);
 
         usage->load(db, tday);
 
@@ -239,6 +259,11 @@ bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader) {
         loader->oper = shared_ptr<OperatorList>(oper);
     else
         delete oper;
+
+    if (pricelist->loaded)
+        loader->pricelist = shared_ptr<PricelistList>(pricelist);
+    else
+        delete pricelist;
 
     if (usage->loaded)
         loader->usage.addlist(tday, usage);

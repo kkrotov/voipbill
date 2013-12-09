@@ -20,6 +20,9 @@ typedef struct _UsageObj {
     int region;
     int freemin;
     bool paid_redirect;
+    bool tariffication_by_minutes;
+    bool tariffication_full_first_minute;
+    bool tariffication_free_first_seconds;
     int pl_local_id;
     int pl_local_mob_id;
     int pl_russia_id;
@@ -31,24 +34,25 @@ typedef struct _Operator {
     int id;
     int pricelist_id;
     int term_in_cost; // x4
-    int term_out_cost; // x4;
-    int term_out_local_cost; // x4;
+    int local_network_id;
+    int local_network_pricelist_id;
+    int client_7800_pricelist_id;
+    int operator_7800_pricelist_id;
 } Operator, *pOperator;
 
-typedef struct _UsageRaw {
+typedef struct _Pricelist {
     int id;
-    int client_id;
-    long long int phone_num;
-    time_t actual_from;
-    time_t actual_to;
     int region;
-} UsageRaw, *pUsageRaw;
+    int operator_id;
+    bool tariffication_by_minutes;
+    bool tariffication_full_first_minute;
+} Pricelist, *pPricelist;
 
 typedef struct _PriceObj {
     int pricelist_id;
+    char prefix[20];
     time_t date_to;
     time_t date_from;
-    char prefix[20];
     unsigned int price; // x4
 } PriceObj, *pPriceObj;
 
@@ -114,22 +118,22 @@ typedef struct _CallObj {
     int dest;
     int usage_id;
     int client_id;
-    int region;
+    int instance_id;
     int len;
     int len_mcn;
-    int price; // x4
+    int len_op;
+    int price_mcn; // x4
     int price_op; // x4
-    int amount; // x2
+    int amount_mcn; // x2
     int amount_op; // x2
-    int pricelist_id;
+    int pricelist_mcn_id;
+    int pricelist_op_id;
     int operator_id;
     int freemin_group_id;
     int geo_id;
-    int pricelist_op_id;
 
     int kill_call_reason;
 
     DT dt;
     void make_dt();
-    void cleanupCalculatedFields();
 } CallObj, *pCallObj;

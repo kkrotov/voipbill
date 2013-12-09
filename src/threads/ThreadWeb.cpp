@@ -334,9 +334,9 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
             html << "<td><b>" << (call->out ? "out" : "in") << "</b></td>";
             html << "<td>" << call->phone << "</td>";
             html << "<td><b>" << call->len << "</b></td>";
-            html << "<td><b>" << string_fmt("%.2f", call->amount / 100.0) << "</b></td>";
-            html << "<td>" << string_fmt("%.2f", call->price / 10000.0) << "</td>";
-            html << "<td>" << call->pricelist_id << "</td>";
+            html << "<td><b>" << string_fmt("%.2f", call->amount_mcn / 100.0) << "</b></td>";
+            html << "<td>" << string_fmt("%.2f", call->price_mcn / 10000.0) << "</td>";
+            html << "<td>" << call->pricelist_mcn_id << "</td>";
             html << "<td>" << call->operator_id << "</td>";
             html << "<td>" << string_fmt("%.2f", call->amount_op / 100.0) << "</td>";
             html << "<td>" << string_fmt("%.2f", call->price_op / 10000.0) << "</td>";

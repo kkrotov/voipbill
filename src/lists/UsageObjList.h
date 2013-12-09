@@ -8,7 +8,7 @@ protected:
     size_t item_size();
     string sql(BDb * db);
     void parse_item(BDbResult &row, void * obj);
-    long long int key(void *obj);
+    long long int key(const void *obj);
 public:
     pUsageObj find(const char * phone);
     pUsageObj find(const long long int phone);

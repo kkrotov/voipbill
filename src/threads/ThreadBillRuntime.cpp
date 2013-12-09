@@ -14,7 +14,7 @@ ThreadBillRuntime::ThreadBillRuntime() {
 
     db_rad.setCS(app.conf.db_rad);
     db_calls.setCS(app.conf.db_calls);
-    db_calls.needAdvisoryLock(app.conf.region_id);
+    db_calls.needAdvisoryLock(app.conf.instance_id);
     calls_saver.setDb(&db_calls);
     calculator.setDb(&db_calls);
 }

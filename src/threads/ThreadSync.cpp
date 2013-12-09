@@ -37,19 +37,19 @@ struct qsync {
             ++n;
         }
         if (full) {
-            ifs = "select rnd from billing.sync z where z.region='" + app.conf.str_region_id + "' and z.table='" + label + "' and z.obj=0";
+            ifs = "select rnd from billing.sync z where z.region='" + app.conf.str_instance_id + "' and z.table='" + label + "' and z.obj=0";
             del = "delete from " + t_to;
-            fix = "delete from billing.sync z where z.region='" + app.conf.str_region_id + "' and z.table='" + label + "' and z.rnd<=%s ";
+            fix = "delete from billing.sync z where z.region='" + app.conf.str_instance_id + "' and z.table='" + label + "' and z.rnd<=%s ";
         } else {
             sel = "select " + sfrom + ", z.rnd " \
                     "from billing.sync z " \
                     "left join " + t_from + " x on z.obj=x.id " \
-                    "where z.region='" + app.conf.str_region_id + "' and z.table='" + label + "' " \
+                    "where z.region='" + app.conf.str_instance_id + "' and z.table='" + label + "' " \
                     "order by z.rnd ";
             //"limit 100";
             ins = "insert into " + t_to + "(" + sto + ") VALUES ";
             del = "delete from " + t_to + " where id in (%s)";
-            fix = "delete from billing.sync z where z.region='" + app.conf.str_region_id + "' and z.table='" + label + "' and z.rnd<=%s ";
+            fix = "delete from billing.sync z where z.region='" + app.conf.str_instance_id + "' and z.table='" + label + "' and z.rnd<=%s ";
         }
         count = 0;
 
@@ -186,7 +186,7 @@ void ThreadSync::htmlfull(stringstream &html) {
     html << "loops: <b>" << t.count << "</b><br/>\n";
     html << "<br/>\n";
 
-    html << "Region: <b>" << app.conf.region_id << "</b><br/>\n";
+    html << "Region: <b>" << app.conf.instance_id << "</b><br/>\n";
     html << "Errors count: <b>" << errors << "</b><br/>\n";
     html << "<br/>\n";
 
@@ -273,6 +273,9 @@ ThreadSync::ThreadSync() {
     s7.add_field("freemin_for_number");
     s7.add_field("pricelist_id");
     s7.add_field("paid_redirect");
+    s7.add_field("tariffication_by_minutes");
+    s7.add_field("tariffication_full_first_minute");
+    s7.add_field("tariffication_free_first_seconds");
     s7.prepare();
     syncs.push_back(s7);
 
@@ -321,11 +324,26 @@ ThreadSync::ThreadSync() {
     s11.t_to = "billing.operator";
     s11.add_field("region");
     s11.add_field("id");
+    s11.add_field("pricelist_id");
     s11.add_field("term_in_cost");
-    s11.add_field("term_out_cost");
-    s11.add_field("term_out_local_cost");
-    s11.add_field("default_pricelist_id");
+    s11.add_field("local_network_id");
+    s11.add_field("local_network_pricelist_id");
+    s11.add_field("client_7800_pricelist_id");
+    s11.add_field("operator_7800_pricelist_id");
     s11.prepare();
     syncs.push_back(s11);
+
+    qsync s12;
+    s12.label = "pricelist";
+    s12.full = true;
+    s12.t_from = "voip.pricelist";
+    s12.t_to = "billing.pricelist";
+    s12.add_field("id");
+    s12.add_field("region");
+    s12.add_field("operator_id");
+    s12.add_field("tariffication_by_minutes");
+    s12.add_field("tariffication_full_first_minute");
+    s12.prepare();
+    syncs.push_back(s12);
 
 }

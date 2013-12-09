@@ -8,7 +8,7 @@ protected:
     size_t item_size();
     string sql(BDb * db);
     void parse_item(BDbResult &row, void * obj);
-    char * key(void *obj);
+    char * key(const void *obj);
 public:
-    pDestObj find(char * prefix);
+    pDestObj find(const char * prefix);
 };

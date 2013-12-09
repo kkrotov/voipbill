@@ -20,7 +20,7 @@ void ThreadTasks::run() {
 
     current_task.reset();
 
-    BDbResult res = db_main.query("select id, task, params from billing.tasks where region_id=" + app.conf.str_region_id + " order by created desc limit 1");
+    BDbResult res = db_main.query("select id, task, params from billing.tasks where region_id=" + app.conf.str_instance_id + " order by created desc limit 1");
     if (res.next()) {
         string task_id = res.get(0);
         string task_name = res.get(1);
@@ -66,7 +66,7 @@ void ThreadTasks::run() {
             task->run();
         }
 
-        db_main.exec("delete from billing.tasks where region_id=" + app.conf.str_region_id + " and id=" + task_id);
+        db_main.exec("delete from billing.tasks where region_id=" + app.conf.str_instance_id + " and id=" + task_id);
 
         tasks_count++;
 

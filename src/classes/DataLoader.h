@@ -5,6 +5,7 @@
 #include "../lists/ClientObjList.h"
 #include "../lists/DestObjList.h"
 #include "../lists/OperatorList.h"
+#include "../lists/PricelistList.h"
 #include "../lists/UsageObjList.h"
 #include "../lists/PriceObjList.h"
 #include "../lists/ClientCounter.h"
@@ -20,6 +21,7 @@ struct curr_data {
     shared_ptr<ClientObjList> client;
     shared_ptr<DestObjList> dest;
     shared_ptr<OperatorList> oper;
+    shared_ptr<PricelistList> pricelist;
     shared_ptr<UsageObjList> usage;
     shared_ptr<PriceObjList> price;
 
@@ -36,6 +38,7 @@ public:
     shared_ptr<ClientObjList> client;
     shared_ptr<DestObjList> dest;
     shared_ptr<OperatorList> oper;
+    shared_ptr<PricelistList> pricelist;
 
 
 
