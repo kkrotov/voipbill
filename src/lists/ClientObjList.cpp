@@ -10,7 +10,7 @@ string ClientObjList::sql(BDb * db) {
                 "   order by id asc ";
 }
 
-void ClientObjList::parse_item(BDbResult &row, void * obj) {
+inline void ClientObjList::parse_item(BDbResult &row, void * obj) {
     pClientObj item = (pClientObj) obj;
     item->id = row.get_i(0);
     item->limit_m = row.get_i(1);
@@ -22,7 +22,7 @@ void ClientObjList::parse_item(BDbResult &row, void * obj) {
     item->disabled = row.get_b(7);
 }
 
-int ClientObjList::key(const void *obj) {
+inline int ClientObjList::key(const void *obj) {
     return ( (pClientObj) obj)->id;
 }
 

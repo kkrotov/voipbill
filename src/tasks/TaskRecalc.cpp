@@ -105,7 +105,7 @@ void TaskRecalc::run() {
     boost::this_thread::interruption_point();
 
     setStatus("7. delete calls from main");
-    db_main->exec("delete from calls.calls_" + app.conf.str_region_id + " where id>=" + lexical_cast<string>(current_call_id));
+    db_main->exec("delete from calls.calls_" + app.conf.str_instance_id + " where id>=" + lexical_cast<string>(current_call_id));
 
 }
 

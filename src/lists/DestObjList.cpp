@@ -15,7 +15,7 @@ string DestObjList::sql(BDb * db) {
                               "     substring(cast(region_id as varchar) from 2 for char_length(cast(region_id as varchar))-2), " \
                               "     replace(substring(cast(city_prefix as varchar) from 2 for char_length(cast(city_prefix as varchar))-2), ',', '|') " \
                               " from billing.instance_settings " \
-                              " where id = " + app.conf.str_region_id);
+                              " where id = " + app.conf.str_instance_id);
     if (res.next()) {
         region_id_list = res.get_s(0);
         city_prefix_list = res.get_s(1);
@@ -39,7 +39,7 @@ string DestObjList::sql(BDb * db) {
                 "   order by prefix asc ";
 }
 
-void DestObjList::parse_item(BDbResult &row, void * obj) {
+inline void DestObjList::parse_item(BDbResult &row, void * obj) {
     pDestObj item = (pDestObj) obj;
     strcpy(item->prefix, row.get(0));
     item->dest = row.get_i(1);
@@ -47,7 +47,7 @@ void DestObjList::parse_item(BDbResult &row, void * obj) {
     item->mob = row.get_b(3);
 }
 
-char * DestObjList::key(const void *obj) {
+inline char * DestObjList::key(const void *obj) {
     return ( (pDestObj) obj)->prefix;
 }
 

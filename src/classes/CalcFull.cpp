@@ -69,17 +69,6 @@ void CalcFull::calculateOperator(pCallObj call) {
 
         if (call->pricelist_op_id == 0) return;
 
-        pPricelist pricelist = data.pricelist->find(call->pricelist_op_id);
-        if (pricelist != 0) {
-            call->len_op = getCallLength(
-                    call->len,
-                    pricelist->tariffication_by_minutes,
-                    pricelist->tariffication_full_first_minute,
-                    false
-                    );
-        }
-
-
         pPriceObj price_op = data.price->find(call->pricelist_op_id, phone);
         if (price_op != 0) {
             call->price_op = price_op->price;
@@ -87,7 +76,35 @@ void CalcFull::calculateOperator(pCallObj call) {
         }
 
     } else {
-        call->price_op = -oper->term_in_cost;
+        if (isUsage7800(call)) {
+            if (oper->operator_7800_pricelist_id == 0) return;
+
+            call->pricelist_op_id = oper->client_7800_pricelist_id;
+
+            pPriceObj price_mcn = data.price->find(call->pricelist_op_id, call->phone);
+            if (price_mcn != 0) {
+                call->price_op = price_mcn->price;
+                strcpy(call->prefix_op, price_mcn->prefix);
+            } else {
+                price_mcn = data.price->find(call->pricelist_op_id, "7");
+                if (price_mcn != 0) {
+                    call->price_op = price_mcn->price;
+                    strcpy(call->prefix_op, price_mcn->prefix);
+                }
+            }
+        } else {
+            call->price_op = -oper->term_in_cost;
+        }
+    }
+
+    pPricelist pricelist = data.pricelist->find(call->pricelist_op_id);
+    if (pricelist != 0) {
+        call->len_op = getCallLength(
+                call->len,
+                pricelist->tariffication_by_minutes,
+                pricelist->tariffication_full_first_minute,
+                false
+                );
     }
 
     call->amount_op = floor((float) (call->len_op * call->price_op) / (60 * 100) + 0.5);
@@ -95,11 +112,11 @@ void CalcFull::calculateOperator(pCallObj call) {
 
 pUsageObj CalcFull::spawnUsageVoip(pCallObj call) {
     pUsageObj usage;
-    if (call->region < 100) {
+    if (call->instance_id < 100) {
         usage = data.usage->find(call->usage);
     } else {
         char fake_a_number[10];
-        sprintf(fake_a_number, "%d", call->region);
+        sprintf(fake_a_number, "%d", call->instance_id);
         usage = data.usage->find(fake_a_number);
     }
     return usage;
@@ -256,9 +273,9 @@ void CalcFull::updateClientCounters(pCallObj call) {
 }
 
 bool CalcFull::isCallFromAnotherInstance(pCallObj call) {
-    return call->region >= 80
-            && call->region < 100
-            && call->region != app.conf.region_id;
+    return call->instance_id >= 80
+            && call->instance_id < 100
+            && call->instance_id != app.conf.instance_id;
 }
 
 bool CalcFull::isUsage7800(pCallObj call) {

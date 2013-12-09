@@ -66,7 +66,7 @@ void insert_row(pCallObj call, string *q) {
     q->append("'");
     q->append(call->time);
     q->append("',");
-    sprintf(num, "%d", call->region);
+    sprintf(num, "%d", call->instance_id);
     q->append(num);
     q->append(",");
     sprintf(num, "%d", call->geo_id);

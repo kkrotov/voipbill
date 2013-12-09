@@ -37,6 +37,7 @@ typedef struct _Operator {
     int local_network_id;
     int local_network_pricelist_id;
     int client_7800_pricelist_id;
+    int operator_7800_pricelist_id;
 } Operator, *pOperator;
 
 typedef struct _Pricelist {
@@ -47,20 +48,11 @@ typedef struct _Pricelist {
     bool tariffication_full_first_minute;
 } Pricelist, *pPricelist;
 
-typedef struct _UsageRaw {
-    int id;
-    int client_id;
-    long long int phone_num;
-    time_t actual_from;
-    time_t actual_to;
-    int region;
-} UsageRaw, *pUsageRaw;
-
 typedef struct _PriceObj {
     int pricelist_id;
+    char prefix[20];
     time_t date_to;
     time_t date_from;
-    char prefix[20];
     unsigned int price; // x4
 } PriceObj, *pPriceObj;
 
@@ -126,7 +118,7 @@ typedef struct _CallObj {
     int dest;
     int usage_id;
     int client_id;
-    int region;
+    int instance_id;
     int len;
     int len_mcn;
     int len_op;

@@ -8,7 +8,7 @@ string ClientCounter::sql(BDb * db) {
     return "";
 }
 
-void ClientCounter::parse_item(BDbResult &row, void * obj) {
+inline void ClientCounter::parse_item(BDbResult &row, void * obj) {
     *(int*) obj = row.size();
 }
 

@@ -39,8 +39,8 @@ public:
     string db_rad;
     string db_calls;
 
-    unsigned short region_id;
-    string str_region_id;
+    unsigned short instance_id;
+    string str_instance_id;
 
     string udp_host;
     unsigned short udp_port;

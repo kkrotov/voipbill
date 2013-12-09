@@ -11,18 +11,18 @@ string PriceObjList::sql(BDb * db) {
             "	order by pricelist_id, ndef::varchar";
 }
 
-void PriceObjList::parse_item(BDbResult &row, void * obj) {
+inline void PriceObjList::parse_item(BDbResult &row, void * obj) {
     pPriceObj item = (pPriceObj) obj;
     item->pricelist_id = row.get_i(0);
     memcpy(item->prefix, row.get(1), 21);
     item->price = row.get_i(2);
 }
 
-int PriceObjList::key0(const void *obj) {
+inline int PriceObjList::key0(const void *obj) {
     return ( (pPriceObj) obj)->pricelist_id;
 }
 
-char * PriceObjList::key(const void *obj) {
+inline char * PriceObjList::key(const void *obj) {
     return ( (pPriceObj) obj)->prefix;
 }
 

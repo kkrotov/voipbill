@@ -36,7 +36,7 @@ string FminCounter::sql(BDb * db) {
     return "";
 }
 
-void FminCounter::parse_item(BDbResult &row, void * obj) {
+inline void FminCounter::parse_item(BDbResult &row, void * obj) {
     *(int*) obj = row.size();
 }
 

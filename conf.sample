@@ -22,7 +22,7 @@ rad =   host=host dbname=dbname user=user password=password
 calls = host=host dbname=dbname user=user password=password
 
 [geo]
-region = 99
+instance_id = 99
 local_region_ids = 7495,7495499
 local_city_codes = 7495,7498,7499
 

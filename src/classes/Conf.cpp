@@ -72,8 +72,8 @@ bool Conf::parse_config_file() {
         db_rad = pt.get<string>("db.rad");
         db_calls = pt.get<string>("db.calls");
 
-        region_id = pt.get<unsigned short>("geo.region");
-        str_region_id = boost::lexical_cast<string>(region_id);
+        instance_id = pt.get<unsigned short>("geo.instance_id");
+        str_instance_id = boost::lexical_cast<string>(instance_id);
 
         udp_host = pt.get<string>("udp.host", "");
         udp_port = pt.get<unsigned short>("udp.port", 0);

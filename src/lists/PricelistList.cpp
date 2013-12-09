@@ -12,7 +12,7 @@ string PricelistList::sql(BDb * db) {
             "   order by id asc ";
 }
 
-void PricelistList::parse_item(BDbResult &row, void * obj) {
+inline void PricelistList::parse_item(BDbResult &row, void * obj) {
     pPricelist item = (pPricelist) obj;
     item->id = row.get_i(0);
     item->region = row.get_i(1);
@@ -21,7 +21,7 @@ void PricelistList::parse_item(BDbResult &row, void * obj) {
     item->tariffication_full_first_minute = row.get_b(4);
 }
 
-int PricelistList::key(const void *obj) {
+inline int PricelistList::key(const void *obj) {
     return ((pPricelist) obj)->id;
 }
 
