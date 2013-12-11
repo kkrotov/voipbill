@@ -18,7 +18,7 @@ typedef struct _UsageObj {
     int id;
     int client_id;
     int region;
-    int freemin;
+    int free_seconds;
     bool paid_redirect;
     bool tariffication_by_minutes;
     bool tariffication_full_first_minute;

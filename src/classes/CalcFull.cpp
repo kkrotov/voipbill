@@ -79,7 +79,7 @@ void CalcFull::calculateOperator(pCallObj call) {
         if (isUsage7800(call)) {
             if (oper->operator_7800_pricelist_id == 0) return;
 
-            call->pricelist_op_id = oper->client_7800_pricelist_id;
+            call->pricelist_op_id = oper->operator_7800_pricelist_id;
 
             pPriceObj price_mcn = data.price->find(call->pricelist_op_id, call->phone);
             if (price_mcn != 0) {
@@ -232,13 +232,13 @@ int CalcFull::getCallLength(int len, bool byMinutes, bool fullFirstMinute, bool 
 void CalcFull::updateFreeMinsCounters(pCallObj call, pUsageObj usage) {
     if (call->dest <= 0 &&
             call->mob == false &&
-            usage->freemin > 0 &&
+            usage->free_seconds > 0 &&
             (call->redirect == false || usage->paid_redirect == false)
             ) {
-        int fm_len = data.counter_fmin->get(call->usage_id, 1);
-        int fm_len2 = fmin_counter2->get(call->usage_id, 1);
-        if (fm_len + fm_len2 + call->len_mcn <= usage->freemin) {
-            fmin_counter2->set(call->usage_id, 1, fm_len2 + call->len_mcn);
+        int used_free_seconds = data.counter_fmin->get(call->usage_id, 1);
+        int used_free_seconds_local = fmin_counter2->get(call->usage_id, 1);
+        if (used_free_seconds + used_free_seconds_local + call->len_mcn <= usage->free_seconds) {
+            fmin_counter2->set(call->usage_id, 1, used_free_seconds_local + call->len_mcn);
             call->freemin_group_id = 1;
             call->amount_mcn = 0;
         }
