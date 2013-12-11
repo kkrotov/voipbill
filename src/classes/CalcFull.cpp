@@ -79,7 +79,7 @@ void CalcFull::calculateOperator(pCallObj call) {
         if (isUsage7800(call)) {
             if (oper->operator_7800_pricelist_id == 0) return;
 
-            call->pricelist_op_id = oper->client_7800_pricelist_id;
+            call->pricelist_op_id = oper->operator_7800_pricelist_id;
 
             pPriceObj price_mcn = data.price->find(call->pricelist_op_id, call->phone);
             if (price_mcn != 0) {
