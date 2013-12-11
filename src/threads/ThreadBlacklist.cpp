@@ -105,7 +105,8 @@ void ThreadBlacklist::update_voip_auto_disabled() {
 
     loader->counter_rwlock.lock();
     shared_ptr<ClientCounter> counters_clients = loader->counter_client;
-    if (counters_clients == 0) {
+    shared_ptr<FminCounter> counters_fmin = loader->counter_fmin.get(get_tmonth());
+    if (counters_clients == 0 || counters_fmin == 0) {
         loader->counter_rwlock.unlock();
         return;
     }
@@ -117,9 +118,10 @@ void ThreadBlacklist::update_voip_auto_disabled() {
         pUsageObj usage = (pUsageObj) usages->_get(j);
         pClientObj client = clients->find(usage->client_id);
         ClientCounterObj &cc = counters_clients->get(usage->client_id);
+        int used_free_seconds = counters_fmin->get(usage->id, 1);
         if (client != 0) {
             if ((client->credit >= 0 && client->balance + client->credit - cc.sumBalance() < 0) &&
-                    (client->last_payed_month < get_tmonth())
+                    (client->last_payed_month < get_tmonth() || used_free_seconds >= usage->free_seconds)
                     ) {
                 need_lock_local = true;
             }

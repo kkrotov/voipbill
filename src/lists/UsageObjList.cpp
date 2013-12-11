@@ -38,7 +38,7 @@ inline void UsageObjList::parse_item(BDbResult &row, void * obj) {
     item->id = row.get_i(1);
     item->client_id = row.get_i(2);
     item->region = row.get_i(3);
-    item->freemin = row.get_i(4);
+    item->free_seconds = row.get_i(4);
     item->paid_redirect = row.get_b(5);
     item->tariffication_by_minutes = row.get_b(6);
     item->tariffication_full_first_minute = row.get_b(7);
