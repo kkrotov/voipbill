@@ -326,7 +326,6 @@ ThreadSync::ThreadSync() {
     s11.add_field("id");
     s11.add_field("pricelist_id");
     s11.add_field("term_in_cost");
-    s11.add_field("local_network_id");
     s11.add_field("local_network_pricelist_id");
     s11.add_field("client_7800_pricelist_id");
     s11.add_field("operator_7800_pricelist_id");
@@ -345,5 +344,20 @@ ThreadSync::ThreadSync() {
     s12.add_field("tariffication_full_first_minute");
     s12.prepare();
     syncs.push_back(s12);
+
+    qsync s13;
+    s13.label = "network_prefix";
+    s13.full = true;
+    s13.t_from = "billing.network_prefix";
+    s13.t_to = "billing.network_prefix";
+    s13.add_field("prefix");
+    s13.add_field("instance_id");
+    s13.add_field("operator_id");
+    s13.add_field("date_from");
+    s13.add_field("deleted");
+    s13.add_field("date_to");
+    s13.add_field("network_type_id");
+    s13.prepare();
+    syncs.push_back(s13);
 
 }

@@ -51,28 +51,46 @@ void CalcFull::calculateOperator(pCallObj call) {
     pOperator oper = data.oper->find(call->operator_id);
     if (oper == 0) return;
 
+    pPriceObj price_op = 0;
+
     if (call->out) {
-        char networkPrefix[20];
         char * phone = &call->phone[0];
 
-        call->pricelist_op_id = oper->pricelist_id;
-
-        if (call->dest < 0 && oper->local_network_id && oper->local_network_pricelist_id) {
-            pPriceObj networkItem = data.price->find(oper->local_network_id, call->phone);
-            if (networkItem != 0) {
+        if (call->dest < 0) {
+            if (oper->local_network_pricelist_id) {
                 call->pricelist_op_id = oper->local_network_pricelist_id;
-                sprintf(networkPrefix, "%d", networkItem->price / 10000);
-                phone = &networkPrefix[0];
+
+                pNetworkPrefixObj networkItem = data.network_prefix->find(call->operator_id, call->phone);
+                if (networkItem != 0) {
+
+                    char networkType[20];
+                    sprintf(networkType, "%d", networkItem->network_type_id);
+
+                    price_op = data.price->find(call->pricelist_op_id, networkType);
+                    if (price_op != 0) {
+                        call->price_op = price_op->price;
+                        strcpy(call->prefix_op, price_op->prefix);
+                    }
+                }
+
+                if (price_op == 0) {
+                    price_op = data.price->find(call->pricelist_op_id, "900");
+                    if (price_op != 0) {
+                        call->price_op = price_op->price;
+                        strcpy(call->prefix_op, price_op->prefix);
+                    }
+                }
+
             }
-        }
+        } else {
+            call->pricelist_op_id = oper->pricelist_id;
+            if (call->pricelist_op_id == 0) return;
 
-
-        if (call->pricelist_op_id == 0) return;
-
-        pPriceObj price_op = data.price->find(call->pricelist_op_id, phone);
-        if (price_op != 0) {
-            call->price_op = price_op->price;
-            strcpy(call->prefix_op, price_op->prefix);
+            price_op = data.price->find(call->pricelist_op_id, phone);
+            if (price_op != 0) {
+                call->price_op = price_op->price;
+                strcpy(call->prefix_op, price_op->prefix);
+            }
         }
 
     } else {
@@ -81,15 +99,15 @@ void CalcFull::calculateOperator(pCallObj call) {
 
             call->pricelist_op_id = oper->operator_7800_pricelist_id;
 
-            pPriceObj price_mcn = data.price->find(call->pricelist_op_id, call->phone);
-            if (price_mcn != 0) {
-                call->price_op = price_mcn->price;
-                strcpy(call->prefix_op, price_mcn->prefix);
+            price_op = data.price->find(call->pricelist_op_id, call->phone);
+            if (price_op != 0) {
+                call->price_op = price_op->price;
+                strcpy(call->prefix_op, price_op->prefix);
             } else {
-                price_mcn = data.price->find(call->pricelist_op_id, "7");
-                if (price_mcn != 0) {
-                    call->price_op = price_mcn->price;
-                    strcpy(call->prefix_op, price_mcn->prefix);
+                price_op = data.price->find(call->pricelist_op_id, "7");
+                if (price_op != 0) {
+                    call->price_op = price_op->price;
+                    strcpy(call->prefix_op, price_op->prefix);
                 }
             }
         } else {
@@ -284,17 +302,19 @@ bool CalcFull::isUsage7800(pCallObj call) {
 
 void CalcFull::html(std::stringstream &html) {
 
-    //QReadLocker locker(&data_global->rwlock);
-    data_global->rwlock.lock();
-    int usage = data_global->usage.datamap.size();
-    int price = data_global->price.datamap.size();
-    int c_fmins = data_global->counter_fmin.datamap.size();
-    data_global->rwlock.unlock();
-    //locker.unlock();
-
     html << "Time: <b>" << string_time(last_call_time) << "</b><br/>\n";
-    html << string_fmt("usage:%d, price:%d, c_fmins:%d <br/>\n",
-            usage, price, c_fmins);
+
+    if (false) {
+        lock_guard<mutex> lock(data_global->rwlock);
+
+        html << string_fmt(
+                "usage:%d, price:%d, network_prefix:%d, c_fmins:%d <br/>\n",
+                data_global->usage.datamap.size(),
+                data_global->price.datamap.size(),
+                data_global->network_prefix.datamap.size(),
+                data_global->counter_fmin.datamap.size()
+                );
+    }
 }
 
 
