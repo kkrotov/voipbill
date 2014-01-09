@@ -27,8 +27,6 @@ bool ThreadLoader::prepare() {
 
 void ThreadLoader::run() {
 
-    std::unique_lock<std::mutex> counter_lock(loader->counter_rwlock, std::defer_lock);
-
     string event;
     ClientObjList * client = 0;
     DestObjList * dest = 0;
@@ -36,6 +34,7 @@ void ThreadLoader::run() {
     PricelistList * pricelist = 0;
     UsageObjList * usage = 0;
     PriceObjList * price = 0;
+    NetworkPrefixObjList * network_prefix = 0;
 
     try {
         BDbResult res = db_calls.query("SELECT event from billing.events");
@@ -53,10 +52,12 @@ void ThreadLoader::run() {
                 client = new ClientObjList();
                 client->load(&db_calls, 0);
 
-                counter_lock.lock();
+                {
+                    lock_guard<mutex> lock(loader->rwlock);
 
-                shared_ptr<ClientCounter> cc = loader->counter_client;
-                if (cc != 0) cc->reload(&db_calls);
+                    shared_ptr<ClientCounter> cc = loader->counter_client;
+                    if (cc != 0) cc->reload(&db_calls);
+                }
 
             } else
                 if (event == "dest") {
@@ -88,6 +89,12 @@ void ThreadLoader::run() {
                 price = new PriceObjList();
                 price->load(&db_calls, tday);
 
+            } else
+                if (event == "network_prefix") {
+
+                network_prefix = new NetworkPrefixObjList();
+                network_prefix->load(&db_calls, tday);
+
             }
 
             boost::this_thread::interruption_point();
@@ -108,11 +115,8 @@ void ThreadLoader::run() {
         throw e;
     }
 
-    if (counter_lock.owns_lock())
-        counter_lock.unlock();
-
-    if (client != 0 || dest != 0 || oper != 0 || pricelist != 0 || usage != 0 || price != 0) {
-        unique_lock<mutex> loader_lock(loader->rwlock);
+    if (client != 0 || dest != 0 || oper != 0 || pricelist != 0 || usage != 0 || price != 0 || network_prefix != 0) {
+        lock_guard<mutex> lock(loader->rwlock);
 
         if (client != 0) {
             if (client->loaded) loader->client = shared_ptr<ClientObjList>(client);
@@ -147,6 +151,11 @@ void ThreadLoader::run() {
             else delete price;
             price = 0;
         }
+        if (network_prefix != 0) {
+            if (network_prefix->loaded) loader->network_prefix.addlist(network_prefix->dt, network_prefix);
+            else delete network_prefix;
+            network_prefix = 0;
+        }
     }
 
 }
@@ -164,45 +173,42 @@ void ThreadLoader::htmlfull(stringstream &html) {
     time_t tday = get_tday();
     time_t tmonth = get_tmonth();
 
-    //QReadLocker locker(&loader->rwlock);
-    loader->rwlock.lock();
+    {
+        lock_guard<mutex> lock(loader->rwlock);
 
+        ol = loader->client.get();
+        if (ol != 0) html << "Client: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
 
+        ol = loader->dest.get();
+        if (ol != 0) html << "Prefix: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
 
-    ol = loader->client.get();
-    if (ol != 0) html << "Client: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+        ol = loader->oper.get();
+        if (ol != 0) html << "Operator: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
 
-    ol = loader->dest.get();
-    if (ol != 0) html << "Prefix: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+        ol = loader->pricelist.get();
+        if (ol != 0) html << "Pricelist: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
 
-    ol = loader->oper.get();
-    if (ol != 0) html << "Operator: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+        ol = loader->usage.get(tday).get();
+        if (ol != 0) html << "Usage: <b>" << loader->usage.datamap.size() << " / " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
 
-    ol = loader->pricelist.get();
-    if (ol != 0) html << "Pricelist: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+        ol = loader->price.get(tday).get();
+        if (ol != 0) html << "Price: <b>" << loader->price.datamap.size() << " / " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
 
-    ol = loader->usage.get(tday).get();
-    if (ol != 0) html << "Usage: <b>" << loader->usage.datamap.size() << " / " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
-
-    ol = loader->price.get(tday).get();
-    if (ol != 0) html << "Price: <b>" << loader->price.datamap.size() << " / " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
-
-    loader->rwlock.unlock();
-    //locker.unlock();
+        ol = loader->network_prefix.get(tday).get();
+        if (ol != 0) html << "Network prefix: <b>" << loader->network_prefix.datamap.size() << " / " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+    }
 
     html << "<br/>\n";
 
-    //QReadLocker locker2(&loader->rwlock);
-    loader->counter_rwlock.lock();
+    {
+        lock_guard<mutex> lock(loader->counter_rwlock);
 
-    ol = loader->counter_client.get();
-    if (ol != 0) html << "Client counter: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ((ClientCounter*) ol)->counter.size() << " rows </b><br/>\n";
+        ol = loader->counter_client.get();
+        if (ol != 0) html << "Client counter: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ((ClientCounter*) ol)->counter.size() << " rows </b><br/>\n";
 
-    ol = loader->counter_fmin.get(tmonth).get();
-    if (ol != 0) html << "Fmin counter: <b>" << loader->counter_fmin.datamap.size() << " " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ((FminCounter*) ol)->counter.size() << " rows </b><br/>\n";
-
-    loader->counter_rwlock.unlock();
-    //locker2.unlock();
+        ol = loader->counter_fmin.get(tmonth).get();
+        if (ol != 0) html << "Fmin counter: <b>" << loader->counter_fmin.datamap.size() << " " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ((FminCounter*) ol)->counter.size() << " rows </b><br/>\n";
+    }
 
     html << "<br/>\n";
 
@@ -223,6 +229,7 @@ bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader) {
     PricelistList * pricelist = new PricelistList();
     UsageObjList * usage = new UsageObjList();
     PriceObjList * price = new PriceObjList();
+    NetworkPrefixObjList * network_prefix = new NetworkPrefixObjList();
 
     try {
         client->load(db);
@@ -237,45 +244,52 @@ bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader) {
 
         price->load(db, tday);
 
+        network_prefix->load(db, tday);
+
     } catch (Exception &e) {
         e.addTrace("Loader::do_load_data");
         Log::exception(e);
         success = false;
     }
 
-    loader->rwlock.lock();
+    {
+        lock_guard<mutex> lock(loader->rwlock);
 
-    if (client->loaded)
-        loader->client = shared_ptr<ClientObjList>(client);
-    else
-        delete client;
+        if (client->loaded)
+            loader->client = shared_ptr<ClientObjList>(client);
+        else
+            delete client;
 
-    if (dest->loaded)
-        loader->dest = shared_ptr<DestObjList>(dest);
-    else
-        delete dest;
+        if (dest->loaded)
+            loader->dest = shared_ptr<DestObjList>(dest);
+        else
+            delete dest;
 
-    if (oper->loaded)
-        loader->oper = shared_ptr<OperatorList>(oper);
-    else
-        delete oper;
+        if (oper->loaded)
+            loader->oper = shared_ptr<OperatorList>(oper);
+        else
+            delete oper;
 
-    if (pricelist->loaded)
-        loader->pricelist = shared_ptr<PricelistList>(pricelist);
-    else
-        delete pricelist;
+        if (pricelist->loaded)
+            loader->pricelist = shared_ptr<PricelistList>(pricelist);
+        else
+            delete pricelist;
 
-    if (usage->loaded)
-        loader->usage.addlist(tday, usage);
-    else
-        delete usage;
+        if (usage->loaded)
+            loader->usage.addlist(tday, usage);
+        else
+            delete usage;
 
-    if (price->loaded)
-        loader->price.addlist(tday, price);
-    else
-        delete price;
+        if (price->loaded)
+            loader->price.addlist(tday, price);
+        else
+            delete price;
 
-    loader->rwlock.unlock();
+        if (network_prefix->loaded)
+            loader->network_prefix.addlist(tday, network_prefix);
+        else
+            delete network_prefix;
+    }
 
     return success;
 }
@@ -301,19 +315,19 @@ bool ThreadLoader::do_load_counters(BDb *db, DataLoader *loader) {
         success = false;
     }
 
-    loader->counter_rwlock.lock();
+    {
+        lock_guard<mutex> lock(loader->counter_rwlock);
 
-    if (counter_client->loaded)
-        loader->counter_client = shared_ptr<ClientCounter>(counter_client);
-    else
-        delete counter_client;
+        if (counter_client->loaded)
+            loader->counter_client = shared_ptr<ClientCounter>(counter_client);
+        else
+            delete counter_client;
 
-    if (counter_fmin->loaded)
-        loader->counter_fmin.addlist(t_month, counter_fmin);
-    else
-        delete counter_fmin;
-
-    loader->counter_rwlock.unlock();
+        if (counter_fmin->loaded)
+            loader->counter_fmin.addlist(t_month, counter_fmin);
+        else
+            delete counter_fmin;
+    }
 
     return success;
 }

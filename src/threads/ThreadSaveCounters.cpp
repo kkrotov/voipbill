@@ -42,38 +42,38 @@ void ThreadSaveCounters::run() {
 
 bool ThreadSaveCounters::save_client_counters(bool clear) {
 
-    loader->counter_rwlock.lock();
-
-    shared_ptr<ClientCounter> cl = loader->counter_client;
-    if (cl == 0) {
-        loader->counter_rwlock.unlock();
-        return false;
-    }
-
     string q;
-    for (map<int, ClientCounterObj>::iterator i = cl->counter.begin(); i != cl->counter.end(); ++i) {
-        ClientCounterObj *value = (ClientCounterObj*) & i->second;
-        if (value->updated == 0) continue;
+    shared_ptr<ClientCounter> cl;
 
-        if (q == "") {
-            q.append("INSERT INTO billing.clients_counters(client_id,region_id,amount_month,amount_month_sum,amount_day,amount_day_sum,amount_sum,voip_auto_disabled,voip_auto_disabled_local)VALUES");
-        } else {
-            q.append(",");
+    {
+        lock_guard<mutex> lock(loader->counter_rwlock);
+
+        cl = loader->counter_client;
+        if (cl == 0) return false;
+
+        for (map<int, ClientCounterObj>::iterator i = cl->counter.begin(); i != cl->counter.end(); ++i) {
+            ClientCounterObj *value = (ClientCounterObj*) & i->second;
+            if (value->updated == 0) continue;
+
+            if (q == "") {
+                q.append("INSERT INTO billing.clients_counters(client_id,region_id,amount_month,amount_month_sum,amount_day,amount_day_sum,amount_sum,voip_auto_disabled,voip_auto_disabled_local)VALUES");
+            } else {
+                q.append(",");
+            }
+            q.append(string_fmt("(%d,'%d','%s',%d,'%s',%d,%d,%s,%s)",
+                    i->first,
+                    app.conf.instance_id,
+                    string_date(value->amount_month).c_str(),
+                    value->sum_month,
+                    string_date(value->amount_day).c_str(),
+                    value->sum_day,
+                    value->sum,
+                    (value->disabled_global ? "true" : "false"),
+                    (value->disabled_local ? "true" : "false")));
+            value->updated = 2;
+
         }
-        q.append(string_fmt("(%d,'%d','%s',%d,'%s',%d,%d,%s,%s)",
-                i->first,
-                app.conf.instance_id,
-                string_date(value->amount_month).c_str(),
-                value->sum_month,
-                string_date(value->amount_day).c_str(),
-                value->sum_day,
-                value->sum,
-                (value->disabled_global ? "true" : "false"),
-                (value->disabled_local ? "true" : "false")));
-        value->updated = 2;
-
     }
-    loader->counter_rwlock.unlock();
 
     if (q.length() > 0) {
         try {
@@ -81,16 +81,20 @@ bool ThreadSaveCounters::save_client_counters(bool clear) {
                 db_main.exec("BEGIN");
                 db_main.exec("DELETE FROM billing.clients_counters WHERE region_id=" + app.conf.str_instance_id);
             }
+
             db_main.exec(q);
+
             if (clear) {
                 db_main.exec("COMMIT");
             }
-            loader->counter_rwlock.lock(); //.lockForWrite();
-            for (map<int, ClientCounterObj>::iterator i = cl->counter.begin(); i != cl->counter.end(); ++i) {
-                if (i->second.updated == 2)
-                    i->second.updated = 0;
+
+            {
+                lock_guard<mutex> lock(loader->counter_rwlock);
+                for (map<int, ClientCounterObj>::iterator i = cl->counter.begin(); i != cl->counter.end(); ++i) {
+                    if (i->second.updated == 2)
+                        i->second.updated = 0;
+                }
             }
-            loader->counter_rwlock.unlock();
         } catch (Exception &e) {
             e.addTrace("ThreadSaveCounters::save_client_counters:");
             Log::exception(e);

@@ -86,6 +86,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/lists/CurrentCallsObjList.o \
 	${OBJECTDIR}/src/lists/DestObjList.o \
 	${OBJECTDIR}/src/lists/FminCounter.o \
+	${OBJECTDIR}/src/lists/NetworkPrefixObjList.o \
 	${OBJECTDIR}/src/lists/ObjList.o \
 	${OBJECTDIR}/src/lists/OperatorList.o \
 	${OBJECTDIR}/src/lists/PriceObjList.o \
@@ -391,6 +392,11 @@ ${OBJECTDIR}/src/lists/FminCounter.o: src/lists/FminCounter.cpp
 	${MKDIR} -p ${OBJECTDIR}/src/lists
 	${RM} $@.d
 	$(COMPILE.cc) -g -Ilibs/boost -Ilibs/gtest/include -I/usr/pgsql-9.1/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/lists/FminCounter.o src/lists/FminCounter.cpp
+
+${OBJECTDIR}/src/lists/NetworkPrefixObjList.o: src/lists/NetworkPrefixObjList.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/lists
+	${RM} $@.d
+	$(COMPILE.cc) -g -Ilibs/boost -Ilibs/gtest/include -I/usr/pgsql-9.1/include -std=c++11 -MMD -MP -MF $@.d -o ${OBJECTDIR}/src/lists/NetworkPrefixObjList.o src/lists/NetworkPrefixObjList.cpp
 
 ${OBJECTDIR}/src/lists/ObjList.o: src/lists/ObjList.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/lists
