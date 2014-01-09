@@ -24,22 +24,19 @@ void CalcBase::prepare(DT & dt) {
 
     if (data.day == dt.day) return;
 
-    data_global->counter_rwlock.unlock();
+    const bool countersAlreadyLocked = true;
 
-    if (!data_global->get(dt, data)) {
+    if (!data_global->get(dt, data, countersAlreadyLocked)) {
 
 
-        if (!data_global->load(db, dt, data)) {
+        if (!data_global->load(db, dt, data, countersAlreadyLocked)) {
 
-            data_global->counter_rwlock.lock();
             throw Exception("cant load data");
 
         }
 
 
     }
-
-    data_global->counter_rwlock.lock();
 
     client_counter2 = counter_local.client;
     fmin_counter2 = counter_local.fmin.get_or_load(db, dt.month, dt.month);
@@ -51,22 +48,17 @@ void CalcBase::calc(CallsObjList *list) {
 
     counter_local.clear();
 
-    data_global->counter_rwlock.lock();
-    try {
-        pCallObj call = 0;
-        for (int i = 0; i < list->count; i++) {
-            call = list->get(i);
+    lock_guard<mutex> lock(data_global->counter_rwlock);
 
-            prepare(call->dt);
+    pCallObj call = 0;
+    for (int i = 0; i < list->count; i++) {
+        call = list->get(i);
 
-            calc_item(call);
-        }
-        if (call != 0) last_call_time = call->dt.time;
-    } catch (exception &e) {
-        data_global->counter_rwlock.unlock();
-        throw e;
+        prepare(call->dt);
+
+        calc_item(call);
     }
-    data_global->counter_rwlock.unlock();
+    if (call != 0) last_call_time = call->dt.time;
 }
 
 void CalcBase::calc_limit(CurrentCallsObjList *list) {
@@ -74,8 +66,9 @@ void CalcBase::calc_limit(CurrentCallsObjList *list) {
 
     counter_local.clear();
 
-    data_global->counter_rwlock.lock();
-    try {
+    {
+        lock_guard<mutex> lock(data_global->counter_rwlock);
+
         time_t current_time = time(NULL);
 
         for (int i = 0; i < list->count; i++) {
@@ -89,11 +82,7 @@ void CalcBase::calc_limit(CurrentCallsObjList *list) {
 
             calc_item(call);
         }
-    } catch (exception &e) {
-        data_global->counter_rwlock.unlock();
-        throw e;
     }
-    data_global->counter_rwlock.unlock();
 
     for (int i = 0; i < list->count; i++) {
         pCallObj call = list->get(i);

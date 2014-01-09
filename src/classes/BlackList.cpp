@@ -9,25 +9,23 @@ BlackList::BlackList() {
 }
 
 void BlackList::add(long long int phone) {
-    lock.lock();
+    lock_guard<mutex> lk(lock);
     if (blacklist.find(phone) == blacklist.end()) {
         list_to_add[phone] = true;
     }
     if (list_to_del.find(phone) != list_to_del.end()) {
         list_to_del.erase(phone);
     }
-    lock.unlock();
 }
 
 void BlackList::del(long long int phone) {
-    lock.lock();
+    lock_guard<mutex> lk(lock);
     if (blacklist.find(phone) != blacklist.end()) {
         list_to_del[phone] = true;
     }
     if (list_to_add.find(phone) != list_to_add.end()) {
         list_to_add.erase(phone);
     }
-    lock.unlock();
 }
 
 bool BlackList::fetch() {
@@ -39,7 +37,7 @@ bool BlackList::fetch() {
 
     time_t current_time = time(NULL);
 
-    lock.lock();
+    lock_guard<mutex> lk(lock);
 
     {
         vector<string>::iterator i = curr_list.begin();
@@ -87,14 +85,16 @@ bool BlackList::fetch() {
 
 void BlackList::push() {
     {
-        lock.lock();
         vector<long long int> list;
-        map<long long int, bool>::iterator i = list_to_add.begin();
-        while (i != list_to_add.end()) {
-            list.push_back(i->first);
-            ++i;
+
+        {
+            lock_guard<mutex> lk(lock);
+            map<long long int, bool>::iterator i = list_to_add.begin();
+            while (i != list_to_add.end()) {
+                list.push_back(i->first);
+                ++i;
+            }
         }
-        lock.unlock();
 
         vector<long long int>::iterator ii = list.begin();
         while (ii != list.end()) {
@@ -104,14 +104,16 @@ void BlackList::push() {
                 ++ii;
                 continue;
             }
-            lock.lock();
-            if (blacklist.find(*ii) == blacklist.end()) {
-                blacklist[*ii] = time(NULL);
+
+            {
+                lock_guard<mutex> lk(lock);
+                if (blacklist.find(*ii) == blacklist.end()) {
+                    blacklist[*ii] = time(NULL);
+                }
+                if (list_to_add.find(*ii) != list_to_add.end()) {
+                    list_to_add.erase(*ii);
+                }
             }
-            if (list_to_add.find(*ii) != list_to_add.end()) {
-                list_to_add.erase(*ii);
-            }
-            lock.unlock();
 
             log_lock_phone(phone);
 
@@ -120,14 +122,16 @@ void BlackList::push() {
     }
 
     {
-        lock.lock();
         vector<long long int> list;
-        map<long long int, bool>::iterator i = list_to_del.begin();
-        while (i != list_to_del.end()) {
-            list.push_back(i->first);
-            ++i;
+
+        {
+            lock_guard<mutex> lk(lock);
+            map<long long int, bool>::iterator i = list_to_del.begin();
+            while (i != list_to_del.end()) {
+                list.push_back(i->first);
+                ++i;
+            }
         }
-        lock.unlock();
 
         vector<long long int>::iterator ii = list.begin();
         while (ii != list.end()) {
@@ -137,14 +141,16 @@ void BlackList::push() {
                 ++ii;
                 continue;
             }
-            lock.lock();
-            if (blacklist.find(*ii) != blacklist.end()) {
-                blacklist.erase(*ii);
+
+            {
+                lock_guard<mutex> lk(lock);
+                if (blacklist.find(*ii) != blacklist.end()) {
+                    blacklist.erase(*ii);
+                }
+                if (list_to_del.find(*ii) != list_to_del.end()) {
+                    list_to_del.erase(*ii);
+                }
             }
-            if (list_to_del.find(*ii) != list_to_del.end()) {
-                list_to_del.erase(*ii);
-            }
-            lock.unlock();
 
             log_unlock_phone(phone);
 
@@ -174,13 +180,18 @@ void BlackList::log_lock_phone(string &phone) {
     string str = "LOCK " + phone;
 
     DataLoader *loader = DataLoader::instance();
-    loader->rwlock.lock();
-    shared_ptr<UsageObjList> usages_ptr = loader->usage.get(get_tday());
-    shared_ptr<ClientObjList> clients_ptr = loader->client;
-    loader->rwlock.unlock();
+    UsageObjList *usages;
+    ClientObjList *clients;
 
-    UsageObjList *usages = usages_ptr.get();
-    ClientObjList *clients = clients_ptr.get();
+    {
+        lock_guard<mutex> lk(loader->rwlock);
+        shared_ptr<UsageObjList> usages_ptr = loader->usage.get(get_tday());
+        shared_ptr<ClientObjList> clients_ptr = loader->client;
+
+        usages = usages_ptr.get();
+        clients = clients_ptr.get();
+    }
+
 
     if (usages != 0 && clients != 0) {
         pUsageObj usage = usages->find(phone.c_str());
@@ -193,7 +204,8 @@ void BlackList::log_lock_phone(string &phone) {
         }
 
         if (client != 0) {
-            loader->counter_rwlock.lock();
+            lock_guard<mutex> lk(loader->counter_rwlock);
+
             shared_ptr<ClientCounter> clients_counters_ptr = loader->counter_client;
             ClientCounter *clients_counters = clients_counters_ptr.get();
             if (clients_counters != 0) {
@@ -229,7 +241,6 @@ void BlackList::log_lock_phone(string &phone) {
                 }
 
             }
-            loader->counter_rwlock.unlock();
         }
     }
 
@@ -240,11 +251,15 @@ void BlackList::log_unlock_phone(string &phone) {
     string str = "UNLOCK " + phone;
 
     DataLoader *loader = DataLoader::instance();
-    loader->rwlock.lock();
-    shared_ptr<UsageObjList> usages_ptr = loader->usage.get(get_tday());
-    loader->rwlock.unlock();
+    UsageObjList * usages;
 
-    UsageObjList *usages = usages_ptr.get();
+    {
+        lock_guard<mutex> lk(loader->rwlock);
+        shared_ptr<UsageObjList> usages_ptr = loader->usage.get(get_tday());
+        usages = usages_ptr.get();
+    }
+
+
     if (usages != 0) {
         pUsageObj usage = usages->find(phone.c_str());
         if (usage != 0) {

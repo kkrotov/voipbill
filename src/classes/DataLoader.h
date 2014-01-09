@@ -8,6 +8,7 @@
 #include "../lists/PricelistList.h"
 #include "../lists/UsageObjList.h"
 #include "../lists/PriceObjList.h"
+#include "../lists/NetworkPrefixObjList.h"
 #include "../lists/ClientCounter.h"
 #include "../lists/FminCounter.h"
 
@@ -24,6 +25,7 @@ struct curr_data {
     shared_ptr<PricelistList> pricelist;
     shared_ptr<UsageObjList> usage;
     shared_ptr<PriceObjList> price;
+    shared_ptr<NetworkPrefixObjList> network_prefix;
 
     shared_ptr<ClientCounter> counter_client;
     shared_ptr<FminCounter> counter_fmin;
@@ -34,13 +36,12 @@ public:
     mutex rwlock;
     Loader<UsageObjList> usage;
     Loader<PriceObjList> price;
+    Loader<NetworkPrefixObjList> network_prefix;
 
     shared_ptr<ClientObjList> client;
     shared_ptr<DestObjList> dest;
     shared_ptr<OperatorList> oper;
     shared_ptr<PricelistList> pricelist;
-
-
 
     mutex counter_rwlock;
     shared_ptr<ClientCounter> counter_client;
@@ -53,9 +54,11 @@ public:
         return &inst;
     }
 
-    bool get(DT & dt, curr_data & data);
+    bool get(DT & dt, curr_data & data, bool countersAlreadyLocked = false);
 
-    bool load(BDb *db, DT & dt, curr_data & data);
+    bool load(BDb *db, DT & dt, curr_data & data, bool countersAlreadyLocked = false);
+
+    bool ready(DT & dt, curr_data & data);
 
     void counter_append(CounterLoader & loader2);
 

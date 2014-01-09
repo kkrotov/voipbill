@@ -46,13 +46,13 @@ void ThreadWeb::handlerHeader(stringstream &html) {
 void ThreadWeb::handlerHome(stringstream &html) {
     handlerHeader(html);
 
-    app.threads.mutex.lock();
+    lock_guard<mutex> lock(app.threads.mutex);
+
     for (auto i = app.threads.threads.begin(); i != app.threads.threads.end(); i++) {
         Thread * thread = *i;
         thread->html(html);
         html << "<hr>\n";
     }
-    app.threads.mutex.unlock();
 }
 
 void ThreadWeb::handlerConfig(stringstream &html) {
@@ -95,15 +95,18 @@ bool ThreadWeb::handlerTask(stringstream &html, map<string, string> &parameters)
     if (parameters.find("id") != parameters.end())
         task_id = parameters["id"];
     Thread * thread = 0;
-    app.threads.mutex.lock();
-    for (list<Thread*>::iterator i = app.threads.threads.begin(); i != app.threads.threads.end(); i++) {
-        thread = *i;
-        if (thread->id == task_id)
-            break;
-        else
-            thread = 0;
+
+    {
+        lock_guard<mutex> lock(app.threads.mutex);
+
+        for (list<Thread*>::iterator i = app.threads.threads.begin(); i != app.threads.threads.end(); i++) {
+            thread = *i;
+            if (thread->id == task_id)
+                break;
+            else
+                thread = 0;
+        }
     }
-    app.threads.mutex.unlock();
 
     if (thread == 0) {
         return false;
@@ -120,16 +123,20 @@ void ThreadWeb::handlerCounters(stringstream &html) {
     handlerHeader(html);
 
     DataLoader *loader = DataLoader::instance();
-    loader->rwlock.lock();
-    shared_ptr<ClientObjList> c = loader->client;
-    loader->rwlock.unlock();
+    shared_ptr<ClientObjList> c;
+    shared_ptr<ClientCounter> cl;
 
-    loader->counter_rwlock.lock();
-    shared_ptr<ClientCounter> cl = loader->counter_client;
-    if (cl == 0) {
-        loader->counter_rwlock.unlock();
-        return;
+    {
+        lock_guard<mutex> lock(loader->rwlock);
+        c = loader->client;
     }
+
+    {
+        lock_guard<mutex> lock(loader->counter_rwlock);
+        shared_ptr<ClientCounter> cl = loader->counter_client;
+        if (cl == 0) return;
+    }
+
     html << "<table><tr><th>client</th><th>month</th><th>month sum</th><th>day</th><th>day sum</th><th>date</th><th>sum</th></tr>";
     map<int, ClientCounterObj>::iterator i;
     for (i = cl->counter.begin(); i != cl->counter.end(); ++i) {
@@ -168,43 +175,42 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
 
     DataLoader *loader = DataLoader::instance();
 
-    loader->rwlock.lock();
-    shared_ptr<ClientObjList> clients = loader->client;
-    if (clients == 0) {
-        loader->rwlock.unlock();
-        return;
+    shared_ptr<ClientObjList> clients;
+    shared_ptr<UsageObjList> usages;
+    pClientObj p_client;
+
+    {
+        lock_guard<mutex> lock(loader->rwlock);
+
+        clients = loader->client;
+        if (clients == 0) return;
+
+        usages = loader->usage.get(get_tday());
+        if (usages == 0) return;
+
+        p_client = clients->find(client_id);
+        if (p_client == 0) {
+            html << "Client " << client_id << " not found";
+            return;
+        }
     }
-    shared_ptr<UsageObjList> usages = loader->usage.get(get_tday());
-    if (usages == 0) {
-        loader->rwlock.unlock();
-        return;
-    }
-    pClientObj p_client = clients->find(client_id);
-    if (p_client == 0) {
-        loader->rwlock.unlock();
-        html << "Client " << client_id << " not found";
-        return;
-    }
-    loader->rwlock.unlock();
 
     ClientObj client = *p_client;
 
     double sum_month, sum_day, sum_balance;
     bool client_disabled_global, client_disabled_local;
     {
-        loader->counter_rwlock.lock(); //.lockForRead();
+        lock_guard<mutex> lock(loader->counter_rwlock);
+
         shared_ptr<ClientCounter> cl = loader->counter_client;
-        if (cl == 0) {
-            loader->counter_rwlock.unlock();
-            return;
-        }
+        if (cl == 0) return;
+
         ClientCounterObj &client_counter = cl->get(client_id);
         sum_month = client_counter.sumMonth();
         sum_day = client_counter.sumDay();
         sum_balance = client_counter.sumBalance();
         client_disabled_global = client_counter.disabled_global;
         client_disabled_local = client_counter.disabled_local;
-        loader->counter_rwlock.unlock();
     }
 
     shared_ptr<CurrentCallsObjList> current_calls_list = ThreadCurrentCalls::getList();
@@ -229,10 +235,12 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
 
     html << "<br/>\n";
 
-    BlackList *bl;
-    bl = BlackListLocal::instance();
-    bl->lock.lock();
+
     {
+        BlackList *bl = BlackListLocal::instance();
+
+        lock_guard<mutex> lock(bl->lock);
+
         map<long long int, time_t>::iterator i = bl->blacklist.begin();
         while (i != bl->blacklist.end()) {
             pUsageObj usage = usages->find(i->first);
@@ -244,11 +252,12 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
             ++i;
         }
     }
-    bl->lock.unlock();
 
-    bl = BlackListGlobal::instance();
-    bl->lock.lock();
     {
+        BlackList *bl = BlackListGlobal::instance();
+
+        lock_guard<mutex> lock(bl->lock);
+
         map<long long int, time_t>::iterator i = bl->blacklist.begin();
         while (i != bl->blacklist.end()) {
             pUsageObj usage = usages->find(i->first);
@@ -260,7 +269,6 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
             ++i;
         }
     }
-    bl->lock.unlock();
 
     html << "<br/>\n";
 

@@ -34,7 +34,6 @@ typedef struct _Operator {
     int id;
     int pricelist_id;
     int term_in_cost; // x4
-    int local_network_id;
     int local_network_pricelist_id;
     int client_7800_pricelist_id;
     int operator_7800_pricelist_id;
@@ -51,10 +50,18 @@ typedef struct _Pricelist {
 typedef struct _PriceObj {
     int pricelist_id;
     char prefix[20];
-    time_t date_to;
     time_t date_from;
+    time_t date_to;
     unsigned int price; // x4
 } PriceObj, *pPriceObj;
+
+typedef struct _NetworkPrefixObj {
+    int operator_id;
+    char prefix[20];
+    time_t date_from;
+    time_t date_to;
+    short int network_type_id;
+} NetworkPrefixObj, *pNetworkPrefixObj;
 
 typedef struct _ClientObj {
     int id;
