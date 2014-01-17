@@ -102,7 +102,7 @@ void CalcBase::calc_limit(CurrentCallsObjList *list) {
         ClientCounterObj &c0 = data.counter_client->get(call->client_id);
         ClientCounterObj &c2 = client_counter2->get(call->client_id);
 
-        if (call->dest < 0) {
+        if (call->isLocal()) {
             if (client->credit >= 0 && client->balance + client->credit - c0.sumBalance() - c2.sumBalance() < 0
                     && client->last_payed_month < get_tmonth()) {
                 call->kill_call_reason = 3000;

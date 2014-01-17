@@ -2,14 +2,14 @@
 
 #include "../threads/Thread.h"
 #include "../lists/CurrentCallsObjList.h"
-#include <boost/smart_ptr/detail/spinlock.hpp>
 
 class ThreadCurrentCalls : public Thread {
 public:
     static shared_ptr<CurrentCallsObjList> getList();
 private:
+    static spinlock lock;
     static shared_ptr<CurrentCallsObjList> list;
-    static boost::detail::spinlock lock;
+    static void setList(shared_ptr<CurrentCallsObjList> plist);
 
     BDb db_rad;
 

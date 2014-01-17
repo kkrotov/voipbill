@@ -79,7 +79,6 @@ bool BlackList::fetch() {
         }
     }
 
-    lock.unlock();
     return true;
 }
 

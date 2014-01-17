@@ -12,43 +12,42 @@ void ThreadPool::run(Thread * thread) {
 }
 
 void ThreadPool::register_thread(Thread *thread) {
-    unique_lock<std::mutex> lock(mutex);
+    {
+        lock_guard<std::mutex> lock(mutex);
 
-    auto it = threads.begin();
-    while (it != threads.end()) {
-        Thread * tmp = *it;
-        if (tmp->id == thread->id) {
-            if (tmp == thread) {
-                return;
+        auto it = threads.begin();
+        while (it != threads.end()) {
+            Thread * tmp = *it;
+            if (tmp->id == thread->id) {
+                if (tmp == thread) {
+                    return;
+                }
+                thread->id = thread->id + string_fmt("%d", rand());
+                break;
             }
-            thread->id = thread->id + string_fmt("%d", rand());
-            break;
+            ++it;
         }
-        ++it;
+        threads.push_back(thread);
     }
-    threads.push_back(thread);
-
-    lock.unlock();
 
     thread_real_status_changed(0);
 }
 
 void ThreadPool::unregister_thread(Thread *thread) {
-    unique_lock<std::mutex> lock(mutex);
+    {
+        lock_guard<std::mutex> lock(mutex);
 
-    auto it = threads.begin();
-    while (it != threads.end()) {
-        if (*it == thread) {
-            thread->task_thread.detach();
-            threads.erase(it);
-            delete thread;
-            break;
+        auto it = threads.begin();
+        while (it != threads.end()) {
+            if (*it == thread) {
+                thread->task_thread.detach();
+                threads.erase(it);
+                delete thread;
+                break;
+            }
+            ++it;
         }
-        ++it;
     }
-
-    lock.unlock();
-
     thread_real_status_changed(0);
 }
 

@@ -9,16 +9,16 @@ void Task::initTask(BDb &db_main, string id, string params) {
 }
 
 void Task::setStatus(string str) {
-    status_lock.lock();
-    status = str;
-    status_lock.unlock();
+    {
+        lock_guard<spinlock> lock(status_lock);
+        status = str;
+    }
     db_main->exec("update billing.tasks set status='" + str + "' where region_id=" + app.conf.str_instance_id + " and id=" + id);
 }
 
 string Task::getStatus() {
-    status_lock.lock();
+    lock_guard<spinlock> lock(status_lock);
     string str = status;
-    status_lock.unlock();
     return str;
 }
 

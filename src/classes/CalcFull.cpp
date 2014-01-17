@@ -56,7 +56,7 @@ void CalcFull::calculateOperator(pCallObj call) {
     if (call->out) {
         char * phone = &call->phone[0];
 
-        if (call->dest < 0) {
+        if (call->isLocal()) {
             if (oper->local_network_pricelist_id) {
                 call->pricelist_op_id = oper->local_network_pricelist_id;
 
@@ -159,13 +159,13 @@ void CalcFull::calculateMcn(pCallObj call) {
 
 void CalcFull::calculateMcnOut(pCallObj call, pUsageObj usage) {
 
-    if (call->dest <= 0)
+    if (call->isLocalOrZona())
         call->pricelist_mcn_id = (call->mob ? usage->pl_local_mob_id : usage->pl_local_id);
-    else if (call->dest == 1)
+    else if (call->isRussian())
         call->pricelist_mcn_id = usage->pl_russia_id;
-    else if (call->dest == 2)
+    else if (call->isInternational())
         call->pricelist_mcn_id = usage->pl_intern_id;
-    else if (call->dest == 3)
+    else if (call->isSNG())
         call->pricelist_mcn_id = usage->pl_sng_id;
 
     call->len_mcn = getCallLength(
@@ -248,7 +248,7 @@ int CalcFull::getCallLength(int len, bool byMinutes, bool fullFirstMinute, bool 
 }
 
 void CalcFull::updateFreeMinsCounters(pCallObj call, pUsageObj usage) {
-    if (call->dest <= 0 &&
+    if (call->isLocalOrZona() &&
             call->mob == false &&
             usage->free_seconds > 0 &&
             (call->redirect == false || usage->paid_redirect == false)
