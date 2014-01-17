@@ -124,18 +124,15 @@ void ThreadWeb::handlerCounters(stringstream &html) {
 
     DataLoader *loader = DataLoader::instance();
     shared_ptr<ClientObjList> c;
-    shared_ptr<ClientCounter> cl;
 
     {
         lock_guard<mutex> lock(loader->rwlock);
         c = loader->client;
     }
 
-    {
-        lock_guard<mutex> lock(loader->counter_rwlock);
-        shared_ptr<ClientCounter> cl = loader->counter_client;
-        if (cl == 0) return;
-    }
+    lock_guard<mutex> lock(loader->counter_rwlock);
+    shared_ptr<ClientCounter> cl = loader->counter_client;
+    if (cl == 0) return;
 
     html << "<table><tr><th>client</th><th>month</th><th>month sum</th><th>day</th><th>day sum</th><th>date</th><th>sum</th></tr>";
     map<int, ClientCounterObj>::iterator i;
@@ -165,7 +162,6 @@ void ThreadWeb::handlerCounters(stringstream &html) {
                 << sum_balance << "</td></tr>";
     }
     html << "</table>";
-    loader->counter_rwlock.unlock();
 }
 
 void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameters) {

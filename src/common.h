@@ -19,6 +19,9 @@ using namespace std;
 #include <boost/lexical_cast.hpp>
 using boost::lexical_cast;
 
+#include <boost/smart_ptr/detail/spinlock.hpp>
+using boost::detail::spinlock;
+
 typedef struct _DT {
     time_t time;
     time_t day;

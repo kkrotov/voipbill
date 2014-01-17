@@ -4,41 +4,44 @@
 #include "../classes/CalcFull.h"
 
 shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::list(new CurrentCallsObjList());
-boost::detail::spinlock ThreadCurrentCalls::lock;
+spinlock ThreadCurrentCalls::lock;
 
 shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::getList() {
     lock.lock();
-    shared_ptr<CurrentCallsObjList> plist = list;
+    shared_ptr<CurrentCallsObjList> callsList = list;
     lock.unlock();
-    return plist;
+    return callsList;
+}
+
+void ThreadCurrentCalls::setList(shared_ptr<CurrentCallsObjList> callsList) {
+    lock.lock();
+    list = callsList;
+    lock.unlock();
 }
 
 void ThreadCurrentCalls::run() {
 
-    shared_ptr<CurrentCallsObjList> l(new CurrentCallsObjList());
+    shared_ptr<CurrentCallsObjList> callsList(new CurrentCallsObjList());
 
-    l->load(&db_rad, 0);
+    callsList->load(&db_rad, 0);
 
-    lock.lock();
-    ThreadCurrentCalls::list = l;
-    lock.unlock();
-
+    this->setList(callsList);
 }
 
 void ThreadCurrentCalls::htmlfull(stringstream &html) {
 
     this->html(html);
 
-    shared_ptr<CurrentCallsObjList> l = ThreadCurrentCalls::getList();
+    shared_ptr<CurrentCallsObjList> callsList = ThreadCurrentCalls::getList();
 
     CalcFull calculator;
-    calculator.calc_limit(l.get());
+    calculator.calc_limit(callsList.get());
 
     html << "Time loop: <b>" << this->t.sloop() << "</b><br/>\n";
     html << "Time full loop: <b>" << this->t.sfull() << "</b><br/>\n";
     html << "loops: <b>" << t.count << "</b><br/>\n";
     html << "<br/>\n";
-    html << "Current calls: <b>" << l->count << "</b><br/>\n";
+    html << "Current calls: <b>" << callsList->count << "</b><br/>\n";
     html << "<br/>\n";
 
     html << "<table width=100% border=1 cellspacing=0>\n";
@@ -57,8 +60,8 @@ void ThreadCurrentCalls::htmlfull(stringstream &html) {
     html << "<th>price_op</th>";
     html << "<th>geo_id</th>";
     html << "</tr>\n";
-    for (int i = 0; i < l->count; i++) {
-        pCallObj call = l->get(i);
+    for (int i = 0; i < callsList->count; i++) {
+        pCallObj call = callsList->get(i);
 
         html << "<tr>";
         html << "<td>" << call->time << "</td>";

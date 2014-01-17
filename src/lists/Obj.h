@@ -143,4 +143,10 @@ typedef struct _CallObj {
 
     DT dt;
     void make_dt();
+    bool isLocal();
+    bool isLocalOrZona();
+    bool isZona();
+    bool isRussian();
+    bool isInternational();
+    bool isSNG();
 } CallObj, *pCallObj;

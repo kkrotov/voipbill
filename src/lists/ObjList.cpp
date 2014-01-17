@@ -7,6 +7,30 @@ void _CallObj::make_dt() {
     parseDateTime((char*) &time, dt);
 }
 
+bool _CallObj::isLocal() {
+    return this->dest < 0;
+}
+
+bool _CallObj::isLocalOrZona() {
+    return this->dest <= 0;
+}
+
+bool _CallObj::isZona() {
+    return this->dest == 0;
+}
+
+bool _CallObj::isRussian() {
+    return this->dest == 1;
+}
+
+bool _CallObj::isInternational() {
+    return this->dest == 2;
+}
+
+bool _CallObj::isSNG() {
+    return this->dest == 3;
+}
+
 ObjList::ObjList() {
     this->data = 0;
     this->count = 0;

@@ -1,10 +1,9 @@
 #pragma once
 
 #include <string>
-#include <boost/smart_ptr/detail/spinlock.hpp>
 
 #include "../classes/BDb.h"
-#include <mutex>
+#include "../common.h"
 
 using namespace std;
 
@@ -15,7 +14,7 @@ protected:
     string params;
     string status;
     string name;
-    mutex status_lock;
+    spinlock status_lock;
 public:
     void setStatus(string str);
     string getStatus();
