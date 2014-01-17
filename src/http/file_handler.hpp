@@ -14,27 +14,27 @@
 #include <string>
 
 namespace http {
-namespace server4 {
+    namespace server4 {
 
-struct reply;
-struct request;
+        struct reply;
+        struct request;
 
-/// The common handler for all incoming requests.
-class file_handler
-{
-public:
+        /// The common handler for all incoming requests.
 
-  /// Handle a request and produce a reply.
-  void operator()(const request& req, reply& rep);
+        class file_handler {
+        public:
 
-private:
+            /// Handle a request and produce a reply.
+            void operator()(const request& req, reply& rep);
 
-  /// Perform URL-decoding on a string. Returns false if the encoding was
-  /// invalid.
-  static bool url_decode(const std::string& in, std::string& out);
-};
+        private:
 
-} // namespace server4
+            /// Perform URL-decoding on a string. Returns false if the encoding was
+            /// invalid.
+            static bool url_decode(const std::string& in, std::string& out);
+        };
+
+    } // namespace server4
 } // namespace http
 
 #endif // HTTP_SERVER4_FILE_HANDLER_HPP

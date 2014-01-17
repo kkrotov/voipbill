@@ -1,38 +1,48 @@
 #include "ClientCounter.h"
 
-size_t ClientCounter::item_size() { return 0; }
-string ClientCounter::sql(BDb * db) { return ""; }
-void ClientCounter::parse_item(BDbResult &row, void * obj) { *(int*)obj = row.size(); }
+size_t ClientCounter::item_size() {
+    return 0;
+}
 
+string ClientCounter::sql(BDb * db) {
+    return "";
+}
+
+inline void ClientCounter::parse_item(BDbResult &row, void * obj) {
+    *(int*) obj = row.size();
+}
 
 ClientCounterObj &ClientCounter::get(const int client_id) {
     return counter[client_id];
 }
-void ClientCounter::set(int client_id,  ClientCounterObj &new_value) {
+
+void ClientCounter::set(int client_id, ClientCounterObj &new_value) {
     counter[client_id] = new_value;
 }
+
 void ClientCounter::clear() {
     counter.clear();
 }
+
 void ClientCounter::append(ClientCounter *newcl) {
     map<int, ClientCounterObj>::iterator i;
-    for (i = newcl->counter.begin(); i != newcl->counter.end(); ++i){
+    for (i = newcl->counter.begin(); i != newcl->counter.end(); ++i) {
         int key = i->first;
         ClientCounterObj &add_value = i->second;
 
         ClientCounterObj &value = counter[key];
 
-        if (value.amount_month < add_value.amount_month){
+        if (value.amount_month < add_value.amount_month) {
             value.amount_month = add_value.amount_month;
             value.sum_month = add_value.sum_month;
-        }else if (value.amount_month == add_value.amount_month){
+        } else if (value.amount_month == add_value.amount_month) {
             value.sum_month += add_value.sum_month;
         }
 
-        if (value.amount_day < add_value.amount_day){
+        if (value.amount_day < add_value.amount_day) {
             value.amount_day = add_value.amount_day;
             value.sum_day = add_value.sum_day;
-        }else if (value.amount_day == add_value.amount_day){
+        } else if (value.amount_day == add_value.amount_day) {
             value.sum_day += add_value.sum_day;
         }
 
@@ -52,25 +62,28 @@ void ClientCounter::load(BDb * db, time_t dt) {
     counter.clear();
 
     BDbResult res = db->query(
-                "   select r_client_id, m_date, m_sum, d_date, d_sum, a_sum, disabled, disabled_local  " \
-                "   from billing.get_amounts() "    );
+            "   select r_client_id, m_date, m_sum, d_date, d_sum, a_sum, disabled, disabled_local  " \
+                "   from calls.get_amounts() ");
     loadtime = time(NULL);
     last_use = loadtime;
-    while(res.next()){
+    while (res.next()) {
         struct tm ttt;
-        ttt.tm_isdst = 0; ttt.tm_wday = 0; ttt.tm_yday = 0;
-        ttt.tm_hour = 0; ttt.tm_min = 0; ttt.tm_sec = 0;
+        ttt.tm_isdst = 0;
+        ttt.tm_wday = 0;
+        ttt.tm_yday = 0;
+        ttt.tm_hour = 0;
+        ttt.tm_min = 0;
+        ttt.tm_sec = 0;
 
         ClientCounterObj cc;
 
         cc.client_id = res.get_i(0);
 
-        sscanf(res.get(1), "%d-%d-%d", &ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday); ttt.tm_year -= 1900; ttt.tm_mon -= 1;
-        cc.amount_month = mktime(&ttt);
+
+        cc.amount_month = parseDate(res.get(1));
         cc.sum_month = res.get_i(2);
 
-        sscanf(res.get(3), "%d-%d-%d", &ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday); ttt.tm_year -= 1900; ttt.tm_mon -= 1;
-        cc.amount_day = mktime(&ttt);
+        cc.amount_day = parseDate(res.get(3));
         cc.sum_day = res.get_i(4);
 
         cc.sum = res.get_i(5);
@@ -87,6 +100,7 @@ void ClientCounter::load(BDb * db, time_t dt) {
 
     t.stop();
 }
+
 void ClientCounter::reload(BDb * db) {
 
     t.start();
@@ -94,10 +108,10 @@ void ClientCounter::reload(BDb * db) {
     bool was_update = false;
 
     BDbResult res = db->query(
-                "   select r_client_id, a_sum  " \
-                "   from billing.reget_amounts() ");
+            "   select r_client_id, a_sum  " \
+                "   from calls.reget_amounts() ");
     loadtime = time(NULL);
-    while(res.next()){
+    while (res.next()) {
         ClientCounterObj &cc = this->get(res.get_i(0));
         cc.sum = res.get_i(1);
         cc.updated = 1;

@@ -1,9 +1,10 @@
 #include "ThreadSync.h"
+#include "../classes/App.h"
 
-typedef pair<string,string> fpair;
+typedef pair<string, string> fpair;
 
-struct qsync{
-    bool    full;
+struct qsync {
+    bool full;
     string label;
     string t_from;
     string t_to;
@@ -18,13 +19,13 @@ struct qsync{
     string sfrom;
     string sto;
 
-    void prepare(){
+    void prepare() {
         sfrom = "";
         sto = "";
         list<fpair>::const_iterator i = fields.begin();
         int n = 1;
-         while (i != fields.end()) {
-            if (sfrom != ""){
+        while (i != fields.end()) {
+            if (sfrom != "") {
                 sfrom.append(",");
                 sto.append(",");
             }
@@ -34,89 +35,93 @@ struct qsync{
             sto.append(fp->second);
             ++i;
             ++n;
-         }
-        if (full){
-            ifs = "select rnd from billing.sync z where z.region='"+app.conf.str_region_id+"' and z.table='"+label+"' and z.obj=0";
-            del = "delete from "+t_to;
-            fix = "delete from billing.sync z where z.region='"+app.conf.str_region_id+"' and z.table='"+label+"' and z.rnd<=%s ";
-        }else{
-            sel =   "select "+sfrom+", z.rnd " \
+        }
+        if (full) {
+            ifs = "select rnd from billing.sync z where z.region='" + app.conf.str_instance_id + "' and z.table='" + label + "' and z.obj=0";
+            del = "delete from " + t_to;
+            fix = "delete from billing.sync z where z.region='" + app.conf.str_instance_id + "' and z.table='" + label + "' and z.rnd<=%s ";
+        } else {
+            sel = "select " + sfrom + ", z.rnd " \
                     "from billing.sync z " \
-                    "left join "+t_from+" x on z.obj=x.id " \
-                    "where z.region='"+app.conf.str_region_id+"' and z.table='"+label+"' " \
+                    "left join " + t_from + " x on z.obj=x.id " \
+                    "where z.region='" + app.conf.str_instance_id + "' and z.table='" + label + "' " \
                     "order by z.rnd ";
-                    //"limit 100";
-            ins = "insert into "+t_to+"("+sto+") VALUES ";
-            del = "delete from "+t_to+" where id in (%s)";
-            fix = "delete from billing.sync z where z.region='"+app.conf.str_region_id+"' and z.table='"+label+"' and z.rnd<=%s ";
+            //"limit 100";
+            ins = "insert into " + t_to + "(" + sto + ") VALUES ";
+            del = "delete from " + t_to + " where id in (%s)";
+            fix = "delete from billing.sync z where z.region='" + app.conf.str_instance_id + "' and z.table='" + label + "' and z.rnd<=%s ";
         }
         count = 0;
 
     }
-    void add_field(string f1, string f2){
+
+    void add_field(string f1, string f2) {
 
         if (f1.find(".") == string::npos) f1 = "x." + f1;
-        fields.push_back(fpair(f1,f2));
+        fields.push_back(fpair(f1, f2));
     }
-    void add_field(string f1){
+
+    void add_field(string f1) {
         add_field(f1, f1);
     }
-    void add_autofield(){
-        fields.push_front(fpair("z.obj","id"));
+
+    void add_autofield() {
+        fields.push_front(fpair("z.obj", "id"));
     }
 };
 
-bool ThreadSync::sync_full(qsync &s){
+bool ThreadSync::sync_full(qsync &s) {
     bool trans_calls = false;
-    try{
+    try {
         //ifs
         BDbResult res = db_main.query(s.ifs);
-        if (res.size() == 0){
+        if (res.size() == 0) {
             return true;
         }
         res.next();
         string rnd = res.get_s(0);
 
-        db_calls.exec( "BEGIN" ); trans_calls = true;
-        db_calls.exec( s.del );
-        BDb::copy(s.t_to,s.t_from, s.sto, "", &db_main, &db_calls);
-        db_calls.exec( "COMMIT" ); trans_calls = false;
-        db_main.exec( string_fmt(s.fix, rnd.c_str()) );
+        db_calls.exec("BEGIN");
+        trans_calls = true;
+        db_calls.exec(s.del);
+        BDb::copy(s.t_to, s.t_from, s.sto, "", &db_main, &db_calls);
+        db_calls.exec("COMMIT");
+        trans_calls = false;
+        db_main.exec(string_fmt(s.fix, rnd.c_str()));
         s.count += 1000000;
-    }catch( DbException &e )
-    {
-        Log::er(e.what());
+    } catch (Exception &e) {
+        e.addTrace("ThreadSync::sync_full");
+        Log::exception(e);
         errors++;
-        if (trans_calls){
-            try{
+        if (trans_calls) {
+            try {
                 db_calls.exec("ROLLBACK");
-            }catch(...){}
+            } catch (...) {
+            }
         }
         return false;
     }
     return true;
 }
 
-
-
-bool ThreadSync::sync_notfull(qsync &s){
+bool ThreadSync::sync_notfull(qsync &s) {
     int size;
-    try{
+    try {
         BDbResult res = db_main.query(s.sel);
-        if (res.size() == 0){
+        if (res.size() == 0) {
             return true;
         }
         string rnd = "0";
         string qins = "";
         string qdel = "";
-        while(res.next()){
-            rnd = res.get_s( s.fields.size() );
+        while (res.next()) {
+            rnd = res.get_s(s.fields.size());
 
             string id(res.get(0));
-            if ( strlen(res.get(1)) > 0 ){
+            if (strlen(res.get(1)) > 0) {
                 if (qins != "") qins.append(",");
                 string qi = "(";
-                for(size_t col = 0; col < s.fields.size(); col++){
+                for (size_t col = 0; col < s.fields.size(); col++) {
                     if (col > 0) qi.append(",");
                     char * val = res.get(col);
                     if (strlen(val) > 0)
@@ -126,65 +131,54 @@ bool ThreadSync::sync_notfull(qsync &s){
                 }
                 qi.append(")");
                 qins.append(qi);
-            }else{
+            } else {
                 if (qdel != "") qdel.append(",");
-                qdel.append("'"+id+"'");
+                qdel.append("'" + id + "'");
             }
         }
         size = res.size();
-        if (rnd.compare("0") != 0){
-            if (qins != "") db_calls.exec( s.ins + qins );
-            if (qdel != "") db_calls.exec( string_fmt(s.del, qdel.c_str()) );
-            db_main.exec( string_fmt(s.fix, rnd.c_str()) );
+        if (rnd.compare("0") != 0) {
+            if (qins != "") db_calls.exec(s.ins + qins);
+            if (qdel != "") db_calls.exec(string_fmt(s.del, qdel.c_str()));
+            db_main.exec(string_fmt(s.fix, rnd.c_str()));
             s.count += size;
         }
 
-    }catch( DbException &e ){
-        Log::er(e.what());
+    } catch (Exception &e) {
+        e.addTrace("ThreadSync::sync_notfull");
+        Log::exception(e);
         errors++;
         return false;
     }
     return true;
 }
 
-void ThreadSync::prepare()
-{
-    while(app.init_sync_done == false)
-    {
-        Log::wr("Sync...");
-        if (this->do_sync() == false)
-        {
-            ssleep(10);
-            continue;
+bool ThreadSync::prepare() {
+    if (!app.init_sync_done) {
+        Log::info("Sync...");
+        if (!this->do_sync()) {
+            return false;
         }
         app.init_sync_done = true;
     }
+    return true;
 }
 
-void ThreadSync::run()
-{
-    while(true){
+void ThreadSync::run() {
 
-        bool err = false;
-
-        t.start();
-
-        for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s){
-            if ((*s).full){
-                if (sync_full(*s) == false) err = true;
-            }else{
-                if (sync_notfull(*s) == false) err = true;
-            }
+    for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s) {
+        if ((*s).full) {
+            sync_full(*s);
+        } else {
+            sync_notfull(*s);
         }
 
-        t.stop();
-
-        ssleep( err ? 60 : 1);
+        boost::this_thread::interruption_point();
     }
+
 }
 
-
-void ThreadSync::htmlfull(stringstream &html){
+void ThreadSync::htmlfull(stringstream &html) {
     this->html(html);
 
     html << "Time loop: <b>" << t.sloop() << "</b><br/>\n";
@@ -192,29 +186,28 @@ void ThreadSync::htmlfull(stringstream &html){
     html << "loops: <b>" << t.count << "</b><br/>\n";
     html << "<br/>\n";
 
-    html << "Region: <b>" << app.conf.region_id << "</b><br/>\n";
+    html << "Region: <b>" << app.conf.instance_id << "</b><br/>\n";
     html << "Errors count: <b>" << errors << "</b><br/>\n";
     html << "<br/>\n";
 
-    for (list<qsync>::const_iterator i = syncs.begin(); i != syncs.end(); ++i){
+    for (list<qsync>::const_iterator i = syncs.begin(); i != syncs.end(); ++i) {
         const qsync &s = *i;
         html << s.label << ": <b>" << s.count << "</b><br/>\n";
     }
 }
 
-
-bool ThreadSync::do_sync(){
-    for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s){
-        if ((*s).full){
+bool ThreadSync::do_sync() {
+    for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s) {
+        if ((*s).full) {
             if (sync_full(*s) == false) return false;
-        }else{
+        } else {
             if (sync_notfull(*s) == false) return false;
         }
     }
     return true;
 }
 
-ThreadSync::ThreadSync(){
+ThreadSync::ThreadSync() {
     id = "sync";
     name = "Sync";
 
@@ -280,6 +273,9 @@ ThreadSync::ThreadSync(){
     s7.add_field("freemin_for_number");
     s7.add_field("pricelist_id");
     s7.add_field("paid_redirect");
+    s7.add_field("tariffication_by_minutes");
+    s7.add_field("tariffication_full_first_minute");
+    s7.add_field("tariffication_free_first_seconds");
     s7.prepare();
     syncs.push_back(s7);
 
@@ -328,11 +324,40 @@ ThreadSync::ThreadSync(){
     s11.t_to = "billing.operator";
     s11.add_field("region");
     s11.add_field("id");
+    s11.add_field("pricelist_id");
     s11.add_field("term_in_cost");
-    s11.add_field("term_out_cost");
-    s11.add_field("term_out_local_cost");
-    s11.add_field("default_pricelist_id");
+    s11.add_field("local_network_pricelist_id");
+    s11.add_field("client_7800_pricelist_id");
+    s11.add_field("operator_7800_pricelist_id");
     s11.prepare();
     syncs.push_back(s11);
+
+    qsync s12;
+    s12.label = "pricelist";
+    s12.full = true;
+    s12.t_from = "voip.pricelist";
+    s12.t_to = "billing.pricelist";
+    s12.add_field("id");
+    s12.add_field("region");
+    s12.add_field("operator_id");
+    s12.add_field("tariffication_by_minutes");
+    s12.add_field("tariffication_full_first_minute");
+    s12.prepare();
+    syncs.push_back(s12);
+
+    qsync s13;
+    s13.label = "network_prefix";
+    s13.full = true;
+    s13.t_from = "billing.network_prefix";
+    s13.t_to = "billing.network_prefix";
+    s13.add_field("prefix");
+    s13.add_field("instance_id");
+    s13.add_field("operator_id");
+    s13.add_field("date_from");
+    s13.add_field("deleted");
+    s13.add_field("date_to");
+    s13.add_field("network_type_id");
+    s13.prepare();
+    syncs.push_back(s13);
 
 }

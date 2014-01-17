@@ -3,15 +3,14 @@
 #include "Thread.h"
 #include "../classes/CalcFull.h"
 
-class ThreadLimitControl : public Thread
-{
+class ThreadLimitControl : public Thread {
 protected:
-    Timer t;
     Timer t_calc;
     Timer t_kill;
+    BDb db_calls;
     CalcFull calculator;
 
-    void wait();
+    bool ready();
 
     void run();
 

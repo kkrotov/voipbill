@@ -11,93 +11,96 @@
 #include "../threads/ThreadCurrentCalls.h"
 #include "../threads/ThreadWeb.h"
 #include "../threads/ThreadTasks.h"
+#include "../threads/ThreadLog.h"
 
 #include "Daemon.h"
 
-App::App()
-{
+#include "LogWriterScreen.h"
+#include "LogWriterFile.h"
+#include "LogWriterSyslog.h"
+
+App::App() {
     init_sync_done = false;
     init_load_counters_done = false;
     init_load_data_done = false;
     init_bill_runtime_started = false;
+
+    onStatusChanged.connect(boost::bind(&ThreadPool::app_status_changed, &threads));
+    onRealStatusChanged.connect(boost::bind(&ThreadPool::app_real_status_changed, &threads));
+
+    status = AppStatus::APP_RUNNING;
+    setRealStatus(AppStatus::APP_STARTED);
 }
 
-bool App::init(int argc, char* argv[]){
+bool App::init(int argc, char* argv[]) {
 
     srand(time(0));
 
     if (!conf.init(argc, argv))
         return false;
 
+    setRealStatus(AppStatus::APP_INITIALIZING);
+
     return true;
 }
 
-void App::run()
-{
+void App::run() {
+
+    initLogger();
+
     Daemoin::setPidFile();
     Daemoin::initSignalHandler();
 
 
     ThreadWeb web;
 
-    std::thread web_thread(web);
+    boost::thread web_thread(web);
 
-    ThreadSync * thread_sync = new ThreadSync();
-    ThreadLoader * thread_loader = new ThreadLoader();
-    ThreadSaveCounters * thread_savecounters = new ThreadSaveCounters();
-    ThreadBlacklist * thread_blacklist = new ThreadBlacklist();
-    ThreadLimitControl * thread_limitcontrol = new ThreadLimitControl();
-    ThreadBillRuntime * thread_billruntime = new ThreadBillRuntime();
-    ThreadCheckStartTable * thread_checkstarttable = new ThreadCheckStartTable();
-    ThreadCurrentCalls * thread_currentcalls = new ThreadCurrentCalls();
-    ThreadTasks * thread_tasks = new ThreadTasks();
-
-
-    thread_sync->start();
-    thread_loader->start();
-    thread_billruntime->start();
-    thread_limitcontrol->start();
-    thread_blacklist->start();
-    thread_savecounters->start();
-    thread_currentcalls->start();
-    thread_checkstarttable->start();
-    thread_tasks->start();
+    threads.run(new ThreadLog());
+    threads.run(new ThreadSync());
+    threads.run(new ThreadLoader());
+    threads.run(new ThreadSaveCounters());
+    threads.run(new ThreadBlacklist());
+    threads.run(new ThreadLimitControl());
+    threads.run(new ThreadBillRuntime());
+    threads.run(new ThreadCheckStartTable());
+    threads.run(new ThreadCurrentCalls());
+    threads.run(new ThreadTasks());
 
     web_thread.join();
 }
 
-void App::register_thread(Thread * thread)
-{
-    threads_mutex.lock();
-    list<Thread*>::iterator it = threads.begin();
-    while(it != threads.end()){
-        Thread * tmp = *it;
-        if (tmp->id == thread->id){
-            if (tmp == thread)
-            {
-                threads_mutex.unlock();
-                return;
-            }
-            thread->id = thread->id + string_fmt("%d", rand());
-            break;
-        }
-        ++it;
-    }
-    threads.push_back(thread);
-    threads_mutex.unlock();
+void App::initLogger() {
+
+    logger.setLogGroupingInterval(conf.log_grouping_interval);
+
+    logger.addLogWriter(pLogWriter(new LogWriterScreen()));
+
+    if (!conf.log_file_filename.empty())
+        logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file_filename, conf.log_file_min_level, conf.log_file_max_level)));
+
+    if (!conf.log_file2_filename.empty())
+        logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file2_filename, conf.log_file2_min_level, conf.log_file2_max_level)));
+
+    if (!conf.log_syslog_ident.empty())
+        logger.addLogWriter(pLogWriter(new LogWriterSyslog(conf.log_syslog_ident, conf.log_syslog_min_level, conf.log_syslog_max_level)));
+
 }
 
-void App::unregister_thread(Thread * thread)
-{
-    threads_mutex.lock();
-    list<Thread*>::iterator it = threads.begin();
-    while(it != threads.end()){
-        if (*it == thread)
-        {
-            threads.erase(it);
-            break;
-        }
-        ++it;
-    }
-    threads_mutex.unlock();
+void App::setStatus(AppStatus status) {
+    this->status = status;
+    onStatusChanged();
+}
+
+void App::setRealStatus(AppStatus real_status) {
+    this->real_status = real_status;
+    onRealStatusChanged();
+}
+
+AppStatus App::getStatus() {
+    return status;
+}
+
+AppStatus App::getRealStatus() {
+    return real_status;
 }

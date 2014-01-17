@@ -1,39 +1,19 @@
 #pragma once
 
+#include <libpq-fe.h>
+
 #include <map>
 #include <list>
 #include <string>
-#include <libpq-fe.h>
-
 using namespace std;
 
-class BDbResult {
-protected:
-	PGresult * res;
-	int count;
-	int index;
-public:
-    BDbResult(PGresult * res);
-    ~BDbResult();
-    int size();
-    char * get(int r, int f);
-    char * get(int f);
-    int get_i(int f);
-    double get_d(int f);
-    long long int get_ll(int f);
-    bool get_b(int f);
-    string get_s(int f);
-    bool next();
-    void force_free();
-};
+#include "BDbResult.h"
 
 class BDb {
-
 protected:
     PGconn * conn;
     string connstr;
-    char error[1024];
-    map<string,bool> listener;
+    int need_advisory_lock;
 public:
     BDb();
     BDb(const string &connstr);
@@ -48,10 +28,7 @@ public:
 
     void disconnect();
 
-    bool reconnect();
-
-    void listen(const string name);
-    list<string> notifies();
+    void needAdvisoryLock(int key);
 
     void exec(const char * squery);
     void exec(const string &squery);

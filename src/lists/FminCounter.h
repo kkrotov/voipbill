@@ -16,7 +16,7 @@ public:
     int & get(int usage_id, int group_id);
     int & get(const int key);
     void set(const int usage_id, const int group_id, const int new_value);
-    void add(const int usage_id, const int group_id, const int value) ;
+    void add(const int usage_id, const int group_id, const int value);
     void clear();
     void append(FminCounter *newfmin);
 };

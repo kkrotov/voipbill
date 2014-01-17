@@ -4,19 +4,17 @@
 #include "../lists/ClientCounter.h"
 #include "../lists/FminCounter.h"
 
-class CounterLoader
-{
+class CounterLoader {
 public:
     shared_ptr<ClientCounter> client;
     Loader<FminCounter> fmin;
 
-    CounterLoader()
-    {
+    CounterLoader() {
         client = shared_ptr<ClientCounter>(new ClientCounter());
         fmin.need_load = false;
     }
 
-    void clear(){
+    void clear() {
         client->clear();
         fmin.clear();
     }

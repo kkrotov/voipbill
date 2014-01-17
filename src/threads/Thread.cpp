@@ -1,75 +1,120 @@
 #include "../common.h"
 #include "Thread.h"
 
-
-Thread::Thread(){
+Thread::Thread() {
     id = string_fmt("%d", rand());
     name = id;
-    status = "created";
+
+    threadSleepSeconds = 1;
+
+    status = ThreadStatus::THREAD_CREATED;
+    setRealStatus(ThreadStatus::THREAD_CREATED);
+
+    status_ready = false;
+    status_prepared = false;
 }
 
-
-Thread::~Thread(){
-    app.unregister_thread(this);
+Thread::~Thread() {
 }
 
-void Thread::start(){
-    std::thread t(&Thread::operator(), this);
+void Thread::start() {
+    boost::thread t(&Thread::operator(), this);
     std::swap(task_thread, t);
 }
 
-void Thread::ssleep(unsigned int seconds)
-{
-    sleep(seconds);
+void Thread::ssleep(unsigned int seconds) {
+    boost::this_thread::sleep_for(boost::chrono::seconds(seconds));
 }
 
-void Thread::usleep(unsigned int milliseconds)
-{
-    struct timespec req;
-
-    if (milliseconds >= 1000)
-    {
-        req.tv_sec = milliseconds / 1000;
-        req.tv_nsec = (milliseconds % 1000) * 1000000L;
-    }else{
-        req.tv_sec = 0;
-        req.tv_nsec = milliseconds;
-    }
-
-    clock_nanosleep(CLOCK_MONOTONIC, 0, &req, NULL);
+void Thread::usleep(unsigned int milliseconds) {
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(milliseconds));
 }
 
-void Thread::wait()
-{
+bool Thread::ready() {
+    return true;
 }
 
-void Thread::prepare()
-{
+bool Thread::prepare() {
+    return true;
 }
 
-void Thread::operator()()
-{
+void Thread::operator()() {
 
-    app.register_thread(this);
+    onStarted(this);
 
-    try
-    {
-        status = "waiting";
-        this->wait();
+    while (true) {
 
-        status = "preparing";
-        this->prepare();
+        try {
+            if (getStatus() == ThreadStatus::THREAD_STOPPED) {
+                setRealStatus(ThreadStatus::THREAD_STOPPED);
+                onFinished(this);
+                return;
+            } else if (getStatus() == ThreadStatus::THREAD_PAUSED) {
+                setRealStatus(ThreadStatus::THREAD_PAUSED);
+            } else if (getStatus() == ThreadStatus::THREAD_RUNNING || getStatus() == ThreadStatus::THREAD_PREPARING) {
+                if (!status_ready) {
+                    setRealStatus(ThreadStatus::THREAD_WAITING);
+                    if (this->ready()) {
+                        status_ready = true;
+                        continue;
+                    }
+                } else if (!status_prepared) {
+                    setRealStatus(ThreadStatus::THREAD_PREPARING);
+                    if (this->prepare()) {
+                        status_prepared = true;
+                        continue;
+                    }
+                } else {
+                    if (getStatus() == ThreadStatus::THREAD_RUNNING) {
+                        setRealStatus(ThreadStatus::THREAD_RUNNING);
+                        TimerScope ts(t);
+                        this->run();
+                    } else {
+                        setRealStatus(ThreadStatus::THREAD_PAUSED);
+                    }
+                }
+            }
 
-        status = "running";
-        this->run();
+
+            ssleep(threadSleepSeconds);
+            continue;
+
+        } catch (boost::thread_interrupted const& e) {
+            continue;
+        } catch (Exception &e) {
+            e.addTrace("Thread(" + name + "): ");
+            Log::exception(e);
+        } catch (std::exception &e) {
+            Log::error("Thread(" + name + "): " + string(e.what()));
+        } catch (...) {
+            Log::error("Thread(" + name + "): ERROR");
+        }
+
+        try {
+            ssleep(threadSleepSeconds);
+        } catch (boost::thread_interrupted const& e) {
+            continue;
+        }
     }
-    catch( std::exception &e ){
-        Log::er(e.what());
-    }
-    catch( ... ){
-        Log::er("ERROR");
-    }
-    app.unregister_thread(this);
 
-    delete this;
+    onFinished(this);
+}
+
+void Thread::setStatus(ThreadStatus status) {
+    this->status = status;
+    onStatusChanged(this);
+    task_thread.interrupt();
+}
+
+void Thread::setRealStatus(ThreadStatus real_status) {
+    this->real_status = real_status;
+    onRealStatusChanged(this);
+}
+
+ThreadStatus Thread::getStatus() {
+    return status;
+}
+
+ThreadStatus Thread::getRealStatus() {
+    return real_status;
 }

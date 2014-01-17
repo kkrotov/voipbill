@@ -5,8 +5,7 @@
 #include "../lists/FminCounter.h"
 #include "../classes/Loader.h"
 
-
-TEST(Loader,ClientCounter) {
+TEST(Loader, ClientCounter) {
 
     ClientCounter l;
     l.get(1000).sum = 1;
@@ -19,22 +18,21 @@ TEST(Loader,ClientCounter) {
 
     l.append(&l2);
 
-    EXPECT_EQ(3, (int)l.counter.size());
+    EXPECT_EQ(3, (int) l.counter.size());
     EXPECT_EQ(2, l.get(1000).sum);
     EXPECT_EQ(2, l.get(1001).sum);
     EXPECT_EQ(1, l.get(1002).sum);
 
-    EXPECT_EQ(2, (int)l2.counter.size());
+    EXPECT_EQ(2, (int) l2.counter.size());
     EXPECT_EQ(1, l2.get(1000).sum);
     EXPECT_EQ(1, l2.get(1002).sum);
 }
 
-
-TEST(Loader,FminCounter) {
+TEST(Loader, FminCounter) {
 
     FminCounter l;
-    l.set(0,1000, 1);
-    l.add(0,1000, 3);
+    l.set(0, 1000, 1);
+    l.add(0, 1000, 3);
     l.add(0, 1001, 4);
     l.get(0, 1001)++;
 
@@ -45,20 +43,19 @@ TEST(Loader,FminCounter) {
 
     l.append(&l2);
 
-    EXPECT_EQ(4, (int)l.counter.size());
+    EXPECT_EQ(4, (int) l.counter.size());
     EXPECT_EQ(5, l.get(0, 1000));
     EXPECT_EQ(5, l.get(0, 1001));
     EXPECT_EQ(1, l.get(0, 1002));
     EXPECT_EQ(1, l.get(1000, 1003));
 
-    EXPECT_EQ(3, (int)l2.counter.size());
+    EXPECT_EQ(3, (int) l2.counter.size());
     EXPECT_EQ(1, l2.get(0, 1000));
     EXPECT_EQ(1, l2.get(0, 1002));
     EXPECT_EQ(1, l2.get(1000, 1003));
 }
 
-
-TEST(Loader,Loader) {
+TEST(Loader, Loader) {
 
     Loader<FminCounter> k1;
 
@@ -112,8 +109,8 @@ TEST(Loader,Loader) {
     EXPECT_FALSE(k2.get(0) == 0);
     EXPECT_TRUE(k2.get(1234) == 0);
 
-    EXPECT_EQ(3, (int)k1.datamap.size());
-    EXPECT_EQ(2, (int)k2.datamap.size());
+    EXPECT_EQ(3, (int) k1.datamap.size());
+    EXPECT_EQ(2, (int) k2.datamap.size());
 
 }
 

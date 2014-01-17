@@ -1,46 +1,62 @@
 #include "Obj.h"
 #include "ObjList.h"
-#include "../classes/DbException.h"
+#include "../classes/Exception.h"
 #include <stdlib.h>
 
 void _CallObj::make_dt() {
-    struct tm ttt;
-    ttt.tm_isdst = 0; ttt.tm_yday = 0;
-
-    sscanf((char*)&time, "%d-%d-%d %d:%d:%d", &ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday, &ttt.tm_hour, &ttt.tm_min, &ttt.tm_sec);
-    ttt.tm_year -= 1900; ttt.tm_mon -= 1;
-
-    dt.time = mktime(&ttt);
-
-    dt.day = dt.time - ttt.tm_hour*3600 - ttt.tm_min*60 - ttt.tm_sec;
-    dt.month = dt.day - (ttt.tm_mday-1)*86400;
+    parseDateTime((char*) &time, dt);
 }
 
-ObjList::ObjList(){
+bool _CallObj::isLocal() {
+    return this->dest < 0;
+}
+
+bool _CallObj::isLocalOrZona() {
+    return this->dest <= 0;
+}
+
+bool _CallObj::isZona() {
+    return this->dest == 0;
+}
+
+bool _CallObj::isRussian() {
+    return this->dest == 1;
+}
+
+bool _CallObj::isInternational() {
+    return this->dest == 2;
+}
+
+bool _CallObj::isSNG() {
+    return this->dest == 3;
+}
+
+ObjList::ObjList() {
     this->data = 0;
     this->count = 0;
     this->loaded = false;
 }
-ObjList::ObjList(const ObjList & w){
+
+ObjList::ObjList(const ObjList & w) {
     this->i_size = w.i_size;
     this->count = w.count;
     this->last_use = w.last_use;
     this->loadtime = w.loadtime;
     this->loadsize = w.loadsize;
     this->loaded = w.loaded;
-    this->data = malloc( w.loadsize );
+    this->data = malloc(w.loadsize);
     memcpy(this->data, w.data, w.loadsize);
 }
 
-ObjList::~ObjList(){
+ObjList::~ObjList() {
     if (data != 0) free(data);
 }
 
-void ObjList::load(BDb * db){
+void ObjList::load(BDb * db) {
     load(db, 0);
 }
 
-void ObjList::load(BDb * db, time_t dt){
+void ObjList::load(BDb * db, time_t dt) {
     this->dt = dt;
 
     t.start();
@@ -53,67 +69,71 @@ void ObjList::load(BDb * db, time_t dt){
     loadtime = time(NULL);
     last_use = loadtime;
 
-    if (data != 0) { free(data); data = 0; }
+    if (data != 0) {
+        free(data);
+        data = 0;
+    }
     if (count > 0) {
-        data = malloc( loadsize );
+        data = malloc(loadsize);
 
         void * pdata = data;
-        while(res.next()){
+        while (res.next()) {
             parse_item(res, pdata);
-            pdata = (char *)pdata + i_size;
+            pdata = (char *) pdata + i_size;
         }
     }
     this->loaded = true;
 
     t.stop();
 }
-void ObjList::pre_free(){
+
+void ObjList::pre_free() {
     if (data != 0) {
         free(data);
         data = 0;
     }
 }
 
-void * ObjList::_get(size_t i){
-    return (char *)data + i*i_size;
+void * ObjList::_get(size_t i) {
+    return (char *) data + i*i_size;
 }
 
-void * ObjListByPrefix::_find(char * prefix)
-{
+void * ObjListByPrefix::_find(const char * prefix) {
     int lowlow = 0, highhigh = count - 1;
 
     void * res_item = 0;
 
     int lenphone = strlen(prefix);
-    for(int i=0;i<lenphone;i++){
+    for (int i = 0; i < lenphone; i++) {
         int low = lowlow, high = highhigh;
-        char str[21];	char *pstr = &str[0];
-        char str2[21];	char *pstr2 = &str2[0];
-        memcpy(pstr, prefix, i+1);
-        str[i+1] = 0;
-        while( low <= high )
-        {
-            int mid = ( low + high ) / 2;
+        char str[21];
+        char *pstr = &str[0];
+        char str2[21];
+        char *pstr2 = &str2[0];
+        memcpy(pstr, prefix, i + 1);
+        str[i + 1] = 0;
+        while (low <= high) {
+            int mid = (low + high) / 2;
 
-            void * item = (char*)data + mid*i_size;
+            void * item = (char*) data + mid*i_size;
             char * key_prefix = key(item);
 
             int diff = strcmp(key_prefix, pstr);
-            if( diff < 0 )
+            if (diff < 0)
                 low = mid + 1;
-            else if( diff > 0 )
+            else if (diff > 0)
                 high = mid - 1;
             else {
                 res_item = item;
                 break;
             }
 
-            memcpy(pstr2, key_prefix, i+1);
-            str2[i+1]=0;
+            memcpy(pstr2, key_prefix, i + 1);
+            str2[i + 1] = 0;
             diff = strcmp(pstr2, pstr);
-            if( diff < 0 )
+            if (diff < 0)
                 lowlow = mid + 1;
-            else if( diff > 0 )
+            else if (diff > 0)
                 highhigh = mid - 1;
 
         }
@@ -122,54 +142,54 @@ void * ObjListByPrefix::_find(char * prefix)
 
 }
 
-void * ObjListByIntPrefix::_find(int value0, char * prefix)
-{
+void * ObjListByIntPrefix::_find(const int value0, const char * prefix) {
     int lowlow = 0, highhigh = count - 1;
 
     void * res_item = 0;
 
     int lenphone = strlen(prefix);
-    for(int i=0;i<lenphone;i++){
+    for (int i = 0; i < lenphone; i++) {
         int low = lowlow, high = highhigh;
-        char str[21];	char *pstr = &str[0];
-        char str2[21];	char *pstr2 = &str2[0];
-        memcpy(pstr, prefix, i+1);
-        str[i+1] = 0;
-        while( low <= high )
-        {
-            int mid = ( low + high ) / 2;
+        char str[21];
+        char *pstr = &str[0];
+        char str2[21];
+        char *pstr2 = &str2[0];
+        memcpy(pstr, prefix, i + 1);
+        str[i + 1] = 0;
+        while (low <= high) {
+            int mid = (low + high) / 2;
 
-            void * item = (char*)data + mid*i_size;
+            void * item = (char*) data + mid*i_size;
             int key0_value = key0(item);
             char * key_prefix = key(item);
 
 
-            if (key0_value < value0){
+            if (key0_value < value0) {
                 low = mid + 1;
                 lowlow = low;
                 continue;
-            }else if (key0_value > value0){
+            } else if (key0_value > value0) {
                 high = mid - 1;
                 highhigh = high;
                 continue;
             }
 
             int diff = strcmp(key_prefix, pstr);
-            if( diff < 0 )
+            if (diff < 0)
                 low = mid + 1;
-            else if( diff > 0 )
+            else if (diff > 0)
                 high = mid - 1;
             else {
                 res_item = item;
                 break;
             }
 
-            memcpy(pstr2, key_prefix, i+1);
-            str2[i+1]=0;
+            memcpy(pstr2, key_prefix, i + 1);
+            str2[i + 1] = 0;
             diff = strcmp(pstr2, pstr);
-            if( diff < 0 )
+            if (diff < 0)
                 lowlow = mid + 1;
-            else if( diff > 0 )
+            else if (diff > 0)
                 highhigh = mid - 1;
 
         }
@@ -178,19 +198,17 @@ void * ObjListByIntPrefix::_find(int value0, char * prefix)
 
 }
 
-void * ObjListByInt::_find(int value)
-{
+void * ObjListByInt::_find(const int value) {
     int low = 0, high = count - 1;
-    while( low <= high )
-    {
-        int mid = ( low + high ) / 2;
+    while (low <= high) {
+        int mid = (low + high) / 2;
 
-        void * item = (char*)data + mid*i_size;
+        void * item = (char*) data + mid*i_size;
         int key_value = key(item);
 
-        if( key_value < value )
+        if (key_value < value)
             low = mid + 1;
-        else if( key_value > value )
+        else if (key_value > value)
             high = mid - 1;
         else
             return item;
@@ -198,19 +216,17 @@ void * ObjListByInt::_find(int value)
     return 0;
 }
 
-void * ObjListBy2Long::_find(long long int value)
-{
+void * ObjListBy2Long::_find(long long int value) {
     int low = 0, high = count - 1;
-    while( low <= high )
-    {
-        int mid = ( low + high ) / 2;
+    while (low <= high) {
+        int mid = (low + high) / 2;
 
-        void * item = (char*)data + mid*i_size;
+        void * item = (char*) data + mid*i_size;
         long long int key_value = key(item);
 
-        if( key_value < value )
+        if (key_value < value)
             low = mid + 1;
-        else if( key_value > value )
+        else if (key_value > value)
             high = mid - 1;
         else
             return item;

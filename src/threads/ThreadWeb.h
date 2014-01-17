@@ -4,8 +4,7 @@
 #include <string>
 using namespace std;
 
-class ThreadWeb
-{
+class ThreadWeb {
 public:
 
     void operator()();
@@ -16,10 +15,10 @@ public:
 
     static void handlerConfig(stringstream &html);
 
-    static bool handlerTask(stringstream &html, map<string,string> &parameters);
+    static bool handlerTask(stringstream &html, map<string, string> &parameters);
 
     static void handlerCounters(stringstream &html);
 
-    static void handlerClient(stringstream &html, map<string,string> &parameters);
+    static void handlerClient(stringstream &html, map<string, string> &parameters);
 
 };

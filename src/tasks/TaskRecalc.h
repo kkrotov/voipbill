@@ -5,8 +5,7 @@
 #include "../classes/CalcFull.h"
 #include "Task.h"
 
-class TaskRecalc : public Task
-{
+class TaskRecalc : public Task {
 protected:
     time_t date_from;
 

@@ -3,118 +3,138 @@
 #include "App.h"
 #include "Log.h"
 
-void UdpControlClient::handle_receive(const boost::system::error_code& error, size_t bytes_recvd, size_t *nread)
-{
-    if (error)
-    {
-        Log::er(error.message());
+void UdpControlClient::handle_receive(const boost::system::error_code& error, size_t bytes_recvd, size_t *nread) {
+    if (error) {
+        Log::error(error.message());
         return;
     }
     if (nread != 0)
         *nread = bytes_recvd;
 }
 
-bool UdpControlClient::sendrecv(string &msg, string &res){
+bool UdpControlClient::sendrecv(string &msg, string &res) {
+    boost::asio::io_service io_service;
+    udp::socket s(io_service);
+
+    string debug_msg = "OpenCA: ";
+
     try {
         boost::asio::ip::address addr = boost::asio::ip::address::from_string(app.conf.udp_host);
-
         udp::endpoint endpoint(addr, app.conf.udp_port);
 
-        boost::asio::io_service io_service;
-        udp::socket s(io_service);
         s.open(udp::v4());
+        s.connect(endpoint);
+
+        debug_msg += msg + ": ";
 
         // send
-        if (msg.size() != s.send_to(boost::asio::buffer(msg.data(), msg.size()), endpoint)) return false;
+        if (msg.size() != s.send(boost::asio::buffer(msg.data(), msg.size()))) {
+            s.close();
+            Log::error(debug_msg + "Send error");
+            return false;
+        }
 
-        // receive
-        size_t nread = 0xFFFF;
-        char recvdata[1024*20];
+        fcntl(s.native(), F_SETFL, O_NONBLOCK);
 
-        boost::asio::deadline_timer timer(io_service);
-        timer.expires_from_now(boost::posix_time::seconds(3));
-        timer.async_wait(boost::bind(UdpControlClient::handle_receive,
-                                     boost::asio::placeholders::error, 0, (size_t *)0));
+        fd_set readset;
+        FD_ZERO(&readset);
+        FD_SET(s.native(), &readset);
 
+        timeval timeout;
+        timeout.tv_sec = 2;
+        timeout.tv_usec = 0;
 
-        s.async_receive(boost::asio::buffer(recvdata, sizeof(recvdata)),
-                        boost::bind(UdpControlClient::handle_receive,
-                                  boost::asio::placeholders::error,
-                                  boost::asio::placeholders::bytes_transferred, &nread));
+        select(s.native() + 1, &readset, NULL, NULL, &timeout);
 
-        io_service.reset();
-        io_service.run_one();
-        timer.cancel();
-        s.cancel();
+        if (FD_ISSET(s.native(), &readset)) {
+            char recvdata[1024 * 20];
+            int bytes_read = recv(s.native(), recvdata, sizeof (recvdata), 0);
 
-        if (nread == 0xFFFF) return false;
+            if (bytes_read > 0) {
+                res.append(&recvdata[0], bytes_read);
+                s.close();
+            }
 
-        if (nread > 0)
-            res.append(&recvdata[0], nread);
+            if (bytes_read >= 0) {
+                Log::debug(debug_msg + res);
+                return true;
+            }
+        }
 
-        return true;
+    } catch (exception& e) {
+        Log::error(e.what());
     }
-    catch (exception& e)
-    {
-        Log::er(e.what());
-    }
+
+    s.close();
+    Log::error(debug_msg + "Receive error");
     return false;
 }
 
-bool UdpControlClient::ready(){
+bool UdpControlClient::ready() {
     return app.conf.udp_host != "" && app.conf.udp_port != 0;
 }
 
-bool UdpControlClient::select(vector<string> &list){
+bool UdpControlClient::select_calls(vector<string> &list) {
     string msg("SELECT");
     string res;
     if (sendrecv(msg, res) == false) return false;
-
-    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","));
+    if (res == "") {
+        list.empty();
+        return true;
+    }
+    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","), boost::token_compress_on);
     return true;
 }
 
-bool UdpControlClient::kill(string &phones, string &ids){
+bool UdpControlClient::kill(string &phones, string &ids) {
     string msg("KILL " + phones + " " + ids);
     string res;
     return sendrecv(msg, res);
 }
 
-bool UdpControlClient::blacklist_local(vector<string> &list){
+bool UdpControlClient::blacklist_local(vector<string> &list) {
     string msg("READ_BLACKLIST_LOCAL");
     string res;
     if (sendrecv(msg, res) == false || res == "0") return false;
-    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","));
+    if (res == "") {
+        list.empty();
+        return true;
+    }
+    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","), boost::token_compress_on);
     return true;
 }
 
-bool UdpControlClient::blacklist_global(vector<string> &list){
+bool UdpControlClient::blacklist_global(vector<string> &list) {
     string msg("READ_BLACKLIST_GLOBAL");
     string res;
     if (sendrecv(msg, res) == false || res == "0") return false;
-    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","));
+    if (res == "") {
+        list.empty();
+        return true;
+    }
+    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","), boost::token_compress_on);
     return true;
 }
 
-bool UdpControlClient::lock_local(string &phones){
+bool UdpControlClient::lock_local(string &phones) {
     string msg("LOCK_LOCAL " + phones);
     string res;
     return sendrecv(msg, res) && res == "1";
 }
 
-bool UdpControlClient::lock_global(string &phones){
+bool UdpControlClient::lock_global(string &phones) {
     string msg("LOCK_GLOBAL " + phones);
     string res;
     return sendrecv(msg, res) && res == "1";
 }
 
-bool UdpControlClient::unlock_local(string &phones){
+bool UdpControlClient::unlock_local(string &phones) {
     string msg("UNLOCK_LOCAL " + phones);
     string res;
     return sendrecv(msg, res) && res == "1";
 }
 
-bool UdpControlClient::unlock_global(string &phones){
+bool UdpControlClient::unlock_global(string &phones) {
     string msg("UNLOCK_GLOBAL " + phones);
     string res;
     return sendrecv(msg, res) && res == "1";

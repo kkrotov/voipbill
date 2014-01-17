@@ -6,21 +6,23 @@ using namespace std;
 
 
 #include <boost/algorithm/string.hpp>
-TEST(libs,string) {
-    string s = "123456123";
-    EXPECT_EQ( s.find("111"), s.npos );
-    EXPECT_EQ( s.find("111"), string::npos );
-    EXPECT_NE( s.find("456"), string::npos );
-    EXPECT_EQ( s.find("456"), (size_t)3 );
 
-    boost::algorithm::replace_all(s,"123","321");
-    EXPECT_EQ( s, "321456321" );
+TEST(libs, string) {
+    string s = "123456123";
+    EXPECT_EQ(s.find("111"), s.npos);
+    EXPECT_EQ(s.find("111"), string::npos);
+    EXPECT_NE(s.find("456"), string::npos);
+    EXPECT_EQ(s.find("456"), (size_t) 3);
+
+    boost::algorithm::replace_all(s, "123", "321");
+    EXPECT_EQ(s, "321456321");
 }
 
 #include <boost/lexical_cast.hpp>
-TEST(libs,lexical_cast) {
-    EXPECT_EQ( boost::lexical_cast<string>(9223372036854775807), "9223372036854775807" );
-    EXPECT_EQ( boost::lexical_cast<long long int>("9223372036854775807"), 9223372036854775807 );
+
+TEST(libs, lexical_cast) {
+    EXPECT_EQ(boost::lexical_cast<string>(9223372036854775807), "9223372036854775807");
+    EXPECT_EQ(boost::lexical_cast<long long int>("9223372036854775807"), 9223372036854775807);
 }
 
 /*
@@ -38,22 +40,24 @@ TEST(libs,regexp) {
     EXPECT_EQ( boost::regex_match(str1, res, exp), true );
     EXPECT_EQ( string(res[1]), "yota.ru.msk.lte.05712857-cd45-4163-a41f-39178ce9cc67" );
 }
-*/
+ */
 
 #include <boost/algorithm/string/split.hpp>
-TEST(libs,split) {
+
+TEST(libs, split) {
     string s = "123,456,789";
     vector<string> ss;
     boost::algorithm::split(ss, s, boost::algorithm::is_any_of(","));
-    EXPECT_EQ( ss.size(), (size_t)3 );
+    EXPECT_EQ(ss.size(), (size_t) 3);
 }
 
 #include <boost/algorithm/string/join.hpp>
-TEST(libs,join) {
+
+TEST(libs, join) {
     vector<string> ss;
     ss.push_back("123");
     ss.push_back("456");
     ss.push_back("789");
     string s = boost::algorithm::join(ss, ",");
-    EXPECT_EQ( s, "123,456,789" );
+    EXPECT_EQ(s, "123,456,789");
 }

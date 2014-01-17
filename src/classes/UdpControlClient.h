@@ -6,7 +6,6 @@
 using boost::asio::ip::udp;
 
 class UdpControlClient {
-
 protected:
 
     static void handle_receive(const boost::system::error_code& error, size_t bytes_recvd, size_t *nread);
@@ -16,7 +15,7 @@ protected:
 public:
     static bool ready();
 
-    static bool select(vector<string> &list);
+    static bool select_calls(vector<string> &list);
 
     static bool kill(string &phones, string &ids);
 

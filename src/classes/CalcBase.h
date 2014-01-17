@@ -4,8 +4,7 @@
 #include "../lists/CallsObjList.h"
 #include "../lists/CurrentCallsObjList.h"
 
-class CalcBase
-{
+class CalcBase {
 public:
     DataLoader *data_global;
     CounterLoader counter_local;
@@ -17,7 +16,7 @@ protected:
 
     curr_data data;
 
-	virtual void calc_item(pCallObj call) = 0;
+    virtual void calc_item(pCallObj call) = 0;
 
 public:
     time_t last_call_time;

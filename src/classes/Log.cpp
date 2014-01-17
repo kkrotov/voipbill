@@ -2,73 +2,56 @@
 #include <stdio.h>
 #include "App.h"
 
-mutex Log::log_mutex;
+#include "Loader.h"
 
-void Log::pr(const string &text){
-    Log::pr(text.c_str());
-}
-void Log::wr(const string &text){
-    Log::wr(text.c_str());
-}
-void Log::er(const string &text){
-    Log::er(text.c_str());
+void Log::info(const string &text) {
+    pLogMessage message(new LogMessage);
+    message->level = LogLevel::INFO;
+    message->message = text;
+    app.logger.logMessage(message);
 }
 
-void Log::pr(const char * text){
-    log_mutex.lock();
-
-    printf("%s", text);
-
-    log_mutex.unlock();
+void Log::error(const string &text) {
+    pLogMessage message(new LogMessage);
+    message->level = LogLevel::ERROR;
+    message->message = text;
+    app.logger.logMessage(message);
 }
 
+void Log::notice(const string &text) {
+    pLogMessage message(new LogMessage);
+    message->level = LogLevel::NOTICE;
+    message->message = text;
+    app.logger.logMessage(message);
+}
 
-void Log::wr(const char * text){
-    time_t rawtime;
-    struct tm * timeinfo;
-    char stime [30]; char * pstime = &stime[0];
-    time ( &rawtime );
-    timeinfo = localtime ( &rawtime );
-    strftime (stime,30,"[%d.%m.%Y %H:%M:%S]",timeinfo);
+void Log::warning(const string &text) {
+    pLogMessage message(new LogMessage);
+    message->level = LogLevel::WARNING;
+    message->message = text;
+    app.logger.logMessage(message);
+}
 
-    log_mutex.lock();
+void Log::debug(const string &text) {
+    pLogMessage message(new LogMessage);
+    message->level = LogLevel::DEBUG;
+    message->message = text;
+    app.logger.logMessage(message);
+}
 
-    printf("%s %s\n", pstime, text);
+void Log::exception(Exception &e) {
 
-    FILE* f = fopen(app.conf.log_file.c_str(),  "a");
-    if (f != 0)
-    {
-        fprintf(f, "%s %s\n", pstime, text);
-        fclose(f);
+    string message = "";
+
+    for (auto it = e.traceList.begin(); it != e.traceList.end(); ++it) {
+        message += *it + " -> ";
     }
 
-    log_mutex.unlock();
-}
-void Log::er(const char * text){
-    time_t rawtime;
-    struct tm * timeinfo;
-    char stime [30]; char * pstime = &stime[0];
-    time ( &rawtime );
-    timeinfo = localtime ( &rawtime );
-    strftime (stime,30,"[%d.%m.%Y %H:%M:%S]",timeinfo);
-
-    log_mutex.lock();
-
-    printf("%s %s\n", pstime, text);
-
-    FILE* f = fopen(app.conf.log_file.c_str(),  "a");
-    if (f != 0)
-    {
-        fprintf(f, "%s %s\n", pstime, text);
-        fclose(f);
+    if (message.size() > 0) {
+        message += "\n";
     }
 
-    FILE* f2 = fopen(app.conf.err_log_file.c_str(),  "a");
-    if (f2 != 0)
-    {
-        fprintf(f2, "%s %s\n", pstime, text);
-        fclose(f2);
-    }
+    message += e.what();
 
-    log_mutex.unlock();
+    Log::error(message);
 }
