@@ -6,6 +6,7 @@ typedef struct _DestObj {
     char prefix[20];
     int dest;
     int geo_id;
+    int geo_operator_id;
     bool mob;
 } DestObj, *pDestObj;
 
@@ -138,6 +139,7 @@ typedef struct _CallObj {
     int operator_id;
     int freemin_group_id;
     int geo_id;
+    int geo_operator_id;
 
     int kill_call_reason;
 

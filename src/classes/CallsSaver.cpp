@@ -72,6 +72,9 @@ void insert_row(pCallObj call, string *q) {
     sprintf(num, "%d", call->geo_id);
     q->append(call->geo_id != 0 ? num : "NULL");
     q->append(",");
+    sprintf(num, "%d", call->geo_operator_id);
+    q->append(call->geo_operator_id != 0 ? num : "NULL");
+    q->append(",");
     sprintf(num, "%d", call->pricelist_op_id);
     q->append(call->pricelist_op_id != 0 ? num : "NULL");
     q->append(",");
@@ -107,7 +110,7 @@ void make_insert_queries(map<time_t, string> &queryPerMonth, CallsObjList *list)
             q->append("INSERT INTO calls.calls_" + string(buff) + "(" \
                         "time,id,direction_out,len,len_mcn,len_op,client_id,usage_id,usage_num, phone_num," \
                         "amount,pricelist_mcn_id,amount_op,operator_id,free_min_groups_id,mob,redirect," \
-                        "dest,month,day,region,geo_id,pricelist_op_id,price,price_op,prefix_geo,prefix_mcn,prefix_op" \
+                        "dest,month,day,region,geo_id,geo_operator_id,pricelist_op_id,price,price_op,prefix_geo,prefix_mcn,prefix_op" \
                      ")VALUES\n");
         } else {
             q = &queryPerMonth[call->dt.month];

@@ -11,6 +11,7 @@ void CalcFull::calc_item(pCallObj call) {
         call->mob = dest->mob;
         call->dest = dest->dest;
         call->geo_id = dest->geo_id;
+        call->geo_operator_id = dest->geo_operator_id;
         strcpy(call->prefix_geo, dest->prefix);
     }
 
@@ -43,6 +44,7 @@ void CalcFull::cleanupCalculatedFields(pCallObj call) {
     call->mob = false;
     call->dest = 2;
     call->geo_id = 0;
+    call->geo_operator_id = 0;
 
     call->len_mcn = call->len_op = call->len;
 }
