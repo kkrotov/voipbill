@@ -34,7 +34,7 @@ string DestObjList::sql(BDb * db) {
                 "                    dest " \
                 "                end " \
                 "            end, " \
-                "    geo_id, geo_operator_id, mob" \
+                "    geo_id, operator_id, mob" \
                 "   from geo.prefix " \
                 "   order by prefix asc ";
 }
