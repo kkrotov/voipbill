@@ -10,12 +10,15 @@
             <file>file:/home/ivanov/project/voip/src/threads/ThreadCurrentCalls.h</file>
             <file>file:/home/ivanov/project/voip/src/lists/CurrentCallsObjList.cpp</file>
             <file>file:/home/ivanov/project/voip/src/classes/CalcFull.cpp</file>
+            <file>file:/home/ivanov/project/voip/src/threads/ThreadSaveCounters.cpp</file>
             <file>file:/home/ivanov/project/voip/src/lists/ObjList.cpp</file>
             <file>file:/home/ivanov/project/voip/src/lists/DestObjList.cpp</file>
             <file>file:/home/ivanov/project/voip/src/tasks/Task.cpp</file>
             <file>file:/home/ivanov/project/voip/src/threads/ThreadCurrentCalls.cpp</file>
             <file>file:/home/ivanov/project/voip/src/threads/ThreadSync.cpp</file>
             <file>file:/home/ivanov/project/voip/src/threads/ThreadBillRuntime.cpp</file>
+            <file>file:/home/ivanov/project/voip/src/classes/DataLoader.cpp</file>
+            <file>file:/home/ivanov/project/voip/src/classes/CallsSaver.cpp</file>
             <file>file:/home/ivanov/project/voip/src/lists/Obj.h</file>
         </group>
     </open-files>

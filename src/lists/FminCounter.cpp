@@ -9,7 +9,7 @@ void FminCounter::load(BDb * db, time_t dt) {
     string stime = string_time(dt);
 
     BDbResult res = db->query(
-            "   select c.usage_id, c.free_min_groups_id, sum(len) from calls.calls c " \
+            "   select c.usage_id, c.free_min_groups_id, sum(len_mcn) from calls.calls c " \
             "   where " \
             "		c.time >= date_trunc('month', '" + stime + "'::timestamp) and " \
             "		c.time <  date_trunc('month', '" + stime + "'::timestamp)+interval '1 month' and " \
