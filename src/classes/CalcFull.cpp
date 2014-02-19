@@ -5,12 +5,13 @@ void CalcFull::calc_item(pCallObj call) {
 
     cleanupCalculatedFields(call);
 
-    pDestObj dest = data.dest->find(call->phone);
+    pDestObj dest = data.dest->find(call->phone_num);
 
     if (dest != 0) {
         call->mob = dest->mob;
         call->dest = dest->dest;
         call->geo_id = dest->geo_id;
+        call->geo_operator_id = dest->geo_operator_id;
         strcpy(call->prefix_geo, dest->prefix);
     }
 
@@ -43,6 +44,7 @@ void CalcFull::cleanupCalculatedFields(pCallObj call) {
     call->mob = false;
     call->dest = 2;
     call->geo_id = 0;
+    call->geo_operator_id = 0;
 
     call->len_mcn = call->len_op = call->len;
 }
@@ -54,13 +56,13 @@ void CalcFull::calculateOperator(pCallObj call) {
     pPriceObj price_op = 0;
 
     if (call->out) {
-        char * phone = &call->phone[0];
+        char * phone = &call->phone_num[0];
 
         if (call->isLocal()) {
             if (oper->local_network_pricelist_id) {
                 call->pricelist_op_id = oper->local_network_pricelist_id;
 
-                pNetworkPrefixObj networkItem = data.network_prefix->find(call->operator_id, call->phone);
+                pNetworkPrefixObj networkItem = data.network_prefix->find(call->operator_id, call->phone_num);
                 if (networkItem != 0) {
 
                     char networkType[20];
@@ -99,7 +101,7 @@ void CalcFull::calculateOperator(pCallObj call) {
 
             call->pricelist_op_id = oper->operator_7800_pricelist_id;
 
-            price_op = data.price->find(call->pricelist_op_id, call->phone);
+            price_op = data.price->find(call->pricelist_op_id, call->phone_num);
             if (price_op != 0) {
                 call->price_op = price_op->price;
                 strcpy(call->prefix_op, price_op->prefix);
@@ -131,7 +133,7 @@ void CalcFull::calculateOperator(pCallObj call) {
 pUsageObj CalcFull::spawnUsageVoip(pCallObj call) {
     pUsageObj usage;
     if (call->instance_id < 100) {
-        usage = data.usage->find(call->usage);
+        usage = data.usage->find(call->usage_num);
     } else {
         char fake_a_number[10];
         sprintf(fake_a_number, "%d", call->instance_id);
@@ -175,7 +177,7 @@ void CalcFull::calculateMcnOut(pCallObj call, pUsageObj usage) {
             usage->tariffication_free_first_seconds
             );
 
-    pPriceObj price_mcn = data.price->find(call->pricelist_mcn_id, call->phone);
+    pPriceObj price_mcn = data.price->find(call->pricelist_mcn_id, call->phone_num);
     if (price_mcn != 0) {
         call->price_mcn = price_mcn->price;
         call->amount_mcn = floor((float) (call->len_mcn * call->price_mcn) / (60 * 100) + 0.5);
@@ -202,7 +204,7 @@ void CalcFull::calculateMcnIn(pCallObj call, pUsageObj usage) {
                     usage->tariffication_free_first_seconds
                     );
 
-            pPriceObj price_mcn = data.price->find(call->pricelist_mcn_id, call->phone);
+            pPriceObj price_mcn = data.price->find(call->pricelist_mcn_id, call->phone_num);
             if (price_mcn != 0) {
                 call->price_mcn = price_mcn->price;
                 call->amount_mcn = floor((float) (call->len_mcn * call->price_mcn) / (60 * 100) + 0.5);
@@ -251,7 +253,7 @@ void CalcFull::updateFreeMinsCounters(pCallObj call, pUsageObj usage) {
     if (call->isLocalOrZona() &&
             call->mob == false &&
             usage->free_seconds > 0 &&
-            (call->redirect == false || usage->paid_redirect == false)
+            (call->redirect_num[0] == 0 || usage->paid_redirect == false)
             ) {
         int used_free_seconds = data.counter_fmin->get(call->usage_id, 1);
         int used_free_seconds_local = fmin_counter2->get(call->usage_id, 1);
@@ -297,7 +299,7 @@ bool CalcFull::isCallFromAnotherInstance(pCallObj call) {
 }
 
 bool CalcFull::isUsage7800(pCallObj call) {
-    return call->usage[0] == '7' && call->usage[1] == '8' && call->usage[2] == '0' && call->usage[3] == '0';
+    return call->usage_num[0] == '7' && call->usage_num[1] == '8' && call->usage_num[2] == '0' && call->usage_num[3] == '0';
 }
 
 void CalcFull::html(std::stringstream &html) {

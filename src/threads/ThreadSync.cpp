@@ -300,6 +300,7 @@ ThreadSync::ThreadSync() {
     s9.t_to = "geo.prefix";
     s9.add_field("prefix");
     s9.add_field("geo_id");
+    s9.add_field("operator_id");
     s9.add_field("mob");
     s9.add_field("dest");
     s9.add_field("region");

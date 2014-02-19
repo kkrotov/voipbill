@@ -29,12 +29,12 @@ void insert_row(pCallObj call, string *q) {
     sprintf(num, "%d", call->usage_id);
     q->append(call->usage_id != 0 ? num : "NULL");
     q->append(",");
-    q->append("'0");
-    q->append(call->usage);
-    q->append("',");
-    q->append("'0");
-    q->append(call->phone);
-    q->append("',");
+    q->append(call->usage_num[0] != 0 ? call->usage_num : "NULL");
+    q->append(",");
+    q->append(call->phone_num[0] != 0 ? call->phone_num : "NULL");
+    q->append(",");
+    q->append(call->redirect_num[0] != 0 ? call->redirect_num : "NULL");
+    q->append(",");
 
     sprintf(num, "%d", call->amount_mcn);
     q->append(num);
@@ -54,8 +54,6 @@ void insert_row(pCallObj call, string *q) {
     q->append(",");
     q->append(call->mob ? "true" : "false");
     q->append(",");
-    q->append(call->redirect ? "true" : "false");
-    q->append(",");
 
     sprintf(num, "%d", call->dest);
     q->append(num);
@@ -71,6 +69,9 @@ void insert_row(pCallObj call, string *q) {
     q->append(",");
     sprintf(num, "%d", call->geo_id);
     q->append(call->geo_id != 0 ? num : "NULL");
+    q->append(",");
+    sprintf(num, "%d", call->geo_operator_id);
+    q->append(call->geo_operator_id != 0 ? num : "NULL");
     q->append(",");
     sprintf(num, "%d", call->pricelist_op_id);
     q->append(call->pricelist_op_id != 0 ? num : "NULL");
@@ -105,9 +106,9 @@ void make_insert_queries(map<time_t, string> &queryPerMonth, CallsObjList *list)
             q = &queryPerMonth[call->dt.month];
             q->reserve(300 + list->count * 300);
             q->append("INSERT INTO calls.calls_" + string(buff) + "(" \
-                        "time,id,direction_out,len,len_mcn,len_op,client_id,usage_id,usage_num, phone_num," \
-                        "amount,pricelist_mcn_id,amount_op,operator_id,free_min_groups_id,mob,redirect," \
-                        "dest,month,day,region,geo_id,pricelist_op_id,price,price_op,prefix_geo,prefix_mcn,prefix_op" \
+                        "time,id,direction_out,len,len_mcn,len_op,client_id,usage_id,usage_num, phone_num, redirect_num," \
+                        "amount,pricelist_mcn_id,amount_op,operator_id,free_min_groups_id,mob," \
+                        "dest,month,day,region,geo_id,geo_operator_id,pricelist_op_id,price,price_op,prefix_geo,prefix_mcn,prefix_op" \
                      ")VALUES\n");
         } else {
             q = &queryPerMonth[call->dt.month];

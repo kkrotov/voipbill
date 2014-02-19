@@ -34,7 +34,7 @@ string DestObjList::sql(BDb * db) {
                 "                    dest " \
                 "                end " \
                 "            end, " \
-                "    geo_id, mob" \
+                "    geo_id, operator_id, mob" \
                 "   from geo.prefix " \
                 "   order by prefix asc ";
 }
@@ -44,7 +44,8 @@ inline void DestObjList::parse_item(BDbResult &row, void * obj) {
     strcpy(item->prefix, row.get(0));
     item->dest = row.get_i(1);
     item->geo_id = row.get_i(2);
-    item->mob = row.get_b(3);
+    item->geo_operator_id = row.get_i(3);
+    item->mob = row.get_b(4);
 }
 
 inline char * DestObjList::key(const void *obj) {

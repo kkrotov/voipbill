@@ -6,6 +6,7 @@ typedef struct _DestObj {
     char prefix[20];
     int dest;
     int geo_id;
+    int geo_operator_id;
     bool mob;
 } DestObj, *pDestObj;
 
@@ -111,8 +112,9 @@ typedef struct _CallObj {
     char time[25];
     bool out;
 
-    char usage[20];
-    char phone[20];
+    char usage_num[20];
+    char phone_num[20];
+    char redirect_num[20];
 
     char prefix_geo[20];
     char prefix_mcn[20];
@@ -121,7 +123,6 @@ typedef struct _CallObj {
     long long int id_num;
 
     bool mob;
-    bool redirect;
     int dest;
     int usage_id;
     int client_id;
@@ -138,6 +139,7 @@ typedef struct _CallObj {
     int operator_id;
     int freemin_group_id;
     int geo_id;
+    int geo_operator_id;
 
     int kill_call_reason;
 
