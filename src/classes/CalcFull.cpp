@@ -17,7 +17,7 @@ void CalcFull::calc_item(pCallObj call) {
 
     calculateOperator(call);
 
-    if (isCallFromAnotherInstance(call)) return;
+    if (call->isCallFromAnotherInstance()) return;
 
     calculateMcn(call);
 }
@@ -64,11 +64,7 @@ void CalcFull::calculateOperator(pCallObj call) {
 
                 pNetworkPrefixObj networkItem = data.network_prefix->find(call->operator_id, call->phone_num);
                 if (networkItem != 0) {
-
-                    char networkType[20];
-                    sprintf(networkType, "%d", networkItem->network_type_id);
-
-                    price_op = data.price->find(call->pricelist_op_id, networkType);
+                    price_op = data.price->find(call->pricelist_op_id, networkItem->network_type_id);
                     if (price_op != 0) {
                         call->price_op = price_op->price;
                         strcpy(call->prefix_op, price_op->prefix);
@@ -131,15 +127,13 @@ void CalcFull::calculateOperator(pCallObj call) {
 }
 
 pUsageObj CalcFull::spawnUsageVoip(pCallObj call) {
-    pUsageObj usage;
-    if (call->instance_id < 100) {
-        usage = data.usage->find(call->usage_num);
+
+    if (call->isTrank()) {
+        return data.usage->find(call->instance_id);
     } else {
-        char fake_a_number[10];
-        sprintf(fake_a_number, "%d", call->instance_id);
-        usage = data.usage->find(fake_a_number);
+        return data.usage->find(call->usage_num);
     }
-    return usage;
+
 }
 
 void CalcFull::calculateMcn(pCallObj call) {
@@ -155,7 +149,6 @@ void CalcFull::calculateMcn(pCallObj call) {
     } else {
         calculateMcnIn(call, usage);
     }
-
 
 }
 

@@ -151,4 +151,6 @@ typedef struct _CallObj {
     bool isRussian();
     bool isInternational();
     bool isSNG();
+    bool isTrank();
+    bool isCallFromAnotherInstance();
 } CallObj, *pCallObj;

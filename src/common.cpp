@@ -127,7 +127,10 @@ time_t t_day_start = 0;
 time_t t_day_end = 0;
 
 time_t get_tday() {
-    time_t rawtime = time(NULL);
+    return get_tday(time(NULL));
+}
+
+time_t get_tday(const time_t rawtime) {
 
     if (rawtime >= t_day_start && rawtime <= t_day_end) {
         return t_day_start;
@@ -150,7 +153,10 @@ time_t t_month_start = 0;
 time_t t_month_end = 0;
 
 time_t get_tmonth() {
-    time_t rawtime = time(NULL);
+    return get_tmonth(time(NULL));
+}
+
+time_t get_tmonth(const time_t rawtime) {
 
     if (rawtime >= t_month_start && rawtime <= t_month_end) {
         return t_month_start;

@@ -115,7 +115,6 @@
         <itemPath>src/lists/FminCounter.h</itemPath>
         <itemPath>src/lists/NetworkPrefixObjList.cpp</itemPath>
         <itemPath>src/lists/NetworkPrefixObjList.h</itemPath>
-        <itemPath>src/lists/Obj.h</itemPath>
         <itemPath>src/lists/ObjList.cpp</itemPath>
         <itemPath>src/lists/ObjList.h</itemPath>
         <itemPath>src/lists/OperatorList.cpp</itemPath>
@@ -128,6 +127,10 @@
         <itemPath>src/lists/RuntimeCallsObjList.h</itemPath>
         <itemPath>src/lists/UsageObjList.cpp</itemPath>
         <itemPath>src/lists/UsageObjList.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="models" projectFiles="true">
+        <itemPath>src/models/obj.cpp</itemPath>
+        <itemPath>src/models/obj.h</itemPath>
       </logicalFolder>
       <logicalFolder name="tasks" displayName="tasks" projectFiles="true">
         <itemPath>src/tasks/Task.cpp</itemPath>
@@ -459,8 +462,6 @@
       </item>
       <item path="src/lists/NetworkPrefixObjList.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src/lists/Obj.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="src/lists/ObjList.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/lists/ObjList.h" ex="false" tool="3" flavor2="0">
@@ -486,6 +487,10 @@
       <item path="src/lists/UsageObjList.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/models/obj.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/models/obj.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/tasks/Task.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -836,8 +841,6 @@
       </item>
       <item path="src/lists/NetworkPrefixObjList.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src/lists/Obj.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="src/lists/ObjList.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/lists/ObjList.h" ex="false" tool="3" flavor2="0">
@@ -863,6 +866,10 @@
       <item path="src/lists/UsageObjList.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/models/obj.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/models/obj.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/tasks/Task.cpp" ex="false" tool="1" flavor2="0">
       </item>

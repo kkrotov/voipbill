@@ -42,8 +42,10 @@ time_t parseDateTime(char * str);
 bool parseDateTime(char * str, DT &dt);
 
 time_t get_tday();
+time_t get_tday(const time_t rawtime);
 
 time_t get_tmonth();
+time_t get_tmonth(const time_t rawtime);
 
 time_t get_tmonth_end();
 
