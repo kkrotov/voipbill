@@ -54,11 +54,11 @@ inline long long int UsageObjList::key(const void *obj) {
     return ((pUsageObj) obj)->phone_num;
 }
 
-pUsageObj UsageObjList::find(const char * phone) {
-    return (pUsageObj) _find(atoll(phone));
+pUsageObj UsageObjList::find(const char * phone_num) {
+    return (pUsageObj) _find(atoll(phone_num));
 }
 
-pUsageObj UsageObjList::find(const long long int phone) {
-    return (pUsageObj) _find(phone);
+pUsageObj UsageObjList::find(const long long int phone_num) {
+    return (pUsageObj) _find(phone_num);
 }
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Obj.h"
 #include "ObjList.h"
 
 class PriceObjList : public ObjListByIntPrefix {
@@ -12,4 +11,5 @@ protected:
     char * key(const void *obj);
 public:
     pPriceObj find(const int pricelist_id, const char * prefix);
+    pPriceObj find(const int pricelist_id, const long long int nPrefix);
 };

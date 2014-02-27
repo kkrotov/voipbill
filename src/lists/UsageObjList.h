@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Obj.h"
 #include "ObjList.h"
 
 class UsageObjList : public ObjListBy2Long {
@@ -10,6 +9,6 @@ protected:
     void parse_item(BDbResult &row, void * obj);
     long long int key(const void *obj);
 public:
-    pUsageObj find(const char * phone);
-    pUsageObj find(const long long int phone);
+    pUsageObj find(const char * phone_num);
+    pUsageObj find(const long long int phone_num);
 };

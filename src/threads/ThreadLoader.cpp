@@ -6,13 +6,6 @@ bool ThreadLoader::ready() {
 }
 
 bool ThreadLoader::prepare() {
-    if (!app.init_load_data_done) {
-        Log::info("Loading data...");
-        if (!this->do_load_data()) {
-            return false;
-        }
-        app.init_load_data_done = true;
-    }
 
     if (!app.init_load_counters_done) {
         Log::info("Loading counters...");
@@ -20,6 +13,14 @@ bool ThreadLoader::prepare() {
             return false;
         }
         app.init_load_counters_done = true;
+    }
+
+    if (!app.init_load_data_done) {
+        Log::info("Loading data...");
+        if (!this->do_load_data()) {
+            return false;
+        }
+        app.init_load_data_done = true;
     }
 
     return true;
@@ -232,6 +233,8 @@ bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader) {
     NetworkPrefixObjList * network_prefix = new NetworkPrefixObjList();
 
     try {
+        db_calls.exec("DELETE from billing.events");
+
         client->load(db);
 
         dest->load(db);
