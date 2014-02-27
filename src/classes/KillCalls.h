@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../lists/CurrentCallsObjList.h"
-#include "../lists/Obj.h"
 #include "UdpControlClient.h"
 #include "../common.h"
 #include "Log.h"

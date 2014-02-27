@@ -103,10 +103,10 @@ void BDb::exec(const char * squery) {
     }
 
 
-    //char short_query[256];
-    //strncpy(short_query, squery, sizeof (short_query) - 1);
-    //errors += "SQL: ";
-    //errors += short_query;
+    char short_query[2048];
+    strncpy(short_query, squery, sizeof (short_query) - 1);
+    errors += "SQL: ";
+    errors += short_query;
     throw DbException(errors, "BDb::exec");
 }
 

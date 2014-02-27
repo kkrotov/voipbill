@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Obj.h"
 #include "ObjList.h"
 
 class PricelistList : public ObjListByInt {

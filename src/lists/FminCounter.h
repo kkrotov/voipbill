@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Obj.h"
 #include "ObjList.h"
 #include <map>
 using namespace std;

@@ -94,6 +94,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/lists/RuntimeCallsObjList.o \
 	${OBJECTDIR}/src/lists/UsageObjList.o \
 	${OBJECTDIR}/src/main.o \
+	${OBJECTDIR}/src/models/obj.o \
 	${OBJECTDIR}/src/tasks/Task.o \
 	${OBJECTDIR}/src/tasks/TaskRecalc.o \
 	${OBJECTDIR}/src/tests/Test.o \
@@ -432,6 +433,11 @@ ${OBJECTDIR}/src/main.o: src/main.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -Ilibs/boost -Ilibs/gtest/include -I/usr/pgsql-9.1/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/main.o src/main.cpp
+
+${OBJECTDIR}/src/models/obj.o: src/models/obj.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/models
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -Ilibs/boost -Ilibs/gtest/include -I/usr/pgsql-9.1/include -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/models/obj.o src/models/obj.cpp
 
 ${OBJECTDIR}/src/tasks/Task.o: src/tasks/Task.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/tasks

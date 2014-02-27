@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common.h"
+#include "../models/obj.h"
 #include "../classes/BDb.h"
 #include "../classes/Timer.h"
 #include "../classes/Exception.h"

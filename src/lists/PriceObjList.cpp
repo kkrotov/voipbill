@@ -30,3 +30,9 @@ pPriceObj PriceObjList::find(const int pricelist_id, const char * prefix) {
     return (pPriceObj) _find(pricelist_id, prefix);
 }
 
+pPriceObj PriceObjList::find(const int pricelist_id, const long long int nPrefix) {
+    char prefix[20];
+    sprintf(prefix, "%d", nPrefix);
+    return (pPriceObj) _find(pricelist_id, prefix);
+}
+

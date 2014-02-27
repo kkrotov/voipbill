@@ -86,6 +86,10 @@ void CalcBase::calc_limit(CurrentCallsObjList *list) {
 
     for (int i = 0; i < list->count; i++) {
         pCallObj call = list->get(i);
+
+        if (call->isCallFromAnotherInstance())
+            continue;
+
         // clients-operators or this region
         if (call->usage_id == 0 && (call->instance_id >= 100 || call->instance_id == app.conf.instance_id)) {
             call->kill_call_reason = 1000;
