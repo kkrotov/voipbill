@@ -1,6 +1,5 @@
 #include "ThreadTasks.h"
 #include "../classes/AppAuth.h"
-#include "../tasks/TaskRecalc.h"
 
 ThreadTasks::ThreadTasks() {
     id = "tasks";

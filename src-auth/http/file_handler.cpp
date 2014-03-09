@@ -72,10 +72,6 @@ namespace http {
                     rep = reply::stock_reply(reply::not_found);
                     return;
                 }
-            } else if (request_path == "/counters") {
-                ThreadWeb::handlerCounters(html);
-            } else if (request_path == "/client") {
-                ThreadWeb::handlerClient(html, parameters);
             } else {
                 rep = reply::stock_reply(reply::not_found);
                 return;

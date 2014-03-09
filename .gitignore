@@ -1,15 +1,14 @@
 /libs
+*~
 
 /app_auth/build
 /app_auth/dist
 /app_auth/.dep.inc
 /app_auth/nbproject/private
 /app_auth/nbproject/*.mk
-/app_auth/nbproject/*.xml~
 
 /app_bill/build
 /app_bill/dist
 /app_bill/.dep.inc
 /app_bill/nbproject/private
 /app_bill/nbproject/*.mk
-/app_bill/nbproject/*.xml~
