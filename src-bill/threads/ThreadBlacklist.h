@@ -1,0 +1,29 @@
+#pragma once
+
+#include "../../src/threads/Thread.h"
+#include "../../src/classes/DataLoader.h"
+#include "../../src/classes/BlackListLocal.h"
+#include "../../src/classes/BlackListGlobal.h"
+
+class ThreadBlacklist : public Thread {
+    DataLoader *loader;
+    BlackListLocal *blacklist_local;
+    BlackListGlobal *blacklist_global;
+
+    time_t last_sync_from_openca_time;
+
+    bool ready();
+    bool prepare();
+
+    void run();
+
+    void sync_blacklist();
+    void sync_once_per_day();
+
+    void update_voip_auto_disabled();
+
+
+    void htmlfull(stringstream &html);
+public:
+    ThreadBlacklist();
+};

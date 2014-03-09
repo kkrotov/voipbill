@@ -28,7 +28,6 @@ typedef struct _DT {
     time_t month;
 } DT, *pDT;
 
-
 string string_fmt(const string &fmt, ...);
 
 string string_date(const time_t dt);

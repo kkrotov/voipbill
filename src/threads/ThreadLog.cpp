@@ -3,7 +3,7 @@
 
 void ThreadLog::run() {
 
-    app.logger.processLogQueue();
+    app().logger.processLogQueue();
 
 }
 
@@ -15,9 +15,9 @@ void ThreadLog::htmlfull(stringstream & html) {
     html << "loops: <b>" << t.count << "</b><br/>\n";
     html << "<br/>\n";
 
-    list<pLogMessage> history = app.logger.getHistory();
+    list<pLogMessage> history = app().logger.getHistory();
 
-    html << "Queue length: <b>" << app.logger.getQueueLength() << "</b><br/>\n";
+    html << "Queue length: <b>" << app().logger.getQueueLength() << "</b><br/>\n";
     html << "History length: <b>" << history.size() << "</b><br/>\n";
     html << "<br/>\n";
 

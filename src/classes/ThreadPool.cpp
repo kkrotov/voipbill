@@ -97,7 +97,7 @@ void ThreadPool::thread_real_status_changed(Thread *thread) {
     } else {
         app_real_status = AppStatus::APP_PREPARING;
     }
-    app.setRealStatus(app_real_status);
+    app().setRealStatus(app_real_status);
 }
 
 void ThreadPool::app_status_changed() {
@@ -117,7 +117,7 @@ void ThreadPool::app_real_status_changed() {
 }
 
 ThreadStatus ThreadPool::getThreadStatusByAppStatus() {
-    AppStatus app_status = app.getStatus();
+    AppStatus app_status = app().getStatus();
 
     if (app_status == AppStatus::APP_PREPARING) {
         return ThreadStatus::THREAD_PREPARING;

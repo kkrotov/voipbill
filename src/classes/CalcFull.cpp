@@ -218,7 +218,7 @@ void CalcFull::calculateMcnIn(pCallObj call, pUsageObj usage) {
 
 int CalcFull::getCallLength(int len, bool byMinutes, bool fullFirstMinute, bool freeFirstMinutes) {
 
-    if (freeFirstMinutes && len <= app.conf.billing_free_seconds)
+    if (freeFirstMinutes && len <= app().conf.billing_free_seconds)
         return 0;
 
     if (len <= 0)
@@ -288,7 +288,7 @@ void CalcFull::updateClientCounters(pCallObj call) {
 bool CalcFull::isCallFromAnotherInstance(pCallObj call) {
     return call->instance_id >= 80
             && call->instance_id < 100
-            && call->instance_id != app.conf.instance_id;
+            && call->instance_id != app().conf.instance_id;
 }
 
 bool CalcFull::isUsage7800(pCallObj call) {

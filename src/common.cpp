@@ -1,4 +1,5 @@
 #include "common.h"
+#include "classes/App.h"
 #include "classes/Logger.h"
 #include "classes/Log.h"
 
