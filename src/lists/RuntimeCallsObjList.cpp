@@ -13,7 +13,7 @@ void RuntimeCallsObjList::refresh_current_id() {
 
 string RuntimeCallsObjList::sql(BDb * db) {
     if (last_id == 0) {
-        BDb db_calls(app.conf.db_calls);
+        BDb db_calls(app().conf.db_calls);
         BDbResult res = db_calls.query("select max(id) from calls.calls");
         if (res.next()) {
             last_id = res.get_ll(0);
@@ -37,10 +37,10 @@ string RuntimeCallsObjList::sql(BDb * db) {
             "	from radacct_voip_stop " \
             "	where " \
             "       radacctid>'" + lexical_cast<string>(last_id) + "' " \
-            "		and disconnectcause != " + lexical_cast<string>(app.conf.billing_dc_break) +
+            "		and disconnectcause != " + lexical_cast<string>(app().conf.billing_dc_break) +
             "       and direction in ('in','out') " \
-            "       and not (in_oper = " + app.conf.str_instance_id + " and out_oper = 80) " \
-            "       and not (in_oper = 80 and out_oper = " + app.conf.str_instance_id + ") " \
+            "       and not (in_oper = " + app().conf.str_instance_id + " and out_oper = 80) " \
+            "       and not (in_oper = 80 and out_oper = " + app().conf.str_instance_id + ") " \
             "	order by radacctid " \
             "	limit " + lexical_cast<string>(nrows);
 }
@@ -68,9 +68,9 @@ inline void RuntimeCallsObjList::parse_item(BDbResult &row, void * obj) {
 
     strcpy((char*) &item->redirect_num, row.get(8));
 
-    if (item->instance_id == 80) item->instance_id = app.conf.instance_id;
-    if (item->instance_id == 0) item->instance_id = app.conf.instance_id;
-    if (item->operator_id == 80) item->operator_id = app.conf.instance_id;
+    if (item->instance_id == 80) item->instance_id = app().conf.instance_id;
+    if (item->instance_id == 0) item->instance_id = app().conf.instance_id;
+    if (item->operator_id == 80) item->operator_id = app().conf.instance_id;
 
     item->kill_call_reason = 0;
     item->prefix_geo[0] = 0;

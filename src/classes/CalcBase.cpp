@@ -91,7 +91,7 @@ void CalcBase::calc_limit(CurrentCallsObjList *list) {
             continue;
 
         // clients-operators or this region
-        if (call->usage_id == 0 && (call->instance_id >= 100 || call->instance_id == app.conf.instance_id)) {
+        if (call->usage_id == 0 && (call->instance_id >= 100 || call->instance_id == app().conf.instance_id)) {
             call->kill_call_reason = 1000;
             continue;
         }

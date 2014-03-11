@@ -1,0 +1,948 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="91">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="f1" displayName="libs" projectFiles="true">
+      <logicalFolder name="f2"
+                     displayName="boost_program_options"
+                     projectFiles="true">
+        <itemPath>../libs/boost/libs/program_options/src/cmdline.cpp</itemPath>
+        <itemPath>../libs/boost/libs/program_options/src/config_file.cpp</itemPath>
+        <itemPath>../libs/boost/libs/program_options/src/convert.cpp</itemPath>
+        <itemPath>../libs/boost/libs/program_options/src/options_description.cpp</itemPath>
+        <itemPath>../libs/boost/libs/program_options/src/parsers.cpp</itemPath>
+        <itemPath>../libs/boost/libs/program_options/src/positional_options.cpp</itemPath>
+        <itemPath>../libs/boost/libs/program_options/src/split.cpp</itemPath>
+        <itemPath>../libs/boost/libs/program_options/src/utf8_codecvt_facet.cpp</itemPath>
+        <itemPath>../libs/boost/libs/program_options/src/value_semantic.cpp</itemPath>
+        <itemPath>../libs/boost/libs/program_options/src/variables_map.cpp</itemPath>
+        <itemPath>../libs/boost/libs/program_options/src/winmain.cpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="boost_system" projectFiles="true">
+        <itemPath>../libs/boost/libs/system/src/error_code.cpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f4" displayName="boost_thread" projectFiles="true">
+        <logicalFolder name="f1" displayName="pthread" projectFiles="true">
+          <itemPath>../libs/boost/libs/thread/src/pthread/once_atomic.cpp</itemPath>
+          <itemPath>../libs/boost/libs/thread/src/pthread/thread.cpp</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="f3" displayName="gtest" projectFiles="true">
+        <itemPath>../libs/gtest/src/gtest-death-test.cc</itemPath>
+        <itemPath>../libs/gtest/src/gtest-filepath.cc</itemPath>
+        <itemPath>../libs/gtest/src/gtest-port.cc</itemPath>
+        <itemPath>../libs/gtest/src/gtest-printers.cc</itemPath>
+        <itemPath>../libs/gtest/src/gtest-test-part.cc</itemPath>
+        <itemPath>../libs/gtest/src/gtest-typed-test.cc</itemPath>
+        <itemPath>../libs/gtest/src/gtest.cc</itemPath>
+      </logicalFolder>
+    </logicalFolder>
+    <logicalFolder name="src" displayName="src" projectFiles="true">
+      <logicalFolder name="classes" displayName="classes" projectFiles="true">
+        <itemPath>../src/classes/App.cpp</itemPath>
+        <itemPath>../src/classes/App.h</itemPath>
+        <itemPath>../src/classes/BDb.cpp</itemPath>
+        <itemPath>../src/classes/BDb.h</itemPath>
+        <itemPath>../src/classes/BDbResult.cpp</itemPath>
+        <itemPath>../src/classes/BDbResult.h</itemPath>
+        <itemPath>../src/classes/BaseLogWriter.cpp</itemPath>
+        <itemPath>../src/classes/BaseLogWriter.h</itemPath>
+        <itemPath>../src/classes/BlackList.cpp</itemPath>
+        <itemPath>../src/classes/BlackList.h</itemPath>
+        <itemPath>../src/classes/BlackListGlobal.h</itemPath>
+        <itemPath>../src/classes/BlackListLocal.h</itemPath>
+        <itemPath>../src/classes/CalcBase.cpp</itemPath>
+        <itemPath>../src/classes/CalcBase.h</itemPath>
+        <itemPath>../src/classes/CalcFull.cpp</itemPath>
+        <itemPath>../src/classes/CalcFull.h</itemPath>
+        <itemPath>../src/classes/CallsSaver.cpp</itemPath>
+        <itemPath>../src/classes/CallsSaver.h</itemPath>
+        <itemPath>../src/classes/Conf.cpp</itemPath>
+        <itemPath>../src/classes/Conf.h</itemPath>
+        <itemPath>../src/classes/CounterLoader.h</itemPath>
+        <itemPath>../src/classes/Daemon.cpp</itemPath>
+        <itemPath>../src/classes/Daemon.h</itemPath>
+        <itemPath>../src/classes/DataLoader.cpp</itemPath>
+        <itemPath>../src/classes/DataLoader.h</itemPath>
+        <itemPath>../src/classes/DbException.h</itemPath>
+        <itemPath>../src/classes/Exception.h</itemPath>
+        <itemPath>../src/classes/KillCalls.h</itemPath>
+        <itemPath>../src/classes/Loader.h</itemPath>
+        <itemPath>../src/classes/Log.cpp</itemPath>
+        <itemPath>../src/classes/Log.h</itemPath>
+        <itemPath>../src/classes/LogWriterFile.cpp</itemPath>
+        <itemPath>../src/classes/LogWriterFile.h</itemPath>
+        <itemPath>../src/classes/LogWriterScreen.cpp</itemPath>
+        <itemPath>../src/classes/LogWriterScreen.h</itemPath>
+        <itemPath>../src/classes/LogWriterSyslog.cpp</itemPath>
+        <itemPath>../src/classes/LogWriterSyslog.h</itemPath>
+        <itemPath>../src/classes/Logger.cpp</itemPath>
+        <itemPath>../src/classes/Logger.h</itemPath>
+        <itemPath>../src/classes/ThreadPool.cpp</itemPath>
+        <itemPath>../src/classes/ThreadPool.h</itemPath>
+        <itemPath>../src/classes/Timer.h</itemPath>
+        <itemPath>../src/classes/UdpControlClient.cpp</itemPath>
+        <itemPath>../src/classes/UdpControlClient.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="http" displayName="http" projectFiles="true">
+        <itemPath>../src/http/coroutine.hpp</itemPath>
+        <itemPath>../src/http/header.hpp</itemPath>
+        <itemPath>../src/http/mime_types.cpp</itemPath>
+        <itemPath>../src/http/mime_types.hpp</itemPath>
+        <itemPath>../src/http/reply.cpp</itemPath>
+        <itemPath>../src/http/reply.hpp</itemPath>
+        <itemPath>../src/http/request.hpp</itemPath>
+        <itemPath>../src/http/request_parser.cpp</itemPath>
+        <itemPath>../src/http/request_parser.hpp</itemPath>
+        <itemPath>../src/http/server.cpp</itemPath>
+        <itemPath>../src/http/server.hpp</itemPath>
+        <itemPath>../src/http/unyield.hpp</itemPath>
+        <itemPath>../src/http/yield.hpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="lists" displayName="lists" projectFiles="true">
+        <itemPath>../src/lists/CallsObjList.cpp</itemPath>
+        <itemPath>../src/lists/CallsObjList.h</itemPath>
+        <itemPath>../src/lists/ClientCounter.cpp</itemPath>
+        <itemPath>../src/lists/ClientCounter.h</itemPath>
+        <itemPath>../src/lists/ClientObjList.cpp</itemPath>
+        <itemPath>../src/lists/ClientObjList.h</itemPath>
+        <itemPath>../src/lists/CurrentCallsObjList.cpp</itemPath>
+        <itemPath>../src/lists/CurrentCallsObjList.h</itemPath>
+        <itemPath>../src/lists/DestObjList.cpp</itemPath>
+        <itemPath>../src/lists/DestObjList.h</itemPath>
+        <itemPath>../src/lists/FminCounter.cpp</itemPath>
+        <itemPath>../src/lists/FminCounter.h</itemPath>
+        <itemPath>../src/lists/NetworkPrefixObjList.cpp</itemPath>
+        <itemPath>../src/lists/NetworkPrefixObjList.h</itemPath>
+        <itemPath>../src/lists/ObjList.cpp</itemPath>
+        <itemPath>../src/lists/ObjList.h</itemPath>
+        <itemPath>../src/lists/OperatorList.cpp</itemPath>
+        <itemPath>../src/lists/OperatorList.h</itemPath>
+        <itemPath>../src/lists/PriceObjList.cpp</itemPath>
+        <itemPath>../src/lists/PriceObjList.h</itemPath>
+        <itemPath>../src/lists/PricelistList.cpp</itemPath>
+        <itemPath>../src/lists/PricelistList.h</itemPath>
+        <itemPath>../src/lists/RuntimeCallsObjList.cpp</itemPath>
+        <itemPath>../src/lists/RuntimeCallsObjList.h</itemPath>
+        <itemPath>../src/lists/UsageObjList.cpp</itemPath>
+        <itemPath>../src/lists/UsageObjList.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="models" projectFiles="true">
+        <itemPath>../src/models/obj.cpp</itemPath>
+        <itemPath>../src/models/obj.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="tasks" displayName="tasks" projectFiles="true">
+        <itemPath>../src/tasks/Task.cpp</itemPath>
+        <itemPath>../src/tasks/Task.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="tests" projectFiles="true">
+        <itemPath>../src/tests/Test.cpp</itemPath>
+        <itemPath>../src/tests/Test.h</itemPath>
+        <itemPath>../src/tests/TestLibs.cpp</itemPath>
+        <itemPath>../src/tests/TestLoader.cpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="threads" displayName="threads" projectFiles="true">
+        <itemPath>../src/threads/Thread.cpp</itemPath>
+        <itemPath>../src/threads/Thread.h</itemPath>
+        <itemPath>../src/threads/ThreadLog.cpp</itemPath>
+        <itemPath>../src/threads/ThreadLog.h</itemPath>
+      </logicalFolder>
+      <itemPath>../src/common.cpp</itemPath>
+      <itemPath>../src/common.h</itemPath>
+      <itemPath>../src/version.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="src-auth" displayName="src-auth" projectFiles="true">
+      <logicalFolder name="classes" displayName="classes" projectFiles="true">
+        <itemPath>../src-auth/classes/AppAuth.cpp</itemPath>
+        <itemPath>../src-auth/classes/AppAuth.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="http" displayName="http" projectFiles="true">
+        <itemPath>../src-auth/http/file_handler.cpp</itemPath>
+        <itemPath>../src-auth/http/file_handler.hpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="tasks" displayName="tasks" projectFiles="true">
+      </logicalFolder>
+      <logicalFolder name="threads" displayName="threads" projectFiles="true">
+        <itemPath>../src-auth/threads/ThreadLoader.cpp</itemPath>
+        <itemPath>../src-auth/threads/ThreadLoader.h</itemPath>
+        <itemPath>../src-auth/threads/ThreadTasks.cpp</itemPath>
+        <itemPath>../src-auth/threads/ThreadTasks.h</itemPath>
+        <itemPath>../src-auth/threads/ThreadWeb.cpp</itemPath>
+        <itemPath>../src-auth/threads/ThreadWeb.h</itemPath>
+      </logicalFolder>
+      <itemPath>../src-auth/main.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+      <itemPath>conf.sample</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>../src</Elem>
+    <Elem>../libs/boost/libs/system/src</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <architecture>2</architecture>
+          <incDir>
+            <pElem>/usr/pgsql-9.1/include</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <architecture>2</architecture>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../libs/boost</pElem>
+            <pElem>../libs/gtest/include</pElem>
+            <pElem>/usr/pgsql-9.1/include</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/usr/pgsql-9.1/lib</pElem>
+            <pElem>../libs</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerOptionItem>-lpq</linkerOptionItem>
+            <linkerOptionItem>-lrt</linkerOptionItem>
+            <linkerOptionItem>-lstdc++</linkerOptionItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../libs/boost/libs/program_options/src/cmdline.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/config_file.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/convert.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/options_description.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/parsers.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/positional_options.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/split.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/utf8_codecvt_facet.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/value_semantic.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/variables_map.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/winmain.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/system/src/error_code.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/thread/src/pthread/once_atomic.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/thread/src/pthread/thread.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest-death-test.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest-filepath.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest-port.cc" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest-printers.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest-test-part.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest-typed-test.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest.cc" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/classes/AppAuth.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/classes/AppAuth.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/http/file_handler.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/http/file_handler.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadLoader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadLoader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadTasks.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadTasks.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadWeb.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadWeb.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/App.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/App.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BDb.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/BDb.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BDbResult.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/BDbResult.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BaseLogWriter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/BaseLogWriter.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BlackList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/BlackList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BlackListGlobal.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BlackListLocal.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/CalcBase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/CalcBase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/CalcFull.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/CalcFull.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/CallsSaver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/CallsSaver.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Conf.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/Conf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/CounterLoader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Daemon.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/Daemon.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/DataLoader.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/DataLoader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/DbException.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Exception.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/KillCalls.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Loader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Log.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/Log.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/LogWriterFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/LogWriterFile.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/LogWriterScreen.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/LogWriterScreen.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/LogWriterSyslog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/LogWriterSyslog.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/Logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/ThreadPool.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/ThreadPool.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Timer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/UdpControlClient.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/classes/UdpControlClient.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/common.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/coroutine.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/header.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/mime_types.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/http/mime_types.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/reply.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/http/reply.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/request.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/request_parser.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/http/request_parser.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/server.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/http/server.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/unyield.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/yield.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/CallsObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/CallsObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/ClientCounter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/ClientCounter.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/ClientObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/ClientObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/CurrentCallsObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/lists/CurrentCallsObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/DestObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/DestObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/FminCounter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/FminCounter.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/NetworkPrefixObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/lists/NetworkPrefixObjList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/lists/ObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/ObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/OperatorList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/OperatorList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/PriceObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/PriceObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/PricelistList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/PricelistList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/RuntimeCallsObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/lists/RuntimeCallsObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/UsageObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/UsageObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/models/obj.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/models/obj.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/tasks/Task.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/tasks/Task.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/tests/Test.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/tests/Test.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/tests/TestLibs.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/tests/TestLoader.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/threads/Thread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/threads/Thread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/threads/ThreadLog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/version.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+          <architecture>2</architecture>
+          <incDir>
+            <pElem>/usr/pgsql-9.1/include</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <architecture>2</architecture>
+          <standard>8</standard>
+          <incDir>
+            <pElem>../libs/boost</pElem>
+            <pElem>../libs/gtest/include</pElem>
+            <pElem>/usr/pgsql-9.1/include</pElem>
+          </incDir>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/usr/pgsql-9.1/lib</pElem>
+            <pElem>../libs</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerOptionItem>-lpq</linkerOptionItem>
+            <linkerOptionItem>-lrt</linkerOptionItem>
+            <linkerOptionItem>-lstdc++</linkerOptionItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../libs/boost/libs/program_options/src/cmdline.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/config_file.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/convert.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/options_description.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/parsers.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/positional_options.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/split.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/utf8_codecvt_facet.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/value_semantic.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/variables_map.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/program_options/src/winmain.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/system/src/error_code.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/thread/src/pthread/once_atomic.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/boost/libs/thread/src/pthread/thread.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest-death-test.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest-filepath.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest-port.cc" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest-printers.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest-test-part.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest-typed-test.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../libs/gtest/src/gtest.cc" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/classes/AppAuth.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/classes/AppAuth.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/http/file_handler.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/http/file_handler.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadLoader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadLoader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadTasks.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadTasks.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadWeb.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadWeb.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/App.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/App.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BDb.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/BDb.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BDbResult.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/BDbResult.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BaseLogWriter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/BaseLogWriter.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BlackList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/BlackList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BlackListGlobal.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BlackListLocal.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/CalcBase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/CalcBase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/CalcFull.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/CalcFull.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/CallsSaver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/CallsSaver.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Conf.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/Conf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/CounterLoader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Daemon.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/Daemon.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/DataLoader.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/DataLoader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/DbException.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Exception.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/KillCalls.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Loader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Log.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/Log.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/LogWriterFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/LogWriterFile.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/LogWriterScreen.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/LogWriterScreen.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/LogWriterSyslog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/LogWriterSyslog.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/Logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/ThreadPool.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/ThreadPool.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Timer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/UdpControlClient.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/classes/UdpControlClient.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/common.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/coroutine.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/header.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/mime_types.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/http/mime_types.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/reply.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/http/reply.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/request.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/request_parser.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/http/request_parser.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/server.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/http/server.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/unyield.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/http/yield.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/CallsObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/CallsObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/ClientCounter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/ClientCounter.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/ClientObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/ClientObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/CurrentCallsObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/lists/CurrentCallsObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/DestObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/DestObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/FminCounter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/FminCounter.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/NetworkPrefixObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/lists/NetworkPrefixObjList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/lists/ObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/ObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/OperatorList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/OperatorList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/PriceObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/PriceObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/PricelistList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/PricelistList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/RuntimeCallsObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/lists/RuntimeCallsObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/lists/UsageObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/lists/UsageObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/models/obj.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/models/obj.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/tasks/Task.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/tasks/Task.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/tests/Test.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/tests/Test.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/tests/TestLibs.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/tests/TestLoader.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/threads/Thread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/threads/Thread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/threads/ThreadLog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/version.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

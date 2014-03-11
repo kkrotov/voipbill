@@ -8,7 +8,7 @@ size_t NetworkPrefixObjList::item_size() {
 
 string NetworkPrefixObjList::sql(BDb * db) {
     string time = string_date(dt);
-    string instance_id = app.conf.str_instance_id;
+    string instance_id = app().conf.str_instance_id;
     return "	select operator_id, prefix, network_type_id from billing.network_prefix " \
             "	where instance_id = '" + instance_id + "' and date_from <= '" + time + "' and (date_to is null or date_to >= '" + time + "') and deleted=false" \
             "	order by operator_id, prefix";

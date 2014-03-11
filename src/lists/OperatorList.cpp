@@ -7,7 +7,7 @@ size_t OperatorList::item_size() {
 }
 
 string OperatorList::sql(BDb * db) {
-    string instance_id = app.conf.str_instance_id;
+    string instance_id = app().conf.str_instance_id;
     return "   select  id, pricelist_id, term_in_cost, local_network_pricelist_id, client_7800_pricelist_id, operator_7800_pricelist_id " \
             "   from billing.operator " \
             "   where region = 0 or region = " + instance_id +

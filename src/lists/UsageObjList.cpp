@@ -8,7 +8,7 @@ size_t UsageObjList::item_size() {
 
 string UsageObjList::sql(BDb * db) {
     string time = string_date(dt);
-    string instance_id = app.conf.str_instance_id;
+    string instance_id = app().conf.str_instance_id;
     return "      select  u.phone_num, u.id, u.client_id, u.region, " \
             "           t1.freemin*60* case t1.freemin_for_number when true then 1 else u.no_of_lines end, " \
             "           t1.paid_redirect, " \

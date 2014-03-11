@@ -36,5 +36,5 @@ bool _CallObj::isTrank() {
 bool _CallObj::isCallFromAnotherInstance() {
     return instance_id >= 80
             && instance_id < 100
-            && instance_id != app.conf.instance_id;
+            && instance_id != app().conf.instance_id;
 }

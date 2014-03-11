@@ -21,8 +21,8 @@ string CurrentCallsObjList::sql(BDb * db) {
             "	from radacct_voip_start " \
             "   where " \
             "       direction in ('in','out') " \
-            "       and not (in_oper = " + app.conf.str_instance_id + " and out_oper = 80) " \
-            "       and not (in_oper = 80 and out_oper = " + app.conf.str_instance_id + ") " \
+            "       and not (in_oper = " + app().conf.str_instance_id + " and out_oper = 80) " \
+            "       and not (in_oper = 80 and out_oper = " + app().conf.str_instance_id + ") " \
             "   order by acctsessionid";
 }
 
@@ -49,9 +49,9 @@ inline void CurrentCallsObjList::parse_item(BDbResult &row, void * obj) {
 
     strcpy((char*) &item->redirect_num, row.get(7));
 
-    if (item->instance_id == 80) item->instance_id = app.conf.instance_id;
-    if (item->instance_id == 0) item->instance_id = app.conf.instance_id;
-    if (item->operator_id == 80) item->operator_id = app.conf.instance_id;
+    if (item->instance_id == 80) item->instance_id = app().conf.instance_id;
+    if (item->instance_id == 0) item->instance_id = app().conf.instance_id;
+    if (item->operator_id == 80) item->operator_id = app().conf.instance_id;
 
     item->kill_call_reason = 0;
     item->prefix_geo[0] = 0;
