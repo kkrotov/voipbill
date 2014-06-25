@@ -148,6 +148,8 @@ typedef struct _CallObj {
     bool isLocal();
     bool isLocalOrZona();
     bool isZona();
+    bool isZonaMob();
+    bool isZonaStd();
     bool isRussian();
     bool isInternational();
     bool isSNG();

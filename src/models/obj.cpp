@@ -17,6 +17,14 @@ bool _CallObj::isZona() {
     return dest == 0;
 }
 
+bool _CallObj::isZonaMob() {
+    return dest == 0 && mob == true;
+}
+
+bool _CallObj::isZonaStd() {
+    return dest == 0 && mob == false;
+}
+
 bool _CallObj::isRussian() {
     return dest == 1;
 }

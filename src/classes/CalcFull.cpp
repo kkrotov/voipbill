@@ -154,8 +154,12 @@ void CalcFull::calculateMcn(pCallObj call) {
 
 void CalcFull::calculateMcnOut(pCallObj call, pUsageObj usage) {
 
-    if (call->isLocalOrZona())
-        call->pricelist_mcn_id = (call->mob ? usage->pl_local_mob_id : usage->pl_local_id);
+    if (call->isLocal())
+        call->pricelist_mcn_id = usage->pl_local_id;
+    else if (call->isZonaMob())
+        call->pricelist_mcn_id = usage->pl_local_mob_id;
+    else if (call->isZonaStd())
+        call->pricelist_mcn_id = usage->pl_russia_id;
     else if (call->isRussian())
         call->pricelist_mcn_id = usage->pl_russia_id;
     else if (call->isInternational())
@@ -243,8 +247,7 @@ int CalcFull::getCallLength(int len, bool byMinutes, bool fullFirstMinute, bool 
 }
 
 void CalcFull::updateFreeMinsCounters(pCallObj call, pUsageObj usage) {
-    if (call->isLocalOrZona() &&
-            call->mob == false &&
+    if (call->isLocal() &&
             usage->free_seconds > 0 &&
             (call->redirect_num[0] == 0 || usage->paid_redirect == false)
             ) {
