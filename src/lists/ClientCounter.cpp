@@ -109,7 +109,7 @@ void ClientCounter::load(BDb * db, time_t dt) {
             "           on c.client_id=cl.id " \
             "           where " \
             "               c.time >= '" + sPrevMonth + "' " \
-            "               and c.time >= cl.amount_date " \
+            "               and (c.time >= cl.amount_date or cl.amount_date is null) " \
             "           group by cl.id " \
             "       ) as a " \
             "   on c.id = a.client_id " \
@@ -185,7 +185,7 @@ void ClientCounter::reload(BDb * db) {
             "           left join billing.clients cl on c.client_id=cl.id " \
             "           where " \
             "               c.time >= '" + sPrevMonth + "'::date " \
-            "               and c.time >= cl.amount_date " \
+            "               and (c.time >= cl.amount_date or cl.amount_date is null) " \
             "               and cl.sync = 2 " \
             "           group by cl.id " \
             "       ) as a " \
