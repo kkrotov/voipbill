@@ -13,10 +13,10 @@ ThreadBlacklist::ThreadBlacklist() {
 }
 
 bool ThreadBlacklist::ready() {
-    return appBill().init_sync_done &&
-            appBill().init_load_data_done &&
-            appBill().init_load_counters_done &&
-            appBill().init_bill_runtime_started;
+    return app().init_sync_done &&
+            app().init_load_data_done &&
+            app().init_load_counters_done &&
+            app().init_bill_runtime_started;
 }
 
 bool ThreadBlacklist::prepare() {

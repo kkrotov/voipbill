@@ -14,8 +14,7 @@ bool App::init(int argc, char* argv[]) {
 
     srand(time(0));
 
-    if (!conf.init(argc, argv))
-        return false;
+    threads.setApp(this);
 
     setRealStatus(AppStatus::APP_INITIALIZING);
 
@@ -26,7 +25,6 @@ void App::run() {
 
     initLogger();
 
-    Daemoin::setPidFile();
     Daemoin::initSignalHandler();
 
     runApp();

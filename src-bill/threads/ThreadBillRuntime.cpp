@@ -20,9 +20,9 @@ ThreadBillRuntime::ThreadBillRuntime() {
 }
 
 bool ThreadBillRuntime::ready() {
-    return appBill().init_sync_done &&
-            appBill().init_load_data_done &&
-            appBill().init_load_counters_done;
+    return app().init_sync_done &&
+            app().init_load_data_done &&
+            app().init_load_counters_done;
 }
 
 void ThreadBillRuntime::run() {
@@ -71,7 +71,7 @@ repeat:
         calc_calls_loop = 0;
     }
 
-    appBill().init_bill_runtime_started = true;
+    app().init_bill_runtime_started = true;
 }
 
 void ThreadBillRuntime::htmlfull(stringstream &html) {

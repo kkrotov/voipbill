@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../src/threads/Thread.h"
-#include "../../src/classes/CalcFull.h"
+#include "../classes/CalcFull.h"
 
 class ThreadLimitControl : public Thread {
 protected:

@@ -10,10 +10,10 @@ ThreadTasks::ThreadTasks() {
 }
 
 bool ThreadTasks::ready() {
-    return appBill().init_sync_done &&
-            appBill().init_load_data_done &&
-            appBill().init_load_counters_done &&
-            appBill().init_bill_runtime_started;
+    return app().init_sync_done &&
+            app().init_load_data_done &&
+            app().init_load_counters_done &&
+            app().init_bill_runtime_started;
 }
 
 void ThreadTasks::run() {
@@ -38,7 +38,7 @@ void ThreadTasks::run() {
             ttt->tm_min = 0;
             ttt->tm_sec = 0;
 
-            TaskRecalc *task = new TaskRecalc(mktime(ttt));
+            TaskRecalc *task = new TaskRecalc(mktime(ttt), app().conf.str_instance_id);
             task->initTask(db_main, task_id, task_params);
             current_task.reset(task);
             task->run();
@@ -62,7 +62,7 @@ void ThreadTasks::run() {
                 ttt->tm_year--;
             }
 
-            TaskRecalc *task = new TaskRecalc(mktime(ttt));
+            TaskRecalc *task = new TaskRecalc(mktime(ttt), app().conf.str_instance_id);
             task->initTask(db_main, task_id, task_params);
             current_task.reset(task);
             task->run();

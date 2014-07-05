@@ -6,11 +6,11 @@
 #include "../../src/common.h"
 #include "../../src/threads/Thread.h"
 #include "ThreadCurrentCalls.h"
-#include "../../src/classes/App.h"
-#include "../../src/classes/DataLoader.h"
-#include "../../src/classes/CalcFull.h"
-#include "../../src/classes/BlackListLocal.h"
-#include "../../src/classes/BlackListGlobal.h"
+#include "../classes/AppBill.h"
+#include "../classes/DataLoader.h"
+#include "../classes/CalcFull.h"
+#include "../classes/BlackListLocal.h"
+#include "../classes/BlackListGlobal.h"
 
 void ThreadWeb::operator()() {
     if (app().conf.web_port == 0) return;

@@ -1,7 +1,7 @@
 #include "ThreadCurrentCalls.h"
-#include "../../src/classes/App.h"
-#include "../../src/classes/DataLoader.h"
-#include "../../src/classes/CalcFull.h"
+#include "../classes/AppBill.h"
+#include "../classes/DataLoader.h"
+#include "../classes/CalcFull.h"
 
 shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::list(new CurrentCallsObjList());
 spinlock ThreadCurrentCalls::lock;

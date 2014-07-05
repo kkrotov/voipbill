@@ -1,5 +1,6 @@
 #include "../classes/AppBill.h"
 #include "../../src/threads/Thread.h"
+#include "../../src/classes/Daemon.h"
 
 #include "../threads/ThreadBlacklist.h"
 #include "../threads/ThreadBillRuntime.h"
@@ -17,13 +18,17 @@
 #include "../../src/classes/LogWriterFile.h"
 #include "../../src/classes/LogWriterSyslog.h"
 
-App & app() {
+AppBill & app() {
     static AppBill appVar;
     return appVar;
 }
 
-AppBill & appBill() {
-    return (AppBill &) app();
+bool AppBill::init(int argc, char* argv[]) {
+
+    if (!conf.init(argc, argv))
+        return false;
+
+    return App::init(argc, argv);
 }
 
 AppBill::AppBill() {
@@ -34,6 +39,8 @@ AppBill::AppBill() {
 }
 
 void AppBill::runApp() {
+
+    Daemoin::setPidFile(conf.pid_file);
 
     ThreadWeb web;
 

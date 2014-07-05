@@ -4,13 +4,11 @@
 #include <vector>
 using namespace std;
 
+#include <boost/property_tree/ptree.hpp>
+
 #include "BaseLogWriter.h"
 
 class Conf {
-    bool parse_cmd_line(int argc, char* argv[]);
-    bool parse_config_file();
-    bool prepare();
-
 public:
     string app_directory;
     string app_name;
@@ -33,24 +31,13 @@ public:
     unsigned short log_grouping_interval;
 
     bool test_mode;
-    unsigned short web_port;
-
-    string db_main;
-    string db_rad;
-    string db_calls;
-
-    unsigned short instance_id;
-    string str_instance_id;
-
-    string udp_host;
-    unsigned short udp_port;
-    unsigned short udp_openca_select_interval;
-    unsigned short udp_force_finish_call_interval;
-
-    unsigned short billing_dc_break;
-    unsigned short billing_free_seconds;
 
     bool init(int argc, char* argv[]);
+protected:
+    virtual bool parse_config_variables(boost::property_tree::ptree &pt) = 0;
 
-
+private:
+    bool parse_cmd_line(int argc, char* argv[]);
+    bool parse_config_file();
+    bool prepare();
 };

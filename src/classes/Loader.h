@@ -4,7 +4,6 @@
 using namespace std;
 
 #include "../lists/ObjList.h"
-#include "../lists/ClientObjList.h"
 
 template <class TypeObjList>
 class Loader {

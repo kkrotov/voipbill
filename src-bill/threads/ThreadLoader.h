@@ -2,7 +2,7 @@
 
 #include "../../src/threads/Thread.h"
 #include "../../src/classes/BDb.h"
-#include "../../src/classes/DataLoader.h"
+#include "../classes/DataLoader.h"
 #include "../../src/classes/Timer.h"
 
 class ThreadLoader : public Thread {

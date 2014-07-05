@@ -1,9 +1,12 @@
 #pragma once
 
 #include "../../src/classes/App.h"
+#include "ConfAuth.h"
 
 class AppAuth : public App {
 public:
+    ConfAuth conf;
+
     // флаг устанавливается когда первоначальное получение данных с центрального сервера завершено
     volatile bool init_sync_done;
     // флаг устанавливается когда счетчики посчитаны и загружены в память
@@ -14,12 +17,13 @@ public:
     volatile bool init_bill_runtime_started;
 
     AppAuth();
+    virtual bool init(int argc, char* argv[]) override;
 
 protected:
     void runApp();
     void initLogger();
 };
 
-AppAuth & appAuth();
+AppAuth & app();
 
 

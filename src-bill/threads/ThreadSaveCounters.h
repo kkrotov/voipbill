@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../src/threads/Thread.h"
-#include "../../src/classes/DataLoader.h"
+#include "../classes/DataLoader.h"
 
 class ThreadSaveCounters : public Thread {
     DataLoader *loader;

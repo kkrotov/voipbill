@@ -1,22 +1,26 @@
 #include "../classes/AppAuth.h"
 #include "../../src/threads/Thread.h"
+#include "../../src/classes/Daemon.h"
 
 #include "../threads/ThreadLoader.h"
 #include "../threads/ThreadWeb.h"
-#include "../threads/ThreadTasks.h"
-#include "../../src/threads/ThreadLog.h"
+#include "../threads/ThreadLog.h"
 
 #include "../../src/classes/LogWriterScreen.h"
 #include "../../src/classes/LogWriterFile.h"
 #include "../../src/classes/LogWriterSyslog.h"
 
-App & app() {
+AppAuth & app() {
     static AppAuth appVar;
     return appVar;
 }
 
-AppAuth & appAuth() {
-    return (AppAuth &) app();
+bool AppAuth::init(int argc, char* argv[]) {
+
+    if (!conf.init(argc, argv))
+        return false;
+
+    return App::init(argc, argv);
 }
 
 AppAuth::AppAuth() {
@@ -28,13 +32,14 @@ AppAuth::AppAuth() {
 
 void AppAuth::runApp() {
 
+    Daemoin::setPidFile(conf.pid_file);
+
     ThreadWeb web;
 
     boost::thread web_thread(web);
 
     threads.run(new ThreadLog());
     threads.run(new ThreadLoader());
-    threads.run(new ThreadTasks());
 
     web_thread.join();
 }

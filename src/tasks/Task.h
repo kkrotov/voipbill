@@ -5,10 +5,13 @@
 #include "../classes/BDb.h"
 #include "../common.h"
 
+#include "../classes/App.h"
+
 using namespace std;
 
 class Task {
 protected:
+    string server_id;
     BDb *db_main;
     string id;
     string params;
@@ -26,5 +29,7 @@ public:
     virtual void html(stringstream &html);
 
     virtual void run() = 0;
+
+    Task(string server_id);
 };
 

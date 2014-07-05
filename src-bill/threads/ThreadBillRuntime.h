@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../../src/threads/Thread.h"
-#include "../../src/classes/CalcFull.h"
-#include "../../src/classes/CallsSaver.h"
-#include "../../src/lists/RuntimeCallsObjList.h"
+#include "../classes/CalcFull.h"
+#include "../classes/CallsSaver.h"
+#include "../lists/RuntimeCallsObjList.h"
 
 class ThreadBillRuntime : public Thread {
 protected:

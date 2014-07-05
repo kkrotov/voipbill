@@ -41,7 +41,6 @@ bool Conf::parse_cmd_line(int argc, char* argv[]) {
     return true;
 }
 
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -51,7 +50,6 @@ bool Conf::parse_config_file() {
         boost::property_tree::ini_parser::read_ini(config_file, pt);
 
         test_mode = pt.get<bool>("main.test_mode", test_mode);
-        web_port = pt.get<unsigned short>("main.web_port", web_port);
 
         unsigned short level;
         log_file_filename = pt.get<string>("log.file_filename", "");
@@ -68,21 +66,7 @@ bool Conf::parse_config_file() {
 
         log_grouping_interval = pt.get<unsigned short>("log.grouping_interval", 60);
 
-        db_main = pt.get<string>("db.main");
-        db_rad = pt.get<string>("db.rad");
-        db_calls = pt.get<string>("db.calls");
-
-        instance_id = pt.get<unsigned short>("geo.instance_id");
-        str_instance_id = boost::lexical_cast<string>(instance_id);
-
-        udp_host = pt.get<string>("udp.host", "");
-        udp_port = pt.get<unsigned short>("udp.port", 0);
-        udp_openca_select_interval = pt.get<unsigned short>("udp.openca_select_interval", 10);
-        udp_force_finish_call_interval = pt.get<unsigned short>("udp.force_finish_call_interval", 3);
-
-
-        billing_dc_break = pt.get<unsigned short>("billing.dc_break", billing_dc_break);
-        billing_free_seconds = pt.get<unsigned short>("billing.free_seconds", billing_free_seconds);
+        parse_config_variables(pt);
 
     } catch (exception& e) {
         cout << "ERROR: Parse config file: " << e.what() << endl;
@@ -110,10 +94,6 @@ bool Conf::init(int argc, char* argv[]) {
     pid_file = "/var/run/" + app_name + ".pid";
 
     test_mode = false;
-    web_port = 8032;
-
-    billing_dc_break = 126;
-    billing_free_seconds = 5;
 
     if (!parse_cmd_line(argc, argv)) return false;
 

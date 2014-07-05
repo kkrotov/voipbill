@@ -1,12 +1,12 @@
 #include "TaskRecalc.h"
 
 #include "../../src/common.h"
-#include "../../src/classes/App.h"
-#include "../../src/classes/CallsSaver.h"
+#include "../classes/AppBill.h"
+#include "../classes/CallsSaver.h"
 #include "../threads/ThreadLoader.h"
 #include "../threads/ThreadBillRuntime.h"
 
-TaskRecalc::TaskRecalc(time_t date_from) {
+TaskRecalc::TaskRecalc(time_t date_from, string server_id) : Task(server_id) {
     this->date_from = date_from;
     calc_calls_loop = 0;
     calc_calls_full = 0;

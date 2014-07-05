@@ -1,6 +1,8 @@
 #include "Task.h"
 
-#include "../classes/App.h"
+Task::Task(string server_id) {
+    this->server_id = server_id;
+}
 
 void Task::initTask(BDb &db_main, string id, string params) {
     this->db_main = &db_main;
@@ -13,7 +15,7 @@ void Task::setStatus(string str) {
         lock_guard<spinlock> lock(status_lock);
         status = str;
     }
-    db_main->exec("update billing.tasks set status='" + str + "' where region_id=" + app().conf.str_instance_id + " and id=" + id);
+    db_main->exec("update billing.tasks set status='" + str + "' where region_id=" + server_id + " and id=" + id);
 }
 
 string Task::getStatus() {

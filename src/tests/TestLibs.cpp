@@ -1,4 +1,4 @@
-#include "Test.h"
+#include "../../src/tests/Test.h"
 
 #include <string>
 #include <vector>

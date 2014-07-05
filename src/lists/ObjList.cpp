@@ -1,4 +1,3 @@
-#include "../models/obj.h"
 #include "ObjList.h"
 #include "../classes/Exception.h"
 #include <stdlib.h>
