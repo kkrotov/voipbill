@@ -6,6 +6,7 @@
 #include "../threads/ThreadWeb.h"
 #include "../threads/ThreadLog.h"
 #include "../threads/ThreadSync.h"
+#include "../threads/ThreadUdpServer.h"
 
 #include "../../src/classes/LogWriterScreen.h"
 #include "../../src/classes/LogWriterFile.h"
@@ -43,6 +44,7 @@ void AppAuth::runApp() {
     threads.run(new ThreadLog());
     threads.run(new ThreadSync());
     threads.run(new ThreadLoader());
+    threads.run(new ThreadUdpServer());
 
     web_thread.join();
 }

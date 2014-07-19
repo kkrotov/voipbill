@@ -114,6 +114,10 @@
         <itemPath>../src-auth/classes/ConfigVersionData.cpp</itemPath>
         <itemPath>../src-auth/classes/ConfigVersionData.h</itemPath>
         <itemPath>../src-auth/classes/Log.cpp</itemPath>
+        <itemPath>../src-auth/classes/UdpMessageProcessor.cpp</itemPath>
+        <itemPath>../src-auth/classes/UdpMessageProcessor.h</itemPath>
+        <itemPath>../src-auth/classes/UdpServer.cpp</itemPath>
+        <itemPath>../src-auth/classes/UdpServer.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="dao" projectFiles="true">
         <itemPath>../src-auth/dao/ConfigVersionDao.h</itemPath>
@@ -163,6 +167,8 @@
         <itemPath>../src-auth/threads/ThreadLog.h</itemPath>
         <itemPath>../src-auth/threads/ThreadSync.cpp</itemPath>
         <itemPath>../src-auth/threads/ThreadSync.h</itemPath>
+        <itemPath>../src-auth/threads/ThreadUdpServer.cpp</itemPath>
+        <itemPath>../src-auth/threads/ThreadUdpServer.h</itemPath>
         <itemPath>../src-auth/threads/ThreadWeb.cpp</itemPath>
         <itemPath>../src-auth/threads/ThreadWeb.h</itemPath>
       </logicalFolder>
@@ -340,6 +346,20 @@
       </item>
       <item path="../src-auth/classes/Log.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="../src-auth/classes/UdpMessageProcessor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/classes/UdpMessageProcessor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/classes/UdpServer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/classes/UdpServer.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src-auth/dao/ConfigVersionDao.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/http/file_handler.cpp" ex="false" tool="1" flavor2="0">
@@ -451,6 +471,16 @@
       <item path="../src-auth/threads/ThreadSync.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/threads/ThreadSync.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadUdpServer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadUdpServer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src-auth/threads/ThreadWeb.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -724,6 +754,20 @@
       </item>
       <item path="../src-auth/classes/Log.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="../src-auth/classes/UdpMessageProcessor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/classes/UdpMessageProcessor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/classes/UdpServer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/classes/UdpServer.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src-auth/dao/ConfigVersionDao.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/http/file_handler.cpp" ex="false" tool="1" flavor2="0">
@@ -835,6 +879,16 @@
       <item path="../src-auth/threads/ThreadSync.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/threads/ThreadSync.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadUdpServer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadUdpServer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src-auth/threads/ThreadWeb.cpp" ex="false" tool="1" flavor2="0">
       </item>
