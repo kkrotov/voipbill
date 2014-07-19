@@ -5,10 +5,9 @@
 #include "../../src/classes/Timer.h"
 
 class ThreadLoader : public Thread {
+    BDb db_local;
     int errors;
 
-    bool ready();
-    bool prepare();
     void run();
 
     void htmlfull(stringstream &html);

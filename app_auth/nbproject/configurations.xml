@@ -111,11 +111,48 @@
         <itemPath>../src-auth/classes/AppAuth.h</itemPath>
         <itemPath>../src-auth/classes/ConfAuth.cpp</itemPath>
         <itemPath>../src-auth/classes/ConfAuth.h</itemPath>
+        <itemPath>../src-auth/classes/ConfigVersionData.cpp</itemPath>
+        <itemPath>../src-auth/classes/ConfigVersionData.h</itemPath>
         <itemPath>../src-auth/classes/Log.cpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="dao" projectFiles="true">
+        <itemPath>../src-auth/dao/ConfigVersionDao.h</itemPath>
       </logicalFolder>
       <logicalFolder name="http" displayName="http" projectFiles="true">
         <itemPath>../src-auth/http/file_handler.cpp</itemPath>
         <itemPath>../src-auth/http/file_handler.hpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f3" displayName="lists" projectFiles="true">
+        <itemPath>../src-auth/lists/AirpList.cpp</itemPath>
+        <itemPath>../src-auth/lists/AirpList.h</itemPath>
+        <itemPath>../src-auth/lists/NumberList.cpp</itemPath>
+        <itemPath>../src-auth/lists/NumberList.h</itemPath>
+        <itemPath>../src-auth/lists/OutcomeList.cpp</itemPath>
+        <itemPath>../src-auth/lists/OutcomeList.h</itemPath>
+        <itemPath>../src-auth/lists/PrefixlistList.cpp</itemPath>
+        <itemPath>../src-auth/lists/PrefixlistList.h</itemPath>
+        <itemPath>../src-auth/lists/PrefixlistPrefixList.cpp</itemPath>
+        <itemPath>../src-auth/lists/PrefixlistPrefixList.h</itemPath>
+        <itemPath>../src-auth/lists/ReleaseReasonList.cpp</itemPath>
+        <itemPath>../src-auth/lists/ReleaseReasonList.h</itemPath>
+        <itemPath>../src-auth/lists/RouteCaseList.cpp</itemPath>
+        <itemPath>../src-auth/lists/RouteCaseList.h</itemPath>
+        <itemPath>../src-auth/lists/RouteTableList.cpp</itemPath>
+        <itemPath>../src-auth/lists/RouteTableList.h</itemPath>
+        <itemPath>../src-auth/lists/RouteTableRouteList.cpp</itemPath>
+        <itemPath>../src-auth/lists/RouteTableRouteList.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="models" projectFiles="true">
+        <itemPath>../src-auth/models/Airp.h</itemPath>
+        <itemPath>../src-auth/models/ConfigVersion.h</itemPath>
+        <itemPath>../src-auth/models/Number.h</itemPath>
+        <itemPath>../src-auth/models/Outcome.h</itemPath>
+        <itemPath>../src-auth/models/Prefixlist.h</itemPath>
+        <itemPath>../src-auth/models/PrefixlistPrefix.h</itemPath>
+        <itemPath>../src-auth/models/ReleaseReason.h</itemPath>
+        <itemPath>../src-auth/models/RouteCase.h</itemPath>
+        <itemPath>../src-auth/models/RouteTable.h</itemPath>
+        <itemPath>../src-auth/models/RouteTableRoute.h</itemPath>
       </logicalFolder>
       <logicalFolder name="tasks" displayName="tasks" projectFiles="true">
       </logicalFolder>
@@ -124,6 +161,8 @@
         <itemPath>../src-auth/threads/ThreadLoader.h</itemPath>
         <itemPath>../src-auth/threads/ThreadLog.cpp</itemPath>
         <itemPath>../src-auth/threads/ThreadLog.h</itemPath>
+        <itemPath>../src-auth/threads/ThreadSync.cpp</itemPath>
+        <itemPath>../src-auth/threads/ThreadSync.h</itemPath>
         <itemPath>../src-auth/threads/ThreadWeb.cpp</itemPath>
         <itemPath>../src-auth/threads/ThreadWeb.h</itemPath>
       </logicalFolder>
@@ -289,13 +328,114 @@
       </item>
       <item path="../src-auth/classes/ConfAuth.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-auth/classes/ConfigVersionData.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/classes/ConfigVersionData.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-auth/classes/Log.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/dao/ConfigVersionDao.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/http/file_handler.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/http/file_handler.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-auth/lists/AirpList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/AirpList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/NumberList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/NumberList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/OutcomeList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/OutcomeList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/PrefixlistList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/PrefixlistList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/PrefixlistPrefixList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/PrefixlistPrefixList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/ReleaseReasonList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/ReleaseReasonList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RouteCaseList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RouteCaseList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RouteTableList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RouteTableList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RouteTableRouteList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RouteTableRouteList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-auth/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/models/Airp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/ConfigVersion.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/Number.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/Outcome.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/Prefixlist.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/PrefixlistPrefix.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/models/ReleaseReason.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/RouteCase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/RouteTable.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/RouteTableRoute.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src-auth/threads/ThreadLoader.cpp"
             ex="false"
@@ -307,6 +447,10 @@
       <item path="../src-auth/threads/ThreadLog.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadSync.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadSync.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/threads/ThreadWeb.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -568,13 +712,114 @@
       </item>
       <item path="../src-auth/classes/ConfAuth.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-auth/classes/ConfigVersionData.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/classes/ConfigVersionData.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-auth/classes/Log.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/dao/ConfigVersionDao.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/http/file_handler.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/http/file_handler.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-auth/lists/AirpList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/AirpList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/NumberList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/NumberList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/OutcomeList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/OutcomeList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/PrefixlistList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/PrefixlistList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/PrefixlistPrefixList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/PrefixlistPrefixList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/ReleaseReasonList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/ReleaseReasonList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RouteCaseList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RouteCaseList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RouteTableList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RouteTableList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RouteTableRouteList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RouteTableRouteList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-auth/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/models/Airp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/ConfigVersion.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/Number.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/Outcome.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/Prefixlist.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/PrefixlistPrefix.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/models/ReleaseReason.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/RouteCase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/RouteTable.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/RouteTableRoute.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src-auth/threads/ThreadLoader.cpp"
             ex="false"
@@ -586,6 +831,10 @@
       <item path="../src-auth/threads/ThreadLog.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadSync.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/threads/ThreadSync.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/threads/ThreadWeb.cpp" ex="false" tool="1" flavor2="0">
       </item>

@@ -5,10 +5,12 @@
 #include "../threads/ThreadLoader.h"
 #include "../threads/ThreadWeb.h"
 #include "../threads/ThreadLog.h"
+#include "../threads/ThreadSync.h"
 
 #include "../../src/classes/LogWriterScreen.h"
 #include "../../src/classes/LogWriterFile.h"
 #include "../../src/classes/LogWriterSyslog.h"
+#include "ConfigVersionData.h"
 
 AppAuth & app() {
     static AppAuth appVar;
@@ -39,6 +41,7 @@ void AppAuth::runApp() {
     boost::thread web_thread(web);
 
     threads.run(new ThreadLog());
+    threads.run(new ThreadSync());
     threads.run(new ThreadLoader());
 
     web_thread.join();
@@ -59,4 +62,20 @@ void AppAuth::initLogger() {
     if (!conf.log_syslog_ident.empty())
         logger.addLogWriter(pLogWriter(new LogWriterSyslog(conf.log_syslog_ident, conf.log_syslog_min_level, conf.log_syslog_max_level)));
 
+}
+
+shared_ptr<ConfigVersionData> AppAuth::getConfigVersionData() {
+    lock_guard<mutex> lock(configVersionDataMutex);
+
+    shared_ptr<ConfigVersionData> tmp = configVersionData;
+
+    return tmp;
+}
+
+void AppAuth::setConfigVersionData(ConfigVersionData * configVersionData) {
+    lock_guard<mutex> lock(configVersionDataMutex);
+
+    shared_ptr<ConfigVersionData> tmp(configVersionData);
+
+    this->configVersionData.swap(tmp);
 }

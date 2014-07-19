@@ -78,13 +78,15 @@ namespace http {
             }
             rep.status = reply::ok;
             rep.content.append(html.str());
-            rep.headers.resize(3);
-            rep.headers[0].name = "Cache-Control";
-            rep.headers[0].value = "no-store, no-cache, must-revalidate";
-            rep.headers[1].name = "Expires";
-            rep.headers[1].value = "Mon, 26 Jul 1997 05:00:00 GMT";
-            rep.headers[2].name = "Content-Length";
-            rep.headers[2].value = boost::lexical_cast<std::string>(rep.content.size());
+            rep.headers.resize(4);
+            rep.headers[0].name = "Content-Type";
+            rep.headers[0].value = "text/html; charset=utf-8";
+            rep.headers[1].name = "Cache-Control";
+            rep.headers[1].value = "no-store, no-cache, must-revalidate";
+            rep.headers[2].name = "Expires";
+            rep.headers[2].value = "Mon, 26 Jul 1997 05:00:00 GMT";
+            rep.headers[3].name = "Content-Length";
+            rep.headers[3].value = boost::lexical_cast<std::string>(rep.content.size());
         }
 
         bool file_handler::url_decode(const std::string& in, std::string& out) {

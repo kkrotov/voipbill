@@ -1,7 +1,9 @@
 #pragma once
 
+#include <mutex>
 #include "../../src/classes/App.h"
 #include "ConfAuth.h"
+#include "ConfigVersionData.h"
 
 class AppAuth : public App {
 public:
@@ -18,8 +20,11 @@ public:
 
     AppAuth();
     virtual bool init(int argc, char* argv[]) override;
-
+    shared_ptr<ConfigVersionData> getConfigVersionData();
+    void setConfigVersionData(ConfigVersionData * configVersionData);
 protected:
+    shared_ptr<ConfigVersionData> configVersionData;
+    mutex configVersionDataMutex;
     void runApp();
     void initLogger();
 };
