@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../../src/threads/Thread.h"
-#include "../../src/classes/DataLoader.h"
-#include "../../src/classes/BlackListLocal.h"
-#include "../../src/classes/BlackListGlobal.h"
+#include "../classes/DataLoader.h"
+#include "../classes/BlackListLocal.h"
+#include "../classes/BlackListGlobal.h"
 
 class ThreadBlacklist : public Thread {
     DataLoader *loader;

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../../src/classes/Timer.h"
-#include "../../src/lists/RuntimeCallsObjList.h"
-#include "../../src/classes/CalcFull.h"
+#include "../lists/RuntimeCallsObjList.h"
+#include "../classes/CalcFull.h"
 #include "../../src/tasks/Task.h"
 
 class TaskRecalc : public Task {
@@ -21,7 +21,7 @@ protected:
 
     void html(stringstream &html);
 public:
-    TaskRecalc(time_t date_from);
+    TaskRecalc(time_t date_from, string server_id);
 
     void run();
 };

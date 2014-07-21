@@ -1,4 +1,5 @@
 #include "BDbResult.h"
+#include <cstring>
 
 BDbResult::BDbResult(PGresult * res) {
     this->res = res;
@@ -41,6 +42,10 @@ bool BDbResult::get_b(int f) {
 
 string BDbResult::get_s(int f) {
     return PQgetvalue(res, index, f);
+}
+
+void BDbResult::fill_cs(int f, char * str, int size) {
+    strncpy(str, PQgetvalue(res, index, f), size - 1);
 }
 
 bool BDbResult::next() {

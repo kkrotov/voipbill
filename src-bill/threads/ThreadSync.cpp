@@ -154,12 +154,12 @@ bool ThreadSync::sync_notfull(qsync &s) {
 }
 
 bool ThreadSync::prepare() {
-    if (!appBill().init_sync_done) {
+    if (!app().init_sync_done) {
         Log::info("Sync...");
         if (!this->do_sync()) {
             return false;
         }
-        appBill().init_sync_done = true;
+        app().init_sync_done = true;
     }
     return true;
 }

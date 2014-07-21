@@ -1,6 +1,6 @@
 #include "ThreadCheckStartTable.h"
-#include "../../src/classes/App.h"
-#include "../../src/classes/UdpControlClient.h"
+#include "../classes/AppBill.h"
+#include "../classes/UdpControlClient.h"
 
 ThreadCheckStartTable::ThreadCheckStartTable() {
     id = "checkstarttable";

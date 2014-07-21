@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../src/threads/Thread.h"
-#include "../../src/lists/CurrentCallsObjList.h"
+#include "../lists/CurrentCallsObjList.h"
 
 class ThreadCurrentCalls : public Thread {
 public:

@@ -6,8 +6,8 @@
 #include <string.h>
 #include <unistd.h>
 
-void Daemoin::setPidFile() {
-    FILE* f = fopen(app().conf.pid_file.c_str(), "w+");
+void Daemoin::setPidFile(string pid_file) {
+    FILE* f = fopen(pid_file.c_str(), "w+");
     if (f) {
         fprintf(f, "%u", getpid());
         fclose(f);

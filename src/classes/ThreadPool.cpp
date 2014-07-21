@@ -1,6 +1,7 @@
 #include "ThreadPool.h"
 #include "../threads/Thread.h"
-#include "App.h"
+
+#include "../classes/App.h"
 
 void ThreadPool::run(Thread * thread) {
     thread->onStarted.connect(boost::bind(&ThreadPool::register_thread, this, _1));
@@ -97,7 +98,7 @@ void ThreadPool::thread_real_status_changed(Thread *thread) {
     } else {
         app_real_status = AppStatus::APP_PREPARING;
     }
-    app().setRealStatus(app_real_status);
+    app->setRealStatus(app_real_status);
 }
 
 void ThreadPool::app_status_changed() {
@@ -117,7 +118,7 @@ void ThreadPool::app_real_status_changed() {
 }
 
 ThreadStatus ThreadPool::getThreadStatusByAppStatus() {
-    AppStatus app_status = app().getStatus();
+    AppStatus app_status = app->getStatus();
 
     if (app_status == AppStatus::APP_PREPARING) {
         return ThreadStatus::THREAD_PREPARING;
@@ -130,4 +131,8 @@ ThreadStatus ThreadPool::getThreadStatusByAppStatus() {
     } else {
         return ThreadStatus::THREAD_CREATED;
     }
+}
+
+void ThreadPool::setApp(App * app) {
+    this->app = app;
 }

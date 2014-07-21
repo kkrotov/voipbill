@@ -46,28 +46,14 @@
         <itemPath>../src/classes/BDbResult.h</itemPath>
         <itemPath>../src/classes/BaseLogWriter.cpp</itemPath>
         <itemPath>../src/classes/BaseLogWriter.h</itemPath>
-        <itemPath>../src/classes/BlackList.cpp</itemPath>
-        <itemPath>../src/classes/BlackList.h</itemPath>
-        <itemPath>../src/classes/BlackListGlobal.h</itemPath>
-        <itemPath>../src/classes/BlackListLocal.h</itemPath>
-        <itemPath>../src/classes/CalcBase.cpp</itemPath>
-        <itemPath>../src/classes/CalcBase.h</itemPath>
-        <itemPath>../src/classes/CalcFull.cpp</itemPath>
-        <itemPath>../src/classes/CalcFull.h</itemPath>
-        <itemPath>../src/classes/CallsSaver.cpp</itemPath>
-        <itemPath>../src/classes/CallsSaver.h</itemPath>
         <itemPath>../src/classes/Conf.cpp</itemPath>
         <itemPath>../src/classes/Conf.h</itemPath>
-        <itemPath>../src/classes/CounterLoader.h</itemPath>
         <itemPath>../src/classes/Daemon.cpp</itemPath>
         <itemPath>../src/classes/Daemon.h</itemPath>
-        <itemPath>../src/classes/DataLoader.cpp</itemPath>
-        <itemPath>../src/classes/DataLoader.h</itemPath>
         <itemPath>../src/classes/DbException.h</itemPath>
         <itemPath>../src/classes/Exception.h</itemPath>
         <itemPath>../src/classes/KillCalls.h</itemPath>
         <itemPath>../src/classes/Loader.h</itemPath>
-        <itemPath>../src/classes/Log.cpp</itemPath>
         <itemPath>../src/classes/Log.h</itemPath>
         <itemPath>../src/classes/LogWriterFile.cpp</itemPath>
         <itemPath>../src/classes/LogWriterFile.h</itemPath>
@@ -80,8 +66,6 @@
         <itemPath>../src/classes/ThreadPool.cpp</itemPath>
         <itemPath>../src/classes/ThreadPool.h</itemPath>
         <itemPath>../src/classes/Timer.h</itemPath>
-        <itemPath>../src/classes/UdpControlClient.cpp</itemPath>
-        <itemPath>../src/classes/UdpControlClient.h</itemPath>
       </logicalFolder>
       <logicalFolder name="http" displayName="http" projectFiles="true">
         <itemPath>../src/http/coroutine.hpp</itemPath>
@@ -99,36 +83,10 @@
         <itemPath>../src/http/yield.hpp</itemPath>
       </logicalFolder>
       <logicalFolder name="lists" displayName="lists" projectFiles="true">
-        <itemPath>../src/lists/CallsObjList.cpp</itemPath>
-        <itemPath>../src/lists/CallsObjList.h</itemPath>
-        <itemPath>../src/lists/ClientCounter.cpp</itemPath>
-        <itemPath>../src/lists/ClientCounter.h</itemPath>
-        <itemPath>../src/lists/ClientObjList.cpp</itemPath>
-        <itemPath>../src/lists/ClientObjList.h</itemPath>
-        <itemPath>../src/lists/CurrentCallsObjList.cpp</itemPath>
-        <itemPath>../src/lists/CurrentCallsObjList.h</itemPath>
-        <itemPath>../src/lists/DestObjList.cpp</itemPath>
-        <itemPath>../src/lists/DestObjList.h</itemPath>
-        <itemPath>../src/lists/FminCounter.cpp</itemPath>
-        <itemPath>../src/lists/FminCounter.h</itemPath>
-        <itemPath>../src/lists/NetworkPrefixObjList.cpp</itemPath>
-        <itemPath>../src/lists/NetworkPrefixObjList.h</itemPath>
         <itemPath>../src/lists/ObjList.cpp</itemPath>
         <itemPath>../src/lists/ObjList.h</itemPath>
-        <itemPath>../src/lists/OperatorList.cpp</itemPath>
-        <itemPath>../src/lists/OperatorList.h</itemPath>
-        <itemPath>../src/lists/PriceObjList.cpp</itemPath>
-        <itemPath>../src/lists/PriceObjList.h</itemPath>
-        <itemPath>../src/lists/PricelistList.cpp</itemPath>
-        <itemPath>../src/lists/PricelistList.h</itemPath>
-        <itemPath>../src/lists/RuntimeCallsObjList.cpp</itemPath>
-        <itemPath>../src/lists/RuntimeCallsObjList.h</itemPath>
-        <itemPath>../src/lists/UsageObjList.cpp</itemPath>
-        <itemPath>../src/lists/UsageObjList.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="models" projectFiles="true">
-        <itemPath>../src/models/obj.cpp</itemPath>
-        <itemPath>../src/models/obj.h</itemPath>
       </logicalFolder>
       <logicalFolder name="tasks" displayName="tasks" projectFiles="true">
         <itemPath>../src/tasks/Task.cpp</itemPath>
@@ -138,13 +96,10 @@
         <itemPath>../src/tests/Test.cpp</itemPath>
         <itemPath>../src/tests/Test.h</itemPath>
         <itemPath>../src/tests/TestLibs.cpp</itemPath>
-        <itemPath>../src/tests/TestLoader.cpp</itemPath>
       </logicalFolder>
       <logicalFolder name="threads" displayName="threads" projectFiles="true">
         <itemPath>../src/threads/Thread.cpp</itemPath>
         <itemPath>../src/threads/Thread.h</itemPath>
-        <itemPath>../src/threads/ThreadLog.cpp</itemPath>
-        <itemPath>../src/threads/ThreadLog.h</itemPath>
       </logicalFolder>
       <itemPath>../src/common.cpp</itemPath>
       <itemPath>../src/common.h</itemPath>
@@ -154,14 +109,65 @@
       <logicalFolder name="classes" displayName="classes" projectFiles="true">
         <itemPath>../src-bill/classes/AppBill.cpp</itemPath>
         <itemPath>../src-bill/classes/AppBill.h</itemPath>
+        <itemPath>../src-bill/classes/BlackList.cpp</itemPath>
+        <itemPath>../src-bill/classes/BlackList.h</itemPath>
+        <itemPath>../src-bill/classes/BlackListGlobal.h</itemPath>
+        <itemPath>../src-bill/classes/BlackListLocal.h</itemPath>
+        <itemPath>../src-bill/classes/CalcBase.cpp</itemPath>
+        <itemPath>../src-bill/classes/CalcBase.h</itemPath>
+        <itemPath>../src-bill/classes/CalcFull.cpp</itemPath>
+        <itemPath>../src-bill/classes/CalcFull.h</itemPath>
+        <itemPath>../src-bill/classes/CallsSaver.cpp</itemPath>
+        <itemPath>../src-bill/classes/CallsSaver.h</itemPath>
+        <itemPath>../src-bill/classes/ConfBill.cpp</itemPath>
+        <itemPath>../src-bill/classes/ConfBill.h</itemPath>
+        <itemPath>../src-bill/classes/CounterLoader.h</itemPath>
+        <itemPath>../src-bill/classes/DataLoader.cpp</itemPath>
+        <itemPath>../src-bill/classes/DataLoader.h</itemPath>
+        <itemPath>../src-bill/classes/Log.cpp</itemPath>
+        <itemPath>../src-bill/classes/UdpControlClient.cpp</itemPath>
+        <itemPath>../src-bill/classes/UdpControlClient.h</itemPath>
       </logicalFolder>
       <logicalFolder name="http" displayName="http" projectFiles="true">
         <itemPath>../src-bill/http/file_handler.cpp</itemPath>
         <itemPath>../src-bill/http/file_handler.hpp</itemPath>
       </logicalFolder>
+      <logicalFolder name="f1" displayName="lists" projectFiles="true">
+        <itemPath>../src-bill/lists/CallsObjList.cpp</itemPath>
+        <itemPath>../src-bill/lists/CallsObjList.h</itemPath>
+        <itemPath>../src-bill/lists/ClientCounter.cpp</itemPath>
+        <itemPath>../src-bill/lists/ClientCounter.h</itemPath>
+        <itemPath>../src-bill/lists/ClientObjList.cpp</itemPath>
+        <itemPath>../src-bill/lists/ClientObjList.h</itemPath>
+        <itemPath>../src-bill/lists/CurrentCallsObjList.cpp</itemPath>
+        <itemPath>../src-bill/lists/CurrentCallsObjList.h</itemPath>
+        <itemPath>../src-bill/lists/DestObjList.cpp</itemPath>
+        <itemPath>../src-bill/lists/DestObjList.h</itemPath>
+        <itemPath>../src-bill/lists/FminCounter.cpp</itemPath>
+        <itemPath>../src-bill/lists/FminCounter.h</itemPath>
+        <itemPath>../src-bill/lists/NetworkPrefixObjList.cpp</itemPath>
+        <itemPath>../src-bill/lists/NetworkPrefixObjList.h</itemPath>
+        <itemPath>../src-bill/lists/OperatorList.cpp</itemPath>
+        <itemPath>../src-bill/lists/OperatorList.h</itemPath>
+        <itemPath>../src-bill/lists/PriceObjList.cpp</itemPath>
+        <itemPath>../src-bill/lists/PriceObjList.h</itemPath>
+        <itemPath>../src-bill/lists/PricelistList.cpp</itemPath>
+        <itemPath>../src-bill/lists/PricelistList.h</itemPath>
+        <itemPath>../src-bill/lists/RuntimeCallsObjList.cpp</itemPath>
+        <itemPath>../src-bill/lists/RuntimeCallsObjList.h</itemPath>
+        <itemPath>../src-bill/lists/UsageObjList.cpp</itemPath>
+        <itemPath>../src-bill/lists/UsageObjList.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f3" displayName="models" projectFiles="true">
+        <itemPath>../src-bill/models/obj.cpp</itemPath>
+        <itemPath>../src-bill/models/obj.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="tasks" displayName="tasks" projectFiles="true">
         <itemPath>../src-bill/tasks/TaskRecalc.cpp</itemPath>
         <itemPath>../src-bill/tasks/TaskRecalc.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="tests" projectFiles="true">
+        <itemPath>../src-bill/tests/TestLoader.cpp</itemPath>
       </logicalFolder>
       <logicalFolder name="threads" displayName="threads" projectFiles="true">
         <itemPath>../src-bill/threads/ThreadBillRuntime.cpp</itemPath>
@@ -176,6 +182,8 @@
         <itemPath>../src-bill/threads/ThreadLimitControl.h</itemPath>
         <itemPath>../src-bill/threads/ThreadLoader.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadLoader.h</itemPath>
+        <itemPath>../src-bill/threads/ThreadLog.cpp</itemPath>
+        <itemPath>../src-bill/threads/ThreadLog.h</itemPath>
         <itemPath>../src-bill/threads/ThreadSaveCounters.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadSaveCounters.h</itemPath>
         <itemPath>../src-bill/threads/ThreadSync.cpp</itemPath>
@@ -343,15 +351,147 @@
       </item>
       <item path="../src-bill/classes/AppBill.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-bill/classes/BlackList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/BlackList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/BlackListGlobal.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/classes/BlackListLocal.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CalcBase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CalcBase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CalcFull.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CalcFull.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CallsSaver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CallsSaver.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/ConfBill.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/ConfBill.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CounterLoader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/classes/DataLoader.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/DataLoader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/Log.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/UdpControlClient.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/classes/UdpControlClient.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-bill/http/file_handler.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/http/file_handler.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-bill/lists/CallsObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/CallsObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/ClientCounter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/ClientCounter.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/ClientObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/ClientObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/CurrentCallsObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/CurrentCallsObjList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/DestObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/DestObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/FminCounter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/FminCounter.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/NetworkPrefixObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/NetworkPrefixObjList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/OperatorList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/OperatorList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/PriceObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/PriceObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/PricelistList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/PricelistList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/RuntimeCallsObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/RuntimeCallsObjList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/UsageObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/UsageObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src-bill/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/models/obj.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/models/obj.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-bill/tasks/TaskRecalc.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/tasks/TaskRecalc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/tests/TestLoader.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadBillRuntime.cpp"
             ex="false"
@@ -410,6 +550,10 @@
       </item>
       <item path="../src-bill/threads/ThreadLoader.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-bill/threads/ThreadLog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src-bill/threads/ThreadSaveCounters.cpp"
             ex="false"
             tool="1"
@@ -451,39 +595,13 @@
       </item>
       <item path="../src/classes/BaseLogWriter.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/classes/BlackList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/classes/BlackList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/BlackListGlobal.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/BlackListLocal.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/CalcBase.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/classes/CalcBase.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/CalcFull.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/classes/CalcFull.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/CallsSaver.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/classes/CallsSaver.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../src/classes/Conf.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/classes/Conf.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/classes/CounterLoader.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../src/classes/Daemon.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/classes/Daemon.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/DataLoader.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/classes/DataLoader.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/DbException.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -492,8 +610,6 @@
       <item path="../src/classes/KillCalls.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/Loader.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/Log.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/classes/Log.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -518,13 +634,6 @@
       <item path="../src/classes/ThreadPool.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/Timer.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/UdpControlClient.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src/classes/UdpControlClient.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/common.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -556,73 +665,9 @@
       </item>
       <item path="../src/http/yield.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/lists/CallsObjList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/CallsObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/ClientCounter.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/ClientCounter.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/ClientObjList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/ClientObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/CurrentCallsObjList.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src/lists/CurrentCallsObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/DestObjList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/DestObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/FminCounter.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/FminCounter.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/NetworkPrefixObjList.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src/lists/NetworkPrefixObjList.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="../src/lists/ObjList.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/lists/ObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/OperatorList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/OperatorList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/PriceObjList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/PriceObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/PricelistList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/PricelistList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/RuntimeCallsObjList.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src/lists/RuntimeCallsObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/UsageObjList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/UsageObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/models/obj.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/models/obj.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/tasks/Task.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -634,15 +679,9 @@
       </item>
       <item path="../src/tests/TestLibs.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../src/tests/TestLoader.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="../src/threads/Thread.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/threads/Thread.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/threads/ThreadLog.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/version.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -792,15 +831,147 @@
       </item>
       <item path="../src-bill/classes/AppBill.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-bill/classes/BlackList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/BlackList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/BlackListGlobal.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/classes/BlackListLocal.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CalcBase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CalcBase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CalcFull.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CalcFull.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CallsSaver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CallsSaver.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/ConfBill.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/ConfBill.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/CounterLoader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/classes/DataLoader.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/DataLoader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/Log.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/classes/UdpControlClient.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/classes/UdpControlClient.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-bill/http/file_handler.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/http/file_handler.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-bill/lists/CallsObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/CallsObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/ClientCounter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/ClientCounter.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/ClientObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/ClientObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/CurrentCallsObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/CurrentCallsObjList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/DestObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/DestObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/FminCounter.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/FminCounter.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/NetworkPrefixObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/NetworkPrefixObjList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/OperatorList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/OperatorList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/PriceObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/PriceObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/PricelistList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/PricelistList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/RuntimeCallsObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/RuntimeCallsObjList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/UsageObjList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/lists/UsageObjList.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src-bill/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/models/obj.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/models/obj.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-bill/tasks/TaskRecalc.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/tasks/TaskRecalc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/tests/TestLoader.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadBillRuntime.cpp"
             ex="false"
@@ -859,6 +1030,10 @@
       </item>
       <item path="../src-bill/threads/ThreadLoader.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-bill/threads/ThreadLog.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src-bill/threads/ThreadSaveCounters.cpp"
             ex="false"
             tool="1"
@@ -900,39 +1075,13 @@
       </item>
       <item path="../src/classes/BaseLogWriter.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/classes/BlackList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/classes/BlackList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/BlackListGlobal.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/BlackListLocal.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/CalcBase.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/classes/CalcBase.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/CalcFull.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/classes/CalcFull.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/CallsSaver.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/classes/CallsSaver.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../src/classes/Conf.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/classes/Conf.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/classes/CounterLoader.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../src/classes/Daemon.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/classes/Daemon.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/DataLoader.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/classes/DataLoader.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/DbException.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -941,8 +1090,6 @@
       <item path="../src/classes/KillCalls.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/Loader.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/Log.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/classes/Log.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -967,13 +1114,6 @@
       <item path="../src/classes/ThreadPool.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/Timer.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/UdpControlClient.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src/classes/UdpControlClient.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/common.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -1005,73 +1145,9 @@
       </item>
       <item path="../src/http/yield.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/lists/CallsObjList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/CallsObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/ClientCounter.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/ClientCounter.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/ClientObjList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/ClientObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/CurrentCallsObjList.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src/lists/CurrentCallsObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/DestObjList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/DestObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/FminCounter.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/FminCounter.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/NetworkPrefixObjList.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src/lists/NetworkPrefixObjList.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="../src/lists/ObjList.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/lists/ObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/OperatorList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/OperatorList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/PriceObjList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/PriceObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/PricelistList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/PricelistList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/RuntimeCallsObjList.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src/lists/RuntimeCallsObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/lists/UsageObjList.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/lists/UsageObjList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/models/obj.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/models/obj.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/tasks/Task.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -1083,15 +1159,9 @@
       </item>
       <item path="../src/tests/TestLibs.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../src/tests/TestLoader.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="../src/threads/Thread.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/threads/Thread.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/threads/ThreadLog.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/version.cpp" ex="false" tool="1" flavor2="0">
       </item>

@@ -16,7 +16,6 @@ static const char * AppStatusNames[]{
 
 class App {
 public:
-    Conf conf;
     Logger logger;
     ThreadPool threads;
 
@@ -30,7 +29,7 @@ public:
 
     App();
 
-    bool init(int argc, char* argv[]);
+    virtual bool init(int argc, char* argv[]);
     void run();
 
     void setStatus(AppStatus status);
@@ -42,5 +41,3 @@ protected:
     virtual void runApp() = 0;
     virtual void initLogger() = 0;
 };
-
-App & app();

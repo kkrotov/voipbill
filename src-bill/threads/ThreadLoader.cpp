@@ -2,25 +2,25 @@
 #include "../classes/AppBill.h"
 
 bool ThreadLoader::ready() {
-    return appBill().init_sync_done;
+    return app().init_sync_done;
 }
 
 bool ThreadLoader::prepare() {
 
-    if (!appBill().init_load_counters_done) {
+    if (!app().init_load_counters_done) {
         Log::info("Loading counters...");
         if (!this->do_load_counters()) {
             return false;
         }
-        appBill().init_load_counters_done = true;
+        app().init_load_counters_done = true;
     }
 
-    if (!appBill().init_load_data_done) {
+    if (!app().init_load_data_done) {
         Log::info("Loading data...");
         if (!this->do_load_data()) {
             return false;
         }
-        appBill().init_load_data_done = true;
+        app().init_load_data_done = true;
     }
 
     return true;

@@ -5,11 +5,7 @@
 
 #include "../../src/common.h"
 #include "../../src/threads/Thread.h"
-#include "../../src/classes/App.h"
-#include "../../src/classes/DataLoader.h"
-#include "../../src/classes/CalcFull.h"
-#include "../../src/classes/BlackListLocal.h"
-#include "../../src/classes/BlackListGlobal.h"
+#include "../classes/AppAuth.h"
 
 void ThreadWeb::operator()() {
     if (app().conf.web_port == 0) return;
@@ -79,14 +75,7 @@ void ThreadWeb::handlerConfig(stringstream &html) {
     html << "log.grouping_interval: " << app().conf.log_grouping_interval << "<br/>\n";
     html << "<br/>\n";
     html << "db.main: " << app().conf.db_main << "<br/>\n";
-    html << "db.rad: " << app().conf.db_rad << "<br/>\n";
-    html << "db.calls: " << app().conf.db_calls << "<br/>\n";
-    html << "<br/>\n";
-    html << "udp.host: " << app().conf.udp_host << "<br/>\n";
-    html << "udp.port: " << app().conf.udp_port << "<br/>\n";
-    html << "<br/>\n";
-    html << "billing.free_seconds: " << app().conf.billing_free_seconds << "<br/>\n";
-    html << "billing.dc_break: " << app().conf.billing_dc_break << "<br/>\n";
+    html << "db.local: " << app().conf.db_local << "<br/>\n";
 }
 
 bool ThreadWeb::handlerTask(stringstream &html, map<string, string> &parameters) {

@@ -20,6 +20,7 @@ public:
     long long int get_ll(int f);
     bool get_b(int f);
     string get_s(int f);
+    void fill_cs(int f, char * str, int size);
     bool next();
     void force_free();
 };

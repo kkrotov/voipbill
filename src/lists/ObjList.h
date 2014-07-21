@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../models/obj.h"
 #include "../classes/BDb.h"
 #include "../classes/Timer.h"
 #include "../classes/Exception.h"

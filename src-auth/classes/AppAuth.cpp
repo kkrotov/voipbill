@@ -1,22 +1,29 @@
 #include "../classes/AppAuth.h"
 #include "../../src/threads/Thread.h"
+#include "../../src/classes/Daemon.h"
 
 #include "../threads/ThreadLoader.h"
 #include "../threads/ThreadWeb.h"
-#include "../threads/ThreadTasks.h"
-#include "../../src/threads/ThreadLog.h"
+#include "../threads/ThreadLog.h"
+#include "../threads/ThreadSync.h"
+#include "../threads/ThreadUdpServer.h"
 
 #include "../../src/classes/LogWriterScreen.h"
 #include "../../src/classes/LogWriterFile.h"
 #include "../../src/classes/LogWriterSyslog.h"
+#include "ConfigVersionData.h"
 
-App & app() {
+AppAuth & app() {
     static AppAuth appVar;
     return appVar;
 }
 
-AppAuth & appAuth() {
-    return (AppAuth &) app();
+bool AppAuth::init(int argc, char* argv[]) {
+
+    if (!conf.init(argc, argv))
+        return false;
+
+    return App::init(argc, argv);
 }
 
 AppAuth::AppAuth() {
@@ -28,13 +35,16 @@ AppAuth::AppAuth() {
 
 void AppAuth::runApp() {
 
+    Daemoin::setPidFile(conf.pid_file);
+
     ThreadWeb web;
 
     boost::thread web_thread(web);
 
     threads.run(new ThreadLog());
+    threads.run(new ThreadSync());
     threads.run(new ThreadLoader());
-    threads.run(new ThreadTasks());
+    threads.run(new ThreadUdpServer());
 
     web_thread.join();
 }
@@ -54,4 +64,20 @@ void AppAuth::initLogger() {
     if (!conf.log_syslog_ident.empty())
         logger.addLogWriter(pLogWriter(new LogWriterSyslog(conf.log_syslog_ident, conf.log_syslog_min_level, conf.log_syslog_max_level)));
 
+}
+
+shared_ptr<ConfigVersionData> AppAuth::getConfigVersionData() {
+    lock_guard<mutex> lock(configVersionDataMutex);
+
+    shared_ptr<ConfigVersionData> tmp = configVersionData;
+
+    return tmp;
+}
+
+void AppAuth::setConfigVersionData(ConfigVersionData * configVersionData) {
+    lock_guard<mutex> lock(configVersionDataMutex);
+
+    shared_ptr<ConfigVersionData> tmp(configVersionData);
+
+    this->configVersionData.swap(tmp);
 }
