@@ -1,15 +1,12 @@
 #include "common.h"
+#include "classes/App.h"
+#include "classes/Logger.h"
+#include "classes/Log.h"
 
 #include <stdio.h>
 #include <stdarg.h>
 
-#ifdef _WIN32
-#define atoll(S) _atoi64(S)
-#endif
-
-#ifdef _WIN64
-#define atoll(S) _atoi64(S)
-#endif
+#define UNIXTIME_40000101 64060588800
 
 string string_fmt(const string &fmt, ...) {
     int size = 100;
@@ -33,6 +30,12 @@ string string_fmt(const string &fmt, ...) {
 
 string string_date(const time_t dt) {
     char buff[20];
+
+    if (dt > UNIXTIME_40000101) {
+        Log::error("string_date: bad unix time");
+        return string("4000-01-01");
+    }
+
     struct tm * timeinfo = localtime(&dt);
     if (timeinfo->tm_year < 0 || timeinfo->tm_year > 1000) {
         timeinfo->tm_year = 0;
@@ -45,6 +48,12 @@ string string_date(const time_t dt) {
 
 string string_time(const time_t dt) {
     char buff[40];
+
+    if (dt > UNIXTIME_40000101) {
+        Log::error("string_time: bad unix time");
+        return string("4000-01-01 00:00:00");
+    }
+
     struct tm * timeinfo = localtime(&dt);
     if (timeinfo->tm_year < 0 || timeinfo->tm_year > 1000) {
         timeinfo->tm_year = 0;
@@ -71,8 +80,9 @@ time_t parseDate(char * str) {
         ttt.tm_isdst = 0;
         ttt.tm_yday = 0;
         return mktime(&ttt);
+    } else {
+        return 0;
     }
-    return 0;
 }
 
 time_t parseDateTime(char * str) {
@@ -86,8 +96,9 @@ time_t parseDateTime(char * str) {
         ttt.tm_isdst = 0;
         ttt.tm_yday = 0;
         return mktime(&ttt);
+    } else {
+        return 0;
     }
-    return 0;
 }
 
 bool parseDateTime(char * str, DT &dt) {
@@ -108,6 +119,7 @@ bool parseDateTime(char * str, DT &dt) {
         dt.time = 0;
         dt.day = 0;
         dt.month = 0;
+        Log::error("parseDateTime: can't parse '" + string(str) + "'");
         return false;
     }
 }
@@ -116,7 +128,10 @@ time_t t_day_start = 0;
 time_t t_day_end = 0;
 
 time_t get_tday() {
-    time_t rawtime = time(NULL);
+    return get_tday(time(NULL));
+}
+
+time_t get_tday(const time_t rawtime) {
 
     if (rawtime >= t_day_start && rawtime <= t_day_end) {
         return t_day_start;
@@ -139,7 +154,10 @@ time_t t_month_start = 0;
 time_t t_month_end = 0;
 
 time_t get_tmonth() {
-    time_t rawtime = time(NULL);
+    return get_tmonth(time(NULL));
+}
+
+time_t get_tmonth(const time_t rawtime) {
 
     if (rawtime >= t_month_start && rawtime <= t_month_end) {
         return t_month_start;

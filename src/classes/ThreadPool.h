@@ -5,9 +5,11 @@
 using namespace std;
 
 #include "../threads/Thread.h"
+class App;
 
 class ThreadPool {
 public:
+    App * app;
     std::mutex mutex;
     list<Thread *> threads;
 
@@ -19,6 +21,7 @@ public:
     void app_status_changed();
     void app_real_status_changed();
     ThreadStatus getThreadStatusByAppStatus();
+    void setApp(App * app);
 
 protected:
 };
