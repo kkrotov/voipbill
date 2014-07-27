@@ -29,6 +29,14 @@ bool _CallObj::isRussian() {
     return dest == 1;
 }
 
+bool _CallObj::isRussianMob() {
+    return dest == 1 && mob == true;
+}
+
+bool _CallObj::isRussianStd() {
+    return dest == 1 && mob == false;
+}
+
 bool _CallObj::isInternational() {
     return dest == 2;
 }
