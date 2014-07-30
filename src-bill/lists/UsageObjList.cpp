@@ -50,10 +50,6 @@ inline void UsageObjList::parse_item(BDbResult &row, void * obj) {
     item->pl_russia_mob_id = row.get_i(12);
     item->pl_intern_id = row.get_i(13);
     item->pl_sng_id = row.get_i(14);
-
-    if (item->pl_russia_mob_id == 0 && item->pl_russia_id != 0) {
-        item->pl_russia_mob_id = item->pl_russia_id;
-    }
 }
 
 inline long long int UsageObjList::key(const void *obj) {

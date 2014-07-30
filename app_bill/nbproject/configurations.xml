@@ -52,7 +52,6 @@
         <itemPath>../src/classes/Daemon.h</itemPath>
         <itemPath>../src/classes/DbException.h</itemPath>
         <itemPath>../src/classes/Exception.h</itemPath>
-        <itemPath>../src/classes/KillCalls.h</itemPath>
         <itemPath>../src/classes/Loader.h</itemPath>
         <itemPath>../src/classes/Log.h</itemPath>
         <itemPath>../src/classes/LogWriterFile.cpp</itemPath>
@@ -124,6 +123,7 @@
         <itemPath>../src-bill/classes/CounterLoader.h</itemPath>
         <itemPath>../src-bill/classes/DataLoader.cpp</itemPath>
         <itemPath>../src-bill/classes/DataLoader.h</itemPath>
+        <itemPath>../src-bill/classes/KillCalls.h</itemPath>
         <itemPath>../src-bill/classes/Log.cpp</itemPath>
         <itemPath>../src-bill/classes/UdpControlClient.cpp</itemPath>
         <itemPath>../src-bill/classes/UdpControlClient.h</itemPath>
@@ -390,6 +390,8 @@
       </item>
       <item path="../src-bill/classes/DataLoader.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-bill/classes/KillCalls.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src-bill/classes/Log.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/classes/UdpControlClient.cpp"
@@ -606,8 +608,6 @@
       <item path="../src/classes/DbException.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/Exception.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/KillCalls.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/Loader.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -870,6 +870,8 @@
       </item>
       <item path="../src-bill/classes/DataLoader.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-bill/classes/KillCalls.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src-bill/classes/Log.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/classes/UdpControlClient.cpp"
@@ -1086,8 +1088,6 @@
       <item path="../src/classes/DbException.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/Exception.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/KillCalls.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/Loader.h" ex="false" tool="3" flavor2="0">
       </item>

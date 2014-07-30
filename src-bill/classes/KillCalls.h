@@ -2,8 +2,8 @@
 
 #include "../lists/CurrentCallsObjList.h"
 #include "UdpControlClient.h"
-#include "../common.h"
-#include "Log.h"
+#include "../../src/common.h"
+#include "../../src/classes/Log.h"
 
 class KillCalls {
 public:
