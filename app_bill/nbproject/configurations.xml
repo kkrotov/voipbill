@@ -245,6 +245,7 @@
             <linkerOptionItem>-lpq</linkerOptionItem>
             <linkerOptionItem>-lrt</linkerOptionItem>
             <linkerOptionItem>-lstdc++</linkerOptionItem>
+            <linkerOptionItem>-lpthread</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
