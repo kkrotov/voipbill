@@ -17,7 +17,7 @@ protected:
     string params;
     string status;
     string name;
-    spinlock status_lock;
+    mutex status_lock;
 public:
     void setStatus(string str);
     string getStatus();

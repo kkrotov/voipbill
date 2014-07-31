@@ -52,7 +52,6 @@
         <itemPath>../src/classes/Daemon.h</itemPath>
         <itemPath>../src/classes/DbException.h</itemPath>
         <itemPath>../src/classes/Exception.h</itemPath>
-        <itemPath>../src/classes/KillCalls.h</itemPath>
         <itemPath>../src/classes/Loader.h</itemPath>
         <itemPath>../src/classes/Log.h</itemPath>
         <itemPath>../src/classes/LogWriterFile.cpp</itemPath>
@@ -514,8 +513,6 @@
       </item>
       <item path="../src/classes/Exception.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/classes/KillCalls.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../src/classes/Loader.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/Log.h" ex="false" tool="3" flavor2="0">
@@ -921,8 +918,6 @@
       <item path="../src/classes/DbException.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/Exception.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/classes/KillCalls.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/Loader.h" ex="false" tool="3" flavor2="0">
       </item>

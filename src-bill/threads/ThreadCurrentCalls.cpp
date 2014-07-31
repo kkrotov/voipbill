@@ -4,19 +4,19 @@
 #include "../classes/CalcFull.h"
 
 shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::list(new CurrentCallsObjList());
-spinlock ThreadCurrentCalls::lock;
+std::mutex ThreadCurrentCalls::sync_mutex;
 
 shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::getList() {
-    lock.lock();
+    sync_mutex.lock();
     shared_ptr<CurrentCallsObjList> callsList = list;
-    lock.unlock();
+    sync_mutex.unlock();
     return callsList;
 }
 
 void ThreadCurrentCalls::setList(shared_ptr<CurrentCallsObjList> callsList) {
-    lock.lock();
+    sync_mutex.lock();
     list = callsList;
-    lock.unlock();
+    sync_mutex.unlock();
 }
 
 void ThreadCurrentCalls::run() {
