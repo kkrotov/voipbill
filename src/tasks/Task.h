@@ -6,6 +6,7 @@
 #include "../common.h"
 
 #include "../classes/App.h"
+#include "../classes/Spinlock.h"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ protected:
     string params;
     string status;
     string name;
-    mutex status_lock;
+    Spinlock status_lock;
 public:
     void setStatus(string str);
     string getStatus();

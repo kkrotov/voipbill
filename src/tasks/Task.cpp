@@ -12,14 +12,14 @@ void Task::initTask(BDb &db_main, string id, string params) {
 
 void Task::setStatus(string str) {
     {
-        lock_guard<mutex> lock(status_lock);
+        lock_guard<Spinlock> lock(status_lock);
         status = str;
     }
     db_main->exec("update billing.tasks set status='" + str + "' where region_id=" + server_id + " and id=" + id);
 }
 
 string Task::getStatus() {
-    lock_guard<mutex> lock(status_lock);
+    lock_guard<Spinlock> lock(status_lock);
     string str = status;
     return str;
 }

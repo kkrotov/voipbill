@@ -62,6 +62,7 @@
         <itemPath>../src/classes/LogWriterSyslog.h</itemPath>
         <itemPath>../src/classes/Logger.cpp</itemPath>
         <itemPath>../src/classes/Logger.h</itemPath>
+        <itemPath>../src/classes/Spinlock.h</itemPath>
         <itemPath>../src/classes/ThreadPool.cpp</itemPath>
         <itemPath>../src/classes/ThreadPool.h</itemPath>
         <itemPath>../src/classes/Timer.h</itemPath>
@@ -630,6 +631,8 @@
       </item>
       <item path="../src/classes/Logger.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src/classes/Spinlock.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src/classes/ThreadPool.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/classes/ThreadPool.h" ex="false" tool="3" flavor2="0">
@@ -1109,6 +1112,8 @@
       <item path="../src/classes/Logger.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/classes/Logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/Spinlock.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/ThreadPool.cpp" ex="false" tool="1" flavor2="0">
       </item>
