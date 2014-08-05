@@ -1,8 +1,8 @@
 #include "ThreadLimitControl.h"
 #include "../classes/AppBill.h"
-#include "../../src/classes/CallsSaver.h"
-#include "../../src/classes/KillCalls.h"
-#include "../../src/lists/CurrentCallsObjList.h"
+#include "../classes/CallsSaver.h"
+#include "../classes/KillCalls.h"
+#include "../lists/CurrentCallsObjList.h"
 #include "ThreadCurrentCalls.h"
 
 ThreadLimitControl::ThreadLimitControl() {

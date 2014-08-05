@@ -27,6 +27,7 @@ typedef struct _UsageObj {
     int pl_local_id;
     int pl_local_mob_id;
     int pl_russia_id;
+    int pl_russia_mob_id;
     int pl_intern_id;
     int pl_sng_id;
 } UsageObj, *pUsageObj;
@@ -151,6 +152,8 @@ typedef struct _CallObj {
     bool isZonaMob();
     bool isZonaStd();
     bool isRussian();
+    bool isRussianMob();
+    bool isRussianStd();
     bool isInternational();
     bool isSNG();
     bool isTrank();

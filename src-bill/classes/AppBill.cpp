@@ -12,7 +12,7 @@
 #include "../threads/ThreadCurrentCalls.h"
 #include "../threads/ThreadWeb.h"
 #include "../threads/ThreadTasks.h"
-#include "../../src/threads/ThreadLog.h"
+#include "../threads/ThreadLog.h"
 
 #include "../../src/classes/LogWriterScreen.h"
 #include "../../src/classes/LogWriterFile.h"

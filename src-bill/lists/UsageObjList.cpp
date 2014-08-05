@@ -13,10 +13,10 @@ string UsageObjList::sql(BDb * db) {
             "           t1.freemin*60* case t1.freemin_for_number when true then 1 else u.no_of_lines end, " \
             "           t1.paid_redirect, " \
             "           t1.tariffication_by_minutes, t1.tariffication_full_first_minute, t1.tariffication_free_first_seconds, " \
-            "           t1.pricelist_id, t2.pricelist_id, t3.pricelist_id, t4.pricelist_id, t5.pricelist_id " \
+            "           t1.pricelist_id, t2.pricelist_id, t3.pricelist_id, t4.pricelist_id, t5.pricelist_id, t6.pricelist_id " \
             "       from billing.usage u " \
             "       left join ( " \
-            "               select l.usage_id, l.tarif_id_local, l.tarif_id_local_mob, l.tarif_id_russia, l.tarif_id_intern, l.tarif_id_sng from ( " \
+            "               select l.usage_id, l.tarif_id_local, l.tarif_id_local_mob, l.tarif_id_russia, l.tarif_id_russia_mob, l.tarif_id_intern, l.tarif_id_sng from ( " \
             "                       select usage_id, max(id) as max_id from billing.tarif_change_log " \
             "                       where date_activation<='" + time + "' " \
             "                       group by usage_id ) as lm " \
@@ -25,10 +25,11 @@ string UsageObjList::sql(BDb * db) {
             "       left join billing.tarif t1 on t1.id = lt.tarif_id_local " \
             "       left join billing.tarif t2 on t2.id = lt.tarif_id_local_mob " \
             "       left join billing.tarif t3 on t3.id = lt.tarif_id_russia " \
-            "       left join billing.tarif t4 on t4.id = lt.tarif_id_intern " \
-            "       left join billing.tarif t5 on t5.id = lt.tarif_id_sng " \
+            "       left join billing.tarif t4 on t4.id = lt.tarif_id_russia_mob " \
+            "       left join billing.tarif t5 on t5.id = lt.tarif_id_intern " \
+            "       left join billing.tarif t6 on t6.id = lt.tarif_id_sng " \
             "       where u.region='" + instance_id + "' and u.actual_from <= '" + time + "' and u.actual_to >= '" + time + "' " \
-            "           and t1.pricelist_id is not null and t2.pricelist_id is not null and t3.pricelist_id is not null and t4.pricelist_id is not null and t5.pricelist_id is not null " \
+            "           and t1.pricelist_id is not null and t2.pricelist_id is not null and t3.pricelist_id is not null and t4.pricelist_id is not null and t5.pricelist_id is not null and t6.pricelist_id is not null " \
             "       order by phone_num::BIGINT asc, u.id asc ";
 }
 
@@ -46,8 +47,9 @@ inline void UsageObjList::parse_item(BDbResult &row, void * obj) {
     item->pl_local_id = row.get_i(9);
     item->pl_local_mob_id = row.get_i(10);
     item->pl_russia_id = row.get_i(11);
-    item->pl_intern_id = row.get_i(12);
-    item->pl_sng_id = row.get_i(13);
+    item->pl_russia_mob_id = row.get_i(12);
+    item->pl_intern_id = row.get_i(13);
+    item->pl_sng_id = row.get_i(14);
 }
 
 inline long long int UsageObjList::key(const void *obj) {

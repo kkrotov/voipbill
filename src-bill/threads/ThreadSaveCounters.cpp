@@ -1,6 +1,6 @@
 #include "ThreadSaveCounters.h"
 #include "../classes/AppBill.h"
-#include "../../src/classes/KillCalls.h"
+#include "../classes/KillCalls.h"
 
 ThreadSaveCounters::ThreadSaveCounters() {
     id = "savecounters";
