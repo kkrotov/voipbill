@@ -35,3 +35,4 @@ port = port
 [billing]
 dc_break = 126
 free_seconds = 5
+regions_counters_select_interval = 10

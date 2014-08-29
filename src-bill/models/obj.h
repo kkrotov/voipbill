@@ -76,6 +76,25 @@ typedef struct _ClientObj {
     time_t last_payed_month;
 } ClientObj, *pClientObj;
 
+typedef struct _RegionsCountersObj {
+    int client_id;
+    int sum;
+    int sum_day;
+    int sum_month;
+    
+    double sumDay() {
+        return ((int) (sum_day * 1.18 + 0.5)) / 100.0;
+    }
+
+    double sumMonth() {
+        return ((int) (sum_month * 1.18 + 0.5)) / 100.0;
+    }
+
+    double sumBalance() {
+        return ((int) (sum * 1.18 + 0.5)) / 100.0;
+    }
+} RegionsCountersObj, *pRegionsCountersObj;
+
 typedef struct _ClientCounterObj {
     int client_id;
     int sum;

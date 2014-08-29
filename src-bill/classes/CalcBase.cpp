@@ -1,5 +1,6 @@
 #include "CalcBase.h"
 #include "AppBill.h"
+#include "../threads/ThreadRegionsCounters.h"
 
 CalcBase::CalcBase() {
     last_call_time = 0;
@@ -65,6 +66,9 @@ void CalcBase::calc_limit(CurrentCallsObjList *list) {
     data.day = 0;
 
     counter_local.clear();
+    
+    shared_ptr<RegionsCountersObjList> spRegionsCtrs = ThreadRegionsCounters::getList();
+    RegionsCountersObjList * regionsCounters = spRegionsCtrs.get();
 
     {
         lock_guard<mutex> lock(data_global->counter_rwlock);
@@ -105,9 +109,19 @@ void CalcBase::calc_limit(CurrentCallsObjList *list) {
 
         ClientCounterObj &c0 = data.counter_client->get(call->client_id);
         ClientCounterObj &c2 = client_counter2->get(call->client_id);
+        pRegionsCountersObj regCtrsSum = regionsCounters->find(call->client_id);
+        double otherRegsSpentTotal = 0.0;
+        double otherRegsSpentDay = 0.0;
+        double otherRegsSpentMonth = 0.0;
+        if (regCtrsSum)
+        {
+            otherRegsSpentTotal = regCtrsSum->sumBalance();
+            otherRegsSpentDay = regCtrsSum->sumDay();
+            otherRegsSpentMonth = regCtrsSum->sumMonth();
+        }
 
         if (call->isLocal()) {
-            if (client->credit >= 0 && client->balance + client->credit - c0.sumBalance() - c2.sumBalance() < 0
+            if (client->credit >= 0 && client->balance + client->credit - c0.sumBalance() - c2.sumBalance() - otherRegsSpentTotal < 0
                     && client->last_payed_month < get_tmonth()) {
                 call->kill_call_reason = 3000;
                 continue;
@@ -118,15 +132,15 @@ void CalcBase::calc_limit(CurrentCallsObjList *list) {
                 continue;
             }
 
-            if (client->credit >= 0 && client->balance + client->credit - c0.sumBalance() - c2.sumBalance() < 0) {
+            if (client->credit >= 0 && client->balance + client->credit - c0.sumBalance() - c2.sumBalance() - otherRegsSpentTotal < 0) {
                 call->kill_call_reason = 3000;
                 continue;
             }
-            if (client->limit_d != 0 && client->limit_d - c0.sumDay() - c2.sumDay() < 0) {
+            if (client->limit_d != 0 && client->limit_d - c0.sumDay() - c2.sumDay() - otherRegsSpentDay < 0) {
                 call->kill_call_reason = 3010;
                 continue;
             }
-            if (client->limit_m != 0 && client->limit_m - c0.sumMonth() - c2.sumMonth() < 0) {
+            if (client->limit_m != 0 && client->limit_m - c0.sumMonth() - c2.sumMonth() - otherRegsSpentMonth < 0) {
                 call->kill_call_reason = 3020;
                 continue;
             }
