@@ -4,6 +4,7 @@
 #include "../../src/classes/Log.h"
 #include "UdpMessageProcessor.h"
 #include "AppAuth.h"
+#include "BillClient.h"
 #include "ConfigVersionData.h"
 
 UdpMessageProcessor::UdpMessageProcessor(const string &message) {
@@ -57,11 +58,25 @@ string UdpMessageProcessor::process() {
         parseRequest();
 
         validateRequest();
-
-        int outcomeId = processRouteTable(data->version->route_table_id);
-        if (outcomeId == 0) {
-            Log::warning("Outcome not found for request: " + message);
-            return string("1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION");
+        
+        int outcomeId;
+        
+        string billResponse = BillClient::query(callingStationId, calledStationId);
+ 
+        if (billResponse == "voip_disabled") {
+            outcomeId = data->version->blocked_outcome_id;           
+            if (outcomeId == 0) return "0";
+        } else if (billResponse == "low_balance") {
+            outcomeId = data->version->low_balance_outcome_id;     
+            if (outcomeId == 0) return "0";
+        } else if (billResponse == "reject") {
+            return "0";
+        } else {
+            outcomeId = processRouteTable(data->version->route_table_id);
+            if (outcomeId == 0) {
+                Log::warning("Outcome not found for request: " + message);
+                return "1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION";
+            }
         }
 
         return processOutcome(outcomeId);

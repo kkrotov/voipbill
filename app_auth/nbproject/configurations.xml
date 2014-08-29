@@ -108,6 +108,8 @@
       <logicalFolder name="classes" displayName="classes" projectFiles="true">
         <itemPath>../src-auth/classes/AppAuth.cpp</itemPath>
         <itemPath>../src-auth/classes/AppAuth.h</itemPath>
+        <itemPath>/home/ivanov/project/voip/src-auth/classes/BillClient.cpp</itemPath>
+        <itemPath>/home/ivanov/project/voip/src-auth/classes/BillClient.h</itemPath>
         <itemPath>../src-auth/classes/ConfAuth.cpp</itemPath>
         <itemPath>../src-auth/classes/ConfAuth.h</itemPath>
         <itemPath>../src-auth/classes/ConfigVersionData.cpp</itemPath>
@@ -610,6 +612,16 @@
       </item>
       <item path="../src/version.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="/home/ivanov/project/voip/src-auth/classes/BillClient.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="/home/ivanov/project/voip/src-auth/classes/BillClient.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
@@ -1032,6 +1044,16 @@
       <item path="../src/threads/Thread.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/version.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/home/ivanov/project/voip/src-auth/classes/BillClient.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="/home/ivanov/project/voip/src-auth/classes/BillClient.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
     </conf>
   </confs>

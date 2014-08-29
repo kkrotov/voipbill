@@ -6,6 +6,7 @@
 
 class ThreadUdpServer : public Thread {
     int errors;
+    BDb db_calls;
 
     void run();
 

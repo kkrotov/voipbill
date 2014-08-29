@@ -8,8 +8,9 @@
 #include "CalcFull.h"
 #include "../threads/ThreadCurrentCalls.h"
 
-UdpMessageProcessor::UdpMessageProcessor(const string &message) {
+UdpMessageProcessor::UdpMessageProcessor(const string &message, BDb * db_calls) {
     this->message = message;
+    this->db_calls = db_calls;
 }
 
 void UdpMessageProcessor::parseRequest() {
@@ -67,8 +68,7 @@ string UdpMessageProcessor::process() {
         Log::error("UdpMessageProcessor: ERROR");
     }
 
-    Log::warning("Fallback to default route for request: " + message);
-    return string("1");
+    return string("accept");
 }
 
 string UdpMessageProcessor::analyzeCall() {
@@ -93,6 +93,9 @@ void UdpMessageProcessor::calculateCall() {
     CurrentCallsObjList * list = splist.get();
 
     CalcFull calculator;
+
+    calculator.setDb(db_calls);
+
     calculator.calc_current(list);
 
     prepareCall();
@@ -112,8 +115,8 @@ void UdpMessageProcessor::prepareCall() {
     call.id_num = 0;
     call.time[0] = 0;
     call.dt.time = rawtime;
-    call.dt.day = rawtime - timeinfo->tm_hour * 3600 - timeinfo->tm_min * 60 - timeinfo->tm_sec;
-    call.dt.month = rawtime - (timeinfo->tm_mday - 1) * 86400;
+    call.dt.day = call.dt.time - timeinfo->tm_hour * 3600 - timeinfo->tm_min * 60 - timeinfo->tm_sec;
+    call.dt.month = call.dt.day - (timeinfo->tm_mday - 1) * 86400;
     call.len = 60;
     call.out = true;
     strcpy((char*) &call.usage_num, callingStationId.c_str());

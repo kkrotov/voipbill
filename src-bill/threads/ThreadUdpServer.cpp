@@ -37,7 +37,7 @@ void ThreadUdpServer::run() {
 
 
 
-            auto processor = new UdpMessageProcessor(recv_buf.data());
+            auto processor = new UdpMessageProcessor(recv_buf.data(), &db_calls);
             string response = processor->process();
 
 
@@ -66,5 +66,7 @@ ThreadUdpServer::ThreadUdpServer() {
     id = "udp_server";
     name = "Udp Server";
 
+    db_calls.setCS(app().conf.db_calls);
+    
     errors = 0;
 }
