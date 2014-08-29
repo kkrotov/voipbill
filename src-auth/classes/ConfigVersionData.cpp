@@ -15,6 +15,8 @@ ConfigVersionData::ConfigVersionData() {
     releaseReasonList = 0;
     routeTableList = 0;
     routeTableRouteList = 0;
+    operatorList = 0;
+    routingReportDataList = 0;
 }
 
 ConfigVersionData::~ConfigVersionData() {
@@ -28,6 +30,8 @@ ConfigVersionData::~ConfigVersionData() {
     if (releaseReasonList != 0) delete releaseReasonList;
     if (routeTableList != 0) delete routeTableList;
     if (routeTableRouteList != 0) delete routeTableRouteList;
+    if (operatorList != 0) delete operatorList;
+    if (routingReportDataList != 0) delete routingReportDataList;
 }
 
 ConfigVersionData * ConfigVersionData::load(BDb *db) {
@@ -65,6 +69,12 @@ ConfigVersionData * ConfigVersionData::load(BDb *db) {
 
         data->routeTableRouteList = new RouteTableRouteList();
         data->routeTableRouteList->load(db);
+
+        data->operatorList = new OperatorList();
+        data->operatorList->load(db);
+
+        data->routingReportDataList = new RoutingReportDataList();
+        data->routingReportDataList->load(db);
 
     } catch (Exception &e) {
         delete data;

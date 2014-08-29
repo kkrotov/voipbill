@@ -83,8 +83,8 @@ void ThreadWeb::handlerConfig(stringstream &html) {
     html << "db.rad: " << app().conf.db_rad << "<br/>\n";
     html << "db.calls: " << app().conf.db_calls << "<br/>\n";
     html << "<br/>\n";
-    html << "udp.host: " << app().conf.udp_host << "<br/>\n";
-    html << "udp.port: " << app().conf.udp_port << "<br/>\n";
+    html << "udp.host: " << app().conf.openca_udp_host << "<br/>\n";
+    html << "udp.port: " << app().conf.openca_udp_port << "<br/>\n";
     html << "<br/>\n";
     html << "billing.free_seconds: " << app().conf.billing_free_seconds << "<br/>\n";
     html << "billing.dc_break: " << app().conf.billing_dc_break << "<br/>\n";
@@ -213,7 +213,7 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
     CurrentCallsObjList * calls_list = current_calls_list.get();
 
     CalcFull calculator;
-    calculator.calc_limit(calls_list);
+    calculator.calc_current(calls_list);
 
     ClientCounterObj &c2 = calculator.client_counter2->get(client_id);
     sum_balance = sum_balance + c2.sumBalance();

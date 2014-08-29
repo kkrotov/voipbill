@@ -29,7 +29,9 @@ void ThreadLimitControl::run() {
         {
             TimerScope ts2(t_calc);
 
-            calculator.calc_limit(list);
+            calculator.calc_current(list);
+
+            calculator.calc_process_result(list);
         }
 
         {

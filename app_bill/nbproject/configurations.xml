@@ -128,6 +128,8 @@
         <itemPath>../src-bill/classes/Log.cpp</itemPath>
         <itemPath>../src-bill/classes/UdpControlClient.cpp</itemPath>
         <itemPath>../src-bill/classes/UdpControlClient.h</itemPath>
+        <itemPath>../src-bill/classes/UdpMessageProcessor.cpp</itemPath>
+        <itemPath>../src-bill/classes/UdpMessageProcessor.h</itemPath>
       </logicalFolder>
       <logicalFolder name="http" displayName="http" projectFiles="true">
         <itemPath>../src-bill/http/file_handler.cpp</itemPath>
@@ -191,6 +193,8 @@
         <itemPath>../src-bill/threads/ThreadSync.h</itemPath>
         <itemPath>../src-bill/threads/ThreadTasks.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadTasks.h</itemPath>
+        <itemPath>../src-bill/threads/ThreadUdpServer.cpp</itemPath>
+        <itemPath>../src-bill/threads/ThreadUdpServer.h</itemPath>
         <itemPath>../src-bill/threads/ThreadWeb.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadWeb.h</itemPath>
       </logicalFolder>
@@ -406,6 +410,16 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src-bill/classes/UdpMessageProcessor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/classes/UdpMessageProcessor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-bill/http/file_handler.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/http/file_handler.hpp" ex="false" tool="3" flavor2="0">
@@ -578,6 +592,16 @@
             flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadTasks.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadUdpServer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadUdpServer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadWeb.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -888,6 +912,16 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src-bill/classes/UdpMessageProcessor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/classes/UdpMessageProcessor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-bill/http/file_handler.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/http/file_handler.hpp" ex="false" tool="3" flavor2="0">
@@ -1060,6 +1094,16 @@
             flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadTasks.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadUdpServer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadUdpServer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadWeb.cpp" ex="false" tool="1" flavor2="0">
       </item>

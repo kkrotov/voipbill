@@ -11,6 +11,8 @@
 #include "../lists/ReleaseReasonList.h"
 #include "../lists/RouteTableList.h"
 #include "../lists/RouteTableRouteList.h"
+#include "../lists/OperatorList.h"
+#include "../lists/RoutingReportDataList.h"
 
 class ConfigVersionData {
 public:
@@ -24,6 +26,8 @@ public:
     ReleaseReasonList * releaseReasonList;
     RouteTableList * routeTableList;
     RouteTableRouteList * routeTableRouteList;
+    OperatorList * operatorList;
+    RoutingReportDataList * routingReportDataList;
 
     ConfigVersionData();
 

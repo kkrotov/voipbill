@@ -17,9 +17,6 @@ void UdpMessageProcessor::parseRequest() {
     vector<string> parameters;
     split(parameters, message, boost::algorithm::is_any_of(";"));
 
-    string calling_station_id;
-    string called_station_id;
-
     for (auto it = parameters.begin(); it != parameters.end(); ++it) {
         vector<string> pair;
         split(pair, *it, boost::algorithm::is_any_of(":"));
@@ -55,16 +52,31 @@ bool UdpMessageProcessor::validateRequest() {
 
 string UdpMessageProcessor::process() {
 
-    parseRequest();
+    try {
 
-    validateRequest();
+        parseRequest();
 
-    int outcomeId = processRouteTable(data->version->route_table_id);
-    if (outcomeId == 0) {
-        throw new Exception("Outcome not found for request: " + message, "UdpMessageProcessor::process");
+        validateRequest();
+
+        int outcomeId = processRouteTable(data->version->route_table_id);
+        if (outcomeId == 0) {
+            Log::warning("Outcome not found for request: " + message);
+            return string("1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION");
+        }
+
+        return processOutcome(outcomeId);
+
+    } catch (Exception &e) {
+        e.addTrace("UdpMessageProcessor ");
+        Log::exception(e);
+    } catch (std::exception &e) {
+        Log::error("UdpMessageProcessor: " + string(e.what()));
+    } catch (...) {
+        Log::error("UdpMessageProcessor: ERROR");
     }
 
-    return processOutcome(outcomeId);
+    Log::warning("Fallback to default route for request: " + message);
+    return string("1");
 }
 
 int UdpMessageProcessor::processRouteTable(const int routeTableId) {
@@ -132,8 +144,25 @@ string UdpMessageProcessor::processOutcome(int outcomeId) {
 }
 
 string UdpMessageProcessor::processAutoOutcome(pOutcome outcome) {
+    auto autoRoute = data->routingReportDataList->find(callingStationId.c_str());
+    if (autoRoute == 0) {
+        Log::warning("Auto Route not found for request: " + message);
+        return string("1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION");
+    }
 
-    return string("ROUTE_CASE:RC_AUTO");
+    string routeCase = "rc_auto";
+
+    auto operators = autoRoute->getOperators();
+    for (auto it = operators.begin(); it != operators.end(); ++it) {
+        auto oper = data->operatorList->find(*it);
+        if (oper == 0) {
+            throw new Exception("Operator #" + lexical_cast<string>(*it) + " not found", "UdpMessageProcessor::processAutoOutcome");
+        }
+
+        routeCase = routeCase + "_" + oper->getFormattedCode();
+    }
+
+    return string("1;Cisco-AVPair=RTCASE=") + routeCase;
 }
 
 string UdpMessageProcessor::processRouteCaseOutcome(pOutcome outcome) {
@@ -142,7 +171,7 @@ string UdpMessageProcessor::processRouteCaseOutcome(pOutcome outcome) {
         throw new Exception("Route case #" + lexical_cast<string>(outcome->route_case_id) + " not found", "UdpMessageProcessor::processRouteCaseOutcome");
     }
 
-    return string("ROUTE_CASE:") + string(routeCase->name);
+    return string("1;Cisco-AVPair=RTCASE=") + string(routeCase->name);
 }
 
 string UdpMessageProcessor::processReleaseReasonOutcome(pOutcome outcome) {
@@ -151,7 +180,7 @@ string UdpMessageProcessor::processReleaseReasonOutcome(pOutcome outcome) {
         throw new Exception("Release reason #" + lexical_cast<string>(outcome->release_reason_id) + " not found", "UdpMessageProcessor::processReleaseReasonOutcome");
     }
 
-    return string("RELEASE_REASON:") + string(releaseReason->name);
+    return string("1;Cisco-AVPair=Reason=") + string(releaseReason->name);
 }
 
 string UdpMessageProcessor::processAirpOutcome(pOutcome outcome) {
@@ -160,7 +189,7 @@ string UdpMessageProcessor::processAirpOutcome(pOutcome outcome) {
         throw new Exception("Airp #" + lexical_cast<string>(outcome->airp_id) + " not found", "UdpMessageProcessor::processAirpOutcome");
     }
 
-    return string("AIRP:") + string(airp->name);
+    return string("1;Cisco-AVPair=AIRP=") + string(airp->name);
 }
 
 bool UdpMessageProcessor::filterByNumber(const int numberId, string strNumber) {

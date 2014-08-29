@@ -33,7 +33,7 @@ void ThreadCurrentCalls::htmlfull(stringstream &html) {
     shared_ptr<CurrentCallsObjList> callsList = ThreadCurrentCalls::getList();
 
     CalcFull calculator;
-    calculator.calc_limit(callsList.get());
+    calculator.calc_current(callsList.get());
 
     html << "Time loop: <b>" << this->t.sloop() << "</b><br/>\n";
     html << "Time full loop: <b>" << this->t.sfull() << "</b><br/>\n";

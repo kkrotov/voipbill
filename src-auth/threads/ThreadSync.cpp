@@ -252,4 +252,29 @@ ThreadSync::ThreadSync() {
     s10.add_field("outcome_route_table_id");
     s10.prepare();
     syncs.push_back(s10);
+
+    qsync s11;
+    s11.label = "routing_report_data";
+    s11.t_from = "routing_report_data";
+    s11.t_to = "routing_report_data";
+    s11.add_field("prefix");
+    s11.add_field("locked");
+    s11.add_field("routes");
+    s11.prepare();
+    syncs.push_back(s11);
+
+    qsync s12;
+    s12.label = "operator";
+    s12.t_from = "operator";
+    s12.t_to = "operator";
+    s12.add_field("id");
+    s12.add_field("name");
+    s12.add_field("code");
+    s12.add_field("source_rule_default_allowed");
+    s12.add_field("destination_rule_default_allowed");
+    s12.add_field("default_priority");
+    s12.add_field("openca");
+    s12.add_field("auto_routing");
+    s12.prepare();
+    syncs.push_back(s12);
 }

@@ -19,8 +19,8 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
     string debug_msg = "OpenCA: ";
 
     try {
-        boost::asio::ip::address addr = boost::asio::ip::address::from_string(app().conf.udp_host);
-        udp::endpoint endpoint(addr, app().conf.udp_port);
+        boost::asio::ip::address addr = boost::asio::ip::address::from_string(app().conf.openca_udp_host);
+        udp::endpoint endpoint(addr, app().conf.openca_udp_port);
 
         s.open(udp::v4());
         s.connect(endpoint);
@@ -71,7 +71,7 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
 }
 
 bool UdpControlClient::ready() {
-    return app().conf.udp_host != "" && app().conf.udp_port != 0;
+    return app().conf.openca_udp_host != "" && app().conf.openca_udp_port != 0;
 }
 
 bool UdpControlClient::select_calls(vector<string> &list) {

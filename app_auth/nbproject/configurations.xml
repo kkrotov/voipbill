@@ -115,8 +115,6 @@
         <itemPath>../src-auth/classes/Log.cpp</itemPath>
         <itemPath>../src-auth/classes/UdpMessageProcessor.cpp</itemPath>
         <itemPath>../src-auth/classes/UdpMessageProcessor.h</itemPath>
-        <itemPath>../src-auth/classes/UdpServer.cpp</itemPath>
-        <itemPath>../src-auth/classes/UdpServer.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="dao" projectFiles="true">
         <itemPath>../src-auth/dao/ConfigVersionDao.h</itemPath>
@@ -130,6 +128,8 @@
         <itemPath>../src-auth/lists/AirpList.h</itemPath>
         <itemPath>../src-auth/lists/NumberList.cpp</itemPath>
         <itemPath>../src-auth/lists/NumberList.h</itemPath>
+        <itemPath>../src-auth/lists/OperatorList.cpp</itemPath>
+        <itemPath>../src-auth/lists/OperatorList.h</itemPath>
         <itemPath>../src-auth/lists/OutcomeList.cpp</itemPath>
         <itemPath>../src-auth/lists/OutcomeList.h</itemPath>
         <itemPath>../src-auth/lists/PrefixlistList.cpp</itemPath>
@@ -144,11 +144,14 @@
         <itemPath>../src-auth/lists/RouteTableList.h</itemPath>
         <itemPath>../src-auth/lists/RouteTableRouteList.cpp</itemPath>
         <itemPath>../src-auth/lists/RouteTableRouteList.h</itemPath>
+        <itemPath>../src-auth/lists/RoutingReportDataList.cpp</itemPath>
+        <itemPath>../src-auth/lists/RoutingReportDataList.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="models" projectFiles="true">
         <itemPath>../src-auth/models/Airp.h</itemPath>
         <itemPath>../src-auth/models/ConfigVersion.h</itemPath>
         <itemPath>../src-auth/models/Number.h</itemPath>
+        <itemPath>../src-auth/models/Operator.h</itemPath>
         <itemPath>../src-auth/models/Outcome.h</itemPath>
         <itemPath>../src-auth/models/Prefixlist.h</itemPath>
         <itemPath>../src-auth/models/PrefixlistPrefix.h</itemPath>
@@ -156,6 +159,7 @@
         <itemPath>../src-auth/models/RouteCase.h</itemPath>
         <itemPath>../src-auth/models/RouteTable.h</itemPath>
         <itemPath>../src-auth/models/RouteTableRoute.h</itemPath>
+        <itemPath>../src-auth/models/RoutingReportData.h</itemPath>
       </logicalFolder>
       <logicalFolder name="tasks" displayName="tasks" projectFiles="true">
       </logicalFolder>
@@ -355,10 +359,6 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src-auth/classes/UdpServer.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src-auth/classes/UdpServer.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../src-auth/dao/ConfigVersionDao.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/http/file_handler.cpp" ex="false" tool="1" flavor2="0">
@@ -372,6 +372,10 @@
       <item path="../src-auth/lists/NumberList.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/lists/NumberList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/OperatorList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/OperatorList.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/lists/OutcomeList.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -428,6 +432,16 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src-auth/lists/RoutingReportDataList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RoutingReportDataList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-auth/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/models/Airp.h" ex="false" tool="3" flavor2="0">
@@ -435,6 +449,8 @@
       <item path="../src-auth/models/ConfigVersion.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/models/Number.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/Operator.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/models/Outcome.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -452,6 +468,11 @@
       <item path="../src-auth/models/RouteTable.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/models/RouteTableRoute.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/models/RoutingReportData.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -761,10 +782,6 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src-auth/classes/UdpServer.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src-auth/classes/UdpServer.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../src-auth/dao/ConfigVersionDao.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/http/file_handler.cpp" ex="false" tool="1" flavor2="0">
@@ -778,6 +795,10 @@
       <item path="../src-auth/lists/NumberList.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/lists/NumberList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/OperatorList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/OperatorList.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/lists/OutcomeList.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -834,6 +855,16 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src-auth/lists/RoutingReportDataList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/RoutingReportDataList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-auth/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/models/Airp.h" ex="false" tool="3" flavor2="0">
@@ -841,6 +872,8 @@
       <item path="../src-auth/models/ConfigVersion.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/models/Number.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/Operator.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/models/Outcome.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -858,6 +891,11 @@
       <item path="../src-auth/models/RouteTable.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/models/RouteTableRoute.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/models/RoutingReportData.h"
             ex="false"
             tool="3"
             flavor2="0">

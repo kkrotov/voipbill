@@ -4,7 +4,8 @@
 
 bool ConfAuth::parse_config_variables(boost::property_tree::ptree &pt) {
 
-    web_port = pt.get<unsigned short>("main.web_port", 8030);
+    web_port = pt.get<unsigned short>("main.web_port", 8031);
+    api_port = pt.get<unsigned short>("main.api_port", 8031);
 
     db_main = pt.get<string>("db.main");
     db_local = pt.get<string>("db.local");

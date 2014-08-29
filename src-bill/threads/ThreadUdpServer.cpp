@@ -1,5 +1,5 @@
 #include "ThreadUdpServer.h"
-#include "../classes/AppAuth.h"
+#include "../classes/AppBill.h"
 #include "../classes/UdpMessageProcessor.h"
 
 #include <boost/array.hpp>
