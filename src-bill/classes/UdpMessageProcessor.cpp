@@ -72,7 +72,7 @@ string UdpMessageProcessor::process() {
 }
 
 string UdpMessageProcessor::analyzeCall() {
-    if (call.kill_call_reason == O) {
+    if (call.kill_call_reason == 0) {
         return "accept";
     } else if (call.kill_call_reason == KILL_REASON_CREDIT_LIMIT) {
         return "low_balance";

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="91">
+<configurationDescriptor version="94">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="f1" displayName="libs" projectFiles="true">
       <logicalFolder name="f2"
@@ -215,18 +215,18 @@
           <incDir>
             <pElem>../libs/boost</pElem>
             <pElem>../libs/gtest/include</pElem>
-            <pElem>/usr/pgsql-9.1/include</pElem>
+            <pElem>/usr/include/postgresql</pElem>
           </incDir>
         </ccTool>
         <linkerTool>
           <linkerAddLib>
-            <pElem>/usr/pgsql-9.1/lib</pElem>
             <pElem>../libs</pElem>
           </linkerAddLib>
           <linkerLibItems>
             <linkerOptionItem>-lpq</linkerOptionItem>
             <linkerOptionItem>-lrt</linkerOptionItem>
             <linkerOptionItem>-lstdc++</linkerOptionItem>
+            <linkerOptionItem>-lpthread</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
@@ -632,7 +632,7 @@
           <incDir>
             <pElem>../libs/boost</pElem>
             <pElem>../libs/gtest/include</pElem>
-            <pElem>/usr/pgsql-9.1/include</pElem>
+            <pElem>/usr/include/postgresql</pElem>
           </incDir>
         </ccTool>
         <fortranCompilerTool>
@@ -643,13 +643,13 @@
         </asmTool>
         <linkerTool>
           <linkerAddLib>
-            <pElem>/usr/pgsql-9.1/lib</pElem>
             <pElem>../libs</pElem>
           </linkerAddLib>
           <linkerLibItems>
             <linkerOptionItem>-lpq</linkerOptionItem>
             <linkerOptionItem>-lrt</linkerOptionItem>
             <linkerOptionItem>-lstdc++</linkerOptionItem>
+            <linkerOptionItem>-lpthread</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
