@@ -187,14 +187,16 @@
         <itemPath>../src-bill/threads/ThreadLoader.h</itemPath>
         <itemPath>../src-bill/threads/ThreadLog.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadLog.h</itemPath>
-        <itemPath>../src-bill/threads/ThreadSaveCounters.cpp</itemPath>
-        <itemPath>../src-bill/threads/ThreadSaveCounters.h</itemPath>
         <itemPath>../src-bill/threads/ThreadSelectCurrentCalls.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadSelectCurrentCalls.h</itemPath>
         <itemPath>../src-bill/threads/ThreadSelectGlobalCounters.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadSelectGlobalCounters.h</itemPath>
         <itemPath>../src-bill/threads/ThreadSync.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadSync.h</itemPath>
+        <itemPath>../src-bill/threads/ThreadSyncCalls.cpp</itemPath>
+        <itemPath>../src-bill/threads/ThreadSyncCalls.h</itemPath>
+        <itemPath>../src-bill/threads/ThreadSyncCounters.cpp</itemPath>
+        <itemPath>../src-bill/threads/ThreadSyncCounters.h</itemPath>
         <itemPath>../src-bill/threads/ThreadTasks.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadTasks.h</itemPath>
         <itemPath>../src-bill/threads/ThreadUdpServer.cpp</itemPath>
@@ -575,16 +577,6 @@
       </item>
       <item path="../src-bill/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src-bill/threads/ThreadSaveCounters.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src-bill/threads/ThreadSaveCounters.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="../src-bill/threads/ThreadSelectCurrentCalls.cpp"
             ex="false"
             tool="1"
@@ -608,6 +600,26 @@
       <item path="../src-bill/threads/ThreadSync.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadSync.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCalls.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCalls.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCounters.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCounters.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadTasks.cpp"
             ex="false"
@@ -1097,16 +1109,6 @@
       </item>
       <item path="../src-bill/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src-bill/threads/ThreadSaveCounters.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src-bill/threads/ThreadSaveCounters.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="../src-bill/threads/ThreadSelectCurrentCalls.cpp"
             ex="false"
             tool="1"
@@ -1130,6 +1132,26 @@
       <item path="../src-bill/threads/ThreadSync.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadSync.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCalls.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCalls.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCounters.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCounters.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadTasks.cpp"
             ex="false"

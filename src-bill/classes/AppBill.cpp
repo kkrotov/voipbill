@@ -7,7 +7,8 @@
 #include "../threads/ThreadLimitControl.h"
 #include "../threads/ThreadLoader.h"
 #include "../threads/ThreadSync.h"
-#include "../threads/ThreadSaveCounters.h"
+#include "../threads/ThreadSyncCounters.h"
+//#include "../threads/ThreadSyncCalls.h"
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadSelectCurrentCalls.h"
 #include "../threads/ThreadWeb.h"
@@ -51,7 +52,8 @@ void AppBill::runApp() {
     threads.run(new ThreadLog());
     threads.run(new ThreadSync());
     threads.run(new ThreadLoader());
-    threads.run(new ThreadSaveCounters());
+    threads.run(new ThreadSyncCounters());
+ //   threads.run(new ThreadSyncCalls());
     threads.run(new ThreadBlacklist());
     threads.run(new ThreadLimitControl());
     threads.run(new ThreadBillRuntime());
