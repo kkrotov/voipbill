@@ -1,23 +1,23 @@
-#include "ThreadCurrentCalls.h"
+#include "ThreadSelectCurrentCalls.h"
 #include "../classes/AppBill.h"
 #include "../classes/DataLoader.h"
 #include "../classes/CalcFull.h"
 
-shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::list(new CurrentCallsObjList());
-Spinlock ThreadCurrentCalls::sync_mutex;
+shared_ptr<CurrentCallsObjList> ThreadSelectCurrentCalls::list(new CurrentCallsObjList());
+Spinlock ThreadSelectCurrentCalls::sync_mutex;
 
-shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::getList() {
+shared_ptr<CurrentCallsObjList> ThreadSelectCurrentCalls::getList() {
     lock_guard<Spinlock> guard(sync_mutex);
     shared_ptr<CurrentCallsObjList> callsList = list;
     return callsList;
 }
 
-void ThreadCurrentCalls::setList(shared_ptr<CurrentCallsObjList> callsList) {
+void ThreadSelectCurrentCalls::setList(shared_ptr<CurrentCallsObjList> callsList) {
     lock_guard<Spinlock> guard(sync_mutex);
     list = callsList;
 }
 
-void ThreadCurrentCalls::run() {
+void ThreadSelectCurrentCalls::run() {
 
     shared_ptr<CurrentCallsObjList> callsList(new CurrentCallsObjList());
 
@@ -26,11 +26,11 @@ void ThreadCurrentCalls::run() {
     this->setList(callsList);
 }
 
-void ThreadCurrentCalls::htmlfull(stringstream &html) {
+void ThreadSelectCurrentCalls::htmlfull(stringstream &html) {
 
     this->html(html);
 
-    shared_ptr<CurrentCallsObjList> callsList = ThreadCurrentCalls::getList();
+    shared_ptr<CurrentCallsObjList> callsList = ThreadSelectCurrentCalls::getList();
 
     CalcFull calculator;
     calculator.calc_current(callsList.get());
@@ -80,7 +80,7 @@ void ThreadCurrentCalls::htmlfull(stringstream &html) {
     html << "</table>\n";
 }
 
-ThreadCurrentCalls::ThreadCurrentCalls() {
+ThreadSelectCurrentCalls::ThreadSelectCurrentCalls() {
     id = "currentcalls";
     name = "Current Calls";
     db_rad.setCS(app().conf.db_rad);

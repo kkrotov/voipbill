@@ -1,6 +1,8 @@
 #include "CalcBase.h"
 #include "AppBill.h"
 
+#include "../threads/ThreadSelectGlobalCounters.h"
+
 CalcBase::CalcBase() {
     last_call_time = 0;
     this->db = 0;
@@ -112,21 +114,22 @@ void CalcBase::calc_process_call(pCallObj call) {
 
     ClientCounterObj &c0 = data.counter_client->get(call->client_id);
     ClientCounterObj &c2 = client_counter2->get(call->client_id);
-    shared_ptr<RegionsCountersObjList> spRegionsCtrs = ThreadRegionsCounters::getList();
-    RegionsCountersObjList * regionsCounters = spRegionsCtrs.get();
-    pRegionsCountersObj regCtrsSum = regionsCounters->find(call->client_id);
-    double otherRegsSpentTotal = 0.0;
-    double otherRegsSpentDay = 0.0;
-    double otherRegsSpentMonth = 0.0;
-    if (regCtrsSum)
-    {
-       otherRegsSpentTotal = regCtrsSum->sumBalance();
-       otherRegsSpentDay = regCtrsSum->sumDay();
-       otherRegsSpentMonth = regCtrsSum->sumMonth();
+
+    double spentBalanceSum = c0.sumBalance() + c2.sumBalance();
+    double spentDaySum = c0.sumDay() + c2.sumDay();
+    double spentMonthSum = c0.sumMonth() + c2.sumMonth();
+
+    pGlobalCountersObj globalCounter =
+            ThreadSelectGlobalCounters::getList()->find(call->client_id);
+
+    if (globalCounter) {
+        spentBalanceSum += globalCounter->sumBalance();
+        spentDaySum += globalCounter->sumDay();
+        spentMonthSum += globalCounter->sumMonth();
     }
 
     if (call->isLocal()) {
-        if (client->credit >= 0 && client->balance + client->credit - c0.sumBalance() - c2.sumBalance() - otherRegsSpentTotal < 0
+        if (client->credit >= 0 && client->balance + client->credit - spentBalanceSum < 0
                 && client->last_payed_month < get_tmonth()) {
             call->kill_call_reason = KILL_REASON_CREDIT_LIMIT;
             return;
@@ -137,15 +140,15 @@ void CalcBase::calc_process_call(pCallObj call) {
             return;
         }
 
-        if (client->credit >= 0 && client->balance + client->credit - c0.sumBalance() - c2.sumBalance() - otherRegsSpentTotal < 0) {
+        if (client->credit >= 0 && client->balance + client->credit - spentBalanceSum < 0) {
             call->kill_call_reason = KILL_REASON_CREDIT_LIMIT;
             return;
         }
-        if (client->limit_d != 0 && client->limit_d - c0.sumDay() - c2.sumDay() - otherRegsSpentDay < 0) {
+        if (client->limit_d != 0 && client->limit_d - spentDaySum < 0) {
             call->kill_call_reason = KILL_REASON_DAYLY_LIMIT;
             return;
         }
-        if (client->limit_m != 0 && client->limit_m - c0.sumMonth() - c2.sumMonth() - otherRegsSpentMonth < 0) {
+        if (client->limit_m != 0 && client->limit_m - spentMonthSum < 0) {
             call->kill_call_reason = KILL_REASON_MONTHLY_LIMIT;
             return;
         }

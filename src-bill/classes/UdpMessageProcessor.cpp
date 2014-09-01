@@ -6,7 +6,7 @@
 #include "AppBill.h"
 #include "../classes/DataLoader.h"
 #include "CalcFull.h"
-#include "../threads/ThreadCurrentCalls.h"
+#include "../threads/ThreadSelectCurrentCalls.h"
 
 UdpMessageProcessor::UdpMessageProcessor(const string &message, BDb * db_calls) {
     this->message = message;
@@ -89,7 +89,7 @@ string UdpMessageProcessor::analyzeCall() {
 
 void UdpMessageProcessor::calculateCall() {
 
-    shared_ptr<CurrentCallsObjList> splist = ThreadCurrentCalls::getList();
+    shared_ptr<CurrentCallsObjList> splist = ThreadSelectCurrentCalls::getList();
     CurrentCallsObjList * list = splist.get();
 
     CalcFull calculator;
