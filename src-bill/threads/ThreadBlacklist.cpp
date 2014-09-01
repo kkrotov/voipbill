@@ -1,5 +1,6 @@
 #include "ThreadBlacklist.h"
 #include "../classes/AppBill.h"
+#include "ThreadRegionsCounters.h"
 
 ThreadBlacklist::ThreadBlacklist() {
     id = "blacklist";
@@ -105,6 +106,9 @@ void ThreadBlacklist::update_voip_auto_disabled() {
         shared_ptr<ClientCounter> counters_clients = loader->counter_client;
         shared_ptr<FminCounter> counters_fmin = loader->counter_fmin.get(get_tmonth());
         if (counters_clients == 0 || counters_fmin == 0) return;
+        
+        shared_ptr<RegionsCountersObjList> spRegionsCtrs = ThreadRegionsCounters::getList();
+        RegionsCountersObjList * regionsCounters = spRegionsCtrs.get();
 
         for (int j = 0; j < usages->count; j++) {
             bool need_lock_local = false;
@@ -113,17 +117,27 @@ void ThreadBlacklist::update_voip_auto_disabled() {
             pUsageObj usage = (pUsageObj) usages->_get(j);
             pClientObj client = clients->find(usage->client_id);
             ClientCounterObj &cc = counters_clients->get(usage->client_id);
+            pRegionsCountersObj regCtrsSum = regionsCounters->find(usage->client_id);
+            double otherRegsSpentTotal = 0.0;
+            double otherRegsSpentDay = 0.0;
+            double otherRegsSpentMonth = 0.0;
+            if (regCtrsSum)
+            {
+                otherRegsSpentTotal = regCtrsSum->sumBalance();
+                otherRegsSpentDay = regCtrsSum->sumDay();
+                otherRegsSpentMonth = regCtrsSum->sumMonth();
+            }
             int used_free_seconds = counters_fmin->get(usage->id, 1);
             if (client != 0) {
-                if ((client->credit >= 0 && client->balance + client->credit - cc.sumBalance() < 0) &&
+                if ((client->credit >= 0 && client->balance + client->credit - cc.sumBalance() - otherRegsSpentTotal < 0) &&
                         (client->last_payed_month < get_tmonth() || used_free_seconds >= usage->free_seconds)
                         ) {
                     need_lock_local = true;
                 }
 
-                if ((client->credit >= 0 && client->balance + client->credit - cc.sumBalance() < 0) ||
-                        (client->limit_d != 0 && client->limit_d - cc.sumDay() < 0) ||
-                        (client->limit_m != 0 && client->limit_m - cc.sumMonth() < 0) ||
+                if ((client->credit >= 0 && client->balance + client->credit - cc.sumBalance() - otherRegsSpentTotal < 0) ||
+                        (client->limit_d != 0 && client->limit_d - cc.sumDay() - otherRegsSpentDay < 0) ||
+                        (client->limit_m != 0 && client->limit_m - cc.sumMonth() - otherRegsSpentMonth < 0) ||
                         (client->disabled)
                         ) {
                     need_lock_global = true;

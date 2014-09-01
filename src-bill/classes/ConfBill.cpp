@@ -23,4 +23,5 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     billing_dc_break = pt.get<unsigned short>("billing.dc_break", 126);
     billing_free_seconds = pt.get<unsigned short>("billing.free_seconds", 5);
 
+    regions_counters_select_interval = pt.get<unsigned short>("billing.regions_counters_select_interval", 10);
 }

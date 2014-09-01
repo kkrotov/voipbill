@@ -14,6 +14,7 @@
 #include "../threads/ThreadTasks.h"
 #include "../threads/ThreadLog.h"
 #include "../threads/ThreadUdpServer.h"
+#include "../threads/ThreadRegionsCounters.h"
 
 #include "../../src/classes/LogWriterScreen.h"
 #include "../../src/classes/LogWriterFile.h"
@@ -58,6 +59,7 @@ void AppBill::runApp() {
     threads.run(new ThreadCurrentCalls());
     threads.run(new ThreadTasks());
     threads.run(new ThreadUdpServer());
+    threads.run(new ThreadRegionsCounters());
 
     web_thread.join();
 }
