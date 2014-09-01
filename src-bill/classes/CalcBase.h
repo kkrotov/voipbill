@@ -32,8 +32,10 @@ public:
     void prepare(DT & dt);
 
     void calc(CallsObjList *list);
-
-    void calc_limit(CurrentCallsObjList *list);
+    void calc_call(pCallObj call);
+    void calc_current(CurrentCallsObjList *list);
+    void calc_process_result(CurrentCallsObjList *list);
+    void calc_process_call(pCallObj call);
 
     void save();
 };

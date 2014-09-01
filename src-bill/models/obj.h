@@ -2,6 +2,13 @@
 
 #include "../../src/common.h"
 
+#define KILL_REASON_UNKNOWN_NUMBER  1000
+#define KILL_REASON_UNKNOWN_CLIENT  1010
+#define KILL_REASON_VOIP_DISABLED   2000
+#define KILL_REASON_CREDIT_LIMIT    3000
+#define KILL_REASON_DAYLY_LIMIT     3010
+#define KILL_REASON_MONTHLY_LIMIT   3020
+
 typedef struct _DestObj {
     char prefix[20];
     int dest;
