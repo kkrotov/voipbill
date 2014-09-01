@@ -29,7 +29,7 @@ void UdpMessageProcessor::parseRequest() {
             if (name == "calling") {
                 callingStationId = value;
             } else if (name == "called") {
-                calledStationId = value;
+                calledStationId = value.substr(5);
             }
         }
     }
@@ -186,7 +186,14 @@ string UdpMessageProcessor::processRouteCaseOutcome(pOutcome outcome) {
         throw new Exception("Route case #" + lexical_cast<string>(outcome->route_case_id) + " not found", "UdpMessageProcessor::processRouteCaseOutcome");
     }
 
-    return string("1;Cisco-AVPair=RTCASE=") + string(routeCase->name);
+    string response = string("1;Cisco-AVPair=RTCASE=") + string(routeCase->name);
+    if (outcome->calling_station_id[0] != 0) {
+        response += ";Calling-Station-Id:" + string(outcome->calling_station_id);
+    }
+    if (outcome->called_station_id[0] != 0) {
+        response += ";Called-Station-Id:" + string(outcome->called_station_id);
+    }
+    return response;
 }
 
 string UdpMessageProcessor::processReleaseReasonOutcome(pOutcome outcome) {
@@ -204,7 +211,14 @@ string UdpMessageProcessor::processAirpOutcome(pOutcome outcome) {
         throw new Exception("Airp #" + lexical_cast<string>(outcome->airp_id) + " not found", "UdpMessageProcessor::processAirpOutcome");
     }
 
-    return string("1;Cisco-AVPair=AIRP=") + string(airp->name);
+    string response = string("1;Cisco-AVPair=AIRP=") + string(airp->name);
+    if (outcome->calling_station_id[0] != 0) {
+        response += ";Calling-Station-Id:" + string(outcome->calling_station_id);
+    }
+    if (outcome->called_station_id[0] != 0) {
+        response += ";Called-Station-Id:" + string(outcome->called_station_id);
+    }
+    return response;
 }
 
 bool UdpMessageProcessor::filterByNumber(const int numberId, string strNumber) {

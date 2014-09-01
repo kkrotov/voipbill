@@ -41,8 +41,8 @@ bool BillClient::sendrecv(string &msg, string &res) {
         FD_SET(s.native(), &readset);
 
         timeval timeout;
-        timeout.tv_sec = 2;
-        timeout.tv_usec = 0;
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 10000; // 10 milliseconds
 
         select(s.native() + 1, &readset, NULL, NULL, &timeout);
 
@@ -66,7 +66,7 @@ bool BillClient::sendrecv(string &msg, string &res) {
     }
 
     s.close();
-//    Log::error(debug_msg + "Receive error");
+    Log::error(debug_msg + "Receive error");
     return false;
 }
 
@@ -75,7 +75,7 @@ string BillClient::query(string callingStationId, string calledStationId) {
     string msg = "calling:" + callingStationId + ";called:" + calledStationId;
     string res;
 
-    if (sendrecv(msg, res) == false) return false;
+    if (sendrecv(msg, res) == false) return "accept";
 
     return res;
 }

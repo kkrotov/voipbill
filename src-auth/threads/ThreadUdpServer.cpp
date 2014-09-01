@@ -12,43 +12,40 @@ using boost::asio::ip::udp;
 
 void ThreadUdpServer::run() {
 
-    try {
-        boost::asio::io_service io_service;
+    boost::asio::io_service io_service;
 
-        udp::socket socket(io_service, udp::endpoint(udp::v4(), app().conf.api_port));
+    udp::socket socket(io_service, udp::endpoint(udp::v4(), app().conf.api_port));
 
-        for (;;) {
-            boost::array<char, 1024> recv_buf;
-            udp::endpoint remote_endpoint;
-            boost::system::error_code error;
-
-
-
-            int bytes_received = socket.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0, error);
+    for (;;) {
+        boost::array<char, 1024> recv_buf;
+        udp::endpoint remote_endpoint;
+        boost::system::error_code error;
 
 
 
-            if (error && error != boost::asio::error::message_size)
-                throw boost::system::system_error(error);
+        int bytes_received = socket.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0, error);
 
 
 
-            recv_buf[bytes_received] = 0;
+        if (error && error != boost::asio::error::message_size)
+            throw boost::system::system_error(error);
 
 
 
-            auto processor = new UdpMessageProcessor(recv_buf.data());
-            string response = processor->process();
+        recv_buf[bytes_received] = 0;
 
 
 
-            boost::system::error_code ignored_error;
-            socket.send_to(boost::asio::buffer(response),
-                    remote_endpoint, 0, ignored_error);
-        }
-    } catch (exception& e) {
-        Log::error("Error in ThreadUdpServer::run: " + string(e.what()));
+        auto processor = new UdpMessageProcessor(recv_buf.data());
+        string response = processor->process();
+
+
+
+        boost::system::error_code ignored_error;
+        socket.send_to(boost::asio::buffer(response),
+                remote_endpoint, 0, ignored_error);
     }
+
 }
 
 void ThreadUdpServer::htmlfull(stringstream &html) {
