@@ -17,7 +17,7 @@ void ThreadSyncCalls::run() {
         BDbResult res = db_main.query("select max(id) from calls.calls_" + app().conf.str_instance_id);
         main_last_id = res.next() ? res.get_ll(0) : 0;
     } catch (Exception &e) {
-        e.addTrace("ThreadSaveCounters::save_calls::get_main_last_id");
+        e.addTrace("ThreadSyncCalls::run::get_main_last_id");
         throw e;
     }
 
@@ -31,7 +31,7 @@ void ThreadSyncCalls::run() {
         local_sync_month += res.get_s(0).substr(0, 4);
         local_sync_month += res.get_s(0).substr(5, 2);
     } catch (Exception &e) {
-        e.addTrace("ThreadSaveCounters::save_calls::get_local_sync_month");
+        e.addTrace("ThreadSyncCalls::run::get_local_sync_month");
         throw e;
     }
 
@@ -43,7 +43,7 @@ void ThreadSyncCalls::run() {
                 &db_calls, &db_main);
 
     } catch (Exception &e) {
-        e.addTrace("ThreadSaveCounters::save_calls::copy(main_last_id:" + lexical_cast<string>(main_last_id) + ")");
+        e.addTrace("ThreadSyncCalls::run::copy(main_last_id:" + lexical_cast<string>(main_last_id) + ")");
         throw e;
     }
 }

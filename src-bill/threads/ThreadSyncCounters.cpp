@@ -96,7 +96,7 @@ void ThreadSyncCounters::save_client_counters(bool clear) {
                 } catch (...) {
                 }
             }
-            e.addTrace("ThreadSaveCounters::save_client_counters:");
+            e.addTrace("ThreadSyncCounters::save_client_counters:");
             throw e;
         }
     }
