@@ -18,14 +18,16 @@ typedef struct rlm_mcn_t {
     char *billing_host;
     int billing_port;
     char *message;
+    int timeout_ms;
 
 } MCN_INST;
 
 static const CONF_PARSER module_config[] = {
     { "billing_host", PW_TYPE_STRING_PTR, offsetof(MCN_INST, billing_host), NULL, NULL},
     { "billing_port", PW_TYPE_INTEGER, offsetof(MCN_INST, billing_port), NULL, "0"},
+    { "timeout_ms", PW_TYPE_INTEGER, offsetof(MCN_INST, timeout_ms), NULL, "100"},
     { "message", PW_TYPE_STRING_PTR, offsetof(MCN_INST, message), NULL, NULL},
-
+    
     { NULL, -1, 0, NULL, NULL} /* end the list */
 };
 
@@ -64,16 +66,13 @@ void mcn_process_auth_request(char *request, char *response, int response_size, 
         return;
     }
 
-//    struct sockaddr_in client_addr;
-//    socklen_t l = sizeof (client_addr);
-
     fd_set eventset;
     FD_ZERO(&eventset);
     FD_SET(sock, &eventset);
 
     struct timeval timeout;
     timeout.tv_sec = 0;
-    timeout.tv_usec = 100000; // 100 millisecond
+    timeout.tv_usec = instance->timeout_ms * 1000;
 
     sendto(sock, request, strlen(request), 0, (struct sockaddr *) &addr, sizeof(addr));
 
@@ -155,7 +154,7 @@ static int mcn_authorize(MCN_INST *instance, REQUEST *request) {
             case STATE_PARSE_REPLY_CODE:
                 if (*pos == ';' || endOfLine) {
                     *pos = 0;
-                    if (strcmp(posStart, "1") == 0) {
+                    if (strcmp(posStart, "1") == 0 || endOfLine) {
                         request->reply->code = PW_AUTHENTICATION_ACK;
                         RDEBUG2("Set reply code: PW_AUTHENTICATION_ACK");
                     } else {
