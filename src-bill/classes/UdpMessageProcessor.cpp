@@ -46,7 +46,7 @@ bool UdpMessageProcessor::validateRequest() {
         throw new Exception("Udp request validation: bad called: " + message, "UdpMessageProcessor::validateRequest");
     }
 
-    if (trunk >= 80) {
+    if (trunk < 80) {
         throw new Exception("Udp request validation: bad trunk: " + lexical_cast<string>(trunk), "UdpMessageProcessor::validateRequest");
     }
 

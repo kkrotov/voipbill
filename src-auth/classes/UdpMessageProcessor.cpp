@@ -36,10 +36,12 @@ void UdpMessageProcessor::parseRequest() {
                     prefix = "";
                     bNumber = value;
                 }
-            } else if (name == "redirection") {
+            } else if (name == "redirnum") {
                 redirectionNumber = value;
             } else if (name == "trunk") {
-                trunk = atoi(value.c_str());
+                vector<string> trunkParts;
+                split(trunkParts, value, boost::algorithm::is_any_of("_"));
+                trunk = atoi(trunkParts.at(trunkParts.size() -1).c_str());
             }
         }
     }
@@ -65,7 +67,7 @@ bool UdpMessageProcessor::validateRequest() {
         throw new Exception("Udp request validation: bad called: " + message, "UdpMessageProcessor::validateRequest");
     }
 
-    if (trunk >= 80) {
+    if (trunk < 80) {
         throw new Exception("Udp request validation: bad trunk: " + lexical_cast<string>(trunk), "UdpMessageProcessor::validateRequest");
     }
 
