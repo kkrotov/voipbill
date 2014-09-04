@@ -3,7 +3,7 @@
 
 ThreadSyncCalls::ThreadSyncCalls() {
     id = "sync_calls";
-    name = "Sync Calls";
+    name = "Sync Calls to central db";
 
     db_main.setCS(app().conf.db_main);
     db_calls.setCS(app().conf.db_calls);
