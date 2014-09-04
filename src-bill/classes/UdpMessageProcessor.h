@@ -16,8 +16,9 @@ public:
 private:
     BDb * db_calls;
     string message;
-    string callingStationId;
-    string calledStationId;
+    string aNumber;
+    string bNumber;
+    int trunk;
     CallObj call;
 
 

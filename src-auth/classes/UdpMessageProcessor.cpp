@@ -27,11 +27,27 @@ void UdpMessageProcessor::parseRequest() {
             string value = pair.at(1);
 
             if (name == "calling") {
-                callingStationId = value;
+                aNumber = value;
             } else if (name == "called") {
-                calledStationId = value.substr(5);
+                if (value.substr(0, 1) == "0") {
+                    prefix = value.substr(0, 3);
+                    bNumber = value.substr(3);
+                } else {
+                    prefix = "";
+                    bNumber = value;
+                }
+            } else if (name == "redirection") {
+                redirectionNumber = value;
+            } else if (name == "trunk") {
+                trunk = atoi(value.c_str());
             }
         }
+    }
+    
+    if (needSwapCallingAndRedirectionNumber() ) {
+        string tmp = redirectionNumber;
+        redirectionNumber = aNumber;
+        aNumber = tmp;
     }
 }
 
@@ -41,12 +57,16 @@ bool UdpMessageProcessor::validateRequest() {
         throw new Exception("ConfigVersionData not ready");
     }
 
-    if (callingStationId == "") {
+    if (aNumber == "") {
         throw new Exception("Udp request validation: bad calling: " + message, "UdpMessageProcessor::validateRequest");
     }
 
-    if (calledStationId == "") {
+    if (bNumber == "") {
         throw new Exception("Udp request validation: bad called: " + message, "UdpMessageProcessor::validateRequest");
+    }
+
+    if (trunk >= 80) {
+        throw new Exception("Udp request validation: bad trunk: " + lexical_cast<string>(trunk), "UdpMessageProcessor::validateRequest");
     }
 
 }
@@ -61,7 +81,7 @@ string UdpMessageProcessor::process() {
         
         int outcomeId;
         
-        string billResponse = BillClient::query(callingStationId, calledStationId);
+        string billResponse = BillClient::query(aNumber, bNumber, trunk);
  
         if (billResponse == "voip_disabled") {
             outcomeId = data->version->blocked_outcome_id;           
@@ -108,11 +128,11 @@ int UdpMessageProcessor::processRouteTable(const int routeTableId) {
         auto route = data->routeTableRouteList->find(routeTable->id, order);
         if (route == 0) break;
 
-        if (route->a_number_id && !filterByNumber(route->a_number_id, callingStationId)) {
+        if (route->a_number_id && !filterByNumber(route->a_number_id, aNumber)) {
             continue;
         }
 
-        if (route->b_number_id && !filterByNumber(route->b_number_id, calledStationId)) {
+        if (route->b_number_id && !filterByNumber(route->b_number_id, bNumber)) {
             continue;
         }
 
@@ -159,7 +179,7 @@ string UdpMessageProcessor::processOutcome(int outcomeId) {
 }
 
 string UdpMessageProcessor::processAutoOutcome(pOutcome outcome) {
-    auto autoRoute = data->routingReportDataList->find(callingStationId.c_str());
+    auto autoRoute = data->routingReportDataList->find(bNumber.c_str());
     if (autoRoute == 0) {
         Log::warning("Auto Route not found for request: " + message);
         return string("1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION");
@@ -245,3 +265,14 @@ bool UdpMessageProcessor::filterByNumber(const int numberId, string strNumber) {
     return false;
 }
 
+bool UdpMessageProcessor::needSwapCallingAndRedirectionNumber() {
+    if (isConnectedOperator()) {
+        return false;
+    }
+    
+    return prefix.substr(2, 1) == "1";
+}
+
+bool UdpMessageProcessor::isConnectedOperator() {
+    return trunk >= 100;
+}
