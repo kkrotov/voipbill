@@ -70,6 +70,9 @@ void ThreadWeb::handlerConfig(stringstream &html) {
 
     html << "<br/>\n";
     html << "main.web_port: " << app().conf.web_port << "<br/>\n";
+    html << "main.api_port: " << app().conf.api_port << "<br/>\n";
+    html << "main.auth_api_host: " << app().conf.auth_api_host << "<br/>\n";
+    html << "main.auth_api_port: " << app().conf.auth_api_port << "<br/>\n";
     html << "main.test_mode: " << app().conf.test_mode << "<br/>\n";
     html << "<br/>\n";
     html << "log.grouping_interval: " << app().conf.log_grouping_interval << "<br/>\n";
