@@ -52,8 +52,8 @@ void UdpMessageProcessor::parseRequest() {
         aNumber = tmp;
     }
 
-    if (
-            data != 0
+    if (    !isConnectedOperator()
+            && data != 0
             && data->version->calling_station_id_for_line_without_number[0] != 0
             && aNumber.substr(0, 11) == string(data->version->calling_station_id_for_line_without_number)
             && (aNumber.substr(11, 1) == "*" || aNumber.substr(11, 1) == "+")
