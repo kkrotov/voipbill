@@ -41,15 +41,27 @@ void UdpMessageProcessor::parseRequest() {
             } else if (name == "trunk") {
                 vector<string> trunkParts;
                 split(trunkParts, value, boost::algorithm::is_any_of("_"));
-                trunk = atoi(trunkParts.at(trunkParts.size() -1).c_str());
+                trunk = atoi(trunkParts.at(trunkParts.size() - 1).c_str());
             }
         }
     }
-    
-    if (needSwapCallingAndRedirectionNumber() ) {
+
+    if (needSwapCallingAndRedirectionNumber()) {
         string tmp = redirectionNumber;
         redirectionNumber = aNumber;
         aNumber = tmp;
+    }
+
+    if (
+            data != 0
+            && data->version->calling_station_id_for_line_without_number[0] != 0
+            && aNumber.substr(0, 11) == string(data->version->calling_station_id_for_line_without_number)
+            && (aNumber.substr(11, 1) == "*" || aNumber.substr(11, 1) == "+")
+            ) {
+        aNumberForAuth = aNumber.substr(12);
+        aNumber = aNumber.substr(0, 11);
+    } else {
+        aNumberForAuth = aNumber;
     }
 }
 
@@ -80,16 +92,16 @@ string UdpMessageProcessor::process() {
         parseRequest();
 
         validateRequest();
-        
+
         int outcomeId;
-        
-        string billResponse = BillClient::query(aNumber, bNumber, trunk);
- 
+
+        string billResponse = BillClient::query(aNumberForAuth, bNumber, trunk);
+
         if (billResponse == "voip_disabled") {
-            outcomeId = data->version->blocked_outcome_id;           
+            outcomeId = data->version->blocked_outcome_id;
             if (outcomeId == 0) return "0";
         } else if (billResponse == "low_balance") {
-            outcomeId = data->version->low_balance_outcome_id;     
+            outcomeId = data->version->low_balance_outcome_id;
             if (outcomeId == 0) return "0";
         } else if (billResponse == "reject") {
             return "0";
@@ -271,7 +283,7 @@ bool UdpMessageProcessor::needSwapCallingAndRedirectionNumber() {
     if (isConnectedOperator()) {
         return false;
     }
-    
+
     return prefix.substr(2, 1) == "1";
 }
 

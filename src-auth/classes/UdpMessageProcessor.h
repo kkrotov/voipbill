@@ -17,6 +17,7 @@ private:
     string message;
     string prefix;
     string aNumber;
+    string aNumberForAuth;
     string bNumber;
     string redirectionNumber;
     int trunk;
