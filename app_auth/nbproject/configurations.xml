@@ -223,6 +223,7 @@
         <linkerTool>
           <linkerAddLib>
             <pElem>../libs</pElem>
+            <pElem>/usr/pgsql-9.1/lib</pElem>
           </linkerAddLib>
           <linkerLibItems>
             <linkerOptionItem>-lpq</linkerOptionItem>
@@ -656,6 +657,7 @@
         <linkerTool>
           <linkerAddLib>
             <pElem>../libs</pElem>
+            <pElem>/usr/pgsql-9.1/lib</pElem>
           </linkerAddLib>
           <linkerLibItems>
             <linkerOptionItem>-lpq</linkerOptionItem>
