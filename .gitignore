@@ -1,4 +1,5 @@
 /libs
+/.idea
 *~
 
 /app_auth/build
