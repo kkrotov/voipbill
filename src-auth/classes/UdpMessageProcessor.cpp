@@ -41,7 +41,7 @@ void UdpMessageProcessor::parseRequest() {
             } else if (name == "trunk") {
                 vector<string> trunkParts;
                 split(trunkParts, value, boost::algorithm::is_any_of("_"));
-                trunk = atoi(trunkParts.at(trunkParts.size() - 1).c_str());
+                trunkNumber = atoi(trunkParts.at(trunkParts.size() - 1).c_str());
             }
         }
     }
@@ -79,8 +79,8 @@ bool UdpMessageProcessor::validateRequest() {
         throw new Exception("Udp request validation: bad called: " + message, "UdpMessageProcessor::validateRequest");
     }
 
-    if (trunk < 80) {
-        throw new Exception("Udp request validation: bad trunk: " + lexical_cast<string>(trunk), "UdpMessageProcessor::validateRequest");
+    if (trunkNumber < 80) {
+        throw new Exception("Udp request validation: bad trunk: " + lexical_cast<string>(trunkNumber), "UdpMessageProcessor::validateRequest");
     }
 
 }
@@ -95,7 +95,7 @@ string UdpMessageProcessor::process() {
 
         int outcomeId;
 
-        string billResponse = BillClient::query(aNumberForAuth, bNumber, trunk);
+        string billResponse = BillClient::query(aNumberForAuth, bNumber, trunkNumber);
 
         if (billResponse == "voip_disabled") {
             outcomeId = data->version->blocked_outcome_id;
@@ -106,7 +106,16 @@ string UdpMessageProcessor::process() {
         } else if (billResponse == "reject") {
             return "0";
         } else {
-            outcomeId = processRouteTable(data->version->route_table_id);
+            if (isConnectedOperator()) {
+                auto trunk = data->trunkList->find(trunkNumber);
+                if (trunk == 0) {
+                    Log::warning("Trunk " + lexical_cast<string>(trunkNumber) + " not found for request: " + message);
+                    return "1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION";
+                }
+                outcomeId = processRouteTable(trunk->route_table_id);
+            } else {
+                outcomeId = processRouteTable(data->version->route_table_id);
+            }
             if (outcomeId == 0) {
                 Log::warning("Outcome not found for request: " + message);
                 return "1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION";
@@ -288,5 +297,5 @@ bool UdpMessageProcessor::needSwapCallingAndRedirectionNumber() {
 }
 
 bool UdpMessageProcessor::isConnectedOperator() {
-    return trunk >= 100;
+    return trunkNumber >= 100;
 }

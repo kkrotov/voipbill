@@ -12,7 +12,7 @@ using namespace std;
 struct Number {
     int id;
     char name[51];
-    char prefixlist_ids[51];
+    char prefixlist_ids[101];
 
     vector<int> getPrefixlistIds() {
         string str(prefixlist_ids);

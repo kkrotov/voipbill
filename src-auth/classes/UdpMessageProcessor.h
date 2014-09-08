@@ -20,7 +20,7 @@ private:
     string aNumberForAuth;
     string bNumber;
     string redirectionNumber;
-    int trunk;
+    int trunkNumber;
 
     shared_ptr<ConfigVersionData> data;
 

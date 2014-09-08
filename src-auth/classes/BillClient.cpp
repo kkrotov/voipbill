@@ -70,9 +70,9 @@ bool BillClient::sendrecv(string &msg, string &res) {
     return false;
 }
 
-string BillClient::query(string aNumber, string bNumber, int trunk) {
+string BillClient::query(string aNumber, string bNumber, int trunkNumber) {
 
-    string msg = "calling:" + aNumber + ";called:" + bNumber + ";trunk:" + lexical_cast<string>(trunk);
+    string msg = "calling:" + aNumber + ";called:" + bNumber + ";trunk:" + lexical_cast<string>(trunkNumber);
     string res;
 
     if (sendrecv(msg, res) == false) return "accept";

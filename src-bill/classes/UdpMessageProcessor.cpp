@@ -30,7 +30,7 @@ void UdpMessageProcessor::parseRequest() {
             } else if (name == "called") {
                 bNumber = value;
             } else if (name == "trunk") {
-                trunk = atoi(value.c_str());
+                trunkNumber = atoi(value.c_str());
             }
         }
     }
@@ -46,8 +46,8 @@ bool UdpMessageProcessor::validateRequest() {
         throw new Exception("Udp request validation: bad called: " + message, "UdpMessageProcessor::validateRequest");
     }
 
-    if (trunk < 80) {
-        throw new Exception("Udp request validation: bad trunk: " + lexical_cast<string>(trunk), "UdpMessageProcessor::validateRequest");
+    if (trunkNumber < 80) {
+        throw new Exception("Udp request validation: bad trunk: " + lexical_cast<string>(trunkNumber), "UdpMessageProcessor::validateRequest");
     }
 
 }
@@ -126,7 +126,7 @@ void UdpMessageProcessor::prepareCall() {
     call.out = true;
     strcpy((char*) &call.usage_num, aNumber.c_str());
     strcpy((char*) &call.phone_num, bNumber.c_str());
-    call.instance_id = trunk;
+    call.instance_id = trunkNumber;
     call.operator_id = 0;
     call.kill_call_reason = 0;
     call.prefix_geo[0] = 0;

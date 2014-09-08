@@ -277,4 +277,26 @@ ThreadSync::ThreadSync() {
     s12.add_field("auto_routing");
     s12.prepare();
     syncs.push_back(s12);
+
+    qsync s13;
+    s13.label = "trunk";
+    s13.t_from = "trunk";
+    s13.t_to = "trunk";
+    s13.add_field("id");
+    s13.add_field("name");
+    s13.add_field("number");
+    s13.add_field("route_table_id");
+    s13.prepare();
+    syncs.push_back(s13);
+
+    qsync s14;
+    s14.label = "trunk_group";
+    s14.t_from = "trunk_group";
+    s14.t_to = "trunk_group";
+    s14.add_field("id");
+    s14.add_field("name");
+    s14.add_field("trunk_ids");
+    s14.add_field("trunk_numbers");
+    s14.prepare();
+    syncs.push_back(s14);
 }

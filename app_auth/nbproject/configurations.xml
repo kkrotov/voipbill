@@ -148,6 +148,10 @@
         <itemPath>../src-auth/lists/RouteTableRouteList.h</itemPath>
         <itemPath>../src-auth/lists/RoutingReportDataList.cpp</itemPath>
         <itemPath>../src-auth/lists/RoutingReportDataList.h</itemPath>
+        <itemPath>../src-auth/lists/TrunkGroupList.cpp</itemPath>
+        <itemPath>../src-auth/lists/TrunkGroupList.h</itemPath>
+        <itemPath>../src-auth/lists/TrunkList.cpp</itemPath>
+        <itemPath>../src-auth/lists/TrunkList.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="models" projectFiles="true">
         <itemPath>../src-auth/models/Airp.h</itemPath>
@@ -162,6 +166,8 @@
         <itemPath>../src-auth/models/RouteTable.h</itemPath>
         <itemPath>../src-auth/models/RouteTableRoute.h</itemPath>
         <itemPath>../src-auth/models/RoutingReportData.h</itemPath>
+        <itemPath>../src-auth/models/Trunk.h</itemPath>
+        <itemPath>../src-auth/models/TrunkGroup.h</itemPath>
       </logicalFolder>
       <logicalFolder name="tasks" displayName="tasks" projectFiles="true">
       </logicalFolder>
@@ -445,6 +451,17 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src-auth/lists/TrunkGroupList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/TrunkGroupList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/TrunkList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/TrunkList.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src-auth/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/models/Airp.h" ex="false" tool="3" flavor2="0">
@@ -479,6 +496,10 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="../src-auth/models/Trunk.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/TrunkGroup.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/threads/ThreadLoader.cpp"
             ex="false"
@@ -879,6 +900,17 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src-auth/lists/TrunkGroupList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/TrunkGroupList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/TrunkList.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src-auth/lists/TrunkList.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src-auth/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/models/Airp.h" ex="false" tool="3" flavor2="0">
@@ -913,6 +945,10 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="../src-auth/models/Trunk.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-auth/models/TrunkGroup.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/threads/ThreadLoader.cpp"
             ex="false"

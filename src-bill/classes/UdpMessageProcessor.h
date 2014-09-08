@@ -18,7 +18,7 @@ private:
     string message;
     string aNumber;
     string bNumber;
-    int trunk;
+    int trunkNumber;
     CallObj call;
 
 
