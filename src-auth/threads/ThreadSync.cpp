@@ -285,6 +285,7 @@ ThreadSync::ThreadSync() {
     s13.add_field("id");
     s13.add_field("name");
     s13.add_field("number");
+    s13.add_field("cpc_id");
     s13.add_field("route_table_id");
     s13.prepare();
     syncs.push_back(s13);
