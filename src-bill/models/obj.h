@@ -37,6 +37,9 @@ typedef struct _UsageObj {
     int pl_russia_mob_id;
     int pl_intern_id;
     int pl_sng_id;
+    bool isConnectedOperator() {
+        return phone_num >= 100 && phone_num < 1000;
+    }
 } UsageObj, *pUsageObj;
 
 typedef struct _Operator {
@@ -83,7 +86,7 @@ typedef struct _ClientObj {
     time_t last_payed_month;
 } ClientObj, *pClientObj;
 
-typedef struct _RegionsCountersObj {
+typedef struct _GlobalCountersObj {
     int client_id;
     int sum;
     int sum_day;
@@ -100,7 +103,7 @@ typedef struct _RegionsCountersObj {
     double sumBalance() {
         return ((int) (sum * 1.18 + 0.5)) / 100.0;
     }
-} RegionsCountersObj, *pRegionsCountersObj;
+} GlobalCountersObj, *pGlobalCountersObj;
 
 typedef struct _ClientCounterObj {
     int client_id;

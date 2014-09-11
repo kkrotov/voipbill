@@ -1,11 +1,11 @@
-#include "RegionsCountersObjList.h"
+#include "GlobalCountersObjList.h"
 #include "../classes/AppBill.h"
 
-size_t RegionsCountersObjList::item_size() {
-    return sizeof (RegionsCountersObj);
+size_t GlobalCountersObjList::item_size() {
+    return sizeof (GlobalCountersObj);
 }
 
-string RegionsCountersObjList::sql(BDb * db) {
+string GlobalCountersObjList::sql(BDb * db) {
     string instance_id = app().conf.str_instance_id;
     string sDay = string_date(get_tday());
     string sMonth = string_date(get_tmonth());
@@ -18,18 +18,18 @@ string RegionsCountersObjList::sql(BDb * db) {
            "     order by client_id asc ";
 }
 
-inline void RegionsCountersObjList::parse_item(BDbResult &row, void * obj) {
-    pRegionsCountersObj item = (pRegionsCountersObj) obj;
+inline void GlobalCountersObjList::parse_item(BDbResult &row, void * obj) {
+    pGlobalCountersObj item = (pGlobalCountersObj) obj;
     item->client_id = row.get_i(0);
     item->sum = row.get_i(1);
     item->sum_day = row.get_i(2);
     item->sum_month = row.get_i(3);
 }
 
-inline int RegionsCountersObjList::key(const void *obj) {
-    return ( (pRegionsCountersObj) obj)->client_id;
+inline int GlobalCountersObjList::key(const void *obj) {
+    return ( (pGlobalCountersObj) obj)->client_id;
 }
 
-pRegionsCountersObj RegionsCountersObjList::find(const int client_id) {
-    return (pRegionsCountersObj) _find(client_id);
+pGlobalCountersObj GlobalCountersObjList::find(const int client_id) {
+    return (pGlobalCountersObj) _find(client_id);
 }

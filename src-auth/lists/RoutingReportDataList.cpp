@@ -6,7 +6,7 @@ size_t RoutingReportDataList::item_size() {
 
 string RoutingReportDataList::sql(BDb * db) {
     return "   select prefix, routes " \
-            "   from routing_report_data " \
+            "   from auth.routing_report_data " \
             "   where locked = false " \
             "   order by prefix ";
 }

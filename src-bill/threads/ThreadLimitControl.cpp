@@ -3,7 +3,7 @@
 #include "../classes/CallsSaver.h"
 #include "../classes/KillCalls.h"
 #include "../lists/CurrentCallsObjList.h"
-#include "ThreadCurrentCalls.h"
+#include "ThreadSelectCurrentCalls.h"
 
 ThreadLimitControl::ThreadLimitControl() {
     id = "limitcontrol";
@@ -21,7 +21,7 @@ bool ThreadLimitControl::ready() {
 
 void ThreadLimitControl::run() {
 
-    shared_ptr<CurrentCallsObjList> splist = ThreadCurrentCalls::getList();
+    shared_ptr<CurrentCallsObjList> splist = ThreadSelectCurrentCalls::getList();
     CurrentCallsObjList * list = splist.get();
 
     if (list->loadtime + 60 >= time(NULL)) {

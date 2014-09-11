@@ -113,6 +113,7 @@
         <itemPath>../src-bill/classes/BlackList.h</itemPath>
         <itemPath>../src-bill/classes/BlackListGlobal.h</itemPath>
         <itemPath>../src-bill/classes/BlackListLocal.h</itemPath>
+        <itemPath>../src-bill/classes/BlackListTrunk.h</itemPath>
         <itemPath>../src-bill/classes/CalcBase.cpp</itemPath>
         <itemPath>../src-bill/classes/CalcBase.h</itemPath>
         <itemPath>../src-bill/classes/CalcFull.cpp</itemPath>
@@ -148,6 +149,8 @@
         <itemPath>../src-bill/lists/DestObjList.h</itemPath>
         <itemPath>../src-bill/lists/FminCounter.cpp</itemPath>
         <itemPath>../src-bill/lists/FminCounter.h</itemPath>
+        <itemPath>../src-bill/lists/GlobalCountersObjList.cpp</itemPath>
+        <itemPath>../src-bill/lists/GlobalCountersObjList.h</itemPath>
         <itemPath>../src-bill/lists/NetworkPrefixObjList.cpp</itemPath>
         <itemPath>../src-bill/lists/NetworkPrefixObjList.h</itemPath>
         <itemPath>../src-bill/lists/OperatorList.cpp</itemPath>
@@ -156,8 +159,6 @@
         <itemPath>../src-bill/lists/PriceObjList.h</itemPath>
         <itemPath>../src-bill/lists/PricelistList.cpp</itemPath>
         <itemPath>../src-bill/lists/PricelistList.h</itemPath>
-        <itemPath>../src-bill/lists/RegionsCountersObjList.cpp</itemPath>
-        <itemPath>../src-bill/lists/RegionsCountersObjList.h</itemPath>
         <itemPath>../src-bill/lists/RuntimeCallsObjList.cpp</itemPath>
         <itemPath>../src-bill/lists/RuntimeCallsObjList.h</itemPath>
         <itemPath>../src-bill/lists/UsageObjList.cpp</itemPath>
@@ -181,20 +182,22 @@
         <itemPath>../src-bill/threads/ThreadBlacklist.h</itemPath>
         <itemPath>../src-bill/threads/ThreadCheckStartTable.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadCheckStartTable.h</itemPath>
-        <itemPath>../src-bill/threads/ThreadCurrentCalls.cpp</itemPath>
-        <itemPath>../src-bill/threads/ThreadCurrentCalls.h</itemPath>
         <itemPath>../src-bill/threads/ThreadLimitControl.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadLimitControl.h</itemPath>
         <itemPath>../src-bill/threads/ThreadLoader.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadLoader.h</itemPath>
         <itemPath>../src-bill/threads/ThreadLog.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadLog.h</itemPath>
-        <itemPath>../src-bill/threads/ThreadRegionsCounters.cpp</itemPath>
-        <itemPath>../src-bill/threads/ThreadRegionsCounters.h</itemPath>
-        <itemPath>../src-bill/threads/ThreadSaveCounters.cpp</itemPath>
-        <itemPath>../src-bill/threads/ThreadSaveCounters.h</itemPath>
+        <itemPath>../src-bill/threads/ThreadSelectCurrentCalls.cpp</itemPath>
+        <itemPath>../src-bill/threads/ThreadSelectCurrentCalls.h</itemPath>
+        <itemPath>../src-bill/threads/ThreadSelectGlobalCounters.cpp</itemPath>
+        <itemPath>../src-bill/threads/ThreadSelectGlobalCounters.h</itemPath>
         <itemPath>../src-bill/threads/ThreadSync.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadSync.h</itemPath>
+        <itemPath>../src-bill/threads/ThreadSyncCalls.cpp</itemPath>
+        <itemPath>../src-bill/threads/ThreadSyncCalls.h</itemPath>
+        <itemPath>../src-bill/threads/ThreadSyncCounters.cpp</itemPath>
+        <itemPath>../src-bill/threads/ThreadSyncCounters.h</itemPath>
         <itemPath>../src-bill/threads/ThreadTasks.cpp</itemPath>
         <itemPath>../src-bill/threads/ThreadTasks.h</itemPath>
         <itemPath>../src-bill/threads/ThreadUdpServer.cpp</itemPath>
@@ -248,6 +251,7 @@
         <linkerTool>
           <linkerAddLib>
             <pElem>../libs</pElem>
+            <pElem>/usr/pgsql-9.1/lib</pElem>
           </linkerAddLib>
           <linkerLibItems>
             <linkerOptionItem>-lpq</linkerOptionItem>
@@ -374,6 +378,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src-bill/classes/BlackListTrunk.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-bill/classes/CalcBase.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/classes/CalcBase.h" ex="false" tool="3" flavor2="0">
@@ -463,6 +472,16 @@
       </item>
       <item path="../src-bill/lists/FminCounter.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-bill/lists/GlobalCountersObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/GlobalCountersObjList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-bill/lists/NetworkPrefixObjList.cpp"
             ex="false"
             tool="1"
@@ -487,16 +506,6 @@
             flavor2="0">
       </item>
       <item path="../src-bill/lists/PricelistList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src-bill/lists/RegionsCountersObjList.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src-bill/lists/RegionsCountersObjList.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
       </item>
       <item path="../src-bill/lists/RuntimeCallsObjList.cpp"
             ex="false"
@@ -554,16 +563,6 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src-bill/threads/ThreadCurrentCalls.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src-bill/threads/ThreadCurrentCalls.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="../src-bill/threads/ThreadLimitControl.cpp"
             ex="false"
             tool="1"
@@ -585,22 +584,22 @@
       </item>
       <item path="../src-bill/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src-bill/threads/ThreadRegionsCounters.cpp"
+      <item path="../src-bill/threads/ThreadSelectCurrentCalls.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../src-bill/threads/ThreadRegionsCounters.h"
+      <item path="../src-bill/threads/ThreadSelectCurrentCalls.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src-bill/threads/ThreadSaveCounters.cpp"
+      <item path="../src-bill/threads/ThreadSelectGlobalCounters.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../src-bill/threads/ThreadSaveCounters.h"
+      <item path="../src-bill/threads/ThreadSelectGlobalCounters.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -608,6 +607,26 @@
       <item path="../src-bill/threads/ThreadSync.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadSync.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCalls.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCalls.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCounters.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCounters.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadTasks.cpp"
             ex="false"
@@ -770,6 +789,7 @@
         <linkerTool>
           <linkerAddLib>
             <pElem>../libs</pElem>
+            <pElem>/usr/pgsql-9.1/lib</pElem>
           </linkerAddLib>
           <linkerLibItems>
             <linkerOptionItem>-lpq</linkerOptionItem>
@@ -896,6 +916,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src-bill/classes/BlackListTrunk.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-bill/classes/CalcBase.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/classes/CalcBase.h" ex="false" tool="3" flavor2="0">
@@ -985,6 +1010,16 @@
       </item>
       <item path="../src-bill/lists/FminCounter.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-bill/lists/GlobalCountersObjList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/lists/GlobalCountersObjList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-bill/lists/NetworkPrefixObjList.cpp"
             ex="false"
             tool="1"
@@ -1009,16 +1044,6 @@
             flavor2="0">
       </item>
       <item path="../src-bill/lists/PricelistList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src-bill/lists/RegionsCountersObjList.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src-bill/lists/RegionsCountersObjList.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
       </item>
       <item path="../src-bill/lists/RuntimeCallsObjList.cpp"
             ex="false"
@@ -1076,16 +1101,6 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src-bill/threads/ThreadCurrentCalls.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src-bill/threads/ThreadCurrentCalls.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="../src-bill/threads/ThreadLimitControl.cpp"
             ex="false"
             tool="1"
@@ -1107,22 +1122,22 @@
       </item>
       <item path="../src-bill/threads/ThreadLog.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src-bill/threads/ThreadRegionsCounters.cpp"
+      <item path="../src-bill/threads/ThreadSelectCurrentCalls.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../src-bill/threads/ThreadRegionsCounters.h"
+      <item path="../src-bill/threads/ThreadSelectCurrentCalls.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src-bill/threads/ThreadSaveCounters.cpp"
+      <item path="../src-bill/threads/ThreadSelectGlobalCounters.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../src-bill/threads/ThreadSaveCounters.h"
+      <item path="../src-bill/threads/ThreadSelectGlobalCounters.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -1130,6 +1145,26 @@
       <item path="../src-bill/threads/ThreadSync.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadSync.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCalls.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCalls.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCounters.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/threads/ThreadSyncCounters.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src-bill/threads/ThreadTasks.cpp"
             ex="false"

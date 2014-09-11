@@ -3,10 +3,9 @@
 #include "../../src/common.h"
 #include "../../src/classes/Log.h"
 #include "UdpMessageProcessor.h"
-#include "AppBill.h"
 #include "../classes/DataLoader.h"
 #include "CalcFull.h"
-#include "../threads/ThreadCurrentCalls.h"
+#include "../threads/ThreadSelectCurrentCalls.h"
 
 UdpMessageProcessor::UdpMessageProcessor(const string &message, BDb * db_calls) {
     this->message = message;
@@ -27,9 +26,11 @@ void UdpMessageProcessor::parseRequest() {
             string value = pair.at(1);
 
             if (name == "calling") {
-                callingStationId = value;
+                aNumber = value;
             } else if (name == "called") {
-                calledStationId = value;
+                bNumber = value;
+            } else if (name == "trunk") {
+                trunkNumber = atoi(value.c_str());
             }
         }
     }
@@ -37,12 +38,16 @@ void UdpMessageProcessor::parseRequest() {
 
 bool UdpMessageProcessor::validateRequest() {
 
-    if (callingStationId == "") {
+    if (aNumber == "") {
         throw new Exception("Udp request validation: bad calling: " + message, "UdpMessageProcessor::validateRequest");
     }
 
-    if (calledStationId == "") {
+    if (bNumber == "") {
         throw new Exception("Udp request validation: bad called: " + message, "UdpMessageProcessor::validateRequest");
+    }
+
+    if (trunkNumber < 80) {
+        throw new Exception("Udp request validation: bad trunk: " + lexical_cast<string>(trunkNumber), "UdpMessageProcessor::validateRequest");
     }
 
 }
@@ -89,7 +94,7 @@ string UdpMessageProcessor::analyzeCall() {
 
 void UdpMessageProcessor::calculateCall() {
 
-    shared_ptr<CurrentCallsObjList> splist = ThreadCurrentCalls::getList();
+    shared_ptr<CurrentCallsObjList> splist = ThreadSelectCurrentCalls::getList();
     CurrentCallsObjList * list = splist.get();
 
     CalcFull calculator;
@@ -119,9 +124,9 @@ void UdpMessageProcessor::prepareCall() {
     call.dt.month = call.dt.day - (timeinfo->tm_mday - 1) * 86400;
     call.len = 60;
     call.out = true;
-    strcpy((char*) &call.usage_num, callingStationId.c_str());
-    strcpy((char*) &call.phone_num, calledStationId.c_str());
-    call.instance_id = app().conf.instance_id;
+    strcpy((char*) &call.usage_num, aNumber.c_str());
+    strcpy((char*) &call.phone_num, bNumber.c_str());
+    call.instance_id = trunkNumber;
     call.operator_id = 0;
     call.kill_call_reason = 0;
     call.prefix_geo[0] = 0;

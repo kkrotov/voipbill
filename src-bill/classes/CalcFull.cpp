@@ -219,6 +219,13 @@ void CalcFull::calculateMcnIn(pCallObj call, pUsageObj usage) {
 
             updateClientCounters(call);
         }
+    } else {
+        call->len_mcn = getCallLength(
+                call->len,
+                usage->tariffication_by_minutes,
+                usage->tariffication_full_first_minute,
+                usage->tariffication_free_first_seconds
+        );
     }
 }
 

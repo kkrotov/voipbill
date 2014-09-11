@@ -2,19 +2,20 @@
 #include "../../src/threads/Thread.h"
 #include "../../src/classes/Daemon.h"
 
+#include "../threads/ThreadWeb.h"
+#include "../threads/ThreadLog.h"
+#include "../threads/ThreadSync.h"
+#include "../threads/ThreadSyncCounters.h"
+#include "../threads/ThreadSyncCalls.h"
+#include "../threads/ThreadSelectCurrentCalls.h"
+#include "../threads/ThreadSelectGlobalCounters.h"
+#include "../threads/ThreadLoader.h"
 #include "../threads/ThreadBlacklist.h"
 #include "../threads/ThreadBillRuntime.h"
 #include "../threads/ThreadLimitControl.h"
-#include "../threads/ThreadLoader.h"
-#include "../threads/ThreadSync.h"
-#include "../threads/ThreadSaveCounters.h"
 #include "../threads/ThreadCheckStartTable.h"
-#include "../threads/ThreadCurrentCalls.h"
-#include "../threads/ThreadWeb.h"
 #include "../threads/ThreadTasks.h"
-#include "../threads/ThreadLog.h"
 #include "../threads/ThreadUdpServer.h"
-#include "../threads/ThreadRegionsCounters.h"
 
 #include "../../src/classes/LogWriterScreen.h"
 #include "../../src/classes/LogWriterFile.h"
@@ -50,16 +51,17 @@ void AppBill::runApp() {
 
     threads.run(new ThreadLog());
     threads.run(new ThreadSync());
+    threads.run(new ThreadSyncCounters());
+    threads.run(new ThreadSyncCalls());
+    threads.run(new ThreadSelectCurrentCalls());
+    threads.run(new ThreadSelectGlobalCounters());
     threads.run(new ThreadLoader());
-    threads.run(new ThreadSaveCounters());
     threads.run(new ThreadBlacklist());
-    threads.run(new ThreadLimitControl());
     threads.run(new ThreadBillRuntime());
+    threads.run(new ThreadLimitControl());
     threads.run(new ThreadCheckStartTable());
-    threads.run(new ThreadCurrentCalls());
     threads.run(new ThreadTasks());
     threads.run(new ThreadUdpServer());
-    threads.run(new ThreadRegionsCounters());
 
     web_thread.join();
 }

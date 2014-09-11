@@ -6,7 +6,7 @@ size_t RouteTableList::item_size() {
 
 string RouteTableList::sql(BDb * db) {
     return "   select  id, name " \
-            "   from route_table " \
+            "   from auth.route_table " \
             "   order by id ";
 }
 

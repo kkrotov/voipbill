@@ -14,6 +14,6 @@ protected:
 
 public:
     
-    static string query(string callingStationId, string calledStationId);
+    static string query(string aNumber, string bNumber, int trunkNumber);
 
 };

@@ -6,7 +6,7 @@ size_t OperatorList::item_size() {
 
 string OperatorList::sql(BDb * db) {
     return "   select  id, name, code " \
-            "   from operator " \
+            "   from auth.operator " \
             "   order by id ";
 }
 

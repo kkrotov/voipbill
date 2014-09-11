@@ -22,7 +22,7 @@ public:
     unsigned short billing_dc_break;
     unsigned short billing_free_seconds;
     
-    unsigned short regions_counters_select_interval;
+    unsigned short global_counters_select_interval;
 
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);

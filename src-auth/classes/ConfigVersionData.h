@@ -13,6 +13,8 @@
 #include "../lists/RouteTableRouteList.h"
 #include "../lists/OperatorList.h"
 #include "../lists/RoutingReportDataList.h"
+#include "../lists/TrunkList.h"
+#include "../lists/TrunkGroupList.h"
 
 class ConfigVersionData {
 public:
@@ -28,6 +30,8 @@ public:
     RouteTableRouteList * routeTableRouteList;
     OperatorList * operatorList;
     RoutingReportDataList * routingReportDataList;
+    TrunkList * trunkList;
+    TrunkGroupList * trunkGroupList;
 
     ConfigVersionData();
 

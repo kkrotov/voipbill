@@ -8,7 +8,7 @@ string OutcomeList::sql(BDb * db) {
     return "   select  id, name, type_id, " \
             "       calling_station_id, called_station_id, " \
             "       route_case_id, release_reason_id, airp_id " \
-            "   from outcome " \
+            "   from auth.outcome " \
             "   order by id ";
 }
 
