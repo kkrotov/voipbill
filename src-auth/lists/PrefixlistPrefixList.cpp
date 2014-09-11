@@ -6,7 +6,7 @@ size_t PrefixlistPrefixList::item_size() {
 
 string PrefixlistPrefixList::sql(BDb * db) {
     return "   select  prefixlist_id, prefix " \
-            "   from prefixlist_prefix " \
+            "   from auth.prefixlist_prefix " \
             "   order by prefixlist_id, prefix ";
 }
 

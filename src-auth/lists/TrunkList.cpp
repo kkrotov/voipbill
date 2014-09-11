@@ -6,7 +6,7 @@ size_t TrunkList::item_size() {
 
 string TrunkList::sql(BDb * db) {
     return "   select number, name, route_table_id " \
-            "   from trunk " \
+            "   from auth.trunk " \
             "   order by number ";
 }
 

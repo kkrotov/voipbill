@@ -52,7 +52,7 @@ void UdpMessageProcessor::parseRequest() {
         aNumber = tmp;
     }
 
-    if (    !isConnectedOperator()
+    if (isLocalTrunk()
             && data != 0
             && data->version->calling_station_id_for_line_without_number[0] != 0
             && aNumber.substr(0, 11) == string(data->version->calling_station_id_for_line_without_number)
@@ -106,16 +106,13 @@ string UdpMessageProcessor::process() {
         } else if (billResponse == "reject") {
             return "0";
         } else {
-            if (isConnectedOperator()) {
-                auto trunk = data->trunkList->find(trunkNumber);
-                if (trunk == 0) {
-                    Log::warning("Trunk " + lexical_cast<string>(trunkNumber) + " not found for request: " + message);
-                    return "1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION";
-                }
-                outcomeId = processRouteTable(trunk->route_table_id);
-            } else {
-                outcomeId = processRouteTable(data->version->route_table_id);
+            auto trunk = data->trunkList->find(trunkNumber);
+            if (trunk == 0) {
+                Log::warning("Trunk " + lexical_cast<string>(trunkNumber) + " not found for request: " + message);
+                return "1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION";
             }
+
+            outcomeId = processRouteTable(trunk->route_table_id);
             if (outcomeId == 0) {
                 Log::warning("Outcome not found for request: " + message);
                 return "1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION";
@@ -289,13 +286,9 @@ bool UdpMessageProcessor::filterByNumber(const int numberId, string strNumber) {
 }
 
 bool UdpMessageProcessor::needSwapCallingAndRedirectionNumber() {
-    if (isConnectedOperator()) {
-        return false;
-    }
-
-    return prefix.substr(2, 1) == "1";
+    return isLocalTrunk() && prefix.substr(2, 1) == "1";
 }
 
-bool UdpMessageProcessor::isConnectedOperator() {
-    return trunkNumber >= 100;
+bool UdpMessageProcessor::isLocalTrunk() {
+    return trunkNumber == app().conf.server_id;
 }

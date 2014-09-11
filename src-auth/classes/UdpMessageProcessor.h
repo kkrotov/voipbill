@@ -37,8 +37,8 @@ private:
     string processRouteCaseOutcome(pOutcome outcome);
     string processReleaseReasonOutcome(pOutcome outcome);
     string processAirpOutcome(pOutcome outcome);
-    
-    bool isConnectedOperator();
+
+    bool isLocalTrunk();
     bool needSwapCallingAndRedirectionNumber();
 };
 

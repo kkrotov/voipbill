@@ -4,11 +4,13 @@
 #include "../classes/DataLoader.h"
 #include "../classes/BlackListLocal.h"
 #include "../classes/BlackListGlobal.h"
+#include "../classes/BlackListTrunk.h"
 
 class ThreadBlacklist : public Thread {
     DataLoader *loader;
     BlackListLocal *blacklist_local;
     BlackListGlobal *blacklist_global;
+    BlackListTrunk *blacklist_trunk;
 
     time_t last_sync_from_openca_time;
 

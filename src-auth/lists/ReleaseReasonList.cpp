@@ -6,7 +6,7 @@ size_t ReleaseReasonList::item_size() {
 
 string ReleaseReasonList::sql(BDb * db) {
     return "   select  id, name " \
-            "   from release_reason " \
+            "   from auth.release_reason " \
             "   order by id ";
 }
 

@@ -113,6 +113,7 @@
         <itemPath>../src-bill/classes/BlackList.h</itemPath>
         <itemPath>../src-bill/classes/BlackListGlobal.h</itemPath>
         <itemPath>../src-bill/classes/BlackListLocal.h</itemPath>
+        <itemPath>../src-bill/classes/BlackListTrunk.h</itemPath>
         <itemPath>../src-bill/classes/CalcBase.cpp</itemPath>
         <itemPath>../src-bill/classes/CalcBase.h</itemPath>
         <itemPath>../src-bill/classes/CalcFull.cpp</itemPath>
@@ -373,6 +374,11 @@
             flavor2="0">
       </item>
       <item path="../src-bill/classes/BlackListLocal.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/classes/BlackListTrunk.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -906,6 +912,11 @@
             flavor2="0">
       </item>
       <item path="../src-bill/classes/BlackListLocal.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src-bill/classes/BlackListTrunk.h"
             ex="false"
             tool="3"
             flavor2="0">

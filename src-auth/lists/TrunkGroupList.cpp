@@ -6,7 +6,7 @@ size_t TrunkGroupList::item_size() {
 
 string TrunkGroupList::sql(BDb * db) {
     return "   select  id, name, trunk_numbers " \
-            "   from trunk_group " \
+            "   from auth.trunk_group " \
             "   order by id ";
 }
 

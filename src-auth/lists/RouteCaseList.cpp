@@ -6,7 +6,7 @@ size_t RouteCaseList::item_size() {
 
 string RouteCaseList::sql(BDb * db) {
     return "   select  id, name " \
-            "   from route_case " \
+            "   from auth.route_case " \
             "   order by id ";
 }
 
