@@ -2,6 +2,13 @@
 
 #include "../../src/common.h"
 
+#define KILL_REASON_UNKNOWN_NUMBER  1000
+#define KILL_REASON_UNKNOWN_CLIENT  1010
+#define KILL_REASON_VOIP_DISABLED   2000
+#define KILL_REASON_CREDIT_LIMIT    3000
+#define KILL_REASON_DAYLY_LIMIT     3010
+#define KILL_REASON_MONTHLY_LIMIT   3020
+
 typedef struct _DestObj {
     char prefix[20];
     int dest;
@@ -27,8 +34,12 @@ typedef struct _UsageObj {
     int pl_local_id;
     int pl_local_mob_id;
     int pl_russia_id;
+    int pl_russia_mob_id;
     int pl_intern_id;
     int pl_sng_id;
+    bool isConnectedOperator() {
+        return phone_num >= 100 && phone_num < 1000;
+    }
 } UsageObj, *pUsageObj;
 
 typedef struct _Operator {
@@ -74,6 +85,25 @@ typedef struct _ClientObj {
     time_t amount_date;
     time_t last_payed_month;
 } ClientObj, *pClientObj;
+
+typedef struct _GlobalCountersObj {
+    int client_id;
+    int sum;
+    int sum_day;
+    int sum_month;
+    
+    double sumDay() {
+        return ((int) (sum_day * 1.18 + 0.5)) / 100.0;
+    }
+
+    double sumMonth() {
+        return ((int) (sum_month * 1.18 + 0.5)) / 100.0;
+    }
+
+    double sumBalance() {
+        return ((int) (sum * 1.18 + 0.5)) / 100.0;
+    }
+} GlobalCountersObj, *pGlobalCountersObj;
 
 typedef struct _ClientCounterObj {
     int client_id;
@@ -151,6 +181,8 @@ typedef struct _CallObj {
     bool isZonaMob();
     bool isZonaStd();
     bool isRussian();
+    bool isRussianMob();
+    bool isRussianStd();
     bool isInternational();
     bool isSNG();
     bool isTrank();

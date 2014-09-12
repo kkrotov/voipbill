@@ -19,7 +19,7 @@ public:
                         id, name, \
                         low_balance_outcome_id, blocked_outcome_id, calling_station_id_for_line_without_number, \
                         route_table_id \
-                    from config_version \
+                    from auth.config_version \
                     limit 1 \
                 ");
         if (res.next()) {

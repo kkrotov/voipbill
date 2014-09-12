@@ -160,8 +160,10 @@ void CalcFull::calculateMcnOut(pCallObj call, pUsageObj usage) {
         call->pricelist_mcn_id = usage->pl_local_mob_id;
     else if (call->isZonaStd())
         call->pricelist_mcn_id = usage->pl_russia_id;
-    else if (call->isRussian())
+    else if (call->isRussianStd())
         call->pricelist_mcn_id = usage->pl_russia_id;
+    else if (call->isRussianMob())
+        call->pricelist_mcn_id = usage->pl_russia_mob_id;
     else if (call->isInternational())
         call->pricelist_mcn_id = usage->pl_intern_id;
     else if (call->isSNG())
@@ -217,6 +219,13 @@ void CalcFull::calculateMcnIn(pCallObj call, pUsageObj usage) {
 
             updateClientCounters(call);
         }
+    } else {
+        call->len_mcn = getCallLength(
+                call->len,
+                usage->tariffication_by_minutes,
+                usage->tariffication_full_first_minute,
+                usage->tariffication_free_first_seconds
+        );
     }
 }
 

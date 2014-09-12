@@ -8,7 +8,7 @@ string RouteTableRouteList::sql(BDb * db) {
     return "   select  route_table_id, \"order\", " \
             "       a_number_id, b_number_id, " \
             "       outcome_id, outcome_route_table_id " \
-            "   from route_table_route " \
+            "   from auth.route_table_route " \
             "   order by route_table_id, \"order\" ";
 }
 

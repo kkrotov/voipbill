@@ -6,7 +6,7 @@ size_t AirpList::item_size() {
 
 string AirpList::sql(BDb * db) {
     return "   select  id, name " \
-            "   from airp " \
+            "   from auth.airp " \
             "   order by id ";
 }
 

@@ -25,16 +25,21 @@ public:
 
     static bool blacklist_global(vector<string> &list);
 
-    static bool lock(string &phones);
+    static bool blacklist_trunk(vector<string> &list);
 
-    static bool lock_local(string &phones);
+    static bool lock(string &phone);
 
-    static bool lock_global(string &phones);
+    static bool lock_local(string &phone);
 
-    static bool unlock(string &phones);
+    static bool lock_global(string &phone);
 
-    static bool unlock_local(string &phones);
+    static bool lock_trunk(string &phone);
 
-    static bool unlock_global(string &phones);
+    static bool unlock(string &trunk);
 
+    static bool unlock_local(string &phone);
+
+    static bool unlock_global(string &phone);
+
+    static bool unlock_trunk(string &trunk);
 };

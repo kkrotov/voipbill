@@ -1,25 +1,23 @@
-#include "ThreadCurrentCalls.h"
+#include "ThreadSelectCurrentCalls.h"
 #include "../classes/AppBill.h"
 #include "../classes/DataLoader.h"
 #include "../classes/CalcFull.h"
 
-shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::list(new CurrentCallsObjList());
-spinlock ThreadCurrentCalls::lock;
+shared_ptr<CurrentCallsObjList> ThreadSelectCurrentCalls::list(new CurrentCallsObjList());
+Spinlock ThreadSelectCurrentCalls::sync_mutex;
 
-shared_ptr<CurrentCallsObjList> ThreadCurrentCalls::getList() {
-    lock.lock();
+shared_ptr<CurrentCallsObjList> ThreadSelectCurrentCalls::getList() {
+    lock_guard<Spinlock> guard(sync_mutex);
     shared_ptr<CurrentCallsObjList> callsList = list;
-    lock.unlock();
     return callsList;
 }
 
-void ThreadCurrentCalls::setList(shared_ptr<CurrentCallsObjList> callsList) {
-    lock.lock();
+void ThreadSelectCurrentCalls::setList(shared_ptr<CurrentCallsObjList> callsList) {
+    lock_guard<Spinlock> guard(sync_mutex);
     list = callsList;
-    lock.unlock();
 }
 
-void ThreadCurrentCalls::run() {
+void ThreadSelectCurrentCalls::run() {
 
     shared_ptr<CurrentCallsObjList> callsList(new CurrentCallsObjList());
 
@@ -28,14 +26,14 @@ void ThreadCurrentCalls::run() {
     this->setList(callsList);
 }
 
-void ThreadCurrentCalls::htmlfull(stringstream &html) {
+void ThreadSelectCurrentCalls::htmlfull(stringstream &html) {
 
     this->html(html);
 
-    shared_ptr<CurrentCallsObjList> callsList = ThreadCurrentCalls::getList();
+    shared_ptr<CurrentCallsObjList> callsList = ThreadSelectCurrentCalls::getList();
 
     CalcFull calculator;
-    calculator.calc_limit(callsList.get());
+    calculator.calc_current(callsList.get());
 
     html << "Time loop: <b>" << this->t.sloop() << "</b><br/>\n";
     html << "Time full loop: <b>" << this->t.sfull() << "</b><br/>\n";
@@ -82,7 +80,7 @@ void ThreadCurrentCalls::htmlfull(stringstream &html) {
     html << "</table>\n";
 }
 
-ThreadCurrentCalls::ThreadCurrentCalls() {
+ThreadSelectCurrentCalls::ThreadSelectCurrentCalls() {
     id = "currentcalls";
     name = "Current Calls";
     db_rad.setCS(app().conf.db_rad);

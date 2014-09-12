@@ -4,6 +4,7 @@
 #include "../../src/classes/Log.h"
 #include "UdpMessageProcessor.h"
 #include "AppAuth.h"
+#include "BillClient.h"
 #include "ConfigVersionData.h"
 
 UdpMessageProcessor::UdpMessageProcessor(const string &message) {
@@ -17,9 +18,6 @@ void UdpMessageProcessor::parseRequest() {
     vector<string> parameters;
     split(parameters, message, boost::algorithm::is_any_of(";"));
 
-    string calling_station_id;
-    string called_station_id;
-
     for (auto it = parameters.begin(); it != parameters.end(); ++it) {
         vector<string> pair;
         split(pair, *it, boost::algorithm::is_any_of(":"));
@@ -29,11 +27,41 @@ void UdpMessageProcessor::parseRequest() {
             string value = pair.at(1);
 
             if (name == "calling") {
-                callingStationId = value;
+                aNumber = value;
             } else if (name == "called") {
-                calledStationId = value;
+                if (value.substr(0, 1) == "0") {
+                    prefix = value.substr(0, 3);
+                    bNumber = value.substr(3);
+                } else {
+                    prefix = "";
+                    bNumber = value;
+                }
+            } else if (name == "redirnum") {
+                redirectionNumber = value;
+            } else if (name == "trunk") {
+                vector<string> trunkParts;
+                split(trunkParts, value, boost::algorithm::is_any_of("_"));
+                trunkNumber = atoi(trunkParts.at(trunkParts.size() - 1).c_str());
             }
         }
+    }
+
+    if (needSwapCallingAndRedirectionNumber()) {
+        string tmp = redirectionNumber;
+        redirectionNumber = aNumber;
+        aNumber = tmp;
+    }
+
+    if (isLocalTrunk()
+            && data != 0
+            && data->version->calling_station_id_for_line_without_number[0] != 0
+            && aNumber.substr(0, 11) == string(data->version->calling_station_id_for_line_without_number)
+            && (aNumber.substr(11, 1) == "*" || aNumber.substr(11, 1) == "+")
+            ) {
+        aNumberForAuth = aNumber.substr(12);
+        aNumber = aNumber.substr(0, 11);
+    } else {
+        aNumberForAuth = aNumber;
     }
 }
 
@@ -43,28 +71,67 @@ bool UdpMessageProcessor::validateRequest() {
         throw new Exception("ConfigVersionData not ready");
     }
 
-    if (callingStationId == "") {
+    if (aNumber == "") {
         throw new Exception("Udp request validation: bad calling: " + message, "UdpMessageProcessor::validateRequest");
     }
 
-    if (calledStationId == "") {
+    if (bNumber == "") {
         throw new Exception("Udp request validation: bad called: " + message, "UdpMessageProcessor::validateRequest");
+    }
+
+    if (trunkNumber < 80) {
+        throw new Exception("Udp request validation: bad trunk: " + lexical_cast<string>(trunkNumber), "UdpMessageProcessor::validateRequest");
     }
 
 }
 
 string UdpMessageProcessor::process() {
 
-    parseRequest();
+    try {
 
-    validateRequest();
+        parseRequest();
 
-    int outcomeId = processRouteTable(data->version->route_table_id);
-    if (outcomeId == 0) {
-        throw new Exception("Outcome not found for request: " + message, "UdpMessageProcessor::process");
+        validateRequest();
+
+        int outcomeId;
+
+        string billResponse = BillClient::query(aNumberForAuth, bNumber, trunkNumber);
+
+        if (billResponse == "voip_disabled") {
+            outcomeId = data->version->blocked_outcome_id;
+            if (outcomeId == 0) return "0";
+        } else if (billResponse == "low_balance") {
+            outcomeId = data->version->low_balance_outcome_id;
+            if (outcomeId == 0) return "0";
+        } else if (billResponse == "reject") {
+            return "0";
+        } else {
+            auto trunk = data->trunkList->find(trunkNumber);
+            if (trunk == 0) {
+                Log::warning("Trunk " + lexical_cast<string>(trunkNumber) + " not found for request: " + message);
+                return "1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION";
+            }
+
+            outcomeId = processRouteTable(trunk->route_table_id);
+            if (outcomeId == 0) {
+                Log::warning("Outcome not found for request: " + message);
+                return "1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION";
+            }
+        }
+
+        return processOutcome(outcomeId);
+
+    } catch (Exception &e) {
+        e.addTrace("UdpMessageProcessor ");
+        Log::exception(e);
+    } catch (std::exception &e) {
+        Log::error("UdpMessageProcessor: " + string(e.what()));
+    } catch (...) {
+        Log::error("UdpMessageProcessor: ERROR");
     }
 
-    return processOutcome(outcomeId);
+    Log::warning("Fallback to default route for request: " + message);
+    return string("1");
 }
 
 int UdpMessageProcessor::processRouteTable(const int routeTableId) {
@@ -81,11 +148,11 @@ int UdpMessageProcessor::processRouteTable(const int routeTableId) {
         auto route = data->routeTableRouteList->find(routeTable->id, order);
         if (route == 0) break;
 
-        if (route->a_number_id && !filterByNumber(route->a_number_id, callingStationId)) {
+        if (route->a_number_id && !filterByNumber(route->a_number_id, aNumber)) {
             continue;
         }
 
-        if (route->b_number_id && !filterByNumber(route->b_number_id, calledStationId)) {
+        if (route->b_number_id && !filterByNumber(route->b_number_id, bNumber)) {
             continue;
         }
 
@@ -132,8 +199,25 @@ string UdpMessageProcessor::processOutcome(int outcomeId) {
 }
 
 string UdpMessageProcessor::processAutoOutcome(pOutcome outcome) {
+    auto autoRoute = data->routingReportDataList->find(bNumber.c_str());
+    if (autoRoute == 0) {
+        Log::warning("Auto Route not found for request: " + message);
+        return string("1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION");
+    }
 
-    return string("ROUTE_CASE:RC_AUTO");
+    string routeCase = "rc_auto";
+
+    auto operators = autoRoute->getOperators();
+    for (auto it = operators.begin(); it != operators.end(); ++it) {
+        auto oper = data->operatorList->find(*it);
+        if (oper == 0) {
+            throw new Exception("Operator #" + lexical_cast<string>(*it) + " not found", "UdpMessageProcessor::processAutoOutcome");
+        }
+
+        routeCase = routeCase + "_" + oper->getFormattedCode();
+    }
+
+    return string("1;Cisco-AVPair=RTCASE=") + routeCase;
 }
 
 string UdpMessageProcessor::processRouteCaseOutcome(pOutcome outcome) {
@@ -142,7 +226,14 @@ string UdpMessageProcessor::processRouteCaseOutcome(pOutcome outcome) {
         throw new Exception("Route case #" + lexical_cast<string>(outcome->route_case_id) + " not found", "UdpMessageProcessor::processRouteCaseOutcome");
     }
 
-    return string("ROUTE_CASE:") + string(routeCase->name);
+    string response = string("1;Cisco-AVPair=RTCASE=") + string(routeCase->name);
+    if (outcome->calling_station_id[0] != 0) {
+        response += ";Calling-Station-Id:" + string(outcome->calling_station_id);
+    }
+    if (outcome->called_station_id[0] != 0) {
+        response += ";Called-Station-Id:" + string(outcome->called_station_id);
+    }
+    return response;
 }
 
 string UdpMessageProcessor::processReleaseReasonOutcome(pOutcome outcome) {
@@ -151,7 +242,7 @@ string UdpMessageProcessor::processReleaseReasonOutcome(pOutcome outcome) {
         throw new Exception("Release reason #" + lexical_cast<string>(outcome->release_reason_id) + " not found", "UdpMessageProcessor::processReleaseReasonOutcome");
     }
 
-    return string("RELEASE_REASON:") + string(releaseReason->name);
+    return string("1;Cisco-AVPair=Reason=") + string(releaseReason->name);
 }
 
 string UdpMessageProcessor::processAirpOutcome(pOutcome outcome) {
@@ -160,7 +251,14 @@ string UdpMessageProcessor::processAirpOutcome(pOutcome outcome) {
         throw new Exception("Airp #" + lexical_cast<string>(outcome->airp_id) + " not found", "UdpMessageProcessor::processAirpOutcome");
     }
 
-    return string("AIRP:") + string(airp->name);
+    string response = string("1;Cisco-AVPair=AIRP=") + string(airp->name);
+    if (outcome->calling_station_id[0] != 0) {
+        response += ";Calling-Station-Id:" + string(outcome->calling_station_id);
+    }
+    if (outcome->called_station_id[0] != 0) {
+        response += ";Called-Station-Id:" + string(outcome->called_station_id);
+    }
+    return response;
 }
 
 bool UdpMessageProcessor::filterByNumber(const int numberId, string strNumber) {
@@ -187,3 +285,10 @@ bool UdpMessageProcessor::filterByNumber(const int numberId, string strNumber) {
     return false;
 }
 
+bool UdpMessageProcessor::needSwapCallingAndRedirectionNumber() {
+    return isLocalTrunk() && prefix.substr(2, 1) == "1";
+}
+
+bool UdpMessageProcessor::isLocalTrunk() {
+    return trunkNumber == app().conf.server_id;
+}

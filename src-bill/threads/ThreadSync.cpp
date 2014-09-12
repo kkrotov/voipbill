@@ -258,6 +258,7 @@ ThreadSync::ThreadSync() {
     s3.add_field("tarif_id_local");
     s3.add_field("tarif_id_local_mob");
     s3.add_field("tarif_id_russia");
+    s3.add_field("tarif_id_russia_mob");
     s3.add_field("tarif_id_intern");
     s3.add_field("tarif_id_sng");
     s3.prepare();

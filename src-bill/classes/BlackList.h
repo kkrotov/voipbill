@@ -14,8 +14,8 @@ protected:
     void log_unlock_phone(string &phone);
 
     virtual bool udp_blacklist(vector<string> &list) = 0;
-    virtual bool udp_lock(string &phones) = 0;
-    virtual bool udp_unlock(string &phones) = 0;
+    virtual bool udp_lock(string &phone) = 0;
+    virtual bool udp_unlock(string &phone) = 0;
 
 public:
     map<long long int, time_t> blacklist;

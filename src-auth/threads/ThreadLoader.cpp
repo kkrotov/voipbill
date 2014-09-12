@@ -76,6 +76,18 @@ void ThreadLoader::htmlfull(stringstream &html) {
 
         ol = configVersionData->routeTableRouteList;
         if (ol != 0) html << "RouteTableRoute: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+
+        ol = configVersionData->operatorList;
+        if (ol != 0) html << "Operator: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+
+        ol = configVersionData->routingReportDataList;
+        if (ol != 0) html << "RoutingReportData: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+
+        ol = configVersionData->trunkList;
+        if (ol != 0) html << "Trunk: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+
+        ol = configVersionData->trunkGroupList;
+        if (ol != 0) html << "TrunkGroup: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
     }
 
     html << "<br/>\n";
