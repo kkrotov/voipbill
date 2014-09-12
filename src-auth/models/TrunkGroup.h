@@ -31,6 +31,18 @@ struct TrunkGroup {
         return intTrunkNumbers;
     }
 
+    bool hasTrunkNumber(int trunkNumber) {
+        vector<int> trunkNumbers = getTrunkNumbers();
+
+        for (auto it = trunkNumbers.begin(); it != trunkNumbers.end(); ++it) {
+            if (trunkNumber == *it) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 };
 
 typedef TrunkGroup * pTrunkGroup;

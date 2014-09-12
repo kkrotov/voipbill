@@ -40,5 +40,7 @@ private:
 
     bool isLocalTrunk();
     bool needSwapCallingAndRedirectionNumber();
+    bool canRouteForOperator(pOperator oper);
+    bool isOperatorRulesMatched(pOperator oper, bool outgoing, string strNumber);
 };
 

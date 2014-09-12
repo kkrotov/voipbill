@@ -65,6 +65,7 @@ set(AUTH_SOURCES
     src-auth/lists/AirpList.cpp
     src-auth/lists/NumberList.cpp
     src-auth/lists/OperatorList.cpp
+    src-auth/lists/OperatorRuleList.cpp
     src-auth/lists/OutcomeList.cpp
     src-auth/lists/PrefixlistList.cpp
     src-auth/lists/PrefixlistPrefixList.cpp

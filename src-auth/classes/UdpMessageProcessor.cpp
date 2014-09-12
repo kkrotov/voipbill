@@ -208,13 +208,24 @@ string UdpMessageProcessor::processAutoOutcome(pOutcome outcome) {
     string routeCase = "rc_auto";
 
     auto operators = autoRoute->getOperators();
+    int operators_count = 0;
     for (auto it = operators.begin(); it != operators.end(); ++it) {
+        if (operators_count >= 3) break;
+        
         auto oper = data->operatorList->find(*it);
         if (oper == 0) {
             throw new Exception("Operator #" + lexical_cast<string>(*it) + " not found", "UdpMessageProcessor::processAutoOutcome");
         }
 
-        routeCase = routeCase + "_" + oper->getFormattedCode();
+        if (canRouteForOperator(oper)) {
+            routeCase = routeCase + "_" + oper->getFormattedCode();
+            operators_count++;
+        }
+    }
+    
+    if (operators_count == 0) {
+        Log::warning("Auto Route not contains operators for request: " + message);
+        return "1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION";
     }
 
     return string("1;Cisco-AVPair=RTCASE=") + routeCase;
@@ -292,3 +303,49 @@ bool UdpMessageProcessor::needSwapCallingAndRedirectionNumber() {
 bool UdpMessageProcessor::isLocalTrunk() {
     return trunkNumber == app().conf.server_id;
 }
+
+bool UdpMessageProcessor::canRouteForOperator(pOperator oper) {
+    bool matchedForANumber = isOperatorRulesMatched(oper, false, aNumber);
+    bool matchedForBNumber = isOperatorRulesMatched(oper, true, bNumber);
+
+    if (oper->source_rule_default_allowed == matchedForANumber) {
+        return false;
+    }
+
+    if (oper->destination_rule_default_allowed == matchedForBNumber) {
+        return false;
+    }
+
+    return true;
+}
+
+
+bool UdpMessageProcessor::isOperatorRulesMatched(pOperator oper, bool outgoing, string strNumber) {
+    int order = 1;
+    
+    pOperatorRule rule = data->operatorRuleList->find(oper->id, outgoing, order);
+    while (rule != 0) {
+        auto trunkGroup = data->trunkGroupList->find(rule->trunk_group_id);
+        if (trunkGroup == 0) {
+            throw new Exception("TrunkGroup #" + lexical_cast<string>(rule->trunk_group_id) + " not found", "UdpMessageProcessor::isOperatorRulesMatched");
+        }
+
+        if (trunkGroup->hasTrunkNumber(trunkNumber)) {
+            auto prefixlist = data->prefixlistList->find(rule->prefixlist_id);
+            if (prefixlist == 0) {
+                throw new Exception("Prefixlist #" + lexical_cast<string>(rule->prefixlist_id) + " not found", "UdpMessageProcessor::isOperatorRulesMatched");
+            }
+
+            auto prefix = data->prefixlistPrefixList->find(prefixlist->id, strNumber.c_str());
+            if (prefix) {
+                return true;
+            }
+        }
+
+        order++;
+        rule = data->operatorRuleList->find(oper->id, outgoing, order);
+    }
+
+    return false;
+}
+

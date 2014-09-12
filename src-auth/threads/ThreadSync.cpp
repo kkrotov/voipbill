@@ -61,7 +61,7 @@ void ThreadSync::run() {
                 string deleteQuery = "delete from " + s->t_to;
 
                 string selectQuery = "select " + s->sfrom + " from " + s->t_from;
-                if (s->t_from != "auth.prefixlist_prefix" && s->t_from != "auth.route_table_route") {
+                if (s->t_from != "auth.prefixlist_prefix" && s->t_from != "auth.route_table_route" && s->t_from != "auth.operator_rule") {
                     selectQuery += " where ";
                     selectQuery += (s->t_from == "auth.config_version" ? "id" : "config_version_id");
                     selectQuery += " = " + lexical_cast<string>(newVersionId);
@@ -300,4 +300,16 @@ ThreadSync::ThreadSync() {
     s14.add_field("trunk_numbers");
     s14.prepare();
     syncs.push_back(s14);
+
+    qsync s15;
+    s15.label = "operator_rule";
+    s15.t_from = "auth.operator_rule";
+    s15.t_to = "auth.operator_rule";
+    s15.add_field("operator_id");
+    s15.add_field("outgoing");
+    s15.add_field("\"order\"");
+    s15.add_field("trunk_group_id");
+    s15.add_field("prefixlist_id");
+    s15.prepare();
+    syncs.push_back(s15);
 }
