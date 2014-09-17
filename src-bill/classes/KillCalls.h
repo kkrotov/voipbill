@@ -36,6 +36,8 @@ public:
                     reason = "Unknown number";
                 else if (call->kill_call_reason == KILL_REASON_UNKNOWN_CLIENT)
                     reason = "Unknown client";
+                else if (call->kill_call_reason == KILL_REASON_UNKNOWN_MCN_PRICE)
+                    reason = "Unknown mcn price";
                 else if (call->kill_call_reason == KILL_REASON_VOIP_DISABLED)
                     reason = "Void disabled";
                 else if (call->kill_call_reason == KILL_REASON_CREDIT_LIMIT)
@@ -48,7 +50,7 @@ public:
                     reason = "Reason" + lexical_cast<string>(call->kill_call_reason);
 
 
-                Log::notice("KILL " + string(call->id) + " / " + string(call->usage_num) + " / " + reason);
+                Log::notice("KILL " + string(call->id) + " / " + string(call->usage_num) + " / " + string(call->phone_num) + " / " + reason);
             }
         }
 
