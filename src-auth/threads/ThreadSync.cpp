@@ -157,7 +157,6 @@ ThreadSync::ThreadSync() {
     s1.add_field("low_balance_outcome_id");
     s1.add_field("blocked_outcome_id");
     s1.add_field("calling_station_id_for_line_without_number");
-    s1.add_field("route_table_id");
     s1.prepare();
     syncs.push_back(s1);
 
@@ -258,7 +257,6 @@ ThreadSync::ThreadSync() {
     s11.t_from = "auth.routing_report_data";
     s11.t_to = "auth.routing_report_data";
     s11.add_field("prefix");
-    s11.add_field("locked");
     s11.add_field("routes");
     s11.prepare();
     syncs.push_back(s11);
