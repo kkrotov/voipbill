@@ -50,11 +50,8 @@ void ThreadSync::run() {
     int newVersionId = getNewConfigVersionId();
 
     if (newVersionId > 0) {
-        bool trans_calls = false;
         try {
-            db_local.exec("BEGIN");
-            trans_calls = true;
-
+            BDbTransaction trans(&db_local);
 
             for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s) {
 
@@ -76,19 +73,12 @@ void ThreadSync::run() {
                 boost::this_thread::interruption_point();
             }
 
+            trans.commit();
 
-            db_local.exec("COMMIT");
-            trans_calls = false;
         } catch (Exception &e) {
             e.addTrace("ThreadSync::run");
             Log::exception(e);
             errors++;
-            if (trans_calls) {
-                try {
-                    db_local.exec("ROLLBACK");
-                } catch (...) {
-                }
-            }
         }
     }
 

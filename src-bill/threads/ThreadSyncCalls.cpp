@@ -42,26 +42,16 @@ void ThreadSyncCalls::run() {
         throw e;
     }
 
-    bool transaction = false;
     try {
-        db_calls.exec("BEGIN");
-        transaction = true;
+        BDbTransaction trans(&db_calls);
 
         copyCallsPart(local_prev_sync_month);
 
         copyCallsPart(local_sync_month);
 
-        db_calls.exec("COMMIT");
-        transaction = false;
+        trans.commit();
 
     } catch (Exception &e) {
-
-        if (transaction) {
-            try {
-                db_calls.exec("ROLLBACK");
-            } catch (...) { }
-        }
-
         e.addTrace("ThreadSyncCalls::run::copy(main_last_id:" + main_last_id + ")");
         throw e;
     }

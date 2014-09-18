@@ -71,7 +71,6 @@ struct qsync {
 };
 
 bool ThreadSync::sync_full(qsync &s) {
-    bool trans_calls = false;
     try {
         //ifs
         BDbResult res = db_main.query(s.ifs);
@@ -81,24 +80,19 @@ bool ThreadSync::sync_full(qsync &s) {
         res.next();
         string rnd = res.get_s(0);
 
-        db_calls.exec("BEGIN");
-        trans_calls = true;
+        BDbTransaction trans(&db_calls);
+
         db_calls.exec(s.del);
         BDb::copy(s.t_to, s.t_from, s.sto, "", &db_main, &db_calls);
-        db_calls.exec("COMMIT");
-        trans_calls = false;
+
+        trans.commit();
+
         db_main.exec(string_fmt(s.fix, rnd.c_str()));
         s.count += 1000000;
     } catch (Exception &e) {
         e.addTrace("ThreadSync::sync_full");
         Log::exception(e);
         errors++;
-        if (trans_calls) {
-            try {
-                db_calls.exec("ROLLBACK");
-            } catch (...) {
-            }
-        }
         return false;
     }
     return true;

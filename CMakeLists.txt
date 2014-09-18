@@ -13,6 +13,7 @@ set(COMMON_SOURCES
     src/classes/App.cpp
     src/classes/BDb.cpp
     src/classes/BDbResult.cpp
+    src/classes/BDbTransaction.cpp
     src/classes/BaseLogWriter.cpp
     src/classes/Conf.cpp
     src/classes/Daemon.cpp

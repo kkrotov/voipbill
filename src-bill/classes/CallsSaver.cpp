@@ -133,32 +133,19 @@ void CallsSaver::setDb(BDb *db) {
 }
 
 void CallsSaver::save(CallsObjList *list) {
-    bool transaction = false;
-    try {
-        map<time_t, string> queryPerMonth;
+    map<time_t, string> queryPerMonth;
 
-        make_insert_queries(queryPerMonth, list);
+    make_insert_queries(queryPerMonth, list);
 
-        db->exec("BEGIN");
-        transaction = true;
+    BDbTransaction trans(db);
 
-        typename map<time_t, string>::iterator i, e;
-        for (i = queryPerMonth.begin(), e = queryPerMonth.end(); i != e;) {
-            db->exec(i->second);
-            i++;
-        }
-
-        db->exec("COMMIT");
-        transaction = false;
-
-    } catch (Exception &e) {
-        if (transaction) {
-            try {
-                db->exec("ROLLBACK");
-            } catch (...) { }
-        }
-        throw e;
+    typename map<time_t, string>::iterator i, e;
+    for (i = queryPerMonth.begin(), e = queryPerMonth.end(); i != e;) {
+        db->exec(i->second);
+        i++;
     }
+
+    trans.commit();
 }
 
 
