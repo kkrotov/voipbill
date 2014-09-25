@@ -1,15 +1,15 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from sql_access import *
-from config import *
 import socket
 import uuid
 from datetime import datetime
 from datetime import timedelta
 import threading
-import sys
-import weakref
+
+from sqldb import *
+from config.config import *
+
+from classes.model import avbilling
 
 def printlog(text):
     #log = open(logfile, 'a+')
@@ -18,22 +18,22 @@ def printlog(text):
     #log.close()
     print(time + ': ' + text + '\n')
 
-# TODO: add condition list to wait from test istead of predefined timeout
-class OpenCAEmulator(threading.Thread):
+# TODO: add condition list to wait from test instead of predefined timeout
+class OpenCARealtimeEmulator(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.active = False
 
-        self.defaultConnectTime = cfg['openca_defaultConnectTime']
-        self.nasipaddress = cfg['openca_nasipaddress']
-        self.operatorRouteNamePrefix = cfg['openca_operatorRouteNamePrefix']
+        self.defaultConnectTime = cfg.openca_defaultConnectTime
+        self.nasipaddress = cfg.openca_nasipaddress
+        self.operatorRouteNamePrefix = cfg.openca_operatorRouteNamePrefix
 
-        self.avbilling = DbWrap(cfg['avbilling_conn_str'])
+        self.avbilling = sqlConnection(cfg.avbillinguser, cfg.avbillingpassword, cfg.dbname_avbilling, False)
 
-        self.udp = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-        self.udp.bind( ('',cfg['openca_udpPort']) )
+        self.udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.udp.bind(('', cfg.openca_udpPort))
 
-        self.nextSessionId = cfg['openca_lastSessionId']
+        self.nextSessionId = cfg.openca_lastSessionId
         self.currentCalls = {}
         self.localLocked = {}
         self.globalLocked = {}
@@ -88,9 +88,12 @@ class OpenCAEmulator(threading.Thread):
         return True
 
     def kill_call(self, callid, code):
-        print( 'Kill call ' + callid + ' (' + self.currentCalls[callid]['caller'] + '->' + self.currentCalls[callid]['callee'] + ')' )
-        self.emulateCallEnd(callid, int(code))
-        return True
+        try:
+            print( 'Kill call ' + callid + ' (' + self.currentCalls[callid]['caller'] + '->' + self.currentCalls[callid]['callee'] + ')' )
+            self.emulateCallEnd(callid, int(code))
+            return True
+        except:
+            return False
 
     def run(self):
         while self.active:
@@ -168,7 +171,7 @@ class OpenCAEmulator(threading.Thread):
             caller, callee, self.nasipaddress, 0, 3, 3,
             self.operatorRouteNamePrefix % in_oper,
             self.operatorRouteNamePrefix % out_oper, outreplacecdpn,
-            redirectnum, None, None, None)
+            redirectnum, None, 0, 0)
 
         self.currentCalls[newCallSessionId] = {
             'uniqueid': uniqueId,
@@ -208,12 +211,16 @@ class OpenCAEmulator(threading.Thread):
             call['redirectnum'], currTime, reason, duration)
 
         inserted = []
+
+        connection = avbilling.bind.raw_connection()
         try:
-            cursor = self.avbilling.cursor()
-            cursor.execute("SELECT radacctid FROM radacct_voip_stop WHERE acctuniqueid=%s", (call['uniqueid'],) )
+            cursor = connection.cursor()
+            cursor.execute("SELECT radacctid FROM radacct_voip_stop WHERE acctuniqueid=%s", (call['uniqueid'],))
             inserted = cursor.fetchall()
-        finally:
             cursor.close()
+            connection.commit()
+        finally:
+            connection.close()
 
         self.currentCalls.pop(callid, None)
 
@@ -222,30 +229,30 @@ class OpenCAEmulator(threading.Thread):
 
     def generateCall(self, connecttime, duration, caller, callee, caller_op, callee_op, redirectnum = ''):
         callid = self.emulateCallStart(caller, callee, caller_op, callee_op, redirectnum, connecttime)
-        self.emulateCallEnd(callid, 16, duration)
+        return self.emulateCallEnd(callid, 16, duration)
 
     def openCAtoRadSql(self, accttype, acctsessionid, acctuniqueid, setuptime, connecttime,
                        callingstationid, calledstationid, nasipaddress, acctdelaytime,
                        incd_noa, incg_noa, in_route, out_route, outreplacecdpn,
                        redirectnum, disconnecttime, disconnectcause, acctsessiontime):
-        cursor = self.avbilling.cursor()
-        try:
-            setuptime = setuptime.replace(microsecond = int(setuptime.microsecond / 1000) * 1000)
-            connecttime = connecttime.replace(microsecond = int(connecttime.microsecond / 1000) * 1000)
-            if disconnecttime:
-                disconnecttime = disconnecttime.replace(microsecond = int(disconnecttime.microsecond / 1000) * 1000)
-            cursor.execute(
-                """SELECT openca_to_radsql(%s::varchar, %s::bigint, %s::varchar, %s::varchar,
-                    %s::varchar, %s::varchar, %s::varchar, %s::varchar, %s::smallint,
-                    %s::smallint, %s::smallint, %s::varchar, %s::varchar, %s::varchar,
-                    %s::varchar, %s::varchar, %s::smallint, %s::bigint)""",
-                (accttype, acctsessionid, acctuniqueid, setuptime, connecttime,
-                       callingstationid, calledstationid, nasipaddress, acctdelaytime,
-                       incd_noa, incg_noa, in_route, out_route, outreplacecdpn,
-                       redirectnum, disconnecttime, disconnectcause, acctsessiontime))
-        except Exception as oEx:
-            print(self.avbilling.db.notices)
-            raise oEx
-        finally:
-            cursor.close()
 
+        setuptime = setuptime.replace(microsecond = int(setuptime.microsecond / 1000) * 1000)
+        connecttime = connecttime.replace(microsecond = int(connecttime.microsecond / 1000) * 1000)
+        if disconnecttime:
+            disconnecttime = disconnecttime.replace(microsecond = int(disconnecttime.microsecond / 1000) * 1000)
+
+        connection = avbilling.bind.raw_connection()
+        try:
+            cursor = connection.cursor()
+            cursor.execute("""SELECT openca_to_radsql(%s::varchar, %s::bigint, %s::varchar, %s::varchar, %s::varchar,
+                                     %s::varchar, %s::varchar, %s::varchar, %s::smallint, %s::smallint, %s::smallint,
+                                     %s::varchar, %s::varchar, %s::varchar, %s::varchar, %s::varchar,
+                                    %s::smallint, %s::bigint)""",
+                                                         (accttype, acctsessionid, acctuniqueid, setuptime,
+                                  connecttime, callingstationid, calledstationid, nasipaddress, acctdelaytime,
+                                  incd_noa, incg_noa, in_route, out_route, outreplacecdpn,
+                                  redirectnum, disconnecttime, disconnectcause, acctsessiontime))
+            cursor.close()
+            connection.commit()
+        finally:
+            connection.close()
