@@ -59,10 +59,10 @@ void insert_row(pCallObj call, string *q) {
     q->append(num);
     q->append(",");
     q->append("'");
-    q->append(call->time);
+    q->append(string(call->time).substr(0, 7) + "-01");
     q->append("',");
     q->append("'");
-    q->append(call->time);
+    q->append(string(call->time).substr(0, 10));
     q->append("',");
     sprintf(num, "%d", call->instance_id);
     q->append(num);
@@ -133,19 +133,19 @@ void CallsSaver::setDb(BDb *db) {
 }
 
 void CallsSaver::save(CallsObjList *list) {
-    try {
-        map<time_t, string> queryPerMonth;
+    map<time_t, string> queryPerMonth;
 
-        make_insert_queries(queryPerMonth, list);
+    make_insert_queries(queryPerMonth, list);
 
-        typename map<time_t, string>::iterator i, e;
-        for (i = queryPerMonth.begin(), e = queryPerMonth.end(); i != e;) {
-            db->exec(i->second);
-            i++;
-        }
-    } catch (Exception &e) {
-        throw e;
+    BDbTransaction trans(db);
+
+    typename map<time_t, string>::iterator i, e;
+    for (i = queryPerMonth.begin(), e = queryPerMonth.end(); i != e;) {
+        db->exec(i->second);
+        i++;
     }
+
+    trans.commit();
 }
 
 

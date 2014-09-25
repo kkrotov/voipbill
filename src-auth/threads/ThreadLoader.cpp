@@ -80,6 +80,9 @@ void ThreadLoader::htmlfull(stringstream &html) {
         ol = configVersionData->operatorList;
         if (ol != 0) html << "Operator: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
 
+        ol = configVersionData->operatorRuleList;
+        if (ol != 0) html << "OperatorRule: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+
         ol = configVersionData->routingReportDataList;
         if (ol != 0) html << "RoutingReportData: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
 

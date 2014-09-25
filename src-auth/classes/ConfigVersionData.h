@@ -12,6 +12,7 @@
 #include "../lists/RouteTableList.h"
 #include "../lists/RouteTableRouteList.h"
 #include "../lists/OperatorList.h"
+#include "../lists/OperatorRuleList.h"
 #include "../lists/RoutingReportDataList.h"
 #include "../lists/TrunkList.h"
 #include "../lists/TrunkGroupList.h"
@@ -29,6 +30,7 @@ public:
     RouteTableList * routeTableList;
     RouteTableRouteList * routeTableRouteList;
     OperatorList * operatorList;
+    OperatorRuleList * operatorRuleList;
     RoutingReportDataList * routingReportDataList;
     TrunkList * trunkList;
     TrunkGroupList * trunkGroupList;

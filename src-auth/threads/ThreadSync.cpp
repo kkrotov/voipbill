@@ -50,18 +50,15 @@ void ThreadSync::run() {
     int newVersionId = getNewConfigVersionId();
 
     if (newVersionId > 0) {
-        bool trans_calls = false;
         try {
-            db_local.exec("BEGIN");
-            trans_calls = true;
-
+            BDbTransaction trans(&db_local);
 
             for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s) {
 
                 string deleteQuery = "delete from " + s->t_to;
 
                 string selectQuery = "select " + s->sfrom + " from " + s->t_from;
-                if (s->t_from != "auth.prefixlist_prefix" && s->t_from != "auth.route_table_route") {
+                if (s->t_from != "auth.prefixlist_prefix" && s->t_from != "auth.route_table_route" && s->t_from != "auth.operator_rule") {
                     selectQuery += " where ";
                     selectQuery += (s->t_from == "auth.config_version" ? "id" : "config_version_id");
                     selectQuery += " = " + lexical_cast<string>(newVersionId);
@@ -76,19 +73,12 @@ void ThreadSync::run() {
                 boost::this_thread::interruption_point();
             }
 
+            trans.commit();
 
-            db_local.exec("COMMIT");
-            trans_calls = false;
         } catch (Exception &e) {
             e.addTrace("ThreadSync::run");
             Log::exception(e);
             errors++;
-            if (trans_calls) {
-                try {
-                    db_local.exec("ROLLBACK");
-                } catch (...) {
-                }
-            }
         }
     }
 
@@ -157,7 +147,6 @@ ThreadSync::ThreadSync() {
     s1.add_field("low_balance_outcome_id");
     s1.add_field("blocked_outcome_id");
     s1.add_field("calling_station_id_for_line_without_number");
-    s1.add_field("route_table_id");
     s1.prepare();
     syncs.push_back(s1);
 
@@ -258,7 +247,6 @@ ThreadSync::ThreadSync() {
     s11.t_from = "auth.routing_report_data";
     s11.t_to = "auth.routing_report_data";
     s11.add_field("prefix");
-    s11.add_field("locked");
     s11.add_field("routes");
     s11.prepare();
     syncs.push_back(s11);
@@ -300,4 +288,16 @@ ThreadSync::ThreadSync() {
     s14.add_field("trunk_numbers");
     s14.prepare();
     syncs.push_back(s14);
+
+    qsync s15;
+    s15.label = "operator_rule";
+    s15.t_from = "auth.operator_rule";
+    s15.t_to = "auth.operator_rule";
+    s15.add_field("operator_id");
+    s15.add_field("outgoing");
+    s15.add_field("\"order\"");
+    s15.add_field("trunk_group_id");
+    s15.add_field("prefixlist_id");
+    s15.prepare();
+    syncs.push_back(s15);
 }

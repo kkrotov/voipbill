@@ -6,7 +6,6 @@ struct ConfigVersion {
     int low_balance_outcome_id;
     int blocked_outcome_id;
     char calling_station_id_for_line_without_number[101];
-    int route_table_id;
 };
 
 typedef ConfigVersion * pConfigVersion;
