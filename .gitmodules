@@ -1,0 +1,3 @@
+[submodule "migration"]
+	path = migration
+	url = git@github.com:welltime/migration.git
