@@ -13,6 +13,7 @@ set(COMMON_SOURCES
     src/classes/App.cpp
     src/classes/BDb.cpp
     src/classes/BDbResult.cpp
+    src/classes/BDbTransaction.cpp
     src/classes/BaseLogWriter.cpp
     src/classes/Conf.cpp
     src/classes/Daemon.cpp
@@ -65,6 +66,7 @@ set(AUTH_SOURCES
     src-auth/lists/AirpList.cpp
     src-auth/lists/NumberList.cpp
     src-auth/lists/OperatorList.cpp
+    src-auth/lists/OperatorRuleList.cpp
     src-auth/lists/OutcomeList.cpp
     src-auth/lists/PrefixlistList.cpp
     src-auth/lists/PrefixlistPrefixList.cpp

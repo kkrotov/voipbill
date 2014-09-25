@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="94">
+<configurationDescriptor version="95">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="f1" displayName="libs" projectFiles="true">
       <logicalFolder name="f2"
@@ -44,6 +44,8 @@
         <itemPath>../src/classes/BDb.h</itemPath>
         <itemPath>../src/classes/BDbResult.cpp</itemPath>
         <itemPath>../src/classes/BDbResult.h</itemPath>
+        <itemPath>../src/classes/BDbTransaction.cpp</itemPath>
+        <itemPath>../src/classes/BDbTransaction.h</itemPath>
         <itemPath>../src/classes/BaseLogWriter.cpp</itemPath>
         <itemPath>../src/classes/BaseLogWriter.h</itemPath>
         <itemPath>../src/classes/Conf.cpp</itemPath>
@@ -132,6 +134,8 @@
         <itemPath>../src-auth/lists/NumberList.h</itemPath>
         <itemPath>../src-auth/lists/OperatorList.cpp</itemPath>
         <itemPath>../src-auth/lists/OperatorList.h</itemPath>
+        <itemPath>../src-auth/lists/OperatorRuleList.cpp</itemPath>
+        <itemPath>../src-auth/lists/OperatorRuleList.h</itemPath>
         <itemPath>../src-auth/lists/OutcomeList.cpp</itemPath>
         <itemPath>../src-auth/lists/OutcomeList.h</itemPath>
         <itemPath>../src-auth/lists/PrefixlistList.cpp</itemPath>
@@ -158,6 +162,7 @@
         <itemPath>../src-auth/models/ConfigVersion.h</itemPath>
         <itemPath>../src-auth/models/Number.h</itemPath>
         <itemPath>../src-auth/models/Operator.h</itemPath>
+        <itemPath>../src-auth/models/OperatorRule.h</itemPath>
         <itemPath>../src-auth/models/Outcome.h</itemPath>
         <itemPath>../src-auth/models/Prefixlist.h</itemPath>
         <itemPath>../src-auth/models/PrefixlistPrefix.h</itemPath>
@@ -386,6 +391,16 @@
       </item>
       <item path="../src-auth/lists/OperatorList.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-auth/lists/OperatorRuleList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/OperatorRuleList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-auth/lists/OutcomeList.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/lists/OutcomeList.h" ex="false" tool="3" flavor2="0">
@@ -472,6 +487,8 @@
       </item>
       <item path="../src-auth/models/Operator.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-auth/models/OperatorRule.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src-auth/models/Outcome.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/models/Prefixlist.h" ex="false" tool="3" flavor2="0">
@@ -541,6 +558,10 @@
       <item path="../src/classes/BDbResult.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/classes/BDbResult.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BDbTransaction.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/BDbTransaction.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/BaseLogWriter.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -835,6 +856,16 @@
       </item>
       <item path="../src-auth/lists/OperatorList.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-auth/lists/OperatorRuleList.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src-auth/lists/OperatorRuleList.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src-auth/lists/OutcomeList.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/lists/OutcomeList.h" ex="false" tool="3" flavor2="0">
@@ -921,6 +952,8 @@
       </item>
       <item path="../src-auth/models/Operator.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src-auth/models/OperatorRule.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src-auth/models/Outcome.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src-auth/models/Prefixlist.h" ex="false" tool="3" flavor2="0">
@@ -990,6 +1023,10 @@
       <item path="../src/classes/BDbResult.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/classes/BDbResult.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/classes/BDbTransaction.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/classes/BDbTransaction.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/classes/BaseLogWriter.cpp" ex="false" tool="1" flavor2="0">
       </item>

@@ -72,14 +72,14 @@ void ThreadSyncCounters::save_client_counters(bool clear) {
     if (q.length() > 0) {
         try {
             if (clear) {
-                db_main.exec("BEGIN");
+                BDbTransaction trans(&db_main);
+
                 db_main.exec("DELETE FROM billing.clients_counters WHERE region_id=" + app().conf.str_instance_id);
-            }
+                db_main.exec(q);
 
-            db_main.exec(q);
-
-            if (clear) {
-                db_main.exec("COMMIT");
+                trans.commit();
+            } else {
+                db_main.exec(q);
             }
 
             {
@@ -90,12 +90,6 @@ void ThreadSyncCounters::save_client_counters(bool clear) {
                 }
             }
         } catch (Exception &e) {
-            if (clear) {
-                try {
-                    db_main.exec("ROLLBACK");
-                } catch (...) {
-                }
-            }
             e.addTrace("ThreadSyncCounters::save_client_counters:");
             throw e;
         }

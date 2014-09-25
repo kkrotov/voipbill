@@ -112,6 +112,11 @@ void CalcBase::calc_process_call(pCallObj call) {
         return;
     }
 
+    if (call->prefix_mcn[0] == 0) {
+        call->kill_call_reason = KILL_REASON_UNKNOWN_MCN_PRICE;
+        return;
+    }
+
     ClientCounterObj &c0 = data.counter_client->get(call->client_id);
     ClientCounterObj &c2 = client_counter2->get(call->client_id);
 
