@@ -6,7 +6,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__) + r"/../../test-bill")
 
 from password import *
-from classes.config_class import *
+from classes.Config import *
 
 
 baseCfg = Config(
