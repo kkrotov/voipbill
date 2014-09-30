@@ -25,7 +25,7 @@ void App::run() {
 
     initLogger();
 
-    Daemoin::initSignalHandler();
+    Daemoin::initSignalHandler(this);
 
     runApp();
 }

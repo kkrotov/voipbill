@@ -3,6 +3,11 @@
 
 #include "../classes/App.h"
 
+ThreadPool::ThreadPool() :
+    app(NULL),
+    shutdownFlag(false) {
+}
+
 void ThreadPool::run(Thread * thread) {
     thread->onStarted.connect(boost::bind(&ThreadPool::register_thread, this, _1));
     thread->onFinished.connect(boost::bind(&ThreadPool::unregister_thread, this, _1));
@@ -35,6 +40,8 @@ void ThreadPool::register_thread(Thread *thread) {
 }
 
 void ThreadPool::unregister_thread(Thread *thread) {
+
+    bool last = false;
     {
         lock_guard<std::mutex> lock(mutex);
 
@@ -48,8 +55,29 @@ void ThreadPool::unregister_thread(Thread *thread) {
             }
             ++it;
         }
+        
+        if (shutdownFlag && threads.empty()) {
+            last = true;
+        }
     }
     thread_real_status_changed(0);
+    
+    if (last) {
+        onLastThreadExits();
+    }
+}
+
+void ThreadPool::shutdown()
+{
+    lock_guard<std::mutex> lock(mutex);
+    shutdownFlag = true;
+
+    auto it = threads.begin();
+    while (it != threads.end()) {
+        Thread *thread = *it;
+        thread->setStatus(ThreadStatus::THREAD_STOPPED);
+        ++it;
+    }
 }
 
 void ThreadPool::thread_status_changed(Thread *thread) {

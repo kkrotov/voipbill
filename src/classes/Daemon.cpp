@@ -6,6 +6,9 @@
 #include <string.h>
 #include <unistd.h>
 
+static App* p_app = 0;
+
+
 void Daemoin::setPidFile(string pid_file) {
     FILE* f = fopen(pid_file.c_str(), "w+");
     if (f) {
@@ -53,6 +56,39 @@ void posix_death_signal(int signum) {
     exit(3);
 }
 
-void Daemoin::initSignalHandler() {
-    signal(SIGSEGV, posix_death_signal);
+void shutdown_app(int signum) {
+    if (p_app)
+    {
+        App* app = p_app;
+        p_app = 0;
+        app->threads.shutdown();
+    }
+}
+
+void termination_handler(int signum) {
+    switch (signum) {
+        case SIGSEGV:
+            posix_death_signal(signum);
+            break;
+        case SIGTERM:
+        case SIGHUP:
+        case SIGINT:
+        case SIGQUIT:
+        case SIGABRT:
+            shutdown_app(signum);
+    }
+}
+
+void set_action(int signum, __sighandler_t handler) {
+    struct sigaction new_action = {0};
+    new_action.sa_handler = handler;
+    sigaction(signum, &new_action, NULL);
+}
+
+void Daemoin::initSignalHandler(class App* app) {
+    p_app = app;
+    int catch_signals[] = {SIGSEGV, SIGINT, SIGHUP, SIGTERM, SIGQUIT, SIGABRT};
+    for (int i=0; i<sizeof(catch_signals)/sizeof(catch_signals[0]); ++i) {
+        set_action(catch_signals[i], termination_handler);
+    }
 }

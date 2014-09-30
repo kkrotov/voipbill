@@ -12,6 +12,10 @@ public:
     App * app;
     std::mutex mutex;
     list<Thread *> threads;
+    
+    boost::signals2::signal<void() > onLastThreadExits;
+    
+    ThreadPool();
 
     void run(Thread * thread);
     void register_thread(Thread * thread);
@@ -22,6 +26,11 @@ public:
     void app_real_status_changed();
     ThreadStatus getThreadStatusByAppStatus();
     void setApp(App * app);
+    
+    // Прервать выполнение всех потоков. Данный метод только отдаёт "команду",
+    // не дожидаясь актуального завершения потоков.
+    void shutdown();
 
-protected:
+private:
+    bool shutdownFlag;
 };

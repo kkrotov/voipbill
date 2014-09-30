@@ -11,13 +11,23 @@
 using boost::asio::ip::udp;
 
 void ThreadUdpServer::run() {
-
     try {
+        volatile bool running = true;
         boost::asio::io_service io_service;
-
         udp::socket socket(io_service, udp::endpoint(udp::v4(), app().conf.api_port));
+        
+        onStatusChanged.connect(
+            [&socket, &running] (Thread *thread) {
+                if (thread->getStatus() == ThreadStatus::THREAD_STOPPED) {
+                    running = false;
+                    shutdown(socket.native_handle(), SHUT_RDWR);
+                }
+            }
+        );
 
-        for (;;) {
+        
+
+        while (running) {
             boost::array<char, 1024> recv_buf;
             udp::endpoint remote_endpoint;
             boost::system::error_code error;
@@ -25,8 +35,6 @@ void ThreadUdpServer::run() {
 
 
             int bytes_received = socket.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0, error);
-
-
 
             if (error && error != boost::asio::error::message_size)
                 throw boost::system::system_error(error);
