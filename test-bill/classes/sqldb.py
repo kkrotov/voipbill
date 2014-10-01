@@ -3,27 +3,6 @@
 from collections import namedtuple
 import datetime
 
-from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker
-
-from psycopg2.extras import Inet
-
-
-def sqlConnection(user, password, dbname='', autocommit=False):
-    extArgs = {}
-    if autocommit:
-        extArgs = {'isolation_level': "AUTOCOMMIT"}
-    engine = create_engine('postgresql+psycopg2://' + user + ':' + password + '@localhost/' + dbname,
-                           client_encoding='utf8', echo=False, **extArgs)
-    SessionClass = sessionmaker(bind=engine, autocommit=autocommit)
-    return SessionClass()
-
-'''
-def sqlConnection(dbname, user, password):
-    engine = create_engine('postgres://' + user + ':' + password + '@localhost/' + dbname)
-    SessionClass = sessionmaker(bind=engine)
-    return SessionClass()
-'''
 
 TableCleaner = namedtuple("TableCleaner", "connection tables")
 
