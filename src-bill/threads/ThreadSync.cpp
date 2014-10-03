@@ -310,7 +310,7 @@ ThreadSync::ThreadSync() {
     s10.add_field("id");
     s10.add_field("region_id");
     s10.add_field("city_prefix");
-    s10.add_field("geo_city_id");
+    s10.add_field("city_geo_id");
     s10.prepare();
     syncs.push_back(s10);
 
