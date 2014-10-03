@@ -28,9 +28,9 @@ string CurrentCallsObjList::sql(BDb * db) {
 
 inline void CurrentCallsObjList::parse_item(BDbResult &row, void * obj) {
     pCallObj item = (pCallObj) obj;
-    strncpy((char*) item->id, row.get(0), 20);
+    row.fill_cs(0, item->id, sizeof(item->id));
     item->id_num = row.get_ll(0);
-    strncpy((char*) item->time, row.get(1), 25);
+    row.fill_cs(1, item->time, sizeof(item->time));
     item->make_dt();
     item->len = 0;
     item->len_mcn = 0;
