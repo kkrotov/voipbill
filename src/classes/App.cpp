@@ -3,6 +3,8 @@
 #include "Daemon.h"
 
 App::App() {
+    threads.setApp(this);
+    
     onStatusChanged.connect(boost::bind(&ThreadPool::app_status_changed, &threads));
     onRealStatusChanged.connect(boost::bind(&ThreadPool::app_real_status_changed, &threads));
 
@@ -13,9 +15,7 @@ App::App() {
 bool App::init(int argc, char* argv[]) {
 
     srand(time(0));
-
-    threads.setApp(this);
-
+    
     setRealStatus(AppStatus::APP_INITIALIZING);
 
     return true;

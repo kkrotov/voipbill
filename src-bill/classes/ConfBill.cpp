@@ -1,6 +1,8 @@
 #include "../classes/ConfBill.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+#include <boost/algorithm/string.hpp>
 
 bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
 
@@ -24,4 +26,10 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     billing_free_seconds = pt.get<unsigned short>("billing.free_seconds", 5);
 
     global_counters_select_interval = pt.get<unsigned short>("billing.global_counters_select_interval", 10);
+    
+    test_mode = pt.get<bool>("testing.enable_test", false);
+    
+    string test_run_threads_string = pt.get<string>("testing.run_threads");
+    boost::split(test_run_threads, test_run_threads_string, boost::is_any_of(";, \t\n"),
+            boost::algorithm::token_compress_on);
 }

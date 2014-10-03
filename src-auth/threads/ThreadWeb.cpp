@@ -11,6 +11,7 @@ void ThreadWeb::operator()() {
     if (app().conf.web_port == 0) return;
 
     boost::asio::io_service io_service;
+    app().threads.onLastThreadExits.connect(boost::bind(&boost::asio::io_service::stop, &io_service));
     http::server4::server(io_service, "0.0.0.0",
             string_fmt("%d", app().conf.web_port),
             http::server4::file_handler())();
@@ -40,14 +41,12 @@ void ThreadWeb::handlerHeader(stringstream &html) {
 
 void ThreadWeb::handlerHome(stringstream &html) {
     handlerHeader(html);
-
-    lock_guard<mutex> lock(app().threads.mutex);
-
-    for (auto i = app().threads.threads.begin(); i != app().threads.threads.end(); i++) {
-        Thread * thread = *i;
+    
+    app().threads.forAllThreads([&](Thread* thread) {
         thread->html(html);
         html << "<hr>\n";
-    }
+        return true;
+    });
 }
 
 void ThreadWeb::handlerConfig(stringstream &html) {
@@ -73,7 +72,6 @@ void ThreadWeb::handlerConfig(stringstream &html) {
     html << "main.api_port: " << app().conf.api_port << "<br/>\n";
     html << "main.auth_api_host: " << app().conf.auth_api_host << "<br/>\n";
     html << "main.auth_api_port: " << app().conf.auth_api_port << "<br/>\n";
-    html << "main.test_mode: " << app().conf.test_mode << "<br/>\n";
     html << "<br/>\n";
     html << "log.grouping_interval: " << app().conf.log_grouping_interval << "<br/>\n";
     html << "<br/>\n";
@@ -87,17 +85,13 @@ bool ThreadWeb::handlerTask(stringstream &html, map<string, string> &parameters)
         task_id = parameters["id"];
     Thread * thread = 0;
 
-    {
-        lock_guard<mutex> lock(app().threads.mutex);
-
-        for (list<Thread*>::iterator i = app().threads.threads.begin(); i != app().threads.threads.end(); i++) {
-            thread = *i;
-            if (thread->id == task_id)
-                break;
-            else
-                thread = 0;
+    app().threads.forAllThreads([&](Thread* th) {
+        if (th->id == task_id) {
+            thread = th;
+            return false;
         }
-    }
+        return true;
+    });
 
     if (thread == 0) {
         return false;

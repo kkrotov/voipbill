@@ -71,5 +71,14 @@ class OpenCAEmulator(threading.Thread):
         elif command == 'READ_BLACKLIST_GLOBAL' and len(arguments) == 1:
             result = OpenCA.readBlacklistGlobal()
             self.globalBlacklistQueried = True
+        elif command == 'READ_LOCKED_TRUNK' and len(arguments) == 1:
+            result = OpenCA.readLockedTrunk()
+            self.lockedTrunkQueried = True
+        elif command == 'LOCK_TRUNK' and len(arguments) == 2:
+            if OpenCA.lockTrunk(arguments[1]):
+                result = '1'
+        elif command == 'UNLOCK_TRUNK' and len(arguments) == 2:
+            if OpenCA.unlockTrunk(arguments[1]):
+                result = '1'
 
         return result

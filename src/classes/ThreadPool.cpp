@@ -67,8 +67,19 @@ void ThreadPool::unregister_thread(Thread *thread) {
     }
 }
 
-void ThreadPool::shutdown()
-{
+bool ThreadPool::forAllThreads(std::function<bool(Thread*)> callback) {
+    lock_guard<std::mutex> lock(mutex);
+
+    for (auto it : threads) {
+        if (!callback(it)) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+void ThreadPool::shutdown() {
     lock_guard<std::mutex> lock(mutex);
     shutdownFlag = true;
 
@@ -85,47 +96,51 @@ void ThreadPool::thread_status_changed(Thread *thread) {
 }
 
 void ThreadPool::thread_real_status_changed(Thread *thread) {
-    lock_guard<std::mutex> lock(mutex);
 
-    int count = 0;
-    int initiated = 0;
-    int preparing = 0;
-    int running = 0;
-    int paused = 0;
-    int stopped = 0;
+    AppStatus app_real_status = AppStatus::APP_STARTED;
+    {
+        lock_guard<std::mutex> lock(mutex);
 
-    auto it = threads.begin();
-    while (it != threads.end()) {
-        Thread *th = *it;
-        ThreadStatus thread_real_status = th->getRealStatus();
+        int count = 0;
+        int initiated = 0;
+        int preparing = 0;
+        int running = 0;
+        int paused = 0;
+        int stopped = 0;
 
-        if (thread_real_status <= ThreadStatus::THREAD_WAITING) {
-            initiated++;
-        } else if (thread_real_status == ThreadStatus::THREAD_PREPARING) {
-            preparing++;
-        } else if (thread_real_status == ThreadStatus::THREAD_RUNNING) {
-            running++;
-        } else if (thread_real_status == ThreadStatus::THREAD_PAUSED) {
-            paused++;
-        } else if (thread_real_status == ThreadStatus::THREAD_STOPPED) {
-            stopped++;
+        auto it = threads.begin();
+        while (it != threads.end()) {
+            Thread *th = *it;
+            ThreadStatus thread_real_status = th->getRealStatus();
+
+            if (thread_real_status <= ThreadStatus::THREAD_WAITING) {
+                initiated++;
+            } else if (thread_real_status == ThreadStatus::THREAD_PREPARING) {
+                preparing++;
+            } else if (thread_real_status == ThreadStatus::THREAD_RUNNING) {
+                running++;
+            } else if (thread_real_status == ThreadStatus::THREAD_PAUSED) {
+                paused++;
+            } else if (thread_real_status == ThreadStatus::THREAD_STOPPED) {
+                stopped++;
+            }
+            count++;
+            ++it;
         }
-        count++;
-        ++it;
-    }
 
-    AppStatus app_real_status;
-    if (stopped == count) {
-        app_real_status = AppStatus::APP_STOPPED;
-    } else if (paused == count) {
-        app_real_status = AppStatus::APP_PAUSED;
-    } else if (running == count) {
-        app_real_status = AppStatus::APP_RUNNING;
-    } else if (initiated == count) {
-        app_real_status = AppStatus::APP_INITIALIZING;
-    } else {
-        app_real_status = AppStatus::APP_PREPARING;
+        if (stopped == count) {
+            app_real_status = AppStatus::APP_STOPPED;
+        } else if (paused == count) {
+            app_real_status = AppStatus::APP_PAUSED;
+        } else if (running == count) {
+            app_real_status = AppStatus::APP_RUNNING;
+        } else if (initiated == count) {
+            app_real_status = AppStatus::APP_INITIALIZING;
+        } else {
+            app_real_status = AppStatus::APP_PREPARING;
+        }
     }
+    
     app->setRealStatus(app_real_status);
 }
 

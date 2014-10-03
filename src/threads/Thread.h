@@ -18,43 +18,24 @@ static const char * ThreadStatusNames[] = {
 class Thread {
 public:
     string id;
-    string name;
+    // Инициализируется ThreadPool'ом - переделать.
     ThreadStatus status;
-    ThreadStatus real_status;
 
-    bool status_ready;
-    bool status_prepared;
-
-    boost::thread task_thread;
+    boost::signals2::signal<void(Thread *) > onStatusChanged;
     boost::signals2::signal<void(Thread *) > onStarted;
     boost::signals2::signal<void(Thread *) > onFinished;
-    boost::signals2::signal<void(Thread *) > onStatusChanged;
     boost::signals2::signal<void(Thread *) > onRealStatusChanged;
 
-    int threadSleepSeconds;
+    boost::thread task_thread;
 
-    Thread();
-    virtual ~Thread();
+    virtual ~Thread();    
+    void start(bool exitAfterSingleRun=false);
 
-    void start();
-
-    static void ssleep(unsigned int seconds);
-
-    static void usleep(unsigned int milliseconds);
-
-    virtual bool ready();
-
-    virtual bool prepare();
-
-    virtual void run() = 0;
-
-    void setStatus(ThreadStatus status);
-    void setRealStatus(ThreadStatus real_status);
     ThreadStatus getStatus();
+    void setStatus(ThreadStatus status);
+    
     ThreadStatus getRealStatus();
-
-    void operator()();
-
+    
     void html(stringstream &html) {
         ThreadStatus status = getStatus();
         ThreadStatus real_status = getRealStatus();
@@ -67,12 +48,40 @@ public:
         }
         html << "</div>\n";
     }
-
+    
     virtual void htmlfull(stringstream &html) {
         this->html(html);
     }
+
 protected:
+    string name;
+    
+    int threadSleepSeconds;
     Timer t;
+    
+    Thread();
+
+    static void ssleep(unsigned int seconds);
+    
+private:
+    ThreadStatus real_status;
+
+    bool status_ready;
+    bool status_prepared;
+    
+    bool exitAfterSingleRun;
+
+    static void usleep(unsigned int milliseconds);
+
+    virtual bool ready();
+
+    virtual bool prepare();
+
+    virtual void run() = 0;
+    
+    void setRealStatus(ThreadStatus real_status);
+
+    void operator()();
 };
 
 typedef shared_ptr<Thread> pThread;

@@ -75,6 +75,7 @@ class TarifierFullTest(BaseTestCase):
     def testCallMatch(self):
         Radius.stopCall(caller = '74951005555', callee = '74951234567', inOper = 99, outOper = 2, duration = 15 )
 
+        cfg.appbill_threads = 'loader, runtime'
         self.startBillingApp()
         time.sleep(5)
         self.stopBillingApp()

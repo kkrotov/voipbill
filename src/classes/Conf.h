@@ -30,8 +30,6 @@ public:
 
     unsigned short log_grouping_interval;
 
-    bool test_mode;
-
     bool init(int argc, char* argv[]);
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt) = 0;

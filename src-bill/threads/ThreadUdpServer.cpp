@@ -16,16 +16,15 @@ void ThreadUdpServer::run() {
         boost::asio::io_service io_service;
         udp::socket socket(io_service, udp::endpoint(udp::v4(), app().conf.api_port));
         
-        onStatusChanged.connect(
-            [&socket, &running] (Thread *thread) {
-                if (thread->getStatus() == ThreadStatus::THREAD_STOPPED) {
+        boost::signals2::connection onStatusChangedDelegate = onStatusChanged.connect(
+                [&socket, &running, &onStatusChangedDelegate] (Thread *thread) {
+                if (running && thread->getStatus() == ThreadStatus::THREAD_STOPPED) {
+                    onStatusChangedDelegate.disconnect();
                     running = false;
                     shutdown(socket.native_handle(), SHUT_RDWR);
                 }
-            }
-        );
+        });
 
-        
 
         while (running) {
             boost::array<char, 1024> recv_buf;

@@ -48,21 +48,73 @@ void AppBill::runApp() {
     ThreadWeb web;
 
     boost::thread web_thread(web);
+    
+    Thread* th = 0;
+    std::map<std::string, Thread*> namedThreads{
+        {(th = new ThreadLog(), th->id), th},
+        {(th = new ThreadSync(), th->id), th},
+        {(th = new ThreadSyncCounters(), th->id), th},
+        {(th = new ThreadSyncCalls(), th->id), th},
+        {(th = new ThreadSelectCurrentCalls(), th->id), th},
+        {(th = new ThreadSelectGlobalCounters(), th->id), th},
+        {(th = new ThreadLoader(), th->id), th},
+        {(th = new ThreadBlacklist(), th->id), th},
+        {(th = new ThreadBillRuntime(), th->id), th},
+        {(th = new ThreadLimitControl(), th->id), th},
+        {(th = new ThreadCheckStartTable(), th->id), th},
+        {(th = new ThreadTasks(), th->id), th},
+        {(th = new ThreadUdpServer(), th->id), th}
+    };
+    
+    std::vector<std::string> standardThreads{
+      "log",
+      "sync",
+      "sync_counters",
+      "sync_calls",
+      "currentcalls",
+      "select_global_counters",
+      "loader",
+      "blacklist",
+      "runtime",
+      "limitcontrol",
+      "checkstarttable",
+      "tasks",
+      "udp_server"
+    };
+    
+    // Стандартный запуск через пул
+    if (!conf.test_mode) {
+        for (auto thread: standardThreads) {
+            threads.run(namedThreads[thread]);
+        }
 
-    threads.run(new ThreadLog());
-    threads.run(new ThreadSync());
-    threads.run(new ThreadSyncCounters());
-    threads.run(new ThreadSyncCalls());
-    threads.run(new ThreadSelectCurrentCalls());
-    threads.run(new ThreadSelectGlobalCounters());
-    threads.run(new ThreadLoader());
-    threads.run(new ThreadBlacklist());
-    threads.run(new ThreadBillRuntime());
-    threads.run(new ThreadLimitControl());
-    threads.run(new ThreadCheckStartTable());
-    threads.run(new ThreadTasks());
-    threads.run(new ThreadUdpServer());
+        for (auto threadRec: namedThreads) {
+            if (threadRec.second->getStatus() == ThreadStatus::THREAD_CREATED) {
+                delete threadRec.second;
+            }
+        }
+    } else { // Запуск потоков в рамках теста
+        init_sync_done = true;
+        init_bill_runtime_started = true;
+        
+        for (auto thread: conf.test_run_threads) {
+            Thread* th = namedThreads[thread];
+            if (th) {
+                th->status = ThreadStatus::THREAD_RUNNING;
+                th->start(true);
+                th->task_thread.join();
+                delete th;
+                namedThreads.erase(thread);
+            }
+        }
 
+        for (auto threadRec: namedThreads) {
+            delete threadRec.second;
+        }
+        
+        threads.onLastThreadExits();
+    }
+    
     web_thread.join();
 }
 

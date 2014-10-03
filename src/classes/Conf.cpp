@@ -19,10 +19,7 @@ bool Conf::parse_cmd_line(int argc, char* argv[]) {
         po::notify(vm);
 
 
-        if (vm.count("test")) {
-            test_mode = true;
-        } else
-            if (vm.count("help")) {
+        if (vm.count("help")) {
             cout << desc << "\n";
             return false;
         }
@@ -48,8 +45,6 @@ bool Conf::parse_config_file() {
     try {
         boost::property_tree::ptree pt;
         boost::property_tree::ini_parser::read_ini(config_file, pt);
-
-        test_mode = pt.get<bool>("main.test_mode", test_mode);
 
         unsigned short level;
         log_file_filename = pt.get<string>("log.file_filename", "");
@@ -92,8 +87,6 @@ bool Conf::init(int argc, char* argv[]) {
 
     config_file = app_directory + "/" + app_name + ".conf";
     pid_file = "/var/run/" + app_name + ".pid";
-
-    test_mode = false;
 
     if (!parse_cmd_line(argc, argv)) return false;
 

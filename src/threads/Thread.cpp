@@ -1,23 +1,24 @@
 #include "../common.h"
 #include "Thread.h"
 
-Thread::Thread() {
+Thread::Thread() :
+    exitAfterSingleRun{false},
+    threadSleepSeconds{1},
+    status{ThreadStatus::THREAD_CREATED},
+    status_ready{false},
+    status_prepared{false} {
+
     id = string_fmt("%d", rand());
     name = id;
 
-    threadSleepSeconds = 1;
-
-    status = ThreadStatus::THREAD_CREATED;
     setRealStatus(ThreadStatus::THREAD_CREATED);
-
-    status_ready = false;
-    status_prepared = false;
 }
 
 Thread::~Thread() {
 }
 
-void Thread::start() {
+void Thread::start(bool exitAfterSingleRun) {
+    this->exitAfterSingleRun = exitAfterSingleRun;
     boost::thread t(&Thread::operator(), this);
     std::swap(task_thread, t);
 }
@@ -69,6 +70,11 @@ void Thread::operator()() {
                         setRealStatus(ThreadStatus::THREAD_RUNNING);
                         TimerScope ts(t);
                         this->run();
+                        if (exitAfterSingleRun)
+                        {
+                            setStatus(ThreadStatus::THREAD_STOPPED);
+                            continue;
+                        }
                     } else {
                         setRealStatus(ThreadStatus::THREAD_PAUSED);
                     }
@@ -88,6 +94,13 @@ void Thread::operator()() {
             Log::error("Thread(" + name + "): " + string(e.what()));
         } catch (...) {
             Log::error("Thread(" + name + "): ERROR");
+        }
+        
+        if (exitAfterSingleRun)
+        {
+            Log::flush();
+            setStatus(ThreadStatus::THREAD_STOPPED);
+            continue;
         }
 
         try {
