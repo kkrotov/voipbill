@@ -31,7 +31,7 @@ bool ThreadBlacklist::prepare() {
     }
 
     if (!blacklist_trunk->fetch()) {
-        return false;
+        //return false;
     }
 
     last_sync_from_openca_time = time(NULL);

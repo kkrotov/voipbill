@@ -140,7 +140,7 @@ typedef struct _ClientCounterObj {
 
 typedef struct _CallObj {
     char id[20];
-    char time[25];
+    char time[28];
     bool out;
 
     char usage_num[20];
