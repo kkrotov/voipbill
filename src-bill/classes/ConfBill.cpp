@@ -9,6 +9,13 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     web_port = pt.get<unsigned short>("main.web_port", 8032);
     api_port = pt.get<unsigned short>("main.api_port", 8032);
 
+    test_mode = pt.get<bool>("main.test_mode", false);
+    
+    string test_threads_string = pt.get<string>("main.test_threads", "");
+    boost::split(test_threads, test_threads_string, boost::is_any_of(";, \t\n"),
+            boost::algorithm::token_compress_on);
+
+    
     db_main = pt.get<string>("db.main");
     db_rad = pt.get<string>("db.rad");
     db_calls = pt.get<string>("db.calls");
@@ -27,9 +34,4 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
 
     global_counters_select_interval = pt.get<unsigned short>("billing.global_counters_select_interval", 10);
     
-    test_mode = pt.get<bool>("testing.enable_test", false);
-    
-    string test_run_threads_string = pt.get<string>("testing.run_threads");
-    boost::split(test_run_threads, test_run_threads_string, boost::is_any_of(";, \t\n"),
-            boost::algorithm::token_compress_on);
 }

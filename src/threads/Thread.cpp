@@ -69,7 +69,9 @@ void Thread::operator()() {
                     if (getStatus() == ThreadStatus::THREAD_RUNNING) {
                         setRealStatus(ThreadStatus::THREAD_RUNNING);
                         TimerScope ts(t);
+
                         this->run();
+
                         if (exitAfterSingleRun)
                         {
                             setStatus(ThreadStatus::THREAD_STOPPED);
@@ -98,7 +100,6 @@ void Thread::operator()() {
         
         if (exitAfterSingleRun)
         {
-            Log::flush();
             setStatus(ThreadStatus::THREAD_STOPPED);
             continue;
         }
@@ -115,7 +116,9 @@ void Thread::operator()() {
 
 void Thread::setStatus(ThreadStatus status) {
     this->status = status;
-    onStatusChanged(this);
+    if (status == THREAD_STOPPED) {
+        onShutdown();
+    }
     task_thread.interrupt();
 }
 
@@ -131,3 +134,4 @@ ThreadStatus Thread::getStatus() {
 ThreadStatus Thread::getRealStatus() {
     return real_status;
 }
+       

@@ -10,13 +10,15 @@
 void ThreadWeb::operator()() {
     if (app().conf.web_port == 0) return;
 
-    boost::asio::io_service io_service;
-    app().threads.onLastThreadExits.connect(boost::bind(&boost::asio::io_service::stop, &io_service));
     http::server4::server(io_service, "0.0.0.0",
             string_fmt("%d", app().conf.web_port),
             http::server4::file_handler())();
     io_service.run();
 
+}
+
+void ThreadWeb::stop() {
+    io_service.stop();
 }
 
 void ThreadWeb::handlerHeader(stringstream &html) {

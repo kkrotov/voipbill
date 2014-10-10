@@ -21,5 +21,6 @@ private:
 
 public:
     ThreadSelectGlobalCounters();
+    static const char* idName() { return "select_global_counters"; }
 };
 

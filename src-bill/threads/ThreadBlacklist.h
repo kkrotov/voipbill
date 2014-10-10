@@ -28,4 +28,5 @@ class ThreadBlacklist : public Thread {
     void htmlfull(stringstream &html);
 public:
     ThreadBlacklist();
+    static const char* idName() { return "blacklist"; }
 };

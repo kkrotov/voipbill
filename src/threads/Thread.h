@@ -18,10 +18,10 @@ static const char * ThreadStatusNames[] = {
 class Thread {
 public:
     string id;
-    // Инициализируется ThreadPool'ом - переделать.
+    // Инициализируется ThreadPool'ом - переделать: либо инициализировать через
+    // аргумент в конструкторе, либо через setStatus().
     ThreadStatus status;
 
-    boost::signals2::signal<void(Thread *) > onStatusChanged;
     boost::signals2::signal<void(Thread *) > onStarted;
     boost::signals2::signal<void(Thread *) > onFinished;
     boost::signals2::signal<void(Thread *) > onRealStatusChanged;
@@ -80,6 +80,7 @@ private:
     virtual void run() = 0;
     
     void setRealStatus(ThreadStatus real_status);
+    virtual void onShutdown() { }
 
     void operator()();
 };

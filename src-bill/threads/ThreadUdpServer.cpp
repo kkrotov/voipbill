@@ -10,48 +10,59 @@
 
 using boost::asio::ip::udp;
 
+void ThreadUdpServer::reopenSocket() {
+    if (!socket.is_open() && status != ThreadStatus::THREAD_STOPPED) {
+        udp::socket socket{io_service, udp::endpoint(udp::v4(), app().conf.api_port)};
+        std::swap(this->socket, socket);
+    }
+}
+
+void ThreadUdpServer::onShutdown() {
+    if (socket.is_open()) {
+        shutdown(socket.native_handle(), SHUT_RDWR);
+    }
+}
+
+void ThreadUdpServer::threadCleanup(Thread* thisThread) {
+    if (socket.is_open()) {
+        socket.close();
+    }
+}
+
+void ThreadUdpServer::receive(boost::array<char, 1024>& recv_buf, udp::endpoint& remote_endpoint) {
+    boost::system::error_code error;
+
+    int bytes_received = socket.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0, error);
+
+    if (error && error != boost::asio::error::message_size)
+        throw boost::system::system_error(error);
+
+    recv_buf[bytes_received] = 0;
+}
+
+string ThreadUdpServer::process(const string &message) {
+    auto processor = new UdpMessageProcessor(message, &db_calls);
+    return processor->process();
+}
+
+void ThreadUdpServer::send(const string &message, const udp::endpoint& remote_endpoint) {
+    boost::system::error_code ignored_error;
+    socket.send_to(boost::asio::buffer(message),
+            remote_endpoint, 0, ignored_error);
+}
+
 void ThreadUdpServer::run() {
     try {
-        volatile bool running = true;
-        boost::asio::io_service io_service;
-        udp::socket socket(io_service, udp::endpoint(udp::v4(), app().conf.api_port));
-        
-        boost::signals2::connection onStatusChangedDelegate = onStatusChanged.connect(
-                [&socket, &running, &onStatusChangedDelegate] (Thread *thread) {
-                if (running && thread->getStatus() == ThreadStatus::THREAD_STOPPED) {
-                    onStatusChangedDelegate.disconnect();
-                    running = false;
-                    shutdown(socket.native_handle(), SHUT_RDWR);
-                }
-        });
+        reopenSocket();
 
-
-        while (running) {
+        while (status != ThreadStatus::THREAD_STOPPED) {
             boost::array<char, 1024> recv_buf;
             udp::endpoint remote_endpoint;
-            boost::system::error_code error;
+            
+            receive(recv_buf, remote_endpoint);
+            string response = process(recv_buf.data());
 
-
-
-            int bytes_received = socket.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0, error);
-
-            if (error && error != boost::asio::error::message_size)
-                throw boost::system::system_error(error);
-
-
-
-            recv_buf[bytes_received] = 0;
-
-
-
-            auto processor = new UdpMessageProcessor(recv_buf.data(), &db_calls);
-            string response = processor->process();
-
-
-
-            boost::system::error_code ignored_error;
-            socket.send_to(boost::asio::buffer(response),
-                    remote_endpoint, 0, ignored_error);
+            send(response, remote_endpoint);
         }
     } catch (exception& e) {
         Log::error("Error in ThreadUdpServer::run: " + string(e.what()));
@@ -69,11 +80,14 @@ void ThreadUdpServer::htmlfull(stringstream &html) {
     html << "Errors count: <b>" << errors << "</b><br/>\n";
 }
 
-ThreadUdpServer::ThreadUdpServer() {
-    id = "udp_server";
+ThreadUdpServer::ThreadUdpServer() :
+    socket{io_service} {
+    id = idName();
     name = "Udp Server";
 
     db_calls.setCS(app().conf.db_calls);
     
     errors = 0;
+    
+    onFinished.connect(boost::bind(&ThreadUdpServer::threadCleanup, this, _1));
 }

@@ -43,79 +43,28 @@ AppBill::AppBill() {
 
 void AppBill::runApp() {
 
-    Daemoin::setPidFile(conf.pid_file);
+    Daemon::setPidFile(conf.pid_file);
+    
+    registerAllThreads();
 
     ThreadWeb web;
 
-    boost::thread web_thread(web);
+    boost::thread web_thread(boost::ref(web));
     
-    Thread* th = 0;
-    std::map<std::string, Thread*> namedThreads{
-        {(th = new ThreadLog(), th->id), th},
-        {(th = new ThreadSync(), th->id), th},
-        {(th = new ThreadSyncCounters(), th->id), th},
-        {(th = new ThreadSyncCalls(), th->id), th},
-        {(th = new ThreadSelectCurrentCalls(), th->id), th},
-        {(th = new ThreadSelectGlobalCounters(), th->id), th},
-        {(th = new ThreadLoader(), th->id), th},
-        {(th = new ThreadBlacklist(), th->id), th},
-        {(th = new ThreadBillRuntime(), th->id), th},
-        {(th = new ThreadLimitControl(), th->id), th},
-        {(th = new ThreadCheckStartTable(), th->id), th},
-        {(th = new ThreadTasks(), th->id), th},
-        {(th = new ThreadUdpServer(), th->id), th}
-    };
-    
-    std::vector<std::string> standardThreads{
-      "log",
-      "sync",
-      "sync_counters",
-      "sync_calls",
-      "currentcalls",
-      "select_global_counters",
-      "loader",
-      "blacklist",
-      "runtime",
-      "limitcontrol",
-      "checkstarttable",
-      "tasks",
-      "udp_server"
-    };
-    
-    // Стандартный запуск через пул
-    if (!conf.test_mode) {
-        for (auto thread: standardThreads) {
-            threads.run(namedThreads[thread]);
-        }
-
-        for (auto threadRec: namedThreads) {
-            if (threadRec.second->getStatus() == ThreadStatus::THREAD_CREATED) {
-                delete threadRec.second;
-            }
-        }
-    } else { // Запуск потоков в рамках теста
-        init_sync_done = true;
-        init_bill_runtime_started = true;
-        
-        for (auto thread: conf.test_run_threads) {
-            Thread* th = namedThreads[thread];
-            if (th) {
-                th->status = ThreadStatus::THREAD_RUNNING;
-                th->start(true);
-                th->task_thread.join();
-                delete th;
-                namedThreads.erase(thread);
-            }
-        }
-
-        for (auto threadRec: namedThreads) {
-            delete threadRec.second;
-        }
-        
-        threads.onLastThreadExits();
+    if (conf.test_mode) {
+        runAppInTestMode();
+    } else {
+        runAppInSingleMode();
     }
     
+    threads.joinAll();
+
+    web.stop();
     web_thread.join();
+    
+    if (conf.test_mode) {
+        Log::flush();
+    }
 }
 
 void AppBill::initLogger() {
@@ -133,4 +82,71 @@ void AppBill::initLogger() {
     if (!conf.log_syslog_ident.empty())
         logger.addLogWriter(pLogWriter(new LogWriterSyslog(conf.log_syslog_ident, conf.log_syslog_min_level, conf.log_syslog_max_level)));
 
+}
+
+template<class T>
+void AppBill::registerThread() {
+    threadConstructorsMap[T::idName()] = []() -> Thread * { return new T(); };
+}
+
+Thread * AppBill::newThreadObject(std::string id) {
+    return threadConstructorsMap[id]();
+}
+
+void AppBill::registerAllThreads() {
+
+    registerThread<ThreadLog>();
+    registerThread<ThreadSync>();
+    registerThread<ThreadSyncCounters>();
+    registerThread<ThreadSyncCalls>();
+    registerThread<ThreadSelectCurrentCalls>();
+    registerThread<ThreadSelectGlobalCounters>();
+    registerThread<ThreadLoader>();
+    registerThread<ThreadBlacklist>();
+    registerThread<ThreadBillRuntime>();
+    registerThread<ThreadLimitControl>();
+    registerThread<ThreadCheckStartTable>();
+    registerThread<ThreadTasks>();
+    registerThread<ThreadUdpServer>();
+}
+
+void AppBill::runAppInSingleMode()
+{
+    std::vector<std::string> standardThreads {
+      "log",
+      "sync",
+      "sync_counters",
+      "sync_calls",
+      "currentcalls",
+      "select_global_counters",
+      "loader",
+      "blacklist",
+      "runtime",
+      "limitcontrol",
+      "checkstarttable",
+      "tasks",
+      "udp_server"
+    };
+
+    for (auto thread: standardThreads) {
+        threads.run(newThreadObject(thread));
+    }
+}
+
+void AppBill::runAppInTestMode()
+{
+    init_sync_done = true;
+    init_bill_runtime_started = true;
+
+    for (auto threadName: conf.test_threads) {
+        Thread* thread = newThreadObject(threadName);
+        if (thread) {
+            thread->status = ThreadStatus::THREAD_RUNNING;
+            thread->start(true);
+            thread->task_thread.join();
+            delete thread;
+        }
+    }
+   
+    setStatus(AppStatus::APP_STOPPED);
 }

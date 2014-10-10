@@ -9,21 +9,15 @@ class App;
 
 class ThreadPool {
 public:
-    ThreadPool();
-    
-    void setApp(App * app);
+    ThreadPool(App * application);
+
     void run(Thread * thread);
-    
-    // Прервать выполнение всех потоков. Данный метод только отдаёт "команду",
-    // не дожидаясь актуального завершения потоков.
-    void shutdown();
+    void joinAll();
     
     void app_status_changed();
     void app_real_status_changed();
     
     bool forAllThreads(std::function<bool(Thread*)> callback);
-    
-    boost::signals2::signal<void() > onLastThreadExits;
     
 private:
     std::mutex mutex;

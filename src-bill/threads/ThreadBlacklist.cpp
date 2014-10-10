@@ -3,7 +3,7 @@
 #include "ThreadSelectGlobalCounters.h"
 
 ThreadBlacklist::ThreadBlacklist() {
-    id = "blacklist";
+    id = idName();
     name = "Blacklist";
 
     loader = DataLoader::instance();

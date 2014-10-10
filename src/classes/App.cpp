@@ -2,9 +2,7 @@
 
 #include "Daemon.h"
 
-App::App() {
-    threads.setApp(this);
-    
+App::App() : threads{this} {
     onStatusChanged.connect(boost::bind(&ThreadPool::app_status_changed, &threads));
     onRealStatusChanged.connect(boost::bind(&ThreadPool::app_real_status_changed, &threads));
 
@@ -25,7 +23,7 @@ void App::run() {
 
     initLogger();
 
-    Daemoin::initSignalHandler(this);
+    Daemon::initSignalHandler();
 
     runApp();
 }

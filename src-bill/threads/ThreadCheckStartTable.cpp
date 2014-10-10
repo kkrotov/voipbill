@@ -3,7 +3,7 @@
 #include "../classes/UdpControlClient.h"
 
 ThreadCheckStartTable::ThreadCheckStartTable() {
-    id = "checkstarttable";
+    id = idName();
     name = "Check Start Table";
     db_rad.setCS(app().conf.db_rad);
 

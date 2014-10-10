@@ -336,7 +336,7 @@ bool ThreadLoader::do_load_counters(BDb *db, DataLoader *loader) {
 }
 
 ThreadLoader::ThreadLoader() {
-    id = "loader";
+    id = idName();
     name = "Loader";
 
     loader = DataLoader::instance();

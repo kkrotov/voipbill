@@ -25,7 +25,7 @@ public:
     unsigned short global_counters_select_interval;
     
     bool test_mode;
-    vector<string> test_run_threads;
+    vector<string> test_threads;
 
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);

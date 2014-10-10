@@ -3,15 +3,12 @@
 
 #include "../classes/App.h"
 
-ThreadPool::ThreadPool() :
-    app(NULL),
-    shutdownFlag(false) {
+ThreadPool::ThreadPool(App * application) : app{application} {
 }
 
 void ThreadPool::run(Thread * thread) {
     thread->onStarted.connect(boost::bind(&ThreadPool::register_thread, this, _1));
     thread->onFinished.connect(boost::bind(&ThreadPool::unregister_thread, this, _1));
-    thread->onStatusChanged.connect(boost::bind(&ThreadPool::thread_status_changed, this, _1));
     thread->onRealStatusChanged.connect(boost::bind(&ThreadPool::thread_real_status_changed, this, _1));
     thread->status = getThreadStatusByAppStatus();
     thread->start();
@@ -55,16 +52,8 @@ void ThreadPool::unregister_thread(Thread *thread) {
             }
             ++it;
         }
-        
-        if (shutdownFlag && threads.empty()) {
-            last = true;
-        }
     }
     thread_real_status_changed(0);
-    
-    if (last) {
-        onLastThreadExits();
-    }
 }
 
 bool ThreadPool::forAllThreads(std::function<bool(Thread*)> callback) {
@@ -79,20 +68,19 @@ bool ThreadPool::forAllThreads(std::function<bool(Thread*)> callback) {
     return true;
 }
 
-void ThreadPool::shutdown() {
-    lock_guard<std::mutex> lock(mutex);
-    shutdownFlag = true;
-
-    auto it = threads.begin();
-    while (it != threads.end()) {
-        Thread *thread = *it;
-        thread->setStatus(ThreadStatus::THREAD_STOPPED);
-        ++it;
+void ThreadPool::joinAll() {
+    for (;;) {
+        Thread * thread = 0;
+        {
+            lock_guard<std::mutex> lock(mutex);
+            if (threads.begin() != threads.end()) {
+                thread = * threads.begin();
+            } else {
+                break;
+            }
+        }
+        thread->task_thread.join();
     }
-}
-
-void ThreadPool::thread_status_changed(Thread *thread) {
-
 }
 
 void ThreadPool::thread_real_status_changed(Thread *thread) {
@@ -174,8 +162,4 @@ ThreadStatus ThreadPool::getThreadStatusByAppStatus() {
     } else {
         return ThreadStatus::THREAD_CREATED;
     }
-}
-
-void ThreadPool::setApp(App * app) {
-    this->app = app;
 }

@@ -31,7 +31,7 @@ void ThreadLog::htmlfull(stringstream & html) {
 }
 
 ThreadLog::ThreadLog() {
-    id = "log";
+    id = idName();
     name = "Log";
 }
 

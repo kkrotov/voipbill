@@ -23,5 +23,6 @@ class ThreadCheckStartTable : public Thread {
 
 public:
     ThreadCheckStartTable();
+    static const char* idName() { return "checkstarttable"; }
 };
 

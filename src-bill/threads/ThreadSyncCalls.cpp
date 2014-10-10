@@ -2,7 +2,7 @@
 #include "../classes/AppBill.h"
 
 ThreadSyncCalls::ThreadSyncCalls() {
-    id = "sync_calls";
+    id = idName();
     name = "Sync Calls to central db";
 
     db_main.setCS(app().conf.db_main);

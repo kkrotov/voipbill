@@ -5,7 +5,7 @@
 bool ThreadBillRuntime::need_refresh_current_id = false;
 
 ThreadBillRuntime::ThreadBillRuntime() {
-    id = "runtime";
+    id = idName();
     name = "Bill Runtime";
 
     calc_calls_full = 0;

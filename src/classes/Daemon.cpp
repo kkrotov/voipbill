@@ -6,10 +6,9 @@
 #include <string.h>
 #include <unistd.h>
 
-static App* p_app = 0;
+extern App & app();
 
-
-void Daemoin::setPidFile(string pid_file) {
+void Daemon::setPidFile(string pid_file) {
     FILE* f = fopen(pid_file.c_str(), "w+");
     if (f) {
         fprintf(f, "%u", getpid());
@@ -21,7 +20,7 @@ void Daemoin::setPidFile(string pid_file) {
 #include <execinfo.h>
 #include <inttypes.h>
 
-static void full_write(int fd, const char *buf, size_t len) {
+void Daemon::full_write(int fd, const char *buf, size_t len) {
     while (len > 0) {
         ssize_t ret = write(fd, buf, len);
 
@@ -33,7 +32,9 @@ static void full_write(int fd, const char *buf, size_t len) {
     }
 }
 
-void posix_death_signal(int signum) {
+void Daemon::posix_death_signal(int signum) {
+    printf("\nDEATH\n");
+    
     static const char start[] = "BACKTRACE ------------\n";
     static const char end[] = "----------------------\n";
 
@@ -56,16 +57,7 @@ void posix_death_signal(int signum) {
     exit(3);
 }
 
-void shutdown_app(int signum) {
-    if (p_app)
-    {
-        App* app = p_app;
-        p_app = 0;
-        app->threads.shutdown();
-    }
-}
-
-void termination_handler(int signum) {
+void Daemon::termination_handler(int signum) {
     switch (signum) {
         case SIGSEGV:
             posix_death_signal(signum);
@@ -75,7 +67,7 @@ void termination_handler(int signum) {
         case SIGINT:
         case SIGQUIT:
         case SIGABRT:
-            shutdown_app(signum);
+            app().setStatus(AppStatus::APP_STOPPED);
     }
 }
 
@@ -85,10 +77,9 @@ void set_action(int signum, __sighandler_t handler) {
     sigaction(signum, &new_action, NULL);
 }
 
-void Daemoin::initSignalHandler(class App* app) {
-    p_app = app;
+void Daemon::initSignalHandler() {
     int catch_signals[] = {SIGSEGV, SIGINT, SIGHUP, SIGTERM, SIGQUIT, SIGABRT};
-    for (int i=0; i<sizeof(catch_signals)/sizeof(catch_signals[0]); ++i) {
-        set_action(catch_signals[i], termination_handler);
+    for (auto signal : catch_signals) {
+        set_action(signal, termination_handler);
     }
 }

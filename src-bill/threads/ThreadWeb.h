@@ -2,12 +2,16 @@
 
 #include <map>
 #include <string>
+#include <boost/asio.hpp>
+
 using namespace std;
 
 class ThreadWeb {
 public:
 
     void operator()();
+
+    void stop();
 
     static void handlerHeader(stringstream &html);
 
@@ -21,4 +25,6 @@ public:
 
     static void handlerClient(stringstream &html, map<string, string> &parameters);
 
+private:
+    boost::asio::io_service io_service;
 };
