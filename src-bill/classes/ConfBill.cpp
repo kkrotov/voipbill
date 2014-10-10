@@ -1,7 +1,6 @@
 #include "../classes/ConfBill.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/property_tree/ini_parser.hpp>
 #include <boost/algorithm/string.hpp>
 
 bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
@@ -15,7 +14,6 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     boost::split(test_threads, test_threads_string, boost::is_any_of(";, \t\n"),
             boost::algorithm::token_compress_on);
 
-    
     db_main = pt.get<string>("db.main");
     db_rad = pt.get<string>("db.rad");
     db_calls = pt.get<string>("db.calls");
