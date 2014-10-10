@@ -38,7 +38,6 @@ void ThreadPool::register_thread(Thread *thread) {
 
 void ThreadPool::unregister_thread(Thread *thread) {
 
-    bool last = false;
     {
         lock_guard<std::mutex> lock(mutex);
 
