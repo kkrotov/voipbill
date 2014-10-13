@@ -5,7 +5,7 @@
 
 #include "../../src/common.h"
 #include "../../src/threads/Thread.h"
-#include "ThreadCurrentCalls.h"
+#include "ThreadSelectCurrentCalls.h"
 #include "../classes/AppBill.h"
 #include "../classes/DataLoader.h"
 #include "../classes/CalcFull.h"
@@ -75,6 +75,7 @@ void ThreadWeb::handlerConfig(stringstream &html) {
 
     html << "<br/>\n";
     html << "main.web_port: " << app().conf.web_port << "<br/>\n";
+    html << "main.api_port: " << app().conf.api_port << "<br/>\n";
     html << "main.test_mode: " << app().conf.test_mode << "<br/>\n";
     html << "<br/>\n";
     html << "log.grouping_interval: " << app().conf.log_grouping_interval << "<br/>\n";
@@ -83,11 +84,12 @@ void ThreadWeb::handlerConfig(stringstream &html) {
     html << "db.rad: " << app().conf.db_rad << "<br/>\n";
     html << "db.calls: " << app().conf.db_calls << "<br/>\n";
     html << "<br/>\n";
-    html << "udp.host: " << app().conf.udp_host << "<br/>\n";
-    html << "udp.port: " << app().conf.udp_port << "<br/>\n";
+    html << "udp.host: " << app().conf.openca_udp_host << "<br/>\n";
+    html << "udp.port: " << app().conf.openca_udp_port << "<br/>\n";
     html << "<br/>\n";
     html << "billing.free_seconds: " << app().conf.billing_free_seconds << "<br/>\n";
     html << "billing.dc_break: " << app().conf.billing_dc_break << "<br/>\n";
+    html << "billing.global_counters_select_interval: " << app().conf.global_counters_select_interval << "<br/>\n";
 }
 
 bool ThreadWeb::handlerTask(stringstream &html, map<string, string> &parameters) {
@@ -209,11 +211,11 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
         client_disabled_local = client_counter.disabled_local;
     }
 
-    shared_ptr<CurrentCallsObjList> current_calls_list = ThreadCurrentCalls::getList();
+    shared_ptr<CurrentCallsObjList> current_calls_list = ThreadSelectCurrentCalls::getList();
     CurrentCallsObjList * calls_list = current_calls_list.get();
 
     CalcFull calculator;
-    calculator.calc_limit(calls_list);
+    calculator.calc_current(calls_list);
 
     ClientCounterObj &c2 = calculator.client_counter2->get(client_id);
     sum_balance = sum_balance + c2.sumBalance();

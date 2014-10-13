@@ -1,6 +1,7 @@
 [main]
 test_mode = false
 web_port = 8032
+api_port = 8032
 
 [log]
 ## 0 - DEBUG, 1 - INFO, 2 - NOTICE, 3 - WARNING, 4 - ERROR, 5 - CRITICAL
@@ -23,8 +24,6 @@ calls = host=host dbname=dbname user=user password=password
 
 [geo]
 instance_id = 99
-local_region_ids = 7495,7495499
-local_city_codes = 7495,7498,7499
 
 [udp]
 host = host
@@ -35,3 +34,4 @@ port = port
 [billing]
 dc_break = 126
 free_seconds = 5
+global_counters_select_interval = 10

@@ -15,8 +15,12 @@ public:
 
 private:
     string message;
-    string callingStationId;
-    string calledStationId;
+    string prefix;
+    string aNumber;
+    string aNumberForAuth;
+    string bNumber;
+    string redirectionNumber;
+    int trunkNumber;
 
     shared_ptr<ConfigVersionData> data;
 
@@ -33,5 +37,10 @@ private:
     string processRouteCaseOutcome(pOutcome outcome);
     string processReleaseReasonOutcome(pOutcome outcome);
     string processAirpOutcome(pOutcome outcome);
+
+    bool isLocalTrunk();
+    bool needSwapCallingAndRedirectionNumber();
+    bool canRouteForOperator(pOperator oper);
+    bool isOperatorRulesMatched(pOperator oper, bool outgoing, string strNumber);
 };
 

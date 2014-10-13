@@ -50,20 +50,17 @@ void ThreadSync::run() {
     int newVersionId = getNewConfigVersionId();
 
     if (newVersionId > 0) {
-        bool trans_calls = false;
         try {
-            db_local.exec("BEGIN");
-            trans_calls = true;
-
+            BDbTransaction trans(&db_local);
 
             for (list<qsync>::iterator s = syncs.begin(); s != syncs.end(); ++s) {
 
                 string deleteQuery = "delete from " + s->t_to;
 
                 string selectQuery = "select " + s->sfrom + " from " + s->t_from;
-                if (s->t_from != "prefixlist_prefix" && s->t_from != "route_table_route") {
+                if (s->t_from != "auth.prefixlist_prefix" && s->t_from != "auth.route_table_route" && s->t_from != "auth.operator_rule") {
                     selectQuery += " where ";
-                    selectQuery += (s->t_from == "config_version" ? "id" : "config_version_id");
+                    selectQuery += (s->t_from == "auth.config_version" ? "id" : "config_version_id");
                     selectQuery += " = " + lexical_cast<string>(newVersionId);
                 }
 
@@ -76,19 +73,12 @@ void ThreadSync::run() {
                 boost::this_thread::interruption_point();
             }
 
+            trans.commit();
 
-            db_local.exec("COMMIT");
-            trans_calls = false;
         } catch (Exception &e) {
             e.addTrace("ThreadSync::run");
             Log::exception(e);
             errors++;
-            if (trans_calls) {
-                try {
-                    db_local.exec("ROLLBACK");
-                } catch (...) {
-                }
-            }
         }
     }
 
@@ -99,7 +89,7 @@ int ThreadSync::getNewConfigVersionId() {
     int newVersionId = 0;
 
     {
-        auto res = db_main.query("select id from config_version where server_id = " + app().conf.str_server_id + " and status_id = 3");
+        auto res = db_main.query("select id from auth.config_version where server_id = " + app().conf.str_server_id + " and status_id = 3");
         if (res.next()) {
             newVersionId = res.get_i(0);
         } else {
@@ -108,7 +98,7 @@ int ThreadSync::getNewConfigVersionId() {
     }
 
     {
-        auto res = db_local.query("select id from config_version");
+        auto res = db_local.query("select id from auth.config_version");
         if (res.next()) {
             currentVersionId = res.get_i(0);
         }
@@ -150,21 +140,20 @@ ThreadSync::ThreadSync() {
 
     qsync s1;
     s1.label = "config_version";
-    s1.t_from = "config_version";
-    s1.t_to = "config_version";
+    s1.t_from = "auth.config_version";
+    s1.t_to = "auth.config_version";
     s1.add_field("id");
     s1.add_field("name");
     s1.add_field("low_balance_outcome_id");
     s1.add_field("blocked_outcome_id");
     s1.add_field("calling_station_id_for_line_without_number");
-    s1.add_field("route_table_id");
     s1.prepare();
     syncs.push_back(s1);
 
     qsync s2;
     s2.label = "airp";
-    s2.t_from = "airp";
-    s2.t_to = "airp";
+    s2.t_from = "auth.airp";
+    s2.t_to = "auth.airp";
     s2.add_field("id");
     s2.add_field("name");
     s2.prepare();
@@ -172,8 +161,8 @@ ThreadSync::ThreadSync() {
 
     qsync s3;
     s3.label = "number";
-    s3.t_from = "number";
-    s3.t_to = "number";
+    s3.t_from = "auth.number";
+    s3.t_to = "auth.number";
     s3.add_field("id");
     s3.add_field("name");
     s3.add_field("prefixlist_ids");
@@ -182,8 +171,8 @@ ThreadSync::ThreadSync() {
 
     qsync s4;
     s4.label = "outcome";
-    s4.t_from = "outcome";
-    s4.t_to = "outcome";
+    s4.t_from = "auth.outcome";
+    s4.t_to = "auth.outcome";
     s4.add_field("id");
     s4.add_field("name");
     s4.add_field("calling_station_id");
@@ -197,8 +186,8 @@ ThreadSync::ThreadSync() {
 
     qsync s5;
     s5.label = "prefixlist";
-    s5.t_from = "prefixlist";
-    s5.t_to = "prefixlist";
+    s5.t_from = "auth.prefixlist";
+    s5.t_to = "auth.prefixlist";
     s5.add_field("id");
     s5.add_field("name");
     s5.prepare();
@@ -206,8 +195,8 @@ ThreadSync::ThreadSync() {
 
     qsync s6;
     s6.label = "prefixlist_prefix";
-    s6.t_from = "prefixlist_prefix";
-    s6.t_to = "prefixlist_prefix";
+    s6.t_from = "auth.prefixlist_prefix";
+    s6.t_to = "auth.prefixlist_prefix";
     s6.add_field("prefixlist_id");
     s6.add_field("prefix");
     s6.prepare();
@@ -215,8 +204,8 @@ ThreadSync::ThreadSync() {
 
     qsync s7;
     s7.label = "release_reason";
-    s7.t_from = "release_reason";
-    s7.t_to = "release_reason";
+    s7.t_from = "auth.release_reason";
+    s7.t_to = "auth.release_reason";
     s7.add_field("id");
     s7.add_field("name");
     s7.prepare();
@@ -224,8 +213,8 @@ ThreadSync::ThreadSync() {
 
     qsync s8;
     s8.label = "route_case";
-    s8.t_from = "route_case";
-    s8.t_to = "route_case";
+    s8.t_from = "auth.route_case";
+    s8.t_to = "auth.route_case";
     s8.add_field("id");
     s8.add_field("name");
     s8.prepare();
@@ -233,8 +222,8 @@ ThreadSync::ThreadSync() {
 
     qsync s9;
     s9.label = "route_table";
-    s9.t_from = "route_table";
-    s9.t_to = "route_table";
+    s9.t_from = "auth.route_table";
+    s9.t_to = "auth.route_table";
     s9.add_field("id");
     s9.add_field("name");
     s9.prepare();
@@ -242,8 +231,8 @@ ThreadSync::ThreadSync() {
 
     qsync s10;
     s10.label = "route_table_route";
-    s10.t_from = "route_table_route";
-    s10.t_to = "route_table_route";
+    s10.t_from = "auth.route_table_route";
+    s10.t_to = "auth.route_table_route";
     s10.add_field("route_table_id");
     s10.add_field("\"order\"");
     s10.add_field("a_number_id");
@@ -252,4 +241,63 @@ ThreadSync::ThreadSync() {
     s10.add_field("outcome_route_table_id");
     s10.prepare();
     syncs.push_back(s10);
+
+    qsync s11;
+    s11.label = "routing_report_data";
+    s11.t_from = "auth.routing_report_data";
+    s11.t_to = "auth.routing_report_data";
+    s11.add_field("prefix");
+    s11.add_field("routes");
+    s11.prepare();
+    syncs.push_back(s11);
+
+    qsync s12;
+    s12.label = "operator";
+    s12.t_from = "auth.operator";
+    s12.t_to = "auth.operator";
+    s12.add_field("id");
+    s12.add_field("name");
+    s12.add_field("code");
+    s12.add_field("source_rule_default_allowed");
+    s12.add_field("destination_rule_default_allowed");
+    s12.add_field("default_priority");
+    s12.add_field("openca");
+    s12.add_field("auto_routing");
+    s12.prepare();
+    syncs.push_back(s12);
+
+    qsync s13;
+    s13.label = "trunk";
+    s13.t_from = "auth.trunk";
+    s13.t_to = "auth.trunk";
+    s13.add_field("id");
+    s13.add_field("name");
+    s13.add_field("number");
+    s13.add_field("cpc_id");
+    s13.add_field("route_table_id");
+    s13.prepare();
+    syncs.push_back(s13);
+
+    qsync s14;
+    s14.label = "trunk_group";
+    s14.t_from = "auth.trunk_group";
+    s14.t_to = "auth.trunk_group";
+    s14.add_field("id");
+    s14.add_field("name");
+    s14.add_field("trunk_ids");
+    s14.add_field("trunk_numbers");
+    s14.prepare();
+    syncs.push_back(s14);
+
+    qsync s15;
+    s15.label = "operator_rule";
+    s15.t_from = "auth.operator_rule";
+    s15.t_to = "auth.operator_rule";
+    s15.add_field("operator_id");
+    s15.add_field("outgoing");
+    s15.add_field("\"order\"");
+    s15.add_field("trunk_group_id");
+    s15.add_field("prefixlist_id");
+    s15.prepare();
+    syncs.push_back(s15);
 }

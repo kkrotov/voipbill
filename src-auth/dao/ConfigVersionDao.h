@@ -17,9 +17,8 @@ public:
                 db->query(" \
                     select \
                         id, name, \
-                        low_balance_outcome_id, blocked_outcome_id, calling_station_id_for_line_without_number, \
-                        route_table_id \
-                    from config_version \
+                        low_balance_outcome_id, blocked_outcome_id, calling_station_id_for_line_without_number \
+                    from auth.config_version \
                     limit 1 \
                 ");
         if (res.next()) {
@@ -30,7 +29,6 @@ public:
             version->low_balance_outcome_id = res.get_i(2);
             version->blocked_outcome_id = res.get_i(3);
             res.fill_cs(4, version->calling_station_id_for_line_without_number, sizeof (version->calling_station_id_for_line_without_number));
-            version->route_table_id = res.get_i(5);
 
             return version;
         } else {

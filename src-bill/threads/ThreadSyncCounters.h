@@ -3,10 +3,9 @@
 #include "../../src/threads/Thread.h"
 #include "../classes/DataLoader.h"
 
-class ThreadSaveCounters : public Thread {
+class ThreadSyncCounters : public Thread {
     DataLoader *loader;
     BDb db_main;
-    BDb db_calls;
 
     bool ready();
 
@@ -14,13 +13,9 @@ class ThreadSaveCounters : public Thread {
 
     void run();
 
-    bool save_client_counters(bool clear = false);
-
-    bool save_calls();
-
-    bool save_calls_old();
+    void save_client_counters(bool clear = false);
 
     void htmlfull(stringstream &html);
 public:
-    ThreadSaveCounters();
+    ThreadSyncCounters();
 };

@@ -19,8 +19,8 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
     string debug_msg = "OpenCA: ";
 
     try {
-        boost::asio::ip::address addr = boost::asio::ip::address::from_string(app().conf.udp_host);
-        udp::endpoint endpoint(addr, app().conf.udp_port);
+        boost::asio::ip::address addr = boost::asio::ip::address::from_string(app().conf.openca_udp_host);
+        udp::endpoint endpoint(addr, app().conf.openca_udp_port);
 
         s.open(udp::v4());
         s.connect(endpoint);
@@ -71,7 +71,7 @@ bool UdpControlClient::sendrecv(string &msg, string &res) {
 }
 
 bool UdpControlClient::ready() {
-    return app().conf.udp_host != "" && app().conf.udp_port != 0;
+    return app().conf.openca_udp_host != "" && app().conf.openca_udp_port != 0;
 }
 
 bool UdpControlClient::select_calls(vector<string> &list) {
@@ -116,26 +116,50 @@ bool UdpControlClient::blacklist_global(vector<string> &list) {
     return true;
 }
 
-bool UdpControlClient::lock_local(string &phones) {
-    string msg("LOCK_LOCAL " + phones);
+bool UdpControlClient::blacklist_trunk(vector<string> &list) {
+    string msg("READ_LOCKED_TRUNK");
+    string res;
+    if (sendrecv(msg, res) == false || res == "0") return false;
+    if (res == "") {
+        list.empty();
+        return true;
+    }
+    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","), boost::token_compress_on);
+    return true;
+}
+
+bool UdpControlClient::lock_local(string &phone) {
+    string msg("LOCK_LOCAL " + phone);
     string res;
     return sendrecv(msg, res) && res == "1";
 }
 
-bool UdpControlClient::lock_global(string &phones) {
-    string msg("LOCK_GLOBAL " + phones);
+bool UdpControlClient::lock_global(string &phone) {
+    string msg("LOCK_GLOBAL " + phone);
     string res;
     return sendrecv(msg, res) && res == "1";
 }
 
-bool UdpControlClient::unlock_local(string &phones) {
-    string msg("UNLOCK_LOCAL " + phones);
+bool UdpControlClient::lock_trunk(string &trunk) {
+    string msg("LOCK_TRUNK " + trunk);
     string res;
     return sendrecv(msg, res) && res == "1";
 }
 
-bool UdpControlClient::unlock_global(string &phones) {
-    string msg("UNLOCK_GLOBAL " + phones);
+bool UdpControlClient::unlock_local(string &phone) {
+    string msg("UNLOCK_LOCAL " + phone);
+    string res;
+    return sendrecv(msg, res) && res == "1";
+}
+
+bool UdpControlClient::unlock_global(string &phone) {
+    string msg("UNLOCK_GLOBAL " + phone);
+    string res;
+    return sendrecv(msg, res) && res == "1";
+}
+
+bool UdpControlClient::unlock_trunk(string &trunk) {
+    string msg("UNLOCK_TRUNK " + trunk);
     string res;
     return sendrecv(msg, res) && res == "1";
 }

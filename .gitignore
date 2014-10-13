@@ -1,5 +1,8 @@
 /libs
+/.idea
 *~
+
+*.pyc
 
 /app_auth/build
 /app_auth/dist

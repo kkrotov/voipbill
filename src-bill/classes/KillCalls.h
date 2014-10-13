@@ -2,8 +2,8 @@
 
 #include "../lists/CurrentCallsObjList.h"
 #include "UdpControlClient.h"
-#include "../common.h"
-#include "Log.h"
+#include "../../src/common.h"
+#include "../../src/classes/Log.h"
 
 class KillCalls {
 public:
@@ -32,23 +32,25 @@ public:
                 if (call->kill_call_reason == 0) continue;
 
                 string reason;
-                if (call->kill_call_reason == 1000)
+                if (call->kill_call_reason == KILL_REASON_UNKNOWN_NUMBER)
                     reason = "Unknown number";
-                else if (call->kill_call_reason == 1010)
+                else if (call->kill_call_reason == KILL_REASON_UNKNOWN_CLIENT)
                     reason = "Unknown client";
-                else if (call->kill_call_reason == 2000)
+                else if (call->kill_call_reason == KILL_REASON_UNKNOWN_MCN_PRICE)
+                    reason = "Unknown mcn price";
+                else if (call->kill_call_reason == KILL_REASON_VOIP_DISABLED)
                     reason = "Void disabled";
-                else if (call->kill_call_reason == 3000)
+                else if (call->kill_call_reason == KILL_REASON_CREDIT_LIMIT)
                     reason = "Credit limit";
-                else if (call->kill_call_reason == 3010)
+                else if (call->kill_call_reason == KILL_REASON_DAYLY_LIMIT)
                     reason = "Daily limit";
-                else if (call->kill_call_reason == 3020)
+                else if (call->kill_call_reason == KILL_REASON_MONTHLY_LIMIT)
                     reason = "Monthly limit";
                 else
                     reason = "Reason" + lexical_cast<string>(call->kill_call_reason);
 
 
-                Log::notice("KILL " + string(call->id) + " / " + string(call->usage_num) + " / " + reason);
+                Log::notice("KILL " + string(call->id) + " / " + string(call->usage_num) + " / " + string(call->phone_num) + " / " + reason);
             }
         }
 

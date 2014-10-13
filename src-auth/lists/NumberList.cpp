@@ -6,7 +6,7 @@ size_t NumberList::item_size() {
 
 string NumberList::sql(BDb * db) {
     return "   select  id, name, prefixlist_ids " \
-            "   from number " \
+            "   from auth.number " \
             "   order by id ";
 }
 

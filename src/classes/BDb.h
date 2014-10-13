@@ -8,6 +8,7 @@
 using namespace std;
 
 #include "BDbResult.h"
+#include "BDbTransaction.h"
 
 class BDb {
 protected:

@@ -8,6 +8,9 @@ public:
     string db_local;
 
     unsigned short web_port;
+    unsigned short api_port;
+    string auth_api_host;
+    unsigned short auth_api_port;
 
     unsigned short server_id;
     string str_server_id;
