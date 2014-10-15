@@ -9,7 +9,7 @@ BlackList::BlackList() {
 }
 
 void BlackList::add(long long int phone) {
-    lock_guard<mutex> lk(lock);
+    lock_guard<mutex> lk(rwlock);
     if (blacklist.find(phone) == blacklist.end()) {
         list_to_add[phone] = true;
     }
@@ -19,12 +19,34 @@ void BlackList::add(long long int phone) {
 }
 
 void BlackList::del(long long int phone) {
-    lock_guard<mutex> lk(lock);
+    lock_guard<mutex> lk(rwlock);
     if (blacklist.find(phone) != blacklist.end()) {
         list_to_del[phone] = true;
     }
     if (list_to_add.find(phone) != list_to_add.end()) {
         list_to_add.erase(phone);
+    }
+}
+
+void BlackList::change_lock(long long int phone, bool need_lock) {
+    if (is_locked(phone) != need_lock) {
+        if (need_lock) {
+            add(phone);
+        } else {
+            del(phone);
+        }
+    }
+}
+
+void BlackList::lock(long long int phone) {
+    if (!is_locked(phone)) {
+        add(phone);
+    }
+}
+
+void BlackList::unlock(long long int phone) {
+    if (is_locked(phone)) {
+        del(phone);
     }
 }
 
@@ -37,7 +59,7 @@ bool BlackList::fetch() {
 
     time_t current_time = time(NULL);
 
-    lock_guard<mutex> lk(lock);
+    lock_guard<mutex> lk(rwlock);
 
     {
         vector<string>::iterator i = curr_list.begin();
@@ -87,7 +109,7 @@ void BlackList::push() {
         vector<long long int> list;
 
         {
-            lock_guard<mutex> lk(lock);
+            lock_guard<mutex> lk(rwlock);
             map<long long int, bool>::iterator i = list_to_add.begin();
             while (i != list_to_add.end()) {
                 list.push_back(i->first);
@@ -105,7 +127,7 @@ void BlackList::push() {
             }
 
             {
-                lock_guard<mutex> lk(lock);
+                lock_guard<mutex> lk(rwlock);
                 if (blacklist.find(*ii) == blacklist.end()) {
                     blacklist[*ii] = time(NULL);
                 }
@@ -124,7 +146,7 @@ void BlackList::push() {
         vector<long long int> list;
 
         {
-            lock_guard<mutex> lk(lock);
+            lock_guard<mutex> lk(rwlock);
             map<long long int, bool>::iterator i = list_to_del.begin();
             while (i != list_to_del.end()) {
                 list.push_back(i->first);
@@ -142,7 +164,7 @@ void BlackList::push() {
             }
 
             {
-                lock_guard<mutex> lk(lock);
+                lock_guard<mutex> lk(rwlock);
                 if (blacklist.find(*ii) != blacklist.end()) {
                     blacklist.erase(*ii);
                 }

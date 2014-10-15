@@ -143,8 +143,12 @@ void ThreadLoader::run() {
 
 
         if (usage != 0) {
-            if (usage->loaded) loader->usage.addlist(usage->dt, usage);
-            else delete usage;
+            if (usage->loaded) {
+                loader->usage.addlist(usage->dt, usage);
+                loader->usageReloadTimestamp = time(NULL);
+            } else {
+                delete usage;
+            }
             usage = 0;
         }
         if (price != 0) {

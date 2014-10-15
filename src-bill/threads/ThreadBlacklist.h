@@ -20,7 +20,7 @@ class ThreadBlacklist : public Thread {
     void run();
 
     void sync_blacklist();
-    void sync_once_per_day();
+    void sync_once_per_hour();
 
     void update_voip_auto_disabled();
 

@@ -46,6 +46,8 @@ public:
     mutex counter_rwlock;
     shared_ptr<ClientCounter> counter_client;
     Loader<FminCounter> counter_fmin;
+    
+    volatile time_t usageReloadTimestamp;
 
     DataLoader();
 

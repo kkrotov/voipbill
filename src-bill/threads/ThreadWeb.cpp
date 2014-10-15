@@ -11,6 +11,7 @@
 #include "../classes/CalcFull.h"
 #include "../classes/BlackListLocal.h"
 #include "../classes/BlackListGlobal.h"
+#include "../classes/BlackListTrunk.h"
 
 void ThreadWeb::operator()() {
     if (app().conf.web_port == 0) return;
@@ -233,7 +234,7 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
     {
         BlackList *bl = BlackListLocal::instance();
 
-        lock_guard<mutex> lock(bl->lock);
+        lock_guard<mutex> lock(bl->rwlock);
 
         map<long long int, time_t>::iterator i = bl->blacklist.begin();
         while (i != bl->blacklist.end()) {
@@ -250,13 +251,30 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
     {
         BlackList *bl = BlackListGlobal::instance();
 
-        lock_guard<mutex> lock(bl->lock);
+        lock_guard<mutex> lock(bl->rwlock);
 
         map<long long int, time_t>::iterator i = bl->blacklist.begin();
         while (i != bl->blacklist.end()) {
             pUsageObj usage = usages->find(i->first);
             if (usage != 0 && usage->client_id == client_id) {
-                html << "Locked Gobal <b>number</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
+                html << "Locked Global <b>number</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
+                html << lexical_cast<string>(i->first);
+                html << "</b><br/>\n";
+            }
+            ++i;
+        }
+    }
+    
+    {
+        BlackList *bl = BlackListTrunk::instance();
+
+        lock_guard<mutex> lock(bl->rwlock);
+
+        map<long long int, time_t>::iterator i = bl->blacklist.begin();
+        while (i != bl->blacklist.end()) {
+            pUsageObj usage = usages->find(i->first);
+            if (usage != 0 && usage->client_id == client_id) {
+                html << "Locked Trunk <b>number</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
                 html << lexical_cast<string>(i->first);
                 html << "</b><br/>\n";
             }

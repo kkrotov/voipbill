@@ -18,6 +18,9 @@ public:
     unsigned short openca_udp_port;
     unsigned short udp_openca_select_interval;
     unsigned short udp_force_finish_call_interval;
+    
+    unsigned short openca_sync_blacklist_interval_min;
+    unsigned short openca_sync_blacklist_interval_max;
 
     unsigned short billing_dc_break;
     unsigned short billing_free_seconds;
