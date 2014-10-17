@@ -2,7 +2,8 @@
 #include "Thread.h"
 
 Thread::Thread() :
-    exitAfterSingleRun{false},
+    exitAfterRunsCount{0},
+    runsCount{0},
     threadSleepSeconds{1},
     status{ThreadStatus::THREAD_CREATED},
     status_ready{false},
@@ -17,8 +18,9 @@ Thread::Thread() :
 Thread::~Thread() {
 }
 
-void Thread::start(bool exitAfterSingleRun) {
-    this->exitAfterSingleRun = exitAfterSingleRun;
+void Thread::start(int exitAfterRunsCount, bool skipPrepare) {
+    this->exitAfterRunsCount = exitAfterRunsCount;
+    this->status_prepared = skipPrepare;
     boost::thread t(&Thread::operator(), this);
     std::swap(task_thread, t);
 }
@@ -72,10 +74,13 @@ void Thread::operator()() {
 
                         this->run();
 
-                        if (exitAfterSingleRun)
+                        if (exitAfterRunsCount)
                         {
-                            setStatus(ThreadStatus::THREAD_STOPPED);
-                            continue;
+                            ++runsCount;
+                            if (runsCount == exitAfterRunsCount) {
+                                setStatus(ThreadStatus::THREAD_STOPPED);
+                                continue;
+                            }
                         }
                     } else {
                         setRealStatus(ThreadStatus::THREAD_PAUSED);
@@ -98,7 +103,7 @@ void Thread::operator()() {
             Log::error("Thread(" + name + "): ERROR");
         }
         
-        if (exitAfterSingleRun)
+        if (exitAfterRunsCount)
         {
             setStatus(ThreadStatus::THREAD_STOPPED);
             continue;

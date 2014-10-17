@@ -90,7 +90,12 @@ void AppBill::registerThread() {
 }
 
 Thread * AppBill::newThreadObject(std::string id) {
-    return threadConstructorsMap[id]();
+    auto fn = threadConstructorsMap[id];
+    if (fn) {
+        return fn();
+    } else {
+        return 0;
+    }
 }
 
 void AppBill::registerAllThreads() {
@@ -142,9 +147,13 @@ void AppBill::runAppInTestMode()
         Thread* thread = newThreadObject(threadName);
         if (thread) {
             thread->status = ThreadStatus::THREAD_RUNNING;
-            thread->start(true);
+            int runsCount = conf.test_threads_runs_count[threadName];
+            bool skipPrepare = conf.test_threads_skip_prepare[threadName];
+            thread->start(runsCount, skipPrepare);
             thread->task_thread.join();
             delete thread;
+        } else {
+            Log::error("UNKNOWN THREAD " + threadName);
         }
     }
    

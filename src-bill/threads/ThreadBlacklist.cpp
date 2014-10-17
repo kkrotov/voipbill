@@ -15,6 +15,7 @@ ThreadBlacklist::ThreadBlacklist() {
 }
 
 bool ThreadBlacklist::ready() {
+//    last_sync_from_openca_time = time(NULL);
     return app().init_sync_done &&
             app().init_load_data_done &&
             app().init_load_counters_done &&

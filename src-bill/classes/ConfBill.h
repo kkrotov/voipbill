@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../src/classes/Conf.h"
+#include <map>
 
 class ConfBill : public Conf {
 public:
@@ -28,7 +29,9 @@ public:
     unsigned short global_counters_select_interval;
     
     bool test_mode;
-    vector<string> test_threads;
+    std::vector<std::string> test_threads;
+    std::map<std::string, int> test_threads_runs_count;
+    std::map<std::string, bool> test_threads_skip_prepare;
 
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);

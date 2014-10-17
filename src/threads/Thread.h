@@ -28,8 +28,9 @@ public:
 
     boost::thread task_thread;
 
-    virtual ~Thread();    
-    void start(bool exitAfterSingleRun=false);
+    virtual ~Thread();
+
+    void start(int exitAfterRunsCount = 0, bool skipPrepare = false);
 
     ThreadStatus getStatus();
     void setStatus(ThreadStatus status);
@@ -69,7 +70,8 @@ private:
     bool status_ready;
     bool status_prepared;
     
-    bool exitAfterSingleRun;
+    int exitAfterRunsCount;
+    int runsCount;
 
     static void usleep(unsigned int milliseconds);
 
