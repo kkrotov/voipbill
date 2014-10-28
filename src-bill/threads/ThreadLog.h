@@ -10,5 +10,6 @@ private:
 
 public:
     ThreadLog();
+    static const char* idName() { return "log"; }
 };
 

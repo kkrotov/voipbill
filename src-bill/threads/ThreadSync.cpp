@@ -202,7 +202,7 @@ bool ThreadSync::do_sync() {
 }
 
 ThreadSync::ThreadSync() {
-    id = "sync";
+    id = idName();
     name = "Sync";
 
     errors = 0;

@@ -35,17 +35,20 @@ AppAuth::AppAuth() {
 
 void AppAuth::runApp() {
 
-    Daemoin::setPidFile(conf.pid_file);
+    Daemon::setPidFile(conf.pid_file);
 
     ThreadWeb web;
 
-    boost::thread web_thread(web);
+    boost::thread web_thread(boost::ref(web));
 
     threads.run(new ThreadLog());
     threads.run(new ThreadSync());
     threads.run(new ThreadLoader());
     threads.run(new ThreadUdpServer());
 
+    threads.joinAll();
+
+    web.stop();
     web_thread.join();
 }
 

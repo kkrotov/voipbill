@@ -22,12 +22,16 @@ public:
     map<long long int, bool> list_to_add;
     map<long long int, bool> list_to_del;
 
-    mutex lock;
+    mutex rwlock;
 
     BlackList();
 
     void add(long long int phone);
     void del(long long int phone);
+
+    void change_lock(long long int phone, bool need_lock);
+    void lock(long long int phone);
+    void unlock(long long int phone);
 
     bool is_locked(long long int phone);
 

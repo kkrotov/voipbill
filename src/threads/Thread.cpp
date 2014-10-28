@@ -1,23 +1,26 @@
 #include "../common.h"
 #include "Thread.h"
 
-Thread::Thread() {
+Thread::Thread() :
+    exitAfterRunsCount{0},
+    runsCount{0},
+    threadSleepSeconds{1},
+    status{ThreadStatus::THREAD_CREATED},
+    status_ready{false},
+    status_prepared{false} {
+
     id = string_fmt("%d", rand());
     name = id;
 
-    threadSleepSeconds = 1;
-
-    status = ThreadStatus::THREAD_CREATED;
     setRealStatus(ThreadStatus::THREAD_CREATED);
-
-    status_ready = false;
-    status_prepared = false;
 }
 
 Thread::~Thread() {
 }
 
-void Thread::start() {
+void Thread::start(int exitAfterRunsCount, bool skipPrepare) {
+    this->exitAfterRunsCount = exitAfterRunsCount;
+    this->status_prepared = skipPrepare;
     boost::thread t(&Thread::operator(), this);
     std::swap(task_thread, t);
 }
@@ -68,7 +71,17 @@ void Thread::operator()() {
                     if (getStatus() == ThreadStatus::THREAD_RUNNING) {
                         setRealStatus(ThreadStatus::THREAD_RUNNING);
                         TimerScope ts(t);
+
                         this->run();
+
+                        if (exitAfterRunsCount)
+                        {
+                            ++runsCount;
+                            if (runsCount == exitAfterRunsCount) {
+                                setStatus(ThreadStatus::THREAD_STOPPED);
+                                continue;
+                            }
+                        }
                     } else {
                         setRealStatus(ThreadStatus::THREAD_PAUSED);
                     }
@@ -89,6 +102,12 @@ void Thread::operator()() {
         } catch (...) {
             Log::error("Thread(" + name + "): ERROR");
         }
+        
+        if (exitAfterRunsCount)
+        {
+            setStatus(ThreadStatus::THREAD_STOPPED);
+            continue;
+        }
 
         try {
             ssleep(threadSleepSeconds);
@@ -102,7 +121,9 @@ void Thread::operator()() {
 
 void Thread::setStatus(ThreadStatus status) {
     this->status = status;
-    onStatusChanged(this);
+    if (status == THREAD_STOPPED) {
+        onShutdown();
+    }
     task_thread.interrupt();
 }
 
@@ -118,3 +139,4 @@ ThreadStatus Thread::getStatus() {
 ThreadStatus Thread::getRealStatus() {
     return real_status;
 }
+       

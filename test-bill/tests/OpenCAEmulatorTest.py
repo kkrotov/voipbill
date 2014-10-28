@@ -9,7 +9,8 @@ class OpenCAEmulatorTest(unittest.TestCase):
 
 
     def testSleep(self):
-        pass
+        from time import sleep
+        sleep(34566)
 
 
     def tearDown(self):

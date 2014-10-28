@@ -28,6 +28,7 @@ class ThreadSync : public Thread {
 public:
 
     ThreadSync();
+    static const char* idName() { return "sync"; }
 
     bool do_sync();
 

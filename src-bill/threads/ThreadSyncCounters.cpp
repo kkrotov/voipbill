@@ -2,7 +2,7 @@
 #include "../classes/AppBill.h"
 
 ThreadSyncCounters::ThreadSyncCounters() {
-    id = "sync_counters";
+    id = idName();
     name = "Sync Counters to central db";
 
     db_main.setCS(app().conf.db_main);

@@ -3,7 +3,7 @@
 #include "../tasks/TaskRecalc.h"
 
 ThreadTasks::ThreadTasks() {
-    id = "tasks";
+    id = idName();
     name = "Tasks";
     tasks_count = 0;
     db_main.setCS(app().conf.db_main);

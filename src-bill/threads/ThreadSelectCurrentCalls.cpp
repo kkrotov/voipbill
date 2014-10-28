@@ -81,7 +81,7 @@ void ThreadSelectCurrentCalls::htmlfull(stringstream &html) {
 }
 
 ThreadSelectCurrentCalls::ThreadSelectCurrentCalls() {
-    id = "currentcalls";
+    id = idName();
     name = "Current Calls";
     db_rad.setCS(app().conf.db_rad);
 }

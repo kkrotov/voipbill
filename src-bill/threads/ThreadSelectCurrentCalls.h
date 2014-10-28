@@ -21,5 +21,6 @@ private:
 
 public:
     ThreadSelectCurrentCalls();
+    static const char* idName() { return "currentcalls"; }
 };
 

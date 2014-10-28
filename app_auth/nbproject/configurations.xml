@@ -26,15 +26,6 @@
           <itemPath>../libs/boost/libs/thread/src/pthread/thread.cpp</itemPath>
         </logicalFolder>
       </logicalFolder>
-      <logicalFolder name="f3" displayName="gtest" projectFiles="true">
-        <itemPath>../libs/gtest/src/gtest-death-test.cc</itemPath>
-        <itemPath>../libs/gtest/src/gtest-filepath.cc</itemPath>
-        <itemPath>../libs/gtest/src/gtest-port.cc</itemPath>
-        <itemPath>../libs/gtest/src/gtest-printers.cc</itemPath>
-        <itemPath>../libs/gtest/src/gtest-test-part.cc</itemPath>
-        <itemPath>../libs/gtest/src/gtest-typed-test.cc</itemPath>
-        <itemPath>../libs/gtest/src/gtest.cc</itemPath>
-      </logicalFolder>
     </logicalFolder>
     <logicalFolder name="src" displayName="src" projectFiles="true">
       <logicalFolder name="classes" displayName="classes" projectFiles="true">
@@ -92,11 +83,6 @@
       <logicalFolder name="tasks" displayName="tasks" projectFiles="true">
         <itemPath>../src/tasks/Task.cpp</itemPath>
         <itemPath>../src/tasks/Task.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="f1" displayName="tests" projectFiles="true">
-        <itemPath>../src/tests/Test.cpp</itemPath>
-        <itemPath>../src/tests/Test.h</itemPath>
-        <itemPath>../src/tests/TestLibs.cpp</itemPath>
       </logicalFolder>
       <logicalFolder name="threads" displayName="threads" projectFiles="true">
         <itemPath>../src/threads/Thread.cpp</itemPath>
@@ -314,35 +300,6 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../libs/gtest/src/gtest-death-test.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../libs/gtest/src/gtest-filepath.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../libs/gtest/src/gtest-port.cc" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../libs/gtest/src/gtest-printers.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../libs/gtest/src/gtest-test-part.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../libs/gtest/src/gtest-typed-test.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../libs/gtest/src/gtest.cc" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="../src-auth/classes/AppAuth.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/classes/AppAuth.h" ex="false" tool="3" flavor2="0">
@@ -642,12 +599,6 @@
       <item path="../src/tasks/Task.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/tasks/Task.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/tests/Test.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/tests/Test.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/tests/TestLibs.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/threads/Thread.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -779,35 +730,6 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../libs/gtest/src/gtest-death-test.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../libs/gtest/src/gtest-filepath.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../libs/gtest/src/gtest-port.cc" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../libs/gtest/src/gtest-printers.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../libs/gtest/src/gtest-test-part.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../libs/gtest/src/gtest-typed-test.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../libs/gtest/src/gtest.cc" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="../src-auth/classes/AppAuth.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src-auth/classes/AppAuth.h" ex="false" tool="3" flavor2="0">
@@ -1107,12 +1029,6 @@
       <item path="../src/tasks/Task.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/tasks/Task.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/tests/Test.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/tests/Test.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/tests/TestLibs.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/threads/Thread.cpp" ex="false" tool="1" flavor2="0">
       </item>

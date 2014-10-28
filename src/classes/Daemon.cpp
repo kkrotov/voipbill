@@ -6,7 +6,9 @@
 #include <string.h>
 #include <unistd.h>
 
-void Daemoin::setPidFile(string pid_file) {
+extern App & app();
+
+void Daemon::setPidFile(string pid_file) {
     FILE* f = fopen(pid_file.c_str(), "w+");
     if (f) {
         fprintf(f, "%u", getpid());
@@ -18,7 +20,7 @@ void Daemoin::setPidFile(string pid_file) {
 #include <execinfo.h>
 #include <inttypes.h>
 
-static void full_write(int fd, const char *buf, size_t len) {
+void Daemon::full_write(int fd, const char *buf, size_t len) {
     while (len > 0) {
         ssize_t ret = write(fd, buf, len);
 
@@ -30,7 +32,9 @@ static void full_write(int fd, const char *buf, size_t len) {
     }
 }
 
-void posix_death_signal(int signum) {
+void Daemon::posix_death_signal(int signum) {
+    printf("\nDEATH\n");
+    
     static const char start[] = "BACKTRACE ------------\n";
     static const char end[] = "----------------------\n";
 
@@ -53,6 +57,29 @@ void posix_death_signal(int signum) {
     exit(3);
 }
 
-void Daemoin::initSignalHandler() {
-    signal(SIGSEGV, posix_death_signal);
+void Daemon::termination_handler(int signum) {
+    switch (signum) {
+        case SIGSEGV:
+            posix_death_signal(signum);
+            break;
+        case SIGTERM:
+        case SIGHUP:
+        case SIGINT:
+        case SIGQUIT:
+        case SIGABRT:
+            app().setStatus(AppStatus::APP_STOPPED);
+    }
+}
+
+void set_action(int signum, __sighandler_t handler) {
+    struct sigaction new_action = {0};
+    new_action.sa_handler = handler;
+    sigaction(signum, &new_action, NULL);
+}
+
+void Daemon::initSignalHandler() {
+    int catch_signals[] = {SIGSEGV, SIGINT, SIGHUP, SIGTERM, SIGQUIT, SIGABRT};
+    for (auto signal : catch_signals) {
+        set_action(signal, termination_handler);
+    }
 }
