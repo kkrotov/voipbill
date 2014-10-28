@@ -23,4 +23,5 @@ public:
     bool do_load_counters(BDb *db = 0, DataLoader *loader = 0);
 
     ThreadLoader();
+    static const char* idName() { return "loader"; }
 };

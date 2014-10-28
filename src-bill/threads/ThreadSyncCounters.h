@@ -18,4 +18,5 @@ class ThreadSyncCounters : public Thread {
     void htmlfull(stringstream &html);
 public:
     ThreadSyncCounters();
+    static const char* idName() { return "sync_counters"; }
 };

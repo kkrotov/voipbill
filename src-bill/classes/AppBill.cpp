@@ -43,27 +43,28 @@ AppBill::AppBill() {
 
 void AppBill::runApp() {
 
-    Daemoin::setPidFile(conf.pid_file);
+    Daemon::setPidFile(conf.pid_file);
+    
+    registerAllThreads();
 
     ThreadWeb web;
 
-    boost::thread web_thread(web);
+    boost::thread web_thread(boost::ref(web));
+    
+    if (conf.test_mode) {
+        runAppInTestMode();
+    } else {
+        runAppInSingleMode();
+    }
+    
+    threads.joinAll();
 
-    threads.run(new ThreadLog());
-    threads.run(new ThreadSync());
-    threads.run(new ThreadSyncCounters());
-    threads.run(new ThreadSyncCalls());
-    threads.run(new ThreadSelectCurrentCalls());
-    threads.run(new ThreadSelectGlobalCounters());
-    threads.run(new ThreadLoader());
-    threads.run(new ThreadBlacklist());
-    threads.run(new ThreadBillRuntime());
-    threads.run(new ThreadLimitControl());
-    threads.run(new ThreadCheckStartTable());
-    threads.run(new ThreadTasks());
-    threads.run(new ThreadUdpServer());
-
+    web.stop();
     web_thread.join();
+    
+    if (conf.test_mode) {
+        Log::flush();
+    }
 }
 
 void AppBill::initLogger() {
@@ -81,4 +82,80 @@ void AppBill::initLogger() {
     if (!conf.log_syslog_ident.empty())
         logger.addLogWriter(pLogWriter(new LogWriterSyslog(conf.log_syslog_ident, conf.log_syslog_min_level, conf.log_syslog_max_level)));
 
+}
+
+template<class T>
+void AppBill::registerThread() {
+    threadConstructorsMap[T::idName()] = []() -> Thread * { return new T(); };
+}
+
+Thread * AppBill::newThreadObject(std::string id) {
+    auto fn = threadConstructorsMap[id];
+    if (fn) {
+        return fn();
+    } else {
+        return 0;
+    }
+}
+
+void AppBill::registerAllThreads() {
+
+    registerThread<ThreadLog>();
+    registerThread<ThreadSync>();
+    registerThread<ThreadSyncCounters>();
+    registerThread<ThreadSyncCalls>();
+    registerThread<ThreadSelectCurrentCalls>();
+    registerThread<ThreadSelectGlobalCounters>();
+    registerThread<ThreadLoader>();
+    registerThread<ThreadBlacklist>();
+    registerThread<ThreadBillRuntime>();
+    registerThread<ThreadLimitControl>();
+    registerThread<ThreadCheckStartTable>();
+    registerThread<ThreadTasks>();
+    registerThread<ThreadUdpServer>();
+}
+
+void AppBill::runAppInSingleMode()
+{
+    std::vector<std::string> standardThreads {
+      "log",
+      "sync",
+      "sync_counters",
+      "sync_calls",
+      "currentcalls",
+      "select_global_counters",
+      "loader",
+      "blacklist",
+      "runtime",
+      "limitcontrol",
+      "checkstarttable",
+      "tasks",
+      "udp_server"
+    };
+
+    for (auto thread: standardThreads) {
+        threads.run(newThreadObject(thread));
+    }
+}
+
+void AppBill::runAppInTestMode()
+{
+    init_sync_done = true;
+    init_bill_runtime_started = true;
+
+    for (auto threadName: conf.test_threads) {
+        Thread* thread = newThreadObject(threadName);
+        if (thread) {
+            thread->status = ThreadStatus::THREAD_RUNNING;
+            int runsCount = conf.test_threads_runs_count[threadName];
+            bool skipPrepare = conf.test_threads_skip_prepare[threadName];
+            thread->start(runsCount, skipPrepare);
+            thread->task_thread.join();
+            delete thread;
+        } else {
+            Log::error("UNKNOWN THREAD " + threadName);
+        }
+    }
+   
+    setStatus(AppStatus::APP_STOPPED);
 }

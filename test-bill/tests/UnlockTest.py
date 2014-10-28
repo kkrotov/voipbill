@@ -18,7 +18,7 @@ from models.nispdRegion.Call import Call as NispdRegionCall
 from models.avbilling.StopCall import *
 from models.avbilling.StartCall import *
 
-class TarifierFullTest(BaseTestCase):
+class UnlockTest(BaseTestCase):
 
     def before(self):
         self.cleanup([
@@ -67,18 +67,49 @@ class TarifierFullTest(BaseTestCase):
             Tariff(id = 10, pricelist_id = 11),
 
             Usage(region = 99, client_id = 10, id = 10, phone_num = '74951005555'),
+            Usage(region = 99, client_id = 11, id = 11, phone_num = '74952006666'),
 
             UsageTariff(id = 10, usage_id = 10, tariff_id = 10),
+            UsageTariff(id = 11, usage_id = 11, tariff_id = 10),
         ])
 
+    def testUnlockUnused(self):
+        """ Переход из действующего usage'а в недействующий (тот, который не загружается в память приложения),
+        должен приводить к удалению лишних номеров из чёрного списка.
 
-    def testCallMatch(self):
-        Radius.stopCall(caller = '74951005555', callee = '74951234567', inOper = 99, outOper = 2, duration = 15 )
+        Переход должен осуществляться во время работы приложения.
+        Услуга должна быть заблокирована - поле disabled/disabled_global должно стоять до запуска приложения.
 
-        cfg.appbill_threads = 'loader, runtime'
-        self.startBillingApp()
-        time.sleep(5)
-        self.stopBillingApp()
+        Эмулятор должен получить команду блокировки - это момент, когда допустимо начинать тест.
+
+        Тест: поле usage.actual_to = now(). Эмулятор OpenCA должен получить команды разблокировки.
+        (текущая реализация синхронизирует списки с OpenCA один раз в сутки).
+
+        Для корректного теста нужна бредовая управляющая последовательность:
+        1. Запустить loader
+        2. Запустить blacklist.prepare и .run
+        3. Поменять дату actual_to. Подождать cfg.openca_sync_blacklist_interval_min (???!)
+        4. Запустить blacklist.run
+        5. После остановки blacklist.run остановить loader, выгрузиться.
+        6. Запись должна исчезнуть
+        """
+
+        self.startOpenCA()
+        cfg.openca_sync_blacklist_interval_min = 1
+        cfg.openca_sync_blacklist_interval_max = 2
+
+        assert(OpenCA.readBlacklistGlobal() == '')
+
+        self.execBillingApp('sync, loader, runtime, blacklist')
+        assert(OpenCA.readBlacklistGlobal() == '74952006666,74951005555')
+
+        conn = Usage.connection()
+        conn.query(Usage).filter_by(id=10).update({"actual_to": '2014-02-02'})
+        conn.commit()
+
+        self.execBillingApp('sync, loader, runtime, blacklist:1:m')
+        assert(OpenCA.readBlacklistGlobal() == '74952006666')
+        self.stopOpenCA()
 
 
 

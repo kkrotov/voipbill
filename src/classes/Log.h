@@ -14,5 +14,7 @@ public:
     static void debug(const string &text);
 
     static void exception(Exception &e);
+
+    static void flush();
 };
 

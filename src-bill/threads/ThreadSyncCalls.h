@@ -17,4 +17,5 @@ class ThreadSyncCalls : public Thread {
     void htmlfull(stringstream &html);
 public:
     ThreadSyncCalls();
+    static const char* idName() { return "sync_calls"; }
 };

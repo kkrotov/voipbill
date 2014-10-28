@@ -20,5 +20,6 @@ protected:
 
 public:
     ThreadTasks();
+    static const char* idName() { return "tasks"; }
 };
 

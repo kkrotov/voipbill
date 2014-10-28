@@ -6,7 +6,7 @@
 #include "ThreadSelectCurrentCalls.h"
 
 ThreadLimitControl::ThreadLimitControl() {
-    id = "limitcontrol";
+    id = idName();
     name = "Limit control";
     db_calls.setCS(app().conf.db_calls);
     calculator.setDb(&db_calls);

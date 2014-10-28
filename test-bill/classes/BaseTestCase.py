@@ -37,6 +37,15 @@ class BaseTestCase(unittest.TestCase):
         if self.bill:
             self.bill.stop()
 
+    def waitBillingApp(self, timeout=300):
+        if self.bill:
+            self.bill.join(timeout)
+
+    def execBillingApp(self, threads):
+        cfg.appbill_threads = threads
+        self.startBillingApp()
+        self.waitBillingApp()
+
     def startOpenCA(self):
         self.openCA = OpenCAEmulator()
         self.openCA.start()

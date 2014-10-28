@@ -43,7 +43,7 @@ void ThreadSelectGlobalCounters::htmlfull(stringstream &html) {
 }
 
 ThreadSelectGlobalCounters::ThreadSelectGlobalCounters() {
-    id = "select_global_counters";
+    id = idName();
     name = "Select Global counters";
     db_main.setCS(app().conf.db_main);
     

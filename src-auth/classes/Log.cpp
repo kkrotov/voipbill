@@ -53,3 +53,7 @@ void Log::exception(Exception &e) {
 
     Log::error(message);
 }
+
+void Log::flush() {
+    app().logger.processLogQueue();
+}

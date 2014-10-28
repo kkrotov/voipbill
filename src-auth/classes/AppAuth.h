@@ -27,6 +27,7 @@ protected:
     mutex configVersionDataMutex;
     void runApp();
     void initLogger();
+    
 };
 
 AppAuth & app();

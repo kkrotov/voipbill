@@ -6,6 +6,7 @@ class OpenCA:
     __currentCalls = {}
     __lockedNumbersLocal = {}
     __lockedNumbersGlobal = {}
+    __lockedTrunk = {}
     __lastSessionId = cfg.openca_lastSessionId
 
     @staticmethod
@@ -24,6 +25,7 @@ class OpenCA:
     @staticmethod
     def killCall(sessionId):
         OpenCA.__currentCalls.pop(sessionId, None)
+        return True
 
     @staticmethod
     def readBlacklistLocal():
@@ -34,17 +36,35 @@ class OpenCA:
         return ','.join(OpenCA.__lockedNumbersGlobal.keys())
 
     @staticmethod
+    def readLockedTrunk():
+        return ','.join(OpenCA.__lockedTrunk.keys())
+
+    @staticmethod
     def lockNumberLocal(number):
         OpenCA.__lockedNumbersLocal[number] = True
+        return True
 
     @staticmethod
     def lockNumberGlobal(number):
         OpenCA.__lockedNumbersGlobal[number] = True
+        return True
+
+    @staticmethod
+    def lockTrunk(number):
+        OpenCA.__lockedTrunk[number] = True
+        return True
 
     @staticmethod
     def unlockNumberLocal(number):
         OpenCA.__lockedNumbersLocal.pop(number, None)
+        return True
 
     @staticmethod
     def unlockNumberGlobal(number):
         OpenCA.__lockedNumbersGlobal.pop(number, None)
+        return True
+
+    @staticmethod
+    def unlockTrunk(number):
+        OpenCA.__lockedTrunk.pop(number, None)
+        return True

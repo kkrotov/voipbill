@@ -3,10 +3,12 @@
 
 #include "../classes/App.h"
 
+ThreadPool::ThreadPool(App * application) : app{application} {
+}
+
 void ThreadPool::run(Thread * thread) {
     thread->onStarted.connect(boost::bind(&ThreadPool::register_thread, this, _1));
     thread->onFinished.connect(boost::bind(&ThreadPool::unregister_thread, this, _1));
-    thread->onStatusChanged.connect(boost::bind(&ThreadPool::thread_status_changed, this, _1));
     thread->onRealStatusChanged.connect(boost::bind(&ThreadPool::thread_real_status_changed, this, _1));
     thread->status = getThreadStatusByAppStatus();
     thread->start();
@@ -35,6 +37,7 @@ void ThreadPool::register_thread(Thread *thread) {
 }
 
 void ThreadPool::unregister_thread(Thread *thread) {
+
     {
         lock_guard<std::mutex> lock(mutex);
 
@@ -52,52 +55,79 @@ void ThreadPool::unregister_thread(Thread *thread) {
     thread_real_status_changed(0);
 }
 
-void ThreadPool::thread_status_changed(Thread *thread) {
+bool ThreadPool::forAllThreads(std::function<bool(Thread*)> callback) {
+    lock_guard<std::mutex> lock(mutex);
 
+    for (auto it : threads) {
+        if (!callback(it)) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+void ThreadPool::joinAll() {
+    for (;;) {
+        Thread * thread = 0;
+        {
+            lock_guard<std::mutex> lock(mutex);
+            if (threads.begin() != threads.end()) {
+                thread = * threads.begin();
+            } else {
+                break;
+            }
+        }
+        thread->task_thread.join();
+    }
 }
 
 void ThreadPool::thread_real_status_changed(Thread *thread) {
-    lock_guard<std::mutex> lock(mutex);
 
-    int count = 0;
-    int initiated = 0;
-    int preparing = 0;
-    int running = 0;
-    int paused = 0;
-    int stopped = 0;
+    AppStatus app_real_status = AppStatus::APP_STARTED;
+    {
+        lock_guard<std::mutex> lock(mutex);
 
-    auto it = threads.begin();
-    while (it != threads.end()) {
-        Thread *th = *it;
-        ThreadStatus thread_real_status = th->getRealStatus();
+        int count = 0;
+        int initiated = 0;
+        int preparing = 0;
+        int running = 0;
+        int paused = 0;
+        int stopped = 0;
 
-        if (thread_real_status <= ThreadStatus::THREAD_WAITING) {
-            initiated++;
-        } else if (thread_real_status == ThreadStatus::THREAD_PREPARING) {
-            preparing++;
-        } else if (thread_real_status == ThreadStatus::THREAD_RUNNING) {
-            running++;
-        } else if (thread_real_status == ThreadStatus::THREAD_PAUSED) {
-            paused++;
-        } else if (thread_real_status == ThreadStatus::THREAD_STOPPED) {
-            stopped++;
+        auto it = threads.begin();
+        while (it != threads.end()) {
+            Thread *th = *it;
+            ThreadStatus thread_real_status = th->getRealStatus();
+
+            if (thread_real_status <= ThreadStatus::THREAD_WAITING) {
+                initiated++;
+            } else if (thread_real_status == ThreadStatus::THREAD_PREPARING) {
+                preparing++;
+            } else if (thread_real_status == ThreadStatus::THREAD_RUNNING) {
+                running++;
+            } else if (thread_real_status == ThreadStatus::THREAD_PAUSED) {
+                paused++;
+            } else if (thread_real_status == ThreadStatus::THREAD_STOPPED) {
+                stopped++;
+            }
+            count++;
+            ++it;
         }
-        count++;
-        ++it;
-    }
 
-    AppStatus app_real_status;
-    if (stopped == count) {
-        app_real_status = AppStatus::APP_STOPPED;
-    } else if (paused == count) {
-        app_real_status = AppStatus::APP_PAUSED;
-    } else if (running == count) {
-        app_real_status = AppStatus::APP_RUNNING;
-    } else if (initiated == count) {
-        app_real_status = AppStatus::APP_INITIALIZING;
-    } else {
-        app_real_status = AppStatus::APP_PREPARING;
+        if (stopped == count) {
+            app_real_status = AppStatus::APP_STOPPED;
+        } else if (paused == count) {
+            app_real_status = AppStatus::APP_PAUSED;
+        } else if (running == count) {
+            app_real_status = AppStatus::APP_RUNNING;
+        } else if (initiated == count) {
+            app_real_status = AppStatus::APP_INITIALIZING;
+        } else {
+            app_real_status = AppStatus::APP_PREPARING;
+        }
     }
+    
     app->setRealStatus(app_real_status);
 }
 
@@ -131,8 +161,4 @@ ThreadStatus ThreadPool::getThreadStatusByAppStatus() {
     } else {
         return ThreadStatus::THREAD_CREATED;
     }
-}
-
-void ThreadPool::setApp(App * app) {
-    this->app = app;
 }

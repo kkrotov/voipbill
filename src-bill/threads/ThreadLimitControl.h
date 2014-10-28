@@ -18,5 +18,6 @@ protected:
 
 public:
     ThreadLimitControl();
+    static const char* idName() { return "limitcontrol"; }
 };
 

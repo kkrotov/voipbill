@@ -136,6 +136,25 @@ typedef struct _ClientCounterObj {
     double sumBalance() {
         return ((int) (sum * 1.18 + 0.5)) / 100.0;
     }
+    
+    void updateVoipDisabledGlobal(bool lock) {
+        updateVoipDisabled(true, lock);
+    }
+    
+    void updateVoipDisabledLocal(bool lock) {
+        updateVoipDisabled(false, lock);
+    }
+    
+private:
+    void updateVoipDisabled(bool global, bool lock) {
+        bool & voipDisabled = global ? disabled_global : disabled_local;
+        
+        if (voipDisabled != lock) {
+            voipDisabled = lock;
+            updated = 1;
+        }
+    }
+
 } ClientCounterObj, *pClientCounterObj;
 
 typedef struct _CallObj {

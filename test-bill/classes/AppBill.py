@@ -26,7 +26,6 @@ class AppBill(threading.Thread):
         self.__process.communicate()
         self.__process = None
 
-
     def __initializeConfig(self):
         configFile = open(self.__configPath, 'w+')
         templateFile = open(cfg.billing_app_config_template, 'r')
