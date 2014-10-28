@@ -194,6 +194,7 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
     ClientObj client = *p_client;
 
     double sum_month, sum_day, sum_balance;
+    double sum_month2, sum_day2, sum_balance2;
     bool client_disabled_global, client_disabled_local;
     {
         lock_guard<mutex> lock(loader->counter_rwlock);
@@ -216,9 +217,9 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
     calculator.calc_current(calls_list);
 
     ClientCounterObj &c2 = calculator.client_counter2->get(client_id);
-    sum_balance = sum_balance + c2.sumBalance();
-    sum_day = sum_day + c2.sumDay();
-    sum_month = sum_month + c2.sumMonth();
+    sum_balance2 = c2.sumBalance();
+    sum_day2 = c2.sumDay();
+    sum_month2 = c2.sumMonth();
     
     double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
     pGlobalCountersObj globalCounter = ThreadSelectGlobalCounters::getList()->find(client_id);
@@ -295,17 +296,17 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
     html << "<br/>\n";
 
     if (client.credit >= 0)
-        html << "Balance avaiable: <b>" << string_fmt("%.2f", client.balance + client.credit - sum_balance_global) << "</b><br/>\n";
+        html << "Balance avaiable: <b>" << string_fmt("%.2f", client.balance + client.credit - sum_balance - sum_balance2 - sum_balance_global) << "</b><br/>\n";
 
     if (client.limit_d != 0)
-        html << "Daily avaiable: <b>" << string_fmt("%.2f", client.limit_d - sum_day - sum_day_global) << "</b><br/>\n";
+        html << "Daily avaiable: <b>" << string_fmt("%.2f", client.limit_d - sum_day - sum_day2 - sum_day_global) << "</b><br/>\n";
 
     if (client.limit_m != 0)
-        html << "Monthly avaiable: <b>" << string_fmt("%.2f", client.limit_m - sum_month - sum_month_global) << "</b><br/>\n";
+        html << "Monthly avaiable: <b>" << string_fmt("%.2f", client.limit_m - sum_month - sum_month2 - sum_month_global) << "</b><br/>\n";
 
     html << "<br/>\n";
 
-    html << "Balance accounts: <b>" << string_fmt("%.2f", client.balance) << "</b><br/>\n";
+    html << "Balance accounts: <b>" << string_fmt("%.2f", client.balance - sum_balance - sum_balance2 - sum_balance_global) << "</b> = " << string_fmt("%.2f", client.balance) << " - " << string_fmt("%.2f", sum_balance) << " - " << string_fmt("%.2f", sum_balance2) << " - " << string_fmt("%.2f", sum_balance_global) << "<br/>\n";
     if (client.limit_d != 0)
         html << "Daily limit: <b>" << client.limit_d << "</b><br/>\n";
     if (client.limit_m != 0)
@@ -321,9 +322,9 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
 
     html << "<br/>\n";
 
-    html << "Sum from account: <b>" << string_fmt("%.2f", sum_balance + sum_balance_global) << "</b> = " << string_fmt("%.2f", sum_balance) << " + " << string_fmt("%.2f", sum_balance_global) << "<br/>\n";
-    html << "Sum Day: <b>" << string_fmt("%.2f", sum_day + sum_day_global) << "</b> = " << string_fmt("%.2f", sum_day) << " + " << string_fmt("%.2f", sum_day_global) << "<br/>\n";
-    html << "Sum Month: <b>" << string_fmt("%.2f", sum_month + sum_month_global) << "</b> = " << string_fmt("%.2f", sum_month) << " + " << string_fmt("%.2f", sum_month_global) << "<br/>\n";
+    html << "Sum from account: <b>" << string_fmt("%.2f", sum_balance + sum_balance2 + sum_balance_global) << "</b> = " << string_fmt("%.2f", sum_balance) << " + " << string_fmt("%.2f", sum_balance2) << " + " << string_fmt("%.2f", sum_balance_global) << "<br/>\n";
+    html << "Sum Day: <b>" << string_fmt("%.2f", sum_day + sum_day2 + sum_day_global) << "</b> = " << string_fmt("%.2f", sum_day) << " + " << string_fmt("%.2f", sum_day2) << " + " << string_fmt("%.2f", sum_day_global) << "<br/>\n";
+    html << "Sum Month: <b>" << string_fmt("%.2f", sum_month + sum_month2 + sum_month_global) << "</b> = " << string_fmt("%.2f", sum_month) << " + " << string_fmt("%.2f", sum_month2) << " + " << string_fmt("%.2f", sum_month_global) << "<br/>\n";
     html << "<br/>\n";
 
 

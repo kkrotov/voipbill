@@ -275,14 +275,16 @@ void CalcFull::updateClientCounters(pCallObj call) {
 
     ClientCounterObj &cc = client_counter2->get(call->client_id);
 
-    if (call->dt.month == cc.amount_month) {
+    if (abs(call->dt.month - cc.amount_month) < 43200) {
+        cc.amount_month = call->dt.month;
         cc.sum_month += call->amount_mcn;
     } else if (call->dt.month > cc.amount_month) {
         cc.amount_month = call->dt.month;
         cc.sum_month = call->amount_mcn;
     }
 
-    if (call->dt.day == cc.amount_day) {
+    if (abs(call->dt.day - cc.amount_day) < 43200) {
+        cc.amount_day = call->dt.day;
         cc.sum_day += call->amount_mcn;
     } else if (call->dt.day > cc.amount_day) {
         cc.amount_day = call->dt.day;

@@ -118,7 +118,7 @@ typedef struct _ClientCounterObj {
     unsigned char updated;
 
     double sumDay() {
-        if (amount_day == get_tday()) {
+        if (abs(amount_day - get_tday()) < 43200) {
             return ((int) (sum_day * 1.18 + 0.5)) / 100.0;
         } else {
             return 0;
@@ -126,7 +126,7 @@ typedef struct _ClientCounterObj {
     }
 
     double sumMonth() {
-        if (amount_month == get_tmonth()) {
+        if (abs(amount_month - get_tmonth()) < 43200) {
             return ((int) (sum_month * 1.18 + 0.5)) / 100.0;
         } else {
             return 0;

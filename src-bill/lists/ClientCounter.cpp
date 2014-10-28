@@ -32,18 +32,20 @@ void ClientCounter::append(ClientCounter *newcl) {
 
         ClientCounterObj &value = counter[key];
 
-        if (value.amount_month < add_value.amount_month) {
+        if (abs(value.amount_month - add_value.amount_month) < 43200) {
+            value.amount_month = add_value.amount_month;
+            value.sum_month += add_value.sum_month;
+        } else if (value.amount_month < add_value.amount_month) {
             value.amount_month = add_value.amount_month;
             value.sum_month = add_value.sum_month;
-        } else if (value.amount_month == add_value.amount_month) {
-            value.sum_month += add_value.sum_month;
         }
 
-        if (value.amount_day < add_value.amount_day) {
+        if (abs(value.amount_day - add_value.amount_day) < 43200) {
+            value.amount_day = add_value.amount_day;
+            value.sum_day += add_value.sum_day;
+        } else if (value.amount_day < add_value.amount_day) {
             value.amount_day = add_value.amount_day;
             value.sum_day = add_value.sum_day;
-        } else if (value.amount_day == add_value.amount_day) {
-            value.sum_day += add_value.sum_day;
         }
 
         value.sum += add_value.sum;
