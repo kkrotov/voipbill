@@ -53,7 +53,7 @@ void BlackList::unlock(long long int phone) {
 bool BlackList::fetch() {
     vector<string> curr_list;
     if (udp_blacklist(curr_list) == false) {
-        Log::error("Can not fetch black list from opanca");
+        //Log::error("Can not fetch black list from opanca");
         return false;
     }
 

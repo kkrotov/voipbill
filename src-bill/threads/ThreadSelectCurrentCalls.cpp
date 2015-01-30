@@ -32,7 +32,10 @@ void ThreadSelectCurrentCalls::htmlfull(stringstream &html) {
 
     shared_ptr<CurrentCallsObjList> callsList = ThreadSelectCurrentCalls::getList();
 
+    BDb db_main;
+    db_main.setCS(app().conf.db_main);
     CalcFull calculator;
+    calculator.setDb(&db_main);
     calculator.calc_current(callsList.get());
 
     html << "Time loop: <b>" << this->t.sloop() << "</b><br/>\n";
