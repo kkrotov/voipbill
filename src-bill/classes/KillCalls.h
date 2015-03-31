@@ -49,8 +49,7 @@ public:
                 else
                     reason = "Reason" + lexical_cast<string>(call->kill_call_reason);
 
-
-                Log::notice("KILL " + string(call->id) + " / " + string(call->usage_num) + " / " + string(call->phone_num) + " / " + reason);
+                Log::notice("KILLED " + string(call->id) + " / " + string(call->usage_num) + " / " + string(call->phone_num) + " / " + reason);
             }
         }
 
