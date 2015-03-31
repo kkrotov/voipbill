@@ -83,7 +83,7 @@ string UdpMessageProcessor::analyzeCall() {
         return "low_balance";
     } else if (
             call.kill_call_reason == KILL_REASON_VOIP_DISABLED
-            || call.kill_call_reason == KILL_REASON_DAYLY_LIMIT
+            || call.kill_call_reason == KILL_REASON_DAILY_LIMIT
             || call.kill_call_reason == KILL_REASON_MONTHLY_LIMIT
             ) {
         return "voip_disabled";

@@ -102,7 +102,8 @@ static bool needLockLocal(pClientObj client, ClientCounterObj &cc, pGlobalCounte
         double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0);
         int usedFreeSeconds = counters_fmin->get(usage->id, 1);
 
-        if ((client->credit >= 0 && client->balance + client->credit - spentBalanceSum < 0) &&
+        
+        if (client->isConsumedCreditLimit(spentBalanceSum) &&
             (client->last_payed_month < get_tmonth() || usedFreeSeconds >= usage->free_seconds)
         ) {
             return true;
@@ -118,10 +119,10 @@ static bool needLockGlobal(pClientObj client, ClientCounterObj &cc, pGlobalCount
         double spentDaySum = cc.sumDay() + (globalCounter ? globalCounter->sumDay() : 0);
         double spentMonthSum = cc.sumMonth() + (globalCounter ? globalCounter->sumMonth() : 0);
         
-        if ((client->credit >= 0 && client->balance + client->credit - spentBalanceSum < 0) ||
-                (client->limit_d != 0 && client->limit_d - spentDaySum < 0) ||
-                (client->limit_m != 0 && client->limit_m - spentMonthSum < 0) ||
-                (client->disabled)
+        if (client->isConsumedCreditLimit(spentBalanceSum) ||
+                client->isConsumedDailyLimit(spentDaySum) ||
+                client->isConsumedMonthlyLimit(spentMonthSum) ||
+                client->disabled
                 ) {
             return true;
         }

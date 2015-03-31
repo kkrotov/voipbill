@@ -7,7 +7,7 @@
 #define KILL_REASON_UNKNOWN_MCN_PRICE   1030
 #define KILL_REASON_VOIP_DISABLED       2000
 #define KILL_REASON_CREDIT_LIMIT        3000
-#define KILL_REASON_DAYLY_LIMIT         3010
+#define KILL_REASON_DAILY_LIMIT         3010
 #define KILL_REASON_MONTHLY_LIMIT       3020
 
 typedef struct _DestObj {
@@ -85,6 +85,30 @@ typedef struct _ClientObj {
     bool disabled;
     time_t amount_date;
     time_t last_payed_month;
+    
+    bool hasCreditLimit() {
+        return credit >= 0;
+    }
+    
+    bool hasDailyLimit() {
+        return limit_d != 0;
+    }
+    
+    bool hasMonthlyLimit() {
+        return limit_m != 0;
+    }
+
+    bool isConsumedCreditLimit(double value) {
+        return hasCreditLimit() && (balance + credit - value < 0);
+    }
+    
+    bool isConsumedDailyLimit(double value) {
+        return hasDailyLimit() && (limit_d - value < 0);
+    }
+    
+    bool isConsumedMonthlyLimit(double value) {
+        return hasMonthlyLimit() && (limit_m - value < 0);
+    }
 } ClientObj, *pClientObj;
 
 typedef struct _GlobalCountersObj {

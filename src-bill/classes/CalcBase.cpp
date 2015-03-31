@@ -120,23 +120,32 @@ void CalcBase::calc_process_call(pCallObj call) {
     ClientCounterObj &c0 = data.counter_client->get(call->client_id);
     ClientCounterObj &c2 = client_counter2->get(call->client_id);
 
-    double spentBalanceSum = c0.sumBalance() + c2.sumBalance();
-    double spentDaySum = c0.sumDay() + c2.sumDay();
-    double spentMonthSum = c0.sumMonth() + c2.sumMonth();
+
 
     pGlobalCountersObj globalCounter =
             ThreadSelectGlobalCounters::getList()->find(call->client_id);
 
+    double globalBalanceSum = 0, globalDaySum = 0, globalMonthSum = 0;
     if (globalCounter) {
-        spentBalanceSum += globalCounter->sumBalance();
-        spentDaySum += globalCounter->sumDay();
-        spentMonthSum += globalCounter->sumMonth();
+        globalBalanceSum = globalCounter->sumBalance();
+        globalDaySum = globalCounter->sumDay();
+        globalMonthSum = globalCounter->sumMonth();
     }
 
+    double spentBalanceSum = c0.sumBalance() + c2.sumBalance() + globalBalanceSum;
+    double spentDaySum = c0.sumDay() + c2.sumDay() + globalDaySum;
+    double spentMonthSum = c0.sumMonth() + c2.sumMonth() + globalMonthSum;
+
     if (call->isLocal()) {
-        if (client->credit >= 0 && client->balance + client->credit - spentBalanceSum < 0
+        if (client->isConsumedCreditLimit(spentBalanceSum)
                 && client->last_payed_month < get_tmonth()) {
             call->kill_call_reason = KILL_REASON_CREDIT_LIMIT;
+            
+            Log::notice(
+                "KILL Reason " + string(call->usage_num) + " / " + string(call->phone_num) + " : Credit limit: Avaiable: <b>" + string_fmt("%.2f", client->balance + client->credit - c0.sumBalance() - c2.sumBalance() - globalBalanceSum) + "</b> = " +
+                string_fmt("%.2f", client->balance) + " (balance) + " + string_fmt("%.2f", client->credit) + " (credit) - " + string_fmt("%.2f", c0.sumBalance()) + " (local) - " + string_fmt("%.2f", c2.sumBalance()) + " (current) - " + string_fmt("%.2f", globalBalanceSum) + " (global) <br/>\n"
+            );
+
             return;
         }
     } else {
@@ -145,16 +154,34 @@ void CalcBase::calc_process_call(pCallObj call) {
             return;
         }
 
-        if (client->credit >= 0 && client->balance + client->credit - spentBalanceSum < 0) {
+        if (client->isConsumedCreditLimit(spentBalanceSum)) {
             call->kill_call_reason = KILL_REASON_CREDIT_LIMIT;
+            
+            Log::notice(
+                "KILL Reason " + string(call->usage_num) + " / " + string(call->phone_num) + " : Credit limit: Avaiable: <b>" + string_fmt("%.2f", client->balance + client->credit - c0.sumBalance() - c2.sumBalance() - globalBalanceSum) + "</b> = " +
+                string_fmt("%.2f", client->balance) + " (balance) + " + string_fmt("%.2f", client->credit) + " (credit) - " + string_fmt("%.2f", c0.sumBalance()) + " (local) - " + string_fmt("%.2f", c2.sumBalance()) + " (current) - " + string_fmt("%.2f", globalBalanceSum) + " (global) <br/>\n"
+            );
+
             return;
         }
-        if (client->limit_d != 0 && client->limit_d - spentDaySum < 0) {
-            call->kill_call_reason = KILL_REASON_DAYLY_LIMIT;
+        if (client->isConsumedDailyLimit(spentDaySum)) {
+            call->kill_call_reason = KILL_REASON_DAILY_LIMIT;
+
+            Log::notice(
+                "KILL Reason " + string(call->usage_num) + " / " + string(call->phone_num) + " : Daily limit: Avaiable: <b>" + string_fmt("%.2f", client->limit_d - c0.sumDay() - c2.sumDay() - globalDaySum) + "</b> = " +
+                string_fmt("%.2f", client->limit_d) + " (limit_d) - " + string_fmt("%.2f", c0.sumDay()) + " (local) - " + string_fmt("%.2f", c2.sumDay()) + " (current) - " + string_fmt("%.2f", globalDaySum) + " (global) <br/>\n"
+            );
+
             return;
         }
-        if (client->limit_m != 0 && client->limit_m - spentMonthSum < 0) {
+        if (client->isConsumedMonthlyLimit(spentMonthSum)) {           
             call->kill_call_reason = KILL_REASON_MONTHLY_LIMIT;
+            
+            Log::notice(
+                "KILL Reason " + string(call->usage_num) + " / " + string(call->phone_num) + " : Monthly limit: Avaiable: <b>" + string_fmt("%.2f", client->limit_m - c0.sumMonth() - c2.sumMonth() - globalMonthSum) + "</b> = " +
+                string_fmt("%.2f", client->limit_m) + " (limit_m) - " + string_fmt("%.2f", c0.sumMonth()) + " (local) - " + string_fmt("%.2f", c2.sumMonth()) + " (current) - " + string_fmt("%.2f", globalMonthSum) + " (global) <br/>\n"
+            );
+
             return;
         }
     }

@@ -42,7 +42,7 @@ public:
                     reason = "Void disabled";
                 else if (call->kill_call_reason == KILL_REASON_CREDIT_LIMIT)
                     reason = "Credit limit";
-                else if (call->kill_call_reason == KILL_REASON_DAYLY_LIMIT)
+                else if (call->kill_call_reason == KILL_REASON_DAILY_LIMIT)
                     reason = "Daily limit";
                 else if (call->kill_call_reason == KILL_REASON_MONTHLY_LIMIT)
                     reason = "Monthly limit";

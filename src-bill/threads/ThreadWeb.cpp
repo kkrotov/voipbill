@@ -295,26 +295,27 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
 
     html << "<br/>\n";
 
-    if (client.credit >= 0)
-        html << "Balance avaiable: <b>" << string_fmt("%.2f", client.balance + client.credit - sum_balance - sum_balance2 - sum_balance_global) << "</b><br/>\n";
+    if (client.hasCreditLimit()) {
+        html << "Balance avaiable: <b>" << string_fmt("%.2f", client.balance + client.credit - sum_balance - sum_balance2 - sum_balance_global) << "</b> = ";
+        html << string_fmt("%.2f", client.balance) << " (balance) + " << string_fmt("%.2f", client.credit) << " (credit) - " << string_fmt("%.2f", sum_balance) << " (local) - " << string_fmt("%.2f", sum_balance2) << " (current) - " << string_fmt("%.2f", sum_balance_global) << " (global) <br/>\n";
+    }
 
-    if (client.limit_d != 0)
-        html << "Daily avaiable: <b>" << string_fmt("%.2f", client.limit_d - sum_day - sum_day2 - sum_day_global) << "</b><br/>\n";
+    if (client.hasDailyLimit()) {
+        html << "Daily avaiable: <b>" << string_fmt("%.2f", client.limit_d - sum_day - sum_day2 - sum_day_global) << "</b> = ";
+        html << string_fmt("%.2f", client.limit_d) << " (limit_d) - " << string_fmt("%.2f", sum_day) << " (local) - " << string_fmt("%.2f", sum_day2) << " (current) - " << string_fmt("%.2f", sum_day_global) << " (global) <br/>\n";
+    }
 
-    if (client.limit_m != 0)
-        html << "Monthly avaiable: <b>" << string_fmt("%.2f", client.limit_m - sum_month - sum_month2 - sum_month_global) << "</b><br/>\n";
+    if (client.hasMonthlyLimit()) {
+        html << "Monthly avaiable: <b>" << string_fmt("%.2f", client.limit_m - sum_month - sum_month2 - sum_month_global) << "</b> = ";
+        html << string_fmt("%.2f", client.limit_m) << " (limit_m) - " << string_fmt("%.2f", sum_month) << " (local) - " << string_fmt("%.2f", sum_month2) << " (current) - " << string_fmt("%.2f", sum_month_global) << " (global) <br/>\n";
+    }
 
     html << "<br/>\n";
 
-    html << "Balance accounts: <b>" << string_fmt("%.2f", client.balance - sum_balance - sum_balance2 - sum_balance_global) << "</b> = " << string_fmt("%.2f", client.balance) << " - " << string_fmt("%.2f", sum_balance) << " - " << string_fmt("%.2f", sum_balance2) << " - " << string_fmt("%.2f", sum_balance_global) << "<br/>\n";
-    if (client.limit_d != 0)
-        html << "Daily limit: <b>" << client.limit_d << "</b><br/>\n";
-    if (client.limit_m != 0)
-        html << "Monthly limit: <b>" << client.limit_m << "</b><br/>\n";
-    if (client.credit >= 0)
-        html << "Credit limit: <b>" << client.credit << "</b><br/>\n";
-    if (client.disabled)
+    if (client.disabled) {
         html << "Voip disabled: <b>" << "true" << "</b><br/>\n";
+    }
+
     html << "<br/>\n";
 
     html << "Last account date: <b>" << string_time(client.amount_date) << "</b><br/>\n";
@@ -322,9 +323,9 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
 
     html << "<br/>\n";
 
-    html << "Sum from account: <b>" << string_fmt("%.2f", sum_balance + sum_balance2 + sum_balance_global) << "</b> = " << string_fmt("%.2f", sum_balance) << " + " << string_fmt("%.2f", sum_balance2) << " + " << string_fmt("%.2f", sum_balance_global) << "<br/>\n";
-    html << "Sum Day: <b>" << string_fmt("%.2f", sum_day + sum_day2 + sum_day_global) << "</b> = " << string_fmt("%.2f", sum_day) << " + " << string_fmt("%.2f", sum_day2) << " + " << string_fmt("%.2f", sum_day_global) << "<br/>\n";
-    html << "Sum Month: <b>" << string_fmt("%.2f", sum_month + sum_month2 + sum_month_global) << "</b> = " << string_fmt("%.2f", sum_month) << " + " << string_fmt("%.2f", sum_month2) << " + " << string_fmt("%.2f", sum_month_global) << "<br/>\n";
+    html << "Sum from account: <b>" << string_fmt("%.2f", sum_balance + sum_balance2 + sum_balance_global) << "</b> = " << string_fmt("%.2f", sum_balance) << " (local) + " << string_fmt("%.2f", sum_balance2) << " (current) + " << string_fmt("%.2f", sum_balance_global) << " (global) <br/>\n";
+    html << "Sum Day: <b>" << string_fmt("%.2f", sum_day + sum_day2 + sum_day_global) << "</b> = " << string_fmt("%.2f", sum_day) << " (local) + " << string_fmt("%.2f", sum_day2) << " (current) + " << string_fmt("%.2f", sum_day_global) << " (global) <br/>\n";
+    html << "Sum Month: <b>" << string_fmt("%.2f", sum_month + sum_month2 + sum_month_global) << "</b> = " << string_fmt("%.2f", sum_month) << " (local) + " << string_fmt("%.2f", sum_month2) << " (current) + " << string_fmt("%.2f", sum_month_global) << " (global) <br/>\n";
     html << "<br/>\n";
 
 
