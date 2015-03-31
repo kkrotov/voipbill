@@ -100,7 +100,7 @@ void CalcBase::calc_process_call(pCallObj call) {
         return;
 
     // clients-operators or this region
-    if (call->usage_id == 0 && (call->instance_id >= 100 || call->instance_id == app().conf.instance_id)) {
+    if (call->usage_id == 0 && (call->instance_id >= 200 || call->instance_id == app().conf.instance_id)) {
         call->kill_call_reason = KILL_REASON_UNKNOWN_NUMBER;
         return;
     }

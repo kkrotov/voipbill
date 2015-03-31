@@ -46,11 +46,11 @@ bool _CallObj::isSNG() {
 }
 
 bool _CallObj::isTrank() {
-    return instance_id >= 100;
+    return instance_id >= 200;
 }
 
 bool _CallObj::isCallFromAnotherInstance() {
     return instance_id >= 80
-            && instance_id < 100
+            && instance_id < 200
             && instance_id != app().conf.instance_id;
 }

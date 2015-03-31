@@ -301,7 +301,7 @@ void CalcFull::updateClientCounters(pCallObj call) {
 
 bool CalcFull::isCallFromAnotherInstance(pCallObj call) {
     return call->instance_id >= 80
-            && call->instance_id < 100
+            && call->instance_id < 200
             && call->instance_id != app().conf.instance_id;
 }
 
