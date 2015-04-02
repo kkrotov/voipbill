@@ -39,6 +39,7 @@ void ThreadUdpServer::run() {
         auto processor = new UdpMessageProcessor(recv_buf.data());
         string response = processor->process();
 
+        Log::debug("RESPONSE: " + response);
 
 
         boost::system::error_code ignored_error;

@@ -297,7 +297,7 @@ bool UdpMessageProcessor::filterByNumber(const int numberId, string strNumber) {
 }
 
 bool UdpMessageProcessor::needSwapCallingAndRedirectionNumber() {
-    return isLocalTrunk() && prefix.substr(2, 1) == "1";
+    return isLocalTrunk() && prefix != "" && prefix.substr(2, 1) == "1";
 }
 
 bool UdpMessageProcessor::isLocalTrunk() {
