@@ -90,7 +90,6 @@ void ThreadWeb::handlerConfig(stringstream &html) {
     html << "udp.port: " << app().conf.openca_udp_port << "<br/>\n";
     html << "<br/>\n";
     html << "billing.free_seconds: " << app().conf.billing_free_seconds << "<br/>\n";
-    html << "billing.dc_break: " << app().conf.billing_dc_break << "<br/>\n";
     html << "billing.global_counters_select_interval: " << app().conf.global_counters_select_interval << "<br/>\n";
 }
 

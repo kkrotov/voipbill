@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 2.8.4)
+cmake_minimum_required(VERSION 2.8)
 project(voip)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-include_directories(libs libs/boost libs/gtest/include /usr/include/postgresql)
-link_directories(/usr/pgsql-9.1/lib)
+include_directories(/usr/include/postgresql)
+link_directories(/usr/pgsql-9.4/lib)
 
 set(COMMON_SOURCES
     src/common.cpp
@@ -29,30 +29,21 @@ set(COMMON_SOURCES
     src/http/reply.cpp
     src/http/request_parser.cpp
     src/http/server.cpp
-    src/tests/Test.cpp
-    src/tests/TestLibs.cpp
 
-    libs/boost/libs/system/src/error_code.cpp
-    libs/boost/libs/program_options/src/cmdline.cpp
-    libs/boost/libs/program_options/src/config_file.cpp
-    libs/boost/libs/program_options/src/convert.cpp
-    libs/boost/libs/program_options/src/options_description.cpp
-    libs/boost/libs/program_options/src/parsers.cpp
-    libs/boost/libs/program_options/src/positional_options.cpp
-    libs/boost/libs/program_options/src/split.cpp
-    libs/boost/libs/program_options/src/utf8_codecvt_facet.cpp
-    libs/boost/libs/program_options/src/value_semantic.cpp
-    libs/boost/libs/program_options/src/variables_map.cpp
-    libs/boost/libs/program_options/src/winmain.cpp
-    libs/boost/libs/thread/src/pthread/once_atomic.cpp
-    libs/boost/libs/thread/src/pthread/thread.cpp
-    libs/gtest/src/gtest-death-test.cc
-    libs/gtest/src/gtest-filepath.cc
-    libs/gtest/src/gtest-port.cc
-    libs/gtest/src/gtest-printers.cc
-    libs/gtest/src/gtest-test-part.cc
-    libs/gtest/src/gtest-typed-test.cc
-    libs/gtest/src/gtest.cc
+    libs/boost/system/src/error_code.cpp
+    libs/boost/program_options/src/cmdline.cpp
+    libs/boost/program_options/src/config_file.cpp
+    libs/boost/program_options/src/convert.cpp
+    libs/boost/program_options/src/options_description.cpp
+    libs/boost/program_options/src/parsers.cpp
+    libs/boost/program_options/src/positional_options.cpp
+    libs/boost/program_options/src/split.cpp
+    libs/boost/program_options/src/utf8_codecvt_facet.cpp
+    libs/boost/program_options/src/value_semantic.cpp
+    libs/boost/program_options/src/variables_map.cpp
+    libs/boost/program_options/src/winmain.cpp
+    libs/boost/thread/src/pthread/once_atomic.cpp
+    libs/boost/thread/src/pthread/thread.cpp
 )
 
 set(AUTH_SOURCES
@@ -108,11 +99,10 @@ set(BILL_SOURCES
     src-bill/lists/OperatorList.cpp
     src-bill/lists/PricelistList.cpp
     src-bill/lists/PriceObjList.cpp
-    src-bill/lists/RuntimeCallsObjList.cpp
+    src-bill/lists/CdrObjList.cpp
     src-bill/lists/UsageObjList.cpp
     src-bill/models/obj.cpp
     src-bill/tasks/TaskRecalc.cpp
-    src-bill/tests/TestLoader.cpp
     src-bill/threads/ThreadBillRuntime.cpp
     src-bill/threads/ThreadBlacklist.cpp
     src-bill/threads/ThreadCheckStartTable.cpp
@@ -134,5 +124,5 @@ set(BILL_SOURCES
 add_executable(app_auth ${COMMON_SOURCES} ${AUTH_SOURCES})
 target_link_libraries(app_auth stdc++ rt pthread pq)
 
-add_executable(app_bill ${COMMON_SOURCES} ${BILL_SOURCES})
+add_executable(app_bill ${COMMON_SOURCES} ${BILL_SOURCES} src-bill/classes/CallsList.h src-bill/classes/CallsList.cpp)
 target_link_libraries(app_bill stdc++ rt pthread pq)

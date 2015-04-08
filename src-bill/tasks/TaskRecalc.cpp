@@ -18,7 +18,6 @@ void TaskRecalc::run() {
 
     setStatus("1. getting min id");
 
-    BDb db_rad(app().conf.db_rad);
     BDb db_calls(app().conf.db_calls);
     BDbResult res = db_calls.query("select min(id) from calls.calls where time>='" + string_time(date_from) + "'");
 
@@ -61,32 +60,32 @@ void TaskRecalc::run() {
     while (true) {
 
 
-        if (calls_list.loaddata(&db_rad)) {
+        if (cdr_list.loaddata(&db_calls)) {
 
             {
                 TimerScope ts1(t_calc);
 
-                calculator.calc(&calls_list);
+//                calculator.calc(&cdr_list);
             }
 
             {
                 TimerScope ts2(t_save);
 
-                sv.save(&calls_list);
+//                sv.save(&cdr_list);
 
-                calculator.save();
+//                calculator.save();
             }
 
-            calc_calls_loop = calls_list.count;
-            calc_calls_full = calc_calls_full + calls_list.count;
+            calc_calls_loop = cdr_list.count;
+            calc_calls_full = calc_calls_full + cdr_list.count;
 
-            calls_list.next();
+            cdr_list.next();
 
             boost::this_thread::interruption_point();
 
             setStatus("5. calc " + lexical_cast<string>(calc_calls_full) + " " + string_time(calculator.last_call_time));
 
-            if (calls_list.count >= calls_list.nrows) continue;
+            if (cdr_list.count >= cdr_list.nrows) continue;
         }
 
         break;

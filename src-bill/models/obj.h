@@ -181,43 +181,61 @@ private:
 
 } ClientCounterObj, *pClientCounterObj;
 
-typedef struct _CallObj {
+typedef struct _CdrObj {
     char id[20];
-    char time[28];
-    bool out;
 
-    char usage_num[20];
-    char phone_num[20];
-    char redirect_num[20];
+    char connect_time[28];
+    int session_time;
+    
+    char src_number[20];
+    char dst_number[20];
+    char redirect_number[20];
 
-    char prefix_geo[20];
-    char prefix_mcn[20];
-    char prefix_op[20];
+    char src_route[33];
+    char dst_route[33];
+
+    short src_noa;
+    short dst_noa;
 
     long long int id_num;
 
-    bool mob;
-    int dest;
-    int usage_id;
-    int client_id;
-    int instance_id;
-    int len;
-    int len_mcn;
-    int len_op;
-    int price_mcn; // x4
-    int price_op; // x4
-    int amount_mcn; // x2
-    int amount_op; // x2
-    int pricelist_mcn_id;
-    int pricelist_op_id;
-    int operator_id;
-    int freemin_group_id;
+    DT dt;
+    void make_dt();
+} CdrObj, *pCdrObj;
+
+typedef struct _CallObj {
+    char id[20];
+    char cdr_id[20];
+    char call_time[28];
+    char call_origin[10];
+
+    int client_account_id;
+    int service_id;
+
+    char src_number[33];
+    char dst_number[33];
+    char redirect_number[33];
+
+    int billed_time;
+    double rate;
+    double cost;
+    double tax_cost;
+
+    int service_package_id;
+    int service_package_limit_id;
+    int package_time;
+    double package_credit;
+
+    int pricelist_id;
+    char prefix[20];
+
+    int destination_id;
     int geo_id;
-    int geo_operator_id;
 
     int kill_call_reason;
 
     DT dt;
+    void init(CdrObj * cdr);
     void make_dt();
     bool isLocal();
     bool isLocalOrZona();

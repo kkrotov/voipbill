@@ -1,8 +1,0 @@
-Create boost folder: http://sourceforge.net/projects/boost/files/latest/download?source=files
-
-Create gtest folder: https://code.google.com/p/googletest/downloads/detail?name=gtest-1.6.0.zip&can=2&q=
-
-Create symlink named 'libstdc++.a' to the Tool Collection's libstdc++.a
-  (ex. /usr/lib/gcc/x86_64-redhat-linux/4.8.2/libstdc++.a
-    or /opt/rh/devtoolset-2/root/usr/lib/gcc/x86_64-redhat-linux/4.8.2/libstdc++.a
-  )

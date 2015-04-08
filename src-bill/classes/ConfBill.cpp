@@ -48,7 +48,6 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     openca_sync_blacklist_interval_min = pt.get<unsigned short>("udp.openca_sync_blacklist_interval_min", 10);
     openca_sync_blacklist_interval_max = pt.get<unsigned short>("udp.openca_sync_blacklist_interval_max", 3600);
 
-    billing_dc_break = pt.get<unsigned short>("billing.dc_break", 126);
     billing_free_seconds = pt.get<unsigned short>("billing.free_seconds", 5);
 
     global_counters_select_interval = pt.get<unsigned short>("billing.global_counters_select_interval", 10);

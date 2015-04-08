@@ -5,7 +5,6 @@
 class CalcFull : public CalcBase {
 protected:
     void calc_item(pCallObj call);
-    void cleanupCalculatedFields(pCallObj call);
     pUsageObj spawnUsageVoip(pCallObj call);
     int getCallLength(int len, bool byMinutes, bool fullFirstMinute, bool freeFirstMinutes);
     void calculateOperator(pCallObj call);

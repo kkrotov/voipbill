@@ -3,7 +3,7 @@
 
 void CalcFull::calc_item(pCallObj call) {
 
-    cleanupCalculatedFields(call);
+    call->len_mcn = call->len_op = call->len;
 
     pDestObj dest = data.dest->find(call->phone_num);
 
@@ -13,6 +13,8 @@ void CalcFull::calc_item(pCallObj call) {
         call->geo_id = dest->geo_id;
         call->geo_operator_id = dest->geo_operator_id;
         strcpy(call->prefix_geo, dest->prefix);
+    } else {
+        call->dest = 2;
     }
 
     calculateOperator(call);
@@ -20,33 +22,6 @@ void CalcFull::calc_item(pCallObj call) {
     if (call->isCallFromAnotherInstance()) return;
 
     calculateMcn(call);
-}
-
-void CalcFull::cleanupCalculatedFields(pCallObj call) {
-    call->usage_id = 0;
-    call->client_id = 0;
-
-    call->price_mcn = 0;
-    call->price_op = 0;
-
-    call->amount_mcn = 0;
-    call->amount_op = 0;
-
-    call->freemin_group_id = 0;
-
-    call->pricelist_mcn_id = 0;
-    call->pricelist_op_id = 0;
-
-    call->prefix_geo[0] = 0;
-    call->prefix_mcn[0] = 0;
-    call->prefix_op[0] = 0;
-
-    call->mob = false;
-    call->dest = 2;
-    call->geo_id = 0;
-    call->geo_operator_id = 0;
-
-    call->len_mcn = call->len_op = call->len;
 }
 
 void CalcFull::calculateOperator(pCallObj call) {

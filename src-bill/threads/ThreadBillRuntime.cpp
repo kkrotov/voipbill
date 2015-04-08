@@ -1,6 +1,6 @@
 #include "ThreadBillRuntime.h"
 #include "../classes/AppBill.h"
-#include "../lists/RuntimeCallsObjList.h"
+#include "../lists/CdrObjList.h"
 
 bool ThreadBillRuntime::need_refresh_current_id = false;
 
@@ -12,7 +12,6 @@ ThreadBillRuntime::ThreadBillRuntime() {
     calc_calls_loop = 0;
 
 
-    db_rad.setCS(app().conf.db_rad);
     db_calls.setCS(app().conf.db_calls);
     db_calls.needAdvisoryLock(app().conf.instance_id);
     calls_saver.setDb(&db_calls);
@@ -32,20 +31,20 @@ void ThreadBillRuntime::run() {
 repeat:
 
     if (need_refresh_current_id) {
-        calls_list.refresh_current_id();
+        cdr_list.refresh_current_id();
         need_refresh_current_id = false;
     }
 
     TimerScope ts1(t);
 
-    if (calls_list.loaddata(&db_rad)) {
+    if (cdr_list.loaddata(&db_calls)) {
 
         boost::this_thread::interruption_point();
 
         {
             TimerScope ts2(t_calc);
 
-            calculator.calc(&calls_list);
+//            calculator.calc(&calls_list);
         }
 
         boost::this_thread::interruption_point();
@@ -53,18 +52,18 @@ repeat:
         {
             TimerScope ts3(t_save);
 
-            calls_saver.save(&calls_list);
+//            calls_saver.save(&calls_list);
             calculator.save();
         }
 
         boost::this_thread::interruption_point();
 
-        calc_calls_loop = calls_list.count;
-        calc_calls_full = calc_calls_full + calls_list.count;
+        calc_calls_loop = cdr_list.count;
+        calc_calls_full = calc_calls_full + cdr_list.count;
 
-        calls_list.next();
+        cdr_list.next();
 
-        if (calls_list.count >= calls_list.nrows)
+        if (cdr_list.count >= cdr_list.nrows)
             goto repeat;
 
     } else {
@@ -77,7 +76,7 @@ repeat:
 void ThreadBillRuntime::htmlfull(stringstream &html) {
     this->html(html);
 
-    html << "radacctid><b>" << calls_list.last_id << "</b> and disconnectcause != <b>" << app().conf.billing_dc_break << "</b><br/>\n";
+    html << "radacctid><b>" << cdr_list.last_id << "</b><br/>\n";
     html << "<br/>\n";
 
     html << "Time calc: <b>" << t_calc.sloop() << "</b><br/>\n";

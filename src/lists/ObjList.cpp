@@ -46,6 +46,7 @@ void ObjList::load(BDb * db, time_t dt) {
     }
     if (count > 0) {
         data = malloc(loadsize);
+        memset(data, 0, loadsize);
 
         void * pdata = data;
         while (res.next()) {

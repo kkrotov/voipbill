@@ -1,8 +1,19 @@
 #include "obj.h"
 #include "../classes/AppBill.h"
 
+void _CdrObj::make_dt() {
+    parseDateTime((char*) &connect_time, dt);
+}
+
 void _CallObj::make_dt() {
     parseDateTime((char*) &time, dt);
+}
+
+void _CallObj::init(CdrObj * cdr) {
+    strcpy(cdr_id, cdr->id);
+    strcpy(src_number, cdr->src_number);
+    strcpy(dst_number, cdr->dst_number);
+    strcpy(redirect_number, cdr->redirect_number);
 }
 
 bool _CallObj::isLocal() {

@@ -23,7 +23,6 @@ public:
     unsigned short openca_sync_blacklist_interval_min;
     unsigned short openca_sync_blacklist_interval_max;
 
-    unsigned short billing_dc_break;
     unsigned short billing_free_seconds;
     
     unsigned short global_counters_select_interval;
