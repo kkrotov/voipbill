@@ -10,7 +10,6 @@ class Timer {
     unsigned long long full_time;
 
     timespec ts_start;
-    timespec ts_stop;
 
     bool started;
 
@@ -34,21 +33,29 @@ public:
     void stop() {
         if (!started) return;
 
-        clock_gettime(CLOCK_MONOTONIC, &ts_stop);
-
-        this->time = (ts_stop.tv_sec * 1e9 + ts_stop.tv_nsec) - (ts_start.tv_sec * 1e9 + ts_start.tv_nsec);
+        this->time = current();
         this->full_time += this->time;
         this->count++;
 
         started = false;
     }
 
+    unsigned long long current() {
+        if (started) {
+            timespec ts_current;
+            clock_gettime(CLOCK_MONOTONIC, &ts_current);
+            return (ts_current.tv_sec * 1e9 + ts_current.tv_nsec) - (ts_start.tv_sec * 1e9 + ts_start.tv_nsec);
+        } else {
+            return 0;
+        }
+    }
+
     double tloop() {
-        return this->time / 1.0e9;
+        return (this->time + current()) / 1.0e9;
     }
 
     double tfull() {
-        return this->full_time / 1.0e9;
+        return (this->full_time + current()) / 1.0e9;
     }
 
     string sloop() {

@@ -4,9 +4,11 @@
 #include "../../src/classes/BDb.h"
 #include "../classes/DataLoader.h"
 #include "../../src/classes/Timer.h"
+#include "../data/DataContainer.h"
 
 class ThreadLoader : public Thread {
     DataLoader * loader;
+    DataContainer * data;
     BDb db_calls;
     int errors;
 
@@ -18,7 +20,7 @@ class ThreadLoader : public Thread {
 
 public:
 
-    bool do_load_data(BDb *db = 0, DataLoader *loader = 0);
+    bool do_load_data(BDb *db = 0, DataLoader *loader = 0, DataContainer *data = 0);
 
     bool do_load_counters(BDb *db = 0, DataLoader *loader = 0);
 

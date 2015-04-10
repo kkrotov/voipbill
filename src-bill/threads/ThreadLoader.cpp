@@ -29,28 +29,29 @@ bool ThreadLoader::prepare() {
 void ThreadLoader::run() {
 
     string event;
-    ClientObjList * client = 0;
+    ServerList * server = 0;
+    ClientList * client = 0;
     DestObjList * dest = 0;
     OperatorList * oper = 0;
     PricelistList * pricelist = 0;
     UsageObjList * usage = 0;
     PriceObjList * price = 0;
-    NetworkPrefixObjList * network_prefix = 0;
+    NetworkPrefixList * network_prefix = 0;
 
     try {
-        BDbResult res = db_calls.query("SELECT event from billing.events");
+        BDbResult res = db_calls.query("SELECT event from event.queue WHERE app='billing'");
         while (res.next()) {
 
             event = res.get_s(0);
 
             time_t tday = get_tday();
 
-            db_calls.exec("DELETE from billing.events WHERE event='" + event + "'");
+            db_calls.exec("DELETE from event.queue WHERE app='billing' and event='" + event + "'");
 
 
             if (event == "clients") {
 
-                client = new ClientObjList();
+                client = new ClientList();
                 client->load(&db_calls, 0);
 
                 {
@@ -93,7 +94,7 @@ void ThreadLoader::run() {
             } else
                 if (event == "network_prefix") {
 
-                network_prefix = new NetworkPrefixObjList();
+                network_prefix = new NetworkPrefixList();
                 network_prefix->load(&db_calls, tday);
 
             }
@@ -106,7 +107,7 @@ void ThreadLoader::run() {
         errors++;
         if (event.length() > 0) {
             try {
-                db_calls.exec("INSERT INTO billing.events(event)VALUES('" + event + "')");
+                db_calls.exec("INSERT INTO event.queue(app,event)VALUES('billing','" + event + "')");
             } catch (...) {
             }
             event.clear();
@@ -116,11 +117,16 @@ void ThreadLoader::run() {
         throw e;
     }
 
-    if (client != 0 || dest != 0 || oper != 0 || pricelist != 0 || usage != 0 || price != 0 || network_prefix != 0) {
+    if (server != 0 || client != 0 || dest != 0 || oper != 0 || pricelist != 0 || usage != 0 || price != 0 || network_prefix != 0) {
         lock_guard<mutex> lock(loader->rwlock);
 
+        if (server != 0) {
+            if (server->loaded) loader->server = shared_ptr<ServerList>(server);
+            else delete server;
+            server = 0;
+        }
         if (client != 0) {
-            if (client->loaded) loader->client = shared_ptr<ClientObjList>(client);
+            if (client->loaded) loader->client = shared_ptr<ClientList>(client);
             else delete client;
             client = 0;
         }
@@ -171,73 +177,314 @@ void ThreadLoader::htmlfull(stringstream &html) {
     html << "Time loop: <b>" << t.sloop() + "</b><br/>\n";
     html << "Time full loop: <b>" << t.sfull() + "</b><br/>\n";
     html << "loops: <b>" << t.count << "</b><br/>\n";
+    html << "Loader errors count: <b>" << errors << "</b><br/>\n";
     html << "<br/>\n";
 
-
     ObjList * ol;
+    BaseData * dl;
     time_t tday = get_tday();
     time_t tmonth = get_tmonth();
 
+    html << "<table border=1 width=100%>";
+    html << "<tr><th></th><th>Updated at</th><th>Size</th><th>Rows</th><th>Last time</th><th>Total time</th></tr>";
     {
         lock_guard<mutex> lock(loader->rwlock);
 
+        dl = &data->server;
+        html << "<tr><th>server</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->instanceSettings;
+        html << "<tr><th>instanceSettings</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->airp;
+        html << "<tr><th>airp</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->number;
+        html << "<tr><th>number</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->outcome;
+        html << "<tr><th>outcome</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->prefixlist;
+        html << "<tr><th>prefixlist</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->prefixlistPrefix;
+        html << "<tr><th>prefixlistPrefix</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->releaseReason;
+        html << "<tr><th>releaseReason</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->routeCase;
+        html << "<tr><th>routeCase</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->routeTable;
+        html << "<tr><th>routeTable</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->routeTableRoute;
+        html << "<tr><th>routeTableRoute</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->trunk;
+        html << "<tr><th>trunk</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->trunkNumberPreprocessing;
+        html << "<tr><th>trunkNumberPreprocessing</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->trunkPriority;
+        html << "<tr><th>trunkPriority</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->trunkRule;
+        html << "<tr><th>trunkRule</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->client;
+        html << "<tr><th>client</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->voipOperator;
+        html << "<tr><th>voipOperator</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->pricelist;
+        html << "<tr><th>pricelist</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+        dl = &data->geoPrefix;
+        html << "<tr><th>geoPrefix</th>";
+        if (dl->ready()) {
+            html << "<td>" << string_time(dl->time()) << "</td><td>" <<  dl->size() / 1024 << " Kb</td><td>" <<  dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
+
+
+
+        ol = loader->server.get();
+        html << "<tr><th>Server</th>";
+        if (ol != 0) {
+            html << "<td>" << string_time(ol->loadtime) << "</td><td>" << ol->loadsize / 1024 << " Kb</td><td>" << ol->count << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
+
         ol = loader->client.get();
-        if (ol != 0) html << "Client: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+        html << "<tr><th>Client</th>";
+        if (ol != 0) {
+            html << "<td>" << string_time(ol->loadtime) << "</td><td>" << ol->loadsize / 1024 << " Kb</td><td>" << ol->count << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
 
         ol = loader->dest.get();
-        if (ol != 0) html << "Prefix: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+        html << "<tr><th>Prefix</th>";
+        if (ol != 0) {
+            html << "<td>" << string_time(ol->loadtime) << "</td><td>" << ol->loadsize / 1024 << " Kb</td><td>" << ol->count << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
 
         ol = loader->oper.get();
-        if (ol != 0) html << "Operator: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+        html << "<tr><th>Operator</th>";
+        if (ol != 0) {
+            html << "<td>" << string_time(ol->loadtime) << "</td><td>" << ol->loadsize / 1024 << " Kb</td><td>" << ol->count << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
 
         ol = loader->pricelist.get();
-        if (ol != 0) html << "Pricelist: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+        html << "<tr><th>Pricelist</th>";
+        if (ol != 0) {
+            html << "<td>" << string_time(ol->loadtime) << "</td><td>" << ol->loadsize / 1024 << " Kb</td><td>" << ol->count << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
 
         ol = loader->usage.get(tday).get();
-        if (ol != 0) html << "Usage: <b>" << loader->usage.datamap.size() << " / " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+        html << "<tr><th>Usage</th>";
+        if (ol != 0) {
+            html << "<td>" << string_time(ol->loadtime) << "</td><td>" << ol->loadsize / 1024 << " Kb</td><td>" << ol->count << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
 
         ol = loader->price.get(tday).get();
-        if (ol != 0) html << "Price: <b>" << loader->price.datamap.size() << " / " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+        html << "<tr><th>Price</th>";
+        if (ol != 0) {
+            html << "<td>" << string_time(ol->loadtime) << "</td><td>" << ol->loadsize / 1024 << " Kb</td><td>" << ol->count << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
 
         ol = loader->network_prefix.get(tday).get();
-        if (ol != 0) html << "Network prefix: <b>" << loader->network_prefix.datamap.size() << " / " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ol->loadsize / 1024 << " K / " << ol->count << " rows </b><br/>\n";
+        html << "<tr><th>Network prefix</th>";
+        if (ol != 0) {
+            html << "<td>" << string_time(ol->loadtime) << "</td><td>" << ol->loadsize / 1024 << " Kb</td><td>" << ol->count << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
     }
-
-    html << "<br/>\n";
-
     {
         lock_guard<mutex> lock(loader->counter_rwlock);
 
         ol = loader->counter_client.get();
-        if (ol != 0) html << "Client counter: <b>" << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ((ClientCounter*) ol)->counter.size() << " rows </b><br/>\n";
+        html << "<tr><th>Client counter</th>";
+        if (ol != 0) {
+            html << "<td>" << string_time(ol->loadtime) << "</td><td></td><td>" << ((ClientCounter*) ol)->counter.size() << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
 
         ol = loader->counter_fmin.get(tmonth).get();
-        if (ol != 0) html << "Fmin counter: <b>" << loader->counter_fmin.datamap.size() << " " << string_time(ol->loadtime) << " / " << ol->t.sloop() << " s / " << ((FminCounter*) ol)->counter.size() << " rows </b><br/>\n";
+        html << "<tr><th>Fmin counter</th>";
+        if (ol != 0) {
+            html << "<td>" << string_time(ol->loadtime) << "</td><td></td><td>" << ((FminCounter*) ol)->counter.size() << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
+        }
+        html << "</tr>\n";
     }
 
-    html << "<br/>\n";
+    html << "</table>\n";
 
-    html << "Loader errors count: <b>" << errors << "</b><br/>\n";
 }
 
-bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader) {
+bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader, DataContainer *data) {
     bool success = true;
     time_t tday = get_tday();
 
     if (loader == 0) loader = this->loader;
+    if (data == 0) data = this->data;
     if (db == 0) db = &db_calls;
 
-
-    ClientObjList * client = new ClientObjList();
+    ServerList * server = new ServerList();
+    ClientList * client = new ClientList();
     DestObjList * dest = new DestObjList();
     OperatorList * oper = new OperatorList();
     PricelistList * pricelist = new PricelistList();
     UsageObjList * usage = new UsageObjList();
     PriceObjList * price = new PriceObjList();
-    NetworkPrefixObjList * network_prefix = new NetworkPrefixObjList();
+    NetworkPrefixList * network_prefix = new NetworkPrefixList();
 
     try {
-        db_calls.exec("DELETE from billing.events");
+        db_calls.exec("DELETE from event.queue");
+
+        data->loadAll(db);
+
+        server->load(db);
 
         client->load(db);
 
@@ -262,8 +509,13 @@ bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader) {
     {
         lock_guard<mutex> lock(loader->rwlock);
 
+        if (server->loaded)
+            loader->server = shared_ptr<ServerList>(server);
+        else
+            delete server;
+
         if (client->loaded)
-            loader->client = shared_ptr<ClientObjList>(client);
+            loader->client = shared_ptr<ClientList>(client);
         else
             delete client;
 
@@ -344,6 +596,7 @@ ThreadLoader::ThreadLoader() {
     name = "Loader";
 
     loader = DataLoader::instance();
+    data = DataContainer::instance();
     db_calls.setCS(app().conf.db_calls);
     errors = 0;
 }

@@ -106,7 +106,7 @@ void CalcBase::calc_process_call(pCallObj call) {
     }
     if (call->out == false) return;
 
-    pClientObj client = data.client->find(call->client_id);
+    pClient client = data.client->find(call->client_id);
     if (client == 0) {
         call->kill_call_reason = KILL_REASON_UNKNOWN_CLIENT;
         return;

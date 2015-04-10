@@ -97,7 +97,7 @@ void ThreadBlacklist::sync_blacklist() {
     blacklist_trunk->push();
 }
 
-static bool needLockLocal(pClientObj client, ClientCounterObj &cc, pGlobalCountersObj globalCounter, pUsageObj usage, FminCounter * counters_fmin) {
+static bool needLockLocal(pClient client, ClientCounterObj &cc, pGlobalCountersObj globalCounter, pUsageObj usage, FminCounter * counters_fmin) {
     if (client != 0) {
         double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0);
         int usedFreeSeconds = counters_fmin->get(usage->id, 1);
@@ -113,7 +113,7 @@ static bool needLockLocal(pClientObj client, ClientCounterObj &cc, pGlobalCounte
     return false;
 }
 
-static bool needLockGlobal(pClientObj client, ClientCounterObj &cc, pGlobalCountersObj globalCounter) {
+static bool needLockGlobal(pClient client, ClientCounterObj &cc, pGlobalCountersObj globalCounter) {
     if (client != 0) {
         double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0);
         double spentDaySum = cc.sumDay() + (globalCounter ? globalCounter->sumDay() : 0);
@@ -133,7 +133,7 @@ static bool needLockGlobal(pClientObj client, ClientCounterObj &cc, pGlobalCount
 
 void ThreadBlacklist::update_voip_auto_disabled() {
 
-    shared_ptr<ClientObjList> clients;
+    shared_ptr<ClientList> clients;
     shared_ptr<UsageObjList> usages;
 
     {
@@ -155,7 +155,7 @@ void ThreadBlacklist::update_voip_auto_disabled() {
 
         for (int j = 0; j < usages->count; j++) {
             pUsageObj usage = (pUsageObj) usages->_get(j);
-            pClientObj client = clients->find(usage->client_id);
+            pClient client = clients->find(usage->client_id);
             pGlobalCountersObj globalCounter = counters_global->find(usage->client_id);
 
             ClientCounterObj &cc = counters_clients->get(usage->client_id);

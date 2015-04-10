@@ -8,8 +8,8 @@ class BDbResult {
 protected:
     PGresult * res;
     int count;
-    int index;
 public:
+    int index;
     BDbResult(PGresult * res);
     ~BDbResult();
     int size();
@@ -22,5 +22,8 @@ public:
     string get_s(int f);
     void fill_cs(int f, char * str, int size);
     bool next();
+    bool previous();
+    bool first();
+    bool last();
     void force_free();
 };

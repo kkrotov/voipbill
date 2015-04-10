@@ -56,6 +56,30 @@ bool BDbResult::next() {
         return false;
 }
 
+bool BDbResult::previous() {
+    index--;
+    if (count > 0 && index < count) {
+        return true;
+    } else
+        return false;
+}
+
+bool BDbResult::first() {
+    if (count > 0) {
+        index = 0;
+        return true;
+    } else
+        return false;
+}
+
+bool BDbResult::last() {
+    if (count > 0) {
+        index = count - 1;
+        return true;
+    } else
+        return false;
+}
+
 void BDbResult::force_free() {
     if (res != 0) {
         PQclear(res);

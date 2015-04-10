@@ -202,12 +202,12 @@ void BlackList::log_lock_phone(string &phone) {
 
     DataLoader *loader = DataLoader::instance();
     UsageObjList *usages;
-    ClientObjList *clients;
+    ClientList *clients;
 
     {
         lock_guard<mutex> lk(loader->rwlock);
         shared_ptr<UsageObjList> usages_ptr = loader->usage.get(get_tday());
-        shared_ptr<ClientObjList> clients_ptr = loader->client;
+        shared_ptr<ClientList> clients_ptr = loader->client;
 
         usages = usages_ptr.get();
         clients = clients_ptr.get();
@@ -216,7 +216,7 @@ void BlackList::log_lock_phone(string &phone) {
 
     if (usages != 0 && clients != 0) {
         pUsageObj usage = usages->find(phone.c_str());
-        pClientObj client;
+        pClient client;
         if (usage != 0) {
             str = str + " / " + lexical_cast<string>(usage->client_id);
             client = clients->find(usage->client_id);

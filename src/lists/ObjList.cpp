@@ -75,8 +75,8 @@ void * ObjListByPrefix::_find(const char * prefix) {
 
     void * res_item = 0;
 
-    int lenphone = strlen(prefix);
-    for (int i = 0; i < lenphone; i++) {
+    size_t lenphone = strlen(prefix);
+    for (size_t i = 0; i < lenphone; i++) {
         int low = lowlow, high = highhigh;
         char str[21];
         char *pstr = &str[0];
@@ -119,8 +119,8 @@ void * ObjListByIntPrefix::_find(const int value0, const char * prefix) {
 
     void * res_item = 0;
 
-    int lenphone = strlen(prefix);
-    for (int i = 0; i < lenphone; i++) {
+    size_t lenphone = strlen(prefix);
+    for (size_t i = 0; i < lenphone; i++) {
         int low = lowlow, high = highhigh;
         char str[21];
         char *pstr = &str[0];
@@ -206,3 +206,105 @@ void * ObjListBy2Long::_find(long long int value) {
     return 0;
 }
 
+void *ObjListByIntInt::_find(const int value1, const int value2) {
+    int low = 0, high = count - 1;
+    while (low <= high) {
+        int mid = (low + high) / 2;
+
+        void * item = (char*) data + mid*i_size;
+
+        int key_value1 = key1(item);
+
+        if (key_value1 < value1)
+            low = mid + 1;
+        else if (key_value1 > value1)
+            high = mid - 1;
+        else {
+
+            int key_value2 = key2(item);
+
+            if (key_value2 < value2)
+                low = mid + 1;
+            else if (key_value2 > value2)
+                high = mid - 1;
+            else
+                return item;
+        }
+    }
+    return 0;
+}
+
+void *ObjListByIntBoolInt::_find(const int value1, const bool value2, const int value3) {
+    int low = 0, high = count - 1;
+    while (low <= high) {
+        int mid = (low + high) / 2;
+
+        void * item = (char*) data + mid*i_size;
+
+        int key_value1 = key1(item);
+
+        if (key_value1 < value1)
+            low = mid + 1;
+        else if (key_value1 > value1)
+            high = mid - 1;
+        else {
+
+            int key_value2 = key2(item);
+
+            if (key_value2 < value2)
+                low = mid + 1;
+            else if (key_value2 > value2)
+                high = mid - 1;
+            else {
+
+                int key_value3 = key3(item);
+
+                if (key_value3 < value3)
+                    low = mid + 1;
+                else if (key_value3 > value3)
+                    high = mid - 1;
+                else
+                    return item;
+            }
+        }
+    }
+    return 0;
+}
+
+void *ObjListByIntLongPeriod::_find(const int value1, const long long int value2, const time_t value3) {
+    int low = 0, high = count - 1;
+    while (low <= high) {
+        int mid = (low + high) / 2;
+
+        void * item = (char*) data + mid*i_size;
+
+        int key_value1 = key1(item);
+
+        if (key_value1 < value1)
+            low = mid + 1;
+        else if (key_value1 > value1)
+            high = mid - 1;
+        else {
+
+            long long int key_value2 = key2(item);
+
+            if (key_value2 < value2)
+                low = mid + 1;
+            else if (key_value2 > value2)
+                high = mid - 1;
+            else {
+
+                time_t key_value3_from = key3_from(item);
+                time_t key_value3_to = key3_to(item);
+
+                if (key_value3_from > value3)
+                    high = mid - 1;
+                else if (key_value3_to < value3)
+                    low = mid + 1;
+                else
+                    return item;
+            }
+        }
+    }
+    return 0;
+}

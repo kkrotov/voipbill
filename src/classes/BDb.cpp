@@ -154,20 +154,19 @@ BDbResult BDb::query(const string &squery) {
     return query(squery.c_str());
 }
 
-void BDb::copy(string table_to, string table_from, string columns, string query, BDb *db_from, BDb *db_to) {
-    char error[1024];
+void BDb::copy(string dst_table, string src_table, string columns, string query, BDb *db_from, BDb *db_to) {
 
     string query_from("COPY ");
     if (query != "") {
         query_from.append("(" + query + ") ");
     } else {
-        query_from.append(table_from + " ");
+        query_from.append(src_table + " ");
         if (columns != "") query_from.append("(" + columns + ") ");
     }
     query_from.append("TO STDOUT WITH BINARY");
 
     string query_to("COPY ");
-    query_to.append(table_to + " ");
+    query_to.append(dst_table + " ");
     if (columns != "") query_to.append("(" + columns + ") ");
     query_to.append("FROM STDIN WITH BINARY");
 

@@ -5,7 +5,7 @@ DataLoader::DataLoader() {
 
 }
 
-bool DataLoader::get(DT & dt, curr_data & data, bool countersAlreadyLocked) {
+bool DataLoader::get(DT &dt, curr_data &data, bool countersAlreadyLocked) {
 
     {
         unique_lock<mutex> lock(counter_rwlock, defer_lock);
@@ -19,6 +19,7 @@ bool DataLoader::get(DT & dt, curr_data & data, bool countersAlreadyLocked) {
     {
         lock_guard<mutex> lock(rwlock);
 
+        data.server = server;
         data.client = client;
         data.dest = dest;
         data.oper = oper;
@@ -31,7 +32,7 @@ bool DataLoader::get(DT & dt, curr_data & data, bool countersAlreadyLocked) {
     return ready(dt, data);
 }
 
-bool DataLoader::load(BDb *db, DT & dt, curr_data & data, bool countersAlreadyLocked) {
+bool DataLoader::load(BDb *db, DT &dt, curr_data &data, bool countersAlreadyLocked) {
 
     {
         unique_lock<mutex> lock(counter_rwlock, defer_lock);
@@ -50,6 +51,7 @@ bool DataLoader::load(BDb *db, DT & dt, curr_data & data, bool countersAlreadyLo
     {
         lock_guard<mutex> lock(rwlock);
         try {
+            data.server = server;
             data.client = client;
             data.dest = dest;
             data.oper = oper;
@@ -66,9 +68,14 @@ bool DataLoader::load(BDb *db, DT & dt, curr_data & data, bool countersAlreadyLo
     return ready(dt, data);
 }
 
-inline bool DataLoader::ready(DT & dt, curr_data & data) {
+inline bool DataLoader::ready(DT &dt, curr_data &data) {
 
-    if (data.client == 0 || data.dest == 0 || data.oper == 0 || data.pricelist == 0 ||
+    if (
+            data.server == 0 ||
+            data.client == 0 ||
+            data.dest == 0 ||
+            data.oper == 0 ||
+            data.pricelist == 0 ||
             data.usage == 0 ||
             data.price == 0 ||
             data.network_prefix == 0 ||
@@ -83,7 +90,7 @@ inline bool DataLoader::ready(DT & dt, curr_data & data) {
     return true;
 }
 
-void DataLoader::counter_append(CounterLoader & loader2) {
+void DataLoader::counter_append(CounterLoader &loader2) {
     lock_guard<mutex> lock(counter_rwlock);
 
     counter_client->append(loader2.client.get());

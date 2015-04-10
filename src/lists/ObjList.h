@@ -68,3 +68,30 @@ protected:
 public:
     virtual void * _find(const long long int value);
 };
+
+class ObjListByIntInt : public ObjList {
+protected:
+    virtual int key1(const void * obj) = 0;
+    virtual int key2(const void * obj) = 0;
+public:
+    virtual void * _find(const int value1, const int value2);
+};
+
+class ObjListByIntBoolInt : public ObjList {
+protected:
+    virtual int key1(const void * obj) = 0;
+    virtual bool key2(const void * obj) = 0;
+    virtual int key3(const void * obj) = 0;
+public:
+    virtual void * _find(const int value1, const bool value2, const int value3);
+};
+
+class ObjListByIntLongPeriod : public ObjList {
+protected:
+    virtual int key1(const void * obj) = 0;
+    virtual long long int key2(const void * obj) = 0;
+    virtual time_t key3_from(const void * obj) = 0;
+    virtual time_t key3_to(const void * obj) = 0;
+public:
+    virtual void * _find(const int value1, const long long int value2, const time_t value3);
+};

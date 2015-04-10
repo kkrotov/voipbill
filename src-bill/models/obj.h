@@ -43,23 +43,6 @@ typedef struct _UsageObj {
     }
 } UsageObj, *pUsageObj;
 
-typedef struct _Operator {
-    int id;
-    int pricelist_id;
-    int term_in_cost; // x4
-    int local_network_pricelist_id;
-    int client_7800_pricelist_id;
-    int operator_7800_pricelist_id;
-} Operator, *pOperator;
-
-typedef struct _Pricelist {
-    int id;
-    int region;
-    int operator_id;
-    bool tariffication_by_minutes;
-    bool tariffication_full_first_minute;
-} Pricelist, *pPricelist;
-
 typedef struct _PriceObj {
     int pricelist_id;
     char prefix[20];
@@ -67,49 +50,6 @@ typedef struct _PriceObj {
     time_t date_to;
     unsigned int price; // x4
 } PriceObj, *pPriceObj;
-
-typedef struct _NetworkPrefixObj {
-    int operator_id;
-    char prefix[20];
-    time_t date_from;
-    time_t date_to;
-    short int network_type_id;
-} NetworkPrefixObj, *pNetworkPrefixObj;
-
-typedef struct _ClientObj {
-    int id;
-    int limit_m;
-    int limit_d;
-    int credit;
-    double balance;
-    bool disabled;
-    time_t amount_date;
-    time_t last_payed_month;
-    
-    bool hasCreditLimit() {
-        return credit >= 0;
-    }
-    
-    bool hasDailyLimit() {
-        return limit_d != 0;
-    }
-    
-    bool hasMonthlyLimit() {
-        return limit_m != 0;
-    }
-
-    bool isConsumedCreditLimit(double value) {
-        return hasCreditLimit() && (balance + credit - value < 0);
-    }
-    
-    bool isConsumedDailyLimit(double value) {
-        return hasDailyLimit() && (limit_d - value < 0);
-    }
-    
-    bool isConsumedMonthlyLimit(double value) {
-        return hasMonthlyLimit() && (limit_m - value < 0);
-    }
-} ClientObj, *pClientObj;
 
 typedef struct _GlobalCountersObj {
     int client_id;
@@ -187,17 +127,15 @@ typedef struct _CdrObj {
     char connect_time[28];
     int session_time;
     
-    char src_number[20];
-    char dst_number[20];
-    char redirect_number[20];
+    char src_number[33];
+    char dst_number[33];
+    char redirect_number[33];
 
     char src_route[33];
     char dst_route[33];
 
     short src_noa;
     short dst_noa;
-
-    long long int id_num;
 
     DT dt;
     void make_dt();
@@ -235,18 +173,8 @@ typedef struct _CallObj {
     int kill_call_reason;
 
     DT dt;
-    void init(CdrObj * cdr);
+    void initByCdr(CdrObj * cdr);
+    void initOrigByCdr(CdrObj * cdr);
+    void initTermByCdr(CdrObj * cdr);
     void make_dt();
-    bool isLocal();
-    bool isLocalOrZona();
-    bool isZona();
-    bool isZonaMob();
-    bool isZonaStd();
-    bool isRussian();
-    bool isRussianMob();
-    bool isRussianStd();
-    bool isInternational();
-    bool isSNG();
-    bool isTrank();
-    bool isCallFromAnotherInstance();
 } CallObj, *pCallObj;

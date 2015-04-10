@@ -266,7 +266,7 @@ void CalcFull::updateClientCounters(pCallObj call) {
         cc.sum_day = call->amount_mcn;
     }
 
-    pClientObj client = data.client->find(call->client_id);
+    pClient client = data.client->find(call->client_id);
     if (client != 0 && call->dt.time >= client->amount_date) {
         cc.sum += call->amount_mcn;
     }

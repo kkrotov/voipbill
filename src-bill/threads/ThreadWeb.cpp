@@ -120,9 +120,9 @@ bool ThreadWeb::handlerTask(stringstream &html, map<string, string> &parameters)
 
 void ThreadWeb::handlerCounters(stringstream &html) {
     handlerHeader(html);
-
+/*
     DataLoader *loader = DataLoader::instance();
-    shared_ptr<ClientObjList> c;
+    shared_ptr<ClientList> c;
 
     {
         lock_guard<mutex> lock(loader->rwlock);
@@ -144,7 +144,7 @@ void ThreadWeb::handlerCounters(stringstream &html) {
 
         time_t amount_date = 0;
         if (c != 0) {
-            pClientObj client = c->find(value.client_id);
+            pClient client = c->find(value.client_id);
             if (client != 0) {
                 amount_date = client->amount_date;
             }
@@ -161,18 +161,19 @@ void ThreadWeb::handlerCounters(stringstream &html) {
                 << sum_balance << "</td></tr>";
     }
     html << "</table>";
+*/
 }
 
 void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameters) {
     handlerHeader(html);
-
+/*
     int client_id = atoi(parameters["id"].c_str());
 
     DataLoader *loader = DataLoader::instance();
 
-    shared_ptr<ClientObjList> clients;
+    shared_ptr<ClientList> clients;
     shared_ptr<UsageObjList> usages;
-    pClientObj p_client;
+    pClient p_client;
 
     {
         lock_guard<mutex> lock(loader->rwlock);
@@ -190,7 +191,7 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
         }
     }
 
-    ClientObj client = *p_client;
+    Client client = *p_client;
 
     double sum_month, sum_day, sum_balance;
     double sum_month2, sum_day2, sum_balance2;
@@ -378,5 +379,5 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
         }
         html << "</table>\n";
     }
-
+*/
 }
