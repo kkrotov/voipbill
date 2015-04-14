@@ -9,18 +9,59 @@
 
 using namespace std;
 
+template <typename T>
 class BaseData {
 protected:
-    shared_ptr<ObjList> data;
+    shared_ptr<T> data;
     mutex lock;
-    virtual ObjList * create() = 0;
 public:
     Timer timer;
-    BaseData();
-    bool ready();
-    shared_ptr<ObjList> get();
-    void load(BDb * db);
-    time_t time();
-    int rows();
-    int size();
+
+    BaseData() {
+        data = shared_ptr<T>();
+    }
+
+    bool ready() {
+        lock_guard<mutex> guard(lock);
+        return data != 0;
+    }
+
+    shared_ptr<T> get() {
+        lock_guard<mutex> guard(lock);
+        return data;
+    }
+
+    void load(BDb * db) {
+        TimerScope timerScope(timer);
+
+        shared_ptr<T> tmpData = shared_ptr<T>( new T() );
+        static_cast<BaseObjList*>(tmpData.get())->load(db);
+
+        lock_guard<mutex> guard(lock);
+        data.swap(tmpData);
+    }
+
+    time_t time() {
+        if (ready()) {
+            auto tmpData = get();
+            return static_cast<BaseObjList*>(tmpData.get())->loadTime();
+        }
+        return 0;
+    }
+
+    size_t rows() {
+        if (ready()) {
+            auto tmpData = get();
+            return static_cast<BaseObjList*>(tmpData.get())->size();
+        }
+        return 0;
+    }
+
+    size_t size() {
+        if (ready()) {
+            auto tmpData = get();
+            return static_cast<BaseObjList*>(tmpData.get())->dataSize();
+        }
+        return 0;
+    }
 };

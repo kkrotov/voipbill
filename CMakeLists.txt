@@ -22,7 +22,6 @@ set(COMMON_SOURCES
     src/classes/LogWriterScreen.cpp
     src/classes/LogWriterSyslog.cpp
     src/classes/ThreadPool.cpp
-    src/lists/ObjList.cpp
     src/tasks/Task.cpp
     src/threads/Thread.cpp
     src/http/mime_types.cpp
@@ -82,6 +81,8 @@ set(BILL_SOURCES
 #    src-bill/classes/CalcBase.cpp
 #    src-bill/classes/CalcFull.cpp
 #    src-bill/classes/CallsSaver.cpp
+    src-bill/classes/Billing.cpp
+    src-bill/classes/BillingCall.cpp
     src-bill/classes/ConfBill.cpp
     src-bill/classes/DataLoader.cpp
     src-bill/classes/Log.cpp
@@ -89,30 +90,22 @@ set(BILL_SOURCES
 #    src-bill/classes/UdpMessageProcessor.cpp
 #    src-bill/classes/CallsList.cpp
     src-bill/http/file_handler.cpp
-#    src-bill/lists/CallsObjList.cpp
-    src-bill/lists/ClientCounter.cpp
-#    src-bill/lists/CurrentCallsObjList.cpp
-    src-bill/lists/FminCounter.cpp
-#    src-bill/lists/GlobalCountersObjList.cpp
-#    src-bill/lists/CdrObjList.cpp
-    src-bill/lists/UsageObjList.cpp
-    src-bill/models/obj.cpp
 #    src-bill/tasks/TaskRecalc.cpp
     src-bill/sync/BasePull.cpp
     src-bill/sync/ManagerPull.cpp
     src-bill/threads/ThreadLog.cpp
     src-bill/threads/ThreadSync.cpp
+    src-bill/threads/ThreadLoader.cpp
+    src-bill/threads/ThreadSelectCurrentCalls.cpp
 #    src-bill/threads/ThreadBillRuntime.cpp
 #    src-bill/threads/ThreadBlacklist.cpp
 #    src-bill/threads/ThreadCheckStartTable.cpp
 #    src-bill/threads/ThreadLimitControl.cpp
-    src-bill/threads/ThreadLoader.cpp
-#    src-bill/threads/ThreadSelectCurrentCalls.cpp
 #    src-bill/threads/ThreadSelectGlobalCounters.cpp
-#    src-bill/threads/ThreadSyncCalls.cpp
-#    src-bill/threads/ThreadSyncCounters.cpp
 #    src-bill/threads/ThreadTasks.cpp
 #    src-bill/threads/ThreadUdpServer.cpp
+#    src-bill/threads/ThreadSyncCalls.cpp
+#    src-bill/threads/ThreadSyncCounters.cpp
     src-bill/threads/ThreadWeb.cpp
     src-bill/main.cpp
 )

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-
 #include <boost/algorithm/string.hpp>
 
 using boost::algorithm::split;

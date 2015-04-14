@@ -4,22 +4,18 @@
 #include "../models/Trunk.h"
 #include "../classes/AppBill.h"
 
-class TrunkList : public ObjListByInt {
+class TrunkList : public ObjListByString<Trunk> {
 protected:
-    size_t item_size() {
-        return sizeof (Trunk);
-    }
 
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
         return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, default_priority, auto_routing, route_table_id, our_trunk " \
             "   from auth.trunk " \
             "   where server_id = " + server_id +
-            "   order by id asc ";
+            "   order by trunk_name asc ";
     }
 
-    inline void parse_item(BDbResult &row, void * obj) {
-        Trunk * item = (Trunk *) obj;
+    inline void parse_item(BDbResult &row, Trunk * item) {
         item->id = row.get_i(0);
         row.fill_cs(1, item->name, sizeof(item->name));
         row.fill_cs(2, item->trunk_name, sizeof(item->trunk_name));
@@ -32,11 +28,11 @@ protected:
         item->our_trunk = row.get_b(9);
     }
 
-    inline int key(const void *obj) {
-        return ((Trunk *) obj)->id;
+    inline char * key(Trunk *item) {
+        return item->trunk_name;
     }
 public:
-    Trunk * find(const int id) {
-        return (Trunk *) _find(id);
+    Trunk * find(const char * trunk_name) {
+        return (Trunk *) _find(trunk_name);
     }
 };

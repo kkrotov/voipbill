@@ -5,5 +5,6 @@ struct GeoPrefix {
     int dest;
     int geo_id;
     int geo_operator_id;
+    int region_id;
     bool mob;
 };

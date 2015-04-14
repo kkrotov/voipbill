@@ -7,6 +7,7 @@
 using boost::algorithm::split;
 using boost::algorithm::replace_all;
 using boost::algorithm::join;
+using boost::algorithm::is_any_of;
 
 #include <boost/bind.hpp>
 
@@ -14,6 +15,7 @@ using boost::algorithm::join;
 #include <sstream>
 #include <map>
 #include <vector>
+#include <queue>
 using namespace std;
 
 #include <boost/lexical_cast.hpp>

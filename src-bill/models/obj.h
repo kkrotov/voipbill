@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../src/common.h"
+#include "Cdr.h"
 
 #define KILL_REASON_UNKNOWN_NUMBER      1000
 #define KILL_REASON_UNKNOWN_CLIENT      1010
@@ -21,35 +22,6 @@ typedef struct _DestObj {
 typedef struct _MobObj {
     char prefix[20];
 } MobObj, *pMobObj;
-
-typedef struct _UsageObj {
-    long long int phone_num;
-    int id;
-    int client_id;
-    int region;
-    int free_seconds;
-    bool paid_redirect;
-    bool tariffication_by_minutes;
-    bool tariffication_full_first_minute;
-    bool tariffication_free_first_seconds;
-    int pl_local_id;
-    int pl_local_mob_id;
-    int pl_russia_id;
-    int pl_russia_mob_id;
-    int pl_intern_id;
-    int pl_sng_id;
-    bool isConnectedOperator() {
-        return phone_num >= 100 && phone_num < 1000;
-    }
-} UsageObj, *pUsageObj;
-
-typedef struct _PriceObj {
-    int pricelist_id;
-    char prefix[20];
-    time_t date_from;
-    time_t date_to;
-    unsigned int price; // x4
-} PriceObj, *pPriceObj;
 
 typedef struct _GlobalCountersObj {
     int client_id;
@@ -121,26 +93,6 @@ private:
 
 } ClientCounterObj, *pClientCounterObj;
 
-typedef struct _CdrObj {
-    char id[20];
-
-    char connect_time[28];
-    int session_time;
-    
-    char src_number[33];
-    char dst_number[33];
-    char redirect_number[33];
-
-    char src_route[33];
-    char dst_route[33];
-
-    short src_noa;
-    short dst_noa;
-
-    DT dt;
-    void make_dt();
-} CdrObj, *pCdrObj;
-
 typedef struct _CallObj {
     char id[20];
     char cdr_id[20];
@@ -173,8 +125,8 @@ typedef struct _CallObj {
     int kill_call_reason;
 
     DT dt;
-    void initByCdr(CdrObj * cdr);
-    void initOrigByCdr(CdrObj * cdr);
-    void initTermByCdr(CdrObj * cdr);
+    void initByCdr(Cdr * cdr);
+    void initOrigByCdr(Cdr * cdr);
+    void initTermByCdr(Cdr * cdr);
     void make_dt();
 } CallObj, *pCallObj;

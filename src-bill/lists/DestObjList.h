@@ -5,11 +5,8 @@
 #include "../classes/AppBill.h"
 #include "../../src/classes/DbException.h"
 
-class DestObjList : public ObjListByPrefix {
+class DestObjList : public ObjListByPrefix<DestObj> {
 protected:
-    size_t item_size() {
-        return sizeof (DestObj);
-    }
 
     string sql(BDb * db) {
         BDbResult res = db->query(" select " \
@@ -39,8 +36,7 @@ protected:
         }
     }
 
-    inline void parse_item(BDbResult &row, void * obj) {
-        pDestObj item = (pDestObj) obj;
+    inline void parse_item(BDbResult &row, DestObj * item) {
         strcpy(item->prefix, row.get(0));
         item->dest = row.get_i(1);
         item->geo_id = row.get_i(2);
@@ -48,14 +44,14 @@ protected:
         item->mob = row.get_b(4);
     }
 
-    inline char * key(const void *obj) {
-        return ( (pDestObj) obj)->prefix;
+    inline char * key(DestObj *item) {
+        return item->prefix;
     }
 
 
 public:
 
-    pDestObj find(const char * prefix) {
-        return (pDestObj) _find(prefix);
+    DestObj *find(const char * prefix) {
+        return (DestObj *) _find(prefix);
     }
 };

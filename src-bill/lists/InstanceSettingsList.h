@@ -4,11 +4,8 @@
 #include "../models/InstanceSettings.h"
 #include "../classes/AppBill.h"
 
-class InstanceSettingsList : public ObjListByInt {
+class InstanceSettingsList : public ObjListByInt<InstanceSettings> {
 protected:
-    size_t item_size() {
-        return sizeof (InstanceSettings);
-    }
 
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
@@ -18,15 +15,14 @@ protected:
                 "   order by id asc ";
     }
 
-    inline void parse_item(BDbResult &row, void * obj) {
-        InstanceSettings * item = (InstanceSettings *) obj;
+    inline void parse_item(BDbResult &row, InstanceSettings * item) {
         item->id = row.get_i(0);
         row.fill_cs(1, item->region_id, sizeof(item->region_id));
-        row.fill_cs(2, item->city_geo_id, sizeof(item->city_geo_id));
+        item->city_geo_id = row.get_i(2);
     }
 
-    inline int key(const void *obj) {
-        return ( (InstanceSettings *) obj)->id;
+    inline int key(InstanceSettings *item) {
+        return item->id;
     }
 public:
     InstanceSettings * find(const int id) {

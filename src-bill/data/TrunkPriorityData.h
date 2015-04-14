@@ -3,10 +3,6 @@
 #include "BaseData.h"
 #include "../lists/TrunkPriorityList.h"
 
-class TrunkPriorityData : public BaseData {
-
-    ObjList * create() {
-        return new TrunkPriorityList();
-    }
+class TrunkPriorityData : public BaseData<TrunkPriorityList> {
 
 };

@@ -3,10 +3,9 @@
 #include <time.h>
 
 struct TariffChangeLog {
-    int id;
     int usage_id;
-    time_t ts;
     time_t activation_date;
+    time_t expire_dt;
     int tariff_id_local;
     int tariff_id_local_mob;
     int tariff_id_russia;

@@ -19,9 +19,18 @@
 #include "TrunkRuleData.h"
 #include "ClientData.h"
 #include "OperatorData.h"
-#include "NetworkPrefixData.h"
 #include "PricelistData.h"
+#include "PricelistPriceData.h"
+#include "NetworkPrefixData.h"
 #include "GeoPrefixData.h"
+#include "UsageData.h"
+#include "ServiceNumberData.h"
+#include "ServiceTrunkData.h"
+#include "ServiceTrunkSettingsData.h"
+#include "TariffData.h"
+#include "TariffChangeLogData.h"
+
+#include "CurrentCdrData.h"
 
 class DataContainer {
 public:
@@ -43,7 +52,17 @@ public:
     ClientData client;
     OperatorData voipOperator;
     PricelistData pricelist;
+    PricelistPriceData pricelistPrice;
+    NetworkPrefixData networkPrefix;
     GeoPrefixData geoPrefix;
+    UsageData usage;
+    ServiceNumberData serviceNumber;
+    ServiceTrunkData serviceTrunk;
+    ServiceTrunkSettingsData serviceTrunkSettings;
+    TariffData tariff;
+    TariffChangeLogData tariffChangeLog;
+
+    CurrentCdrData currentCdrData;
 
     static DataContainer * instance() {
         static DataContainer inst;
@@ -69,6 +88,16 @@ public:
         client.load(db);
         voipOperator.load(db);
         pricelist.load(db);
+        pricelistPrice.load(db);
+        networkPrefix.load(db);
         geoPrefix.load(db);
+        usage.load(db);
+        serviceNumber.load(db);
+        serviceTrunk.load(db);
+        serviceTrunkSettings.load(db);
+        tariff.load(db);
+        tariffChangeLog.load(db);
+
+        currentCdrData.load(db);
     }
 };

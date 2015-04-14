@@ -4,11 +4,8 @@
 #include "../models/Operator.h"
 #include "../classes/AppBill.h"
 
-class OperatorList : public ObjListByInt {
+class OperatorList : public ObjListByInt<Operator> {
 protected:
-    size_t item_size() {
-        return sizeof (Operator);
-    }
 
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
@@ -18,8 +15,7 @@ protected:
                "   order by id asc ";
     }
 
-    inline void parse_item(BDbResult &row, void * obj) {
-        Operator * item = (Operator *) obj;
+    inline void parse_item(BDbResult &row, Operator * item) {
         item->id = row.get_i(0);
         item->pricelist_id = row.get_i(1);
         item->term_in_cost = row.get_d(2)*10000;
@@ -28,8 +24,8 @@ protected:
         item->operator_7800_pricelist_id = row.get_i(5);
     }
 
-    inline int key(const void *obj) {
-        return ((Operator *) obj)->id;
+    inline int key(Operator *item) {
+        return item->id;
     }
 
 public:

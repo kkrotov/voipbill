@@ -1,8 +1,8 @@
 #pragma once
 
 struct ServiceTrunkSettings {
-    int id;
-    char type[13];
+    int trunk_id;
+    bool orig;
     int order;
     int src_number_id;
     int dst_number_id;

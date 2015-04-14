@@ -3,11 +3,8 @@
 #include "../../src/lists/ObjList.h"
 #include "../models/TrunkRule.h"
 
-class TrunkRuleList : public ObjListByIntBoolInt {
+class TrunkRuleList : public ObjListByIntBoolInt<TrunkRule> {
 protected:
-    size_t item_size() {
-        return sizeof (TrunkRule);
-    }
 
     string sql(BDb * db) {
         return "   select trunk_id, outgoing, \"order\", prefixlist_id " \
@@ -15,22 +12,21 @@ protected:
             "   order by trunk_id asc, outgoing asc, \"order\" asc ";
     }
 
-    inline void parse_item(BDbResult &row, void * obj) {
-        TrunkRule * item = (TrunkRule *) obj;
+    inline void parse_item(BDbResult &row, TrunkRule * item) {
         item->trunk_id = row.get_i(0);
         item->outgoing = row.get_b(1);
         item->order = row.get_i(2);
         item->prefixlist_id = row.get_i(3);
     }
 
-    inline int key1(const void *obj) {
-        return ((TrunkRule *) obj)->trunk_id;
+    inline int key1(TrunkRule *item) {
+        return item->trunk_id;
     }
-    inline bool key2(const void *obj) {
-        return ((TrunkRule *) obj)->outgoing;
+    inline bool key2(TrunkRule *item) {
+        return item->outgoing;
     }
-    inline int key3(const void *obj) {
-        return ((TrunkRule *) obj)->order;
+    inline int key3(TrunkRule *item) {
+        return item->order;
     }
 public:
     TrunkRule * find(const int trunk_id, const bool outgoing, const int order) {

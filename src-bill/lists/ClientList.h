@@ -3,11 +3,8 @@
 #include "../../src/lists/ObjList.h"
 #include "../models/Client.h"
 
-class ClientList : public ObjListByInt {
+class ClientList : public ObjListByInt<Client> {
 protected:
-    size_t item_size() {
-        return sizeof (Client);
-    }
 
     string sql(BDb * db) {
         return "   select id, voip_limit_month, voip_limit_day, credit, balance, amount_date, last_payed_month, voip_disabled " \
@@ -15,8 +12,7 @@ protected:
                 "   order by id asc ";
     }
 
-    inline void parse_item(BDbResult &row, void * obj) {
-        pClient item = (pClient) obj;
+    inline void parse_item(BDbResult &row, Client * item) {
         item->id = row.get_i(0);
         item->limit_m = row.get_i(1);
         item->limit_d = row.get_i(2);
@@ -27,12 +23,12 @@ protected:
         item->disabled = row.get_b(7);
     }
 
-    inline int key(const void *obj) {
-        return ( (pClient) obj)->id;
+    inline int key(Client *item) {
+        return item->id;
     }
 public:
-    pClient find(const int id) {
-        return (pClient) _find(id);
+    Client * find(const int id) {
+        return (Client *) _find(id);
     }
 };
 

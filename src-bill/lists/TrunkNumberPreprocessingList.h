@@ -3,11 +3,8 @@
 #include "../../src/lists/ObjList.h"
 #include "../models/TrunkNumberPreprocessing.h"
 
-class TrunkNumberPreprocessingList : public ObjListByIntInt {
+class TrunkNumberPreprocessingList : public ObjListByIntInt<TrunkNumberPreprocessing> {
 protected:
-    size_t item_size() {
-        return sizeof (TrunkNumberPreprocessing);
-    }
 
     string sql(BDb * db) {
         return "   select trunk_id, \"order\", src, noa, length, prefix " \
@@ -15,8 +12,7 @@ protected:
             "   order by trunk_id asc, \"order\" asc ";
     }
 
-    inline void parse_item(BDbResult &row, void * obj) {
-        TrunkNumberPreprocessing * item = (TrunkNumberPreprocessing *) obj;
+    inline void parse_item(BDbResult &row, TrunkNumberPreprocessing * item) {
         item->trunk_id = row.get_i(0);
         item->order = row.get_i(1);
         item->src = row.get_b(2);
@@ -25,11 +21,11 @@ protected:
         row.fill_cs(5, item->prefix, sizeof(item->prefix));
     }
 
-    inline int key1(const void *obj) {
-        return ((TrunkNumberPreprocessing *) obj)->trunk_id;
+    inline int key1(TrunkNumberPreprocessing *item) {
+        return item->trunk_id;
     }
-    inline int key2(const void *obj) {
-        return ((TrunkNumberPreprocessing *) obj)->order;
+    inline int key2(TrunkNumberPreprocessing *item) {
+        return item->order;
     }
 
 public:

@@ -6,10 +6,8 @@
 #include "../threads/ThreadLog.h"
 #include "../threads/ThreadSync.h"
 #include "../threads/ThreadLoader.h"
-/*
-#include "../threads/ThreadSyncCounters.h"
-#include "../threads/ThreadSyncCalls.h"
 #include "../threads/ThreadSelectCurrentCalls.h"
+/*
 #include "../threads/ThreadSelectGlobalCounters.h"
 #include "../threads/ThreadBlacklist.h"
 #include "../threads/ThreadBillRuntime.h"
@@ -17,6 +15,8 @@
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
 #include "../threads/ThreadUdpServer.h"
+#include "../threads/ThreadSyncCounters.h"
+#include "../threads/ThreadSyncCalls.h"
 */
 #include "../../src/classes/LogWriterScreen.h"
 #include "../../src/classes/LogWriterFile.h"
@@ -104,10 +104,10 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadLog>();
     registerThread<ThreadSync>();
     registerThread<ThreadLoader>();
-    /*
-    registerThread<ThreadSyncCounters>();
-    registerThread<ThreadSyncCalls>();
     registerThread<ThreadSelectCurrentCalls>();
+
+    /*
+
     registerThread<ThreadSelectGlobalCounters>();
     registerThread<ThreadBlacklist>();
     registerThread<ThreadBillRuntime>();
@@ -115,27 +115,31 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadCheckStartTable>();
     registerThread<ThreadTasks>();
     registerThread<ThreadUdpServer>();
+
+    registerThread<ThreadSyncCounters>();
+    registerThread<ThreadSyncCalls>();
      */
 }
 
 void AppBill::runAppInSingleMode()
 {
     std::vector<std::string> standardThreads {
-      "log",
-      "sync",
-      "loader"
-        /*,
-        "sync_counters",
-        "sync_calls",
-        "currentcalls",
-        "select_global_counters",
-        "blacklist",
-        "runtime",
-        "limitcontrol",
-        "checkstarttable",
-        "tasks",
-        "udp_server"
-         */
+            "log",
+            "sync",
+            "loader",
+            "currentcalls"
+            /*,
+            "select_global_counters",
+            "blacklist",
+            "runtime",
+            "limitcontrol",
+            "checkstarttable",
+            "tasks",
+            "udp_server",
+
+            "sync_counters",
+            "sync_calls"
+             */
     };
 
     for (auto thread: standardThreads) {

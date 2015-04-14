@@ -2,7 +2,7 @@
 
 struct NetworkPrefix {
     int operator_id;
-    char prefix[20];
+    long long int prefix;
     time_t date_from;
     time_t date_to;
     int network_type_id;

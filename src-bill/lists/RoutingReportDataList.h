@@ -3,11 +3,8 @@
 #include "../../src/lists/ObjList.h"
 #include "../models/RoutingReportData.h"
 
-class RoutingReportDataList : public ObjListByPrefix {
+class RoutingReportDataList : public ObjListByPrefix<RoutingReportData> {
 protected:
-    size_t item_size() {
-        return sizeof (RoutingReportData);
-    }
 
     string sql(BDb * db) {
         return "   select prefix, routes " \
@@ -15,13 +12,12 @@ protected:
             "   order by prefix asc ";
     }
 
-    inline void parse_item(BDbResult &row, void * obj) {
-        RoutingReportData * item = (RoutingReportData *) obj;
+    inline void parse_item(BDbResult &row, RoutingReportData * item) {
         row.fill_cs(0, item->prefix, sizeof(item->prefix));
         row.fill_cs(1, item->routes, sizeof(item->routes));
     }
 
-    inline int key(const void *obj) {
+    inline int key(const void *item) {
         return ((RoutingReportData *) obj)->prefix;
     }
 public:

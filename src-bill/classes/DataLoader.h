@@ -9,7 +9,7 @@
 #include "../lists/PricelistList.h"
 #include "../lists/UsageObjList.h"
 #include "../lists/PriceObjList.h"
-#include "../lists/NetworkPrefixList.h"
+#include "../lists/NetworkPrefixObjList.h"
 #include "../lists/ClientCounter.h"
 #include "../lists/FminCounter.h"
 
@@ -27,7 +27,7 @@ struct curr_data {
     shared_ptr<PricelistList> pricelist;
     shared_ptr<UsageObjList> usage;
     shared_ptr<PriceObjList> price;
-    shared_ptr<NetworkPrefixList> network_prefix;
+    shared_ptr<NetworkPrefixObjList> network_prefix;
 
     shared_ptr<ClientCounter> counter_client;
     shared_ptr<FminCounter> counter_fmin;
@@ -45,7 +45,7 @@ public:
 
     Loader<UsageObjList> usage;
     Loader<PriceObjList> price;
-    Loader<NetworkPrefixList> network_prefix;
+    Loader<NetworkPrefixObjList> network_prefix;
 
     mutex counter_rwlock;
     shared_ptr<ClientCounter> counter_client;

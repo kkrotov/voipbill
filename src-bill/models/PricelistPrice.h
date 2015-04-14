@@ -7,5 +7,5 @@ struct PricelistPrice {
     long long int prefix;
     time_t date_from;
     time_t date_to;
-    unsigned int price; // x4
+    double price;
 };

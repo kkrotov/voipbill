@@ -1,14 +1,10 @@
 #pragma once
 
 #include "../../src/lists/ObjList.h"
-#include "../models/obj.h"
+#include "../models/PriceObj.h"
 
-class PriceObjList : public ObjListByIntPrefix {
+class PriceObjList : public ObjListByIntPrefix<PriceObj> {
 protected:
-
-    size_t item_size() {
-        return sizeof (PriceObj);
-    }
 
     string sql(BDb * db) {
         string time = string_date(dt);
@@ -17,30 +13,29 @@ protected:
             "	order by pricelist_id, ndef::varchar";
     }
 
-    inline void parse_item(BDbResult &row, void * obj) {
-        pPriceObj item = (pPriceObj) obj;
+    inline void parse_item(BDbResult &row, PriceObj * item) {
         item->pricelist_id = row.get_i(0);
         memcpy(item->prefix, row.get(1), 21);
         item->price = row.get_i(2);
     }
 
-    inline int key0(const void *obj) {
-        return ( (pPriceObj) obj)->pricelist_id;
+    inline int key0(PriceObj *item) {
+        return item->pricelist_id;
     }
 
-    inline char * key(const void *obj) {
-        return ( (pPriceObj) obj)->prefix;
+    inline char * key(PriceObj *item) {
+        return item->prefix;
     }
 
 
 public:
-    pPriceObj find(const int pricelist_id, const char * prefix) {
-        return (pPriceObj) _find(pricelist_id, prefix);
+    PriceObj * find(const int pricelist_id, const char * prefix) {
+        return (PriceObj *) _find(pricelist_id, prefix);
     }
 
-    pPriceObj find(const int pricelist_id, const long long int nPrefix) {
+    PriceObj * find(const int pricelist_id, const long long int nPrefix) {
         char prefix[20];
         sprintf(prefix, "%lld", nPrefix);
-        return (pPriceObj) _find(pricelist_id, prefix);
+        return (PriceObj *) _find(pricelist_id, prefix);
     }
 };

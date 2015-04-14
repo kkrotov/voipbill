@@ -101,7 +101,7 @@ void CalcFull::calculateOperator(pCallObj call) {
     call->amount_op = floor((float) (call->len_op * call->price_op) / (60 * 100) + 0.5);
 }
 
-pUsageObj CalcFull::spawnUsageVoip(pCallObj call) {
+UsageObj * CalcFull::spawnUsageVoip(pCallObj call) {
 
     if (call->isTrank()) {
         return data.usage->find(call->instance_id);
@@ -127,7 +127,7 @@ void CalcFull::calculateMcn(pCallObj call) {
 
 }
 
-void CalcFull::calculateMcnOut(pCallObj call, pUsageObj usage) {
+void CalcFull::calculateMcnOut(pCallObj call, UsageObj * usage) {
 
     if (call->isLocal())
         call->pricelist_mcn_id = usage->pl_local_id;
@@ -165,7 +165,7 @@ void CalcFull::calculateMcnOut(pCallObj call, pUsageObj usage) {
 
 }
 
-void CalcFull::calculateMcnIn(pCallObj call, pUsageObj usage) {
+void CalcFull::calculateMcnIn(pCallObj call, UsageObj * usage) {
     if (isUsage7800(call)) {
         pOperator oper = data.oper->find(call->operator_id);
         if (oper != 0 && oper->client_7800_pricelist_id != 0) {
@@ -230,7 +230,7 @@ int CalcFull::getCallLength(int len, bool byMinutes, bool fullFirstMinute, bool 
     }
 }
 
-void CalcFull::updateFreeMinsCounters(pCallObj call, pUsageObj usage) {
+void CalcFull::updateFreeMinsCounters(pCallObj call, UsageObj * usage) {
     if (call->isLocal() &&
             usage->free_seconds > 0 &&
             (call->redirect_num[0] == 0 || usage->paid_redirect == false)

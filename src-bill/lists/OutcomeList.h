@@ -4,11 +4,8 @@
 #include "../models/Outcome.h"
 #include "../classes/AppBill.h"
 
-class OutcomeList : public ObjListByInt {
+class OutcomeList : public ObjListByInt<Outcome> {
 protected:
-    size_t item_size() {
-        return sizeof (Outcome);
-    }
 
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
@@ -18,8 +15,7 @@ protected:
             "   order by id asc ";
     }
 
-    inline void parse_item(BDbResult &row, void * obj) {
-        Outcome * item = (Outcome *) obj;
+    inline void parse_item(BDbResult &row, Outcome * item) {
         item->id = row.get_i(0);
         row.fill_cs(1, item->name, sizeof(item->name));
         item->type_id = row.get_i(2);
@@ -30,8 +26,8 @@ protected:
         row.fill_cs(7, item->called_station_id, sizeof(item->called_station_id));
     }
 
-    inline int key(const void *obj) {
-        return ((Outcome *) obj)->id;
+    inline int key(Outcome *item) {
+        return item->id;
     }
 public:
     Outcome * find(const int id) {

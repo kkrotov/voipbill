@@ -3,10 +3,6 @@
 #include "BaseData.h"
 #include "../lists/ClientList.h"
 
-class ClientData : public BaseData {
-
-    ObjList * create() {
-        return new ClientList();
-    }
+class ClientData : public BaseData<ClientList> {
 
 };

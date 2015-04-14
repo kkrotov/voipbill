@@ -4,11 +4,8 @@
 #include "../models/RouteCase.h"
 #include "../classes/AppBill.h"
 
-class RouteCaseList : public ObjListByInt {
+class RouteCaseList : public ObjListByInt<RouteCase> {
 protected:
-    size_t item_size() {
-        return sizeof (RouteCase);
-    }
 
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
@@ -18,14 +15,13 @@ protected:
             "   order by id asc ";
     }
 
-    inline void parse_item(BDbResult &row, void * obj) {
-        RouteCase * item = (RouteCase *) obj;
+    inline void parse_item(BDbResult &row, RouteCase * item) {
         item->id = row.get_i(0);
         row.fill_cs(1, item->name, sizeof(item->name));
     }
 
-    inline int key(const void *obj) {
-        return ((RouteCase *) obj)->id;
+    inline int key(RouteCase *item) {
+        return item->id;
     }
 public:
     RouteCase * find(const int id) {
