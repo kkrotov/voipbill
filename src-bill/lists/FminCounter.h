@@ -52,17 +52,17 @@ public:
         return counter[key];
     }
 
-    int & get(const int key) {
+    int & get(int key) {
         return counter[key];
     }
 
-    void set(const int usage_id, const int group_id, const int new_value) {
-        const int key = (usage_id << 10) + group_id;
+    void set(int usage_id, int group_id, int new_value) {
+        int key = (usage_id << 10) + group_id;
         counter[key] = new_value;
     }
 
-    void add(const int usage_id, const int group_id, const int add_value) {
-        const int key = (usage_id << 10) + group_id;
+    void add(int usage_id, int group_id, int add_value) {
+        int key = (usage_id << 10) + group_id;
         int & value = counter[key];
         value += add_value;
     }

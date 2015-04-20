@@ -3,13 +3,13 @@
 #include "../../src/lists/ObjList.h"
 #include "../models/Tariff.h"
 
-class TariffList : public ObjListByInt<Tariff> {
+class TariffList : public ObjList<Tariff> {
 protected:
 
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
         return "   select id, freemin, freemin_for_number, pricelist_id, paid_redirect, tariffication_by_minutes, tariffication_full_first_minute, tariffication_free_first_seconds " \
-            "   from billing.tarif " \
+            "   from billing.tariff " \
             "   order by id asc ";
     }
 
@@ -24,11 +24,24 @@ protected:
         item->tariffication_free_first_seconds = row.get_b(7);
     }
 
-    inline int key(Tariff *item) {
-        return item->id;
-    }
+    struct key_id {
+        bool operator() (const Tariff & left, int id) {
+            return left.id < id;
+        }
+        bool operator() (int id, const Tariff &  right) {
+            return id < right.id;
+        }
+    };
+
 public:
-    Tariff * find(const int id) {
-        return (Tariff *) _find(id);
+    Tariff * find(int id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

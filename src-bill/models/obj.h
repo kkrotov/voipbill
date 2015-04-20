@@ -23,24 +23,6 @@ typedef struct _MobObj {
     char prefix[20];
 } MobObj, *pMobObj;
 
-typedef struct _GlobalCountersObj {
-    int client_id;
-    int sum;
-    int sum_day;
-    int sum_month;
-    
-    double sumDay() {
-        return ((int) (sum_day * 1.18 + 0.5)) / 100.0;
-    }
-
-    double sumMonth() {
-        return ((int) (sum_month * 1.18 + 0.5)) / 100.0;
-    }
-
-    double sumBalance() {
-        return ((int) (sum * 1.18 + 0.5)) / 100.0;
-    }
-} GlobalCountersObj, *pGlobalCountersObj;
 
 typedef struct _ClientCounterObj {
     int client_id;

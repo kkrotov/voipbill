@@ -7,4 +7,5 @@ struct Operator {
     int local_network_pricelist_id;
     int client_7800_pricelist_id;
     int operator_7800_pricelist_id;
+
 };

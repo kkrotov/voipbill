@@ -6,8 +6,8 @@ class PullTariff : public BasePull {
 public:
     void init() {
         event = "tariff";
-        src_table = "billing.tarif";
-        dst_table = "billing.tarif";
+        src_table = "billing.tariff";
+        dst_table = "billing.tariff";
 
         key = "id";
 

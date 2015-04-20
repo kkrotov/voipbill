@@ -4,7 +4,7 @@
 #include "../models/InstanceSettings.h"
 #include "../classes/AppBill.h"
 
-class InstanceSettingsList : public ObjListByInt<InstanceSettings> {
+class InstanceSettingsList : public ObjList<InstanceSettings> {
 protected:
 
     string sql(BDb * db) {
@@ -21,12 +21,25 @@ protected:
         item->city_geo_id = row.get_i(2);
     }
 
-    inline int key(InstanceSettings *item) {
-        return item->id;
-    }
+    struct key_id {
+        bool operator() (const InstanceSettings & left, int id) {
+            return left.id < id;
+        }
+        bool operator() (int id, const InstanceSettings & right) {
+            return id < right.id;
+        }
+    };
+
 public:
-    InstanceSettings * find(const int id) {
-        return (InstanceSettings *) _find(id);
+    InstanceSettings * find(int id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };
 

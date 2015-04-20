@@ -3,7 +3,7 @@
 #include "../../src/lists/ObjList.h"
 #include "../models/GeoPrefix.h"
 
-class GeoPrefixList : public ObjListByPrefix<GeoPrefix> {
+class GeoPrefixList : public ObjList<GeoPrefix> {
 protected:
 
     string sql(BDb * db) {
@@ -21,14 +21,40 @@ protected:
         item->mob = row.get_b(5);
     }
 
-    inline char * key(GeoPrefix *item) {
-        return item->prefix;
+    struct key_prefix {
+        bool operator() (const GeoPrefix & left, char * prefix) {
+            return strcmp(left.prefix, prefix) < 0;
+        }
+        bool operator() (char * prefix, const GeoPrefix & right) {
+            return strcmp(prefix, right.prefix) < 0;
+        }
+    };
+
+    GeoPrefix * _find(char * prefix) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, prefix, key_prefix());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 
-
 public:
+    GeoPrefix * find(char * prefix) {
+        char tmpPrefix[20];
+        strcpy(tmpPrefix, prefix);
+        int len = strlen(tmpPrefix);
+        while (len > 0) {
+            tmpPrefix[len] = 0;
+            auto result = _find(tmpPrefix);
+            if (result != 0) {
+                return result;
+            }
 
-    GeoPrefix * find(const char * prefix) {
-        return (GeoPrefix *) _find(prefix);
+            len -= 1;
+        }
+        return nullptr;
     }
 };

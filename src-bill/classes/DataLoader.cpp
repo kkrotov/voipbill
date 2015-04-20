@@ -16,19 +16,6 @@ bool DataLoader::get(DT &dt, curr_data &data, bool countersAlreadyLocked) {
         data.counter_client = counter_client;
     }
 
-    {
-        lock_guard<mutex> lock(rwlock);
-
-        data.server = server;
-        data.client = client;
-        data.dest = dest;
-        data.oper = oper;
-        data.pricelist = pricelist;
-        data.usage = usage.get(dt.day);
-        data.price = price.get(dt.day);
-        data.network_prefix = network_prefix.get(dt.day);
-    }
-
     return ready(dt, data);
 }
 
@@ -48,37 +35,12 @@ bool DataLoader::load(BDb *db, DT &dt, curr_data &data, bool countersAlreadyLock
         }
     }
 
-    {
-        lock_guard<mutex> lock(rwlock);
-        try {
-            data.server = server;
-            data.client = client;
-            data.dest = dest;
-            data.oper = oper;
-            data.pricelist = pricelist;
-            data.usage = usage.get_or_load(db, dt.day);
-            data.price = price.get_or_load(db, dt.day);
-            data.network_prefix = network_prefix.get_or_load(db, dt.day);
-        } catch (Exception &e) {
-            Log::error(e.what());
-            return false;
-        }
-    }
-
     return ready(dt, data);
 }
 
 inline bool DataLoader::ready(DT &dt, curr_data &data) {
 
     if (
-            data.server == 0 ||
-            data.client == 0 ||
-            data.dest == 0 ||
-            data.oper == 0 ||
-            data.pricelist == 0 ||
-            data.usage == 0 ||
-            data.price == 0 ||
-            data.network_prefix == 0 ||
             data.counter_fmin == 0 ||
             data.counter_client == 0
             ) {

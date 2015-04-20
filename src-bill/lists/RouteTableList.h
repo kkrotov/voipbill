@@ -4,7 +4,7 @@
 #include "../models/RouteTable.h"
 #include "../classes/AppBill.h"
 
-class RouteTableList : public ObjListByInt<RouteTable> {
+class RouteTableList : public ObjList<RouteTable> {
 protected:
 
     string sql(BDb * db) {
@@ -20,11 +20,24 @@ protected:
         row.fill_cs(1, item->name, sizeof(item->name));
     }
 
-    inline int key(RouteTable *item) {
-        return item->id;
-    }
+    struct key_id {
+        bool operator() (const RouteTable & left, int id) {
+            return left.id < id;
+        }
+        bool operator() (int id, const RouteTable & right) {
+            return id < right.id;
+        }
+    };
+
 public:
-    RouteTable * find(const int id) {
-        return (RouteTable *) _find(id);
+    RouteTable * find(int id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

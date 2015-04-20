@@ -7,4 +7,5 @@ struct TrunkNumberPreprocessing {
     int noa;
     int length;
     char prefix[11];
+
 };

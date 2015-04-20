@@ -29,73 +29,135 @@ bool ThreadLoader::prepare() {
 void ThreadLoader::run() {
 
     string event;
-    ServerList * server = 0;
-    ClientList * client = 0;
-    DestObjList * dest = 0;
-    OperatorList * oper = 0;
-    PricelistList * pricelist = 0;
-    UsageObjList * usage = 0;
-    PriceObjList * price = 0;
-    NetworkPrefixObjList * network_prefix = 0;
 
     try {
-        BDbResult res = db_calls.query("SELECT event from event.queue WHERE app='billing'");
+        BDbResult res = db_calls.query("SELECT event from event.queue");
         while (res.next()) {
 
             event = res.get_s(0);
 
             time_t tday = get_tday();
 
-            db_calls.exec("DELETE from event.queue WHERE app='billing' and event='" + event + "'");
+            db_calls.exec("DELETE from event.queue WHERE event='" + event + "'");
 
 
             if (event == "clients") {
-
-                client = new ClientList();
-                client->load(&db_calls, 0);
+                data->client.load(&db_calls);
 
                 {
-                    lock_guard<mutex> lock(loader->rwlock);
+                    lock_guard<mutex> lock(loader->counter_rwlock);
 
                     shared_ptr<ClientCounter> cc = loader->counter_client;
                     if (cc != 0) cc->reload(&db_calls);
                 }
 
-            } else
-                if (event == "dest") {
+            } else if (event == "airp") {
 
-                dest = new DestObjList();
-                dest->load(&db_calls, 0);
+                data->airp.load(&db_calls);
 
-            } else
-                if (event == "operator") {
+            } else if (event == "number") {
 
-                oper = new OperatorList();
-                oper->load(&db_calls, 0);
+                data->number.load(&db_calls);
 
-            } else
-                if (event == "pricelist") {
+            } else if (event == "outcome") {
 
-                pricelist = new PricelistList();
-                pricelist->load(&db_calls, 0);
+                data->outcome.load(&db_calls);
 
-            } else
-                if (event == "usage") {
+            } else if (event == "prefixlist") {
 
-                usage = new UsageObjList();
-                usage->load(&db_calls, tday);
+                data->prefixlist.load(&db_calls);
 
-            } else
-                if (event == "price") {
+            } else if (event == "prefixlist_prefix") {
 
-                price = new PriceObjList();
-                price->load(&db_calls, tday);
+                data->prefixlistPrefix.load(&db_calls);
 
-            } else
-                if (event == "network_prefix") {
+            } else if (event == "release_reason") {
 
-                network_prefix = new NetworkPrefixObjList();
-                network_prefix->load(&db_calls, tday);
+                data->releaseReason.load(&db_calls);
+
+            } else if (event == "route_case") {
+
+                data->routeCase.load(&db_calls);
+
+            } else if (event == "route_table") {
+
+                data->routeTable.load(&db_calls);
+
+            } else if (event == "route_table") {
+
+                data->routeTable.load(&db_calls);
+
+            } else if (event == "route_table") {
+
+                data->routeTable.load(&db_calls);
+
+            } else if (event == "route_table_route") {
+
+                data->routeTableRoute.load(&db_calls);
+
+            } else if (event == "routing_report_data") {
+
+                //
+
+            } else if (event == "trunk") {
+
+                data->trunk.load(&db_calls);
+
+            } else if (event == "trunk_number_preprocessing") {
+
+                data->trunkNumberPreprocessing.load(&db_calls);
+
+            } else if (event == "trunk_priority") {
+
+                data->trunkPriority.load(&db_calls);
+
+            } else if (event == "trunk_rule") {
+
+                data->trunkRule.load(&db_calls);
+
+            } else if (event == "defs") {
+
+                data->pricelistPrice.load(&db_calls);
+
+            } else if (event == "instance_settings") {
+
+                data->instanceSettings.load(&db_calls);
+
+            } else if (event == "network_prefix") {
+
+                data->networkPrefix.load(&db_calls);
+
+            } else if (event == "operator") {
+
+                data->voipOperator.load(&db_calls);
+
+            } else if (event == "pricelist") {
+
+                data->pricelist.load(&db_calls);
+
+            } else if (event == "service_number") {
+
+                data->serviceNumber.load(&db_calls);
+
+            } else if (event == "service_trunk") {
+
+                data->serviceTrunk.load(&db_calls);
+
+            } else if (event == "service_trunk_settings") {
+
+                data->serviceTrunkSettings.load(&db_calls);
+
+            } else if (event == "tariff") {
+
+                data->tariff.load(&db_calls);
+
+            } else if (event == "tariff_change_log") {
+
+                data->tariffChangeLog.load(&db_calls);
+
+            } else if (event == "server") {
+
+                data->server.load(&db_calls);
 
             }
 
@@ -104,10 +166,9 @@ void ThreadLoader::run() {
         }
     } catch (Exception &e) {
 
-        errors++;
         if (event.length() > 0) {
             try {
-                db_calls.exec("INSERT INTO event.queue(app,event)VALUES('billing','" + event + "')");
+                db_calls.exec("INSERT INTO event.queue(event)VALUES('" + event + "')");
             } catch (...) {
             }
             event.clear();
@@ -117,68 +178,10 @@ void ThreadLoader::run() {
         throw e;
     }
 
-    if (server != 0 || client != 0 || dest != 0 || oper != 0 || pricelist != 0 || usage != 0 || price != 0 || network_prefix != 0) {
-        lock_guard<mutex> lock(loader->rwlock);
-
-        if (server != 0) {
-            if (server->loaded) loader->server = shared_ptr<ServerList>(server);
-            else delete server;
-            server = 0;
-        }
-        if (client != 0) {
-            if (client->loaded) loader->client = shared_ptr<ClientList>(client);
-            else delete client;
-            client = 0;
-        }
-        if (dest != 0) {
-            if (dest->loaded) loader->dest = shared_ptr<DestObjList>(dest);
-            else delete dest;
-            dest = 0;
-        }
-        if (oper != 0) {
-            if (oper->loaded) loader->oper = shared_ptr<OperatorList>(oper);
-            else delete oper;
-            oper = 0;
-        }
-
-        if (pricelist != 0) {
-            if (pricelist->loaded) loader->pricelist = shared_ptr<PricelistList>(pricelist);
-            else delete pricelist;
-            pricelist = 0;
-        }
-
-
-        if (usage != 0) {
-            if (usage->loaded) {
-                loader->usage.addlist(usage->dt, usage);
-                loader->usageReloadTimestamp = time(NULL);
-            } else {
-                delete usage;
-            }
-            usage = 0;
-        }
-        if (price != 0) {
-            if (price->loaded) loader->price.addlist(price->dt, price);
-            else delete price;
-            price = 0;
-        }
-        if (network_prefix != 0) {
-            if (network_prefix->loaded) loader->network_prefix.addlist(network_prefix->dt, network_prefix);
-            else delete network_prefix;
-            network_prefix = 0;
-        }
-    }
-
 }
 
 void ThreadLoader::htmlfull(stringstream &html) {
     this->html(html);
-
-    html << "Time loop: <b>" << t.sloop() + "</b><br/>\n";
-    html << "Time full loop: <b>" << t.sfull() + "</b><br/>\n";
-    html << "loops: <b>" << t.count << "</b><br/>\n";
-    html << "Loader errors count: <b>" << errors << "</b><br/>\n";
-    html << "<br/>\n";
 
     time_t tday = get_tday();
     time_t tmonth = get_tmonth();
@@ -186,8 +189,6 @@ void ThreadLoader::htmlfull(stringstream &html) {
     html << "<table border=1 width=100%>";
     html << "<tr><th></th><th>Updated at</th><th>Size</th><th>Rows</th><th>Last time</th><th>Total time</th></tr>";
     {
-        lock_guard<mutex> lock(loader->rwlock);
-
         {
             auto dl = &data->server;
             html << "<tr><th>server</th>";
@@ -336,13 +337,6 @@ void ThreadLoader::htmlfull(stringstream &html) {
             html << "</tr>\n";
         }
         {
-            auto dl = &data->usage;
-            html << "<tr><th>usage</th>";
-            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
-            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
-            html << "</tr>\n";
-        }
-        {
             auto dl = &data->serviceNumber;
             html << "<tr><th>serviceNumber</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
@@ -378,98 +372,17 @@ void ThreadLoader::htmlfull(stringstream &html) {
             html << "</tr>\n";
         }
         {
-            auto dl = &data->currentCdrData;
-            html << "<tr><th>currentCdrData</th>";
+            auto dl = &data->globalCounters;
+            html << "<tr><th>globalCounters</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto ol = loader->server.get();
-            html << "<tr><th>Server</th>";
-            if (ol != 0) {
-                html << "<td>" << string_time(ol->loadTime()) << "</td><td>" << ol->dataSize() / 1024 << " Kb</td><td>" <<
-                ol->size() << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
-            } else {
-                html << "<td colspan=5></td>";
-            }
-            html << "</tr>\n";
-        }
-        {
-            auto ol = loader->client.get();
-            html << "<tr><th>Client</th>";
-            if (ol != 0) {
-                html << "<td>" << string_time(ol->loadTime()) << "</td><td>" << ol->dataSize() / 1024 << " Kb</td><td>" <<
-                ol->size() << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
-            } else {
-                html << "<td colspan=5></td>";
-            }
-            html << "</tr>\n";
-        }
-        {
-            auto ol = loader->dest.get();
-            html << "<tr><th>Prefix</th>";
-            if (ol != 0) {
-                html << "<td>" << string_time(ol->loadTime()) << "</td><td>" << ol->dataSize() / 1024 << " Kb</td><td>" <<
-                ol->size() << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
-            } else {
-                html << "<td colspan=5></td>";
-            }
-            html << "</tr>\n";
-        }
-        {
-            auto ol = loader->oper.get();
-            html << "<tr><th>Operator</th>";
-            if (ol != 0) {
-                html << "<td>" << string_time(ol->loadTime()) << "</td><td>" << ol->dataSize() / 1024 << " Kb</td><td>" <<
-                ol->size() << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
-            } else {
-                html << "<td colspan=5></td>";
-            }
-            html << "</tr>\n";
-        }
-        {
-            auto ol = loader->pricelist.get();
-            html << "<tr><th>Pricelist</th>";
-            if (ol != 0) {
-                html << "<td>" << string_time(ol->loadTime()) << "</td><td>" << ol->dataSize() / 1024 << " Kb</td><td>" <<
-                ol->size() << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
-            } else {
-                html << "<td colspan=5></td>";
-            }
-            html << "</tr>\n";
-        }
-        {
-            auto ol = loader->usage.get(tday).get();
-            html << "<tr><th>Usage</th>";
-            if (ol != 0) {
-                html << "<td>" << string_time(ol->loadTime()) << "</td><td>" << ol->dataSize() / 1024 << " Kb</td><td>" <<
-                ol->size() << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
-            } else {
-                html << "<td colspan=5></td>";
-            }
-            html << "</tr>\n";
-        }
-        {
-            auto ol = loader->price.get(tday).get();
-            html << "<tr><th>Price</th>";
-            if (ol != 0) {
-                html << "<td>" << string_time(ol->loadTime()) << "</td><td>" << ol->dataSize() / 1024 << " Kb</td><td>" <<
-                ol->size() << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
-            } else {
-                html << "<td colspan=5></td>";
-            }
-            html << "</tr>\n";
-        }
-        {
-            auto ol = loader->network_prefix.get(tday).get();
-            html << "<tr><th>Network prefix</th>";
-            if (ol != 0) {
-                html << "<td>" << string_time(ol->loadTime()) << "</td><td>" << ol->dataSize() / 1024 << " Kb</td><td>" <<
-                ol->size() << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() << "</td>";
-            } else {
-                html << "<td colspan=5></td>";
-            }
+            auto dl = &data->currentCdrData;
+            html << "<tr><th>currentCdrData</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
     }
@@ -508,90 +421,21 @@ void ThreadLoader::htmlfull(stringstream &html) {
 
 bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader, DataContainer *data) {
     bool success = true;
-    time_t tday = get_tday();
 
     if (loader == 0) loader = this->loader;
     if (data == 0) data = this->data;
     if (db == 0) db = &db_calls;
 
-    ServerList * server = new ServerList();
-    ClientList * client = new ClientList();
-    DestObjList * dest = new DestObjList();
-    OperatorList * oper = new OperatorList();
-    PricelistList * pricelist = new PricelistList();
-    UsageObjList * usage = new UsageObjList();
-    PriceObjList * price = new PriceObjList();
-    NetworkPrefixObjList * network_prefix = new NetworkPrefixObjList();
 
     try {
         db_calls.exec("DELETE from event.queue");
 
         data->loadAll(db);
 
-        server->load(db);
-
-        client->load(db);
-
-        dest->load(db);
-
-        oper->load(db);
-
-        pricelist->load(db);
-
-        usage->load(db, tday);
-
-        price->load(db, tday);
-
-        network_prefix->load(db, tday);
-
     } catch (Exception &e) {
         e.addTrace("Loader::do_load_data");
         Log::exception(e);
         success = false;
-    }
-
-    {
-        lock_guard<mutex> lock(loader->rwlock);
-
-        if (server->loaded)
-            loader->server = shared_ptr<ServerList>(server);
-        else
-            delete server;
-
-        if (client->loaded)
-            loader->client = shared_ptr<ClientList>(client);
-        else
-            delete client;
-
-        if (dest->loaded)
-            loader->dest = shared_ptr<DestObjList>(dest);
-        else
-            delete dest;
-
-        if (oper->loaded)
-            loader->oper = shared_ptr<OperatorList>(oper);
-        else
-            delete oper;
-
-        if (pricelist->loaded)
-            loader->pricelist = shared_ptr<PricelistList>(pricelist);
-        else
-            delete pricelist;
-
-        if (usage->loaded)
-            loader->usage.addlist(tday, usage);
-        else
-            delete usage;
-
-        if (price->loaded)
-            loader->price.addlist(tday, price);
-        else
-            delete price;
-
-        if (network_prefix->loaded)
-            loader->network_prefix.addlist(tday, network_prefix);
-        else
-            delete network_prefix;
     }
 
     return success;
@@ -642,5 +486,4 @@ ThreadLoader::ThreadLoader() {
     loader = DataLoader::instance();
     data = DataContainer::instance();
     db_calls.setCS(app().conf.db_calls);
-    errors = 0;
 }

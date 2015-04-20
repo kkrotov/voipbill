@@ -78,8 +78,10 @@ void set_action(int signum, __sighandler_t handler) {
 }
 
 void Daemon::initSignalHandler() {
+    /*
     int catch_signals[] = {SIGSEGV, SIGINT, SIGHUP, SIGTERM, SIGQUIT, SIGABRT};
     for (auto signal : catch_signals) {
         set_action(signal, termination_handler);
     }
+    */
 }

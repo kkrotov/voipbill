@@ -7,34 +7,13 @@ protected:
     Billing *billing;
     Call *call;
     Cdr *cdr;
+    PreparedData *data;
 
-    ServerList *serverList;
-    InstanceSettingsList *instanceSettingsList;
-    TrunkList *trunkList;
-    TrunkNumberPreprocessingList *trunkNumberPreprocessingList;
-    GeoPrefixList *geoPrefixList;
-    ServiceNumberList *serviceNumberList;
-    ServiceTrunkList *serviceTrunkList;
-    ServiceTrunkSettingsList *serviceTrunkSettingsList;
-    TariffList *tariffList;
-    TariffChangeLogList *tariffChangeLogList;
-    PricelistList *pricelistList;
-    PricelistPriceList *pricelistPriceList;
-    NetworkPrefixList *networkPrefixList;
-    OperatorList *operatorList;
-    NumberList *numberList;
-    PrefixlistList *prefixlistList;
-    PrefixlistPrefixList *prefixlistPrefixList;
-
-    Server *server;
-    InstanceSettings *instanceSettings;
     Trunk *trunk;
-
 
 public:
     BillingCall(Billing *billing);
-    bool init(Call *call, Cdr *cdr);
-    void calc();
+    void calc(Call *call, Cdr *cdr, PreparedData *preparedData);
 
 protected:
     void numberPreprocessing();

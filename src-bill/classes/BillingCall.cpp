@@ -5,55 +5,12 @@ BillingCall::BillingCall(Billing *billing) {
     this->billing = billing;
 }
 
-bool BillingCall::init(Call *call, Cdr *cdr) {
+void BillingCall::calc(Call *call, Cdr *cdr, PreparedData *preparedData) {
     this->call = call;
     this->cdr = cdr;
+    this->data = preparedData;
 
-    serverList = (ServerList *)billing->data->server.get().get();
-    instanceSettingsList = (InstanceSettingsList *)billing->data->instanceSettings.get().get();
-    trunkList = (TrunkList *)billing->data->trunk.get().get();
-    trunkNumberPreprocessingList = (TrunkNumberPreprocessingList *)billing->data->trunkNumberPreprocessing.get().get();
-    geoPrefixList = (GeoPrefixList *)billing->data->geoPrefix.get().get();
-    serviceTrunkList = (ServiceTrunkList *)billing->data->serviceTrunk.get().get();
-    serviceTrunkSettingsList = (ServiceTrunkSettingsList *)billing->data->serviceTrunkSettings.get().get();
-    serviceNumberList = (ServiceNumberList *)billing->data->serviceNumber.get().get();
-    tariffList = (TariffList *)billing->data->tariff.get().get();
-    tariffChangeLogList = (TariffChangeLogList *)billing->data->tariffChangeLog.get().get();
-    pricelistList = (PricelistList *)billing->data->pricelist.get().get();
-    pricelistPriceList = (PricelistPriceList *)billing->data->pricelistPrice.get().get();
-    networkPrefixList = (NetworkPrefixList *)billing->data->networkPrefix.get().get();
-    operatorList = (OperatorList *)billing->data->voipOperator.get().get();
-    numberList = (NumberList *)billing->data->number.get().get();
-    prefixlistList = (PrefixlistList *)billing->data->prefixlist.get().get();
-    prefixlistPrefixList = (PrefixlistPrefixList *)billing->data->prefixlistPrefix.get().get();
-
-    if (serverList == nullptr) return false;
-    if (instanceSettingsList == nullptr) return false;
-    if (trunkList == nullptr) return false;
-    if (trunkNumberPreprocessingList == nullptr) return false;
-    if (geoPrefixList == nullptr) return false;
-    if (serviceTrunkList == nullptr) return false;
-    if (serviceTrunkSettingsList == nullptr) return false;
-    if (serviceNumberList == nullptr) return false;
-    if (tariffList == nullptr) return false;
-    if (tariffChangeLogList == nullptr) return false;
-    if (pricelistList == nullptr) return false;
-    if (pricelistPriceList == nullptr) return false;
-    if (networkPrefixList == nullptr) return false;
-    if (operatorList == nullptr) return false;
-
-    server = serverList->find(app().conf.instance_id);
-    instanceSettings = instanceSettingsList->find(app().conf.instance_id);
-
-    if (server == nullptr) return false;
-    if (instanceSettings == nullptr) return false;
-
-
-    return true;
-}
-
-void BillingCall::calc() {
-    trunk = trunkList->find(getRoute());
+    trunk = data->trunk->find(getRoute());
     if (trunk == nullptr) {
         return;
     }
@@ -74,9 +31,9 @@ void BillingCall::fillGeoPrefix() {
 
     GeoPrefix * geoPrefix;
     if (call->orig) {
-        geoPrefix = geoPrefixList->find(call->dst_number);
+        geoPrefix = data->geoPrefix->find(call->dst_number);
     } else {
-        geoPrefix = geoPrefixList->find(call->src_number);
+        geoPrefix = data->geoPrefix->find(call->src_number);
     }
 
     if (geoPrefix != nullptr) {
@@ -92,7 +49,7 @@ void BillingCall::numberPreprocessing() {
     int order = 1;
 
     while (true) {
-        auto numberPreprocessing = trunkNumberPreprocessingList->find(trunk->id, order);
+        auto numberPreprocessing = data->trunkNumberPreprocessing->find(trunk->id, order);
         if (numberPreprocessing == nullptr) {
             break;
         }
@@ -114,10 +71,10 @@ void BillingCall::numberPreprocessing() {
 }
 
 int BillingCall::getDest(GeoPrefix * geoPrefix) {
-    if (geoPrefix->geo_id == instanceSettings->city_geo_id) {
+    if (geoPrefix->geo_id == data->instanceSettings->city_geo_id) {
         return -1;
     } else {
-        auto regionIds = instanceSettings->getRegionIds();
+        auto regionIds = data->instanceSettings->getRegionIds();
         for (auto it = regionIds.begin(); it != regionIds.end(); ++it) {
             if (geoPrefix->region_id == *it) {
                 return 0;
@@ -128,7 +85,7 @@ int BillingCall::getDest(GeoPrefix * geoPrefix) {
 }
 
 void BillingCall::calcByTrunk() {
-    auto serviceTrunk = serviceTrunkList->find(getRoute(), time(NULL));
+    auto serviceTrunk = data->serviceTrunk->find(getRoute(), time(NULL));
     if (serviceTrunk == nullptr) {
         return;
     }
@@ -145,7 +102,7 @@ void BillingCall::calcByTrunk() {
 }
 
 void BillingCall::calcByNumber() {
-    auto serviceNumber = serviceNumberList->find(getNumber(), time(NULL));
+    auto serviceNumber = data->serviceNumber->find(getNumber(), time(NULL));
     if (serviceNumber == nullptr) {
         return;
     }
@@ -164,7 +121,7 @@ void BillingCall::calcByNumber() {
 void BillingCall::calcOrigByTrunk(ServiceTrunk *serviceTrunk) {
     int order = 1;
     while (true) {
-        auto trunkSettings = serviceTrunkSettingsList->find(serviceTrunk->id, true, order);
+        auto trunkSettings = data->serviceTrunkSettings->find(serviceTrunk->id, true, order);
         if (trunkSettings == nullptr) {
             return;
         }
@@ -178,12 +135,12 @@ void BillingCall::calcOrigByTrunk(ServiceTrunk *serviceTrunk) {
             continue;
         }
 
-        auto pricelist = pricelistList->find(trunkSettings->pricelist_id);
+        auto pricelist = data->pricelist->find(trunkSettings->pricelist_id);
         if (pricelist == nullptr) {
             continue;
         }
 
-        auto price = pricelistPriceList->find(trunkSettings->pricelist_id, call->src_number, time(NULL));
+        auto price = data->pricelistPrice->find(trunkSettings->pricelist_id, call->src_number, time(NULL));
         if (price == nullptr) {
             continue;
         }
@@ -204,7 +161,7 @@ void BillingCall::calcOrigByTrunk(ServiceTrunk *serviceTrunk) {
 void BillingCall::calcTermByTrunk(ServiceTrunk *serviceTrunk) {
     int order = 1;
     while (true) {
-        auto trunkSettings = serviceTrunkSettingsList->find(serviceTrunk->id, false, order);
+        auto trunkSettings = data->serviceTrunkSettings->find(serviceTrunk->id, false, order);
         if (trunkSettings == nullptr) {
             return;
         }
@@ -218,12 +175,12 @@ void BillingCall::calcTermByTrunk(ServiceTrunk *serviceTrunk) {
             continue;
         }
 
-        auto pricelist = pricelistList->find(trunkSettings->pricelist_id);
+        auto pricelist = data->pricelist->find(trunkSettings->pricelist_id);
         if (pricelist == nullptr) {
             continue;
         }
 
-        auto price = pricelistPriceList->find(trunkSettings->pricelist_id, call->src_number, time(NULL));
+        auto price = data->pricelistPrice->find(trunkSettings->pricelist_id, call->src_number, time(NULL));
         if (price == nullptr) {
             continue;
         }
@@ -242,7 +199,7 @@ void BillingCall::calcTermByTrunk(ServiceTrunk *serviceTrunk) {
 }
 
 void BillingCall::calcOrigByNumber(ServiceNumber *serviceNumber) {
-    auto logTariff = tariffChangeLogList->find(serviceNumber->id, time(NULL));
+    auto logTariff = data->tariffChangeLog->find(serviceNumber->id, time(NULL));
     if (logTariff == nullptr) {
         return;
     }
@@ -264,14 +221,14 @@ void BillingCall::calcOrigByNumber(ServiceNumber *serviceNumber) {
         tariffId = logTariff->tariff_id_sng;
 
 
-    auto tariff = tariffList->find(tariffId);
+    auto tariff = data->tariff->find(tariffId);
     if (tariff == nullptr) {
         return;
     }
 
     call->pricelist_id = tariff->pricelist_id;
 
-    auto price = pricelistPriceList->find(call->pricelist_id, getRemoteNumber(), time(NULL));
+    auto price = data->pricelistPrice->find(call->pricelist_id, call->dst_number, time(NULL));
     if (price == nullptr) {
         return;
     }
@@ -288,12 +245,12 @@ void BillingCall::calcOrigByNumber(ServiceNumber *serviceNumber) {
 }
 
 void BillingCall::calcTermByNumber(ServiceNumber *serviceNumber) {
-    auto logTariff = tariffChangeLogList->find(serviceNumber->id, time(NULL));
+    auto logTariff = data->tariffChangeLog->find(serviceNumber->id, time(NULL));
     if (logTariff == nullptr) {
         return;
     }
 
-    auto tariff = tariffList->find(logTariff->tariff_id_local);
+    auto tariff = data->tariff->find(logTariff->tariff_id_local);
     if (tariff == nullptr) {
         return;
     }
@@ -308,7 +265,7 @@ void BillingCall::calcTermByNumber(ServiceNumber *serviceNumber) {
     if (isUsage7800()) {
         call->pricelist_id = tariff->pricelist_id;
 
-        auto price = pricelistPriceList->find(call->pricelist_id, getRemoteNumber(), time(NULL));
+        auto price = data->pricelistPrice->find(call->pricelist_id, call->src_number, time(NULL));
         if (price == nullptr) {
             return;
         }
@@ -335,7 +292,7 @@ char * BillingCall::getRemoteRoute() {
 }
 
 bool BillingCall::filterByNumber(int numberId, char * str) {
-    auto number = numberList->find(numberId);
+    auto number = data->number->find(numberId);
     if (number == nullptr) {
         return false;
     }
@@ -352,12 +309,12 @@ bool BillingCall::filterByNumber(int numberId, char * str) {
 }
 
 bool BillingCall::filterByPrefixlist(int prefixlistId, char * str) {
-    auto prefixlist = prefixlistList->find(prefixlistId);
+    auto prefixlist = data->prefixlist->find(prefixlistId);
     if (prefixlist == nullptr) {
         return false;
     }
 
-    auto prefix = prefixlistPrefixList->find(prefixlist->id, str);
+    auto prefix = data->prefixlistPrefix->find(prefixlist->id, str);
     return prefix != nullptr;
 }
 

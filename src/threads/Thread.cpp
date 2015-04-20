@@ -70,9 +70,11 @@ void Thread::operator()() {
                 } else {
                     if (getStatus() == ThreadStatus::THREAD_RUNNING) {
                         setRealStatus(ThreadStatus::THREAD_RUNNING);
-                        TimerScope ts(t);
+                        TimerScope ts(timer);
 
                         this->run();
+
+                        lastError = "";
 
                         if (exitAfterRunsCount)
                         {
@@ -97,10 +99,16 @@ void Thread::operator()() {
         } catch (Exception &e) {
             e.addTrace("Thread(" + name + "): ");
             Log::exception(e);
+            lastError = e.getFullMessage();
+            errorsCount++;
         } catch (std::exception &e) {
             Log::error("Thread(" + name + "): " + string(e.what()));
+            lastError = string(e.what());
+            errorsCount++;
         } catch (...) {
             Log::error("Thread(" + name + "): ERROR");
+            lastError = "Unknown error";
+            errorsCount++;
         }
         
         if (exitAfterRunsCount)

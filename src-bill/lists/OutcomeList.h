@@ -4,7 +4,7 @@
 #include "../models/Outcome.h"
 #include "../classes/AppBill.h"
 
-class OutcomeList : public ObjListByInt<Outcome> {
+class OutcomeList : public ObjList<Outcome> {
 protected:
 
     string sql(BDb * db) {
@@ -26,11 +26,24 @@ protected:
         row.fill_cs(7, item->called_station_id, sizeof(item->called_station_id));
     }
 
-    inline int key(Outcome *item) {
-        return item->id;
-    }
+    struct key_id {
+        bool operator() (const Outcome & left, int id) {
+            return left.id < id;
+        }
+        bool operator() (int id, const Outcome & right) {
+            return id < right.id;
+        }
+    };
+
 public:
-    Outcome * find(const int id) {
-        return (Outcome *) _find(id);
+    Outcome * find(int id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

@@ -17,7 +17,7 @@ protected:
 public:
     map<int, ClientCounterObj> counter;
 
-    ClientCounterObj &get(const int client_id) {
+    ClientCounterObj &get(int client_id) {
         return counter[client_id];
     }
 

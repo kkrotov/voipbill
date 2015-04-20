@@ -37,17 +37,26 @@ public:
     
     ThreadStatus getRealStatus();
     
-    void html(stringstream &html) {
+    void threadTotals(stringstream &html) {
         ThreadStatus status = getStatus();
         ThreadStatus real_status = getRealStatus();
 
-        html << "<div>";
-        html << "<a href='/task?id=" << this->id << "'>" << this->name << "</a> ";
-        html << "<b>" << ThreadStatusNames[real_status] << "</b>";
-        if (status != real_status) {
-            html << " (" << ThreadStatusNames[status] << ")";
-        }
-        html << "</div>\n";
+        html << "<tr>";
+        html << "<td style='text-align: left'><a href='/task?id=" << this->id << "'>" << this->name << "</a></td>\n";
+        html << "<td style='text-align: left'>" << ThreadStatusNames[real_status] << (status != real_status ? " (" + string(ThreadStatusNames[status]) + ")" : "") << "</b></td>\n";
+        html << "<td style='text-align: left'>Count: <b>" << timer.count << "</b></td>\n";
+        html << "<td style='text-align: left'>Time last: <b>" << timer.sloop() << "</b></td>\n";
+        html << "<td style='text-align: left'>Time total: <b>" << timer.sloop() << "</b></td>\n";
+        html << "<td style='text-align: left'>Errors: <b>" << errorsCount << "</b></td>\n";
+        html << "<td style='text-align: left'>" << lastError << "</td>\n";
+        html << "</tr>";
+    }
+
+    void html(stringstream &html) {
+        html << "<table style='width:100%'>\n";
+        this->threadTotals(html);
+        html << "</table>\n";
+        html << "<hr/><br/>\n";
     }
     
     virtual void htmlfull(stringstream &html) {
@@ -58,7 +67,9 @@ protected:
     string name;
     
     int threadSleepSeconds;
-    Timer t;
+    Timer timer;
+    int errorsCount = 0;
+    string lastError;
     
     Thread();
 

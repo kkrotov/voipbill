@@ -7,4 +7,5 @@ struct RouteTableRoute {
     int b_number_id;
     int outcome_id;
     int outcome_route_table_id;
+
 };

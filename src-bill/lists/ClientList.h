@@ -3,7 +3,7 @@
 #include "../../src/lists/ObjList.h"
 #include "../models/Client.h"
 
-class ClientList : public ObjListByInt<Client> {
+class ClientList : public ObjList<Client> {
 protected:
 
     string sql(BDb * db) {
@@ -23,12 +23,25 @@ protected:
         item->disabled = row.get_b(7);
     }
 
-    inline int key(Client *item) {
-        return item->id;
-    }
+    struct key_id {
+        bool operator() (const Client & left, int id) {
+            return left.id < id;
+        }
+        bool operator() (int id, const Client & right) {
+            return id < right.id;
+        }
+    };
+
 public:
-    Client * find(const int id) {
-        return (Client *) _find(id);
+    Client * find(int id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };
 

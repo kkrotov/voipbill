@@ -54,8 +54,7 @@ void ThreadBlacklist::sync_once_per_hour() {
     if (last_sync_from_openca_time + app().conf.openca_sync_blacklist_interval_min >= time(NULL))
         return;
     
-    if (loader->usageReloadTimestamp < last_sync_from_openca_time
-            && last_sync_from_openca_time + app().conf.openca_sync_blacklist_interval_max >= time(NULL))
+    if (last_sync_from_openca_time + app().conf.openca_sync_blacklist_interval_max >= time(NULL))
         return;
     
     last_sync_from_openca_time = time(NULL);

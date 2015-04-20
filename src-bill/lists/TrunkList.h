@@ -4,7 +4,7 @@
 #include "../models/Trunk.h"
 #include "../classes/AppBill.h"
 
-class TrunkList : public ObjListByString<Trunk> {
+class TrunkList : public ObjList<Trunk> {
 protected:
 
     string sql(BDb * db) {
@@ -28,11 +28,24 @@ protected:
         item->our_trunk = row.get_b(9);
     }
 
-    inline char * key(Trunk *item) {
-        return item->trunk_name;
-    }
+    struct key_trunk_name {
+        bool operator() (const Trunk & left, char * trunk_name) {
+            return strcmp(left.trunk_name, trunk_name) < 0;
+        }
+        bool operator() (char * trunk_name, const Trunk & right) {
+            return strcmp(trunk_name, right.trunk_name) < 0;
+        }
+    };
+
 public:
-    Trunk * find(const char * trunk_name) {
-        return (Trunk *) _find(trunk_name);
+    Trunk * find(char * trunk_name) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, trunk_name, key_trunk_name());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

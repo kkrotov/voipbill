@@ -9,10 +9,12 @@
 #include "../sync/PullOperator.h"
 #include "../sync/PullPricelist.h"
 #include "../sync/PullTariff.h"
+#include "../sync/PullServiceNumber.h"
+#include "../sync/PullServiceTrunk.h"
+#include "../sync/PullServiceTrunkSettings.h"
 #include "../sync/PullTariffLog.h"
-#include "../sync/PullUsage.h"
-#include "../sync/PullServer.h"
 
+#include "../sync/PullServer.h"
 #include "../sync/PullAirp.h"
 #include "../sync/PullNumber.h"
 #include "../sync/PullOutcome.h"
@@ -56,11 +58,6 @@ void ThreadSync::run() {
 void ThreadSync::htmlfull(stringstream &html) {
     this->html(html);
 
-    html << "Last time: <b>" << t.sloop() << "</b><br/>\n";
-    html << "Total time: <b>" << t.sfull() << "</b><br/>\n";
-    html << "loops: <b>" << t.count << "</b><br/>\n";
-    html << "<br/>\n";
-
     html << "Region: <b>" << app().conf.instance_id << "</b><br/>\n";
     html << "Errors count: <b>" << manager.errors_count << "</b><br/>\n";
     html << "<br/>\n";
@@ -89,15 +86,17 @@ ThreadSync::ThreadSync() {
     manager.add(new PullClient());
     manager.add(new PullGeoPrefix());
     manager.add(new PullInstance());
-    manager.add(new PullLogTariff());
     manager.add(new PullNetworkPrefix());
     manager.add(new PullOperator());
     manager.add(new PullPricelist());
     manager.add(new PullTariff());
     manager.add(new PullDefs());
-    manager.add(new PullUsage());
-    manager.add(new PullServer());
+    manager.add(new PullServiceNumber());
+    manager.add(new PullServiceTrunk());
+    manager.add(new PullServiceTrunkSettings());
+    manager.add(new PullLogTariff());
 
+    manager.add(new PullServer());
     manager.add(new PullAirp());
     manager.add(new PullNumber());
     manager.add(new PullOutcome());

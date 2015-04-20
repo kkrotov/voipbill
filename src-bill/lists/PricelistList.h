@@ -3,7 +3,7 @@
 #include "../../src/lists/ObjList.h"
 #include "../models/Pricelist.h"
 
-class PricelistList : public ObjListByInt<Pricelist> {
+class PricelistList : public ObjList<Pricelist> {
 protected:
 
     string sql(BDb * db) {
@@ -20,13 +20,24 @@ protected:
         item->tariffication_full_first_minute = row.get_b(4);
     }
 
-    inline int key(Pricelist *item) {
-        return item->id;
-    }
-
+    struct key_id {
+        bool operator() (const Pricelist & left, int id) {
+            return left.id < id;
+        }
+        bool operator() (int id, const Pricelist & right) {
+            return id < right.id;
+        }
+    };
 
 public:
-    Pricelist * find(const int id) {
-        return (Pricelist *) _find(id);
+    Pricelist * find(int id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

@@ -4,7 +4,7 @@
 #include "../models/Server.h"
 #include "../classes/AppBill.h"
 
-class ServerList : public ObjListByInt<Server> {
+class ServerList : public ObjList<Server> {
 protected:
 
     string sql(BDb * db) {
@@ -24,11 +24,24 @@ protected:
         row.fill_cs(5, item->calling_station_id_for_line_without_number, sizeof(item->calling_station_id_for_line_without_number));
     }
 
-    inline int key(Server *item) {
-        return item->id;
-    }
+    struct key_id {
+        bool operator() (const Server & left, int id) {
+            return left.id < id;
+        }
+        bool operator() (int id, const Server & right) {
+            return id < right.id;
+        }
+    };
+
 public:
-    Server * find(const int id) {
-        return (Server *) _find(id);
+    Server * find(int id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

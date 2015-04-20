@@ -14,6 +14,7 @@ public:
     ~BDbResult();
     int size();
     char * get(int r, int f);
+    bool is_null(int f);
     char * get(int f);
     int get_i(int f);
     double get_d(int f);

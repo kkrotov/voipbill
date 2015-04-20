@@ -3,38 +3,70 @@
 #include "../../src/lists/ObjList.h"
 #include "../models/ServiceTrunkSettings.h"
 
-class ServiceTrunkSettingsList : public ObjListByIntBoolInt<ServiceTrunkSettings> {
+class ServiceTrunkSettingsList : public ObjList<ServiceTrunkSettings> {
 protected:
 
     string sql(BDb * db) {
-        return "    select trunk_id, orig, \"order\", src_number_id, dst_number_id, pricelist_id " \
+        return "    select trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id " \
             "       from billing.service_trunk_settings " \
-            "       order by trunk_id asc, orig asc, \"order\" asc ";
+            "       order by trunk_id asc, \"type\" asc, \"order\" asc ";
     }
 
     inline void parse_item(BDbResult &row, ServiceTrunkSettings * item) {
         item->trunk_id = row.get_i(0);
-        item->orig = row.get_i(1);
+        item->type = row.get_i(1);
         item->order = row.get_i(2);
         item->src_number_id = row.get_i(3);
         item->dst_number_id = row.get_i(4);
         item->pricelist_id = row.get_i(5);
     }
 
-    inline int key1(ServiceTrunkSettings *item) {
-        return item->trunk_id;
-    }
+    struct key_trunk_id {
+        bool operator() (const ServiceTrunkSettings & left, int trunk_id) {
+            return left.trunk_id < trunk_id;
+        }
+        bool operator() (int trunk_id, const ServiceTrunkSettings & right) {
+            return trunk_id < right.trunk_id;
+        }
+    };
 
-    inline bool key2(ServiceTrunkSettings *item) {
-        return item->orig;
-    }
+    struct key_type {
+        bool operator() (const ServiceTrunkSettings & left, int type) {
+            return left.type < type;
+        }
+        bool operator() (int type, const ServiceTrunkSettings & right) {
+            return type < right.type;
+        }
+    };
 
-    inline int key3(ServiceTrunkSettings *item) {
-        return item->order;
-    }
+    struct key_order {
+        bool operator() (const ServiceTrunkSettings & left, int order) {
+            return left.order < order;
+        }
+        bool operator() (int order, const ServiceTrunkSettings & right) {
+            return order < right.order;
+        }
+    };
 
 public:
-    ServiceTrunkSettings * find(const int trunk_id, bool orig, int order) {
-        return (ServiceTrunkSettings *) _find(trunk_id, orig, order);
+    ServiceTrunkSettings * find(int trunk_id, int type, int order) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, trunk_id, key_trunk_id());
+            begin = p.first;
+            end = p.second;
+        }
+        {
+            auto p = equal_range(begin, end, type, key_type());
+            begin = p.first;
+            end = p.second;
+        }
+        {
+            auto p = equal_range(begin, end, order, key_order());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

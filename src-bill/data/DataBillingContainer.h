@@ -7,8 +7,8 @@
 
 class DataBillingContainer {
 public:
-    queue<Call> cdrs;
-    queue<Call> calls;
+    deque<Call> cdrs;
+    deque<Call> calls;
 
     static DataBillingContainer * instance() {
         static DataBillingContainer inst;

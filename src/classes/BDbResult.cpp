@@ -20,6 +20,10 @@ char * BDbResult::get(int r, int f) {
     return PQgetvalue(res, r, f);
 }
 
+bool BDbResult::is_null(int f) {
+    return (bool)PQgetisnull(res, index, f);
+}
+
 char * BDbResult::get(int f) {
     return PQgetvalue(res, index, f);
 }

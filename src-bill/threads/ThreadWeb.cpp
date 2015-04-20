@@ -6,7 +6,7 @@
 #include "../../src/common.h"
 #include "../../src/threads/Thread.h"
 #include "ThreadSelectCurrentCalls.h"
-#include "ThreadSelectGlobalCounters.h"
+#include "ThreadRemoteLoader.h"
 #include "../classes/AppBill.h"
 #include "../classes/DataLoader.h"
 // #include "../classes/CalcFull.h"
@@ -49,12 +49,13 @@ void ThreadWeb::handlerHeader(stringstream &html) {
 
 void ThreadWeb::handlerHome(stringstream &html) {
     handlerHeader(html);
-    
+
+    html << "<table style='width:100%'>\n";
     app().threads.forAllThreads([&](Thread* thread) {
-        thread->html(html);
-        html << "<hr>\n";
+        thread->threadTotals(html);
         return true;
     });
+    html << "</table>\n";
 }
 
 void ThreadWeb::handlerConfig(stringstream &html) {
@@ -222,7 +223,7 @@ void ThreadWeb::handlerClient(stringstream &html, map<string, string> &parameter
     sum_month2 = c2.sumMonth();
     
     double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
-    pGlobalCountersObj globalCounter = ThreadSelectGlobalCounters::getList()->find(client_id);
+    pGlobalCountersObj globalCounter = ThreadRemoteLoader::getList()->find(client_id);
     if (globalCounter) {
         sum_balance_global += globalCounter->sumBalance();
         sum_day_global += globalCounter->sumDay();

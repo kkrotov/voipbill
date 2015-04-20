@@ -2,7 +2,7 @@
 
 struct ServiceTrunkSettings {
     int trunk_id;
-    bool orig;
+    int type;
     int order;
     int src_number_id;
     int dst_number_id;

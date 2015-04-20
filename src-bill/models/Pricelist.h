@@ -6,4 +6,5 @@ struct Pricelist {
     int operator_id;
     bool tariffication_by_minutes;
     bool tariffication_full_first_minute;
+
 };

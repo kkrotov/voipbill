@@ -9,4 +9,5 @@ struct Outcome {
     int airp_id;
     char calling_station_id[21];
     char called_station_id[21];
+
 };

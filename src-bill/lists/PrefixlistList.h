@@ -4,7 +4,7 @@
 #include "../models/Prefixlist.h"
 #include "../classes/AppBill.h"
 
-class PrefixlistList : public ObjListByInt<Prefixlist> {
+class PrefixlistList : public ObjList<Prefixlist> {
 protected:
 
     string sql(BDb * db) {
@@ -20,11 +20,24 @@ protected:
         row.fill_cs(1, item->name, sizeof(item->name));
     }
 
-    inline int key(Prefixlist *item) {
-        return item->id;
-    }
+    struct key_id {
+        bool operator() (const Prefixlist & left, int id) {
+            return left.id < id;
+        }
+        bool operator() (int id, const Prefixlist & right) {
+            return id < right.id;
+        }
+    };
+
 public:
-    Prefixlist * find(const int id) {
-        return (Prefixlist *) _find(id);
+    Prefixlist * find(int id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

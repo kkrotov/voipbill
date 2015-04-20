@@ -11,4 +11,5 @@ struct Trunk {
     bool auto_routing;
     int route_table_id;
     bool our_trunk;
+
 };

@@ -4,7 +4,7 @@
 #include "../models/ServiceTrunk.h"
 #include "../classes/AppBill.h"
 
-class ServiceTrunkList : public ObjListByStringPeriod<ServiceTrunk> {
+class ServiceTrunkList : public ObjList<ServiceTrunk> {
 protected:
 
     string sql(BDb * db) {
@@ -13,7 +13,7 @@ protected:
             "               orig_enabled, term_enabled, orig_min_payment, term_min_payment, " \
             "               extract(epoch from activation_dt), extract(epoch from expire_dt) " \
             "       from billing.service_trunk " \
-            "       where server_id='" + server_id + "' and expire_dt > now() " \
+            "       where (server_id='" + server_id + "' or server_id is null) and expire_dt > now() " \
             "       order by trunk_name asc, activation_dt asc ";
     }
 
@@ -29,21 +29,40 @@ protected:
         item->expire_dt = row.get_ll(8);
     }
 
+    struct key_trunk_name {
+        bool operator() (const ServiceTrunk & left, char * trunk_name) {
+            return strcmp(left.trunk_name, trunk_name) < 0;
+        }
+        bool operator() (char * trunk_name, const ServiceTrunk & right) {
+            return strcmp(trunk_name, right.trunk_name) < 0;
+        }
+    };
 
-    inline char * key1(ServiceTrunk *item) {
-        return item->trunk_name;
-    }
+    struct key_timestamp {
+        bool operator() (const ServiceTrunk & left, time_t timestamp) {
+            return left.expire_dt < timestamp;
+        }
+        bool operator() (time_t timestamp, const ServiceTrunk & right) {
+            return timestamp < right.activation_dt;
+        }
+    };
 
-    inline time_t key2_from(ServiceTrunk *item) {
-        return item->activation_dt;
-    }
-
-    inline time_t key2_to(ServiceTrunk *item) {
-        return item->expire_dt;
-    }
 
 public:
-    ServiceTrunk * find(const char * trunk_name, time_t timestamp) {
-        return (ServiceTrunk *) _find(trunk_name, timestamp);
+    ServiceTrunk * find(char * trunk_name, time_t timestamp) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, trunk_name, key_trunk_name());
+            begin = p.first;
+            end = p.second;
+        }
+        {
+            auto p = equal_range(begin, end, timestamp, key_timestamp());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
+
 };

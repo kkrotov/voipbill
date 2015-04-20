@@ -6,9 +6,10 @@
 #include "../threads/ThreadLog.h"
 #include "../threads/ThreadSync.h"
 #include "../threads/ThreadLoader.h"
+#include "../threads/ThreadRemoteLoader.h"
 #include "../threads/ThreadSelectCurrentCalls.h"
 /*
-#include "../threads/ThreadSelectGlobalCounters.h"
+#include "../threads/ThreadRemoteLoader.h"
 #include "../threads/ThreadBlacklist.h"
 #include "../threads/ThreadBillRuntime.h"
 #include "../threads/ThreadLimitControl.h"
@@ -104,11 +105,12 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadLog>();
     registerThread<ThreadSync>();
     registerThread<ThreadLoader>();
+    registerThread<ThreadRemoteLoader>();
     registerThread<ThreadSelectCurrentCalls>();
 
     /*
 
-    registerThread<ThreadSelectGlobalCounters>();
+    registerThread<ThreadRemoteLoader>();
     registerThread<ThreadBlacklist>();
     registerThread<ThreadBillRuntime>();
     registerThread<ThreadLimitControl>();
@@ -127,6 +129,7 @@ void AppBill::runAppInSingleMode()
             "log",
             "sync",
             "loader",
+            "remote_loader",
             "currentcalls"
             /*,
             "select_global_counters",

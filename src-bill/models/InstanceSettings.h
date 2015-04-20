@@ -20,4 +20,5 @@ struct InstanceSettings {
 
         return regionIds;
     }
+
 };

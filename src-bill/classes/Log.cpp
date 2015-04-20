@@ -39,19 +39,8 @@ void Log::debug(const string &text) {
 
 void Log::exception(Exception &e) {
 
-    string message = "";
+    Log::error(e.getFullMessage());
 
-    for (auto it = e.traceList.begin(); it != e.traceList.end(); ++it) {
-        message += *it + " -> ";
-    }
-
-    if (message.size() > 0) {
-        message += "\n";
-    }
-
-    message += e.what();
-
-    Log::error(message);
 }
 
 void Log::flush() {

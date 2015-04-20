@@ -24,25 +24,26 @@ void Billing::calcCurrentCdrs() {
     auto currentCdrs = data->currentCdrData.get();
 
     time_t now = time(NULL);
+    PreparedData preparedData;
 
     for (size_t i = 0; i < currentCdrs->size(); i++) {
         auto cdr = currentCdrs->get(i);
         time_t cdr_time = parseDateTime(cdr->connect_time);
+
+        if (!data->prepareData(preparedData, cdr_time)) {
+            break;
+        }
+
         cdr->session_time = (int)(now - cdr_time);
 
         Call origCall = Call(cdr, CALL_ORIG);
-        if (billingCall.init(&origCall, cdr)) { ;
-            billingCall.calc();
-        } else {
-            break;
-        }
+        billingCall.calc(&origCall, cdr, &preparedData);
 
         Call termCall = Call(cdr, CALL_TERM);
-        if (billingCall.init(&termCall, cdr)) {
-            billingCall.calc();
-        } else {
-            break;
-        }
+        billingCall.calc(&termCall, cdr, &preparedData);
+
+        dstBillingData->calls.push_back(origCall);
+        dstBillingData->calls.push_back(termCall);
     }
 }
 

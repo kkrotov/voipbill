@@ -3,4 +3,5 @@
 struct ReleaseReason {
     int id;
     char name[51];
+
 };

@@ -10,7 +10,6 @@ class ThreadLoader : public Thread {
     DataLoader * loader;
     DataContainer * data;
     BDb db_calls;
-    int errors;
 
     bool ready();
     bool prepare();

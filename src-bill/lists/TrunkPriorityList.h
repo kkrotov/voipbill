@@ -3,7 +3,7 @@
 #include "../../src/lists/ObjList.h"
 #include "../models/TrunkPriority.h"
 
-class TrunkPriorityList : public ObjListByIntInt<TrunkPriority> {
+class TrunkPriorityList : public ObjList<TrunkPriority> {
 protected:
 
     string sql(BDb * db) {
@@ -19,14 +19,38 @@ protected:
         item->prefixlist_id = row.get_i(3);
     }
 
-    inline int key1(TrunkPriority *item) {
-        return item->trunk_id;
-    }
-    inline int key2(TrunkPriority *item) {
-        return item->order;
-    }
+    struct key_trunk_id {
+        bool operator() (const TrunkPriority & left, int trunk_id) {
+            return left.trunk_id < trunk_id;
+        }
+        bool operator() (int trunk_id, const TrunkPriority & right) {
+            return trunk_id < right.trunk_id;
+        }
+    };
+
+    struct key_order {
+        bool operator() (const TrunkPriority & left, int order) {
+            return left.order < order;
+        }
+        bool operator() (int order, const TrunkPriority & right) {
+            return order < right.order;
+        }
+    };
+
 public:
-    TrunkPriority * find(const int trunk_id, const int order) {
-        return (TrunkPriority *) _find(trunk_id, order);
+    TrunkPriority * find(int trunk_id, int order) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, trunk_id, key_trunk_id());
+            begin = p.first;
+            end = p.second;
+        }
+        {
+            auto p = equal_range(begin, end, order, key_order());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

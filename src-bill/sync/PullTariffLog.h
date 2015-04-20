@@ -6,8 +6,8 @@ class PullLogTariff : public BasePull {
 public:
     void init() {
         event = "tariff_change_log";
-        src_table = "billing.tarif_change_log";
-        dst_table = "billing.tarif_change_log";
+        src_table = "billing.tariff_change_log";
+        dst_table = "billing.tariff_change_log";
 
         key = "id";
 

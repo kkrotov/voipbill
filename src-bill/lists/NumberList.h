@@ -4,7 +4,7 @@
 #include "../models/Number.h"
 #include "../classes/AppBill.h"
 
-class NumberList : public ObjListByInt<Number> {
+class NumberList : public ObjList<Number> {
 protected:
 
     string sql(BDb * db) {
@@ -21,11 +21,24 @@ protected:
         row.fill_cs(2, item->prefixlist_ids, sizeof(item->prefixlist_ids));
     }
 
-    inline int key(Number *item) {
-        return item->id;
-    }
+    struct key_id {
+        bool operator() (const Number & left, int id) {
+            return left.id < id;
+        }
+        bool operator() (int id, const Number & right) {
+            return id < right.id;
+        }
+    };
+
 public:
-    Number * find(const int id) {
-        return (Number *) _find(id);
+    Number * find(int id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

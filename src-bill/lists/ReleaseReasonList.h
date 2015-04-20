@@ -4,7 +4,7 @@
 #include "../models/ReleaseReason.h"
 #include "../classes/AppBill.h"
 
-class ReleaseReasonList : public ObjListByInt<ReleaseReason> {
+class ReleaseReasonList : public ObjList<ReleaseReason> {
 protected:
 
     string sql(BDb * db) {
@@ -20,11 +20,24 @@ protected:
         row.fill_cs(1, item->name, sizeof(item->name));
     }
 
-    inline int key(ReleaseReason *item) {
-        return item->id;
-    }
+    struct key_id {
+        bool operator() (const ReleaseReason & left, int id) {
+            return left.id < id;
+        }
+        bool operator() (int id, const ReleaseReason & right) {
+            return id < right.id;
+        }
+    };
+
 public:
-    ReleaseReason * find(const int id) {
-        return (ReleaseReason *) _find(id);
+    ReleaseReason * find(int id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

@@ -4,7 +4,7 @@
 #include "../models/Airp.h"
 #include "../classes/AppBill.h"
 
-class AirpList : public ObjListByInt<Airp> {
+class AirpList : public ObjList<Airp> {
 protected:
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
@@ -19,11 +19,25 @@ protected:
         row.fill_cs(1, item->name, sizeof(item->name));
     }
 
-    inline int key(Airp *item) {
-        return item->id;
-    }
+    struct key_id {
+        bool operator() (const Airp & left, int id) {
+            return left.id < id;
+        }
+        bool operator() (int id, const Airp & right) {
+            return id < right.id;
+        }
+    };
+
 public:
-    Airp * find(const int id) {
-        return (Airp *) _find(id);
+    Airp * find(int id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
+
 };

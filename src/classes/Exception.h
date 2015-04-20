@@ -44,4 +44,22 @@ public:
     void addTrace(const string &trace) {
         traceList.push_front(trace);
     }
+
+    string getFullMessage() {
+
+        string message = "";
+
+        for (auto it = traceList.begin(); it != traceList.end(); ++it) {
+            message += *it + " -> ";
+        }
+
+        if (message.size() > 0) {
+            message += "\n";
+        }
+
+        message += what();
+
+        return message;
+
+    }
 };

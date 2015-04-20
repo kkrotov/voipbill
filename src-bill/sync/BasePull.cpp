@@ -93,11 +93,11 @@ void BasePull::pullPartial() {
 
             for (size_t col = 0; col < fields.size(); col++) {
                 if (col > 0) ins.append(",");
-                char *val = res.get(col);
-                if (strlen(val) > 0)
-                    ins.append("'").append(val).append("'");
-                else
+                if (res.is_null(col)) {
                     ins.append("NULL");
+                } else {
+                    ins.append("'").append(res.get(col)).append("'");
+                }
             }
 
             ins.append(")");

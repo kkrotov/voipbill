@@ -10,10 +10,6 @@ void ThreadLog::run() {
 void ThreadLog::htmlfull(stringstream & html) {
 
     this->html(html);
-    html << "Time loop: <b>" << t.sloop() + "</b><br/>\n";
-    html << "Time full loop: <b>" << t.sfull() + "</b><br/>\n";
-    html << "loops: <b>" << t.count << "</b><br/>\n";
-    html << "<br/>\n";
 
     list<pLogMessage> history = app().logger.getHistory();
 

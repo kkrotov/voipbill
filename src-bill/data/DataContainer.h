@@ -23,14 +23,44 @@
 #include "PricelistPriceData.h"
 #include "NetworkPrefixData.h"
 #include "GeoPrefixData.h"
-#include "UsageData.h"
 #include "ServiceNumberData.h"
 #include "ServiceTrunkData.h"
 #include "ServiceTrunkSettingsData.h"
 #include "TariffData.h"
 #include "TariffChangeLogData.h"
+#include "GlobalCountersData.h"
 
 #include "CurrentCdrData.h"
+
+struct PreparedData {
+    Server *server;
+    InstanceSettings *instanceSettings;
+    shared_ptr<AirpList> airp;
+    shared_ptr<NumberList> number;
+    shared_ptr<OutcomeList> outcome;
+    shared_ptr<PrefixlistList> prefixlist;
+    shared_ptr<PrefixlistPrefixList> prefixlistPrefix;
+    shared_ptr<ReleaseReasonList> releaseReason;
+    shared_ptr<RouteCaseList> routeCase;
+    shared_ptr<RouteTableList> routeTable;
+    shared_ptr<RouteTableRouteList> routeTableRoute;
+    shared_ptr<TrunkList> trunk;
+    shared_ptr<TrunkNumberPreprocessingList> trunkNumberPreprocessing;
+    shared_ptr<TrunkPriorityList> trunkPriority;
+    shared_ptr<TrunkRuleList> trunkRule;
+    shared_ptr<ClientList> client;
+    shared_ptr<OperatorList> voipOperator;
+    shared_ptr<PricelistList> pricelist;
+    shared_ptr<PricelistPriceList> pricelistPrice;
+    shared_ptr<NetworkPrefixList> networkPrefix;
+    shared_ptr<GeoPrefixList> geoPrefix;
+    shared_ptr<ServiceNumberList> serviceNumber;
+    shared_ptr<ServiceTrunkList> serviceTrunk;
+    shared_ptr<ServiceTrunkSettingsList> serviceTrunkSettings;
+    shared_ptr<TariffList> tariff;
+    shared_ptr<TariffChangeLogList> tariffChangeLog;
+    shared_ptr<GlobalCountersList> globalCounters;
+};
 
 class DataContainer {
 public:
@@ -55,12 +85,12 @@ public:
     PricelistPriceData pricelistPrice;
     NetworkPrefixData networkPrefix;
     GeoPrefixData geoPrefix;
-    UsageData usage;
     ServiceNumberData serviceNumber;
     ServiceTrunkData serviceTrunk;
     ServiceTrunkSettingsData serviceTrunkSettings;
     TariffData tariff;
     TariffChangeLogData tariffChangeLog;
+    GlobalCountersData globalCounters;
 
     CurrentCdrData currentCdrData;
 
@@ -91,7 +121,6 @@ public:
         pricelistPrice.load(db);
         networkPrefix.load(db);
         geoPrefix.load(db);
-        usage.load(db);
         serviceNumber.load(db);
         serviceTrunk.load(db);
         serviceTrunkSettings.load(db);
@@ -99,5 +128,134 @@ public:
         tariffChangeLog.load(db);
 
         currentCdrData.load(db);
+    }
+
+    bool prepareData(PreparedData &data, time_t time) {
+
+        {
+            shared_ptr<ServerList> list = server.get();
+            if (list != nullptr) {
+                auto item = list->find(app().conf.instance_id);
+                if (item != nullptr) {
+                    data.server = server.get()->find(app().conf.instance_id);
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        {
+            shared_ptr<InstanceSettingsList> list = instanceSettings.get();
+            if (list != nullptr) {
+                auto item = list->find(app().conf.instance_id);
+                if (item != nullptr) {
+                    data.instanceSettings = item;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        if ((data.airp = airp.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.number = number.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.outcome = outcome.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.prefixlist = prefixlist.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.prefixlistPrefix = prefixlistPrefix.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.releaseReason = releaseReason.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.routeCase = routeCase.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.routeTable = routeTable.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.routeTableRoute = routeTableRoute.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.trunk = trunk.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.trunkNumberPreprocessing = trunkNumberPreprocessing.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.trunkPriority = trunkPriority.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.trunkRule = trunkRule.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.client = client.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.voipOperator = voipOperator.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.pricelist = pricelist.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.pricelistPrice = pricelistPrice.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.networkPrefix = networkPrefix.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.geoPrefix = geoPrefix.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.serviceNumber = serviceNumber.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.serviceTrunk = serviceTrunk.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.serviceTrunkSettings = serviceTrunkSettings.get()) = nullptr) {
+            return false;
+        }
+
+        if ((data.tariff = tariff.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.tariffChangeLog = tariffChangeLog.get()) == nullptr) {
+            return false;
+        }
+
+        return true;
     }
 };

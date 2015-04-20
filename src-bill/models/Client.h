@@ -33,5 +33,5 @@ struct Client {
     bool isConsumedMonthlyLimit(double value) {
         return hasMonthlyLimit() && (limit_m - value < 0);
     }
+
 };
-typedef Client *pClient;

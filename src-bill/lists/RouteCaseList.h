@@ -4,7 +4,7 @@
 #include "../models/RouteCase.h"
 #include "../classes/AppBill.h"
 
-class RouteCaseList : public ObjListByInt<RouteCase> {
+class RouteCaseList : public ObjList<RouteCase> {
 protected:
 
     string sql(BDb * db) {
@@ -20,11 +20,24 @@ protected:
         row.fill_cs(1, item->name, sizeof(item->name));
     }
 
-    inline int key(RouteCase *item) {
-        return item->id;
-    }
+    struct key_id {
+        bool operator() (const RouteCase & left, int id) {
+            return left.id < id;
+        }
+        bool operator() (int id, const RouteCase & right) {
+            return id < right.id;
+        }
+    };
+
 public:
-    RouteCase * find(const int id) {
-        return (RouteCase *) _find(id);
+    RouteCase * find(int id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

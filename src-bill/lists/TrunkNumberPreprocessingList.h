@@ -3,7 +3,7 @@
 #include "../../src/lists/ObjList.h"
 #include "../models/TrunkNumberPreprocessing.h"
 
-class TrunkNumberPreprocessingList : public ObjListByIntInt<TrunkNumberPreprocessing> {
+class TrunkNumberPreprocessingList : public ObjList<TrunkNumberPreprocessing> {
 protected:
 
     string sql(BDb * db) {
@@ -21,15 +21,38 @@ protected:
         row.fill_cs(5, item->prefix, sizeof(item->prefix));
     }
 
-    inline int key1(TrunkNumberPreprocessing *item) {
-        return item->trunk_id;
-    }
-    inline int key2(TrunkNumberPreprocessing *item) {
-        return item->order;
-    }
+    struct key_trunk_id {
+        bool operator() (const TrunkNumberPreprocessing & left, int trunk_id) {
+            return left.trunk_id < trunk_id;
+        }
+        bool operator() (int trunk_id, const TrunkNumberPreprocessing & right) {
+            return trunk_id < right.trunk_id;
+        }
+    };
+
+    struct key_order {
+        bool operator() (const TrunkNumberPreprocessing & left, int order) {
+            return left.order < order;
+        }
+        bool operator() (int order, const TrunkNumberPreprocessing & right) {
+            return order < right.order;
+        }
+    };
 
 public:
-    TrunkNumberPreprocessing * find(const int trunk_id, const int order) {
-        return (TrunkNumberPreprocessing *) _find(trunk_id, order);
+    TrunkNumberPreprocessing * find(int trunk_id, int order) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, trunk_id, key_trunk_id());
+            begin = p.first;
+            end = p.second;
+        }
+        {
+            auto p = equal_range(begin, end, order, key_order());
+            begin = p.first;
+            end = p.second;
+        }
+        return begin <  end ? &*begin : nullptr;
     }
 };

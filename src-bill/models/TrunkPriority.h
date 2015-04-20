@@ -5,4 +5,5 @@ struct TrunkPriority {
     int order;
     int priority;
     int prefixlist_id;
+
 };
