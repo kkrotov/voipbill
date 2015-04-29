@@ -2,16 +2,15 @@
 
 #include "../../src/threads/Thread.h"
 #include "../../src/classes/BDb.h"
-#include "../classes/DataLoader.h"
 #include "../../src/classes/Timer.h"
 #include "../data/DataContainer.h"
+#include "../data/DataBillingContainer.h"
 
 class ThreadLoader : public Thread {
-    DataLoader * loader;
     DataContainer * data;
+    DataBillingContainer * billingData;
     BDb db_calls;
 
-    bool ready();
     bool prepare();
     void run();
 
@@ -19,9 +18,9 @@ class ThreadLoader : public Thread {
 
 public:
 
-    bool do_load_data(BDb *db = 0, DataLoader *loader = 0, DataContainer *data = 0);
+    bool do_load_data(BDb *db = 0, DataContainer *data = 0);
 
-    bool do_load_counters(BDb *db = 0, DataLoader *loader = 0);
+    bool do_load_counters(BDb *db = 0, DataBillingContainer *billingData = 0);
 
     ThreadLoader();
     static const char* idName() { return "loader"; }

@@ -16,7 +16,6 @@ string string_time(time_t dt);
 class BaseObjList {
 public:
     virtual void load(BDb * db) = 0;
-    virtual void load(BDb * db, time_t dt) = 0;
     virtual size_t dataSize() = 0;
     virtual size_t size() = 0;
     virtual time_t loadTime() = 0;
@@ -30,32 +29,11 @@ protected:
     virtual string sql(BDb *db = 0) = 0;
     virtual void parse_item(BDbResult &row, T * item) = 0;
 public:
-    Timer t;
-    time_t last_use;
-    time_t dt;
-    bool loaded;
-
-
-    ObjList() {
-        this->loaded = false;
-    }
-
-    virtual ~ObjList() {
-    }
 
     virtual void load(BDb * db) {
-        load(db, 0);
-    }
-
-    virtual void load(BDb * db, time_t dt) {
-        this->dt = dt;
-
-        t.start();
-
         BDbResult res = db->query(sql(db));
 
         loadtime = time(NULL);
-        last_use = loadtime;
 
         this->data.clear();
         this->data.resize(res.size());
@@ -63,10 +41,6 @@ public:
         while (res.next()) {
             parse_item(res, &this->data.at(res.index));
         }
-
-        this->loaded = true;
-
-        t.stop();
     }
 
     T * get(size_t i) {
@@ -77,7 +51,7 @@ public:
         return sizeof(T) * this->data.size();
     }
 
-    size_t size() {
+    virtual size_t size() {
         return this->data.size();
     }
 

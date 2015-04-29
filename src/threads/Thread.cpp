@@ -33,6 +33,45 @@ void Thread::usleep(unsigned int milliseconds) {
     boost::this_thread::sleep_for(boost::chrono::milliseconds(milliseconds));
 }
 
+void Thread::threadTotalsHeader(stringstream &html) {
+    html << "<tr>\n";
+    html << "<td style='text-align: left'>Thread</td>\n";
+    html << "<td style='text-align: left'>Status</td>\n";
+    html << "<td style='text-align: left'>Count</td>\n";
+    html << "<td style='text-align: left'>Time last</td>\n";
+    html << "<td style='text-align: left'>Time total</td>\n";
+    html << "<td style='text-align: left'>Errors</td>\n";
+    html << "<td style='text-align: left'>Last error</td>\n";
+    html << "</tr>";
+}
+
+void Thread::threadTotalsData(stringstream &html) {
+    ThreadStatus status = getStatus();
+    ThreadStatus real_status = getRealStatus();
+
+    html << "<tr>\n";
+    html << "<td style='text-align: left'><a href='/task?id=" << this->id << "'>" << this->name << "</a></td>\n";
+    html << "<td style='text-align: left'>" << ThreadStatusNames[real_status] << (status != real_status ? " (" + string(ThreadStatusNames[status]) + ")" : "") << "</b></td>\n";
+    html << "<td style='text-align: left'>" << timer.count << "</td>\n";
+    html << "<td style='text-align: left'>" << timer.sloop() << " " << timer.sloop_cpu_usage() << "%</td>\n";
+    html << "<td style='text-align: left'>" << timer.sfull() << " " << timer.sfull_cpu_usage() << "%</td>\n";
+    html << "<td style='text-align: left'>" << errorsCount << "</td>\n";
+    html << "<td style='text-align: left'>" << lastError << "</td>\n";
+    html << "</tr>\n";
+}
+
+void Thread::html(stringstream &html) {
+    html << "<table style='width:100%'>\n";
+    this->threadTotalsHeader(html);
+    this->threadTotalsData(html);
+    html << "</table>\n";
+    html << "<hr/><br/>\n";
+}
+
+void Thread::htmlfull(stringstream &html) {
+    this->html(html);
+}
+
 bool Thread::ready() {
     return true;
 }

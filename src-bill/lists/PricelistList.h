@@ -30,7 +30,7 @@ protected:
     };
 
 public:
-    Pricelist * find(int id) {
+    Pricelist * find(int id, stringstream *trace) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -38,6 +38,19 @@ public:
             begin = p.first;
             end = p.second;
         }
-        return begin <  end ? &*begin : nullptr;
+        auto result = begin <  end ? &*begin : nullptr;
+
+        if (trace != nullptr) {
+            if (result != nullptr) {
+                *trace << "FOUND|PRICELIST|BY ID '" << id << "'" << endl;
+                *trace << "||";
+                result->dump(*trace);
+                *trace << endl;
+            } else {
+                *trace << "NOT FOUND|PRICELIST|BY ID '" << id << "'" << endl;
+            }
+        }
+
+        return result;
     }
 };

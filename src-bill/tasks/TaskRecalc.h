@@ -1,21 +1,16 @@
 #pragma once
 
 #include "../../src/classes/Timer.h"
-#include "../lists/CdrObjList.h"
-#include "../classes/CalcFull.h"
 #include "../../src/tasks/Task.h"
+#include "../data/DataBillingContainer.h"
 
 class TaskRecalc : public Task {
 protected:
     time_t date_from;
+    DataBillingContainer billingData;
+    long long int recalc_from_call_id;
 
-    CdrObjList cdr_list;
-
-    int calc_calls_loop;
-    int calc_calls_full;
-
-    CalcFull calculator;
-
+    Timer t_load;
     Timer t_calc;
     Timer t_save;
 

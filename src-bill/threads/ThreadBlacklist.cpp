@@ -1,12 +1,13 @@
 #include "ThreadBlacklist.h"
 #include "../classes/AppBill.h"
-#include "ThreadSelectGlobalCounters.h"
 
 ThreadBlacklist::ThreadBlacklist() {
     id = idName();
     name = "Blacklist";
 
-    loader = DataLoader::instance();
+    data = DataContainer::instance();
+    billingData = DataBillingContainer::instance();
+
     blacklist_global = BlackListGlobal::instance();
     blacklist_local = BlackListLocal::instance();
     blacklist_trunk = BlackListTrunk::instance();
@@ -15,14 +16,22 @@ ThreadBlacklist::ThreadBlacklist() {
 }
 
 bool ThreadBlacklist::ready() {
-//    last_sync_from_openca_time = time(NULL);
-    return app().init_sync_done &&
-            app().init_load_data_done &&
-            app().init_load_counters_done &&
-            app().init_bill_runtime_started;
+    last_sync_from_openca_time = time(NULL);
+
+
+    if (!billingData->ready()) {
+        return false;
+    }
+
+    return true;
 }
 
 bool ThreadBlacklist::prepare() {
+
+    if (!data->prepareData(preparedData, time(nullptr))) {
+        return false;
+    }
+
     if (!blacklist_local->fetch()) {
         return false;
     }
@@ -32,7 +41,7 @@ bool ThreadBlacklist::prepare() {
     }
 
     if (!blacklist_trunk->fetch()) {
-        //return false;
+        return false;
     }
 
     last_sync_from_openca_time = time(NULL);
@@ -43,6 +52,19 @@ bool ThreadBlacklist::prepare() {
 }
 
 void ThreadBlacklist::run() {
+
+    if (!data->prepareData(preparedData, time(nullptr))) {
+        return;
+    }
+
+    if (!billingData->ready()) {
+        return;
+    }
+
+    if (!data->globalCounters.ready()) {
+        return;
+    }
+
 
     sync_once_per_hour();
 
@@ -66,12 +88,20 @@ void ThreadBlacklist::sync_once_per_hour() {
     sync_blacklist();
 }
 
-static void delExpiredUsages(BlackList * blacklist, UsageObjList * usages) {
-    map<long long int, time_t>::iterator i;
-
-    i = blacklist->blacklist.begin();
+void ThreadBlacklist::delExpiredServiceNumber(BlackList * blacklist) {
+    auto i = blacklist->blacklist.begin();
     while (i != blacklist->blacklist.end()) {
-        if (usages->find(i->first) == 0) {
+        if (preparedData.serviceNumber->find(atoll(i->first.c_str()), time(nullptr)) == 0) {
+            blacklist->del(i->first);
+        }
+        ++i;
+    }
+}
+
+void ThreadBlacklist::delExpiredServiceTrunk(BlackList * blacklist) {
+    auto i = blacklist->blacklist.begin();
+    while (i != blacklist->blacklist.end()) {
+        if (preparedData.trunkByName->find(i->first.c_str()) == 0) {
             blacklist->del(i->first);
         }
         ++i;
@@ -79,98 +109,120 @@ static void delExpiredUsages(BlackList * blacklist, UsageObjList * usages) {
 }
 
 void ThreadBlacklist::sync_blacklist() {
-    shared_ptr<UsageObjList> usages;
 
-    {
-        lock_guard<mutex> lock(loader->rwlock);
-        usages = loader->usage.get(get_tday());
-        if (usages == 0) return;
-    }
-    
-    delExpiredUsages(blacklist_local, usages.get());
-    delExpiredUsages(blacklist_global, usages.get());
-    delExpiredUsages(blacklist_trunk, usages.get());
+    delExpiredServiceNumber(blacklist_local);
+    delExpiredServiceNumber(blacklist_global);
+    delExpiredServiceTrunk(blacklist_trunk);
 
     blacklist_local->push();
     blacklist_global->push();
     blacklist_trunk->push();
 }
 
-static bool needLockLocal(pClient client, ClientCounterObj &cc, pGlobalCountersObj globalCounter, pUsageObj usage, FminCounter * counters_fmin) {
-    if (client != 0) {
-        double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0);
-        int usedFreeSeconds = counters_fmin->get(usage->id, 1);
+bool ThreadBlacklist::needLockLocal(ServiceNumber * serviceNumber) {
+    bool result = false;
 
-        
-        if (client->isConsumedCreditLimit(spentBalanceSum) &&
-            (client->last_payed_month < get_tmonth() || usedFreeSeconds >= usage->free_seconds)
-        ) {
-            return true;
+    ClientCounterObj &cc = billingData->clientCounter.get()->get(serviceNumber->client_account_id);
+
+    auto client = preparedData.client->find(serviceNumber->client_account_id);
+    if (client != nullptr) {
+        auto globalCounter = data->globalCounters.get()->find(client->id);
+
+        double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0);
+
+        if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth()) {
+            result = true;
         }
     }
-    
-    return false;
+
+    cc.updateVoipDisabledLocal(result);
+
+    return result;
 }
 
-static bool needLockGlobal(pClient client, ClientCounterObj &cc, pGlobalCountersObj globalCounter) {
-    if (client != 0) {
+bool ThreadBlacklist::needLockGlobal(ServiceNumber * serviceNumber) {
+    bool result = false;
+
+    ClientCounterObj &cc = billingData->clientCounter.get()->get(serviceNumber->client_account_id);
+
+    auto client = preparedData.client->find(serviceNumber->client_account_id);
+    if (client != nullptr) {
+        auto globalCounter = data->globalCounters.get()->find(client->id);
+
         double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0);
         double spentDaySum = cc.sumDay() + (globalCounter ? globalCounter->sumDay() : 0);
         double spentMonthSum = cc.sumMonth() + (globalCounter ? globalCounter->sumMonth() : 0);
-        
+
         if (client->isConsumedCreditLimit(spentBalanceSum) ||
-                client->isConsumedDailyLimit(spentDaySum) ||
-                client->isConsumedMonthlyLimit(spentMonthSum) ||
-                client->disabled
+            client->isConsumedDailyLimit(spentDaySum) ||
+            client->isConsumedMonthlyLimit(spentMonthSum) ||
+            client->disabled
                 ) {
-            return true;
+            result = true;
         }
     }
-    
-    return false;
+
+    cc.updateVoipDisabledGlobal(result);
+
+    return result;
+}
+
+bool ThreadBlacklist::needLockTrunk(ServiceTrunk * serviceTrunk) {
+    bool result = false;
+
+    ClientCounterObj &cc = billingData->clientCounter.get()->get(serviceTrunk->client_account_id);
+
+    auto client = preparedData.client->find(serviceTrunk->client_account_id);
+    if (client != nullptr) {
+        auto globalCounter = data->globalCounters.get()->find(client->id);
+
+        double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0);
+        double spentDaySum = cc.sumDay() + (globalCounter ? globalCounter->sumDay() : 0);
+        double spentMonthSum = cc.sumMonth() + (globalCounter ? globalCounter->sumMonth() : 0);
+
+        if (client->isConsumedCreditLimit(spentBalanceSum) ||
+            client->isConsumedDailyLimit(spentDaySum) ||
+            client->isConsumedMonthlyLimit(spentMonthSum) ||
+            client->disabled
+                ) {
+            result = true;
+        }
+    }
+
+    cc.updateVoipDisabledLocal(result);
+    cc.updateVoipDisabledGlobal(result);
+
+    return result;
 }
 
 void ThreadBlacklist::update_voip_auto_disabled() {
 
-    shared_ptr<ClientList> clients;
-    shared_ptr<UsageObjList> usages;
+    time_t now = time(nullptr);
 
-    {
-        lock_guard<mutex> lock(loader->rwlock);
+    for (size_t j = 0; j < preparedData.serviceNumber->size(); j++) {
+        auto serviceNumber = preparedData.serviceNumber->get(j);
+        if (serviceNumber->activation_dt > now || serviceNumber->expire_dt < now) {
+            continue;
+        }
 
-        clients = loader->client;
-        usages = loader->usage.get(get_tday());
-        if (usages == 0) return;
+        bool need_lock_local = needLockLocal(serviceNumber);
+        bool need_lock_global = needLockGlobal(serviceNumber);
+
+        blacklist_local->change_lock(serviceNumber->did, need_lock_local);
+        blacklist_global->change_lock(serviceNumber->did, need_lock_global);
     }
 
-    {
-        lock_guard<mutex> lock(loader->counter_rwlock);
+    for (size_t j = 0; j < preparedData.serviceTrunk->size(); j++) {
+        auto serviceTrunk = preparedData.serviceTrunk->get(j);
+        if (serviceTrunk->activation_dt > now || serviceTrunk->expire_dt < now) {
+            continue;
+        }
 
-        shared_ptr<ClientCounter> counters_clients = loader->counter_client;
-        shared_ptr<FminCounter> counters_fmin = loader->counter_fmin.get(get_tmonth());
-        shared_ptr<GlobalCountersObjList> counters_global = ThreadSelectGlobalCounters::getList();
+        bool need_lock_trunk = needLockTrunk(serviceTrunk);
 
-        if (counters_clients == 0 || counters_fmin == 0 || counters_global == 0) return;
-
-        for (int j = 0; j < usages->count; j++) {
-            pUsageObj usage = (pUsageObj) usages->_get(j);
-            pClient client = clients->find(usage->client_id);
-            pGlobalCountersObj globalCounter = counters_global->find(usage->client_id);
-
-            ClientCounterObj &cc = counters_clients->get(usage->client_id);
-
-            bool need_lock_local = needLockLocal(client, cc, globalCounter, usage, counters_fmin.get());
-            bool need_lock_global = needLockGlobal(client, cc, globalCounter);
-
-            cc.updateVoipDisabledLocal(need_lock_local);
-            cc.updateVoipDisabledGlobal(need_lock_global);
-
-            if (usage->isConnectedOperator()) {
-                blacklist_trunk->change_lock(usage->phone_num, need_lock_global);
-            } else {
-                blacklist_local->change_lock(usage->phone_num, need_lock_local);
-                blacklist_global->change_lock(usage->phone_num, need_lock_global);
-            }
+        auto trunk = preparedData.trunk->find(serviceTrunk->trunk_id);
+        if (trunk != nullptr) {
+            blacklist_trunk->change_lock(trunk->trunk_name, need_lock_trunk);
         }
     }
 
@@ -182,31 +234,23 @@ void ThreadBlacklist::update_voip_auto_disabled() {
 void ThreadBlacklist::htmlfull(stringstream &html) {
     this->html(html);
 
-    html << "Time loop: <b>" << t.sloop() << "</b><br/>\n";
-    html << "Time full loop: <b>" << t.sfull() << "</b><br/>\n";
-    html << "loops: <b>" << t.count << "</b><br/>\n";
-    html << "<br/>\n";
-
-
-    shared_ptr<UsageObjList> usages;
-    pUsageObj usage;
-
-    {
-        lock_guard<mutex> lock(loader->rwlock);
-        usages = loader->usage.get(get_tday());
+    if (!data->prepareData(preparedData, time(nullptr))) {
+        return;
     }
 
+    auto usages = preparedData.serviceNumber;
+    ServiceNumber * usage;
     {
         lock_guard<mutex> lock(blacklist_local->rwlock);
 
         if (blacklist_local->blacklist.size() > 0) {
             html << "BlackListLocal: <b>" << blacklist_local->blacklist.size() << "</b><br/>\n";
-            map<long long int, time_t>::iterator i = blacklist_local->blacklist.begin();
+            auto i = blacklist_local->blacklist.begin();
             while (i != blacklist_local->blacklist.end()) {
                 html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                html << "<b>" << lexical_cast<string>(i->first) << "</b>";
-                if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                    html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
+                html << "<b>" << i->first << "</b>";
+                if ((usage = usages->find(atoll(i->first.c_str()), time(nullptr))) != 0)
+                    html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                 html << "<br/>\n";
                 ++i;
             }
@@ -214,12 +258,12 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
 
         if (blacklist_local->list_to_add.size() > 0) {
             html << "BlackListLocal to Add: <b>" << blacklist_local->list_to_add.size() << "</b><br/>\n";
-            map<long long int, bool>::iterator i = blacklist_local->list_to_add.begin();
+            auto i = blacklist_local->list_to_add.begin();
             while (i != blacklist_local->list_to_add.end()) {
                 html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                html << "<b>" << lexical_cast<string>(i->first) << "</b>";
-                if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                    html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
+                html << "<b>" << i->first << "</b>";
+                if ((usage = usages->find(atoll(i->first.c_str()), time(nullptr))) != 0)
+                    html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                 html << "<br/>\n";
                 ++i;
             }
@@ -227,12 +271,12 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
 
         if (blacklist_local->list_to_del.size() > 0) {
             html << "BlackListLocal to Del: <b>" << blacklist_local->list_to_del.size() << "</b><br/>\n";
-            map<long long int, bool>::iterator i = blacklist_local->list_to_del.begin();
+            auto i = blacklist_local->list_to_del.begin();
             while (i != blacklist_local->list_to_del.end()) {
                 html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                html << "<b>" << lexical_cast<string>(i->first) << "</b>";
-                if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                    html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
+                html << "<b>" << i->first << "</b>";
+                if ((usage = usages->find(atoll(i->first.c_str()), time(nullptr))) != 0)
+                    html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                 html << "<br/>\n";
                 ++i;
             }
@@ -247,12 +291,12 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
 
         if (blacklist_global->blacklist.size() > 0) {
             html << "BlackListGlobal: <b>" << blacklist_global->blacklist.size() << "</b><br/>\n";
-            map<long long int, time_t>::iterator i = blacklist_global->blacklist.begin();
+            auto i = blacklist_global->blacklist.begin();
             while (i != blacklist_global->blacklist.end()) {
                 html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                html << "<b>" << lexical_cast<string>(i->first) << "</b>";
-                if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                    html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
+                html << "<b>" << i->first << "</b>";
+                if ((usage = usages->find(atoll(i->first.c_str()), time(nullptr))) != 0)
+                    html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                 html << "<br/>\n";
                 ++i;
             }
@@ -260,12 +304,12 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
 
         if (blacklist_global->list_to_add.size() > 0) {
             html << "BlackListGlobal to Add: <b>" << blacklist_global->list_to_add.size() << "</b><br/>\n";
-            map<long long int, bool>::iterator i = blacklist_global->list_to_add.begin();
+            auto i = blacklist_global->list_to_add.begin();
             while (i != blacklist_global->list_to_add.end()) {
                 html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                html << "<b>" << lexical_cast<string>(i->first) << "</b>";
-                if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                    html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
+                html << "<b>" << i->first << "</b>";
+                if ((usage = usages->find(atoll(i->first.c_str()), time(nullptr))) != 0)
+                    html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                 html << "<br/>\n";
                 ++i;
             }
@@ -273,12 +317,12 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
 
         if (blacklist_global->list_to_del.size() > 0) {
             html << "BlackListGlobal to Del: <b>" << blacklist_global->list_to_del.size() << "</b><br/>\n";
-            map<long long int, bool>::iterator i = blacklist_global->list_to_del.begin();
+            auto i = blacklist_global->list_to_del.begin();
             while (i != blacklist_global->list_to_del.end()) {
                 html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                html << "<b>" << lexical_cast<string>(i->first) << "</b>";
-                if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                    html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
+                html << "<b>" << i->first << "</b>";
+                if ((usage = usages->find(atoll(i->first.c_str()), time(nullptr))) != 0)
+                    html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                 html << "<br/>\n";
                 ++i;
             }
@@ -286,20 +330,25 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
 
         html << "<br/>\n";
     }
-    
-    
 
     {
         lock_guard<mutex> lock(blacklist_trunk->rwlock);
 
         if (blacklist_trunk->blacklist.size() > 0) {
             html << "BlackListTrunk: <b>" << blacklist_trunk->blacklist.size() << "</b><br/>\n";
-            map<long long int, time_t>::iterator i = blacklist_trunk->blacklist.begin();
+            auto i = blacklist_trunk->blacklist.begin();
             while (i != blacklist_trunk->blacklist.end()) {
                 html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                html << "<b>" << lexical_cast<string>(i->first) << "</b>";
-                if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                    html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
+                html << "<b>" << i->first << "</b>";
+                auto trunk = preparedData.trunkByName->find(i->first.c_str());
+                if (trunk == nullptr) {
+                    trunk = preparedData.trunkByAlias->find(i->first.c_str());
+                }
+                if (trunk != nullptr) {
+                    auto serviceTrunk = preparedData.serviceTrunk->find(trunk->id, time(nullptr));
+                    if (serviceTrunk != nullptr)
+                        html << " / " << "<a href='/client?id=" << serviceTrunk->client_account_id << "'>" << serviceTrunk->client_account_id << "</a>";
+                }
                 html << "<br/>\n";
                 ++i;
             }
@@ -307,12 +356,19 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
 
         if (blacklist_trunk->list_to_add.size() > 0) {
             html << "BlackListTrunk to Add: <b>" << blacklist_trunk->list_to_add.size() << "</b><br/>\n";
-            map<long long int, bool>::iterator i = blacklist_trunk->list_to_add.begin();
+            auto i = blacklist_trunk->list_to_add.begin();
             while (i != blacklist_trunk->list_to_add.end()) {
                 html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                html << "<b>" << lexical_cast<string>(i->first) << "</b>";
-                if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                    html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
+                html << "<b>" << i->first << "</b>";
+                auto trunk = preparedData.trunkByName->find(i->first.c_str());
+                if (trunk == nullptr) {
+                    trunk = preparedData.trunkByAlias->find(i->first.c_str());
+                }
+                if (trunk != nullptr) {
+                    auto serviceTrunk = preparedData.serviceTrunk->find(trunk->id, time(nullptr));
+                    if (serviceTrunk != nullptr)
+                        html << " / " << "<a href='/client?id=" << serviceTrunk->client_account_id << "'>" << serviceTrunk->client_account_id << "</a>";
+                }
                 html << "<br/>\n";
                 ++i;
             }
@@ -320,12 +376,19 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
 
         if (blacklist_trunk->list_to_del.size() > 0) {
             html << "BlackListTrunk to Del: <b>" << blacklist_trunk->list_to_del.size() << "</b><br/>\n";
-            map<long long int, bool>::iterator i = blacklist_trunk->list_to_del.begin();
+            auto i = blacklist_trunk->list_to_del.begin();
             while (i != blacklist_trunk->list_to_del.end()) {
                 html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                html << "<b>" << lexical_cast<string>(i->first) << "</b>";
-                if (usages != 0 && (usage = usages->find(i->first)) != 0)
-                    html << " / " << "<a href='/client?id=" << usage->client_id << "'>" << usage->client_id << "</a>";
+                html << "<b>" << i->first << "</b>";
+                auto trunk = preparedData.trunkByName->find(i->first.c_str());
+                if (trunk == nullptr) {
+                    trunk = preparedData.trunkByAlias->find(i->first.c_str());
+                }
+                if (trunk != nullptr) {
+                    auto serviceTrunk = preparedData.serviceTrunk->find(trunk->id, time(nullptr));
+                    if (serviceTrunk != nullptr)
+                        html << " / " << "<a href='/client?id=" << serviceTrunk->client_account_id << "'>" << serviceTrunk->client_account_id << "</a>";
+                }
                 html << "<br/>\n";
                 ++i;
             }
@@ -333,5 +396,6 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
 
         html << "<br/>\n";
     }
+
 }
 

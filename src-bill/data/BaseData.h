@@ -3,6 +3,7 @@
 #include <mutex>
 
 #include "../../src/common.h"
+#include "../../src/classes/Spinlock.h"
 #include "../../src/lists/ObjList.h"
 #include "../../src/classes/BDb.h"
 #include "../../src/classes/Timer.h"
@@ -13,7 +14,7 @@ template <typename T>
 class BaseData {
 protected:
     shared_ptr<T> data;
-    mutex lock;
+    Spinlock lock;
 public:
     Timer timer;
 
@@ -22,12 +23,12 @@ public:
     }
 
     bool ready() {
-        lock_guard<mutex> guard(lock);
+        lock_guard<Spinlock> guard(lock);
         return data != 0;
     }
 
     shared_ptr<T> get() {
-        lock_guard<mutex> guard(lock);
+        lock_guard<Spinlock> guard(lock);
         return data;
     }
 
@@ -37,7 +38,7 @@ public:
         shared_ptr<T> tmpData = shared_ptr<T>( new T() );
         static_cast<BaseObjList*>(tmpData.get())->load(db);
 
-        lock_guard<mutex> guard(lock);
+        lock_guard<Spinlock> guard(lock);
         data.swap(tmpData);
     }
 

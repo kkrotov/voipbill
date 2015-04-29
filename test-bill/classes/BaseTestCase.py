@@ -48,7 +48,7 @@ class BaseTestCase(unittest.TestCase):
 
     def startOpenCA(self):
         self.openCA = OpenCAEmulator()
-        self.openCA.start()
+        self.openCA.start(cfg.openca_udpPort)
 
 
     def stopOpenCA(self):

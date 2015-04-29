@@ -36,32 +36,13 @@ public:
     void setStatus(ThreadStatus status);
     
     ThreadStatus getRealStatus();
-    
-    void threadTotals(stringstream &html) {
-        ThreadStatus status = getStatus();
-        ThreadStatus real_status = getRealStatus();
 
-        html << "<tr>";
-        html << "<td style='text-align: left'><a href='/task?id=" << this->id << "'>" << this->name << "</a></td>\n";
-        html << "<td style='text-align: left'>" << ThreadStatusNames[real_status] << (status != real_status ? " (" + string(ThreadStatusNames[status]) + ")" : "") << "</b></td>\n";
-        html << "<td style='text-align: left'>Count: <b>" << timer.count << "</b></td>\n";
-        html << "<td style='text-align: left'>Time last: <b>" << timer.sloop() << "</b></td>\n";
-        html << "<td style='text-align: left'>Time total: <b>" << timer.sloop() << "</b></td>\n";
-        html << "<td style='text-align: left'>Errors: <b>" << errorsCount << "</b></td>\n";
-        html << "<td style='text-align: left'>" << lastError << "</td>\n";
-        html << "</tr>";
-    }
+    void threadTotalsHeader(stringstream &html);
+    void threadTotalsData(stringstream &html);
 
-    void html(stringstream &html) {
-        html << "<table style='width:100%'>\n";
-        this->threadTotals(html);
-        html << "</table>\n";
-        html << "<hr/><br/>\n";
-    }
-    
-    virtual void htmlfull(stringstream &html) {
-        this->html(html);
-    }
+    void html(stringstream &html);
+
+    virtual void htmlfull(stringstream &html);
 
 protected:
     string name;

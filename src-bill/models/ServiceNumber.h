@@ -9,4 +9,15 @@ struct ServiceNumber {
     int lines_count;
     time_t activation_dt;
     time_t expire_dt;
+
+    void dump(stringstream &trace) {
+        trace << "(";
+        trace << "id: " << id << ", ";
+        trace << "client_account_id: " << client_account_id << ", ";
+        trace << "did: " << did << ", ";
+        trace << "lines_count: " << lines_count << ", ";
+        trace << "activation_dt: " << activation_dt << ", ";
+        trace << "expire_dt: " << expire_dt << ", ";
+        trace << ")";
+    }
 };

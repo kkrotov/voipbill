@@ -14,12 +14,13 @@ public:
         fields.push_back("id");
         fields.push_back("server_id");
         fields.push_back("client_account_id");
-        fields.push_back("trunk_name");
+        fields.push_back("trunk_id");
         fields.push_back("activation_dt");
         fields.push_back("expire_dt");
         fields.push_back("orig_enabled");
         fields.push_back("term_enabled");
         fields.push_back("orig_min_payment");
         fields.push_back("term_min_payment");
+        fields.push_back("operator_id");
     }
 };

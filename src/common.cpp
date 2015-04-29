@@ -36,13 +36,14 @@ string string_date(const time_t dt) {
         return string("4000-01-01");
     }
 
-    struct tm * timeinfo = localtime(&dt);
-    if (timeinfo->tm_year < 0 || timeinfo->tm_year > 1000) {
-        timeinfo->tm_year = 0;
-        timeinfo->tm_mon = 0;
-        timeinfo->tm_mday = 1;
+    struct tm timeinfo;
+    gmtime_r(&dt, &timeinfo);
+    if (timeinfo.tm_year < 0 || timeinfo.tm_year > 1000) {
+        timeinfo.tm_year = 0;
+        timeinfo.tm_mon = 0;
+        timeinfo.tm_mday = 1;
     }
-    strftime(buff, 20, "%Y-%m-%d", timeinfo);
+    strftime(buff, 20, "%Y-%m-%d", &timeinfo);
     return string(buff);
 }
 
@@ -54,16 +55,17 @@ string string_time(const time_t dt) {
         return string("4000-01-01 00:00:00");
     }
 
-    struct tm * timeinfo = localtime(&dt);
-    if (timeinfo->tm_year < 0 || timeinfo->tm_year > 1000) {
-        timeinfo->tm_year = 0;
-        timeinfo->tm_mon = 0;
-        timeinfo->tm_mday = 1;
-        timeinfo->tm_hour = 0;
-        timeinfo->tm_min = 0;
-        timeinfo->tm_sec = 0;
+    struct tm timeinfo;
+    gmtime_r(&dt, &timeinfo);
+    if (timeinfo.tm_year < 0 || timeinfo.tm_year > 1000) {
+        timeinfo.tm_year = 0;
+        timeinfo.tm_mon = 0;
+        timeinfo.tm_mday = 1;
+        timeinfo.tm_hour = 0;
+        timeinfo.tm_min = 0;
+        timeinfo.tm_sec = 0;
     }
-    strftime(buff, 40, "%Y-%m-%d %H:%M:%S", timeinfo);
+    strftime(buff, 40, "%Y-%m-%d %H:%M:%S", &timeinfo);
     return string(buff);
 }
 
@@ -79,13 +81,13 @@ time_t parseDate(char * str) {
         ttt.tm_sec = 0;
         ttt.tm_isdst = 0;
         ttt.tm_yday = 0;
-        return mktime(&ttt);
+        return timegm(&ttt);
     } else {
         return 0;
     }
 }
 
-time_t parseDateTime(char * str) {
+time_t parseDateTime(const char * str) {
     struct tm ttt;
     if (sscanf(str, "%d-%d-%d %d:%d:%d",
             &ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday,
@@ -95,32 +97,9 @@ time_t parseDateTime(char * str) {
         ttt.tm_mon -= 1;
         ttt.tm_isdst = 0;
         ttt.tm_yday = 0;
-        return mktime(&ttt);
+        return timegm(&ttt);
     } else {
         return 0;
-    }
-}
-
-bool parseDateTime(char * str, DT &dt) {
-    struct tm ttt;
-    if (sscanf(str, "%d-%d-%d %d:%d:%d",
-            &ttt.tm_year, &ttt.tm_mon, &ttt.tm_mday,
-            &ttt.tm_hour, &ttt.tm_min, &ttt.tm_sec) > 0
-            ) {
-        ttt.tm_year -= 1900;
-        ttt.tm_mon -= 1;
-        ttt.tm_isdst = 0;
-        ttt.tm_yday = 0;
-        dt.time = mktime(&ttt);
-        dt.day = dt.time - ttt.tm_hour * 3600 - ttt.tm_min * 60 - ttt.tm_sec;
-        dt.month = dt.day - (ttt.tm_mday - 1)*86400;
-        return true;
-    } else {
-        dt.time = 0;
-        dt.day = 0;
-        dt.month = 0;
-        Log::error("parseDateTime: can't parse '" + string(str) + "'");
-        return false;
     }
 }
 
@@ -138,14 +117,14 @@ time_t get_tday(const time_t rawtime) {
     }
 
     struct tm *ttt;
-    ttt = localtime(&rawtime);
+    ttt = gmtime(&rawtime);
     ttt->tm_isdst = 0;
     ttt->tm_wday = 0;
     ttt->tm_yday = 0;
     ttt->tm_hour = 0;
     ttt->tm_min = 0;
     ttt->tm_sec = 0;
-    t_day_start = mktime(ttt);
+    t_day_start = timegm(ttt);
     t_day_end = t_day_start + 86400 - 1;
     return t_day_start;
 }
@@ -164,7 +143,7 @@ time_t get_tmonth(const time_t rawtime) {
     }
 
     struct tm *ttt;
-    ttt = localtime(&rawtime);
+    ttt = gmtime(&rawtime);
     ttt->tm_mday = 1;
     ttt->tm_isdst = 0;
     ttt->tm_wday = 0;
@@ -172,13 +151,13 @@ time_t get_tmonth(const time_t rawtime) {
     ttt->tm_hour = 0;
     ttt->tm_min = 0;
     ttt->tm_sec = 0;
-    t_month_start = mktime(ttt);
+    t_month_start = timegm(ttt);
 
     if (++ttt->tm_mon == 12) {
         ttt->tm_mon = 0;
         ttt->tm_year++;
     }
-    t_month_end = mktime(ttt) - 1;
+    t_month_end = timegm(ttt) - 1;
     return t_month_start;
 }
 

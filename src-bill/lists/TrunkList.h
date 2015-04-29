@@ -9,7 +9,7 @@ protected:
 
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
-        return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, default_priority, auto_routing, route_table_id, our_trunk " \
+        return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, default_priority, auto_routing, route_table_id, our_trunk, auth_by_number " \
             "   from auth.trunk " \
             "   where server_id = " + server_id +
             "   order by trunk_name asc ";
@@ -26,26 +26,41 @@ protected:
         item->auto_routing = row.get_b(7);
         item->route_table_id = row.get_i(8);
         item->our_trunk = row.get_b(9);
+        item->auth_by_number = row.get_b(10);
     }
 
-    struct key_trunk_name {
-        bool operator() (const Trunk & left, char * trunk_name) {
-            return strcmp(left.trunk_name, trunk_name) < 0;
+    struct key_id {
+        bool operator() (const Trunk & left, int id) {
+            return left.id < id;
         }
-        bool operator() (char * trunk_name, const Trunk & right) {
-            return strcmp(trunk_name, right.trunk_name) < 0;
+        bool operator() (int id, const Trunk & right) {
+            return id < right.id;
         }
     };
 
 public:
-    Trunk * find(char * trunk_name) {
+    Trunk * find(int id, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
-            auto p = equal_range(begin, end, trunk_name, key_trunk_name());
+            auto p = equal_range(begin, end, id, key_id());
             begin = p.first;
             end = p.second;
         }
-        return begin <  end ? &*begin : nullptr;
+        auto result = begin <  end ? &*begin : nullptr;
+
+        if (trace != nullptr) {
+            if (result != nullptr) {
+                *trace << "FOUND|TRUNK|BY ID '" << id << "'" << endl;
+                *trace << "||";
+                result->dump(*trace);
+                *trace << endl;
+            } else {
+                *trace << "NOT FOUND|TRUNK|BY ID '" << id << "'" << endl;
+            }
+        }
+
+        return result;
     }
+
 };

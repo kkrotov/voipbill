@@ -40,7 +40,7 @@ protected:
     };
 
 public:
-    TrunkNumberPreprocessing * find(int trunk_id, int order) {
+    TrunkNumberPreprocessing * find(int trunk_id, int order, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -53,6 +53,20 @@ public:
             begin = p.first;
             end = p.second;
         }
-        return begin <  end ? &*begin : nullptr;
+        auto result = begin <  end ? &*begin : nullptr;
+
+        if (trace != nullptr) {
+
+            if (result != nullptr) {
+                *trace << "FOUND|TRUNK NUMBER PREPROCESSING|BY TRUNK_ID '" << trunk_id << "', ORDER '" << order << "'" << endl;
+                *trace << "||";
+                result->dump(*trace);
+                *trace << endl;
+            } else {
+                *trace << "NOT FOUND|TRUNK NUMBER PREPROCESSING|BY TRUNK_ID '" << trunk_id << "', ORDER '" << order << "'" << endl;
+            }
+        }
+
+        return result;
     }
 };

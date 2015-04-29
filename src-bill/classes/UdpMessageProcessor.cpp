@@ -112,9 +112,10 @@ void UdpMessageProcessor::calculateCall() {
 
 void UdpMessageProcessor::prepareCall() {
     time_t rawtime;
-    struct tm * timeinfo;
     time(&rawtime);
-    timeinfo = localtime(&rawtime);
+    struct tm timeinfo;
+    gmtime_r(&rawtime, &timeinfo);
+
 
     strcpy((char*) &call.id, "0");
     call.id_num = 0;

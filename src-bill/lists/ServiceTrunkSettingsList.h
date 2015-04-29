@@ -49,7 +49,7 @@ protected:
     };
 
 public:
-    ServiceTrunkSettings * find(int trunk_id, int type, int order) {
+    ServiceTrunkSettings * find(int trunk_id, int type, int order, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -67,6 +67,54 @@ public:
             begin = p.first;
             end = p.second;
         }
-        return begin <  end ? &*begin : nullptr;
+        auto result = begin <  end ? &*begin : nullptr;
+
+        if (trace != nullptr) {
+
+            if (result != nullptr) {
+                *trace << "FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "', ORDER '" << order << "'" << endl;
+                *trace << "||";
+                result->dump(*trace);
+                *trace << endl;
+            } else {
+                *trace << "NOT FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "', ORDER '" << order << "'" << endl;
+            }
+        }
+
+        return result;
+    }
+
+    void findAll(vector<ServiceTrunkSettings *> &resultTrunkSettings, int trunk_id, int type, stringstream *trace = nullptr) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, trunk_id, key_trunk_id());
+            begin = p.first;
+            end = p.second;
+        }
+        {
+            auto p = equal_range(begin, end, type, key_type());
+            begin = p.first;
+            end = p.second;
+        }
+
+        if (begin < end) {
+            if (trace != nullptr) {
+                *trace << "FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "'" << endl;
+            }
+            for (auto it = begin; it != end; ++it) {
+                resultTrunkSettings.push_back(&*it);
+
+                if (trace != nullptr) {
+                    *trace << "||";
+                    it->dump(*trace);
+                    *trace << endl;
+                }
+            }
+        } else {
+            if (trace != nullptr) {
+                *trace << "NOT FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "'" << endl;
+            }
+        }
     }
 };

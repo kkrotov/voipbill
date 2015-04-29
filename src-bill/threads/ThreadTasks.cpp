@@ -1,6 +1,8 @@
 #include "ThreadTasks.h"
 #include "../classes/AppBill.h"
 #include "../tasks/TaskRecalc.h"
+#include "../data/DataContainer.h"
+#include "../data/DataBillingContainer.h"
 
 ThreadTasks::ThreadTasks() {
     id = idName();
@@ -10,10 +12,17 @@ ThreadTasks::ThreadTasks() {
 }
 
 bool ThreadTasks::ready() {
-    return app().init_sync_done &&
-            app().init_load_data_done &&
-            app().init_load_counters_done &&
-            app().init_bill_runtime_started;
+
+    PreparedData preparedData;
+    if (!DataContainer::instance()->prepareData(preparedData, time(nullptr))) {
+        return false;
+    }
+
+    if (!DataBillingContainer::instance()->ready()) {
+        return false;
+    }
+
+    return true;
 }
 
 void ThreadTasks::run() {
@@ -28,46 +37,54 @@ void ThreadTasks::run() {
 
         if (task_name == "recalc_current_month") {
             time_t rawtime = time(NULL);
-            struct tm *ttt;
-            ttt = localtime(&rawtime);
-            ttt->tm_mday = 1;
-            ttt->tm_isdst = 0;
-            ttt->tm_wday = 0;
-            ttt->tm_yday = 0;
-            ttt->tm_hour = 0;
-            ttt->tm_min = 0;
-            ttt->tm_sec = 0;
+            struct tm timeinfo;
+            gmtime_r(&rawtime, &timeinfo);
+            timeinfo.tm_mday = 1;
+            timeinfo.tm_isdst = 0;
+            timeinfo.tm_wday = 0;
+            timeinfo.tm_yday = 0;
+            timeinfo.tm_hour = 0;
+            timeinfo.tm_min = 0;
+            timeinfo.tm_sec = 0;
 
-            TaskRecalc *task = new TaskRecalc(mktime(ttt), app().conf.str_instance_id);
+            time_t t_current_month = timegm(&timeinfo);
+            t_current_month -= 12 * 3600;
+
+            TaskRecalc *task = new TaskRecalc(t_current_month, app().conf.str_instance_id);
             task->initTask(db_main, task_id, task_params);
             current_task.reset(task);
             task->run();
 
-            db_main.exec("delete from billing.tasks where region_id=" + app().conf.str_instance_id + " and id=" + task_id);
-        } else
+            db_main.exec(
+                    "delete from billing.tasks where region_id=" + app().conf.str_instance_id + " and id=" + task_id);
+        } else {
             if (task_name == "recalc_last_month") {
-            time_t rawtime = time(NULL);
-            struct tm *ttt;
-            ttt = localtime(&rawtime);
-            ttt->tm_mday = 1;
-            ttt->tm_isdst = 0;
-            ttt->tm_wday = 0;
-            ttt->tm_yday = 0;
-            ttt->tm_hour = 0;
-            ttt->tm_min = 0;
-            ttt->tm_sec = 0;
+                time_t rawtime = time(NULL);
+                struct tm timeinfo;
+                gmtime_r(&rawtime, &timeinfo);
+                timeinfo.tm_mday = 1;
+                timeinfo.tm_isdst = 0;
+                timeinfo.tm_wday = 0;
+                timeinfo.tm_yday = 0;
+                timeinfo.tm_hour = 0;
+                timeinfo.tm_min = 0;
+                timeinfo.tm_sec = 0;
 
-            if (--ttt->tm_mon < 0) {
-                ttt->tm_mon = 11;
-                ttt->tm_year--;
+                if (--timeinfo.tm_mon < 0) {
+                    timeinfo.tm_mon = 11;
+                    timeinfo.tm_year--;
+                }
+
+                time_t t_previous_month = timegm(&timeinfo);
+                t_previous_month -= 12 * 3600;
+
+                TaskRecalc *task = new TaskRecalc(t_previous_month, app().conf.str_instance_id);
+                task->initTask(db_main, task_id, task_params);
+                current_task.reset(task);
+                task->run();
+
+                db_main.exec("delete from billing.tasks where region_id=" + app().conf.str_instance_id + " and id=" + task_id);
             }
-
-            TaskRecalc *task = new TaskRecalc(mktime(ttt), app().conf.str_instance_id);
-            task->initTask(db_main, task_id, task_params);
-            current_task.reset(task);
-            task->run();
-
-            db_main.exec("delete from billing.tasks where region_id=" + app().conf.str_instance_id + " and id=" + task_id);
         }
 
         tasks_count++;
@@ -81,10 +98,6 @@ void ThreadTasks::run() {
 void ThreadTasks::htmlfull(stringstream &html) {
     this->html(html);
 
-    html << "Time loop: <b>" << t.sloop() + "</b><br/>\n";
-    html << "Time full loop: <b>" << t.sfull() + "</b><br/>\n";
-    html << "Loops: <b>" << t.count << "</b><br/>\n";
-    html << "<br/>\n";
     html << "Tasks count: <b>" << lexical_cast<string>(tasks_count) << "</b><br/>\n";
     html << "<br/>\n";
 

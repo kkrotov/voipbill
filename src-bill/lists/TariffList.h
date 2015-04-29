@@ -34,7 +34,7 @@ protected:
     };
 
 public:
-    Tariff * find(int id) {
+    Tariff * find(int id, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -42,6 +42,19 @@ public:
             begin = p.first;
             end = p.second;
         }
-        return begin <  end ? &*begin : nullptr;
+        auto result = begin <  end ? &*begin : nullptr;
+
+        if (trace != nullptr) {
+            if (result != nullptr) {
+                *trace << "FOUND|SEARCH TARIFF|BY ID '" << id << "'" << endl;
+                *trace << "||";
+                result->dump(*trace);
+                *trace << endl;
+            } else {
+                *trace << "NOT FOUND|TARIFF|BY ID '" << id << "'" << endl;
+            }
+        }
+
+        return result;
     }
 };

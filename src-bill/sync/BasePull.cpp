@@ -112,6 +112,7 @@ void BasePull::pullPartial() {
             BDbTransaction trans(&manager->db_calls);
             manager->db_calls.exec(del);
             manager->db_calls.exec(ins);
+            trans.commit();
         }
 
         pull_count_updated += res.size();

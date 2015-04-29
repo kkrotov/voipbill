@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <memory>
 using namespace std;
 
 #include "../lists/ObjList.h"

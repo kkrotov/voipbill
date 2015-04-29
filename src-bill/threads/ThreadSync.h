@@ -10,7 +10,6 @@
 class ThreadSync : public Thread {
     ManagerPull manager;
 
-    bool prepare();
     void run();
 
     void htmlfull(stringstream &html);

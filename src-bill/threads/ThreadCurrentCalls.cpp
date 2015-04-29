@@ -1,26 +1,24 @@
-#include "ThreadSelectCurrentCalls.h"
+#include "ThreadCurrentCalls.h"
 #include "../classes/Billing.h"
+#include "../data/DataCurrentCallsContainer.h"
 
 
-void ThreadSelectCurrentCalls::run() {
+void ThreadCurrentCalls::run() {
+    DataCurrentCallsContainer::instance()->currentCdr.load(&db_calls);
 
-    data->currentCdrData.load(&db_calls);
+    Billing billing;
+    billing.calcCurrentCalls();
 }
 
-void ThreadSelectCurrentCalls::htmlfull(stringstream &html) {
+void ThreadCurrentCalls::htmlfull(stringstream &html) {
 
     this->html(html);
 
-    if (!data->currentCdrData.ready()) {
+    shared_ptr<CurrentCdrList> cdrList = DataCurrentCallsContainer::instance()->currentCdr.get();
+    if (cdrList == nullptr) {
         return;
     }
 
-    shared_ptr<CurrentCdrList> cdrList = data->currentCdrData.get();
-
-    DataBillingContainer dstBillingData;
-    Billing billing;
-    billing.setDstBillingData(&dstBillingData);
-    billing.calcCurrentCdrs();
 
     html << "Current calls: <b>" << cdrList->size() << "</b><br/>\n";
     html << "<br/>\n";
@@ -41,7 +39,7 @@ void ThreadSelectCurrentCalls::htmlfull(stringstream &html) {
         auto cdr = cdrList->get(i);
 
         html << "<tr>";
-        html << "<td>" << cdr->connect_time << "</td>";
+        html << "<td>" << string_time(cdr->connect_time) << "</td>";
         html << "<td>" << cdr->session_time << "</td>";
         html << "<td>" << cdr->src_number << "</td>";
         html << "<td>" << cdr->dst_number << "</td>";
@@ -59,32 +57,37 @@ void ThreadSelectCurrentCalls::htmlfull(stringstream &html) {
     html << "<table width=100% border=1 cellspacing=0>\n";
     html << "<tr>";
     html << "<th></th>";
-    html << "<th>call_time</th>";
+    html << "<th>connect_time</th>";
     html << "<th>src_number</th>";
     html << "<th>dst_number</th>";
-    html << "<th>redirect_number</th>";
     html << "<th>billed_time</th>";
     html << "<th>rate</th>";
     html << "<th>cost</th>";
-    html << "<th>client</th>";
-    html << "<th>service</th>";
+    html << "<th>account</th>";
+    html << "<th>number</th>";
     html << "<th>pricelist_id</th>";
     html << "<th>prefix</th>";
     html << "<th>dest</th>";
     html << "<th>geo_id</th>";
     html << "</tr>\n";
-    for (auto &call : dstBillingData.calls) {
+    auto calls = DataCurrentCallsContainer::instance()->getCallsWaitingSaving();
+    for (auto &call : *calls.get()) {
         html << "<tr>";
         html << "<td>" << (call.orig ? "orig" : "term") << "</td>";
-        html << "<td>" << call.call_time << "</td>";
+        html << "<td>" << string_time(call.connect_time) << "</td>";
         html << "<td>" << call.src_number << "</td>";
         html << "<td>" << call.dst_number << "</td>";
-        html << "<td>" << call.redirect_number << "</td>";
         html << "<td>" << call.billed_time << "</td>";
         html << "<td>" << call.rate << "</td>";
         html << "<td>" << call.cost << "</td>";
-        html << "<td>" << call.client_account_id << "</td>";
-        html << "<td>" << (call.service_type == SERVICE_TYPE_TRUNK ? "trunk " : "") << (call.service_type == SERVICE_TYPE_NUMBER ? "number " : "") << call.service_id << "</td>";
+        html << "<td>" << call.account_id << "</td>";
+        if (call.trunk_service_id != 0) {
+            html << "<td>trunk " << call.trunk_service_id << "</td>";
+        } else if (call.number_service_id != 0) {
+            html << "<td>number " << call.number_service_id << "</td>";
+        } else {
+            html << "<td></td>";
+        }
         html << "<td>" << call.pricelist_id << "</td>";
         html << "<td>" << call.prefix << "</td>";
         html << "<td>" << call.dest << (call.mob ? " mob" : "") << "</td>";
@@ -94,7 +97,7 @@ void ThreadSelectCurrentCalls::htmlfull(stringstream &html) {
     html << "</table>\n";
 }
 
-ThreadSelectCurrentCalls::ThreadSelectCurrentCalls() {
+ThreadCurrentCalls::ThreadCurrentCalls() {
     id = idName();
     name = "Current Calls";
     db_calls.setCS(app().conf.db_calls);

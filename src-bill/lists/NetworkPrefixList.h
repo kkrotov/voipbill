@@ -8,11 +8,11 @@ class NetworkPrefixList : public ObjList<NetworkPrefix> {
 protected:
 
     string sql(BDb * db) {
-        string time = string_date(dt);
         string server_id = app().conf.str_instance_id;
         return "	select operator_id, prefix, network_type_id, extract(epoch from date_from), extract(epoch from date_to) from billing.network_prefix " \
-            "	where instance_id = '" + server_id + "' and deleted=false and date_to > now() " \
+            "	where instance_id = '" + server_id + "' and deleted=false " \
             "	order by operator_id asc, prefix asc, date_from asc";
+        // and date_to > now()
     }
 
     inline void parse_item(BDbResult &row, NetworkPrefix * item) {

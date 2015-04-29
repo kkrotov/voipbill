@@ -1,5 +1,4 @@
 import threading, socket
-from config.config import *
 from classes.OpenCA import OpenCA
 
 class OpenCAEmulator(threading.Thread):
@@ -10,9 +9,9 @@ class OpenCAEmulator(threading.Thread):
         self.stop()
 
 
-    def start(self):
+    def start(self, udpPort):
         self.__udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.__udpSocket.bind(('', cfg.openca_udpPort))
+        self.__udpSocket.bind(('', udpPort))
         super(OpenCAEmulator, self).start()
 
 
@@ -42,6 +41,8 @@ class OpenCAEmulator(threading.Thread):
         self.__udpSocket = None
 
     def __processCommand(self, command):
+
+        print "REQUEST:", command
 
         arguments = command.split(' ')
         command = arguments[0]
@@ -80,5 +81,7 @@ class OpenCAEmulator(threading.Thread):
         elif command == 'UNLOCK_TRUNK' and len(arguments) == 2:
             if OpenCA.unlockTrunk(arguments[1]):
                 result = '1'
+
+        print "RESPONSE:", result
 
         return result

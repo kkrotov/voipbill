@@ -27,23 +27,25 @@ void ManagerPull::pull() {
         clearPulls();
 
         while (res.next()) {
-            string table = res.get_s(0);
+            string event = res.get_s(0);
             string id = res.get_s(1);
 
 
-            map<string, BasePull *>::iterator it = pulls.find(table);
+            map<string, BasePull *>::iterator it = pulls.find(event);
             if (it != pulls.end()) {
                 it->second->addId(id);
+            } else {
+                db_main.exec("delete from event.queue where server_id = " + app().conf.str_instance_id + " and event = '" + event + "'");
             }
         }
 
         if (res.last()) {
             string version = res.get_s(2);
 
-            for (auto it = pulls.cbegin(); it != pulls.cend(); ++it) {
+            for (auto it : pulls) {
                 try {
-                    it->second->pull();
-                    db_main.exec("delete from event.queue where server_id = " + app().conf.str_instance_id + " and event ='" + it->second->event  + "' and version <= " + version);
+                    it.second->pull();
+                    db_main.exec("delete from event.queue where server_id = " + app().conf.str_instance_id + " and event = '" + it.second->event  + "' and version <= " + version);
                 } catch (Exception &e) {
                     e.addTrace("ManagerPull:pull");
                     Log::exception(e);

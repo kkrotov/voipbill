@@ -7,17 +7,19 @@
 #include "../threads/ThreadSync.h"
 #include "../threads/ThreadLoader.h"
 #include "../threads/ThreadRemoteLoader.h"
-#include "../threads/ThreadSelectCurrentCalls.h"
-/*
+#include "../threads/ThreadCurrentCalls.h"
+#include "../threads/ThreadFetchCdr.h"
+#include "../threads/ThreadBillRuntime.h"
+#include "../threads/ThreadSaveCalls.h"
+#include "../threads/ThreadSyncCounters.h"
+#include "../threads/ThreadSyncCalls.h"
 #include "../threads/ThreadRemoteLoader.h"
 #include "../threads/ThreadBlacklist.h"
-#include "../threads/ThreadBillRuntime.h"
 #include "../threads/ThreadLimitControl.h"
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
+/*
 #include "../threads/ThreadUdpServer.h"
-#include "../threads/ThreadSyncCounters.h"
-#include "../threads/ThreadSyncCalls.h"
 */
 #include "../../src/classes/LogWriterScreen.h"
 #include "../../src/classes/LogWriterFile.h"
@@ -106,20 +108,22 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadSync>();
     registerThread<ThreadLoader>();
     registerThread<ThreadRemoteLoader>();
-    registerThread<ThreadSelectCurrentCalls>();
-
-    /*
-
+    registerThread<ThreadCurrentCalls>();
+    registerThread<ThreadFetchCdr>();
+    registerThread<ThreadBillRuntime>();
+    registerThread<ThreadSaveCalls>();
+    registerThread<ThreadSyncCounters>();
+    registerThread<ThreadSyncCalls>();
     registerThread<ThreadRemoteLoader>();
     registerThread<ThreadBlacklist>();
-    registerThread<ThreadBillRuntime>();
     registerThread<ThreadLimitControl>();
     registerThread<ThreadCheckStartTable>();
     registerThread<ThreadTasks>();
+
+    /*
+
     registerThread<ThreadUdpServer>();
 
-    registerThread<ThreadSyncCounters>();
-    registerThread<ThreadSyncCalls>();
      */
 }
 
@@ -130,18 +134,18 @@ void AppBill::runAppInSingleMode()
             "sync",
             "loader",
             "remote_loader",
-            "currentcalls"
-            /*,
-            "select_global_counters",
-            "blacklist",
+            "current_calls",
+            "fetch_cdr",
             "runtime",
+            "save_calls",
+            "sync_counters",
+            "sync_calls",
+            "blacklist",
             "limitcontrol",
             "checkstarttable",
-            "tasks",
+            "tasks"
+            /*,
             "udp_server",
-
-            "sync_counters",
-            "sync_calls"
              */
     };
 

@@ -5,7 +5,7 @@
 ThreadCheckStartTable::ThreadCheckStartTable() {
     id = idName();
     name = "Check Start Table";
-    db_rad.setCS(app().conf.db_rad);
+    db_calls.setCS(app().conf.db_calls);
 
     last_t = 0;
     countWaitingForFinishCalls = 0;
@@ -52,7 +52,7 @@ void ThreadCheckStartTable::run() {
             // if found
             if (radacctCalls.find(it->first) != radacctCalls.end()) {
 
-                forceFinishCall(it->first, it->second);
+                forceFinishCall(it->first);
 
             }
 
@@ -65,9 +65,9 @@ void ThreadCheckStartTable::run() {
 void ThreadCheckStartTable::readRadacctCalls() {
 
     radacctCalls.clear();
-    BDbResult res = db_rad.query("select acctsessionid, acctuniqueid from radacct_voip_start");
+    BDbResult res = db_calls.query("select call_id from calls_cdr.start");
     while (res.next()) {
-        radacctCalls[res.get_s(0)] = res.get_s(1);
+        radacctCalls[res.get_s(0)] = true;
     }
 
 
@@ -86,29 +86,18 @@ void ThreadCheckStartTable::readOpencaCalls() {
     }
 }
 
-void ThreadCheckStartTable::forceFinishCall(string acctSessionId, string acctUniqueId) {
+void ThreadCheckStartTable::forceFinishCall(string callId) {
 
-    bool deleted = false;
-    BDbResult res =
-            db_rad.query(
-            "select force_finish_call('" + acctSessionId + "','" + lexical_cast<string>(time(NULL) - last_t) + "')");
-    if (res.next())
-        deleted = res.get_b(0);
+    db_calls.exec("delete from calls_cdr.start where call_id = '" + callId + "'");
 
-    if (deleted) {
-        Log::error("Force finish call " + acctUniqueId);
-        countForceFinishedCalls++;
-    }
+    Log::error("Force finish call " + callId);
+    countForceFinishedCalls++;
 
 }
 
 void ThreadCheckStartTable::htmlfull(stringstream & html) {
     this->html(html);
 
-    html << "Time loop: <b>" << t.sloop() << "</b><br/>\n";
-    html << "Time full loop: <b>" << t.sfull() << "</b><br/>\n";
-    html << "loops: <b>" << t.count << "</b><br/>\n";
-    html << "<br/>\n";
     html << "countWaitingForFinishCalls: <b>" << countWaitingForFinishCalls << "</b><br/>\n";
     html << "countForceFinishedCalls: <b>" << countForceFinishedCalls << "</b><br/>\n";
 }

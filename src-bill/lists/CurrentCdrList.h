@@ -21,9 +21,11 @@ protected:
     }
 
     inline void parse_item(BDbResult &row, Cdr * item) {
+        time_t now = time(nullptr);
+
         item->id = 0;
-        row.fill_cs(0, item->connect_time, sizeof(item->connect_time));
-        item->session_time = 0;
+        item->connect_time = parseDateTime(row.get(0));
+        item->session_time = (int)(now - item->connect_time);
         strcpy((char*) &item->src_number, row.get(1));
         strcpy((char*) &item->dst_number, row.get(2));
         strcpy((char*) &item->redirect_number, row.get(3));

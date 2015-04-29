@@ -29,8 +29,8 @@ protected:
     }
 
 public:
-    void load(BDb *db, time_t dt) override {
-        ObjList::load(db, dt);
+    void load(BDb *db) override {
+        ObjList::load(db);
 
         time_t max_ts = 64060588800; // 4000-01-01
 
@@ -70,7 +70,7 @@ public:
     };
 
 public:
-    TariffChangeLog * find(int usage_id, time_t timestamp) {
+    TariffChangeLog * find(int usage_id, time_t timestamp, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -83,6 +83,19 @@ public:
             begin = p.first;
             end = p.second;
         }
-        return begin <  end ? &*begin : nullptr;
+        auto result = begin <  end ? &*begin : nullptr;
+
+        if (trace != nullptr) {
+            if (result != nullptr) {
+                *trace << "FOUND|TARIFF CHANGE LOG|BY SERVICE NUMBER ID '" << usage_id << "', TIME '" << timestamp << "'" << endl;
+                *trace << "||";
+                result->dump(*trace);
+                *trace << endl;
+            } else {
+                *trace << "NOT FOUND|TARIFF CHANGE LOG|BY SERVICE NUMBER ID '" << usage_id << "', TIME '" << timestamp << "'" << endl;
+            }
+        }
+
+        return result;
     }
 };

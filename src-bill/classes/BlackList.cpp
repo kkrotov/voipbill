@@ -2,13 +2,14 @@
 
 #include "UdpControlClient.h"
 #include "../../src/classes/Log.h"
-#include "DataLoader.h"
 #include "../../src/common.h"
+#include "../data/DataContainer.h"
+#include "../data/DataBillingContainer.h"
 
 BlackList::BlackList() {
 }
 
-void BlackList::add(long long int phone) {
+void BlackList::add(const string &phone) {
     lock_guard<mutex> lk(rwlock);
     if (blacklist.find(phone) == blacklist.end()) {
         list_to_add[phone] = true;
@@ -18,7 +19,7 @@ void BlackList::add(long long int phone) {
     }
 }
 
-void BlackList::del(long long int phone) {
+void BlackList::del(const string &phone) {
     lock_guard<mutex> lk(rwlock);
     if (blacklist.find(phone) != blacklist.end()) {
         list_to_del[phone] = true;
@@ -28,7 +29,7 @@ void BlackList::del(long long int phone) {
     }
 }
 
-void BlackList::change_lock(long long int phone, bool need_lock) {
+void BlackList::change_lock(const string &phone, bool need_lock) {
     if (is_locked(phone) != need_lock) {
         if (need_lock) {
             add(phone);
@@ -38,13 +39,13 @@ void BlackList::change_lock(long long int phone, bool need_lock) {
     }
 }
 
-void BlackList::lock(long long int phone) {
+void BlackList::lock(const string &phone) {
     if (!is_locked(phone)) {
         add(phone);
     }
 }
 
-void BlackList::unlock(long long int phone) {
+void BlackList::unlock(const string &phone) {
     if (is_locked(phone)) {
         del(phone);
     }
@@ -53,7 +54,7 @@ void BlackList::unlock(long long int phone) {
 bool BlackList::fetch() {
     vector<string> curr_list;
     if (udp_blacklist(curr_list) == false) {
-        //Log::error("Can not fetch black list from opanca");
+        //Log::error("Can nostring fetch black lisstring from opanca");
         return false;
     }
 
@@ -64,14 +65,14 @@ bool BlackList::fetch() {
     {
         vector<string>::iterator i = curr_list.begin();
         while (i != curr_list.end()) {
-            long long int phone = atoll(((string) * i).c_str());
+            string &phone = *i;
             blacklist[phone] = current_time;
             ++i;
         }
     }
 
     {
-        map<long long int, time_t>::iterator i = blacklist.begin();
+        map<string, time_t>::iterator i = blacklist.begin();
         while (i != blacklist.end()) {
             if (i->second != current_time) {
                 blacklist.erase(i++);
@@ -82,7 +83,7 @@ bool BlackList::fetch() {
 
 
     {
-        map<long long int, bool>::iterator i = list_to_add.begin();
+        map<string, bool>::iterator i = list_to_add.begin();
         while (i != list_to_add.end()) {
             if (blacklist.find(i->first) != blacklist.end()) {
                 list_to_add.erase(i++);
@@ -92,7 +93,7 @@ bool BlackList::fetch() {
     }
 
     {
-        map<long long int, bool>::iterator i = list_to_del.begin();
+        map<string, bool>::iterator i = list_to_del.begin();
         while (i != list_to_del.end()) {
             if (blacklist.find(i->first) == blacklist.end()) {
                 list_to_del.erase(i++);
@@ -106,22 +107,22 @@ bool BlackList::fetch() {
 
 void BlackList::push() {
     {
-        vector<long long int> list;
+        vector<string> list;
 
         {
             lock_guard<mutex> lk(rwlock);
-            map<long long int, bool>::iterator i = list_to_add.begin();
+            map<string, bool>::iterator i = list_to_add.begin();
             while (i != list_to_add.end()) {
                 list.push_back(i->first);
                 ++i;
             }
         }
 
-        vector<long long int>::iterator ii = list.begin();
+        auto ii = list.begin();
         while (ii != list.end()) {
-            string phone = lexical_cast<string>(*ii);
+            string &phone = *ii;
             if (udp_lock(phone) == false) {
-                Log::error("Can not lock phone " + phone);
+                Log::error("Can nostring lock phone " + phone);
                 ++ii;
                 continue;
             }
@@ -143,22 +144,22 @@ void BlackList::push() {
     }
 
     {
-        vector<long long int> list;
+        vector<string> list;
 
         {
             lock_guard<mutex> lk(rwlock);
-            map<long long int, bool>::iterator i = list_to_del.begin();
+            map<string, bool>::iterator i = list_to_del.begin();
             while (i != list_to_del.end()) {
                 list.push_back(i->first);
                 ++i;
             }
         }
 
-        vector<long long int>::iterator ii = list.begin();
+        auto ii = list.begin();
         while (ii != list.end()) {
-            string phone = lexical_cast<string>(*ii);
-            if (udp_unlock(phone) == false) {
-                Log::error("Can not unlock phone " + phone);
+            string &phone = *ii;
+            if (!udp_unlock(phone)) {
+                Log::error("Can nostring unlock phone " + phone);
                 ++ii;
                 continue;
             }
@@ -181,59 +182,35 @@ void BlackList::push() {
 
 }
 
-bool BlackList::is_locked(long long int phone) {
+bool BlackList::is_locked(const string &phone) {
     if (blacklist.find(phone) != blacklist.end()) {
-        if (list_to_del.find(phone) != list_to_del.end()) {
-            return false;
-        } else {
-            return true;
-        }
+        return !(list_to_del.find(phone) != list_to_del.end());
     } else {
-        if (list_to_add.find(phone) != list_to_add.end()) {
-            return true;
-        } else {
-            return false;
-        }
+        return list_to_add.find(phone) != list_to_add.end();
     }
 }
 
 void BlackList::log_lock_phone(string &phone) {
     string str = "LOCK " + phone;
 
-    DataLoader *loader = DataLoader::instance();
-    UsageObjList *usages;
-    ClientList *clients;
-
-    {
-        lock_guard<mutex> lk(loader->rwlock);
-        shared_ptr<UsageObjList> usages_ptr = loader->usage.get(get_tday());
-        shared_ptr<ClientList> clients_ptr = loader->client;
-
-        usages = usages_ptr.get();
-        clients = clients_ptr.get();
-    }
-
-
-    if (usages != 0 && clients != 0) {
-        pUsageObj usage = usages->find(phone.c_str());
-        pClient client;
-        if (usage != 0) {
-            str = str + " / " + lexical_cast<string>(usage->client_id);
-            client = clients->find(usage->client_id);
+    PreparedData preparedData;
+    if (DataContainer::instance()->prepareData(preparedData, time(nullptr))) {
+        auto serviceNumber = preparedData.serviceNumber->find(atoll(phone.c_str()), time(nullptr));
+        Client * client;
+        if (serviceNumber != nullptr) {
+            str = str + " / " + lexical_cast<string>(serviceNumber->client_account_id);
+            client = preparedData.client->find(serviceNumber->client_account_id);
         } else {
-            client = 0;
+            client = nullptr;
         }
 
-        if (client != 0) {
-            lock_guard<mutex> lk(loader->counter_rwlock);
+        if (client != nullptr) {
 
-            shared_ptr<ClientCounter> clients_counters_ptr = loader->counter_client;
-            ClientCounter *clients_counters = clients_counters_ptr.get();
-            if (clients_counters != 0) {
-                ClientCounterObj &client_counter = clients_counters->get(usage->client_id);
-                double sum_month = client_counter.sumMonth();
-                double sum_day = client_counter.sumDay();
-                double sum_balance = client_counter.sumBalance();
+            if (DataBillingContainer::instance()->ready()) {
+                ClientCounterObj &clientCounter = DataBillingContainer::instance()->clientCounter.get()->get(client->id);
+                double sum_month = clientCounter.sumMonth();
+                double sum_day = clientCounter.sumDay();
+                double sum_balance = clientCounter.sumBalance();
 
                 if (client->isConsumedCreditLimit(sum_balance)) {
                     str = str + " / Credit limit "
@@ -271,20 +248,12 @@ void BlackList::log_lock_phone(string &phone) {
 void BlackList::log_unlock_phone(string &phone) {
     string str = "UNLOCK " + phone;
 
-    DataLoader *loader = DataLoader::instance();
-    UsageObjList * usages;
+    PreparedData preparedData;
+    if (DataContainer::instance()->prepareData(preparedData, time(nullptr))) {
 
-    {
-        lock_guard<mutex> lk(loader->rwlock);
-        shared_ptr<UsageObjList> usages_ptr = loader->usage.get(get_tday());
-        usages = usages_ptr.get();
-    }
-
-
-    if (usages != 0) {
-        pUsageObj usage = usages->find(phone.c_str());
-        if (usage != 0) {
-            str = str + " / " + lexical_cast<string>(usage->client_id);
+        auto serviceNumber = preparedData.serviceNumber->find(atoll(phone.c_str()), time(nullptr));
+        if (serviceNumber != 0) {
+            str = str + " / " + lexical_cast<string>(serviceNumber->client_account_id);
         }
     }
 

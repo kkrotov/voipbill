@@ -4,6 +4,8 @@
 
 *.pyc
 
+/scripts/.idea
+
 /app_auth/build
 /app_auth/dist
 /app_auth/.dep.inc

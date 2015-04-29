@@ -1,10 +1,6 @@
 #include "ThreadLoader.h"
 #include "../classes/AppBill.h"
 
-bool ThreadLoader::ready() {
-    return app().init_sync_done;
-}
-
 bool ThreadLoader::prepare() {
 
     if (!app().init_load_counters_done) {
@@ -42,14 +38,11 @@ void ThreadLoader::run() {
 
 
             if (event == "clients") {
+
                 data->client.load(&db_calls);
 
-                {
-                    lock_guard<mutex> lock(loader->counter_rwlock);
-
-                    shared_ptr<ClientCounter> cc = loader->counter_client;
-                    if (cc != 0) cc->reload(&db_calls);
-                }
+                shared_ptr<ClientCounter> cc = billingData->clientCounter.get();
+                if (cc != 0) cc->reload(&db_calls);
 
             } else if (event == "airp") {
 
@@ -102,6 +95,8 @@ void ThreadLoader::run() {
             } else if (event == "trunk") {
 
                 data->trunk.load(&db_calls);
+                data->trunkByName.load(&db_calls);
+                data->trunkByAlias.load(&db_calls);
 
             } else if (event == "trunk_number_preprocessing") {
 
@@ -125,7 +120,7 @@ void ThreadLoader::run() {
 
             } else if (event == "network_prefix") {
 
-                data->networkPrefix.load(&db_calls);
+//                data->networkPrefix.load(&db_calls);
 
             } else if (event == "operator") {
 
@@ -323,11 +318,13 @@ void ThreadLoader::htmlfull(stringstream &html) {
             html << "</tr>\n";
         }
         {
+/*
             auto dl = &data->networkPrefix;
             html << "<tr><th>networkPrefix</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
+*/
         }
         {
             auto dl = &data->geoPrefix;
@@ -378,51 +375,39 @@ void ThreadLoader::htmlfull(stringstream &html) {
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
-        {
-            auto dl = &data->currentCdrData;
-            html << "<tr><th>currentCdrData</th>";
-            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
-            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
-            html << "</tr>\n";
-        }
     }
     {
-        lock_guard<mutex> lock(loader->counter_rwlock);
-
-        {
-            auto ol = loader->counter_client.get();
-            html << "<tr><th>Client counter</th>";
-            if (ol != 0) {
-                html << "<td>" << string_time(ol->loadTime()) << "</td><td></td><td>" <<
-                ol->counter.size() << "</td><td>" << ol->t.sloop() << "</td><td>" <<
-                ol->t.sfull() << "</td>";
-            } else {
-                html << "<td colspan=5></td>";
-            }
-            html << "</tr>\n";
+        auto dl = &billingData->clientCounter;
+        html << "<tr><th>Client counter</th>";
+        if (dl != 0) {
+            html << "<td>" << string_time(dl->time()) << "</td><td></td><td>" <<
+                    dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" <<
+                    dl->timer.sfull() << "</td>";
+        } else {
+            html << "<td colspan=5></td>";
         }
-        {
-            auto ol = loader->counter_fmin.get(tmonth).get();
-            html << "<tr><th>Fmin counter</th>";
-            if (ol != 0) {
-                html << "<td>" << string_time(ol->loadTime()) << "</td><td></td><td>" <<
-                ol->counter.size() << "</td><td>" << ol->t.sloop() << "</td><td>" << ol->t.sfull() <<
-                "</td>";
-            } else {
-                html << "<td colspan=5></td>";
-            }
-            html << "</tr>\n";
+        html << "</tr>\n";
+    }
+    {
+        auto dl = &billingData->fminCounter;
+        html << "<tr><th>Fmin counter</th>";
+        if (dl != 0) {
+            html << "<td>" << string_time(dl->time()) << "</td><td></td><td>" <<
+                    dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() <<
+                    "</td>";
+        } else {
+            html << "<td colspan=5></td>";
         }
+        html << "</tr>\n";
     }
 
     html << "</table>\n";
 
 }
 
-bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader, DataContainer *data) {
+bool ThreadLoader::do_load_data(BDb *db, DataContainer *data) {
     bool success = true;
 
-    if (loader == 0) loader = this->loader;
     if (data == 0) data = this->data;
     if (db == 0) db = &db_calls;
 
@@ -441,39 +426,20 @@ bool ThreadLoader::do_load_data(BDb *db, DataLoader *loader, DataContainer *data
     return success;
 }
 
-bool ThreadLoader::do_load_counters(BDb *db, DataLoader *loader) {
+bool ThreadLoader::do_load_counters(BDb *db, DataBillingContainer *billingData) {
     bool success = true;
 
-    if (loader == 0) loader = this->loader;
+    if (billingData == 0) billingData = this->billingData;
     if (db == 0) db = &db_calls;
 
-    ClientCounter * counter_client = new ClientCounter();
-    FminCounter * counter_fmin = new FminCounter();
-    time_t t_month = get_tmonth();
     try {
 
-        counter_client->load(db, 0);
-
-        counter_fmin->load(db, t_month);
+        billingData->loadAll(db);
 
     } catch (Exception &e) {
         e.addTrace("Loader::do_load_counters");
         Log::exception(e);
         success = false;
-    }
-
-    {
-        lock_guard<mutex> lock(loader->counter_rwlock);
-
-        if (counter_client->loaded)
-            loader->counter_client = shared_ptr<ClientCounter>(counter_client);
-        else
-            delete counter_client;
-
-        if (counter_fmin->loaded)
-            loader->counter_fmin.addlist(t_month, counter_fmin);
-        else
-            delete counter_fmin;
     }
 
     return success;
@@ -483,7 +449,7 @@ ThreadLoader::ThreadLoader() {
     id = idName();
     name = "Loader";
 
-    loader = DataLoader::instance();
     data = DataContainer::instance();
+    billingData = DataBillingContainer::instance();
     db_calls.setCS(app().conf.db_calls);
 }

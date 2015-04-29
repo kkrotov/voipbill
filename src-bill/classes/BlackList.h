@@ -18,22 +18,22 @@ protected:
     virtual bool udp_unlock(string &phone) = 0;
 
 public:
-    map<long long int, time_t> blacklist;
-    map<long long int, bool> list_to_add;
-    map<long long int, bool> list_to_del;
+    map<string, time_t> blacklist;
+    map<string, bool> list_to_add;
+    map<string, bool> list_to_del;
 
     mutex rwlock;
 
     BlackList();
 
-    void add(long long int phone);
-    void del(long long int phone);
+    void add(const string &phone);
+    void del(const string &phone);
 
-    void change_lock(long long int phone, bool need_lock);
-    void lock(long long int phone);
-    void unlock(long long int phone);
+    void change_lock(const string &phone, bool need_lock);
+    void lock(const string &phone);
+    void unlock(const string &phone);
 
-    bool is_locked(long long int phone);
+    bool is_locked(const string &phone);
 
     bool fetch();
     void push();

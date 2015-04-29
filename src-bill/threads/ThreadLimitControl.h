@@ -1,20 +1,22 @@
 #pragma once
 
 #include "../../src/threads/Thread.h"
-#include "../classes/CalcFull.h"
+#include "../data/DataContainer.h"
+#include "../data/DataBillingContainer.h"
+
 
 class ThreadLimitControl : public Thread {
 protected:
-    Timer t_calc;
-    Timer t_kill;
-    BDb db_calls;
-    CalcFull calculator;
+    PreparedData preparedData;
 
     bool ready();
 
     void run();
 
     void htmlfull(stringstream &html);
+
+    bool limitControlKillNeeded(Call &call);
+    void fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double &globalMonthSum);
 
 public:
     ThreadLimitControl();

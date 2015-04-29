@@ -1,19 +1,17 @@
 #pragma once
 
 #include "../../src/threads/Thread.h"
-#include "../classes/DataLoader.h"
+#include "../data/DataBillingContainer.h"
 
 class ThreadSyncCounters : public Thread {
-    DataLoader *loader;
+    DataBillingContainer *billingData;
     BDb db_main;
 
     bool ready();
 
-    bool prepare();
-
     void run();
 
-    void save_client_counters(bool clear = false);
+    void save_client_counters();
 
     void htmlfull(stringstream &html);
 public:

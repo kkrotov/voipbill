@@ -6,7 +6,6 @@
 class ConfBill : public Conf {
 public:
     string db_main;
-    string db_rad;
     string db_calls;
 
     unsigned short web_port;
@@ -19,14 +18,14 @@ public:
     unsigned short openca_udp_port;
     unsigned short udp_openca_select_interval;
     unsigned short udp_force_finish_call_interval;
-    
+
     unsigned short openca_sync_blacklist_interval_min;
     unsigned short openca_sync_blacklist_interval_max;
 
     unsigned short billing_free_seconds;
-    
+
     unsigned short global_counters_select_interval;
-    
+
     bool test_mode;
     std::vector<std::string> test_threads;
     std::map<std::string, int> test_threads_runs_count;

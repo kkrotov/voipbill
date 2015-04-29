@@ -9,8 +9,9 @@ protected:
     string sql(BDb * db) {
         return "	select pricelist_id, ndef, price, extract(epoch from date_from), extract(epoch from date_to) " \
                 "   from billing.defs " \
-                "	where deleted=false and date_to > now() " \
+                "	where deleted=false " \
                 "	order by pricelist_id asc, ndef::varchar asc, date_from asc ";
+        // and date_to > now()
     }
 
     inline void parse_item(BDbResult &row, PricelistPrice * item) {
@@ -70,19 +71,33 @@ protected:
     }
 
 public:
-    PricelistPrice * find(int pricelist_id, char * prefix, time_t timestamp) {
+    PricelistPrice * find(int pricelist_id, long long int numberPrefix, time_t timestamp, stringstream *trace = nullptr) {
         char tmpPrefix[20];
-        strcpy(tmpPrefix, prefix);
+        sprintf(tmpPrefix, "%lld", numberPrefix);
+
         int len = strlen(tmpPrefix);
         while (len > 0) {
             tmpPrefix[len] = 0;
             auto result = _find(pricelist_id, tmpPrefix, timestamp);
             if (result != nullptr) {
+
+                if (trace != nullptr) {
+                    *trace << "FOUND|PRICELIST PRICE|BY PRICELIST_ID '" << pricelist_id << "', NUMBER '" << numberPrefix << "', time '" << timestamp << "'" << endl;
+                    *trace << "||";
+                    result->dump(*trace);
+                    *trace << endl;
+                }
+
                 return result;
             }
 
             len -= 1;
         }
+
+        if (trace != nullptr) {
+            *trace << "NOT FOUND|PRICELIST PRICE|BY PRICELIST_ID '" << pricelist_id << "', NUMBER '" << numberPrefix << "', time '" << timestamp << "'" << endl;
+        }
+
         return nullptr;
     }
 

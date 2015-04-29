@@ -11,8 +11,11 @@ protected:
 
     Trunk *trunk;
 
+    stringstream *trace;
+
 public:
     BillingCall(Billing *billing);
+    void setTrace(stringstream *trace);
     void calc(Call *call, Cdr *cdr, PreparedData *preparedData);
 
 protected:
@@ -21,17 +24,18 @@ protected:
     int getDest(GeoPrefix * geoPrefix);
     void calcByTrunk();
     void calcByNumber();
-    void calcOrigByTrunk(ServiceTrunk *serviceTrunk);
-    void calcTermByTrunk(ServiceTrunk *serviceTrunk);
+    bool checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int type, Pricelist * &pricelist, PricelistPrice * &price);
     void calcOrigByNumber(ServiceNumber *serviceNumber);
     void calcTermByNumber(ServiceNumber *serviceNumber);
 
-    char * getNumber();
-    char * getRemoteNumber();
+    void processLineWithoutNumber(Call *call, Cdr *cdr);
+
+    long long int getNumber();
+    long long int getRemoteNumber();
     char * getRoute();
     char * getRemoteRoute();
 
-    bool filterByNumber(int numberId, char * str);
+    bool filterByNumber(int numberId, long long int str);
     bool filterByPrefixlist(int prefixlistId, char * str);
 
     int getCallLength(int len, bool byMinutes, bool fullFirstMinute, bool freeFirstMinutes);

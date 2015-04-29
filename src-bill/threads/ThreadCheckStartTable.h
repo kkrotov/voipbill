@@ -4,12 +4,12 @@
 #include "../../src/classes/BDb.h"
 
 class ThreadCheckStartTable : public Thread {
-    BDb db_rad;
+    BDb db_calls;
     time_t last_t;
     int countWaitingForFinishCalls;
     int countForceFinishedCalls;
 
-    map<string, string> radacctCalls;
+    map<string, bool> radacctCalls;
     map<string, bool> opencaCalls;
     map<string, string> waitingForFinishCalls;
 
@@ -19,7 +19,7 @@ class ThreadCheckStartTable : public Thread {
 
     void readRadacctCalls();
     void readOpencaCalls();
-    void forceFinishCall(string acctSessionId, string acctUniqueId);
+    void forceFinishCall(string callId);
 
 public:
     ThreadCheckStartTable();

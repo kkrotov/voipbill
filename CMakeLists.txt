@@ -52,7 +52,7 @@ set(COMMON_SOURCES
 #    src-auth/classes/ConfAuth.cpp
 #    src-auth/classes/ConfigVersionData.cpp
 #    src-auth/classes/UdpMessageProcessor.cpp
-#    src-auth/http/file_handler.cpp
+#    src-auth/web/file_handler.cpp
 #    src-auth/lists/AirpList.cpp
 #    src-auth/lists/NumberList.cpp
 #    src-auth/lists/OperatorList.cpp
@@ -77,35 +77,33 @@ set(COMMON_SOURCES
 
 set(BILL_SOURCES
     src-bill/classes/AppBill.cpp
-#    src-bill/classes/BlackList.cpp
-#    src-bill/classes/CalcBase.cpp
-#    src-bill/classes/CalcFull.cpp
-#    src-bill/classes/CallsSaver.cpp
+    src-bill/classes/BlackList.cpp
+    src-bill/classes/CallsSaver.cpp
+    src-bill/classes/Billing.cpp
     src-bill/classes/Billing.cpp
     src-bill/classes/BillingCall.cpp
     src-bill/classes/ConfBill.cpp
-    src-bill/classes/DataLoader.cpp
     src-bill/classes/Log.cpp
-#    src-bill/classes/UdpControlClient.cpp
+    src-bill/classes/UdpControlClient.cpp
 #    src-bill/classes/UdpMessageProcessor.cpp
-#    src-bill/classes/CallsList.cpp
-    src-bill/http/file_handler.cpp
-#    src-bill/tasks/TaskRecalc.cpp
     src-bill/sync/BasePull.cpp
     src-bill/sync/ManagerPull.cpp
     src-bill/threads/ThreadLog.cpp
     src-bill/threads/ThreadSync.cpp
     src-bill/threads/ThreadLoader.cpp
     src-bill/threads/ThreadRemoteLoader.cpp
-    src-bill/threads/ThreadSelectCurrentCalls.cpp
-#    src-bill/threads/ThreadBillRuntime.cpp
-#    src-bill/threads/ThreadBlacklist.cpp
-#    src-bill/threads/ThreadCheckStartTable.cpp
-#    src-bill/threads/ThreadLimitControl.cpp
-#    src-bill/threads/ThreadTasks.cpp
+    src-bill/threads/ThreadCurrentCalls.cpp
+    src-bill/threads/ThreadFetchCdr.cpp
+    src-bill/threads/ThreadBillRuntime.cpp
+    src-bill/threads/ThreadSaveCalls.cpp
+    src-bill/threads/ThreadBlacklist.cpp
+    src-bill/threads/ThreadCheckStartTable.cpp
+    src-bill/threads/ThreadLimitControl.cpp
+    src-bill/threads/ThreadTasks.cpp
+    src-bill/tasks/TaskRecalc.cpp
 #    src-bill/threads/ThreadUdpServer.cpp
-#    src-bill/threads/ThreadSyncCalls.cpp
-#    src-bill/threads/ThreadSyncCounters.cpp
+    src-bill/threads/ThreadSyncCalls.cpp
+    src-bill/threads/ThreadSyncCounters.cpp
     src-bill/threads/ThreadWeb.cpp
     src-bill/main.cpp
 )
@@ -114,5 +112,5 @@ set(BILL_SOURCES
 #add_executable(app_auth ${COMMON_SOURCES} ${AUTH_SOURCES})
 #target_link_libraries(app_auth stdc++ rt pthread pq)
 
-add_executable(app_bill ${COMMON_SOURCES} ${BILL_SOURCES} src-bill/data/BaseData.cpp)
+add_executable(app_bill ${COMMON_SOURCES} ${BILL_SOURCES})
 target_link_libraries(app_bill stdc++ rt pthread pq)

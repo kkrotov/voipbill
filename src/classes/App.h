@@ -22,8 +22,6 @@ public:
     AppStatus status;
     AppStatus real_status;
 
-    mutex bill_runnning_mutex;
-
     boost::signals2::signal<void() > onStatusChanged;
     boost::signals2::signal<void() > onRealStatusChanged;
 

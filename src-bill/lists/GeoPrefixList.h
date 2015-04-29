@@ -42,19 +42,32 @@ protected:
     }
 
 public:
-    GeoPrefix * find(char * prefix) {
+    GeoPrefix * find(long long int prefix, stringstream *trace = nullptr) {
         char tmpPrefix[20];
-        strcpy(tmpPrefix, prefix);
+        sprintf(tmpPrefix, "%lld", prefix);
         int len = strlen(tmpPrefix);
         while (len > 0) {
             tmpPrefix[len] = 0;
             auto result = _find(tmpPrefix);
             if (result != 0) {
+
+                if (trace != nullptr) {
+                    *trace << "FOUND|GEO_PREFIX|BY '" << prefix << "'" << endl;
+                    *trace << "||";
+                    result->dump(*trace);
+                    *trace << endl;
+                }
+
                 return result;
             }
 
             len -= 1;
         }
+
+        if (trace != nullptr) {
+            *trace << "NOT FOUND|GEO_PREFIX|BY '" << prefix << "'" << endl;
+        }
+
         return nullptr;
     }
 };

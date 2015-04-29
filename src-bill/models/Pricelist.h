@@ -7,4 +7,13 @@ struct Pricelist {
     bool tariffication_by_minutes;
     bool tariffication_full_first_minute;
 
+    void dump(stringstream &trace) {
+        trace << "(";
+        trace << "id: " << id << ", ";
+        trace << "region: " << region << ", ";
+        trace << "operator_id: " << operator_id << ", ";
+        trace << "tariffication_by_minutes: " << tariffication_by_minutes << ", ";
+        trace << "tariffication_full_first_minute: " << tariffication_full_first_minute << ", ";
+        trace << ")";
+    }
 };

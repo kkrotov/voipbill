@@ -1,151 +1,189 @@
+#include <mutex>
 #include "CallsSaver.h"
-#include "../../src/common.h"
 
-void insert_row(pCallObj call, string *q) {
-    char num[50];
 
-    q->append("(");
+void insert_row(Call * call, stringstream &q) {
 
-    q->append("'");
-    q->append(call->time);
-    q->append("',");
-    q->append("'");
-    q->append(call->id);
-    q->append("',");
-    q->append(call->out ? "true" : "false");
-    q->append(",");
-    sprintf(num, "%d", call->len);
-    q->append(num);
-    q->append(",");
-    sprintf(num, "%d", call->len_mcn);
-    q->append(num);
-    q->append(",");
-    sprintf(num, "%d", call->len_op);
-    q->append(num);
-    q->append(",");
-    sprintf(num, "%d", call->client_id);
-    q->append(call->client_id != 0 ? num : "NULL");
-    q->append(",");
-    sprintf(num, "%d", call->usage_id);
-    q->append(call->usage_id != 0 ? num : "NULL");
-    q->append(",");
-    q->append(call->usage_num[0] != 0 ? call->usage_num : "NULL");
-    q->append(",");
-    q->append(call->phone_num[0] != 0 ? call->phone_num : "NULL");
-    q->append(",");
-    q->append(call->redirect_num[0] != 0 ? call->redirect_num : "NULL");
-    q->append(",");
-
-    sprintf(num, "%d", call->amount_mcn);
-    q->append(num);
-    q->append(",");
-    sprintf(num, "%d", call->pricelist_mcn_id);
-    q->append(call->pricelist_mcn_id != 0 ? num : "NULL");
-    q->append(",");
-    sprintf(num, "%d", call->amount_op);
-    q->append(num);
-    q->append(",");
-    sprintf(num, "%d", call->operator_id);
-    q->append(num);
-    q->append(",");
-
-    sprintf(num, "%d", call->freemin_group_id);
-    q->append(num);
-    q->append(",");
-    q->append(call->mob ? "true" : "false");
-    q->append(",");
-
-    sprintf(num, "%d", call->dest);
-    q->append(num);
-    q->append(",");
-    q->append("'");
-    q->append(string(call->time).substr(0, 7) + "-01");
-    q->append("',");
-    q->append("'");
-    q->append(string(call->time).substr(0, 10));
-    q->append("',");
-    sprintf(num, "%d", call->instance_id);
-    q->append(num);
-    q->append(",");
-    sprintf(num, "%d", call->geo_id);
-    q->append(call->geo_id != 0 ? num : "NULL");
-    q->append(",");
-    sprintf(num, "%d", call->geo_operator_id);
-    q->append(call->geo_operator_id != 0 ? num : "NULL");
-    q->append(",");
-    sprintf(num, "%d", call->pricelist_op_id);
-    q->append(call->pricelist_op_id != 0 ? num : "NULL");
-    q->append(",");
-    sprintf(num, "%d", call->price_mcn);
-    q->append(call->pricelist_mcn_id != 0 ? num : "NULL");
-    q->append(",");
-    sprintf(num, "%d", call->price_op);
-    q->append(call->pricelist_op_id != 0 ? num : "NULL");
-    q->append(",");
-    q->append(call->prefix_geo[0] != 0 ? call->prefix_geo : "NULL");
-    q->append(",");
-    q->append(call->prefix_mcn[0] != 0 ? call->prefix_mcn : "NULL");
-    q->append(",");
-    q->append(call->prefix_op[0] != 0 ? call->prefix_op : "NULL");
-
-    q->append(")\n");
-}
-
-void make_insert_queries(map<time_t, string> &queryPerMonth, CallsObjList *list) {
-
-    string *q = 0;
-
-    for (int i = 0; i < list->count; i++) {
-        pCallObj call = list->get(i);
-
-        if (queryPerMonth.find(call->dt.month) == queryPerMonth.end()) {
-            char buff[20];
-            struct tm * timeinfo = localtime(&call->dt.month);
-            strftime(buff, 20, "%Y%m", timeinfo);
-
-            q = &queryPerMonth[call->dt.month];
-            q->reserve(300 + list->count * 300);
-            q->append("INSERT INTO calls.calls_" + string(buff) + "(" \
-                        "time,id,direction_out,len,len_mcn,len_op,client_id,usage_id,usage_num, phone_num, redirect_num," \
-                        "amount,pricelist_mcn_id,amount_op,operator_id,free_min_groups_id,mob," \
-                        "dest,month,day,region,geo_id,geo_operator_id,pricelist_op_id,price,price_op,prefix_geo,prefix_mcn,prefix_op" \
-                     ")VALUES\n");
-        } else {
-            q = &queryPerMonth[call->dt.month];
-            q->append(",");
-        }
-
-        insert_row(call, q);
-
+    q << "(";
+    q << "'" << call->id << "',";
+    q << (call->orig ? "true" : "false") << ",";
+    q << "'" << call->peer_id << "',";
+    q << "'" << call->cdr_id << "',";
+    q << "'" << string_time(call->connect_time) << "',";
+    if (call->trunk_id != 0) {
+        q << "'" << call->trunk_id << "',";
+    } else {
+        q << "NULL,";
     }
+    if (call->account_id != 0) {
+        q << "'" << call->account_id << "',";
+    } else {
+        q << "NULL,";
+    }
+    if (call->trunk_service_id != 0) {
+        q << "'" << call->trunk_service_id << "',";
+    } else {
+        q << "NULL,";
+    }
+    if (call->number_service_id != 0) {
+        q << "'" << call->number_service_id << "',";
+    } else {
+        q << "NULL,";
+    }
+    if (call->src_number != 0) {
+        q << "'" << call->src_number << "',";
+    } else {
+        q << "NULL,";
+    }
+    if (call->dst_number != 0) {
+        q << "'" << call->dst_number << "',";
+    } else {
+        q << "NULL,";
+    }
+    q << "'" << call->billed_time << "',";
+    q << "'" << call->rate << "',";
+    q << "'" << call->cost << "',";
+    q << "'" << call->tax_cost << "',";
+    q << "'" << call->interconnect_rate << "',";
+    q << "'" << call->interconnect_cost << "',";
+    if (call->service_package_id != 0) {
+        q << "'" << call->service_package_id << "',";
+    } else {
+        q << "NULL,";
+    }
+    if (call->service_package_limit_id != 0) {
+        q << "'" << call->service_package_limit_id << "',";
+    } else {
+        q << "NULL,";
+    }
+    q << "'" << call->package_time << "',";
+    q << "'" << call->package_credit << "',";
+    q << "'" << call->destination_id << "',";
+    if (call->pricelist_id != 0) {
+        q << "'" << call->pricelist_id << "',";
+    } else {
+        q << "NULL,";
+    }
+    if (call->prefix != 0) {
+        q << "'" << call->prefix << "',";
+    } else {
+        q << "NULL,";
+    }
+    if (call->geo_id != 0) {
+        q << "'" << call->geo_id << "',";
+    } else {
+        q << "NULL,";
+    }
+    if (call->geo_operator_id != 0) {
+        q << "'" << call->geo_operator_id << "',";
+    } else {
+        q << "NULL,";
+    }
+    if (call->operator_id != 0) {
+        q << "'" << call->operator_id << "',";
+    } else {
+        q << "NULL,";
+    }
+    q << (call->mob ? "true" : "false");
+    q << ")\n";
 }
+
 
 CallsSaver::CallsSaver() {
     this->db = 0;
+    this->billingData = DataBillingContainer::instance();
 }
 
 CallsSaver::CallsSaver(BDb *db) {
     this->db = db;
+    this->billingData = DataBillingContainer::instance();
 }
 
 void CallsSaver::setDb(BDb *db) {
     this->db = db;
 }
 
-void CallsSaver::save(CallsObjList *list) {
-    map<time_t, string> queryPerMonth;
+void CallsSaver::setBillingData(DataBillingContainer *billingData) {
+    this->billingData = billingData;
+}
 
-    make_insert_queries(queryPerMonth, list);
+size_t CallsSaver::save(const size_t save_part_count) {
+    map<time_t, stringstream> queryPerMonth;
 
-    BDbTransaction trans(db);
+    size_t maxInsertCallsCount = save_part_count;
 
-    typename map<time_t, string>::iterator i, e;
-    for (i = queryPerMonth.begin(), e = queryPerMonth.end(); i != e;) {
-        db->exec(i->second);
-        i++;
+    vector<Call> callsForSave;
+    try {
+        {
+            lock_guard<Spinlock> guard(billingData->callsWaitSavingLock);
+            if (billingData->callsWaitSaving.size() == 0) {
+                return 0;
+            }
+
+            maxInsertCallsCount = billingData->callsWaitSaving.size() < maxInsertCallsCount ? billingData->callsWaitSaving.size() : maxInsertCallsCount;
+            callsForSave.reserve(maxInsertCallsCount);
+
+            for (;;) {
+                if (billingData->callsWaitSaving.size() > 0 && callsForSave.size() < maxInsertCallsCount) {
+                    callsForSave.push_back(billingData->callsWaitSaving.front());
+                    billingData->callsWaitSaving.pop_front();
+                } else {
+                    break;
+                }
+            }
+        }
+
+        for (Call &call : callsForSave) {
+
+            if (queryPerMonth.find(call.dt.month) == queryPerMonth.end()) {
+                char buff[20];
+                struct tm timeinfo;
+                gmtime_r(&call.dt.month, &timeinfo);
+                strftime(buff, 20, "%Y%m", &timeinfo);
+
+                stringstream &q = queryPerMonth[call.dt.month];
+                q << "INSERT INTO calls_raw.calls_raw_" + string(buff) + "(" \
+                        "id,orig,peer_id,cdr_id,connect_time,trunk_id,account_id,trunk_service_id,number_service_id," \
+                        "src_number,dst_number,billed_time,rate,cost,tax_cost,interconnect_rate,interconnect_cost," \
+                        "service_package_id,service_package_limit_id,package_time,package_credit," \
+                        "destination_id,pricelist_id,prefix,geo_id,geo_operator_id,operator_id,mob" \
+                     ")VALUES\n";
+
+                insert_row(&call, q);
+
+            } else {
+
+                stringstream &q = queryPerMonth[call.dt.month];
+                q << ",";
+
+                insert_row(&call, q);
+            }
+
+        }
+
+
+        {
+            BDbTransaction trans(db);
+
+            for (auto &it : queryPerMonth) {
+                db->exec(it.second.str());
+            }
+
+            trans.commit();
+        }
+
+        billingData->savedCallsCount += callsForSave.size();
+        return callsForSave.size();
+
+    } catch (exception &e) {
+        lock_guard<Spinlock> guard(billingData->callsWaitSavingLock);
+
+        for (auto it = callsForSave.rbegin(); it!= callsForSave.rend(); ++it) {
+            billingData->callsWaitSaving.push_front(*it);
+        }
+
+        throw e;
     }
-
-    trans.commit();
 }
 
 

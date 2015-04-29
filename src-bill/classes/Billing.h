@@ -7,20 +7,17 @@ class Billing {
 public:
     DataContainer *data;
     DataBillingContainer *billingData;
-    DataBillingContainer *dstBillingData;
 
 public:
     Billing();
 
     void setData(DataContainer *data);
     void setBillingData(DataBillingContainer *billingData);
-    void setDstBillingData(DataBillingContainer *billingData);
 
-    void calcCurrentCdrs();
-    void calcCdrs();
-
-protected:
-    void calc(Call &call);
-    void initCall(Call &call, Cdr * cdr);
+    void calcCurrentCalls();
+    void calc();
+private:
+    void updateClientCounters(Call &call, PreparedData &preparedData, ClientCounter * clientCounter);
+    void updateFreeMinsCounters(Call &call, FminCounter * fminCounter);
 };
 

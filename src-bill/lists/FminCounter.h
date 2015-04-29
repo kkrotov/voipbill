@@ -16,68 +16,66 @@ protected:
     }
 
 public:
-    map<int, int> counter;
+    map<int, map<int, map<time_t, int>>> counter;
 
-    void load(BDb * db, time_t dt) {
+    void load(BDb * db) {
 
-        t.start();
-
-        this->dt = dt;
         counter.clear();
-        string stime = string_time(dt);
+
+        loadtime = time(NULL);
+
+        time_t tMonth = time(nullptr);
+        string sMonth = string_time(tMonth);
+        {
+            BDbResult res = db->query(
+                    "   select date_trunc('month', connect_time) from calls_raw.calls_raw c " \
+            "	order by c.id desc " \
+            "	limit 1 "
+            );
+            while (res.next()) {
+                tMonth = parseDateTime(res.get(0));
+                sMonth = res.get_s(0);
+            }
+        }
 
         BDbResult res = db->query(
-                "   select c.usage_id, c.free_min_groups_id, sum(len_mcn) from calls.calls c " \
+                "   select c.number_service_id, c.service_package_id, sum(package_time) from calls_raw.calls_raw c " \
             "   where " \
-            "		c.time >= date_trunc('month', '" + stime + "'::timestamp) and " \
-            "		c.time <  date_trunc('month', '" + stime + "'::timestamp)+interval '1 month' and " \
-            "		c.free_min_groups_id <> 0 " \
-            "		group by c.usage_id, c.free_min_groups_id "
+            "		c.connect_time >= '" + sMonth + "'::timestamp and " \
+            "		c.connect_time <  '" + sMonth + "'::timestamp + interval '1 month' and " \
+            "		c.service_package_id > 0 " \
+            "		group by c.number_service_id, c.service_package_id "
         );
-        loadtime = time(NULL);
-        last_use = loadtime;
         while (res.next()) {
-            int key = (res.get_i(0) << 10) + res.get_i(1);
-            counter[key] = res.get_i(2);
+            set(res.get_i(0), res.get_i(1), tMonth, res.get_i(2));
         }
 
-        loaded = true;
-
-        t.stop();
     }
 
-
-    int & get(int usage_id, int group_id) {
-        int key = (usage_id << 10) + group_id;
-        return counter[key];
+    int & get(int usage_id, int group_id, time_t tmonth) {
+        map<int, map<time_t, int>> &counterUsage = counter[usage_id];
+        map<time_t, int> &counterGroup = counterUsage[group_id];
+        int &counterMonth = counterGroup[tmonth];
+        return counterMonth;
     }
 
-    int & get(int key) {
-        return counter[key];
+    void set(int usage_id, int group_id, time_t tmonth, int new_value) {
+        map<int, map<time_t, int>> &counterUsage = counter[usage_id];
+        map<time_t, int> &counterGroup = counterUsage[group_id];
+        int &counterMonth = counterGroup[tmonth];
+        counterMonth = new_value;
     }
 
-    void set(int usage_id, int group_id, int new_value) {
-        int key = (usage_id << 10) + group_id;
-        counter[key] = new_value;
+    void add(int usage_id, int group_id, time_t tmonth, int add_value) {
+        map<int, map<time_t, int>> &counterUsage = counter[usage_id];
+        map<time_t, int> &counterGroup = counterUsage[group_id];
+        int &counterMonth = counterGroup[tmonth];
+        counterMonth += add_value;
     }
 
-    void add(int usage_id, int group_id, int add_value) {
-        int key = (usage_id << 10) + group_id;
-        int & value = counter[key];
-        value += add_value;
-    }
-
-    void clear() {
-        counter.clear();
-    }
-
-    void append(FminCounter *newfmin) {
-        map<int, int>::iterator i;
-        for (i = newfmin->counter.begin(); i != newfmin->counter.end(); ++i) {
-            int key = i->first;
-            int add_value = i->second;
-            int &value = counter[key];
-            value += add_value;
-        }
+    size_t size() {
+        return counter.size();
     }
 };
+
+

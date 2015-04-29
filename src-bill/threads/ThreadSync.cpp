@@ -30,25 +30,6 @@
 #include "../sync/PullTrunkPriority.h"
 #include "../sync/PullTrunkRule.h"
 
-bool ThreadSync::prepare() {
-    if (!app().init_sync_done) {
-
-        Log::info("Sync...");
-
-        try {
-//            manager.pull();
-
-            app().init_sync_done = true;
-
-        } catch (Exception &e) {
-            e.addTrace("ThreadSync::prepare");
-            Log::exception(e);
-        }
-    }
-
-    return app().init_sync_done;
-}
-
 void ThreadSync::run() {
 
     manager.pull();

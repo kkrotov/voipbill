@@ -2,7 +2,6 @@
 
 #include "../../src/threads/Thread.h"
 #include "../../src/tasks/Task.h"
-#include "../classes/CalcFull.h"
 
 class ThreadTasks : public Thread {
 protected:

@@ -12,7 +12,7 @@ ThreadSyncCalls::ThreadSyncCalls() {
 void ThreadSyncCalls::run() {
 
     try {
-        BDbResult res = db_main.query("select id, time from calls.calls_" + app().conf.str_instance_id + " order by id desc limit 1");
+        BDbResult res = db_main.query("select id, connect_time from calls_raw.calls_raw where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
         if (res.next()) {
             main_last_id = res.get_s(0);
             main_last_time = res.get_s(1);
@@ -28,7 +28,7 @@ void ThreadSyncCalls::run() {
     string local_sync_month;
     string local_prev_sync_month;
     try {
-        BDbResult res = db_calls.query("select month, month - interval '1 month' from calls.calls where id>" + main_last_id + " order by id limit 1");
+        BDbResult res = db_calls.query("select date_trunc('month', connect_time), date_trunc('month', connect_time) - interval '1 month' from calls_raw.calls_raw where id>" + main_last_id + " order by id limit 1");
         if (!res.next()) {
             // nothing to sync
             return;
@@ -58,11 +58,11 @@ void ThreadSyncCalls::run() {
 }
 
 void ThreadSyncCalls::copyCallsPart(string month) {
-    BDb::copy("calls.calls_" + app().conf.str_instance_id + "_" + month,
+    BDb::copy("calls_raw.calls_raw_" + month,
         "",
-        "       id, time, direction_out, usage_num, phone_num, redirect_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, month, day, amount, amount_op, client_id, region, geo_id, geo_operator_id, pricelist_op_id, price, price_op, len_mcn, len_op, prefix_geo, prefix_mcn, prefix_op, srv_region_id",
-        "select id, time, direction_out, usage_num, phone_num, redirect_num, len, usage_id, pricelist_mcn_id, operator_id, free_min_groups_id, dest, mob, month, day, amount, amount_op, client_id, region, geo_id, geo_operator_id, pricelist_op_id, price, price_op, len_mcn, len_op, prefix_geo, prefix_mcn, prefix_op, " + app().conf.str_instance_id + "::smallint " \
-        "   from calls.calls_" + month + 
+        "       id, orig, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_limit_id, package_time, package_credit, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, operator_id, server_id",
+        "select id, orig, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_limit_id, package_time, package_credit, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, operator_id, " + app().conf.str_instance_id + " " \
+        "   from calls_raw.calls_raw_" + month +
         "   where id>" + main_last_id +
         "   order by id limit 100000",
         &db_calls, &db_main);
@@ -71,10 +71,6 @@ void ThreadSyncCalls::copyCallsPart(string month) {
 void ThreadSyncCalls::htmlfull(stringstream &html) {
     this->html(html);
 
-    html << "Time loop: <b>" << t.sloop() << "</b><br/>\n";
-    html << "Time full loop: <b>" << t.sfull() << "</b><br/>\n";
-    html << "loops: <b>" << t.count << "</b><br/>\n";
-    html << "<br/>\n";
     html << "Last Id: <b>" << main_last_id << "</b><br/>\n";
     html << "Last Time: <b>" << main_last_time << "</b><br/>\n";
 

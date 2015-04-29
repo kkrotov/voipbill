@@ -5,7 +5,7 @@
 // Copyright (c) 2003-2012 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// file LICENSE_1_0.txt or copy at web://www.boost.org/LICENSE_1_0.txt)
 //
 
 #ifndef HTTP_SERVER4_REQUEST_PARSER_HPP
@@ -73,6 +73,6 @@ private:
 };
 
 } // namespace server4
-} // namespace http
+} // namespace web
 
 #endif // HTTP_SERVER4_REQUEST_PARSER_HPP

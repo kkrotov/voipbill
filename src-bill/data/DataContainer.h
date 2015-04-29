@@ -14,6 +14,8 @@
 #include "RouteTableData.h"
 #include "RouteTableRouteData.h"
 #include "TrunkData.h"
+#include "TrunkByNameData.h"
+#include "TrunkByAliasData.h"
 #include "TrunkNumberPreprocessingData.h"
 #include "TrunkPriorityData.h"
 #include "TrunkRuleData.h"
@@ -30,8 +32,6 @@
 #include "TariffChangeLogData.h"
 #include "GlobalCountersData.h"
 
-#include "CurrentCdrData.h"
-
 struct PreparedData {
     Server *server;
     InstanceSettings *instanceSettings;
@@ -45,6 +45,8 @@ struct PreparedData {
     shared_ptr<RouteTableList> routeTable;
     shared_ptr<RouteTableRouteList> routeTableRoute;
     shared_ptr<TrunkList> trunk;
+    shared_ptr<TrunkByNameList> trunkByName;
+    shared_ptr<TrunkByAliasList> trunkByAlias;
     shared_ptr<TrunkNumberPreprocessingList> trunkNumberPreprocessing;
     shared_ptr<TrunkPriorityList> trunkPriority;
     shared_ptr<TrunkRuleList> trunkRule;
@@ -52,14 +54,13 @@ struct PreparedData {
     shared_ptr<OperatorList> voipOperator;
     shared_ptr<PricelistList> pricelist;
     shared_ptr<PricelistPriceList> pricelistPrice;
-    shared_ptr<NetworkPrefixList> networkPrefix;
+//    shared_ptr<NetworkPrefixList> networkPrefix;
     shared_ptr<GeoPrefixList> geoPrefix;
     shared_ptr<ServiceNumberList> serviceNumber;
     shared_ptr<ServiceTrunkList> serviceTrunk;
     shared_ptr<ServiceTrunkSettingsList> serviceTrunkSettings;
     shared_ptr<TariffList> tariff;
     shared_ptr<TariffChangeLogList> tariffChangeLog;
-    shared_ptr<GlobalCountersList> globalCounters;
 };
 
 class DataContainer {
@@ -76,6 +77,8 @@ public:
     RouteTableData routeTable;
     RouteTableRouteData routeTableRoute;
     TrunkData trunk;
+    TrunkByNameData trunkByName;
+    TrunkByAliasData trunkByAlias;
     TrunkNumberPreprocessingData trunkNumberPreprocessing;
     TrunkPriorityData trunkPriority;
     TrunkRuleData trunkRule;
@@ -83,7 +86,7 @@ public:
     OperatorData voipOperator;
     PricelistData pricelist;
     PricelistPriceData pricelistPrice;
-    NetworkPrefixData networkPrefix;
+    //NetworkPrefixData networkPrefix;
     GeoPrefixData geoPrefix;
     ServiceNumberData serviceNumber;
     ServiceTrunkData serviceTrunk;
@@ -91,8 +94,6 @@ public:
     TariffData tariff;
     TariffChangeLogData tariffChangeLog;
     GlobalCountersData globalCounters;
-
-    CurrentCdrData currentCdrData;
 
     static DataContainer * instance() {
         static DataContainer inst;
@@ -112,6 +113,8 @@ public:
         routeTable.load(db);
         routeTableRoute.load(db);
         trunk.load(db);
+        trunkByName.load(db);
+        trunkByAlias.load(db);
         trunkNumberPreprocessing.load(db);
         trunkPriority.load(db);
         trunkRule.load(db);
@@ -119,15 +122,13 @@ public:
         voipOperator.load(db);
         pricelist.load(db);
         pricelistPrice.load(db);
-        networkPrefix.load(db);
+        //networkPrefix.load(db);
         geoPrefix.load(db);
         serviceNumber.load(db);
         serviceTrunk.load(db);
         serviceTrunkSettings.load(db);
         tariff.load(db);
         tariffChangeLog.load(db);
-
-        currentCdrData.load(db);
     }
 
     bool prepareData(PreparedData &data, time_t time) {
@@ -200,6 +201,14 @@ public:
             return false;
         }
 
+        if ((data.trunkByName = trunkByName.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.trunkByAlias = trunkByAlias.get()) == nullptr) {
+            return false;
+        }
+
         if ((data.trunkNumberPreprocessing = trunkNumberPreprocessing.get()) == nullptr) {
             return false;
         }
@@ -227,11 +236,11 @@ public:
         if ((data.pricelistPrice = pricelistPrice.get()) == nullptr) {
             return false;
         }
-
+/*
         if ((data.networkPrefix = networkPrefix.get()) == nullptr) {
             return false;
         }
-
+*/
         if ((data.geoPrefix = geoPrefix.get()) == nullptr) {
             return false;
         }
@@ -244,7 +253,7 @@ public:
             return false;
         }
 
-        if ((data.serviceTrunkSettings = serviceTrunkSettings.get()) = nullptr) {
+        if ((data.serviceTrunkSettings = serviceTrunkSettings.get()) == nullptr) {
             return false;
         }
 
