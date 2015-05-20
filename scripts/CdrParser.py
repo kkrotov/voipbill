@@ -24,7 +24,7 @@ class CdrParser(Daemon):
 
     def getLastDbFileName(self):
         cur = self.db.cursor()
-        cur.execute("select file_name from public.cdr_file order by file_name desc")
+        cur.execute("select file_name from calls_cdr.cdr_file order by file_name desc")
         lastFileName = cur.fetchone()
         cur.close()
         if lastFileName is not None:
@@ -34,7 +34,7 @@ class CdrParser(Daemon):
 
     def isFileParsed(self, fileName):
         cur = self.db.cursor()
-        cur.execute("select file_name from public.cdr_file where file_name='%s' " % fileName)
+        cur.execute("select file_name from calls_cdr.cdr_file where file_name='%s' " % fileName)
         lastFileName = cur.fetchone()
         cur.close()
         return lastFileName is not None
