@@ -3,6 +3,7 @@ project(voip)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
 
 include_directories(/usr/include/postgresql)
 link_directories(/usr/pgsql-9.4/lib)
@@ -113,4 +114,4 @@ set(BILL_SOURCES
 #target_link_libraries(app_auth stdc++ rt pthread pq)
 
 add_executable(app_bill ${COMMON_SOURCES} ${BILL_SOURCES})
-target_link_libraries(app_bill stdc++ rt pthread pq)
+target_link_libraries(app_bill rt pthread pq)
