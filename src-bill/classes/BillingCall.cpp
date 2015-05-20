@@ -15,8 +15,10 @@ void BillingCall::calc(Call *call, Cdr *cdr, PreparedData *preparedData) {
     this->cdr = cdr;
     this->data = preparedData;
 
-    call->src_number = atoll(cdr->src_number);
-    call->dst_number = atoll(cdr->dst_number);
+    if (call->orig) {
+        call->src_number = atoll(cdr->src_number);
+        call->dst_number = atoll(cdr->dst_number);
+    }
 
     trunk = data->trunkByName->find(getRoute(), trace);
     if (trunk == nullptr) {
@@ -30,7 +32,9 @@ void BillingCall::calc(Call *call, Cdr *cdr, PreparedData *preparedData) {
     }
     call->trunk_id = trunk->id;
 
-    numberPreprocessing();
+    if (call->orig) {
+        numberPreprocessing();
+    }
 
     fillGeoPrefix();
 
@@ -62,13 +66,15 @@ void BillingCall::fillGeoPrefix() {
 void BillingCall::numberPreprocessing() {
     int order = 1;
 
+    bool srcNumberPreprocessingDone = false;
+    bool dstNumberPreprocessingDone = false;
     while (true) {
         auto numberPreprocessing = data->trunkNumberPreprocessing->find(trunk->id, order, trace);
         if (numberPreprocessing == nullptr) {
             break;
         }
 
-        if (numberPreprocessing->src && cdr->src_noa == numberPreprocessing->noa && strlen(cdr->src_number) == numberPreprocessing->length) {
+        if (!srcNumberPreprocessingDone && numberPreprocessing->src && cdr->src_noa == numberPreprocessing->noa && strlen(cdr->src_number) == numberPreprocessing->length) {
             char tmpNumber[20];
             char tmp[20];
 
@@ -78,13 +84,13 @@ void BillingCall::numberPreprocessing() {
 
             call->src_number = atoll(tmp);
 
-            if (*trace != nullptr) {
+            if (trace != nullptr) {
                 *trace << "INFO|NUMBER PREPROCESSING|SET SRC_NUMBER = " << call->src_number << endl;
             }
-            break;
+            srcNumberPreprocessingDone = true;
         }
 
-        if (!numberPreprocessing->src && cdr->dst_noa == numberPreprocessing->noa && strlen(cdr->dst_number) == numberPreprocessing->length) {
+        if (!dstNumberPreprocessingDone && !numberPreprocessing->src && cdr->dst_noa == numberPreprocessing->noa && strlen(cdr->dst_number) == numberPreprocessing->length) {
             char tmpNumber[20];
             char tmp[20];
 
@@ -94,10 +100,10 @@ void BillingCall::numberPreprocessing() {
 
             call->dst_number = atoll(tmp);
 
-            if (*trace != nullptr) {
+            if (trace != nullptr) {
                 *trace << "INFO|NUMBER PREPROCESSING|SET DST_NUMBER = " << call->dst_number << endl;
             }
-            break;
+            dstNumberPreprocessingDone = true;
         }
 
         order++;

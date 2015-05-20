@@ -21,9 +21,9 @@ protected:
 
     inline void parse_item(BDbResult &row, GlobalCounters * item) {
         item->client_id = row.get_i(0);
-        item->sum = row.get_i(1);
-        item->sum_day = row.get_i(2);
-        item->sum_month = row.get_i(3);
+        item->sum = row.get_d(1);
+        item->sum_day = row.get_d(2);
+        item->sum_month = row.get_d(3);
     }
 
     struct key_client_id {

@@ -128,7 +128,7 @@ bool ThreadBlacklist::needLockLocal(ServiceNumber * serviceNumber) {
     if (client != nullptr) {
         auto globalCounter = data->globalCounters.get()->find(client->id);
 
-        double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0);
+        double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0.0);
 
         if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth()) {
             result = true;
@@ -149,9 +149,9 @@ bool ThreadBlacklist::needLockGlobal(ServiceNumber * serviceNumber) {
     if (client != nullptr) {
         auto globalCounter = data->globalCounters.get()->find(client->id);
 
-        double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0);
-        double spentDaySum = cc.sumDay() + (globalCounter ? globalCounter->sumDay() : 0);
-        double spentMonthSum = cc.sumMonth() + (globalCounter ? globalCounter->sumMonth() : 0);
+        double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0.0);
+        double spentDaySum = cc.sumDay() + (globalCounter ? globalCounter->sumDay() : 0.0);
+        double spentMonthSum = cc.sumMonth() + (globalCounter ? globalCounter->sumMonth() : 0.0);
 
         if (client->isConsumedCreditLimit(spentBalanceSum) ||
             client->isConsumedDailyLimit(spentDaySum) ||
@@ -176,9 +176,9 @@ bool ThreadBlacklist::needLockTrunk(ServiceTrunk * serviceTrunk) {
     if (client != nullptr) {
         auto globalCounter = data->globalCounters.get()->find(client->id);
 
-        double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0);
-        double spentDaySum = cc.sumDay() + (globalCounter ? globalCounter->sumDay() : 0);
-        double spentMonthSum = cc.sumMonth() + (globalCounter ? globalCounter->sumMonth() : 0);
+        double spentBalanceSum = cc.sumBalance() + (globalCounter ? globalCounter->sumBalance() : 0.0);
+        double spentDaySum = cc.sumDay() + (globalCounter ? globalCounter->sumDay() : 0.0);
+        double spentMonthSum = cc.sumMonth() + (globalCounter ? globalCounter->sumMonth() : 0.0);
 
         if (client->isConsumedCreditLimit(spentBalanceSum) ||
             client->isConsumedDailyLimit(spentDaySum) ||

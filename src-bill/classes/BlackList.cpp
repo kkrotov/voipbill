@@ -216,21 +216,21 @@ void BlackList::log_lock_phone(string &phone) {
                     str = str + " / Credit limit "
                             + string_fmt("%.2f", client->balance + client->credit - sum_balance) + " = "
                             + string_fmt("%.2f", client->balance) + " + "
-                            + lexical_cast<string>(client->credit) + " - "
+                            + lexical_cast<string>(client->credit) + " + "
                             + string_fmt("%.2f", sum_balance);
                 }
 
                 if (client->isConsumedDailyLimit(sum_day)) {
                     str = str + " / Daily limit "
                             + string_fmt("%.2f", client->limit_d - sum_day) + " = "
-                            + lexical_cast<string>(client->limit_d) + " - "
+                            + lexical_cast<string>(client->limit_d) + " + "
                             + string_fmt("%.2f", sum_day);
                 }
 
                 if (client->isConsumedMonthlyLimit(sum_month)) {
                     str = str + " / Monthly limit "
                             + string_fmt("%.2f", client->limit_m - sum_month) + " = "
-                            + lexical_cast<string>(client->limit_m) + " - "
+                            + lexical_cast<string>(client->limit_m) + " + "
                             + string_fmt("%.2f", sum_month);
                 }
 

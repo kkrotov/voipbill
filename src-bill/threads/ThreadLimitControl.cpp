@@ -76,8 +76,8 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call) {
         if (client->isConsumedCreditLimit(spentBalanceSum)) {
 
             Log::notice(
-                    "KILL: trunk #" + lexical_cast<string>(call.trunk_service_id) + ": Credit limit: " + string_fmt("%.2f", client->balance + client->credit - c0.sumBalance() - c2.sumBalance() - globalBalanceSum) + " = " +
-                    string_fmt("%.2f", client->balance) + " (balance) + " + string_fmt("%d", client->credit) + " (credit) - " + string_fmt("%.2f", c0.sumBalance()) + " (local) - " + string_fmt("%.2f", c2.sumBalance()) + " (current) - " + string_fmt("%.2f", globalBalanceSum) + " (global) <br/>\n"
+                    "KILL: trunk #" + lexical_cast<string>(call.trunk_service_id) + ": Credit limit: " + string_fmt("%.2f", client->balance + client->credit + c0.sumBalance() + c2.sumBalance() + globalBalanceSum) + " = " +
+                    string_fmt("%.2f", client->balance) + " (balance) + " + string_fmt("%d", client->credit) + " (credit) + " + string_fmt("%.2f", c0.sumBalance()) + " (local) + " + string_fmt("%.2f", c2.sumBalance()) + " (current) + " + string_fmt("%.2f", globalBalanceSum) + " (global) <br/>\n"
             );
 
             return true;
@@ -100,8 +100,8 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call) {
                 if (!call.isLocal() || client->last_payed_month < get_tmonth()) {
 
                     Log::notice(
-                            "KILL: number " + lexical_cast<string>(call.src_number) + " -> " + lexical_cast<string>(call.dst_number) + " : Credit limit: " + string_fmt("%.2f", client->balance + client->credit - c0.sumBalance() - c2.sumBalance() - globalBalanceSum) + " = " +
-                            string_fmt("%.2f", client->balance) + " (balance) + " + string_fmt("%d", client->credit) + " (credit) - " + string_fmt("%.2f", c0.sumBalance()) + " (local) - " + string_fmt("%.2f", c2.sumBalance()) + " (current) - " + string_fmt("%.2f", globalBalanceSum) + " (global) <br/>\n"
+                            "KILL: number " + lexical_cast<string>(call.src_number) + " -> " + lexical_cast<string>(call.dst_number) + " : Credit limit: " + string_fmt("%.2f", client->balance + client->credit + c0.sumBalance() + c2.sumBalance() + globalBalanceSum) + " = " +
+                            string_fmt("%.2f", client->balance) + " (balance) + " + string_fmt("%d", client->credit) + " (credit) + " + string_fmt("%.2f", c0.sumBalance()) + " (local) + " + string_fmt("%.2f", c2.sumBalance()) + " (current) + " + string_fmt("%.2f", globalBalanceSum) + " (global) <br/>\n"
                     );
 
                     return true;
@@ -111,8 +111,8 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call) {
             if (!call.isLocal() && client->isConsumedDailyLimit(spentDaySum)) {
 
                 Log::notice(
-                        "KILL: number " + lexical_cast<string>(call.src_number) + " -> " + lexical_cast<string>(call.dst_number) + " : Daily limit: " + string_fmt("%.2f", client->limit_d - c0.sumDay() - c2.sumDay() - globalDaySum) + " = " +
-                        string_fmt("%d", client->limit_d) + " (limit_d) - " + string_fmt("%.2f", c0.sumDay()) + " (local) - " + string_fmt("%.2f", c2.sumDay()) + " (current) - " + string_fmt("%.2f", globalDaySum) + " (global) <br/>\n"
+                        "KILL: number " + lexical_cast<string>(call.src_number) + " -> " + lexical_cast<string>(call.dst_number) + " : Daily limit: " + string_fmt("%.2f", client->limit_d + c0.sumDay() + c2.sumDay() + globalDaySum) + " = " +
+                        string_fmt("%d", client->limit_d) + " (limit_d) + " + string_fmt("%.2f", c0.sumDay()) + " (local) + " + string_fmt("%.2f", c2.sumDay()) + " (current) + " + string_fmt("%.2f", globalDaySum) + " (global) <br/>\n"
                 );
 
                 return true;
@@ -121,8 +121,8 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call) {
             if (!call.isLocal() && client->isConsumedMonthlyLimit(spentMonthSum)) {
 
                 Log::notice(
-                        "KILL: number " + lexical_cast<string>(call.src_number) + " -> " + lexical_cast<string>(call.dst_number) + " : Monthly limit: " + string_fmt("%.2f", client->limit_m - c0.sumMonth() - c2.sumMonth() - globalMonthSum) + " = " +
-                        string_fmt("%d", client->limit_m) + " (limit_m) - " + string_fmt("%.2f", c0.sumMonth()) + " (local) - " + string_fmt("%.2f", c2.sumMonth()) + " (current) - " + string_fmt("%.2f", globalMonthSum) + " (global) <br/>\n"
+                        "KILL: number " + lexical_cast<string>(call.src_number) + " -> " + lexical_cast<string>(call.dst_number) + " : Monthly limit: " + string_fmt("%.2f", client->limit_m + c0.sumMonth() + c2.sumMonth() + globalMonthSum) + " = " +
+                        string_fmt("%d", client->limit_m) + " (limit_m) + " + string_fmt("%.2f", c0.sumMonth()) + " (local) + " + string_fmt("%.2f", c2.sumMonth()) + " (current) + " + string_fmt("%.2f", globalMonthSum) + " (global) <br/>\n"
                 );
 
                 return true;
@@ -150,9 +150,9 @@ void ThreadLimitControl::fetchGlobalCounters(int accountId, double &globalBalanc
         globalDaySum = globalCounter->sumDay();
         globalMonthSum = globalCounter->sumMonth();
     } else {
-        globalBalanceSum = 0;
-        globalDaySum = 0;
-        globalMonthSum = 0;
+        globalBalanceSum = 0.0;
+        globalDaySum = 0.0;
+        globalMonthSum = 0.0;
     }
 }
 

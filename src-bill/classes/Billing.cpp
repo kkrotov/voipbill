@@ -44,6 +44,8 @@ void Billing::calcCurrentCalls() {
         billingCall.calc(&origCall, cdr, &preparedData);
 
         Call termCall = Call(cdr, CALL_TERM);
+        termCall.src_number = origCall.src_number;
+        termCall.dst_number = origCall.dst_number;
         billingCall.calc(&termCall, cdr, &preparedData);
 
         callsWaitSaving->push_back(origCall);
@@ -102,6 +104,8 @@ void Billing::calc() {
         billingCall.calc(&origCall, cdr, &preparedData);
 
         Call termCall = Call(cdr, CALL_TERM);
+        termCall.src_number = origCall.src_number;
+        termCall.dst_number = origCall.dst_number;
         termCall.id = billingData->lastCallId + 2;
         termCall.peer_id = billingData->lastCallId + 1;
         billingCall.calc(&termCall, cdr, &preparedData);
