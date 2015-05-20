@@ -407,12 +407,24 @@ void BillingCall::calcTermByNumber(ServiceNumber *serviceNumber) {
 }
 
 void BillingCall::processLineWithoutNumber(Call *call, Cdr *cdr) {
-    char * pos = strstr(cdr->src_number, "=2A");
+    char * pos = nullptr;
+    if (pos == nullptr) {
+        pos = strstr(cdr->src_number, "=2A");
+        if (pos != nullptr) pos += 3;
+    }
     if (pos == nullptr) {
         pos = strstr(cdr->src_number, "=2B");
+        if (pos != nullptr) pos += 3;
+    }
+    if (pos == nullptr) {
+        pos = strstr(cdr->src_number, "*");
+        if (pos != nullptr) pos += 1;
+    }
+    if (pos == nullptr) {
+        pos = strstr(cdr->src_number, "+");
+        if (pos != nullptr) pos += 1;
     }
     if (pos != nullptr) {
-        pos += 3;
         call->src_number = atoll(pos);
         if (trace != nullptr) {
             *trace << "INFO|LINE WITHOUT NUMBER|SET SRC_NUMBER = " << call->src_number << endl;
