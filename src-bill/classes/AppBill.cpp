@@ -110,7 +110,6 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadSaveCalls>();
     registerThread<ThreadSyncCounters>();
     registerThread<ThreadSyncCalls>();
-    registerThread<ThreadRemoteLoader>();
     registerThread<ThreadBlacklist>();
     registerThread<ThreadLimitControl>();
     registerThread<ThreadCheckStartTable>();
