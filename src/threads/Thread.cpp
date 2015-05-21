@@ -35,13 +35,13 @@ void Thread::usleep(unsigned int milliseconds) {
 
 void Thread::threadTotalsHeader(stringstream &html) {
     html << "<tr>\n";
-    html << "<td style='text-align: left'>Thread</td>\n";
-    html << "<td style='text-align: left'>Status</td>\n";
-    html << "<td style='text-align: left'>Count</td>\n";
-    html << "<td style='text-align: left'>Time last</td>\n";
-    html << "<td style='text-align: left'>Time total</td>\n";
-    html << "<td style='text-align: left'>Errors</td>\n";
-    html << "<td style='text-align: left'>Last error</td>\n";
+    html << "<td style='text-align: left' nowrap>Thread</td>\n";
+    html << "<td style='text-align: left' nowrap>Status</td>\n";
+    html << "<td style='text-align: left' nowrap>Count</td>\n";
+    html << "<td style='text-align: left' nowrap>Time last</td>\n";
+    html << "<td style='text-align: left' nowrap>Time total</td>\n";
+    html << "<td style='text-align: left' nowrap>Errors</td>\n";
+    html << "<td style='text-align: left' nowrap>Last error</td>\n";
     html << "</tr>";
 }
 
@@ -50,13 +50,13 @@ void Thread::threadTotalsData(stringstream &html) {
     ThreadStatus real_status = getRealStatus();
 
     html << "<tr>\n";
-    html << "<td style='text-align: left'><a href='/task?id=" << this->id << "'>" << this->name << "</a></td>\n";
-    html << "<td style='text-align: left'>" << ThreadStatusNames[real_status] << (status != real_status ? " (" + string(ThreadStatusNames[status]) + ")" : "") << "</b></td>\n";
-    html << "<td style='text-align: left'>" << timer.count << "</td>\n";
-    html << "<td style='text-align: left'>" << timer.sloop() << " " << timer.sloop_cpu_usage() << "%</td>\n";
-    html << "<td style='text-align: left'>" << timer.sfull() << " " << timer.sfull_cpu_usage() << "%</td>\n";
-    html << "<td style='text-align: left'>" << errorsCount << "</td>\n";
-    html << "<td style='text-align: left'>" << lastError << "</td>\n";
+    html << "<td style='text-align: left' nowrap><a href='/task?id=" << this->id << "'>" << this->name << "</a></td>\n";
+    html << "<td style='text-align: left' nowrap>" << ThreadStatusNames[real_status] << (status != real_status ? " (" + string(ThreadStatusNames[status]) + ")" : "") << "</b></td>\n";
+    html << "<td style='text-align: left' nowrap>" << timer.count << "</td>\n";
+    html << "<td style='text-align: left' nowrap>" << timer.sloop() << " " << timer.sloop_cpu_usage() << "%</td>\n";
+    html << "<td style='text-align: left' nowrap>" << timer.sfull() << " " << timer.sfull_cpu_usage() << "%</td>\n";
+    html << "<td style='text-align: left' nowrap>" << errorsCount << "</td>\n";
+    html << "<td style='text-align: left' nowrap>" << lastError << "</td>\n";
     html << "</tr>\n";
 }
 
