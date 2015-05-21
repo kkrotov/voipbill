@@ -31,6 +31,7 @@ void BillingCall::calc(Call *call, Cdr *cdr, PreparedData *preparedData) {
         }
     }
     call->trunk_id = trunk->id;
+    call->operator_id = trunk->code;
 
     if (call->orig) {
         numberPreprocessing();
@@ -179,7 +180,6 @@ void BillingCall::calcByTrunk() {
 
     call->account_id = effectiveServiceTrunk->client_account_id;
     call->trunk_service_id = effectiveServiceTrunk->id;
-    call->operator_id = effectiveServiceTrunk->operator_id;
 
     call->pricelist_id = effectivePricelist->id;
     call->prefix = atoll(effectivePrice->prefix);
@@ -217,7 +217,6 @@ void BillingCall::calcByNumber() {
     auto serviceTrunk = data->serviceTrunk->find(trunk->id, call->connect_time, trace);
     if (serviceTrunk != nullptr) {
         call->trunk_service_id = serviceTrunk->id;
-        call->operator_id = serviceTrunk->operator_id;
     }
 
     if (!trunk->our_trunk) {

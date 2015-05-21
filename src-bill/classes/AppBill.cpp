@@ -1,5 +1,4 @@
 #include "../classes/AppBill.h"
-#include "../../src/threads/Thread.h"
 #include "../../src/classes/Daemon.h"
 
 #include "../threads/ThreadWeb.h"
@@ -13,14 +12,11 @@
 #include "../threads/ThreadSaveCalls.h"
 #include "../threads/ThreadSyncCounters.h"
 #include "../threads/ThreadSyncCalls.h"
-#include "../threads/ThreadRemoteLoader.h"
 #include "../threads/ThreadBlacklist.h"
 #include "../threads/ThreadLimitControl.h"
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
-/*
-#include "../threads/ThreadUdpServer.h"
-*/
+//#include "../threads/ThreadUdpServer.h"
 #include "../../src/classes/LogWriterScreen.h"
 #include "../../src/classes/LogWriterFile.h"
 #include "../../src/classes/LogWriterSyslog.h"
@@ -119,12 +115,7 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadLimitControl>();
     registerThread<ThreadCheckStartTable>();
     registerThread<ThreadTasks>();
-
-    /*
-
-    registerThread<ThreadUdpServer>();
-
-     */
+    //registerThread<ThreadUdpServer>();
 }
 
 void AppBill::runAppInSingleMode()
@@ -143,10 +134,8 @@ void AppBill::runAppInSingleMode()
             "blacklist",
             "limitcontrol",
             "checkstarttable",
-            "tasks"
-            /*,
-            "udp_server",
-             */
+            //"tasks",
+            //"udp_server",
     };
 
     for (auto thread: standardThreads) {

@@ -23,15 +23,15 @@ struct Client {
     }
 
     bool isConsumedCreditLimit(double value) {
-        return hasCreditLimit() && (balance + credit - value < 0);
+        return hasCreditLimit() && (balance + credit + value < 0);
     }
 
     bool isConsumedDailyLimit(double value) {
-        return hasDailyLimit() && (limit_d - value < 0);
+        return hasDailyLimit() && (limit_d + value < 0);
     }
 
     bool isConsumedMonthlyLimit(double value) {
-        return hasMonthlyLimit() && (limit_m - value < 0);
+        return hasMonthlyLimit() && (limit_m + value < 0);
     }
 
 };
