@@ -8,6 +8,8 @@ ThreadSyncCounters::ThreadSyncCounters() {
     db_main.setCS(app().conf.db_main);
 
     billingData = DataBillingContainer::instance();
+    last_sync_count = 0;
+    total_sync_count = 0;
 }
 
 bool ThreadSyncCounters::ready() {
@@ -23,12 +25,13 @@ void ThreadSyncCounters::run() {
 void ThreadSyncCounters::save_client_counters() {
 
     string q;
-    shared_ptr<ClientCounter> cl;
 
     auto clientCounter = billingData->clientCounter.get();
 
+    int sync_count = 0;
+
     for (auto it : clientCounter->counter) {
-        ClientCounterObj &value = it.second;
+        ClientCounterObj &value = clientCounter->counter[it.second.client_id];
         if (value.updated == 0) continue;
 
         if (q == "") {
@@ -47,10 +50,10 @@ void ThreadSyncCounters::save_client_counters() {
                 (value.disabled_global ? "true" : "false"),
                 (value.disabled_local ? "true" : "false")));
         value.updated = 2;
-
+        sync_count += 1;
     }
 
-    if (q.length() > 0) {
+    if (sync_count > 0) {
         try {
             if (clientCounter->needTotalSync) {
                 BDbTransaction trans(&db_main);
@@ -67,8 +70,9 @@ void ThreadSyncCounters::save_client_counters() {
 
             {
                 for (auto it : clientCounter->counter) {
-                    if (it.second.updated == 2) {
-                        it.second.updated = 0;
+                    ClientCounterObj &value = clientCounter->counter[it.second.client_id];
+                    if (value.updated == 2) {
+                        value.updated = 0;
                     }
                 }
             }
@@ -77,10 +81,15 @@ void ThreadSyncCounters::save_client_counters() {
             throw e;
         }
     }
+
+    last_sync_count = sync_count;
+    total_sync_count += sync_count;
 }
 
 void ThreadSyncCounters::htmlfull(stringstream &html) {
     this->html(html);
 
+    html << "Last sync count: " << last_sync_count << "<br/>\n";
+    html << "Last sync count: " << total_sync_count << "<br/>\n";
 }
 

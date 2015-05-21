@@ -83,55 +83,70 @@ void Billing::calc() {
     auto clientCounter = billingData->clientCounter.get();
 
     bool calcLoop = true;
+    Cdr cdr;
     while (calcLoop) {
-        Cdr * cdr;
         {
             lock_guard<Spinlock> guard(billingData->cdrsWaitProcessingLock);
-            if (billingData->cdrsWaitProcessing.size() > 0) {
-                cdr = &billingData->cdrsWaitProcessing.front();
-            } else {
+            if (billingData->cdrsWaitProcessing.size() == 0) {
                 break;
             }
-        }
-
-        if (!data->prepareData(preparedData, cdr->connect_time)) {
-            break;
-        }
-
-        Call origCall = Call(cdr, CALL_ORIG);
-        origCall.id = billingData->lastCallId + 1;
-        origCall.peer_id = billingData->lastCallId + 2;
-        billingCall.calc(&origCall, cdr, &preparedData);
-
-        Call termCall = Call(cdr, CALL_TERM);
-        termCall.src_number = origCall.src_number;
-        termCall.dst_number = origCall.dst_number;
-        termCall.id = billingData->lastCallId + 2;
-        termCall.peer_id = billingData->lastCallId + 1;
-        billingCall.calc(&termCall, cdr, &preparedData);
-
-        {
-            lock_guard<Spinlock> guard(billingData->callsWaitSavingLock);
-            billingData->callsWaitSaving.push_back(origCall);
-            billingData->callsWaitSaving.push_back(termCall);
-
-            if (billingData->callsWaitSaving.size() >= calls_max_queue_length) {
-                calcLoop = false;
-            }
-        }
-
-        {
-            lock_guard<Spinlock> guard(billingData->cdrsWaitProcessingLock);
+            cdr = billingData->cdrsWaitProcessing.front();
             billingData->cdrsWaitProcessing.pop_front();
         }
 
-        billingData->calcedCdrsCount += 1;
-        billingData->lastCallId += 2;
-        billingData->lastTime = origCall.connect_time;
+        try {
 
-        updateClientCounters(origCall, preparedData, clientCounter.get());
-        updateClientCounters(termCall, preparedData, clientCounter.get());
-        updateFreeMinsCounters(origCall, fminCounter.get());
+
+            if (!data->prepareData(preparedData, cdr.connect_time)) {
+                lock_guard<Spinlock> guard(billingData->cdrsWaitProcessingLock);
+                billingData->cdrsWaitProcessing.push_front(cdr);
+                break;
+            }
+
+            Call origCall = Call(&cdr, CALL_ORIG);
+            origCall.id = billingData->lastCallId + 1;
+            origCall.peer_id = billingData->lastCallId + 2;
+            billingCall.calc(&origCall, &cdr, &preparedData);
+
+            Call termCall = Call(&cdr, CALL_TERM);
+            termCall.src_number = origCall.src_number;
+            termCall.dst_number = origCall.dst_number;
+            termCall.id = billingData->lastCallId + 2;
+            termCall.peer_id = billingData->lastCallId + 1;
+            billingCall.calc(&termCall, &cdr, &preparedData);
+
+            billingData->calcedCdrsCount += 1;
+            billingData->lastCallId += 2;
+            billingData->lastTime = origCall.connect_time;
+
+            updateClientCounters(origCall, preparedData, clientCounter.get());
+            updateClientCounters(termCall, preparedData, clientCounter.get());
+            updateFreeMinsCounters(origCall, fminCounter.get());
+
+            {
+                lock_guard<Spinlock> guard(billingData->callsWaitSavingLock);
+                billingData->callsWaitSaving.push_back(origCall);
+                billingData->callsWaitSaving.push_back(termCall);
+
+                if (billingData->callsWaitSaving.size() >= calls_max_queue_length) {
+                    calcLoop = false;
+                }
+            }
+
+        } catch (Exception &e) {
+            e.addTrace("Billing::calc");
+            lock_guard<Spinlock> guard(billingData->cdrsWaitProcessingLock);
+            billingData->cdrsWaitProcessing.push_front(cdr);
+            throw e;
+        } catch (std::exception &e) {
+            lock_guard<Spinlock> guard(billingData->cdrsWaitProcessingLock);
+            billingData->cdrsWaitProcessing.push_front(cdr);
+            throw e;
+        } catch (...) {
+            lock_guard<Spinlock> guard(billingData->cdrsWaitProcessingLock);
+            billingData->cdrsWaitProcessing.push_front(cdr);
+            throw Exception("Unknown error", "Billing::calc");
+        }
     }
 
 }

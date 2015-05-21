@@ -6,6 +6,8 @@
 class ThreadSyncCounters : public Thread {
     DataBillingContainer *billingData;
     BDb db_main;
+    int last_sync_count;
+    int total_sync_count;
 
     bool ready();
 
