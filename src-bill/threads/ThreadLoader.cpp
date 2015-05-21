@@ -1,22 +1,21 @@
 #include "ThreadLoader.h"
-#include "../classes/AppBill.h"
 
 bool ThreadLoader::prepare() {
 
-    if (!app().init_load_counters_done) {
+    if (!init_load_counters_done) {
         Log::info("Loading counters...");
         if (!this->do_load_counters()) {
             return false;
         }
-        app().init_load_counters_done = true;
+        init_load_counters_done = true;
     }
 
-    if (!app().init_load_data_done) {
+    if (!init_load_data_done) {
         Log::info("Loading data...");
         if (!this->do_load_data()) {
             return false;
         }
-        app().init_load_data_done = true;
+        init_load_data_done = true;
     }
 
     return true;
@@ -452,4 +451,7 @@ ThreadLoader::ThreadLoader() {
     data = DataContainer::instance();
     billingData = DataBillingContainer::instance();
     db_calls.setCS(app().conf.db_calls);
+
+    init_load_counters_done = false;
+    init_load_data_done = false;
 }

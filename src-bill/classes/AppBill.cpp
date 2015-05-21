@@ -34,13 +34,6 @@ bool AppBill::init(int argc, char* argv[]) {
     return App::init(argc, argv);
 }
 
-AppBill::AppBill() {
-    init_sync_done = false;
-    init_load_counters_done = false;
-    init_load_data_done = false;
-    init_bill_runtime_started = false;
-}
-
 void AppBill::runApp() {
 
     Daemon::setPidFile(conf.pid_file);
@@ -133,7 +126,7 @@ void AppBill::runAppInSingleMode()
             "blacklist",
             "limitcontrol",
             "checkstarttable",
-            //"tasks",
+            "tasks",
             //"udp_server",
     };
 
@@ -144,9 +137,6 @@ void AppBill::runAppInSingleMode()
 
 void AppBill::runAppInTestMode()
 {
-    init_sync_done = true;
-    init_bill_runtime_started = true;
-
     for (auto threadName: conf.test_threads) {
         Thread* thread = newThreadObject(threadName);
         if (thread) {

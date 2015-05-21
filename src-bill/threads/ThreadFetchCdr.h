@@ -12,7 +12,7 @@ protected:
 
 
 public:
-    bool prepare();
+    bool ready();
 
     void run();
 

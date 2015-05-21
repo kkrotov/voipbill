@@ -9,6 +9,7 @@ ThreadTasks::ThreadTasks() {
     name = "Tasks";
     tasks_count = 0;
     db_main.setCS(app().conf.db_main);
+    threadSleepSeconds = 5;
 }
 
 bool ThreadTasks::ready() {

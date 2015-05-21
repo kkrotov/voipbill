@@ -10,6 +10,7 @@
 
 class DataBillingContainer {
 public:
+    mutex fetchCdrLock;
     mutex calcLock;
     mutex saveLock;
 
@@ -23,6 +24,7 @@ public:
     FminCounterData fminCounter;
 
     long long int lastCallId = -1;
+    long long int lastCdrId = -1;
     time_t lastTime = 0;
     size_t calcedCdrsCount = 0;
     size_t savedCallsCount = 0;
@@ -37,7 +39,7 @@ public:
         clientCounter.load(db);
         fminCounter.load(db);
 
-        loadLastCallIdAndTime(db);
+        loadLastCallIdAndCdrIdAndTime(db);
 
         cdrsWaitProcessing.clear();
         callsWaitSaving.clear();
@@ -56,6 +58,10 @@ public:
         }
 
         if (lastCallId < 0) {
+            return false;
+        }
+
+        if (lastCdrId < 0) {
             return false;
         }
 
@@ -81,6 +87,11 @@ public:
         html << "<td style='text-align: left' nowrap>" << savedCallsCount << "<br/>";
         html << "</tr>\n";
         html << "<tr>";
+        html << "<td style='text-align: left' nowrap>last cdr id:</td>";
+        html << "<td style='text-align: left' nowrap>" << lastCdrId << "<br/>";
+        html << "</tr>\n";
+        html << "<tr>";
+        html << "<tr>";
         html << "<td style='text-align: left' nowrap>last call id:</td>";
         html << "<td style='text-align: left' nowrap>" << lastCallId << "<br/>";
         html << "</tr>\n";
@@ -91,13 +102,15 @@ public:
         html << "</table>\n";
     }
 private:
-    void loadLastCallIdAndTime(BDb * db) {
-        auto res = db->query("SELECT MAX(id), MAX(connect_time) FROM calls_raw.calls_raw");
+    void loadLastCallIdAndCdrIdAndTime(BDb * db) {
+        auto res = db->query("SELECT MAX(id), MAX(cdr_id), MAX(connect_time) FROM calls_raw.calls_raw");
         if (res.next()) {
             lastCallId = res.get_ll(0);
-            lastTime = parseDateTime(res.get(1));
+            lastCdrId = res.get_ll(1);
+            lastTime = parseDateTime(res.get(2));
         } else {
             lastCallId = 0;
+            lastCdrId = 0;
             lastTime = 0;
         }
     }

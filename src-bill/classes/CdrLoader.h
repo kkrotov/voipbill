@@ -7,8 +7,6 @@ private:
     BDb * db_calls;
     DataBillingContainer * billingData;
 public:
-    long long int lastCdrId;
-
 
     void setDb(BDb * db_calls) {
         this->db_calls = db_calls;
@@ -16,15 +14,6 @@ public:
 
     void setBillingData(DataBillingContainer * billingData) {
         this->billingData = billingData;
-    }
-
-    void prepare() {
-        BDbResult res = db_calls->query("select max(cdr_id) from calls_raw.calls_raw");
-        if (res.next()) {
-            lastCdrId = res.get_ll(0);
-        } else {
-            lastCdrId = 0;
-        }
     }
 
     bool load(const size_t rows_per_request) {
@@ -49,7 +38,7 @@ public:
             "       call_id" \
             "	from calls_cdr.cdr " \
             "	where " \
-            "       id > '" + lexical_cast<string>(lastCdrId) + "' " \
+            "       id > '" + lexical_cast<string>(billingData->lastCdrId) + "' " \
             "	order by id " \
             "	limit " + lexical_cast<string>(rows_per_request);
 
@@ -74,7 +63,7 @@ public:
                 lock_guard<Spinlock> guard(billingData->callsWaitSavingLock);
                 billingData->cdrsWaitProcessing.push_back(cdr);
 
-                lastCdrId = cdr.id;
+                billingData->lastCdrId = cdr.id;
             }
         }
         return res.size() < rows_per_request;

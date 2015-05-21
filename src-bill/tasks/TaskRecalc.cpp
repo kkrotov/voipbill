@@ -24,10 +24,13 @@ void TaskRecalc::run() {
     BDbResult res = db_calls.query(
             "select min(id) from calls_raw.calls_raw where connect_time>='" + string_time(date_from) + "'");
     recalc_from_call_id = res.next() ? res.get_ll(0) : 0;
+
     if (recalc_from_call_id == 0) {
         Log::error("Nothing to recalc");
         return;
     }
+
+    Log::notice("Recalc calls: date " + string_time(date_from) +", id >= " + lexical_cast<string>(recalc_from_call_id));
 
     boost::this_thread::interruption_point();
 
@@ -96,14 +99,16 @@ void TaskRecalc::run() {
     setStatus("7. waiting calc lock");
     lock_guard<mutex> lock_calc(DataBillingContainer::instance()->calcLock);
 
+    setStatus("8. waiting fetch cdr lock");
+    lock_guard<mutex> lock_fetch_cdr(DataBillingContainer::instance()->fetchCdrLock);
+
     setStatus("8. recalc counters");
     DataBillingContainer::instance()->loadAll(&db_calls);
 
     boost::this_thread::interruption_point();
 
     setStatus("10. delete calls_raw from main");
-    db_main->exec("delete from calls_raw.calls_raw where server_id = " + app().conf.str_instance_id + " and id>=" + lexical_cast<string>(
-            recalc_from_call_id));
+    db_main->exec("delete from calls_raw.calls_raw where server_id = " + app().conf.str_instance_id + " and id>=" + lexical_cast<string>(recalc_from_call_id));
 
 }
 
