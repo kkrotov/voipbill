@@ -115,8 +115,6 @@ void TaskRecalc::run() {
     lock_fetch_cdr.unlock();
     lock_calc_calls.unlock();
     lock_save_calls.unlock();
-    lock_sync_calls_central.unlock();
-    lock_sync_counters_central.unlock();
 
     boost::this_thread::interruption_point();
 
