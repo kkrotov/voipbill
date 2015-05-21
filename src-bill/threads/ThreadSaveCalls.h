@@ -8,8 +8,6 @@ class ThreadSaveCalls : public Thread {
 protected:
     BDb db_calls;
     DataBillingContainer * billingData;
-
-    int savedCallsCount;
 public:
     void run();
 

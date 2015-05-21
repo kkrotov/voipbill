@@ -10,7 +10,7 @@ ThreadBillRuntime::ThreadBillRuntime() {
 
 void ThreadBillRuntime::run() {
 
-    unique_lock<mutex> lock(billingData->calcLock, try_to_lock);
+    unique_lock<mutex> lock(billingData->calcCallsLock, try_to_lock);
     if (!lock.owns_lock()) {
         return;
     }

@@ -8,6 +8,7 @@ ThreadSyncCounters::ThreadSyncCounters() {
     db_main.setCS(app().conf.db_main);
 
     billingData = DataBillingContainer::instance();
+
     last_sync_count = 0;
     total_sync_count = 0;
 }
@@ -17,6 +18,11 @@ bool ThreadSyncCounters::ready() {
 }
 
 void ThreadSyncCounters::run() {
+
+    unique_lock<mutex> lock(billingData->syncCountersCentralLock, try_to_lock);
+    if (!lock.owns_lock()) {
+        return;
+    }
 
     save_client_counters();
 

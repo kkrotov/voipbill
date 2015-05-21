@@ -7,13 +7,12 @@ ThreadSaveCalls::ThreadSaveCalls() {
     name = "Save calls";
     db_calls.setCS(app().conf.db_calls);
     billingData = DataBillingContainer::instance();
-    savedCallsCount = 0;
 }
 
 void ThreadSaveCalls::run() {
     const size_t save_part_count = 50000;
 
-    unique_lock<mutex> lock(billingData->saveLock, try_to_lock);
+    unique_lock<mutex> lock(billingData->saveCallsLock, try_to_lock);
     if (!lock.owns_lock()) {
         return;
     }
@@ -24,7 +23,6 @@ void ThreadSaveCalls::run() {
 
     for(;;) {
         size_t count = callsSaver.save(save_part_count);
-        savedCallsCount += count;
         if (count == 0) {
             break;
         }

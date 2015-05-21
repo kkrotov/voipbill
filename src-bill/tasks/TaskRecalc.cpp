@@ -17,10 +17,14 @@ void TaskRecalc::run() {
 
     BDb db_calls(app().conf.db_calls);
 
-    setStatus("1. waiting save lock");
-    lock_guard<mutex> lock_save(DataBillingContainer::instance()->saveLock);
+    setStatus("1. waiting save calls lock");
+    unique_lock<mutex> lock_save_calls(DataBillingContainer::instance()->saveCallsLock);
 
-    setStatus("2. getting min id");
+    setStatus("2. waiting sync calls central lock");
+    unique_lock<mutex> lock_sync_calls_central(DataBillingContainer::instance()->syncCallsCentralLock);
+
+
+    setStatus("3. getting min id");
     BDbResult res = db_calls.query(
             "select min(id) from calls_raw.calls_raw where connect_time>='" + string_time(date_from) + "'");
     recalc_from_call_id = res.next() ? res.get_ll(0) : 0;
@@ -34,23 +38,23 @@ void TaskRecalc::run() {
 
     boost::this_thread::interruption_point();
 
-    setStatus("3. delete calls_raw from id " + lexical_cast<string>(recalc_from_call_id));
+    setStatus("4. delete calls_raw from id " + lexical_cast<string>(recalc_from_call_id));
     db_calls.exec("delete from calls_raw.calls_raw where id>=" + lexical_cast<string>(recalc_from_call_id));
 
     boost::this_thread::interruption_point();
 
-    setStatus("4. recalc temp data");
+    setStatus("5. recalc temp data");
     DataContainer data;
     data.loadAll(&db_calls);
 
     boost::this_thread::interruption_point();
 
-    setStatus("5. recalc temp counters");
+    setStatus("6. recalc temp counters");
     billingData.loadAll(&db_calls);
 
     boost::this_thread::interruption_point();
 
-    setStatus("6. calc");
+    setStatus("7. calc");
 
     CdrLoader cdrLoader;
     cdrLoader.setDb(&db_calls);
@@ -91,23 +95,32 @@ void TaskRecalc::run() {
 
         boost::this_thread::interruption_point();
 
-        setStatus("6. calc " + lexical_cast<string>(billingData.savedCallsCount));
+        setStatus("7. calc " + lexical_cast<string>(billingData.savedCallsCount));
     }
 
     boost::this_thread::interruption_point();
 
-    setStatus("7. waiting calc lock");
-    lock_guard<mutex> lock_calc(DataBillingContainer::instance()->calcLock);
-
     setStatus("8. waiting fetch cdr lock");
-    lock_guard<mutex> lock_fetch_cdr(DataBillingContainer::instance()->fetchCdrLock);
+    unique_lock<mutex> lock_fetch_cdr(DataBillingContainer::instance()->fetchCdrLock);
 
-    setStatus("8. recalc counters");
+    setStatus("9. waiting calc calls lock");
+    unique_lock<mutex> lock_calc_calls(DataBillingContainer::instance()->calcCallsLock);
+
+    setStatus("10. waiting sync counters central lock");
+    unique_lock<mutex> lock_sync_counters_central(DataBillingContainer::instance()->syncCountersCentralLock);
+
+    setStatus("11. recalc counters");
     DataBillingContainer::instance()->loadAll(&db_calls);
+
+    lock_fetch_cdr.unlock();
+    lock_calc_calls.unlock();
+    lock_save_calls.unlock();
+    lock_sync_calls_central.unlock();
+    lock_sync_counters_central.unlock();
 
     boost::this_thread::interruption_point();
 
-    setStatus("10. delete calls_raw from main");
+    setStatus("12. delete calls_raw from main");
     db_main->exec("delete from calls_raw.calls_raw where server_id = " + app().conf.str_instance_id + " and id>=" + lexical_cast<string>(recalc_from_call_id));
 
 }

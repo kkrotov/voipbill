@@ -2,14 +2,14 @@
 
 #include "../../src/threads/Thread.h"
 #include "../../src/classes/BDb.h"
+#include "../data/DataBillingContainer.h"
 
 class ThreadSyncCalls : public Thread {
     BDb db_main;   
     BDb db_calls;
-    
-    string main_last_id;
-    string main_last_time;
 
+    DataBillingContainer * billingData;
+    
     void run();
     
     void copyCallsPart(string month);

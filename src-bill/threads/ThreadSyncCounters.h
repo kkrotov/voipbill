@@ -4,8 +4,10 @@
 #include "../data/DataBillingContainer.h"
 
 class ThreadSyncCounters : public Thread {
-    DataBillingContainer *billingData;
     BDb db_main;
+
+    DataBillingContainer * billingData;
+
     int last_sync_count;
     int total_sync_count;
 
