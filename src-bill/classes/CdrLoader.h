@@ -64,6 +64,7 @@ public:
                 billingData->cdrsWaitProcessing.push_back(cdr);
 
                 billingData->lastCdrId = cdr.id;
+                billingData->lastCdrTime = cdr.connect_time;
             }
         }
         return res.size() < rows_per_request;

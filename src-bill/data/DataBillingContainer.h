@@ -67,11 +67,7 @@ public:
             return false;
         }
 
-        if (lastCallId < 0) {
-            return false;
-        }
-
-        if (lastCdrId < 0) {
+        if (lastCdrId < 0 || lastCalcCallId < 0 || lastSaveCallId < 0) {
             return false;
         }
 
@@ -79,8 +75,11 @@ public:
     }
 
     void prepareSyncCallsCentral(BDb * db_main) {
-        if (lastSyncCentralCallId < 0) {
+        try {
             loadSyncCentralCallIdAndTime(db_main);
+        } catch (Exception &e) {
+            e.addTrace("DataBillingContainer::prepareSyncCallsCentral");
+            throw e;
         }
     }
 

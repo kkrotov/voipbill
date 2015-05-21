@@ -172,7 +172,13 @@ size_t CallsSaver::save(const size_t save_part_count) {
             trans.commit();
         }
 
-        billingData->savedCallsCount += callsForSave.size();
+        if (callsForSave.size() > 0) {
+            Call &call = callsForSave.at(callsForSave.size() - 1);
+            billingData->lastSaveCallId = call.id;
+            billingData->lastSaveCallTime = call.connect_time;
+            billingData->savedCallsCount += callsForSave.size();
+        }
+
         return callsForSave.size();
 
     } catch (exception &e) {

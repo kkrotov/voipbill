@@ -104,20 +104,20 @@ void Billing::calc() {
             }
 
             Call origCall = Call(&cdr, CALL_ORIG);
-            origCall.id = billingData->lastCallId + 1;
-            origCall.peer_id = billingData->lastCallId + 2;
+            origCall.id = billingData->lastCalcCallId + 1;
+            origCall.peer_id = billingData->lastCalcCallId + 2;
             billingCall.calc(&origCall, &cdr, &preparedData);
 
             Call termCall = Call(&cdr, CALL_TERM);
             termCall.src_number = origCall.src_number;
             termCall.dst_number = origCall.dst_number;
-            termCall.id = billingData->lastCallId + 2;
-            termCall.peer_id = billingData->lastCallId + 1;
+            termCall.id = billingData->lastCalcCallId + 2;
+            termCall.peer_id = billingData->lastCalcCallId + 1;
             billingCall.calc(&termCall, &cdr, &preparedData);
 
             billingData->calcedCdrsCount += 1;
-            billingData->lastCallId += 2;
-            billingData->lastTime = origCall.connect_time;
+            billingData->lastCalcCallId += 2;
+            billingData->lastCalcCallTime = origCall.connect_time;
 
             updateClientCounters(origCall, preparedData, clientCounter.get());
             updateClientCounters(termCall, preparedData, clientCounter.get());
