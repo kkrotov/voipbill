@@ -17,6 +17,10 @@ protected:
 
     void htmlfull(stringstream &html);
 
+
+public:
+    bool hasFullHtml() override;
+
 public:
     ThreadTasks();
     static const char* idName() { return "tasks"; }

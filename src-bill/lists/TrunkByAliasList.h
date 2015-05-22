@@ -56,12 +56,12 @@ public:
         if (trace != nullptr) {
 
             if (result != nullptr) {
-                *trace << "FOUND|TRUNK|BY ALIAS '" << trunk_name << "'" << endl;
+                *trace << "FOUND|TRUNK|BY ALIAS '" << trunk_name << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
-                *trace << endl;
+                *trace << "\n";
             } else {
-                *trace << "NOT FOUND|TRUNK|BY ALIAS '" << trunk_name << "'" << endl;
+                *trace << "NOT FOUND|TRUNK|BY ALIAS '" << trunk_name << "'" << "\n";
             }
         }
 

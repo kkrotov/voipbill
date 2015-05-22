@@ -399,3 +399,6 @@ void ThreadBlacklist::htmlfull(stringstream &html) {
 
 }
 
+bool ThreadBlacklist::hasFullHtml() {
+    return true;
+}

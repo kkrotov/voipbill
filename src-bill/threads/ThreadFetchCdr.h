@@ -15,8 +15,6 @@ public:
     bool ready();
 
     void run();
-
-    void htmlfull(stringstream &html);
 public:
     ThreadFetchCdr();
     static const char* idName() { return "fetch_cdr"; }

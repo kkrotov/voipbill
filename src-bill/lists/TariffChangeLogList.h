@@ -87,12 +87,12 @@ public:
 
         if (trace != nullptr) {
             if (result != nullptr) {
-                *trace << "FOUND|TARIFF CHANGE LOG|BY SERVICE NUMBER ID '" << usage_id << "', TIME '" << timestamp << "'" << endl;
+                *trace << "FOUND|TARIFF CHANGE LOG|BY SERVICE NUMBER ID '" << usage_id << "', TIME '" << timestamp << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
-                *trace << endl;
+                *trace << "\n";
             } else {
-                *trace << "NOT FOUND|TARIFF CHANGE LOG|BY SERVICE NUMBER ID '" << usage_id << "', TIME '" << timestamp << "'" << endl;
+                *trace << "NOT FOUND|TARIFF CHANGE LOG|BY SERVICE NUMBER ID '" << usage_id << "', TIME '" << timestamp << "'" << "\n";
             }
         }
 

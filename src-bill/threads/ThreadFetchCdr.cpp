@@ -31,8 +31,3 @@ void ThreadFetchCdr::run() {
     }
 
 }
-
-void ThreadFetchCdr::htmlfull(stringstream &html) {
-    this->html(html);
-    DataBillingContainer::instance()->html(html);
-}

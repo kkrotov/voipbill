@@ -36,6 +36,10 @@ class ThreadBlacklist : public Thread {
     bool needLockTrunk(ServiceTrunk * serviceTrunk);
 
     void htmlfull(stringstream &html);
+
+public:
+    bool hasFullHtml() override;
+
 public:
     ThreadBlacklist();
     static const char* idName() { return "blacklist"; }

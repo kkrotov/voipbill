@@ -18,8 +18,3 @@ void ThreadBillRuntime::run() {
     Billing billing;
     billing.calc();
 }
-
-void ThreadBillRuntime::htmlfull(stringstream &html) {
-    this->html(html);
-    DataBillingContainer::instance()->html(html);
-}

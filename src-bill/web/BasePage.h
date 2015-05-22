@@ -13,8 +13,15 @@ public:
         html << "td { text-align: center }\n";
         html << "</style>\n";
 
-        html << " <a href='/'>home</a> ";
-        html << " <a href='/config'>config</a> ";
+        html << " <a href='/'>Home</a> | ";
+        html << " <a href='/calls'>Calls</a> | ";
+        html << " <a href='/data'>Data</a> | ";
+        html << " <a href='/data-billing'>Data billing</a> | ";
+        html << " <a href='/counters'>Counters</a> | ";
+        html << " <a href='/fmins'>Free minutes</a> | ";
+        html << " <a href='/sync'>Sync</a> | ";
+        html << " <a href='/log'>Log</a> | ";
+        html << " <a href='/config'>Config</a> | ";
         html << string_time(time(NULL)) << " ";
 
         AppStatus status = app().getStatus();
@@ -24,6 +31,6 @@ public:
             html << " (" << AppStatusNames[status] << ")";
         }
 
-        html << " <hr/> ";
+        html << "\n<hr/><br/>\n";
     }
 };

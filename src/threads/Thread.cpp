@@ -50,8 +50,12 @@ void Thread::threadTotalsData(stringstream &html) {
     ThreadStatus real_status = getRealStatus();
 
     html << "<tr>\n";
-    html << "<td style='text-align: left' nowrap><a href='/task?id=" << this->id << "'>" << this->name << "</a></td>\n";
-    html << "<td style='text-align: left' nowrap>" << ThreadStatusNames[real_status] << (status != real_status ? " (" + string(ThreadStatusNames[status]) + ")" : "") << "</b></td>\n";
+    if (hasFullHtml()) {
+        html << "<td style='text-align: left' nowrap><a href='/task?id=" << this->id << "'>" << this->name << "</a></td>\n";
+    } else {
+        html << "<td style='text-align: left' nowrap>" << this->name << "</td>\n";
+    }
+    html << "<td style='text-align: left' nowrap>" << ThreadStatusNames[real_status] << (status != real_status ? " (" + string(ThreadStatusNames[status]) + ")" : "") << "</td>\n";
     html << "<td style='text-align: left' nowrap>" << timer.count << "</td>\n";
     html << "<td style='text-align: left' nowrap>" << timer.sloop() << " " << timer.sloop_cpu_usage() << "%</td>\n";
     html << "<td style='text-align: left' nowrap>" << timer.sfull() << " " << timer.sfull_cpu_usage() << "%</td>\n";
@@ -61,7 +65,7 @@ void Thread::threadTotalsData(stringstream &html) {
 }
 
 void Thread::html(stringstream &html) {
-    html << "<table style='width:100%'>\n";
+    html << "<table width=100%>\n";
     this->threadTotalsHeader(html);
     this->threadTotalsData(html);
     html << "</table>\n";
@@ -70,6 +74,10 @@ void Thread::html(stringstream &html) {
 
 void Thread::htmlfull(stringstream &html) {
     this->html(html);
+}
+
+bool Thread::hasFullHtml() {
+    return false;
 }
 
 bool Thread::ready() {

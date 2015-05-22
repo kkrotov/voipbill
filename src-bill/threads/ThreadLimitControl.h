@@ -13,8 +13,6 @@ protected:
 
     void run();
 
-    void htmlfull(stringstream &html);
-
     bool limitControlKillNeeded(Call &call);
     void fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double &globalMonthSum);
 

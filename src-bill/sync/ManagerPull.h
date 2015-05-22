@@ -20,6 +20,11 @@ public:
     void add(BasePull * pull);
     void pull();
 
+    static ManagerPull * instance() {
+        static ManagerPull inst;
+        return &inst;
+    }
+
 protected:
     void clearPulls();
     void runPulls();

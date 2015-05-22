@@ -72,7 +72,7 @@ public:
 
         html << "INFO|CDR|";
         cdr.dump(html);
-        html << endl;
+        html << "\n";
 
         PreparedData preparedData;
         if (!DataContainer::instance()->prepareData(preparedData, cdr.connect_time)) {
@@ -89,8 +89,8 @@ public:
 
         html << "INFO|CALL|";
         call.dump(html);
-        html << endl;
+        html << "\n";
 
-        html << "RESULT|OK|rate = " << call.rate << ", cost = " << call.cost << endl;
+        html << "RESULT|OK|rate = " << call.rate << ", cost = " << call.cost << "\n";
     }
 };

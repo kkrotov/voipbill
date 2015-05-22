@@ -4,11 +4,17 @@
 #include "../../src/common.h"
 #include "../models/Cdr.h"
 #include "../models/Call.h"
+#include "../lists/ClientCounter.h"
+#include "../lists/FminCounter.h"
 #include "CurrentCdrData.h"
 
 class DataCurrentCallsContainer {
 public:
     CurrentCdrData currentCdr;
+
+    long long int lastCallId = 0;
+    int callPerSecond = -1;
+    int maxCallPerSecond = -1;
 
     DataCurrentCallsContainer() {
         callsWaitSaving = shared_ptr<vector<Call>>(new vector<Call>());

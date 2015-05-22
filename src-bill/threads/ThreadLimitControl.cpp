@@ -150,7 +150,3 @@ void ThreadLimitControl::fetchGlobalCounters(int accountId, double &globalBalanc
     }
 }
 
-void ThreadLimitControl::htmlfull(stringstream &html) {
-    this->html(html);
-}
-

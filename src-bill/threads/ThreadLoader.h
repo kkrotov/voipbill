@@ -19,8 +19,6 @@ class ThreadLoader : public Thread {
     bool prepare();
     void run();
 
-    void htmlfull(stringstream &html);
-
 public:
 
     bool do_load_data(BDb *db = 0, DataContainer *data = 0);

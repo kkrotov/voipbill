@@ -102,3 +102,6 @@ void ThreadCheckStartTable::htmlfull(stringstream & html) {
     html << "countForceFinishedCalls: <b>" << countForceFinishedCalls << "</b><br/>\n";
 }
 
+bool ThreadCheckStartTable::hasFullHtml() {
+    return true;
+}

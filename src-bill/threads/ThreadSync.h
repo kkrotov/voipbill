@@ -8,11 +8,10 @@
 #include "../sync/ManagerPull.h"
 
 class ThreadSync : public Thread {
-    ManagerPull manager;
+    ManagerPull * manager;
 
     void run();
 
-    void htmlfull(stringstream &html);
 public:
 
     ThreadSync();

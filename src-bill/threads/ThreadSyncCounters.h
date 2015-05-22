@@ -18,6 +18,11 @@ class ThreadSyncCounters : public Thread {
     void save_client_counters();
 
     void htmlfull(stringstream &html);
+
+
+public:
+    bool hasFullHtml() override;
+
 public:
     ThreadSyncCounters();
     static const char* idName() { return "sync_counters"; }

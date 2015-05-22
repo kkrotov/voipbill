@@ -29,8 +29,3 @@ void ThreadSaveCalls::run() {
     }
 
 }
-
-void ThreadSaveCalls::htmlfull(stringstream &html) {
-    this->html(html);
-    DataBillingContainer::instance()->html(html);
-}

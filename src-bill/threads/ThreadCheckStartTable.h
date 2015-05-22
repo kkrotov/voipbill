@@ -21,6 +21,10 @@ class ThreadCheckStartTable : public Thread {
     void readOpencaCalls();
     void forceFinishCall(string callId);
 
+
+public:
+    bool hasFullHtml() override;
+
 public:
     ThreadCheckStartTable();
     static const char* idName() { return "checkstarttable"; }

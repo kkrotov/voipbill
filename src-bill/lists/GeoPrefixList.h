@@ -52,10 +52,10 @@ public:
             if (result != 0) {
 
                 if (trace != nullptr) {
-                    *trace << "FOUND|GEO_PREFIX|BY '" << prefix << "'" << endl;
+                    *trace << "FOUND|GEO_PREFIX|BY '" << prefix << "'" << "\n";
                     *trace << "||";
                     result->dump(*trace);
-                    *trace << endl;
+                    *trace << "\n";
                 }
 
                 return result;
@@ -65,7 +65,7 @@ public:
         }
 
         if (trace != nullptr) {
-            *trace << "NOT FOUND|GEO_PREFIX|BY '" << prefix << "'" << endl;
+            *trace << "NOT FOUND|GEO_PREFIX|BY '" << prefix << "'" << "\n";
         }
 
         return nullptr;

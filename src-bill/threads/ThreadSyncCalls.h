@@ -13,8 +13,6 @@ class ThreadSyncCalls : public Thread {
     void run();
     
     void copyCallsPart(string month);
-
-    void htmlfull(stringstream &html);
 public:
     ThreadSyncCalls();
     static const char* idName() { return "sync_calls"; }

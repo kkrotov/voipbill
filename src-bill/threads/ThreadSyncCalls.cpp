@@ -63,8 +63,3 @@ void ThreadSyncCalls::copyCallsPart(string month) {
         &db_calls, &db_main);
 }
 
-void ThreadSyncCalls::htmlfull(stringstream &html) {
-    this->html(html);
-    billingData->html(html);
-}
-

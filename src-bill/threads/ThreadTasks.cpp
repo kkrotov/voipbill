@@ -110,3 +110,7 @@ void ThreadTasks::htmlfull(stringstream &html) {
         html << "<br/>\n";
     }
 }
+
+bool ThreadTasks::hasFullHtml() {
+    return true;
+}

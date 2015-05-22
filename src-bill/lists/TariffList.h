@@ -46,12 +46,12 @@ public:
 
         if (trace != nullptr) {
             if (result != nullptr) {
-                *trace << "FOUND|SEARCH TARIFF|BY ID '" << id << "'" << endl;
+                *trace << "FOUND|SEARCH TARIFF|BY ID '" << id << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
-                *trace << endl;
+                *trace << "\n";
             } else {
-                *trace << "NOT FOUND|TARIFF|BY ID '" << id << "'" << endl;
+                *trace << "NOT FOUND|TARIFF|BY ID '" << id << "'" << "\n";
             }
         }
 

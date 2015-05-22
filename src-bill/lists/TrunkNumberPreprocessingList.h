@@ -58,12 +58,12 @@ public:
         if (trace != nullptr) {
 
             if (result != nullptr) {
-                *trace << "FOUND|TRUNK NUMBER PREPROCESSING|BY TRUNK_ID '" << trunk_id << "', ORDER '" << order << "'" << endl;
+                *trace << "FOUND|TRUNK NUMBER PREPROCESSING|BY TRUNK_ID '" << trunk_id << "', ORDER '" << order << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
-                *trace << endl;
+                *trace << "\n";
             } else {
-                *trace << "NOT FOUND|TRUNK NUMBER PREPROCESSING|BY TRUNK_ID '" << trunk_id << "', ORDER '" << order << "'" << endl;
+                *trace << "NOT FOUND|TRUNK NUMBER PREPROCESSING|BY TRUNK_ID '" << trunk_id << "', ORDER '" << order << "'" << "\n";
             }
         }
 

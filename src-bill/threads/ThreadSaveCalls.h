@@ -10,8 +10,6 @@ protected:
     DataBillingContainer * billingData;
 public:
     void run();
-
-    void htmlfull(stringstream &html);
 public:
     ThreadSaveCalls();
     static const char* idName() { return "save_calls"; }

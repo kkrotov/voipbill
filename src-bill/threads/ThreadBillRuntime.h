@@ -11,8 +11,6 @@ protected:
     DataBillingContainer *billingData;
 public:
     void run();
-
-    void htmlfull(stringstream &html);
 public:
     ThreadBillRuntime();
     static const char* idName() { return "runtime"; }

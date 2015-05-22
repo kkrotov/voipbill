@@ -82,10 +82,10 @@ public:
             if (result != nullptr) {
 
                 if (trace != nullptr) {
-                    *trace << "FOUND|PRICELIST PRICE|BY PRICELIST_ID '" << pricelist_id << "', NUMBER '" << numberPrefix << "', time '" << timestamp << "'" << endl;
+                    *trace << "FOUND|PRICELIST PRICE|BY PRICELIST_ID '" << pricelist_id << "', NUMBER '" << numberPrefix << "', time '" << timestamp << "'" << "\n";
                     *trace << "||";
                     result->dump(*trace);
-                    *trace << endl;
+                    *trace << "\n";
                 }
 
                 return result;
@@ -95,7 +95,7 @@ public:
         }
 
         if (trace != nullptr) {
-            *trace << "NOT FOUND|PRICELIST PRICE|BY PRICELIST_ID '" << pricelist_id << "', NUMBER '" << numberPrefix << "', time '" << timestamp << "'" << endl;
+            *trace << "NOT FOUND|PRICELIST PRICE|BY PRICELIST_ID '" << pricelist_id << "', NUMBER '" << numberPrefix << "', time '" << timestamp << "'" << "\n";
         }
 
         return nullptr;

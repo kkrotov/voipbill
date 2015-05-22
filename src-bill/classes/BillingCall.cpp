@@ -20,7 +20,7 @@ void BillingCall::calc(Call *call, Cdr *cdr, PreparedData *preparedData) {
         trunk = data->trunkByAlias->find(getRoute(), trace);
         if (trunk == nullptr) {
             if (trace != nullptr) {
-                *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TRUNK WAS NOT FOUND" << endl;
+                *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TRUNK WAS NOT FOUND" << "\n";
             }
             return;
         }
@@ -77,7 +77,7 @@ void BillingCall::numberPreprocessing() {
             call->src_number = atoll(tmp);
 
             if (trace != nullptr) {
-                *trace << "INFO|NUMBER PREPROCESSING|SET SRC_NUMBER = " << call->src_number << endl;
+                *trace << "INFO|NUMBER PREPROCESSING|SET SRC_NUMBER = " << call->src_number << "\n";
             }
             srcNumberPreprocessingDone = true;
         }
@@ -93,7 +93,7 @@ void BillingCall::numberPreprocessing() {
             call->dst_number = atoll(tmp);
 
             if (trace != nullptr) {
-                *trace << "INFO|NUMBER PREPROCESSING|SET DST_NUMBER = " << call->dst_number << endl;
+                *trace << "INFO|NUMBER PREPROCESSING|SET DST_NUMBER = " << call->dst_number << "\n";
             }
             dstNumberPreprocessingDone = true;
         }
@@ -111,7 +111,7 @@ void BillingCall::processRedirectNumber() {
             call->src_number = redirect_number;
 
             if (trace != nullptr) {
-                *trace << "INFO|PROCESS REDIRECT NUMBER|SET SRC_NUMBER = " << call->src_number << endl;
+                *trace << "INFO|PROCESS REDIRECT NUMBER|SET SRC_NUMBER = " << call->src_number << "\n";
             }
         }
     }
@@ -120,7 +120,7 @@ void BillingCall::processRedirectNumber() {
 int BillingCall::getDest(GeoPrefix * geoPrefix) {
     if (geoPrefix->geo_id == data->instanceSettings->city_geo_id) {
         if (trace != nullptr) {
-            *trace << "INFO|GEO_PREFIX SET DEST = -1|CAUSE GEO_ID = INSTANCE_SETTINGS->CITY_GEO_ID" << endl;
+            *trace << "INFO|GEO_PREFIX SET DEST = -1|CAUSE GEO_ID = INSTANCE_SETTINGS->CITY_GEO_ID" << "\n";
         }
         return -1;
     } else {
@@ -128,7 +128,7 @@ int BillingCall::getDest(GeoPrefix * geoPrefix) {
         for (auto it = regionIds.begin(); it != regionIds.end(); ++it) {
             if (geoPrefix->region_id == *it) {
                 if (trace != nullptr) {
-                    *trace << "INFO|GEO_PREFIX SET DEST = 0|CAUSE REGION_ID IN INSTANCE_SETTINGS->REGION_IDS" << endl;
+                    *trace << "INFO|GEO_PREFIX SET DEST = 0|CAUSE REGION_ID IN INSTANCE_SETTINGS->REGION_IDS" << "\n";
                 }
                 return 0;
             }
@@ -140,14 +140,14 @@ int BillingCall::getDest(GeoPrefix * geoPrefix) {
 void BillingCall::calcByTrunk() {
 
     if (trace != nullptr) {
-        *trace << "INFO|TARIFFICATION BY TRUNK" << endl;
+        *trace << "INFO|TARIFFICATION BY TRUNK" << "\n";
     }
 
     vector<ServiceTrunk *> serviceTrunks;
     data->serviceTrunk->findAll(serviceTrunks, trunk->id, call->connect_time, trace);
     if (serviceTrunks.size() == 0) {
         if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE SERVICE TRUNK WAS NOT FOUND" << endl;
+            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE SERVICE TRUNK WAS NOT FOUND" << "\n";
         }
         return;
     }
@@ -169,7 +169,7 @@ void BillingCall::calcByTrunk() {
 
     if (effectiveServiceTrunk == nullptr) {
         if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE EFFECTIVE SERVICE TRUNK WAS NOT FOUND" << endl;
+            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE EFFECTIVE SERVICE TRUNK WAS NOT FOUND" << "\n";
         }
         return;
     }
@@ -177,11 +177,11 @@ void BillingCall::calcByTrunk() {
     if (trace != nullptr) {
         *trace << "INTO|EFFECTIVE PRICELIST|";
         effectivePricelist->dump(*trace);
-        *trace << endl;
+        *trace << "\n";
 
         *trace << "INTO|EFFECTIVE PRICELIST PRICE|";
         effectivePrice->dump(*trace);
-        *trace << endl;
+        *trace << "\n";
     }
 
     call->account_id = effectiveServiceTrunk->client_account_id;
@@ -205,7 +205,7 @@ void BillingCall::calcByTrunk() {
 void BillingCall::calcByNumber() {
 
     if (trace != nullptr) {
-        *trace << "INFO|TARIFFICATION BY NUMBER" << endl;
+        *trace << "INFO|TARIFFICATION BY NUMBER" << "\n";
     }
 
     if (call->orig) {
@@ -215,7 +215,7 @@ void BillingCall::calcByNumber() {
     auto serviceNumber = data->serviceNumber->find(getNumber(), call->connect_time, trace);
     if (serviceNumber == nullptr) {
         if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE SERVICE NUMBER WAS NOT FOUND" << endl;
+            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE SERVICE NUMBER WAS NOT FOUND" << "\n";
         }
         return;
     }
@@ -229,14 +229,14 @@ void BillingCall::calcByNumber() {
 
         if (serviceTrunk == nullptr) {
             if (trace != nullptr) {
-                *trace << "ERROR|TARIFFICATION STOPPED|CAUSE SERVICE TRUNK WAS NOT FOUND" << endl;
+                *trace << "ERROR|TARIFFICATION STOPPED|CAUSE SERVICE TRUNK WAS NOT FOUND" << "\n";
             }
             return;
         }
 
         if (serviceNumber->client_account_id != serviceTrunk->client_account_id) {
             if (trace != nullptr) {
-                *trace << "ERROR|TARIFFICATION STOPPED|CAUSE SERVICE NUMBER ACCOUNT DIFFERENT FROM SERVICE TRUNK_ACCOUNT" << endl;
+                *trace << "ERROR|TARIFFICATION STOPPED|CAUSE SERVICE NUMBER ACCOUNT DIFFERENT FROM SERVICE TRUNK_ACCOUNT" << "\n";
             }
             return;
         }
@@ -262,14 +262,14 @@ bool BillingCall::checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int 
 
         if (trunkSettings->src_number_id > 0 && !filterByNumber(trunkSettings->src_number_id, call->src_number)) {
             if (trace != nullptr) {
-                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE SRC_NUMBER NOT MATCHED" << endl;
+                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE SRC_NUMBER NOT MATCHED" << "\n";
             }
             continue;
         }
 
         if (trunkSettings->dst_number_id > 0 && !filterByNumber(trunkSettings->dst_number_id, call->dst_number)) {
             if (trace != nullptr) {
-                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE DST_NUMBER NOT MATCHED" << endl;
+                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE DST_NUMBER NOT MATCHED" << "\n";
             }
             continue;
         }
@@ -277,7 +277,7 @@ bool BillingCall::checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int 
         pricelist = data->pricelist->find(trunkSettings->pricelist_id, trace);
         if (pricelist == nullptr) {
             if (trace != nullptr) {
-                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST NOT FOUND" << endl;
+                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST NOT FOUND" << "\n";
             }
             continue;
         }
@@ -285,13 +285,13 @@ bool BillingCall::checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int 
         price = data->pricelistPrice->find(trunkSettings->pricelist_id, call->dst_number, call->connect_time, trace);
         if (price == nullptr) {
             if (trace != nullptr) {
-                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << endl;
+                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
             }
             continue;
         }
 
         if (trace != nullptr) {
-            *trace << "INFO|SERVICE TRUNK SETTINGS MATCHED" << endl;
+            *trace << "INFO|SERVICE TRUNK SETTINGS MATCHED" << "\n";
         }
 
         return true;
@@ -305,7 +305,7 @@ void BillingCall::calcOrigByNumber(ServiceNumber *serviceNumber) {
     auto logTariff = data->tariffChangeLog->find(serviceNumber->id, call->connect_time, trace);
     if (logTariff == nullptr) {
         if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF CHANGE LOG NOT FOUND" << endl;
+            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF CHANGE LOG NOT FOUND" << "\n";
         }
         return;
     }
@@ -330,7 +330,7 @@ void BillingCall::calcOrigByNumber(ServiceNumber *serviceNumber) {
     auto tariff = data->tariff->find(tariffId, trace);
     if (tariff == nullptr) {
         if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF NOT FOUND" << endl;
+            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF NOT FOUND" << "\n";
         }
         return;
     }
@@ -340,7 +340,7 @@ void BillingCall::calcOrigByNumber(ServiceNumber *serviceNumber) {
     auto price = data->pricelistPrice->find(call->pricelist_id, call->dst_number, call->connect_time, trace);
     if (price == nullptr) {
         if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE PRICELIST PRICE NOT FOUND" << endl;
+            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
         }
         return;
     }
@@ -375,7 +375,7 @@ void BillingCall::calcTermByNumber(ServiceNumber *serviceNumber) {
     auto logTariff = data->tariffChangeLog->find(serviceNumber->id, call->connect_time, trace);
     if (logTariff == nullptr) {
         if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF CHANGE LOG NOT FOUND" << endl;
+            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF CHANGE LOG NOT FOUND" << "\n";
         }
         return;
     }
@@ -383,7 +383,7 @@ void BillingCall::calcTermByNumber(ServiceNumber *serviceNumber) {
     auto tariff = data->tariff->find(logTariff->tariff_id_local, trace);
     if (tariff == nullptr) {
         if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF NOT FOUND" << endl;
+            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF NOT FOUND" << "\n";
         }
         return;
     }
@@ -397,7 +397,7 @@ void BillingCall::calcTermByNumber(ServiceNumber *serviceNumber) {
 
     if (isUsage7800()) {
         if (trace != nullptr) {
-            *trace << "INFO|TARIFFICATION 7800" << endl;
+            *trace << "INFO|TARIFFICATION 7800" << "\n";
         }
 
         call->pricelist_id = tariff->pricelist_id;
@@ -405,7 +405,7 @@ void BillingCall::calcTermByNumber(ServiceNumber *serviceNumber) {
         auto price = data->pricelistPrice->find(call->pricelist_id, call->src_number, call->connect_time, trace);
         if (price == nullptr) {
             if (trace != nullptr) {
-                *trace << "ERROR|TARIFFICATION STOPPED|CAUSE PRICELIST PRICE NOT FOUND" << endl;
+                *trace << "ERROR|TARIFFICATION STOPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
             }
             return;
         }
@@ -438,7 +438,7 @@ void BillingCall::processLineWithoutNumber(Call *call, Cdr *cdr) {
     if (pos != nullptr) {
         call->src_number = atoll(pos);
         if (trace != nullptr) {
-            *trace << "INFO|LINE WITHOUT NUMBER|SET SRC_NUMBER = " << call->src_number << endl;
+            *trace << "INFO|LINE WITHOUT NUMBER|SET SRC_NUMBER = " << call->src_number << "\n";
         }
     }
 }

@@ -42,12 +42,12 @@ public:
 
         if (trace != nullptr) {
             if (result != nullptr) {
-                *trace << "FOUND|PRICELIST|BY ID '" << id << "'" << endl;
+                *trace << "FOUND|PRICELIST|BY ID '" << id << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
-                *trace << endl;
+                *trace << "\n";
             } else {
-                *trace << "NOT FOUND|PRICELIST|BY ID '" << id << "'" << endl;
+                *trace << "NOT FOUND|PRICELIST|BY ID '" << id << "'" << "\n";
             }
         }
 

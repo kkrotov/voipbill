@@ -44,6 +44,8 @@ public:
 
     virtual void htmlfull(stringstream &html);
 
+    virtual bool hasFullHtml();
+
 protected:
     string name;
     

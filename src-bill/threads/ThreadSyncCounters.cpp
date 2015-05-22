@@ -99,3 +99,6 @@ void ThreadSyncCounters::htmlfull(stringstream &html) {
     html << "Last sync count: " << total_sync_count << "<br/>\n";
 }
 
+bool ThreadSyncCounters::hasFullHtml() {
+    return true;
+}

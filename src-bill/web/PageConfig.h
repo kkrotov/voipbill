@@ -32,8 +32,8 @@ public:
         html << "<br/>\n";
         html << "log.grouping_interval: " << app().conf.log_grouping_interval << "<br/>\n";
         html << "<br/>\n";
-        html << "db.main: " << app().conf.db_main << "<br/>\n";
-        html << "db.calls: " << app().conf.db_calls << "<br/>\n";
+        //html << "db.main: " << app().conf.db_main << "<br/>\n";
+        //html << "db.calls: " << app().conf.db_calls << "<br/>\n";
         html << "<br/>\n";
         html << "udp.host: " << app().conf.openca_udp_host << "<br/>\n";
         html << "udp.port: " << app().conf.openca_udp_port << "<br/>\n";

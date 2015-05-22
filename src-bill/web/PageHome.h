@@ -11,7 +11,7 @@ public:
     void render(std::stringstream &html, map<string, string> &parameters) {
         renderHeader(html);
 
-        html << "<table style='width:100%'>\n";
+        html << "<table width=100%>\n";
         bool firstRow = true;
         app().threads.forAllThreads([&](Thread* thread) {
             if (firstRow) {

@@ -6,8 +6,6 @@ class ThreadLog : public Thread {
 private:
     void run();
 
-    void htmlfull(stringstream &html);
-
 public:
     ThreadLog();
     static const char* idName() { return "log"; }

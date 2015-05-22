@@ -52,12 +52,12 @@ public:
 
         if (trace != nullptr) {
             if (result != nullptr) {
-                *trace << "FOUND|TRUNK|BY ID '" << id << "'" << endl;
+                *trace << "FOUND|TRUNK|BY ID '" << id << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
-                *trace << endl;
+                *trace << "\n";
             } else {
-                *trace << "NOT FOUND|TRUNK|BY ID '" << id << "'" << endl;
+                *trace << "NOT FOUND|TRUNK|BY ID '" << id << "'" << "\n";
             }
         }
 

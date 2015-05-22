@@ -1,12 +1,18 @@
 #pragma once
 
 #include "PageHome.h"
-#include "PageConfig.h"
+#include "PageCalls.h"
+#include "PageData.h"
+#include "PageDataBilling.h"
 #include "PageCounters.h"
 #include "PageFmins.h"
+#include "PageSync.h"
+#include "PageLog.h"
+#include "PageConfig.h"
 #include "PageClient.h"
 #include "PageTask.h"
 #include "PageTestCalc.h"
+#include "PageTestCalcGui.h"
 #include "PageTestRoute.h"
 
 class HttpHandler {
@@ -14,12 +20,18 @@ private:
 
     static void spawHandlers(vector<shared_ptr<BasePage>> &handlers) {
         handlers.push_back(shared_ptr<BasePage>(new PageHome));
-        handlers.push_back(shared_ptr<BasePage>(new PageConfig));
+        handlers.push_back(shared_ptr<BasePage>(new PageCalls));
+        handlers.push_back(shared_ptr<BasePage>(new PageData));
+        handlers.push_back(shared_ptr<BasePage>(new PageDataBilling));
         handlers.push_back(shared_ptr<BasePage>(new PageCounters));
         handlers.push_back(shared_ptr<BasePage>(new PageFmins));
+        handlers.push_back(shared_ptr<BasePage>(new PageSync));
+        handlers.push_back(shared_ptr<BasePage>(new PageLog));
+        handlers.push_back(shared_ptr<BasePage>(new PageConfig));
         handlers.push_back(shared_ptr<BasePage>(new PageClient));
         handlers.push_back(shared_ptr<BasePage>(new PageTask));
         handlers.push_back(shared_ptr<BasePage>(new PageTestCalc));
+        handlers.push_back(shared_ptr<BasePage>(new PageTestCalcGui));
         handlers.push_back(shared_ptr<BasePage>(new PageTestRoute));
     }
 

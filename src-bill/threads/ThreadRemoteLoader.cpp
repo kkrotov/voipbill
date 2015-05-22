@@ -7,21 +7,6 @@ void ThreadRemoteLoader::run() {
 
 }
 
-void ThreadRemoteLoader::htmlfull(stringstream &html) {
-    this->html(html);
-
-    html << "<table border=1 width=100%>";
-    html << "<tr><th></th><th>Updated at</th><th>Size</th><th>Rows</th><th>Last time</th><th>Total time</th></tr>";
-    {
-        auto dl = &data->globalCounters;
-        html << "<tr><th>server</th>";
-        html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
-        dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
-        html << "</tr>\n";
-    }
-    html << "</table>\n";
-}
-
 ThreadRemoteLoader::ThreadRemoteLoader() {
     id = idName();
     name = "Remote Loader";

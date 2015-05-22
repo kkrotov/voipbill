@@ -72,12 +72,12 @@ public:
         if (trace != nullptr) {
 
             if (result != nullptr) {
-                *trace << "FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "', ORDER '" << order << "'" << endl;
+                *trace << "FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "', ORDER '" << order << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
-                *trace << endl;
+                *trace << "\n";
             } else {
-                *trace << "NOT FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "', ORDER '" << order << "'" << endl;
+                *trace << "NOT FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "', ORDER '" << order << "'" << "\n";
             }
         }
 
@@ -100,7 +100,7 @@ public:
 
         if (begin < end) {
             if (trace != nullptr) {
-                *trace << "FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "'" << endl;
+                *trace << "FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "'" << "\n";
             }
             for (auto it = begin; it != end; ++it) {
                 resultTrunkSettings.push_back(&*it);
@@ -108,12 +108,12 @@ public:
                 if (trace != nullptr) {
                     *trace << "||";
                     it->dump(*trace);
-                    *trace << endl;
+                    *trace << "\n";
                 }
             }
         } else {
             if (trace != nullptr) {
-                *trace << "NOT FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "'" << endl;
+                *trace << "NOT FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "'" << "\n";
             }
         }
     }

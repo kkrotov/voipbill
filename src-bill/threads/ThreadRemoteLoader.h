@@ -12,8 +12,6 @@ private:
 
     void run();
 
-    void htmlfull(stringstream &html);
-
 public:
     ThreadRemoteLoader();
     static const char* idName() { return "remote_loader"; }

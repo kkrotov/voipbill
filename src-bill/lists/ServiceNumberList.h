@@ -74,12 +74,12 @@ public:
         if (trace != nullptr) {
 
             if (result != nullptr) {
-                *trace << "FOUND|SERVICE NUMBER|BY DID'" << numberPrefix << "', TIME '" << timestamp << "'" << endl;
+                *trace << "FOUND|SERVICE NUMBER|BY DID'" << numberPrefix << "', TIME '" << timestamp << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
-                *trace << endl;
+                *trace << "\n";
             } else {
-                *trace << "NOT FOUND|SERVICE NUMBER|BY DID'" << numberPrefix << "', TIME '" << timestamp << "'" << endl;
+                *trace << "NOT FOUND|SERVICE NUMBER|BY DID'" << numberPrefix << "', TIME '" << timestamp << "'" << "\n";
             }
         }
 
