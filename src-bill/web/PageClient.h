@@ -214,7 +214,7 @@ public:
                 }
                 html << "<td>" << call.pricelist_id << "</td>";
                 html << "<td>" << call.prefix << "</td>";
-                html << "<td>" << call.dest << (call.mob ? " mob" : "") << "</td>";
+                html << "<td>" << call.destination_id << (call.mob ? " mob" : "") << "</td>";
                 html << "<td>" << call.geo_id << "</td>";
                 html << "</tr>\n";
             }
