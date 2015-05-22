@@ -128,42 +128,42 @@ struct Call {
     }
 
     bool isLocal() {
-        return dest < 0;
+        return destination_id < 0;
     }
 
     bool isLocalOrZona() {
-        return dest <= 0;
+        return destination_id <= 0;
     }
 
     bool isZona() {
-        return dest == 0;
+        return destination_id == 0;
     }
 
     bool isZonaMob() {
-        return dest == 0 && mob;
+        return destination_id == 0 && mob;
     }
 
     bool isZonaStd() {
-        return dest == 0 && !mob;
+        return destination_id == 0 && !mob;
     }
 
     bool isRussian() {
-        return dest == 1;
+        return destination_id == 1;
     }
 
     bool isRussianMob() {
-        return dest == 1 && mob;
+        return destination_id == 1 && mob;
     }
 
     bool isRussianStd() {
-        return dest == 1 && !mob;
+        return destination_id == 1 && !mob;
     }
 
     bool isInternational() {
-        return dest == 2;
+        return destination_id == 2;
     }
 
     bool isSNG() {
-        return dest == 3;
+        return destination_id == 3;
     }
 };
