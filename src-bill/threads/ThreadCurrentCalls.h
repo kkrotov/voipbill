@@ -3,13 +3,17 @@
 #include "../../src/threads/Thread.h"
 #include "../data/DataContainer.h"
 #include "../data/DataBillingContainer.h"
+#include "../data/DataCurrentCallsContainer.h"
 
 class ThreadCurrentCalls : public Thread {
 public:
     BDb db_calls;
     DataContainer * data;
-    DataBillingContainer * billingData;
-    DataBillingContainer * billingDataCurrentCalls;
+    DataCurrentCallsContainer * currentCalls;
+
+    long long int lastCallId = 0;
+    int callPerSecond = 0;
+    int maxCallPerSecond = 0;
 
     void run();
 

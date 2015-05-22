@@ -17,7 +17,8 @@ protected:
             "       src_noa, " \
             "       dst_noa," \
             "       call_id " \
-            "	from calls_cdr.start ";
+            "	from calls_cdr.start " \
+            "   order by call_id ";
     }
 
     inline void parse_item(BDbResult &row, Cdr * item) {
