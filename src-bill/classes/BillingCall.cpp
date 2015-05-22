@@ -15,11 +15,6 @@ void BillingCall::calc(Call *call, Cdr *cdr, PreparedData *preparedData) {
     this->cdr = cdr;
     this->data = preparedData;
 
-    if (call->orig) {
-        call->src_number = atoll(cdr->src_number);
-        call->dst_number = atoll(cdr->dst_number);
-    }
-
     trunk = data->trunkByName->find(getRoute(), trace);
     if (trunk == nullptr) {
         trunk = data->trunkByAlias->find(getRoute(), trace);
@@ -48,12 +43,7 @@ void BillingCall::calc(Call *call, Cdr *cdr, PreparedData *preparedData) {
 
 void BillingCall::fillGeoPrefix() {
 
-    GeoPrefix * geoPrefix;
-    if (call->orig) {
-        geoPrefix = data->geoPrefix->find(call->dst_number, trace);
-    } else {
-        geoPrefix = data->geoPrefix->find(call->src_number, trace);
-    }
+    auto geoPrefix = data->geoPrefix->find(getRemoteNumber(), trace);
 
     if (geoPrefix != nullptr) {
         call->mob = geoPrefix->mob;
@@ -276,7 +266,7 @@ bool BillingCall::checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int 
             continue;
         }
 
-        price = data->pricelistPrice->find(trunkSettings->pricelist_id, call->src_number, call->connect_time, trace);
+        price = data->pricelistPrice->find(trunkSettings->pricelist_id, call->dst_number, call->connect_time, trace);
         if (price == nullptr) {
             if (trace != nullptr) {
                 *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << endl;
@@ -442,7 +432,7 @@ long long int BillingCall::getNumber() {
 }
 
 long long int BillingCall::getRemoteNumber() {
-    return !call->orig ? call->dst_number : call->src_number;
+    return call->orig ? call->dst_number : call->src_number;
 }
 
 char * BillingCall::getRoute() {

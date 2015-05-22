@@ -89,8 +89,8 @@ struct Call {
         trunk_service_id = 0;
         number_service_id = 0;
 
-        src_number = 0;
-        dst_number = 0;
+        src_number = atoll(cdr->src_number);
+        dst_number = atoll(cdr->dst_number);
 
         billed_time = cdr->session_time;
         rate = 0.0;
