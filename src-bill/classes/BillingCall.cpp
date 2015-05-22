@@ -30,6 +30,7 @@ void BillingCall::calc(Call *call, Cdr *cdr, PreparedData *preparedData) {
 
     if (call->orig) {
         numberPreprocessing();
+        processRedirectNumber();
     }
 
     fillGeoPrefix();
@@ -43,7 +44,7 @@ void BillingCall::calc(Call *call, Cdr *cdr, PreparedData *preparedData) {
 
 void BillingCall::fillGeoPrefix() {
 
-    auto geoPrefix = data->geoPrefix->find(getRemoteNumber(), trace);
+    auto geoPrefix = data->geoPrefix->find(call->dst_number, trace);
 
     if (geoPrefix != nullptr) {
         call->mob = geoPrefix->mob;
@@ -98,6 +99,17 @@ void BillingCall::numberPreprocessing() {
         }
 
         order++;
+    }
+}
+
+void BillingCall::processRedirectNumber() {
+
+    if (trunk->use_redirect_number) {
+        call->src_number = atoll(cdr->redirect_number);
+
+        if (trace != nullptr) {
+            *trace << "INFO|PROCESS REDIRECT NUMBER|SET SRC_NUMBER = " << call->src_number << endl;
+        }
     }
 }
 

@@ -12,6 +12,7 @@ struct Trunk {
     int route_table_id;
     bool our_trunk;
     bool auth_by_number;
+    bool use_redirect_number;
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -25,6 +26,7 @@ struct Trunk {
         trace << "route_table_id: " << route_table_id << ", ";
         trace << "our_trunk: " << our_trunk << ", ";
         trace << "auth_by_number: " << auth_by_number << ", ";
+        trace << "use_redirect_number: " << use_redirect_number << ", ";
         trace << ")";
     }
 };

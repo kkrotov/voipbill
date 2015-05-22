@@ -21,6 +21,7 @@ public:
         string session_time;
         string src_number;
         string dst_number;
+        string redirect_number;
         string src_route;
         string dst_route;
         string src_noa;
@@ -41,6 +42,9 @@ public:
         if (parameters.find("dst_number") != parameters.end())
             dst_number = parameters["dst_number"];
 
+        if (parameters.find("redirect_number") != parameters.end())
+            redirect_number = parameters["redirect_number"];
+
         if (parameters.find("src_route") != parameters.end())
             src_route = parameters["src_route"];
 
@@ -59,7 +63,7 @@ public:
         cdr.session_time = atoi(session_time.c_str());
         strncpy(cdr.src_number, src_number.c_str(), sizeof(cdr.src_number) - 1);
         strncpy(cdr.dst_number, dst_number.c_str(), sizeof(cdr.dst_number) - 1);
-        strncpy(cdr.redirect_number, "", sizeof(cdr.redirect_number) - 1);
+        strncpy(cdr.redirect_number, redirect_number.c_str(), sizeof(cdr.redirect_number) - 1);
         strncpy(cdr.src_route, src_route.c_str(), sizeof(cdr.src_route) - 1);
         strncpy(cdr.dst_route, dst_route.c_str(), sizeof(cdr.dst_route) - 1);
         cdr.src_noa = atoi(src_noa.c_str()) ? atoi(src_noa.c_str()) : 3;

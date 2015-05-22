@@ -125,7 +125,7 @@ class CdrParser(Daemon):
         call_id             = self.parseCallId(cdr)
         src_number, src_noa = self.parseSrcNumber(cdr, 'IncomingCallingAddress', True)
         dst_number, dst_noa = self.parseDstNumber(cdr, 'IncomingCalledAddress')
-        redirect_number     = None
+        redirect_number, x  = self.parseSrcNumber(cdr, 'IncomingRedirectingAddress', True)
         setup_time          = self.parseTime(cdr, 'StartTimeStamp')
         connect_time        = self.parseTime(cdr, 'AnswerTimeStamp', True)
         disconnect_time     = self.parseTime(cdr, 'ReleaseTimeStamp')

@@ -20,6 +20,7 @@ public:
 
 protected:
     void numberPreprocessing();
+    void processRedirectNumber();
     void fillGeoPrefix();
     int getDest(GeoPrefix * geoPrefix);
     void calcByTrunk();
