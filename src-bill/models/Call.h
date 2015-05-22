@@ -38,7 +38,6 @@ struct Call {
     int destination_id;
     int geo_id;
 
-    int dest;
     bool mob;
     int geo_operator_id;
     int operator_id;
@@ -72,7 +71,6 @@ struct Call {
         trace << "prefix: " << prefix << ", ";
         trace << "destination_id: " << destination_id << ", ";
         trace << "geo_id: " << geo_id << ", ";
-        trace << "dest: " << dest << ", ";
         trace << "mob: " << mob << ", ";
         trace << "geo_operator_id: " << geo_operator_id << ", ";
         trace << "operator_id: " << operator_id << ", ";
@@ -109,10 +107,9 @@ struct Call {
         pricelist_id = 0;
         prefix = 0;
 
-        destination_id = 0;
+        destination_id = 2;
         geo_id = 0;
 
-        dest = 2;
         mob = false;
         geo_operator_id = 0;
         operator_id = 0;

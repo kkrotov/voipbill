@@ -57,7 +57,7 @@ void BillingCall::fillGeoPrefix() {
 
     if (geoPrefix != nullptr) {
         call->mob = geoPrefix->mob;
-        call->dest = getDest(geoPrefix);
+        call->destination_id = getDest(geoPrefix);
         call->geo_id = geoPrefix->geo_id;
         call->geo_operator_id = geoPrefix->geo_operator_id;;
     }
