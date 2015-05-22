@@ -103,12 +103,16 @@ void BillingCall::numberPreprocessing() {
 }
 
 void BillingCall::processRedirectNumber() {
-
     if (trunk->use_redirect_number) {
-        call->src_number = atoll(cdr->redirect_number);
 
-        if (trace != nullptr) {
-            *trace << "INFO|PROCESS REDIRECT NUMBER|SET SRC_NUMBER = " << call->src_number << endl;
+        long long int redirect_number =  atoll(cdr->redirect_number);
+
+        if (redirect_number > 0) {
+            call->src_number = redirect_number;
+
+            if (trace != nullptr) {
+                *trace << "INFO|PROCESS REDIRECT NUMBER|SET SRC_NUMBER = " << call->src_number << endl;
+            }
         }
     }
 }
