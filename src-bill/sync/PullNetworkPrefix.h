@@ -10,8 +10,7 @@ public:
         dst_table = "billing.network_prefix";
 
         fields.push_back("prefix");
-        fields.push_back("instance_id");
-        fields.push_back("operator_id");
+        fields.push_back("network_config_id");
         fields.push_back("date_from");
         fields.push_back("deleted");
         fields.push_back("date_to");
