@@ -16,5 +16,7 @@ public:
         fields.push_back("operator_id");
         fields.push_back("tariffication_by_minutes");
         fields.push_back("tariffication_full_first_minute");
+        fields.push_back("orig");
+        fields.push_back("local");
     }
 };

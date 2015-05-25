@@ -117,7 +117,7 @@ void ThreadLoader::run() {
 
             } else if (event == "network_prefix") {
 
-//                data->networkPrefix.load(&db_calls);
+                data->networkPrefix.load(&db_calls);
 
             } else if (event == "operator") {
 

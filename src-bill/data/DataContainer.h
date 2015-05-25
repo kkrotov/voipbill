@@ -54,7 +54,7 @@ struct PreparedData {
     shared_ptr<OperatorList> voipOperator;
     shared_ptr<PricelistList> pricelist;
     shared_ptr<PricelistPriceList> pricelistPrice;
-//    shared_ptr<NetworkPrefixList> networkPrefix;
+    shared_ptr<NetworkPrefixList> networkPrefix;
     shared_ptr<GeoPrefixList> geoPrefix;
     shared_ptr<ServiceNumberList> serviceNumber;
     shared_ptr<ServiceTrunkList> serviceTrunk;
@@ -86,7 +86,7 @@ public:
     OperatorData voipOperator;
     PricelistData pricelist;
     PricelistPriceData pricelistPrice;
-    //NetworkPrefixData networkPrefix;
+    NetworkPrefixData networkPrefix;
     GeoPrefixData geoPrefix;
     ServiceNumberData serviceNumber;
     ServiceTrunkData serviceTrunk;
@@ -122,7 +122,7 @@ public:
         voipOperator.load(db);
         pricelist.load(db);
         pricelistPrice.load(db);
-        //networkPrefix.load(db);
+        networkPrefix.load(db);
         geoPrefix.load(db);
         serviceNumber.load(db);
         serviceTrunk.load(db);
@@ -236,11 +236,11 @@ public:
         if ((data.pricelistPrice = pricelistPrice.get()) == nullptr) {
             return false;
         }
-/*
+
         if ((data.networkPrefix = networkPrefix.get()) == nullptr) {
             return false;
         }
-*/
+
         if ((data.geoPrefix = geoPrefix.get()) == nullptr) {
             return false;
         }

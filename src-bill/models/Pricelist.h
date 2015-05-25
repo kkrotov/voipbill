@@ -6,6 +6,8 @@ struct Pricelist {
     int operator_id;
     bool tariffication_by_minutes;
     bool tariffication_full_first_minute;
+    bool orig;
+    bool local;
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -14,6 +16,8 @@ struct Pricelist {
         trace << "operator_id: " << operator_id << ", ";
         trace << "tariffication_by_minutes: " << tariffication_by_minutes << ", ";
         trace << "tariffication_full_first_minute: " << tariffication_full_first_minute << ", ";
+        trace << "orig: " << orig << ", ";
+        trace << "local: " << local << ", ";
         trace << ")";
     }
 };
