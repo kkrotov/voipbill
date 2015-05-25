@@ -7,7 +7,7 @@ class PricelistList : public ObjList<Pricelist> {
 protected:
 
     string sql(BDb * db) {
-        return "   select  id, region, operator_id, tariffication_by_minutes, tariffication_full_first_minute, orig, local, local_network_config_id, initiate_mgmn_cost, initiate_zona_cost " \
+        return "   select  id, region, tariffication_by_minutes, tariffication_full_first_minute, orig, local, local_network_config_id, initiate_mgmn_cost, initiate_zona_cost " \
             "   from billing.pricelist " \
             "   order by id asc ";
     }
@@ -15,14 +15,13 @@ protected:
     inline void parse_item(BDbResult &row, Pricelist * item) {
         item->id = row.get_i(0);
         item->region = row.get_i(1);
-        item->operator_id = row.get_i(2);
-        item->tariffication_by_minutes = row.get_b(3);
-        item->tariffication_full_first_minute = row.get_b(4);
-        item->orig = row.get_b(5);
-        item->local = row.get_b(6);
-        item->local_network_config_id = row.get_i(7);
-        item->initiate_mgmn_cost = row.get_d(8);
-        item->initiate_zona_cost = row.get_d(9);
+        item->tariffication_by_minutes = row.get_b(2);
+        item->tariffication_full_first_minute = row.get_b(3);
+        item->orig = row.get_b(4);
+        item->local = row.get_b(5);
+        item->local_network_config_id = row.get_i(6);
+        item->initiate_mgmn_cost = row.get_d(7);
+        item->initiate_zona_cost = row.get_d(8);
     }
 
     struct key_id {
