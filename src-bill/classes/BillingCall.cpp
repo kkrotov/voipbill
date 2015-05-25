@@ -200,6 +200,15 @@ void BillingCall::calcByTrunk() {
     call->rate = effectivePrice->price;
     call->cost = call->billed_time * call->rate / 60.0;
     call->cost = call->orig ? - call->cost : call->cost;
+
+    if (!call->orig && effectivePricelist->initiate_zona_cost > 0.00001 && call->destination_id == 0) {
+        call->interconnect_rate = effectivePricelist->initiate_zona_cost;
+        call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+    }
+    if (!call->orig && effectivePricelist->initiate_mgmn_cost > 0.00001 && call->destination_id > 0) {
+        call->interconnect_rate = effectivePricelist->initiate_mgmn_cost;
+        call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+    }
 }
 
 void BillingCall::calcByNumber() {
@@ -282,12 +291,35 @@ bool BillingCall::checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int 
             continue;
         }
 
-        price = data->pricelistPrice->find(trunkSettings->pricelist_id, call->dst_number, call->connect_time, trace);
-        if (price == nullptr) {
-            if (trace != nullptr) {
-                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
+        if (pricelist->local) {
+
+            auto networkPrefix = data->networkPrefix->find(pricelist->local_network_config_id, call->dst_number, call->connect_time, trace);
+            if (networkPrefix == nullptr) {
+                if (trace != nullptr) {
+                    *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE NETWORK PREFIX NOT FOUND" << "\n";
+                }
+                continue;
             }
-            continue;
+
+            price = data->pricelistPrice->find(trunkSettings->pricelist_id, networkPrefix->network_type_id, call->connect_time, trace);
+            if (price == nullptr) {
+                if (trace != nullptr) {
+                    *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
+                }
+                continue;
+            }
+
+
+        } else {
+
+            price = data->pricelistPrice->find(trunkSettings->pricelist_id, call->dst_number, call->connect_time, trace);
+            if (price == nullptr) {
+                if (trace != nullptr) {
+                    *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
+                }
+                continue;
+            }
+
         }
 
         if (trace != nullptr) {

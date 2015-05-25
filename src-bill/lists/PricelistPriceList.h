@@ -72,12 +72,14 @@ protected:
 
 public:
     PricelistPrice * find(int pricelist_id, long long int numberPrefix, time_t timestamp, stringstream *trace = nullptr) {
+
         char tmpPrefix[20];
         sprintf(tmpPrefix, "%lld", numberPrefix);
 
         int len = strlen(tmpPrefix);
         while (len > 0) {
             tmpPrefix[len] = 0;
+
             auto result = _find(pricelist_id, tmpPrefix, timestamp);
             if (result != nullptr) {
 
