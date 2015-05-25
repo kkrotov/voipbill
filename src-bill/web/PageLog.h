@@ -20,11 +20,15 @@ public:
         html << "History length: <b>" << history.size() << "</b><br/>\n";
         html << "<br/>\n";
 
+        html << "<table width=100%>\n";
         for (auto it = history.begin(); it != history.end(); ++it) {
             pLogMessage message = *it;
-            html << "<b>" << message->countInGroup << "</b> " << string_time(message->timeInGroup) << " ";
-            html << message->message.substr(0, 60);
-            html << "<br/>\n";
+            html << "<tr>\n";
+            html << "<td nowrap>" << message->countInGroup << "</td>\n";
+            html << "<td nowrap>" << string_time(message->timeInGroup) << "</td>\n";
+            html << "<td width=100%>" << message->message << "</td>\n";
+            html << "</tr>\n";
         }
+        html << "</table>\n";
     }
 };
