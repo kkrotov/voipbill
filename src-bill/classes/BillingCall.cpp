@@ -33,7 +33,8 @@ void BillingCall::calc(Call *call, Cdr *cdr, PreparedData *preparedData) {
         processRedirectNumber();
     }
 
-    fillGeoPrefix();
+    processGeo();
+    processDestinations();
 
     if (trunk->auth_by_number) {
         calcByNumber();
@@ -41,19 +42,6 @@ void BillingCall::calc(Call *call, Cdr *cdr, PreparedData *preparedData) {
         calcByTrunk();
     }
 }
-
-void BillingCall::fillGeoPrefix() {
-
-    auto geoPrefix = data->geoPrefix->find(call->dst_number, trace);
-
-    if (geoPrefix != nullptr) {
-        call->mob = geoPrefix->mob;
-        call->destination_id = getDest(geoPrefix);
-        call->geo_id = geoPrefix->geo_id;
-        call->geo_operator_id = geoPrefix->geo_operator_id;;
-    }
-}
-
 
 void BillingCall::numberPreprocessing() {
     int order = 1;
@@ -115,6 +103,32 @@ void BillingCall::processRedirectNumber() {
             }
         }
     }
+}
+
+void BillingCall::processGeo() {
+    auto geoPrefix = data->geoPrefix->find(call->orig ? call->dst_number : call->src_number, trace);
+    if (geoPrefix != nullptr) {
+        call->geo_id = geoPrefix->geo_id;
+        call->geo_mob = geoPrefix->mob;
+        call->geo_operator_id = geoPrefix->geo_operator_id;;
+        if (trace != nullptr) {
+            *trace << "INFO|SET GEO_ID = " << call->geo_id << ", GEO_MOB = " << call->geo_mob << "\n";
+        }
+    }
+}
+
+void BillingCall::processDestinations() {
+
+    auto geoPrefix = data->geoPrefix->find(call->dst_number, trace);
+
+    if (geoPrefix != nullptr) {
+        call->mob = geoPrefix->mob;
+        call->destination_id = getDest(geoPrefix);
+        if (trace != nullptr) {
+            *trace << "INFO|SET DEST = " << call->destination_id << ", MOB = " << call->mob << "\n";
+        }
+    }
+
 }
 
 int BillingCall::getDest(GeoPrefix * geoPrefix) {

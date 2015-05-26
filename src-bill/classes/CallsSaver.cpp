@@ -84,7 +84,8 @@ void insert_row(Call * call, stringstream &q) {
     } else {
         q << "NULL,";
     }
-    q << (call->mob ? "true" : "false");
+    q << (call->mob ? "true" : "false") << "',";
+    q << (call->geo_mob ? "true" : "false");
     q << ")\n";
 }
 
@@ -146,7 +147,7 @@ size_t CallsSaver::save(const size_t save_part_count) {
                         "id,orig,peer_id,cdr_id,connect_time,trunk_id,account_id,trunk_service_id,number_service_id," \
                         "src_number,dst_number,billed_time,rate,cost,tax_cost,interconnect_rate,interconnect_cost," \
                         "service_package_id,service_package_limit_id,package_time,package_credit," \
-                        "destination_id,pricelist_id,prefix,geo_id,geo_operator_id,operator_id,mob" \
+                        "destination_id,pricelist_id,prefix,geo_id,geo_operator_id,operator_id,mob,geo_mob" \
                      ")VALUES\n";
 
                 insert_row(&call, q);

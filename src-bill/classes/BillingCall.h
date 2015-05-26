@@ -21,7 +21,8 @@ public:
 protected:
     void numberPreprocessing();
     void processRedirectNumber();
-    void fillGeoPrefix();
+    void processGeo();
+    void processDestinations();
     int getDest(GeoPrefix * geoPrefix);
     void calcByTrunk();
     void calcByNumber();
