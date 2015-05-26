@@ -84,7 +84,7 @@ void insert_row(Call * call, stringstream &q) {
     } else {
         q << "NULL,";
     }
-    q << (call->mob ? "true" : "false") << "',";
+    q << (call->mob ? "true" : "false") << ",";
     q << (call->geo_mob ? "true" : "false");
     q << ")\n";
 }
