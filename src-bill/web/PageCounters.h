@@ -44,8 +44,8 @@ public:
                     << string_date(value.amount_day) << "</td><td>"
                     << sum_day << "</td><td>"
                     << string_time(amount_date) << "</td><td>"
-                    << sum_balance << "</td></td>"
-                    << (value.disabled_local ? "TRUE" : "false")  << "</td></td>"
+                    << sum_balance << "</td><td>"
+                    << (value.disabled_local ? "TRUE" : "false")  << "</td><td>"
                     << (value.disabled_global ? "TRUE" : "false") << "</td></tr>";
         }
         html << "</table>";
