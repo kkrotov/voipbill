@@ -35,6 +35,7 @@ public:
         html << "<th>Balance avaiable</th>\n";
         html << "<th>Daily avaiable</th>\n";
         html << "<th>Monthly avaiable</th>\n";
+        html << "<th>Voip disabled</th>\n";
         html << "</tr>\n";
         for (auto it : clientCounter->counter) {
             int key = it.first;
@@ -66,8 +67,8 @@ public:
             html << "<td>" << sum_day << "</td>\n";
             html << "<td>" << string_time(client->amount_date) << "</td>\n";
             html << "<td>" << sum_balance << "</td>\n";
-            html << "<td>" << (value.disabled_local ? "TRUE" : "false")  << "</td>\n";
-            html << "<td>" << (value.disabled_global ? "TRUE" : "false") << "</td>\n";
+            html << "<td>" << (value.disabled_local ? "LOCK" : "-")  << "</td>\n";
+            html << "<td>" << (value.disabled_global ? "LOCK" : "-") << "</td>\n";
 
             if (client != nullptr && client->hasCreditLimit()) {
                 html << "<td>" << string_fmt("%.2f", client->balance + client->credit + sum_balance + sum_balance_global) << "</td>\n";
@@ -86,6 +87,8 @@ public:
             } else {
                 html << "<td>-</td>\n";
             }
+
+            html << "<td>" << (client->disabled ? "DISABLED" : "-") << "</td>\n";
 
             html << "</tr>\n";
         }
