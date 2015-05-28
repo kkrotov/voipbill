@@ -48,7 +48,8 @@ public:
 
 protected:
     string name;
-    
+
+    int threadPrepareSleepSeconds;
     int threadSleepSeconds;
     Timer timer;
     int errorsCount = 0;

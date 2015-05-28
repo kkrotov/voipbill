@@ -42,16 +42,14 @@ public:
 
         double sum_month, sum_day, sum_balance;
         double sum_month2, sum_day2, sum_balance2;
-        bool client_disabled_global, client_disabled_local;
-        ClientCounterObj &clientCounter = billingData->clientCounter.get()->get(client_id);
+        ClientCounterObj clientCounter = billingData->clientCounter.get()->get(client_id);
+        ClientLockObj clientLock = billingData->clientLock.get()->get(client_id);
         sum_month = clientCounter.sumMonth();
         sum_day = clientCounter.sumDay();
         sum_balance = clientCounter.sumBalance();
-        client_disabled_global = clientCounter.disabled_global;
-        client_disabled_local = clientCounter.disabled_local;
 
 
-        ClientCounterObj &c2 = currentCallsData->getClientCounter()->get(client_id);
+        ClientCounterObj c2 = currentCallsData->getClientCounter()->get(client_id);
         sum_balance2 = c2.sumBalance();
         sum_day2 = c2.sumDay();
         sum_month2 = c2.sumMonth();
@@ -70,10 +68,10 @@ public:
         html << "Client Id: <b>" << client->id << "</b><br/>\n";
         html << "-----<br/>\n";
 
-        if (client_disabled_local)
+        if (clientLock.disabled_local)
             html << "Client disabled LOCAL<br/>\n";
 
-        if (client_disabled_global)
+        if (clientLock.disabled_global)
             html << "Client disabled GLOBAL<br/>\n";
 
         html << "-----<br/>\n";
@@ -81,49 +79,46 @@ public:
 
         {
             auto bl = BlackListLocal::instance();
-            auto i = bl->blacklist.begin();
-            while (i != bl->blacklist.end()) {
-                auto serviceNumber = preparedData.serviceNumber->find(atoll(i->first.c_str()), time(nullptr));
+            lock_guard<Spinlock> guard(bl->lock);
+            for (auto phone : bl->blacklist) {
+                auto serviceNumber = preparedData.serviceNumber->find(atoll(phone.c_str()), time(nullptr));
                 if (serviceNumber != nullptr && serviceNumber->client_account_id == client_id) {
                     html << "Locked Local <b>number</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
-                    html << i->first;
+                    html << phone;
                     html << "</b><br/>\n";
                 }
-                ++i;
             }
         }
 
         {
             auto bl = BlackListGlobal::instance();
-            auto i = bl->blacklist.begin();
-            while (i != bl->blacklist.end()) {
-                auto serviceNumber = preparedData.serviceNumber->find(atoll(i->first.c_str()), time(nullptr));
+            lock_guard<Spinlock> guard(bl->lock);
+            for (auto phone : bl->blacklist) {
+                auto serviceNumber = preparedData.serviceNumber->find(atoll(phone.c_str()), time(nullptr));
                 if (serviceNumber != nullptr && serviceNumber->client_account_id == client_id) {
                     html << "Locked Global <b>number</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
-                    html << i->first;
+                    html << phone;
                     html << "</b><br/>\n";
                 }
-                ++i;
             }
         }
 
         {
             auto bl = BlackListTrunk::instance();
-            auto i = bl->blacklist.begin();
-            while (i != bl->blacklist.end()) {
-                auto trunk = preparedData.trunkByName->find(i->first.c_str());
+            lock_guard<Spinlock> guard(bl->lock);
+            for (auto phone : bl->blacklist) {
+                auto trunk = preparedData.trunkByName->find(phone.c_str());
                 if (trunk == nullptr) {
-                    trunk = preparedData.trunkByAlias->find(i->first.c_str());
+                    trunk = preparedData.trunkByAlias->find(phone.c_str());
                 }
                 if (trunk != nullptr) {
                     auto serviceTrunk = preparedData.serviceTrunk->find(trunk->id, time(nullptr));
                     if (serviceTrunk != nullptr && serviceTrunk->client_account_id == client_id) {
                         html << "Locked Trunk <b>trunk</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
-                        html << i->first;
+                        html << phone;
                         html << "</b><br/>\n";
                     }
                 }
-                ++i;
             }
         }
 

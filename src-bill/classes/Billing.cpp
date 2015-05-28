@@ -152,45 +152,14 @@ void Billing::calc() {
 }
 
 void Billing::updateClientCounters(Call &call, PreparedData &preparedData, ClientCounter * clientCounter) {
-    if (abs(call.cost) < 0.000001) {
-        return;
-    }
-
-
-    ClientCounterObj &cc = clientCounter->counter[call.account_id];
-
-    if (abs(call.dt.month - cc.amount_month) < 43200) {
-        cc.amount_month = call.dt.month;
-        cc.sum_month += call.cost;
-    } else if (call.dt.month > cc.amount_month) {
-        cc.amount_month = call.dt.month;
-        cc.sum_month = call.cost;
-    }
-
-    if (abs(call.dt.day - cc.amount_day) < 43200) {
-        cc.amount_day = call.dt.day;
-        cc.sum_day += call.cost;
-    } else if (call.dt.day > cc.amount_day) {
-        cc.amount_day = call.dt.day;
-        cc.sum_day = call.cost;
-    }
 
     auto client = preparedData.client->find(call.account_id);
-    if (client != nullptr && call.connect_time >= client->amount_date) {
-        cc.sum += call.cost;
-    }
 
-    if (cc.client_id == 0) {
-        cc.client_id = call.account_id;
-    }
-
-    cc.updated = 1;
+    clientCounter->add(&call, client);
 
 }
 
 void Billing::updateFreeMinsCounters(Call &call, FminCounter * fminCounter) {
-    if (call.service_package_id != 0 && call.number_service_id != 0) {
-        fminCounter->add(call.number_service_id, 1, call.dt.month, call.package_time);
-    }
+    fminCounter->add(&call);
 }
 

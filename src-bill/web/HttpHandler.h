@@ -6,6 +6,8 @@
 #include "PageDataBilling.h"
 #include "PageCounters.h"
 #include "PageFmins.h"
+#include "PageLocks.h"
+#include "PageBlacklist.h"
 #include "PageSync.h"
 #include "PageLog.h"
 #include "PageConfig.h"
@@ -25,6 +27,8 @@ private:
         handlers.push_back(shared_ptr<BasePage>(new PageDataBilling));
         handlers.push_back(shared_ptr<BasePage>(new PageCounters));
         handlers.push_back(shared_ptr<BasePage>(new PageFmins));
+        handlers.push_back(shared_ptr<BasePage>(new PageLocks));
+        handlers.push_back(shared_ptr<BasePage>(new PageBlacklist));
         handlers.push_back(shared_ptr<BasePage>(new PageSync));
         handlers.push_back(shared_ptr<BasePage>(new PageLog));
         handlers.push_back(shared_ptr<BasePage>(new PageConfig));

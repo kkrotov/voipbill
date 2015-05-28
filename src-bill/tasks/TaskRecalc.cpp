@@ -109,7 +109,10 @@ void TaskRecalc::run() {
     setStatus("10. waiting sync counters central lock");
     unique_lock<mutex> lock_sync_counters_central(DataBillingContainer::instance()->syncCountersCentralLock);
 
-    setStatus("11. recalc counters");
+    setStatus("11. waiting sync locks central lock");
+    unique_lock<mutex> lock_sync_locks_central(DataBillingContainer::instance()->syncCountersCentralLock);
+
+    setStatus("12. recalc counters");
     DataBillingContainer::instance()->loadAll(&db_calls);
 
     lock_fetch_cdr.unlock();
@@ -118,7 +121,7 @@ void TaskRecalc::run() {
 
     boost::this_thread::interruption_point();
 
-    setStatus("12. delete calls_raw from main");
+    setStatus("13. delete calls_raw from main");
     db_main->exec("delete from calls_raw.calls_raw where server_id = " + app().conf.str_instance_id + " and id>=" + lexical_cast<string>(recalc_from_call_id));
 
 }

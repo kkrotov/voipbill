@@ -97,14 +97,18 @@ set(BILL_SOURCES
     src-bill/threads/ThreadFetchCdr.cpp
     src-bill/threads/ThreadBillRuntime.cpp
     src-bill/threads/ThreadSaveCalls.cpp
-    src-bill/threads/ThreadBlacklist.cpp
+    src-bill/threads/ThreadClientLock.cpp
+    src-bill/threads/ThreadBlacklistFetch.cpp
+    src-bill/threads/ThreadBlacklistCalc.cpp
     src-bill/threads/ThreadCheckStartTable.cpp
     src-bill/threads/ThreadLimitControl.cpp
+    src-bill/threads/ThreadUpdateActiveClients.cpp
     src-bill/threads/ThreadTasks.cpp
     src-bill/tasks/TaskRecalc.cpp
 #    src-bill/threads/ThreadUdpServer.cpp
     src-bill/threads/ThreadSyncCalls.cpp
     src-bill/threads/ThreadSyncCounters.cpp
+    src-bill/threads/ThreadSyncLocks.cpp
     src-bill/threads/ThreadWeb.cpp
     src-bill/main.cpp
 )

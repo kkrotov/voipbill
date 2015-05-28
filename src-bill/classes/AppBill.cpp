@@ -11,9 +11,12 @@
 #include "../threads/ThreadBillRuntime.h"
 #include "../threads/ThreadSaveCalls.h"
 #include "../threads/ThreadSyncCounters.h"
-#include "../threads/ThreadSyncCalls.h"
-#include "../threads/ThreadBlacklist.h"
+#include "../threads/ThreadSyncLocks.h"
+#include "../threads/ThreadClientLock.h"
+#include "../threads/ThreadBlacklistFetch.h"
+#include "../threads/ThreadBlacklistCalc.h"
 #include "../threads/ThreadLimitControl.h"
+#include "../threads/ThreadUpdateActiveClients.h"
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
 //#include "../threads/ThreadUdpServer.h"
@@ -102,9 +105,12 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadBillRuntime>();
     registerThread<ThreadSaveCalls>();
     registerThread<ThreadSyncCounters>();
-    registerThread<ThreadSyncCalls>();
-    registerThread<ThreadBlacklist>();
+    registerThread<ThreadSyncLocks>();
+    registerThread<ThreadClientLock>();
+    registerThread<ThreadBlacklistFetch>();
+    registerThread<ThreadBlacklistCalc>();
     registerThread<ThreadLimitControl>();
+    registerThread<ThreadUpdateActiveClients>();
     registerThread<ThreadCheckStartTable>();
     registerThread<ThreadTasks>();
     //registerThread<ThreadUdpServer>();
@@ -122,9 +128,12 @@ void AppBill::runAppInSingleMode()
             "runtime",
             "save_calls",
             "sync_counters",
-            "sync_calls",
-            "blacklist",
+            "sync_locks",
+            "client_lock",
+            "blacklist_fetch",
+            "blacklist_calc",
             "limitcontrol",
+            "update_active_clients",
             "checkstarttable",
             "tasks",
             //"udp_server",

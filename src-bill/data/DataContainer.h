@@ -31,6 +31,7 @@
 #include "TariffData.h"
 #include "TariffChangeLogData.h"
 #include "GlobalCountersData.h"
+#include "ActiveCounterData.h"
 
 struct PreparedData {
     Server *server;
@@ -61,6 +62,7 @@ struct PreparedData {
     shared_ptr<ServiceTrunkSettingsList> serviceTrunkSettings;
     shared_ptr<TariffList> tariff;
     shared_ptr<TariffChangeLogList> tariffChangeLog;
+    shared_ptr<ActiveCounter> activeCounter;
 };
 
 class DataContainer {
@@ -94,6 +96,7 @@ public:
     TariffData tariff;
     TariffChangeLogData tariffChangeLog;
     GlobalCountersData globalCounters;
+    ActiveCounterData activeCounter;
 
     static DataContainer * instance() {
         static DataContainer inst;
@@ -129,6 +132,8 @@ public:
         serviceTrunkSettings.load(db);
         tariff.load(db);
         tariffChangeLog.load(db);
+
+        activeCounter.load(serviceNumber.get(), serviceTrunk.get());
     }
 
     bool prepareData(PreparedData &data, time_t time) {
@@ -262,6 +267,10 @@ public:
         }
 
         if ((data.tariffChangeLog = tariffChangeLog.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.activeCounter = activeCounter.get()) == nullptr) {
             return false;
         }
 

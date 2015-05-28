@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../src/lists/ObjList.h"
+#include "../../src/classes/Spinlock.h"
 #include <map>
 using namespace std;
 
@@ -16,6 +17,8 @@ protected:
     }
 
 public:
+    Spinlock lock;
+
     map<int, map<int, map<time_t, int>>> counter;
 
     void load(BDb * db) {
@@ -59,22 +62,29 @@ public:
         return counterMonth;
     }
 
+    void add(Call * call) {
+
+        if (call->number_service_id == 0 || call->service_package_id == 0 || call->package_time == 0) {
+            return;
+
+        }
+        lock_guard<Spinlock> guard(lock);
+
+        map<int, map<time_t, int>> &counterUsage = counter[call->number_service_id];
+        map<time_t, int> &counterGroup = counterUsage[call->service_package_id];
+        int &counterMonth = counterGroup[call->dt.month];
+        counterMonth += call->package_time;
+    }
+
+    size_t size() {
+        return counter.size();
+    }
+private:
     void set(int usage_id, int group_id, time_t tmonth, int new_value) {
         map<int, map<time_t, int>> &counterUsage = counter[usage_id];
         map<time_t, int> &counterGroup = counterUsage[group_id];
         int &counterMonth = counterGroup[tmonth];
         counterMonth = new_value;
-    }
-
-    void add(int usage_id, int group_id, time_t tmonth, int add_value) {
-        map<int, map<time_t, int>> &counterUsage = counter[usage_id];
-        map<time_t, int> &counterGroup = counterUsage[group_id];
-        int &counterMonth = counterGroup[tmonth];
-        counterMonth += add_value;
-    }
-
-    size_t size() {
-        return counter.size();
     }
 };
 

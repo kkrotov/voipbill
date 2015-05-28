@@ -17,11 +17,11 @@ protected:
         return UdpControlClient::blacklist_local(list);
     }
 
-    bool udp_lock(string &phone) {
+    bool udp_lock(const string &phone) {
         return UdpControlClient::lock_local(phone);
     }
 
-    bool udp_unlock(string &phone) {
+    bool udp_unlock(const string &phone) {
         return UdpControlClient::unlock_local(phone);
     }
 

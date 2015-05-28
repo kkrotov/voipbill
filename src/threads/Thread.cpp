@@ -5,6 +5,7 @@ Thread::Thread() :
     exitAfterRunsCount{0},
     runsCount{0},
     threadSleepSeconds{1},
+    threadPrepareSleepSeconds{1},
     status{ThreadStatus::THREAD_CREATED},
     status_ready{false},
     status_prepared{false} {
@@ -131,6 +132,10 @@ void Thread::operator()() {
                                 continue;
                             }
                         }
+
+                        ssleep(threadSleepSeconds);
+                        continue;
+
                     } else {
                         setRealStatus(ThreadStatus::THREAD_PAUSED);
                     }
@@ -138,7 +143,7 @@ void Thread::operator()() {
             }
 
 
-            ssleep(threadSleepSeconds);
+            ssleep(threadPrepareSleepSeconds);
             continue;
 
         } catch (boost::thread_interrupted const& e) {

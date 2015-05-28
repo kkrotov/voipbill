@@ -6,6 +6,7 @@
 #include "../models/Cdr.h"
 #include "../models/Call.h"
 #include "ClientCounterData.h"
+#include "ClientLockData.h"
 #include "FminCounterData.h"
 #include "../classes/AppBill.h"
 
@@ -16,6 +17,7 @@ public:
     mutex saveCallsLock;
     mutex syncCallsCentralLock;
     mutex syncCountersCentralLock;
+    mutex syncLocksCentralLock;
 
     Spinlock cdrsWaitProcessingLock;
     Spinlock callsWaitSavingLock;
@@ -25,6 +27,7 @@ public:
 
     ClientCounterData clientCounter;
     FminCounterData fminCounter;
+    ClientLockData clientLock;
 
     long long int lastCdrId = -1;
     long long int lastCalcCallId = -1;
@@ -48,6 +51,7 @@ public:
 
         clientCounter.load(db);
         fminCounter.load(db);
+        clientLock.load(db);
 
         loadLastCallIdAndCdrIdAndTime(db);
 
@@ -64,6 +68,10 @@ public:
         }
 
         if (!fminCounter.ready()) {
+            return false;
+        }
+
+        if (!clientLock.ready()) {
             return false;
         }
 

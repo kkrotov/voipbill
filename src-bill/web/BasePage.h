@@ -19,6 +19,8 @@ public:
         html << " <a href='/data-billing'>Data billing</a> | ";
         html << " <a href='/counters'>Counters</a> | ";
         html << " <a href='/fmins'>Free minutes</a> | ";
+        html << " <a href='/locks'>Locks</a> | ";
+        html << " <a href='/blacklist'>Blacklist</a> | ";
         html << " <a href='/sync'>Sync</a> | ";
         html << " <a href='/log'>Log</a> | ";
         html << " <a href='/config'>Config</a> | ";

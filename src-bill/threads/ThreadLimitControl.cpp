@@ -60,8 +60,8 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call) {
     auto currentCallsData = DataCurrentCallsContainer::instance();
 
     auto clientCounter = billingData->clientCounter.get();
-    ClientCounterObj &c0 = clientCounter->get(call.account_id);
-    ClientCounterObj &c2 = currentCallsData->getClientCounter()->get(call.account_id);
+    ClientCounterObj c0 = clientCounter->get(call.account_id);
+    ClientCounterObj c2 = currentCallsData->getClientCounter()->get(call.account_id);
 
     double globalBalanceSum, globalDaySum, globalMonthSum;
     fetchGlobalCounters(call.account_id, globalBalanceSum, globalDaySum, globalMonthSum);

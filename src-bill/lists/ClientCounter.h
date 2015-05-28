@@ -1,7 +1,11 @@
 #pragma once
 
 #include "../../src/lists/ObjList.h"
+#include "../../src/classes/Spinlock.h"
 #include "../models/ClientCounterObj.h"
+#include "../models/Client.h"
+#include "../models/Call.h"
+#include <mutex>
 #include <map>
 
 using namespace std;
@@ -14,22 +18,102 @@ protected:
     inline void parse_item(BDbResult &row, ClientCounterObj * item) {
         item->client_id = 0;
     }
+
 public:
+    Spinlock lock;
+
+    unsigned long long int marker = 0;
+
     bool needTotalSync = true;
 
     map<int, ClientCounterObj> counter;
+    map<int, unsigned long long int> changes;
 
-    ClientCounterObj &get(int client_id) {
+    ClientCounterObj get(int client_id) {
+        lock_guard<Spinlock> guard(lock);
         return counter[client_id];
     }
 
-    void set(int client_id, ClientCounterObj &new_value) {
-        counter[client_id] = new_value;
+    void add(Call * call, Client * client) {
+
+        if (abs(call->cost) < 0.000001) {
+            return;
+        }
+
+        lock_guard<Spinlock> guard(lock);
+
+        ClientCounterObj &value = counter[call->account_id];
+
+        if (value.client_id == 0) {
+            value.client_id = call->account_id;
+        }
+
+        if (abs(call->dt.month - value.amount_month) < 43200) {
+            value.amount_month = call->dt.month;
+            value.sum_month += call->cost;
+        } else if (call->dt.month > value.amount_month) {
+            value.amount_month = call->dt.month;
+            value.sum_month = call->cost;
+        }
+
+        if (abs(call->dt.day - value.amount_day) < 43200) {
+            value.amount_day = call->dt.day;
+            value.sum_day += call->cost;
+        } else if (call->dt.day > value.amount_day) {
+            value.amount_day = call->dt.day;
+            value.sum_day = call->cost;
+        }
+
+        if (client != nullptr && call->connect_time >= client->amount_date) {
+            value.sum += call->cost;
+        }
+
+        marker++;
+        changes[call->account_id] = marker;
+    }
+
+    void getClients(vector<ClientCounterObj> &destClients) {
+        lock_guard<Spinlock> guard(lock);
+
+        destClients.reserve(counter.size());
+        for (auto pair : counter) {
+            destClients.push_back(pair.second);
+        }
+    }
+
+    void getChanges(unsigned long long int &destMarker, vector<int> &destChanges, bool &destNeedTotalSync) {
+        lock_guard<Spinlock> guard(lock);
+
+        destMarker = marker;
+        destNeedTotalSync = needTotalSync;
+
+        if (needTotalSync) {
+            destChanges.reserve(counter.size());
+            for (auto pair : counter) {
+                destChanges.push_back(pair.first);
+            }
+        } else {
+            destChanges.reserve(changes.size());
+            for (auto pair : changes) {
+                destChanges.push_back(pair.first);
+            }
+        }
+    }
+
+    void fixChanges(unsigned long long int old_marker) {
+        lock_guard<Spinlock> guard(lock);
+
+        auto it = changes.begin();
+        while (it != changes.end()) {
+            if (it->second <= old_marker) {
+                changes.erase(it++);
+            } else {
+                ++it;
+            }
+        }
     }
 
     void load(BDb * db) {
-
-        counter.clear();
 
         time_t d_date = get_tday();
         time_t m_date = get_tmonth();
@@ -40,21 +124,11 @@ public:
         string sPrevMonth = string_date(m_date - 32 * 86400);
 
         BDbResult res = db->query(
-                "   select " \
+            "   select " \
             "       c.id, " \
             "       COALESCE(m.m_sum, 0), " \
             "       COALESCE(d.d_sum, 0), " \
-            "       COALESCE(a.a_sum, 0), " \
-            "       cast( " \
-            "           (c.voip_limit_day != 0 and c.voip_limit_day < coalesce(d.d_sum * 1.18,0)) or " \
-            "           (c.voip_limit_month != 0 and c.voip_limit_month < coalesce(m.m_sum * 1.18,0)) or " \
-            "           (c.credit >= 0 and c.balance + c.credit < coalesce(a.a_sum * 1.18,0)) or " \
-            "           c.voip_disabled as boolean " \
-            "       ), " \
-            "       cast( " \
-            "           (c.credit >= 0 and c.balance + c.credit < coalesce(a.a_sum * 1.18,0)) " \
-            "           and coalesce(c.last_payed_month < '" + sMonth + "'::date, true) as boolean " \
-            "       ) " \
+            "       COALESCE(a.a_sum, 0) " \
             "   from billing.clients c  " \
             "   left join " \
             "       (   select account_id, sum(cost) m_sum from calls_raw.calls_raw c " \
@@ -87,22 +161,12 @@ public:
             "       ( " \
             "           COALESCE(m.m_sum, 0) != 0 OR " \
             "           COALESCE(d.d_sum, 0) != 0 OR " \
-            "           COALESCE(a.a_sum, 0) != 0 OR "  \
-            "           cast( "  \
-            "               (c.voip_limit_day != 0 and c.voip_limit_day < coalesce(d.d_sum * 1.18,0)) or "  \
-            "               (c.voip_limit_month != 0 and c.voip_limit_month < coalesce(m.m_sum * 1.18,0)) or "  \
-            "               (c.credit >= 0 and c.balance + c.credit < coalesce(a.a_sum * 1.18,0)) or "  \
-            "               c.voip_disabled as boolean "  \
-            "           ) OR "  \
-            "           cast( "  \
-            "               (c.credit >= 0 and c.balance + c.credit < coalesce(a.a_sum * 1.18,0)) "  \
-            "               and coalesce(c.last_payed_month < '" + sMonth + "'::date, true) as boolean "  \
-            "           ) " \
+            "           COALESCE(a.a_sum, 0) != 0 "  \
             "       ) ");
 
         db->exec("UPDATE billing.clients set sync=0 where sync > 0");
 
-        loadtime = time(NULL);
+        loadtime = time(nullptr);
         while (res.next()) {
             struct tm ttt;
             ttt.tm_isdst = 0;
@@ -124,10 +188,6 @@ public:
 
             cc.sum = res.get_d(3);
 
-            cc.disabled_global = res.get_b(4);
-            cc.disabled_local = res.get_b(5);
-
-            cc.updated = 1;
             counter[cc.client_id] = cc;
         }
     }
@@ -140,7 +200,7 @@ public:
         db->exec("UPDATE billing.clients set sync=2 where sync=1");
 
         BDbResult res = db->query(
-                "   select c.id, COALESCE(a.a_sum,0) " \
+            "   select c.id, COALESCE(a.a_sum,0) " \
             "   from billing.clients c " \
             "   left join " \
             "       (   select account_id, sum(cost) a_sum " \
@@ -157,13 +217,18 @@ public:
 
         db->exec("UPDATE billing.clients set sync=0 where sync=2");
 
-        loadtime = time(NULL);
+        lock_guard<Spinlock> guard(lock);
+
         while (res.next()) {
-            ClientCounterObj &cc = this->get(res.get_i(0));
+            ClientCounterObj &cc = counter[res.get_i(0)];
             cc.client_id = res.get_i(0);
             cc.sum = res.get_d(1);
-            cc.updated = 1;
+
+            marker++;
+            changes[cc.client_id] = marker;
         }
+
+        loadtime = time(nullptr);
     }
 
     size_t size() {

@@ -42,6 +42,11 @@ public:
         data.swap(tmpData);
     }
 
+    void swap(shared_ptr<T> tmpData) {
+        lock_guard<Spinlock> guard(lock);
+        data.swap(tmpData);
+    }
+
     time_t time() {
         if (ready()) {
             auto tmpData = get();

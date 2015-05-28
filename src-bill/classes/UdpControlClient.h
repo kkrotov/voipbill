@@ -27,19 +27,19 @@ public:
 
     static bool blacklist_trunk(vector<string> &list);
 
-    static bool lock(string &phone);
+    static bool lock(const string &phone);
 
-    static bool lock_local(string &phone);
+    static bool lock_local(const string &phone);
 
-    static bool lock_global(string &phone);
+    static bool lock_global(const string &phone);
 
-    static bool lock_trunk(string &phone);
+    static bool lock_trunk(const string &phone);
 
-    static bool unlock(string &trunk);
+    static bool unlock(const string &trunk);
 
-    static bool unlock_local(string &phone);
+    static bool unlock_local(const string &phone);
 
-    static bool unlock_global(string &phone);
+    static bool unlock_global(const string &phone);
 
-    static bool unlock_trunk(string &trunk);
+    static bool unlock_trunk(const string &trunk);
 };

@@ -6,191 +6,80 @@
 #include "../data/DataContainer.h"
 #include "../data/DataBillingContainer.h"
 
-BlackList::BlackList() {
-}
-
-void BlackList::add(const string &phone) {
-    lock_guard<mutex> lk(rwlock);
-    if (blacklist.find(phone) == blacklist.end()) {
-        list_to_add[phone] = true;
-    }
-    if (list_to_del.find(phone) != list_to_del.end()) {
-        list_to_del.erase(phone);
-    }
-}
-
-void BlackList::del(const string &phone) {
-    lock_guard<mutex> lk(rwlock);
-    if (blacklist.find(phone) != blacklist.end()) {
-        list_to_del[phone] = true;
-    }
-    if (list_to_add.find(phone) != list_to_add.end()) {
-        list_to_add.erase(phone);
-    }
-}
-
-void BlackList::change_lock(const string &phone, bool need_lock) {
-    if (is_locked(phone) != need_lock) {
-        if (need_lock) {
-            add(phone);
-        } else {
-            del(phone);
-        }
-    }
-}
-
-void BlackList::lock(const string &phone) {
-    if (!is_locked(phone)) {
-        add(phone);
-    }
-}
-
-void BlackList::unlock(const string &phone) {
-    if (is_locked(phone)) {
-        del(phone);
-    }
-}
-
 bool BlackList::fetch() {
     vector<string> curr_list;
-    if (udp_blacklist(curr_list) == false) {
-        //Log::error("Can nostring fetch black lisstring from opanca");
+    if (!udp_blacklist(curr_list)) {
+        //Log::error("Cant fetch black list from opanca");
         return false;
     }
 
-    time_t current_time = time(NULL);
-
-    lock_guard<mutex> lk(rwlock);
+    lock_guard<Spinlock> guard(lock);
 
     {
-        vector<string>::iterator i = curr_list.begin();
-        while (i != curr_list.end()) {
-            string &phone = *i;
-            blacklist[phone] = current_time;
-            ++i;
-        }
-    }
-
-    {
-        map<string, time_t>::iterator i = blacklist.begin();
-        while (i != blacklist.end()) {
-            if (i->second != current_time) {
-                blacklist.erase(i++);
-            } else
-                ++i;
-        }
-    }
-
-
-    {
-        map<string, bool>::iterator i = list_to_add.begin();
-        while (i != list_to_add.end()) {
-            if (blacklist.find(i->first) != blacklist.end()) {
-                list_to_add.erase(i++);
-            } else
-                ++i;
-        }
-    }
-
-    {
-        map<string, bool>::iterator i = list_to_del.begin();
-        while (i != list_to_del.end()) {
-            if (blacklist.find(i->first) == blacklist.end()) {
-                list_to_del.erase(i++);
-            } else
-                ++i;
+        blacklist.clear();
+        for(string &phone : curr_list) {
+            blacklist.insert(phone);
         }
     }
 
     return true;
 }
 
-void BlackList::push() {
-    {
-        vector<string> list;
+void BlackList::push(set<string> &wanted_blacklist) {
 
-        {
-            lock_guard<mutex> lk(rwlock);
-            map<string, bool>::iterator i = list_to_add.begin();
-            while (i != list_to_add.end()) {
-                list.push_back(i->first);
-                ++i;
+    vector<string> list;
+
+    {
+        lock_guard<Spinlock> guard(lock);
+
+        list_to_add.clear();
+        list_to_del.clear();
+
+        for (auto phone : blacklist) {
+            auto it = wanted_blacklist.find(phone);
+            if (it == wanted_blacklist.end()) {
+                list_to_del.insert(phone);
             }
         }
 
-        auto ii = list.begin();
-        while (ii != list.end()) {
-            string &phone = *ii;
-            if (udp_lock(phone) == false) {
-                Log::error("Can nostring lock phone " + phone);
-                ++ii;
-                continue;
+        for (auto phone : wanted_blacklist) {
+            auto it = blacklist.find(phone);
+            if (it == blacklist.end()) {
+                list_to_add.insert(phone);
             }
-
-            {
-                lock_guard<mutex> lk(rwlock);
-                if (blacklist.find(*ii) == blacklist.end()) {
-                    blacklist[*ii] = time(NULL);
-                }
-                if (list_to_add.find(*ii) != list_to_add.end()) {
-                    list_to_add.erase(*ii);
-                }
-            }
-
-            log_lock_phone(phone);
-
-            ++ii;
         }
     }
 
-    {
-        vector<string> list;
+    for (auto phone : list_to_add) {
+        if (!udp_lock(phone)) {
+            Log::error("Cant lock phone " + phone);
+            continue;
+        }
 
         {
-            lock_guard<mutex> lk(rwlock);
-            map<string, bool>::iterator i = list_to_del.begin();
-            while (i != list_to_del.end()) {
-                list.push_back(i->first);
-                ++i;
-            }
+            lock_guard<Spinlock> guard(lock);
+            blacklist.insert(phone);
         }
 
-        auto ii = list.begin();
-        while (ii != list.end()) {
-            string &phone = *ii;
-            if (!udp_unlock(phone)) {
-                Log::error("Can nostring unlock phone " + phone);
-                ++ii;
-                continue;
-            }
-
-            {
-                lock_guard<mutex> lk(rwlock);
-                if (blacklist.find(*ii) != blacklist.end()) {
-                    blacklist.erase(*ii);
-                }
-                if (list_to_del.find(*ii) != list_to_del.end()) {
-                    list_to_del.erase(*ii);
-                }
-            }
-
-            log_unlock_phone(phone);
-
-            ++ii;
-        }
+        log_lock_phone(phone);
     }
 
-}
+    for (auto phone : list_to_del) {
+        if (!udp_unlock(phone)) {
+            Log::error("Cant unlock phone " + phone);
+            continue;
+        }
 
-bool BlackList::is_locked(const string &phone) {
-    if (blacklist.find(phone) != blacklist.end()) {
-        return !(list_to_del.find(phone) != list_to_del.end());
-    } else {
-        return list_to_add.find(phone) != list_to_add.end();
+        {
+            lock_guard<Spinlock> guard(lock);
+            blacklist.erase(phone);
+        }
+
+        log_unlock_phone(phone);
     }
 }
 
-void BlackList::log_lock_phone(string &phone) {
+void BlackList::log_lock_phone(const string &phone) {
     string str = "LOCK " + phone;
 
     PreparedData preparedData;
@@ -207,7 +96,7 @@ void BlackList::log_lock_phone(string &phone) {
         if (client != nullptr) {
 
             if (DataBillingContainer::instance()->ready()) {
-                ClientCounterObj &clientCounter = DataBillingContainer::instance()->clientCounter.get()->get(client->id);
+                ClientCounterObj clientCounter = DataBillingContainer::instance()->clientCounter.get()->get(client->id);
                 double sum_month = clientCounter.sumMonth();
                 double sum_day = clientCounter.sumDay();
                 double sum_balance = clientCounter.sumBalance();
@@ -245,7 +134,7 @@ void BlackList::log_lock_phone(string &phone) {
     Log::notice(str);
 }
 
-void BlackList::log_unlock_phone(string &phone) {
+void BlackList::log_unlock_phone(const string &phone) {
     string str = "UNLOCK " + phone;
 
     PreparedData preparedData;

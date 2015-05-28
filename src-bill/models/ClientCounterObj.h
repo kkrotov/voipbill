@@ -9,9 +9,6 @@ struct ClientCounterObj {
     double sum_month;
     time_t amount_month;
     time_t amount_day;
-    bool disabled_local;
-    bool disabled_global;
-    unsigned char updated;
 
     double sumDay() {
         if (abs(amount_day - get_tday()) < 43200) {
@@ -32,23 +29,4 @@ struct ClientCounterObj {
     double sumBalance() {
         return sum * 1.18;
     }
-
-    void updateVoipDisabledGlobal(bool lock) {
-        updateVoipDisabled(true, lock);
-    }
-
-    void updateVoipDisabledLocal(bool lock) {
-        updateVoipDisabled(false, lock);
-    }
-
-private:
-    void updateVoipDisabled(bool global, bool lock) {
-        bool & voipDisabled = global ? disabled_global : disabled_local;
-
-        if (voipDisabled != lock) {
-            voipDisabled = lock;
-            updated = 1;
-        }
-    }
-
 };

@@ -2,39 +2,29 @@
 
 #include <time.h>
 #include <map>
+#include <set>
 #include <string>
-#include <mutex>
+#include "../../src/classes/Spinlock.h"
 #include <vector>
 
 using namespace std;
 
 class BlackList {
 protected:
-    void log_lock_phone(string &phone);
-    void log_unlock_phone(string &phone);
+    void log_lock_phone(const string &phone);
+    void log_unlock_phone(const string &phone);
 
     virtual bool udp_blacklist(vector<string> &list) = 0;
-    virtual bool udp_lock(string &phone) = 0;
-    virtual bool udp_unlock(string &phone) = 0;
+    virtual bool udp_lock(const string &phone) = 0;
+    virtual bool udp_unlock(const string &phone) = 0;
 
 public:
-    map<string, time_t> blacklist;
-    map<string, bool> list_to_add;
-    map<string, bool> list_to_del;
+    set<string> blacklist;
+    set<string> list_to_add;
+    set<string> list_to_del;
 
-    mutex rwlock;
-
-    BlackList();
-
-    void add(const string &phone);
-    void del(const string &phone);
-
-    void change_lock(const string &phone, bool need_lock);
-    void lock(const string &phone);
-    void unlock(const string &phone);
-
-    bool is_locked(const string &phone);
+    Spinlock lock;
 
     bool fetch();
-    void push();
+    void push(set<string> &wanted_blacklist);
 };

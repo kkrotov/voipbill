@@ -130,10 +130,12 @@ void ThreadLoader::run() {
             } else if (event == "service_number") {
 
                 data->serviceNumber.load(&db_calls);
+                data->activeCounter.load(data->serviceNumber.get(), data->serviceTrunk.get());
 
             } else if (event == "service_trunk") {
 
                 data->serviceTrunk.load(&db_calls);
+                data->activeCounter.load(data->serviceNumber.get(), data->serviceTrunk.get());
 
             } else if (event == "service_trunk_settings") {
 

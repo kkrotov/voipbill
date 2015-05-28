@@ -34,34 +34,37 @@ void ThreadSyncCounters::save_client_counters() {
 
     auto clientCounter = billingData->clientCounter.get();
 
+    vector<int> changes;
+    unsigned long long int marker;
+    bool needTotalSync;
+
+    clientCounter->getChanges(marker, changes, needTotalSync);
+
     int sync_count = 0;
 
-    for (auto it : clientCounter->counter) {
-        ClientCounterObj &value = clientCounter->counter[it.second.client_id];
-        if (value.updated == 0) continue;
+    for (int account_id : changes) {
+        ClientCounterObj value = clientCounter->get(account_id);
 
-        if (q == "") {
-            q.append("INSERT INTO billing.clients_counters(client_id,region_id,amount_month,amount_month_sum,amount_day,amount_day_sum,amount_sum,voip_auto_disabled,voip_auto_disabled_local)VALUES");
+        if (sync_count == 0) {
+            q.append(
+                    "INSERT INTO billing.clients_counters(client_id,region_id,amount_month,amount_month_sum,amount_day,amount_day_sum,amount_sum)VALUES");
         } else {
             q.append(",");
         }
-        q.append(string_fmt("(%d,'%d','%s','%f','%s','%f','%f',%s,%s)",
-                it.first,
-                app().conf.instance_id,
-                string_date(value.amount_month).c_str(),
-                value.sum_month,
-                string_date(value.amount_day).c_str(),
-                value.sum_day,
-                value.sum,
-                (value.disabled_global ? "true" : "false"),
-                (value.disabled_local ? "true" : "false")));
-        value.updated = 2;
+        q.append(string_fmt("(%d,'%d','%s','%f','%s','%f','%f')",
+                            account_id,
+                            app().conf.instance_id,
+                            string_date(value.amount_month).c_str(),
+                            value.sum_month,
+                            string_date(value.amount_day).c_str(),
+                            value.sum_day,
+                            value.sum));
         sync_count += 1;
     }
 
     if (sync_count > 0) {
         try {
-            if (clientCounter->needTotalSync) {
+            if (needTotalSync) {
                 BDbTransaction trans(&db_main);
 
                 db_main.exec("DELETE FROM billing.clients_counters WHERE region_id=" + app().conf.str_instance_id);
@@ -74,14 +77,8 @@ void ThreadSyncCounters::save_client_counters() {
                 db_main.exec(q);
             }
 
-            {
-                for (auto it : clientCounter->counter) {
-                    ClientCounterObj &value = clientCounter->counter[it.second.client_id];
-                    if (value.updated == 2) {
-                        value.updated = 0;
-                    }
-                }
-            }
+            clientCounter->fixChanges(marker);
+
         } catch (Exception &e) {
             e.addTrace("ThreadSyncCounters::save_client_counters:");
             throw e;

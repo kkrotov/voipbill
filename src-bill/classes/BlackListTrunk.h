@@ -17,11 +17,11 @@ protected:
         return UdpControlClient::blacklist_trunk(list);
     }
 
-    bool udp_lock(string &trunk) {
+    bool udp_lock(const string &trunk) {
         return UdpControlClient::lock_trunk(trunk);
     }
 
-    bool udp_unlock(string &trunk) {
+    bool udp_unlock(const string &trunk) {
         return UdpControlClient::unlock_trunk(trunk);
     }
 
