@@ -222,7 +222,7 @@ public:
         }
         {
             auto dl = &billingData->clientCounter;
-            html << "<tr><th>Client counter</th>";
+            html << "<tr><th>Client Counter</th>";
             if (dl != 0) {
                 html << "<td>" << string_time(dl->time()) << "</td><td></td><td>" <<
                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" <<
@@ -234,7 +234,7 @@ public:
         }
         {
             auto dl = &billingData->fminCounter;
-            html << "<tr><th>Fmin counter</th>";
+            html << "<tr><th>Fmin Counter</th>";
             if (dl != 0) {
                 html << "<td>" << string_time(dl->time()) << "</td><td></td><td>" <<
                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() <<
@@ -246,7 +246,7 @@ public:
         }
         {
             auto dl = &billingData->clientLock;
-            html << "<tr><th>Fmin counter</th>";
+            html << "<tr><th>Client Lock</th>";
             if (dl != 0) {
                 html << "<td>" << string_time(dl->time()) << "</td><td></td><td>" <<
                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() <<
