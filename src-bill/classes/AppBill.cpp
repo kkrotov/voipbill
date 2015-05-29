@@ -10,6 +10,7 @@
 #include "../threads/ThreadFetchCdr.h"
 #include "../threads/ThreadBillRuntime.h"
 #include "../threads/ThreadSaveCalls.h"
+#include "../threads/ThreadSyncCalls.h"
 #include "../threads/ThreadSyncCounters.h"
 #include "../threads/ThreadSyncLocks.h"
 #include "../threads/ThreadClientLock.h"
@@ -104,6 +105,7 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadFetchCdr>();
     registerThread<ThreadBillRuntime>();
     registerThread<ThreadSaveCalls>();
+    registerThread<ThreadSyncCalls>();
     registerThread<ThreadSyncCounters>();
     registerThread<ThreadSyncLocks>();
     registerThread<ThreadClientLock>();
@@ -127,6 +129,7 @@ void AppBill::runAppInSingleMode()
             "fetch_cdr",
             "runtime",
             "save_calls",
+            "sync_calls",
             "sync_counters",
             "sync_locks",
             "client_lock",

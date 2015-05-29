@@ -118,9 +118,11 @@ void Thread::operator()() {
                 } else {
                     if (getStatus() == ThreadStatus::THREAD_RUNNING) {
                         setRealStatus(ThreadStatus::THREAD_RUNNING);
-                        TimerScope ts(timer);
 
-                        this->run();
+                        {
+                            TimerScope ts(timer);
+                            this->run();
+                        }
 
                         lastError = "";
 
