@@ -110,7 +110,7 @@ void TaskRecalc::run() {
     unique_lock<mutex> lock_sync_counters_central(DataBillingContainer::instance()->syncCountersCentralLock);
 
     setStatus("11. waiting sync locks central lock");
-    unique_lock<mutex> lock_sync_locks_central(DataBillingContainer::instance()->syncCountersCentralLock);
+    unique_lock<mutex> lock_sync_locks_central(DataBillingContainer::instance()->syncLocksCentralLock);
 
     setStatus("12. recalc counters");
     DataBillingContainer::instance()->loadAll(&db_calls);

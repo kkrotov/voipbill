@@ -10,8 +10,8 @@ protected:
         return "    select l.usage_id, l.tarif_id_local, l.tarif_id_local_mob, l.tarif_id_russia, l.tarif_id_russia_mob, l.tarif_id_intern, l.tarif_id_sng, " \
                 "           extract(epoch from l.date_activation) " \
                 "   from ( \n"
-                "            select usage_id, max(id) as max_id from billing.tariff_change_log \n"
-                "            group by usage_id \n"
+                "            select usage_id, date_activation, max(id) as max_id from billing.tariff_change_log \n"
+                "            group by usage_id, date_activation \n"
                 "   ) as lm \n"
                 "   inner join billing.tariff_change_log l on l.id = lm.max_id" \
                 "   order by l.usage_id asc, l.date_activation ";
