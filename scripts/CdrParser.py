@@ -140,9 +140,9 @@ class CdrParser(Daemon):
 
         return {
             'call_id': call_id,
-            'src_number': src_number,
-            'dst_number': dst_number,
-            'redirect_number': redirect_number,
+            'src_number': src_number[:32],
+            'dst_number': dst_number[:32],
+            'redirect_number': redirect_number[:32],
             'setup_time': setup_time,
             'connect_time': connect_time,
             'disconnect_time': disconnect_time,

@@ -459,7 +459,7 @@ void BillingCall::calcTermByNumber(ServiceNumber *serviceNumber) {
         call->prefix = atoll(price->prefix);
 
         call->rate = price->price;
-        call->cost = call->billed_time * call->rate / 60.0;
+        call->cost = - (call->billed_time * call->rate / 60.0);
     }
 }
 
