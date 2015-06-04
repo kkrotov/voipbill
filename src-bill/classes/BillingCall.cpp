@@ -372,6 +372,13 @@ void BillingCall::calcOrigByNumber(ServiceNumber *serviceNumber) {
     else if (call->isSNG())
         tariffId = logTariff->tariff_id_sng;
 
+    auto mainTariff = data->tariff->find(logTariff->tariff_id_local, trace);
+    if (mainTariff == nullptr) {
+        if (trace != nullptr) {
+            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF NOT FOUND" << "\n";
+        }
+        return;
+    }
 
     auto tariff = data->tariff->find(tariffId, trace);
     if (tariff == nullptr) {
@@ -395,15 +402,15 @@ void BillingCall::calcOrigByNumber(ServiceNumber *serviceNumber) {
 
     call->billed_time = getCallLength(
             cdr->session_time,
-            tariff->tariffication_by_minutes,
-            tariff->tariffication_full_first_minute,
-            tariff->tariffication_free_first_seconds
+            mainTariff->tariffication_by_minutes,
+            mainTariff->tariffication_full_first_minute,
+            mainTariff->tariffication_free_first_seconds
     );
 
     call->rate = price->price;
     call->cost = - (call->billed_time * call->rate / 60.0);
 
-    int freeSeconds = 60 * tariff->freemin * (tariff->freemin_for_number ? 1 : serviceNumber->lines_count);
+    int freeSeconds = 60 * mainTariff->freemin * (mainTariff->freemin_for_number ? 1 : serviceNumber->lines_count);
     if (call->isLocal() && freeSeconds > 0) {
         auto fminCounter = billing->billingData->fminCounter.get();
         int used_free_seconds = fminCounter->get(call->number_service_id, 1, call->dt.month);
