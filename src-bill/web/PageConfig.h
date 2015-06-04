@@ -18,16 +18,12 @@ public:
         html << "log_file_filename: " << app().conf.log_file_filename << "<br/>\n";
         html << "log_file_min_level: " << app().conf.log_file_min_level << "<br/>\n";
         html << "log_file_max_level: " << app().conf.log_file_max_level << "<br/>\n";
-        html << "log_file2_filename: " << app().conf.log_file2_filename << "<br/>\n";
-        html << "log_file2_min_level: " << app().conf.log_file2_min_level << "<br/>\n";
-        html << "log_file2_max_level: " << app().conf.log_file2_max_level << "<br/>\n";
         html << "log_syslog_ident: " << app().conf.log_syslog_ident << "<br/>\n";
         html << "log_syslog_min_level: " << app().conf.log_syslog_min_level << "<br/>\n";
         html << "log_syslog_max_level: " << app().conf.log_syslog_max_level << "<br/>\n";
 
         html << "<br/>\n";
         html << "main.web_port: " << app().conf.web_port << "<br/>\n";
-        html << "main.api_port: " << app().conf.api_port << "<br/>\n";
         html << "main.test_mode: " << app().conf.test_mode << "<br/>\n";
         html << "<br/>\n";
         html << "log.grouping_interval: " << app().conf.log_grouping_interval << "<br/>\n";

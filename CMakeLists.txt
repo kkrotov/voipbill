@@ -105,7 +105,6 @@ set(BILL_SOURCES
     src-bill/threads/ThreadUpdateActiveClients.cpp
     src-bill/threads/ThreadTasks.cpp
     src-bill/tasks/TaskRecalc.cpp
-#    src-bill/threads/ThreadUdpServer.cpp
     src-bill/threads/ThreadSyncCalls.cpp
     src-bill/threads/ThreadSyncCounters.cpp
     src-bill/threads/ThreadSyncLocks.cpp

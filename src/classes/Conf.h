@@ -20,10 +20,6 @@ public:
     LogLevel log_file_min_level;
     LogLevel log_file_max_level;
 
-    string log_file2_filename;
-    LogLevel log_file2_min_level;
-    LogLevel log_file2_max_level;
-
     string log_syslog_ident;
     LogLevel log_syslog_min_level;
     LogLevel log_syslog_max_level;

@@ -6,7 +6,6 @@
 bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
 
     web_port = pt.get<unsigned short>("main.web_port", 8032);
-    api_port = pt.get<unsigned short>("main.api_port", 8032);
 
     test_mode = pt.get<bool>("main.test_mode", false);
 
@@ -42,10 +41,7 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     openca_udp_host = pt.get<string>("udp.host", "");
     openca_udp_port = pt.get<unsigned short>("udp.port", 0);
     udp_openca_select_interval = pt.get<unsigned short>("udp.openca_select_interval", 10);
-    udp_force_finish_call_interval = pt.get<unsigned short>("udp.force_finish_call_interval", 3);
-
-    openca_sync_blacklist_interval_min = pt.get<unsigned short>("udp.openca_sync_blacklist_interval_min", 10);
-    openca_sync_blacklist_interval_max = pt.get<unsigned short>("udp.openca_sync_blacklist_interval_max", 3600);
+    udp_force_finish_call_interval = pt.get<unsigned short>("udp.force_finish_call_interval", 5);
 
     billing_free_seconds = pt.get<unsigned short>("billing.free_seconds", 5);
 

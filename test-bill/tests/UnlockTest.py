@@ -88,15 +88,13 @@ class UnlockTest(BaseTestCase):
         Для корректного теста нужна бредовая управляющая последовательность:
         1. Запустить loader
         2. Запустить blacklist.prepare и .run
-        3. Поменять дату actual_to. Подождать cfg.openca_sync_blacklist_interval_min (???!)
+        3. Поменять дату actual_to.
         4. Запустить blacklist.run
         5. После остановки blacklist.run остановить loader, выгрузиться.
         6. Запись должна исчезнуть
         """
 
         self.startOpenCA()
-        cfg.openca_sync_blacklist_interval_min = 1
-        cfg.openca_sync_blacklist_interval_max = 2
 
         assert(OpenCA.readBlacklistGlobal() == '')
 

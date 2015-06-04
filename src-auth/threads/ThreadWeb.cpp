@@ -62,9 +62,6 @@ void ThreadWeb::handlerConfig(stringstream &html) {
     html << "log_file_filename: " << app().conf.log_file_filename << "<br/>\n";
     html << "log_file_min_level: " << app().conf.log_file_min_level << "<br/>\n";
     html << "log_file_max_level: " << app().conf.log_file_max_level << "<br/>\n";
-    html << "log_file2_filename: " << app().conf.log_file2_filename << "<br/>\n";
-    html << "log_file2_min_level: " << app().conf.log_file2_min_level << "<br/>\n";
-    html << "log_file2_max_level: " << app().conf.log_file2_max_level << "<br/>\n";
     html << "log_syslog_ident: " << app().conf.log_syslog_ident << "<br/>\n";
     html << "log_syslog_min_level: " << app().conf.log_syslog_min_level << "<br/>\n";
     html << "log_syslog_max_level: " << app().conf.log_syslog_max_level << "<br/>\n";

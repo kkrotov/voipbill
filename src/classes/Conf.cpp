@@ -51,10 +51,6 @@ bool Conf::parse_config_file() {
         log_file_min_level = static_cast<LogLevel> (pt.get<unsigned short>("log.file_min_level", 0));
         log_file_max_level = static_cast<LogLevel> (pt.get<unsigned short>("log.file_max_level", 5));
 
-        log_file2_filename = pt.get<string>("log.file2_filename", "");
-        log_file2_min_level = static_cast<LogLevel> (pt.get<unsigned short>("log.file2_min_level", 0));
-        log_file2_max_level = static_cast<LogLevel> (pt.get<unsigned short>("log.file2_max_level", 5));
-
         log_syslog_ident = pt.get<string>("log.syslog_ident", "");
         log_syslog_min_level = static_cast<LogLevel> (pt.get<unsigned short>("log.syslog_min_level", 0));
         log_syslog_max_level = static_cast<LogLevel> (pt.get<unsigned short>("log.syslog_max_level", 5));

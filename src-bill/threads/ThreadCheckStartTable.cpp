@@ -7,7 +7,6 @@ ThreadCheckStartTable::ThreadCheckStartTable() {
     name = "Check Start Table";
     db_calls.setCS(app().conf.db_calls);
 
-    last_t = 0;
     countWaitingForFinishCalls = 0;
     countForceFinishedCalls = 0;
 
@@ -15,84 +14,64 @@ ThreadCheckStartTable::ThreadCheckStartTable() {
 }
 
 void ThreadCheckStartTable::run() {
-    if (UdpControlClient::ready() == false) return;
+    if (!UdpControlClient::ready()) return;
 
-    readRadacctCalls();
+    auto cdrs = DataCurrentCallsContainer::instance()->currentCdr.get();
 
-    if (radacctCalls.size() == 0) {
-        last_t = time(NULL);
-        return;
-    }
+    set<long long int> opencaCalls;
+    fetchOpencaCurrentCalls(opencaCalls);
 
-    readOpencaCalls();
-
-
-    for (auto it = radacctCalls.begin(); it != radacctCalls.end(); ++it) {
-
-        // if not found
-        if (opencaCalls.find(it->first) == opencaCalls.end()) {
-
-            waitingForFinishCalls[it->first] = it->second;
-            countWaitingForFinishCalls++;
-
-        }
-
-    }
-
-    last_t = time(NULL);
+    set<long long int> waitingForFinishCalls;
+    spawnWaitingForFinishCalls(waitingForFinishCalls, opencaCalls, cdrs.get());
 
     if (waitingForFinishCalls.size() > 0) {
-
         ssleep(app().conf.udp_force_finish_call_interval);
-
-        readRadacctCalls();
-
-        for (auto it = waitingForFinishCalls.begin(); it != waitingForFinishCalls.end(); ++it) {
-
-            // if found
-            if (radacctCalls.find(it->first) != radacctCalls.end()) {
-
-                forceFinishCall(it->first);
-
-            }
-
-        }
-
-        waitingForFinishCalls.clear();
+        forceFinishCalls(waitingForFinishCalls);
     }
 }
 
-void ThreadCheckStartTable::readRadacctCalls() {
-
-    radacctCalls.clear();
-    BDbResult res = db_calls.query("select call_id from calls_cdr.start");
-    while (res.next()) {
-        radacctCalls[res.get_s(0)] = true;
-    }
-
-
-}
-
-void ThreadCheckStartTable::readOpencaCalls() {
+void ThreadCheckStartTable::fetchOpencaCurrentCalls(set<long long int> &opencaCalls) {
 
     vector<string> openca_calls;
-    if (UdpControlClient::select_calls(openca_calls) == false) {
+    if (!UdpControlClient::select_calls(openca_calls)) {
         throw Exception("Can't receive current calls list", "ThreadCheckStartTable::readOpencaCalls");
     }
 
-    opencaCalls.clear();
-    for (auto it = openca_calls.begin(); it != openca_calls.end(); ++it) {
-        opencaCalls[*it] = true;
+    for (string &call_id : openca_calls) {
+        opencaCalls.insert(atoll(call_id.c_str()));
     }
 }
 
-void ThreadCheckStartTable::forceFinishCall(string callId) {
+void ThreadCheckStartTable::spawnWaitingForFinishCalls(set<long long int> &waitingForFinishCalls, set<long long int> &opencaCalls, CurrentCdrList * cdrList) {
 
-    db_calls.exec("delete from calls_cdr.start where call_id = '" + callId + "'");
+    for (size_t i = 0; i < cdrList->size(); ++i) {
+        Cdr *cdr = cdrList->get(i);
+        // if not found
+        if (opencaCalls.find(cdr->call_id) == opencaCalls.end()) {
+            waitingForFinishCalls.insert(cdr->call_id);
+        }
+    }
 
-    Log::error("Force finish call " + callId);
-    countForceFinishedCalls++;
+    countWaitingForFinishCalls = waitingForFinishCalls.size();
+}
 
+void ThreadCheckStartTable::forceFinishCalls(set<long long int> &waitingForFinishCalls) {
+
+    auto newCdrs = DataCurrentCallsContainer::instance()->currentCdr.get();
+
+    set<long long int> callsIds;
+    for (size_t i = 0; i < newCdrs->size(); ++i) {
+        Cdr *cdr = newCdrs->get(i);
+        callsIds.insert(cdr->call_id);
+    }
+
+    for (long long int callId : waitingForFinishCalls) {
+        // if found
+        if (callsIds.find(callId) != callsIds.end()) {
+            db_calls.exec("delete from calls_cdr.start where call_id = '" + lexical_cast<string>(callId) + "'");
+            countForceFinishedCalls++;
+        }
+    }
 }
 
 void ThreadCheckStartTable::htmlfull(stringstream & html) {

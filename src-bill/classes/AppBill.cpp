@@ -20,7 +20,6 @@
 #include "../threads/ThreadUpdateActiveClients.h"
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
-//#include "../threads/ThreadUdpServer.h"
 #include "../../src/classes/LogWriterScreen.h"
 #include "../../src/classes/LogWriterFile.h"
 #include "../../src/classes/LogWriterSyslog.h"
@@ -73,9 +72,6 @@ void AppBill::initLogger() {
     if (!conf.log_file_filename.empty())
         logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file_filename, conf.log_file_min_level, conf.log_file_max_level)));
 
-    if (!conf.log_file2_filename.empty())
-        logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file2_filename, conf.log_file2_min_level, conf.log_file2_max_level)));
-
     if (!conf.log_syslog_ident.empty())
         logger.addLogWriter(pLogWriter(new LogWriterSyslog(conf.log_syslog_ident, conf.log_syslog_min_level, conf.log_syslog_max_level)));
 
@@ -115,7 +111,6 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadUpdateActiveClients>();
     registerThread<ThreadCheckStartTable>();
     registerThread<ThreadTasks>();
-    //registerThread<ThreadUdpServer>();
 }
 
 void AppBill::runAppInSingleMode()
@@ -139,7 +134,6 @@ void AppBill::runAppInSingleMode()
             "update_active_clients",
             "checkstarttable",
             "tasks",
-            //"udp_server",
     };
 
     for (auto thread: standardThreads) {
