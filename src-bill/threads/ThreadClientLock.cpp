@@ -118,54 +118,56 @@ void ThreadClientLock::htmlfull(stringstream &html) {
 
 
 
-    html << "<table border=1>";
+    html << "<table border=1>\n";
     html << "<tr>";
-    html << "<th rowspan=2>Active client</th>";
-    html << "<th colspan=2>Numbers</th>";
-    html << "<th colspan=3>Trunks</th>";
-    html << "</tr>";
-    html << "<tr>";
-    html << "<th>Service ID</th>";
-    html << "<th>DID</th>";
-    html << "<th>Service ID</th>";
-    html << "<th>Trunk ID</th>";
-    html << "<th>Trunk Name</th>";
-    html << "</tr>";
+    html << "<th>Active client</th>";
+    html << "<th>Numbers</th>";
+    html << "<th>Trunks</th>";
+    html << "</tr>\n";
     for (int clientId : preparedData.activeCounter->activeClients) {
-        html << "<tr>";
-        html << "<td valign=top>" << clientId << "</td>";
-        html << "<td valign=top>";
+        html << "<tr>\n";
+        html << "<td align=left valign=top>" << clientId << "</td>\n";
+        html << "<td valign=top>\n";
         {
             map<int, ServiceNumber> numbers = preparedData.activeCounter->clientNumbers[clientId];
-            html << "<table>";
+            html << "<table>\n";
+            html << "<tr>";
+            html << "<th align=left>Service ID</th>";
+            html << "<th align=left>DID</th>";
+            html << "</tr>\n";
             for (auto it: numbers) {
                 html << "<tr>";
-                html << "<td>" << it.second.id << "</td>";
-                html << "<td>" << it.second.did << "</td>";
-                html << "</tr>";
+                html << "<td align=left>" << it.second.id << "</td>";
+                html << "<td align=left>" << it.second.did << "</td>";
+                html << "</tr>\n";
             }
-            html << "</table>";
+            html << "</table>\n";
             html << "&nbsp;";
         }
-        html << "</td>";
-        html << "<td valign=top>";
+        html << "</td>\n";
+        html << "<td valign=top>\n";
         {
             map<int, ServiceTrunk> trunks = preparedData.activeCounter->clientTrunks[clientId];
-            html << "<table>";
+            html << "<table>\n";
+            html << "<tr>";
+            html << "<th align=left>Service ID</th>";
+            html << "<th align=left>Trunk ID</th>";
+            html << "<th align=left>Trunk Name</th>";
+            html << "</tr>\n";
             for (auto it: trunks) {
                 Trunk * trunk = preparedData.trunk->find(it.second.trunk_id);
                 html << "<tr>";
-                html << "<td>" << it.second.id << "</td>";
-                html << "<td>" << it.second.trunk_id << "</td>";
-                html << "<td>" << (trunk != nullptr ? (const char *)&trunk->name[0] : "")  << "</td>";
-                html << "</tr>";
+                html << "<td align=left>" << it.second.id << "</td>";
+                html << "<td align=left>" << it.second.trunk_id << "</td>";
+                html << "<td align=left>" << (trunk != nullptr ? (const char *)&trunk->name[0] : "")  << "</td>";
+                html << "</tr>\n";
             }
-            html << "</table>";
+            html << "</table>\n";
             html << "&nbsp;";
         }
-        html << "</td>";
-        html << "</tr>";
+        html << "</td>\n";
+        html << "</tr>\n";
     }
-    html << "</table>";
+    html << "</table>\n";
 
 }
