@@ -102,3 +102,74 @@ bool ThreadClientLock::needLockGlobal(ClientCounterObj &cc, int client_account_i
 
     return result;
 }
+
+
+bool ThreadClientLock::hasFullHtml() {
+    return true;
+}
+
+
+void ThreadClientLock::htmlfull(stringstream &html) {
+    this->html(html);
+
+    if (!data->prepareData(preparedData, time(nullptr))) {
+        return;
+    }
+
+    set<int> activeClients = preparedData.activeCounter->activeClients;
+    set<int> activeNumbers = preparedData.activeCounter->activeNumbers;
+    set<int> activeTrunks = preparedData.activeCounter->activeTrunks;
+    map<int, map<int, ServiceNumber>> clientNumbers = preparedData.activeCounter->clientNumbers;
+    map<int, map<int, ServiceTrunk>> clientTrunks = preparedData.activeCounter->clientTrunks;
+
+
+
+    html << "<table border=1>";
+    html << "<tr>";
+    html << "<th rowspan>Active client</th>";
+    html << "<th colspan=2>Numbers</th>";
+    html << "<th colspan=3>Trunks</th>";
+    html << "</tr>";
+    html << "<tr>";
+    html << "<th>Service ID</th>";
+    html << "<th>DID</th>";
+    html << "<th>Service ID</th>";
+    html << "<th>Trunk ID</th>";
+    html << "<th>Trunk Name</th>";
+    html << "</tr>";
+    for (int clientId : preparedData.activeCounter->activeClients) {
+        html << "<tr>";
+        html << "<td valign=top>" << clientId << "</td>";
+        html << "<td valign=top>";
+        {
+            map<int, ServiceNumber> numbers = preparedData.activeCounter->clientNumbers[clientId];
+            html << "<table>";
+            for (auto it: numbers) {
+                html << "<tr>";
+                html << "<td>" << it.second.id << "</td>";
+                html << "<td>" << it.second.did << "</td>";
+                html << "</tr>";
+            }
+            html << "</table>";
+        }
+        html << "</td>";
+        html << "<td valign=top>";
+        {
+            map<int, ServiceTrunk> trunks = preparedData.activeCounter->clientTrunks[clientId];
+            html << "<table>";
+            for (auto it: trunks) {
+                Trunk * trunk = preparedData.trunk->find(it.second.trunk_id);
+                html << "<tr>";
+                html << "<td>" << it.second.id << "</td>";
+                html << "<td>" << it.second.trunk_id << "</td>";
+                html << "<td>" << (trunk != nullptr ? (const char *)&trunk->name[0] : "")  << "</td>";
+                html << "</tr>";
+            }
+            html << "</table>";
+        }
+        html << "</td>";
+        html << "</tr>";
+    }
+    html << "</table>";
+
+}

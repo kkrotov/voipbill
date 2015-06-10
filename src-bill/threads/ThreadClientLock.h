@@ -17,6 +17,11 @@ class ThreadClientLock : public Thread {
     bool needLockLocal(ClientCounterObj &cc, int client_account_id);
     bool needLockGlobal(ClientCounterObj &cc, int client_account_id);
 
+
+public:
+    virtual bool hasFullHtml() override;
+    virtual void htmlfull(stringstream &html) override;
+
 public:
     ThreadClientLock();
     static const char* idName() { return "client_lock"; }
