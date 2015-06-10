@@ -27,7 +27,7 @@ void ThreadFetchCdr::run() {
     }
 
     while (!cdrLoader.load(rows_per_request)) {
-        boost::this_thread::interruption_point();
+
     }
 
 }

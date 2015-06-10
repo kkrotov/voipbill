@@ -24,7 +24,6 @@ public:
 
         html << "<br/>\n";
         html << "main.web_port: " << app().conf.web_port << "<br/>\n";
-        html << "main.test_mode: " << app().conf.test_mode << "<br/>\n";
         html << "<br/>\n";
         html << "log.grouping_interval: " << app().conf.log_grouping_interval << "<br/>\n";
         html << "<br/>\n";

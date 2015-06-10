@@ -4,8 +4,9 @@
 #include "../classes/Exception.h"
 #include "../classes/Timer.h"
 #include "../classes/Log.h"
-#include <boost/thread.hpp>
+#include <thread>
 #include <boost/signals2.hpp>
+#include "../classes/ThreadInterrupted.h"
 
 enum ThreadStatus {
     THREAD_CREATED, THREAD_WAITING, THREAD_PREPARING, THREAD_RUNNING, THREAD_PAUSED, THREAD_STOPPED
@@ -26,7 +27,7 @@ public:
     boost::signals2::signal<void(Thread *) > onFinished;
     boost::signals2::signal<void(Thread *) > onRealStatusChanged;
 
-    boost::thread task_thread;
+    std::thread task_thread;
 
     virtual ~Thread();
 

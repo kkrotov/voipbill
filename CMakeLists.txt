@@ -17,7 +17,6 @@ set(COMMON_SOURCES
     src/classes/BDbTransaction.cpp
     src/classes/BaseLogWriter.cpp
     src/classes/Conf.cpp
-    src/classes/Daemon.cpp
     src/classes/Logger.cpp
     src/classes/LogWriterFile.cpp
     src/classes/LogWriterScreen.cpp
@@ -42,8 +41,6 @@ set(COMMON_SOURCES
     libs/boost/program_options/src/value_semantic.cpp
     libs/boost/program_options/src/variables_map.cpp
     libs/boost/program_options/src/winmain.cpp
-    libs/boost/thread/src/pthread/once_atomic.cpp
-    libs/boost/thread/src/pthread/thread.cpp
 )
 
 #set(AUTH_SOURCES

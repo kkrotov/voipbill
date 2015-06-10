@@ -10,9 +10,6 @@ using namespace std;
 
 class Conf {
 public:
-    string app_directory;
-    string app_name;
-
     string config_file;
     string pid_file;
 
@@ -26,12 +23,10 @@ public:
 
     unsigned short log_grouping_interval;
 
-    bool init(int argc, char* argv[]);
+    bool readConfig(string config_file, string pid_file);
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt) = 0;
 
 private:
-    bool parse_cmd_line(int argc, char* argv[]);
-    bool parse_config_file();
-    bool prepare();
+
 };

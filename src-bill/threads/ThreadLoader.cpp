@@ -155,7 +155,7 @@ void ThreadLoader::run() {
 
             }
 
-            boost::this_thread::interruption_point();
+
 
         }
     } catch (Exception &e) {

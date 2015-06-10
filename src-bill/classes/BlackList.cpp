@@ -103,7 +103,7 @@ void BlackList::log_lock_phone(const string &phone) {
 
                 if (client->isConsumedCreditLimit(sum_balance)) {
                     str = str + " / Credit limit "
-                            + string_fmt("%.2f", client->balance + client->credit - sum_balance) + " = "
+                            + string_fmt("%.2f", client->balance + client->credit + sum_balance) + " = "
                             + string_fmt("%.2f", client->balance) + " + "
                             + lexical_cast<string>(client->credit) + " + "
                             + string_fmt("%.2f", sum_balance);
@@ -111,14 +111,14 @@ void BlackList::log_lock_phone(const string &phone) {
 
                 if (client->isConsumedDailyLimit(sum_day)) {
                     str = str + " / Daily limit "
-                            + string_fmt("%.2f", client->limit_d - sum_day) + " = "
+                            + string_fmt("%.2f", client->limit_d + sum_day) + " = "
                             + lexical_cast<string>(client->limit_d) + " + "
                             + string_fmt("%.2f", sum_day);
                 }
 
                 if (client->isConsumedMonthlyLimit(sum_month)) {
                     str = str + " / Monthly limit "
-                            + string_fmt("%.2f", client->limit_m - sum_month) + " = "
+                            + string_fmt("%.2f", client->limit_m + sum_month) + " = "
                             + lexical_cast<string>(client->limit_m) + " + "
                             + string_fmt("%.2f", sum_month);
                 }

@@ -36,23 +36,23 @@ void TaskRecalc::run() {
 
     Log::notice("Recalc calls: date " + string_time(date_from) +", id >= " + lexical_cast<string>(recalc_from_call_id));
 
-    boost::this_thread::interruption_point();
+
 
     setStatus("4. delete calls_raw from id " + lexical_cast<string>(recalc_from_call_id));
     db_calls.exec("delete from calls_raw.calls_raw where id>=" + lexical_cast<string>(recalc_from_call_id));
 
-    boost::this_thread::interruption_point();
+
 
     setStatus("5. recalc temp data");
     DataContainer data;
     data.loadAll(&db_calls);
 
-    boost::this_thread::interruption_point();
+
 
     setStatus("6. recalc temp counters");
     billingData.loadAll(&db_calls);
 
-    boost::this_thread::interruption_point();
+
 
     setStatus("7. calc");
 
@@ -93,12 +93,11 @@ void TaskRecalc::run() {
             saver.save(save_part_count);
         }
 
-        boost::this_thread::interruption_point();
 
         setStatus("7. calc " + lexical_cast<string>(billingData.savedCallsCount));
     }
 
-    boost::this_thread::interruption_point();
+
 
     setStatus("8. waiting fetch cdr lock");
     unique_lock<mutex> lock_fetch_cdr(DataBillingContainer::instance()->fetchCdrLock);
@@ -119,7 +118,7 @@ void TaskRecalc::run() {
     lock_calc_calls.unlock();
     lock_save_calls.unlock();
 
-    boost::this_thread::interruption_point();
+
 
     setStatus("13. delete calls_raw from main");
     db_main->exec("delete from calls_raw.calls_raw where server_id = " + app().conf.str_instance_id + " and id>=" + lexical_cast<string>(recalc_from_call_id));

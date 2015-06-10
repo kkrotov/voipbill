@@ -1,14 +1,16 @@
 #pragma once
 
+#include <set>
 #include "../../src/threads/Thread.h"
 #include "../../src/classes/BDb.h"
 #include "../data/DataCurrentCallsContainer.h"
 
+
 class ThreadCheckStartTable : public Thread {
     BDb db_calls;
 
-    int countWaitingForFinishCalls;
-    int countForceFinishedCalls;
+    size_t countWaitingForFinishCalls;
+    size_t countForceFinishedCalls;
 
     void run();
 

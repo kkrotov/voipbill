@@ -15,6 +15,7 @@ ThreadCheckStartTable::ThreadCheckStartTable() {
 
 void ThreadCheckStartTable::run() {
     if (!UdpControlClient::ready()) return;
+    if (!DataCurrentCallsContainer::instance()->ready()) return;
 
     auto cdrs = DataCurrentCallsContainer::instance()->currentCdr.get();
 

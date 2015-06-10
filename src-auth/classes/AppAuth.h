@@ -26,8 +26,7 @@ protected:
     shared_ptr<ConfigVersionData> configVersionData;
     mutex configVersionDataMutex;
     void runApp();
-    void initLogger();
-    
+
 };
 
 AppAuth & app();

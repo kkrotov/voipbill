@@ -22,16 +22,16 @@ Thread::~Thread() {
 void Thread::start(int exitAfterRunsCount, bool skipPrepare) {
     this->exitAfterRunsCount = exitAfterRunsCount;
     this->status_prepared = skipPrepare;
-    boost::thread t(&Thread::operator(), this);
+    std::thread t(&Thread::operator(), this);
     std::swap(task_thread, t);
 }
 
 void Thread::ssleep(unsigned int seconds) {
-    boost::this_thread::sleep_for(boost::chrono::seconds(seconds));
+    std::this_thread::sleep_for(std::chrono::seconds(seconds));
 }
 
 void Thread::usleep(unsigned int milliseconds) {
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(milliseconds));
+    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
 }
 
 void Thread::threadTotalsHeader(stringstream &html) {
@@ -148,7 +148,7 @@ void Thread::operator()() {
             ssleep(threadPrepareSleepSeconds);
             continue;
 
-        } catch (boost::thread_interrupted const& e) {
+        } catch (ThreadInterrupted const& e) {
             continue;
         } catch (Exception &e) {
             e.addTrace("Thread(" + name + "): ");
@@ -173,7 +173,7 @@ void Thread::operator()() {
 
         try {
             ssleep(threadSleepSeconds);
-        } catch (boost::thread_interrupted const& e) {
+        } catch (ThreadInterrupted const& e) {
             continue;
         }
     }
@@ -186,7 +186,6 @@ void Thread::setStatus(ThreadStatus status) {
     if (status == THREAD_STOPPED) {
         onShutdown();
     }
-    task_thread.interrupt();
 }
 
 void Thread::setRealStatus(ThreadStatus real_status) {

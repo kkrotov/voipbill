@@ -27,8 +27,9 @@ public:
 
     App();
 
-    virtual bool init(int argc, char* argv[]);
-    void run();
+    bool start();
+    bool stop();
+    bool run();
 
     void setStatus(AppStatus status);
     void setRealStatus(AppStatus real_status);
@@ -37,5 +38,4 @@ public:
 
 protected:
     virtual void runApp() = 0;
-    virtual void initLogger() = 0;
 };

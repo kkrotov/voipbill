@@ -12,6 +12,15 @@ Logger::~Logger() {
 void Logger::logMessage(pLogMessage message) {
     lock_guard<std::mutex> lock(mutex);
 
+    if (grouping_interval == 0) {
+        message->time = time(NULL);
+        message->timeInGroup = message->time;
+        message->count = 1;
+        message->countInGroup = 0;
+        queue.push(message);
+        return;
+    }
+
     processGroupingMessages();
 
     pLogMessage history_message = history[message->message];
@@ -43,7 +52,9 @@ void Logger::processLogQueue() {
     {
         lock_guard<std::mutex> lock(mutex);
 
-        processGroupingMessages();
+        if (grouping_interval > 0) {
+            processGroupingMessages();
+        }
 
         while (!queue.empty()) {
             messages.push_back(queue.front());

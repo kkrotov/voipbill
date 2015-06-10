@@ -1,5 +1,4 @@
 #include "../classes/AppBill.h"
-#include "../../src/classes/Daemon.h"
 
 #include "../threads/ThreadWeb.h"
 #include "../threads/ThreadLog.h"
@@ -29,52 +28,20 @@ AppBill & app() {
     return appVar;
 }
 
-bool AppBill::init(int argc, char* argv[]) {
-
-    if (!conf.init(argc, argv))
-        return false;
-
-    return App::init(argc, argv);
-}
-
 void AppBill::runApp() {
 
-    Daemon::setPidFile(conf.pid_file);
-    
     registerAllThreads();
 
     ThreadWeb web;
 
-    boost::thread web_thread(boost::ref(web));
-    
-    if (conf.test_mode) {
-        runAppInTestMode();
-    } else {
-        runAppInSingleMode();
-    }
-    
+    std::thread web_thread(std::ref(web));
+
+    runAppInSingleMode();
+
     threads.joinAll();
 
     web.stop();
     web_thread.join();
-    
-    if (conf.test_mode) {
-        Log::flush();
-    }
-}
-
-void AppBill::initLogger() {
-
-    logger.setLogGroupingInterval(conf.log_grouping_interval);
-
-    logger.addLogWriter(pLogWriter(new LogWriterScreen()));
-
-    if (!conf.log_file_filename.empty())
-        logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file_filename, conf.log_file_min_level, conf.log_file_max_level)));
-
-    if (!conf.log_syslog_ident.empty())
-        logger.addLogWriter(pLogWriter(new LogWriterSyslog(conf.log_syslog_ident, conf.log_syslog_min_level, conf.log_syslog_max_level)));
-
 }
 
 template<class T>
@@ -139,23 +106,4 @@ void AppBill::runAppInSingleMode()
     for (auto thread: standardThreads) {
         threads.run(newThreadObject(thread));
     }
-}
-
-void AppBill::runAppInTestMode()
-{
-    for (auto threadName: conf.test_threads) {
-        Thread* thread = newThreadObject(threadName);
-        if (thread) {
-            thread->status = ThreadStatus::THREAD_RUNNING;
-            int runsCount = conf.test_threads_runs_count[threadName];
-            bool skipPrepare = conf.test_threads_skip_prepare[threadName];
-            thread->start(runsCount, skipPrepare);
-            thread->task_thread.join();
-            delete thread;
-        } else {
-            Log::error("UNKNOWN THREAD " + threadName);
-        }
-    }
-   
-    setStatus(AppStatus::APP_STOPPED);
 }

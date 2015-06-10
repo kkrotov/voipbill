@@ -22,11 +22,6 @@ public:
 
     unsigned short global_counters_select_interval;
 
-    bool test_mode;
-    std::vector<std::string> test_threads;
-    std::map<std::string, int> test_threads_runs_count;
-    std::map<std::string, bool> test_threads_skip_prepare;
-
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);
 };

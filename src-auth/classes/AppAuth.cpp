@@ -52,20 +52,6 @@ void AppAuth::runApp() {
     web_thread.join();
 }
 
-void AppAuth::initLogger() {
-
-    logger.setLogGroupingInterval(conf.log_grouping_interval);
-
-    logger.addLogWriter(pLogWriter(new LogWriterScreen()));
-
-    if (!conf.log_file_filename.empty())
-        logger.addLogWriter(pLogWriter(new LogWriterFile(conf.log_file_filename, conf.log_file_min_level, conf.log_file_max_level)));
-
-    if (!conf.log_syslog_ident.empty())
-        logger.addLogWriter(pLogWriter(new LogWriterSyslog(conf.log_syslog_ident, conf.log_syslog_min_level, conf.log_syslog_max_level)));
-
-}
-
 shared_ptr<ConfigVersionData> AppAuth::getConfigVersionData() {
     lock_guard<mutex> lock(configVersionDataMutex);
 

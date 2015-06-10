@@ -53,8 +53,6 @@ void ManagerPull::pull() {
                 }
             }
         }
-
-        boost::this_thread::interruption_point();
     }
 }
 

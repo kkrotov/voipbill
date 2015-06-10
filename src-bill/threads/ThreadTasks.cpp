@@ -92,7 +92,7 @@ void ThreadTasks::run() {
 
         current_task.reset();
 
-        boost::this_thread::interruption_point();
+
     }
 }
 
