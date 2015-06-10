@@ -116,17 +116,11 @@ void ThreadClientLock::htmlfull(stringstream &html) {
         return;
     }
 
-    set<int> activeClients = preparedData.activeCounter->activeClients;
-    set<int> activeNumbers = preparedData.activeCounter->activeNumbers;
-    set<int> activeTrunks = preparedData.activeCounter->activeTrunks;
-    map<int, map<int, ServiceNumber>> clientNumbers = preparedData.activeCounter->clientNumbers;
-    map<int, map<int, ServiceTrunk>> clientTrunks = preparedData.activeCounter->clientTrunks;
-
 
 
     html << "<table border=1>";
     html << "<tr>";
-    html << "<th rowspan>Active client</th>";
+    html << "<th rowspan=2>Active client</th>";
     html << "<th colspan=2>Numbers</th>";
     html << "<th colspan=3>Trunks</th>";
     html << "</tr>";
@@ -151,6 +145,7 @@ void ThreadClientLock::htmlfull(stringstream &html) {
                 html << "</tr>";
             }
             html << "</table>";
+            html << "&nbsp;";
         }
         html << "</td>";
         html << "<td valign=top>";
@@ -166,6 +161,7 @@ void ThreadClientLock::htmlfull(stringstream &html) {
                 html << "</tr>";
             }
             html << "</table>";
+            html << "&nbsp;";
         }
         html << "</td>";
         html << "</tr>";
