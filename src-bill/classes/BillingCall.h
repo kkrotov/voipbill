@@ -23,7 +23,7 @@ protected:
     void processRedirectNumber();
     void processGeo();
     void processDestinations();
-    int getDest(GeoPrefix * geoPrefix);
+    int getDest(int geo_id);
     void calcByTrunk();
     void calcByNumber();
     bool checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int type, Pricelist * &pricelist, PricelistPrice * &price);

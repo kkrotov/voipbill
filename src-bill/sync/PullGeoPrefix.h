@@ -13,7 +13,5 @@ public:
         fields.push_back("geo_id");
         fields.push_back("operator_id");
         fields.push_back("mob");
-        fields.push_back("dest");
-        fields.push_back("region");
     }
 };

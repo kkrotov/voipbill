@@ -25,6 +25,7 @@
 #include "PricelistPriceData.h"
 #include "NetworkPrefixData.h"
 #include "GeoData.h"
+#include "MobPrefixData.h"
 #include "GeoPrefixData.h"
 #include "ServiceNumberData.h"
 #include "ServiceTrunkData.h"
@@ -58,6 +59,7 @@ struct PreparedData {
     shared_ptr<PricelistPriceList> pricelistPrice;
     shared_ptr<NetworkPrefixList> networkPrefix;
     shared_ptr<GeoList> geo;
+    shared_ptr<MobPrefixList> mobPrefix;
     shared_ptr<GeoPrefixList> geoPrefix;
     shared_ptr<ServiceNumberList> serviceNumber;
     shared_ptr<ServiceTrunkList> serviceTrunk;
@@ -92,6 +94,7 @@ public:
     PricelistPriceData pricelistPrice;
     NetworkPrefixData networkPrefix;
     GeoData geo;
+    MobPrefixData mobPrefix;
     GeoPrefixData geoPrefix;
     ServiceNumberData serviceNumber;
     ServiceTrunkData serviceTrunk;
@@ -130,6 +133,7 @@ public:
         pricelistPrice.load(db);
         networkPrefix.load(db);
         geo.load(db);
+        mobPrefix.load(db);
         geoPrefix.load(db);
         serviceNumber.load(db);
         serviceTrunk.load(db);
@@ -251,6 +255,10 @@ public:
         }
 
         if ((data.geo = geo.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.mobPrefix = mobPrefix.get()) == nullptr) {
             return false;
         }
 

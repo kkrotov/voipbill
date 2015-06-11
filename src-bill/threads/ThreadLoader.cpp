@@ -119,6 +119,10 @@ void ThreadLoader::run() {
 
                 data->geoPrefix.load(&db_calls);
 
+            } else if (event == "mob_prefix") {
+
+                data->mobPrefix.load(&db_calls);
+
             } else if (event == "instance_settings") {
 
                 data->instanceSettings.load(&db_calls);

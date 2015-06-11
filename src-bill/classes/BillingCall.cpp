@@ -123,7 +123,7 @@ void BillingCall::processDestinations() {
 
     if (geoPrefix != nullptr) {
         call->mob = geoPrefix->mob;
-        call->destination_id = getDest(geoPrefix);
+        call->destination_id = getDest(geoPrefix->geo_id);
         if (trace != nullptr) {
             *trace << "INFO|SET DEST = " << call->destination_id << ", MOB = " << call->mob << "\n";
         }
@@ -131,24 +131,31 @@ void BillingCall::processDestinations() {
 
 }
 
-int BillingCall::getDest(GeoPrefix * geoPrefix) {
-    if (geoPrefix->geo_id == data->instanceSettings->city_geo_id) {
+int BillingCall::getDest(int geo_id) {
+    Geo * geo = data->geo->find(geo_id, trace);
+    if (geo == nullptr) {
         if (trace != nullptr) {
-            *trace << "INFO|GEO_PREFIX SET DEST = -1|CAUSE GEO_ID = INSTANCE_SETTINGS->CITY_GEO_ID" << "\n";
+            *trace << "ERROR|GEO NOT FOUND" << "\n";
         }
-        return -1;
-    } else {
-        auto regionIds = data->instanceSettings->getRegionIds();
-        for (auto it = regionIds.begin(); it != regionIds.end(); ++it) {
-            if (geoPrefix->region_id == *it) {
-                if (trace != nullptr) {
-                    *trace << "INFO|GEO_PREFIX SET DEST = 0|CAUSE REGION_ID IN INSTANCE_SETTINGS->REGION_IDS" << "\n";
-                }
-                return 0;
-            }
-        }
-        return geoPrefix->dest;
+        return 2;
     }
+
+    if (data->instanceSettings->city_id > 0 && geo->city_id == data->instanceSettings->city_id) {
+        return -1;
+    }
+
+    auto regionIds = data->instanceSettings->getRegionIds();
+    for (auto it = regionIds.begin(); it != regionIds.end(); ++it) {
+        if (geo->region_id == *it) {
+            return 0;
+        }
+    }
+
+    if (data->instanceSettings->country_id > 0 && geo->country_id == data->instanceSettings->country_id) {
+        return -1;
+    }
+
+    return 2;
 }
 
 void BillingCall::calcByTrunk() {

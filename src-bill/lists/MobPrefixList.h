@@ -1,34 +1,32 @@
 #pragma once
 
 #include "../../src/lists/ObjList.h"
-#include "../models/GeoPrefix.h"
+#include "../models/MobPrefix.h"
 
-class GeoPrefixList : public ObjList<GeoPrefix> {
+class MobPrefixList : public ObjList<MobPrefix> {
 protected:
 
     string sql(BDb * db) {
-        return "   select prefix, geo_id, operator_id, mob" \
-                "   from geo.prefix " \
+        return "   select prefix, mob" \
+                "   from geo.mob_prefix " \
                 "   order by prefix asc ";
     }
 
-    inline void parse_item(BDbResult &row, GeoPrefix * item) {
+    inline void parse_item(BDbResult &row, MobPrefix * item) {
         strcpy(item->prefix, row.get(0));
-        item->geo_id = row.get_i(1);
-        item->geo_operator_id = row.get_i(2);
-        item->mob = row.get_b(3);
+        item->mob = row.get_b(1);
     }
 
     struct key_prefix {
-        bool operator() (const GeoPrefix & left, char * prefix) {
+        bool operator() (const MobPrefix & left, char * prefix) {
             return strcmp(left.prefix, prefix) < 0;
         }
-        bool operator() (char * prefix, const GeoPrefix & right) {
+        bool operator() (char * prefix, const MobPrefix & right) {
             return strcmp(prefix, right.prefix) < 0;
         }
     };
 
-    GeoPrefix * _find(char * prefix) {
+    MobPrefix * _find(char * prefix) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -40,7 +38,7 @@ protected:
     }
 
 public:
-    GeoPrefix * find(long long int prefix, stringstream *trace = nullptr) {
+    MobPrefix * find(long long int prefix, stringstream *trace = nullptr) {
         char tmpPrefix[20];
         sprintf(tmpPrefix, "%lld", prefix);
         int len = strlen(tmpPrefix);
@@ -50,7 +48,7 @@ public:
             if (result != 0) {
 
                 if (trace != nullptr) {
-                    *trace << "FOUND|GEO_PREFIX|BY '" << prefix << "'" << "\n";
+                    *trace << "FOUND|MOB_PREFIX|BY '" << prefix << "'" << "\n";
                     *trace << "||";
                     result->dump(*trace);
                     *trace << "\n";
@@ -63,7 +61,7 @@ public:
         }
 
         if (trace != nullptr) {
-            *trace << "NOT FOUND|GEO_PREFIX|BY '" << prefix << "'" << "\n";
+            *trace << "NOT FOUND|MOB_PREFIX|BY '" << prefix << "'" << "\n";
         }
 
         return nullptr;
