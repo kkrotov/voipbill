@@ -7,7 +7,7 @@ class GeoPrefixList : public ObjList<GeoPrefix> {
 protected:
 
     string sql(BDb * db) {
-        return "   select prefix, geo_id, operator_id, mob" \
+        return "   select prefix, geo_id, operator_id" \
                 "   from geo.prefix " \
                 "   order by prefix asc ";
     }
@@ -16,7 +16,6 @@ protected:
         strcpy(item->prefix, row.get(0));
         item->geo_id = row.get_i(1);
         item->geo_operator_id = row.get_i(2);
-        item->mob = row.get_b(3);
     }
 
     struct key_prefix {

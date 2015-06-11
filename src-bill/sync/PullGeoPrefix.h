@@ -12,6 +12,5 @@ public:
         fields.push_back("prefix");
         fields.push_back("geo_id");
         fields.push_back("operator_id");
-        fields.push_back("mob");
     }
 };
