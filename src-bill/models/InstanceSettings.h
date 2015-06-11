@@ -4,6 +4,8 @@ struct InstanceSettings {
     int id;
     char region_id[100];
     int city_geo_id;
+    int country_id;
+    int city_id;
 
     vector<int> getRegionIds() {
         string temp = string(region_id);

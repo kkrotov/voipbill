@@ -160,6 +160,13 @@ public:
             html << "</tr>\n";
         }
         {
+            auto dl = &data->geo;
+            html << "<tr><th>geo</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+        }
+        {
             auto dl = &data->geoPrefix;
             html << "<tr><th>geoPrefix</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<

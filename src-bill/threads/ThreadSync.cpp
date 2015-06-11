@@ -1,8 +1,8 @@
 #include "ThreadSync.h"
-#include "../classes/AppBill.h"
 
 #include "../sync/PullClient.h"
 #include "../sync/PullDefs.h"
+#include "../sync/PullGeo.h"
 #include "../sync/PullGeoPrefix.h"
 #include "../sync/PullInstance.h"
 #include "../sync/PullNetworkPrefix.h"
@@ -43,6 +43,7 @@ ThreadSync::ThreadSync() {
     manager = ManagerPull::instance();
 
     manager->add(new PullClient());
+    manager->add(new PullGeo());
     manager->add(new PullGeoPrefix());
     manager->add(new PullInstance());
     manager->add(new PullNetworkPrefix());

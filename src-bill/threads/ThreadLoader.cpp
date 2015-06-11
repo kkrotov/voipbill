@@ -111,6 +111,14 @@ void ThreadLoader::run() {
 
                 data->pricelistPrice.load(&db_calls);
 
+            } else if (event == "geo") {
+
+                data->geo.load(&db_calls);
+
+            } else if (event == "prefix") {
+
+                data->geoPrefix.load(&db_calls);
+
             } else if (event == "instance_settings") {
 
                 data->instanceSettings.load(&db_calls);
