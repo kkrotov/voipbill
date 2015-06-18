@@ -47,17 +47,18 @@ void ThreadSyncCounters::save_client_counters() {
 
         if (sync_count == 0) {
             q.append(
-                    "INSERT INTO billing.clients_counters(client_id,region_id,amount_month,amount_month_sum,amount_day,amount_day_sum,amount_sum)VALUES");
+                    "INSERT INTO billing.clients_counters(client_id,region_id,amount_month,amount_month_sum,amount_day,amount_day_sum,amount_date,amount_sum)VALUES");
         } else {
             q.append(",");
         }
-        q.append(string_fmt("(%d,'%d','%s','%f','%s','%f','%f')",
+        q.append(string_fmt("(%d,'%d','%s','%f','%s','%f','%s','%f')",
                             account_id,
                             app().conf.instance_id,
                             string_date(value.amount_month).c_str(),
                             value.sum_month,
                             string_date(value.amount_day).c_str(),
                             value.sum_day,
+                            string_time(value.amount_date).c_str(),
                             value.sum));
         sync_count += 1;
     }

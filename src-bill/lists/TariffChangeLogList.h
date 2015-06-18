@@ -7,7 +7,7 @@ class TariffChangeLogList : public ObjList<TariffChangeLog> {
 protected:
 
     string sql(BDb * db) {
-        return "    select l.usage_id, l.tarif_id_local, l.tarif_id_local_mob, l.tarif_id_russia, l.tarif_id_russia_mob, l.tarif_id_intern, l.tarif_id_sng, " \
+        return "    select l.usage_id, l.tarif_id_local, l.tarif_id_local_mob, l.tarif_id_russia, l.tarif_id_russia_mob, l.tarif_id_intern " \
                 "           extract(epoch from l.date_activation) " \
                 "   from ( \n"
                 "            select usage_id, date_activation, max(id) as max_id from billing.tariff_change_log \n"
@@ -24,8 +24,7 @@ protected:
         item->tariff_id_russia = row.get_i(3);
         item->tariff_id_russia_mob = row.get_i(4);
         item->tariff_id_intern = row.get_i(5);
-        item->tariff_id_sng = row.get_i(6);
-        item->activation_date = row.get_ll(7);
+        item->activation_date = row.get_ll(6);
     }
 
 public:

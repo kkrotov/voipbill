@@ -164,7 +164,4 @@ struct Call {
         return destination_id == 2;
     }
 
-    bool isSNG() {
-        return destination_id == 3;
-    }
 };

@@ -9,6 +9,7 @@ struct ClientCounterObj {
     double sum_month;
     time_t amount_month;
     time_t amount_day;
+    time_t amount_date;
 
     double sumDay() {
         if (abs(amount_day - get_tday()) < 43200) {

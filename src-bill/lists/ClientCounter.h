@@ -128,7 +128,8 @@ public:
             "       c.id, " \
             "       COALESCE(m.m_sum, 0), " \
             "       COALESCE(d.d_sum, 0), " \
-            "       COALESCE(a.a_sum, 0) " \
+            "       COALESCE(a.a_sum, 0), " \
+            "       c.amount_date " \
             "   from billing.clients c  " \
             "   left join " \
             "       (   select account_id, sum(cost) m_sum from calls_raw.calls_raw c " \
@@ -187,6 +188,7 @@ public:
             cc.sum_day = res.get_d(2);
 
             cc.sum = res.get_d(3);
+            cc.amount_date = parseDateTime(res.get(4));
 
             counter[cc.client_id] = cc;
         }
@@ -200,7 +202,7 @@ public:
         db->exec("UPDATE billing.clients set sync=2 where sync=1");
 
         BDbResult res = db->query(
-            "   select c.id, COALESCE(a.a_sum,0) " \
+            "   select c.id, COALESCE(a.a_sum,0), c.amount_date " \
             "   from billing.clients c " \
             "   left join " \
             "       (   select account_id, sum(cost) a_sum " \
@@ -223,6 +225,7 @@ public:
             ClientCounterObj &cc = counter[res.get_i(0)];
             cc.client_id = res.get_i(0);
             cc.sum = res.get_d(1);
+            cc.amount_date = parseDateTime(res.get(2));
 
             marker++;
             changes[cc.client_id] = marker;

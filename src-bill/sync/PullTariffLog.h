@@ -20,6 +20,5 @@ public:
         fields.push_back("tarif_id_russia");
         fields.push_back("tarif_id_russia_mob");
         fields.push_back("tarif_id_intern");
-        fields.push_back("tarif_id_sng");
     }
 };

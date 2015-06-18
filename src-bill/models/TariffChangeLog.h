@@ -11,7 +11,6 @@ struct TariffChangeLog {
     int tariff_id_russia;
     int tariff_id_russia_mob;
     int tariff_id_intern;
-    int tariff_id_sng;
 
 
     void dump(stringstream &trace) {
@@ -24,7 +23,6 @@ struct TariffChangeLog {
         trace << "tariff_id_russia: " << tariff_id_russia << ", ";
         trace << "tariff_id_russia_mob: " << tariff_id_russia_mob << ", ";
         trace << "tariff_id_intern: " << tariff_id_intern << ", ";
-        trace << "tariff_id_sng: " << tariff_id_sng << ", ";
         trace << ")";
     }
 };

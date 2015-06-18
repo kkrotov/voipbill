@@ -390,8 +390,6 @@ void BillingCall::calcOrigByNumber(ServiceNumber *serviceNumber) {
         tariffId = logTariff->tariff_id_russia_mob;
     else if (call->isInternational())
         tariffId = logTariff->tariff_id_intern;
-    else if (call->isSNG())
-        tariffId = logTariff->tariff_id_sng;
 
     auto mainTariff = data->tariff->find(logTariff->tariff_id_local, trace);
     if (mainTariff == nullptr) {
