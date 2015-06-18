@@ -64,7 +64,7 @@ public:
             html << "<td nowrap>" << sum_month << "</td>\n";
             html << "<td nowrap>" << string_date(cc.amount_day) << "</td>\n";
             html << "<td nowrap>" << sum_day << "</td>\n";
-            html << "<td nowrap>" << (client != nullptr ? string_time(client->amount_date) : "") << "</td>\n";
+            html << "<td nowrap>" << string_time(cc.amount_date) << "</td>\n";
             html << "<td nowrap>" << sum_balance << "</td>\n";
 
             if (client != nullptr && client->hasCreditLimit()) {

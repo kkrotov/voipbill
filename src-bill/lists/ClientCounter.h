@@ -222,13 +222,16 @@ public:
         lock_guard<Spinlock> guard(lock);
 
         while (res.next()) {
-            ClientCounterObj &cc = counter[res.get_i(0)];
-            cc.client_id = res.get_i(0);
-            cc.sum = res.get_d(1);
-            cc.amount_date = parseDateTime(res.get(2));
+            auto iCc = counter.find(res.get_i(0));
+            if (iCc != counter.end() || abs(res.get_d(1)) > 0.00001) {
+                ClientCounterObj &cc = counter[res.get_i(0)];
+                cc.client_id = res.get_i(0);
+                cc.sum = res.get_d(1);
+                cc.amount_date = parseDateTime(res.get(2));
 
-            marker++;
-            changes[cc.client_id] = marker;
+                marker++;
+                changes[cc.client_id] = marker;
+            }
         }
 
         loadtime = time(nullptr);

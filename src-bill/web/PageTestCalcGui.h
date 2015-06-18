@@ -93,7 +93,7 @@ public:
             string column2 = traceColumns.size() > 1 ? traceColumns.at(1) : "";
             string column3 = traceColumns.size() > 2 ? traceColumns.at(2) : "";
 
-            if (column1 == "") continue;
+            if (column1 == "" && column2 == "" && column3 == "") continue;
 
             html << "<tr>\n";
             html << "<td nowrap style='text-align: left'>" << column1 << "</td>\n";

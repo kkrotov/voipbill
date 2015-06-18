@@ -70,12 +70,12 @@ public:
         if (trace != nullptr) {
 
             if (result != nullptr) {
-                *trace << "FOUND|SERVICE TRUNK|BY TRUNK ID '" << trunk_id << "', TIME '" << timestamp << "'" << "\n";
+                *trace << "FOUND|SERVICE TRUNK|BY TRUNK ID '" << trunk_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
                 *trace << "\n";
             } else {
-                *trace << "NOT FOUND|SERVICE TRUNK|BY TRUNK ID '" << trunk_id << "', TIME '" << timestamp << "'" << "\n";
+                *trace << "NOT FOUND|SERVICE TRUNK|BY TRUNK ID '" << trunk_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
             }
         }
 
@@ -98,7 +98,7 @@ public:
 
         if (begin < end) {
             if (trace != nullptr) {
-                *trace << "FOUND|SERVICE TRUNK|BY TRUNK ID '" << trunk_id << "', TIME '" << timestamp << "'" << "\n";
+                *trace << "FOUND|SERVICE TRUNK|BY TRUNK ID '" << trunk_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
             }
             for (auto it = begin; it != end; ++it) {
                 resultTrunks.push_back(&*it);
@@ -111,7 +111,7 @@ public:
             }
         } else {
             if (trace != nullptr) {
-                *trace << "NOT FOUND|SERVICE TRUNK|BY TRUNK ID '" << trunk_id << "', TIME '" << timestamp << "'" << "\n";
+                *trace << "NOT FOUND|SERVICE TRUNK|BY TRUNK ID '" << trunk_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
             }
         }
     }

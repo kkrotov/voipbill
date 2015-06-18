@@ -7,7 +7,7 @@ class TariffChangeLogList : public ObjList<TariffChangeLog> {
 protected:
 
     string sql(BDb * db) {
-        return "    select l.usage_id, l.tarif_id_local, l.tarif_id_local_mob, l.tarif_id_russia, l.tarif_id_russia_mob, l.tarif_id_intern " \
+        return "    select l.usage_id, l.tarif_id_local, l.tarif_id_local_mob, l.tarif_id_russia, l.tarif_id_russia_mob, l.tarif_id_intern, " \
                 "           extract(epoch from l.date_activation) " \
                 "   from ( \n"
                 "            select usage_id, date_activation, max(id) as max_id from billing.tariff_change_log \n"
@@ -86,12 +86,12 @@ public:
 
         if (trace != nullptr) {
             if (result != nullptr) {
-                *trace << "FOUND|TARIFF CHANGE LOG|BY SERVICE NUMBER ID '" << usage_id << "', TIME '" << timestamp << "'" << "\n";
+                *trace << "FOUND|TARIFF CHANGE LOG|BY SERVICE NUMBER ID '" << usage_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
                 *trace << "\n";
             } else {
-                *trace << "NOT FOUND|TARIFF CHANGE LOG|BY SERVICE NUMBER ID '" << usage_id << "', TIME '" << timestamp << "'" << "\n";
+                *trace << "NOT FOUND|TARIFF CHANGE LOG|BY SERVICE NUMBER ID '" << usage_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
             }
         }
 
