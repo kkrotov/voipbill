@@ -127,19 +127,19 @@ void BillingCall::processGeo() {
 
 void BillingCall::processDestinations() {
 
-    auto geoPrefix = data->geoPrefix->find(call->dst_number, trace);
-    if (geoPrefix != nullptr) {
-        call->destination_id = getDest(geoPrefix->geo_id);
-        if (trace != nullptr) {
-            *trace << "INFO|SET DEST = " << call->destination_id << "\n";
-        }
-    }
-
     auto mobPrefix = data->mobPrefix->find(call->dst_number, trace);
     if (mobPrefix != nullptr) {
         call->mob = mobPrefix->mob;
         if (trace != nullptr) {
             *trace << "INFO|SET MOB = " << call->mob << "\n";
+        }
+    }
+
+    auto geoPrefix = data->geoPrefix->find(call->dst_number, trace);
+    if (geoPrefix != nullptr) {
+        call->destination_id = getDest(geoPrefix->geo_id);
+        if (trace != nullptr) {
+            *trace << "INFO|SET DEST = " << call->destination_id << "\n";
         }
     }
 
@@ -154,7 +154,7 @@ int BillingCall::getDest(int geo_id) {
         return 2;
     }
 
-    if (data->instanceSettings->city_id > 0 && geo->city_id == data->instanceSettings->city_id) {
+    if (!call->mob && data->instanceSettings->city_id > 0 && geo->city_id == data->instanceSettings->city_id) {
         return -1;
     }
 

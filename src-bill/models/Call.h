@@ -132,14 +132,6 @@ struct Call {
         return destination_id < 0;
     }
 
-    bool isLocalOrZona() {
-        return destination_id <= 0;
-    }
-
-    bool isZona() {
-        return destination_id == 0;
-    }
-
     bool isZonaMob() {
         return destination_id == 0 && mob;
     }
