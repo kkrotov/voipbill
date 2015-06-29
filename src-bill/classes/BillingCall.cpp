@@ -270,7 +270,7 @@ void BillingCall::calcByNumber() {
         call->trunk_service_id = serviceTrunk->id;
     }
 
-    if (!trunk->auth_by_number) {
+    if (!trunk->our_trunk) {
 
         if (serviceTrunk == nullptr) {
             if (trace != nullptr) {
