@@ -66,6 +66,7 @@ class CdrParser(Daemon):
             ftp.login(ftp_user, ftp_password)
             tmpFile = open(tmpFileName, 'wb')
             ftp.retrbinary('RETR %s' % fileName, tmpFile.write)
+            #tmpFile.write('</OT_CDR_File>')
         finally:
             ftp.quit()
             if tmpFile is not None:
