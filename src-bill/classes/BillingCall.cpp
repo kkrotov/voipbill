@@ -107,6 +107,14 @@ void BillingCall::processRedirectNumber() {
 
 void BillingCall::processGeo() {
 
+    auto mobPrefix = data->mobPrefix->find(call->orig ? call->dst_number : call->src_number, trace);
+    if (mobPrefix != nullptr) {
+        call->geo_mob = mobPrefix->mob;
+        if (trace != nullptr) {
+            *trace << "INFO|SET GEO_MOB = " << call->geo_mob << "\n";
+        }
+    }
+
     auto geoPrefix = data->geoPrefix->find(call->orig ? call->dst_number : call->src_number, trace);
     if (geoPrefix != nullptr) {
         call->geo_id = geoPrefix->geo_id;
@@ -116,13 +124,6 @@ void BillingCall::processGeo() {
         }
     }
 
-    auto mobPrefix = data->mobPrefix->find(call->orig ? call->dst_number : call->src_number, trace);
-    if (mobPrefix != nullptr) {
-        call->geo_mob = mobPrefix->mob;
-        if (trace != nullptr) {
-            *trace << "INFO|SET GEO_MOB = " << call->geo_mob << "\n";
-        }
-    }
 }
 
 void BillingCall::processDestinations() {
@@ -166,7 +167,7 @@ int BillingCall::getDest(int geo_id) {
     }
 
     if (data->instanceSettings->country_id > 0 && geo->country_id == data->instanceSettings->country_id) {
-        return -1;
+        return 1;
     }
 
     return 2;
