@@ -16,8 +16,8 @@ struct TariffChangeLog {
     void dump(stringstream &trace) {
         trace << "(";
         trace << "usage_id " << usage_id << ", ";
-        trace << "activation_date: " << activation_date << ", ";
-        trace << "expire_dt: " << expire_dt << ", ";
+        trace << "activation_date: " << string_time(activation_date) << ", ";
+        trace << "expire_dt: " << string_time(expire_dt) << ", ";
         trace << "tariff_id_local: " << tariff_id_local << ", ";
         trace << "tariff_id_local_mob: " << tariff_id_local_mob << ", ";
         trace << "tariff_id_russia: " << tariff_id_russia << ", ";

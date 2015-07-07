@@ -7,7 +7,7 @@ class ClientList : public ObjList<Client> {
 protected:
 
     string sql(BDb * db) {
-        return "   select id, voip_limit_month, voip_limit_day, credit, balance, amount_date, last_payed_month, voip_disabled " \
+        return "   select id, voip_limit_month, voip_limit_day, credit, balance, amount_date, last_payed_month, voip_disabled, organization_id " \
                 "   from billing.clients " \
                 "   order by id asc ";
     }
@@ -21,6 +21,7 @@ protected:
         item->amount_date = parseDateTime(row.get(5));
         item->last_payed_month = parseDate(row.get(6));
         item->disabled = row.get_b(7);
+        item->organization_id = row.get_i(8);
     }
 
     struct key_id {

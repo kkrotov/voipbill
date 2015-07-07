@@ -20,6 +20,7 @@
 #include "TrunkPriorityData.h"
 #include "TrunkRuleData.h"
 #include "ClientData.h"
+#include "OrganizationData.h"
 #include "OperatorData.h"
 #include "PricelistData.h"
 #include "PricelistPriceData.h"
@@ -54,6 +55,7 @@ struct PreparedData {
     shared_ptr<TrunkPriorityList> trunkPriority;
     shared_ptr<TrunkRuleList> trunkRule;
     shared_ptr<ClientList> client;
+    shared_ptr<OrganizationList> organization;
     shared_ptr<OperatorList> voipOperator;
     shared_ptr<PricelistList> pricelist;
     shared_ptr<PricelistPriceList> pricelistPrice;
@@ -89,6 +91,7 @@ public:
     TrunkPriorityData trunkPriority;
     TrunkRuleData trunkRule;
     ClientData client;
+    OrganizationData organization;
     OperatorData voipOperator;
     PricelistData pricelist;
     PricelistPriceData pricelistPrice;
@@ -128,6 +131,7 @@ public:
         trunkPriority.load(db);
         trunkRule.load(db);
         client.load(db);
+        organization.load(db);
         voipOperator.load(db);
         pricelist.load(db);
         pricelistPrice.load(db);
@@ -235,6 +239,10 @@ public:
         }
 
         if ((data.client = client.get()) == nullptr) {
+            return false;
+        }
+
+        if ((data.organization = organization.get()) == nullptr) {
             return false;
         }
 

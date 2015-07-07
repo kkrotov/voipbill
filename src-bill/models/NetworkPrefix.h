@@ -11,8 +11,8 @@ struct NetworkPrefix {
         trace << "(";
         trace << "network_config_id: " << network_config_id << ", ";
         trace << "prefix: " << prefix << ", ";
-        trace << "date_from: " << date_from << ", ";
-        trace << "date_to: " << date_to << ", ";
+        trace << "date_from: " << string_time(date_from) << ", ";
+        trace << "date_to: " << string_time(date_to) << ", ";
         trace << "network_type_id: " << network_type_id << ", ";
         trace << ")";
     }

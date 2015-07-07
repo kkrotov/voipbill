@@ -132,6 +132,13 @@ public:
             html << "</tr>\n";
         }
         {
+            auto dl = &data->organization;
+            html << "<tr><th>organization</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+        }
+        {
             auto dl = &data->voipOperator;
             html << "<tr><th>voipOperator</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<

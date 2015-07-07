@@ -16,10 +16,12 @@ public:
         auto billingData = DataBillingContainer::instance();
 
         auto clientList = data->client.get();
+        auto organizationList = data->organization.get();
         auto clientCounter = billingData->clientCounter.get();
         auto clientLock = billingData->clientLock.get();
 
         if (clientList == nullptr) return;
+        if (organizationList == nullptr) return;
         if (clientCounter == nullptr) return;
         if (clientLock == nullptr || !clientLock->isReady) return;
 
@@ -40,19 +42,29 @@ public:
         for (auto lock : locks) {
             int client_id = lock.client_id;
             ClientCounterObj value = clientCounter->get(client_id);
-            double sum_month = value.sumMonth();
-            double sum_day = value.sumDay();
-            double sum_balance = value.sumBalance();
+
+            double tax_rate = 0;
 
             auto client = clientList->find(client_id);
+            if (client != nullptr) {
+                auto organization = organizationList->find(client->organization_id, time(nullptr));
+                if (organization != nullptr) {
+                    tax_rate = organization->tax_rate / 100.0;
+                }
+            }
+
+            double sum_month = value.sumMonth(tax_rate);
+            double sum_day = value.sumDay(tax_rate);
+            double sum_balance = value.sumBalance(tax_rate);
+
 
             double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
             if (data->globalCounters.ready()) {
                 auto globalCounter = data->globalCounters.get()->find(client_id);
                 if (globalCounter) {
-                    sum_balance_global += globalCounter->sumBalance();
-                    sum_day_global += globalCounter->sumDay();
-                    sum_month_global += globalCounter->sumMonth();
+                    sum_balance_global += globalCounter->sumBalance(tax_rate);
+                    sum_day_global += globalCounter->sumDay(tax_rate);
+                    sum_month_global += globalCounter->sumMonth(tax_rate);
                 }
             }
 

@@ -19,8 +19,8 @@ struct ServiceTrunk {
         trace << "id: " << id << ", ";
         trace << "client_account_id: " << client_account_id << ", ";
         trace << "trunk_id: " << trunk_id << ", ";
-        trace << "activation_dt: " << activation_dt << ", ";
-        trace << "expire_dt: " << expire_dt << ", ";
+        trace << "activation_dt: " << string_time(activation_dt) << ", ";
+        trace << "expire_dt: " << string_time(expire_dt) << ", ";
         trace << "orig_enabled: " << orig_enabled << ", ";
         trace << "term_enabled: " << term_enabled << ", ";
         trace << "orig_min_payment: " << orig_min_payment << ", ";

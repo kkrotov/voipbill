@@ -14,7 +14,7 @@ protected:
     void run();
 
     bool limitControlKillNeeded(Call &call);
-    void fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double &globalMonthSum);
+    void fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double &globalMonthSum, double tax_rate);
 
 public:
     ThreadLimitControl();

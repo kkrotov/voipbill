@@ -1,6 +1,7 @@
 #include "ThreadSync.h"
 
 #include "../sync/PullClient.h"
+#include "../sync/PullOrganization.h"
 #include "../sync/PullDefs.h"
 #include "../sync/PullGeo.h"
 #include "../sync/PullMobPrefix.h"
@@ -44,6 +45,7 @@ ThreadSync::ThreadSync() {
     manager = ManagerPull::instance();
 
     manager->add(new PullClient());
+    manager->add(new PullOrganization());
     manager->add(new PullGeo());
     manager->add(new PullMobPrefix());
     manager->add(new PullGeoPrefix());

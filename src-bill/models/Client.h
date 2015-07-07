@@ -9,6 +9,7 @@ struct Client {
     bool disabled;
     time_t amount_date;
     time_t last_payed_month;
+    int organization_id;
 
     bool hasCreditLimit() {
         return credit >= 0;

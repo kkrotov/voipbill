@@ -19,5 +19,6 @@ public:
         fields.push_back("credit");
         fields.push_back("amount_date");
         fields.push_back("last_payed_month");
+        fields.push_back("organization_id");
     }
 };

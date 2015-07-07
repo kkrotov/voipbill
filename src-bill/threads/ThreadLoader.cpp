@@ -131,6 +131,10 @@ void ThreadLoader::run() {
 
                 data->networkPrefix.load(&db_calls);
 
+            } else if (event == "organization") {
+
+                data->organization.load(&db_calls);
+
             } else if (event == "operator") {
 
                 data->voipOperator.load(&db_calls);
