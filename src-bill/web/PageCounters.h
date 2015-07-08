@@ -43,19 +43,19 @@ public:
         for (ClientCounterObj &cc : clients) {
             int client_id = cc.client_id;
 
-            double tax_rate = 0;
+            double vat_rate = 0;
 
             auto client = clientList->find(client_id);
             if (client != nullptr) {
                 auto organization = organizationList->find(client->organization_id, time(nullptr));
                 if (organization != nullptr) {
-                    tax_rate = organization->tax_rate / 100.0;
+                    vat_rate = organization->vat_rate;
                 }
             }
 
-            double sum_month = cc.sumMonth(tax_rate);
-            double sum_day = cc.sumDay(tax_rate);
-            double sum_balance = cc.sumBalance(tax_rate);
+            double sum_month = cc.sumMonth(vat_rate);
+            double sum_day = cc.sumDay(vat_rate);
+            double sum_balance = cc.sumBalance(vat_rate);
 
 
 
@@ -66,9 +66,9 @@ public:
             if (data->globalCounters.ready()) {
                 auto globalCounter = data->globalCounters.get()->find(client_id);
                 if (globalCounter) {
-                    sum_balance_global += globalCounter->sumBalance(tax_rate);
-                    sum_day_global += globalCounter->sumDay(tax_rate);
-                    sum_month_global += globalCounter->sumMonth(tax_rate);
+                    sum_balance_global += globalCounter->sumBalance(vat_rate);
+                    sum_day_global += globalCounter->sumDay(vat_rate);
+                    sum_month_global += globalCounter->sumMonth(vat_rate);
                 }
             }
 

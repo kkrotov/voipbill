@@ -17,7 +17,7 @@ protected:
         item->organization_id = row.get_i(1);
         item->actual_from = row.get_ll(2);
         item->actual_to = row.get_ll(3) + 86400 - 1;
-        item->tax_rate = row.get_d(4);
+        item->vat_rate = row.get_d(4) / 100.0;
     }
 
     struct key_organization_id {

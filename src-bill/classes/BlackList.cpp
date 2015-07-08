@@ -97,16 +97,12 @@ void BlackList::log_lock_phone(const string &phone) {
 
             if (DataBillingContainer::instance()->ready()) {
 
-                double tax_rate = 0;
-                auto organization = preparedData.organization->find(client->organization_id, time(nullptr));
-                if (organization != nullptr) {
-                    tax_rate = organization->tax_rate / 100.0;
-                }
+                double vat_rate = preparedData.getVatRate(client);
 
                 ClientCounterObj clientCounter = DataBillingContainer::instance()->clientCounter.get()->get(client->id);
-                double sum_month = clientCounter.sumMonth(tax_rate);
-                double sum_day = clientCounter.sumDay(tax_rate);
-                double sum_balance = clientCounter.sumBalance(tax_rate);
+                double sum_month = clientCounter.sumMonth(vat_rate);
+                double sum_day = clientCounter.sumDay(vat_rate);
+                double sum_balance = clientCounter.sumBalance(vat_rate);
 
                 if (client->isConsumedCreditLimit(sum_balance)) {
                     str = str + " / Credit limit "

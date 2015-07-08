@@ -69,6 +69,17 @@ struct PreparedData {
     shared_ptr<TariffList> tariff;
     shared_ptr<TariffChangeLogList> tariffChangeLog;
     shared_ptr<ActiveCounter> activeCounter;
+
+    double getVatRate(Client * client)
+    {
+        if (client != nullptr) {
+            auto org = organization->find(client->organization_id, time(nullptr));
+            if (org != nullptr) {
+                return org->vat_rate;
+            }
+        }
+        return 0;
+    }
 };
 
 class DataContainer {

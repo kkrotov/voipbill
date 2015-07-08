@@ -68,16 +68,11 @@ bool ThreadClientLock::needLockLocal(ClientCounterObj &cc, int client_account_id
 
     auto client = preparedData.client->find(client_account_id);
     if (client != nullptr) {
-        double tax_rate = 0;
-
-        auto organization = preparedData.organization->find(client->organization_id, time(nullptr));
-        if (organization != nullptr) {
-            tax_rate = organization->tax_rate / 100.0;
-        }
+        double vat_rate = preparedData.getVatRate(client);
 
         auto globalCounter = data->globalCounters.get()->find(client->id);
 
-        double spentBalanceSum = cc.sumBalance(tax_rate) + (globalCounter ? globalCounter->sumBalance(tax_rate) : 0.0);
+        double spentBalanceSum = cc.sumBalance(vat_rate) + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
 
         if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth()) {
             result = true;
@@ -92,18 +87,13 @@ bool ThreadClientLock::needLockGlobal(ClientCounterObj &cc, int client_account_i
 
     auto client = preparedData.client->find(client_account_id);
     if (client != nullptr) {
-        double tax_rate = 0;
-
-        auto organization = preparedData.organization->find(client->organization_id, time(nullptr));
-        if (organization != nullptr) {
-            tax_rate = organization->tax_rate / 100.0;
-        }
+        double vat_rate = preparedData.getVatRate(client);
 
         auto globalCounter = data->globalCounters.get()->find(client->id);
 
-        double spentBalanceSum = cc.sumBalance(tax_rate) + (globalCounter ? globalCounter->sumBalance(tax_rate) : 0.0);
-        double spentDaySum = cc.sumDay(tax_rate) + (globalCounter ? globalCounter->sumDay(tax_rate) : 0.0);
-        double spentMonthSum = cc.sumMonth(tax_rate) + (globalCounter ? globalCounter->sumMonth(tax_rate) : 0.0);
+        double spentBalanceSum = cc.sumBalance(vat_rate) + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
+        double spentDaySum = cc.sumDay(vat_rate) + (globalCounter ? globalCounter->sumDay(vat_rate) : 0.0);
+        double spentMonthSum = cc.sumMonth(vat_rate) + (globalCounter ? globalCounter->sumMonth(vat_rate) : 0.0);
 
         if (client->isConsumedCreditLimit(spentBalanceSum) ||
             client->isConsumedDailyLimit(spentDaySum) ||

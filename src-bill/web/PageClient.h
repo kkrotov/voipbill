@@ -40,34 +40,29 @@ public:
             return;
         }
 
-        double tax_rate = 0;
-
-        auto organization = preparedData.organization->find(client->organization_id, time(nullptr));
-        if (organization != nullptr) {
-            tax_rate = organization->tax_rate / 100.0;
-        }
+        double vat_rate = preparedData.getVatRate(client);
 
         double sum_month, sum_day, sum_balance;
         double sum_month2, sum_day2, sum_balance2;
         ClientCounterObj clientCounter = billingData->clientCounter.get()->get(client_id);
         ClientLockObj clientLock = billingData->clientLock.get()->get(client_id);
-        sum_month = clientCounter.sumMonth(tax_rate);
-        sum_day = clientCounter.sumDay(tax_rate);
-        sum_balance = clientCounter.sumBalance(tax_rate);
+        sum_month = clientCounter.sumMonth(vat_rate);
+        sum_day = clientCounter.sumDay(vat_rate);
+        sum_balance = clientCounter.sumBalance(vat_rate);
 
 
         ClientCounterObj c2 = currentCallsData->getClientCounter()->get(client_id);
-        sum_balance2 = c2.sumBalance(tax_rate);
-        sum_day2 = c2.sumDay(tax_rate);
-        sum_month2 = c2.sumMonth(tax_rate);
+        sum_balance2 = c2.sumBalance(vat_rate);
+        sum_day2 = c2.sumDay(vat_rate);
+        sum_month2 = c2.sumMonth(vat_rate);
 
         double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
         if (data->globalCounters.ready()) {
             auto globalCounter = data->globalCounters.get()->find(client_id);
             if (globalCounter) {
-                sum_balance_global += globalCounter->sumBalance(tax_rate);
-                sum_day_global += globalCounter->sumDay(tax_rate);
-                sum_month_global += globalCounter->sumMonth(tax_rate);
+                sum_balance_global += globalCounter->sumBalance(vat_rate);
+                sum_day_global += globalCounter->sumDay(vat_rate);
+                sum_month_global += globalCounter->sumMonth(vat_rate);
             }
         }
 
