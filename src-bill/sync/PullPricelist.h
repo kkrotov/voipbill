@@ -21,5 +21,6 @@ public:
         fields.push_back("local_network_config_id");
         fields.push_back("initiate_mgmn_cost");
         fields.push_back("initiate_zona_cost");
+        fields.push_back("price_include_vat");
     }
 };

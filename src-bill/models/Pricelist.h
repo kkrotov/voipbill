@@ -10,6 +10,7 @@ struct Pricelist {
     int local_network_config_id;
     double initiate_mgmn_cost;
     double initiate_zona_cost;
+    bool price_include_vat;
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -22,6 +23,7 @@ struct Pricelist {
         trace << "local_network_config_id: " << local_network_config_id << ", ";
         trace << "initiate_mgmn_cost " << initiate_mgmn_cost << ", ";
         trace << "initiate_zona_cost: " << initiate_zona_cost << ", ";
+        trace << "price_include_vat: " << price_include_vat << ", ";
         trace << ")";
     }
 };

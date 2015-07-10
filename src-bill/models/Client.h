@@ -10,7 +10,7 @@ struct Client {
     time_t amount_date;
     time_t last_payed_month;
     int organization_id;
-    bool is_operator;
+    bool price_include_vat;
 
     bool hasCreditLimit() {
         return credit >= 0;
@@ -36,12 +36,8 @@ struct Client {
         return hasMonthlyLimit() && (limit_m + value < 0);
     }
 
-    bool isPriceIncludesVat() {
-        return !is_operator;
-    }
-
     double getPriceWithVat(double price, double vat_rate) {
-        if (isPriceIncludesVat()) {
+        if (price_include_vat) {
             return price;
         }
 

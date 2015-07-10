@@ -7,7 +7,7 @@ class PricelistList : public ObjList<Pricelist> {
 protected:
 
     string sql(BDb * db) {
-        return "   select  id, region, tariffication_by_minutes, tariffication_full_first_minute, orig, local, local_network_config_id, initiate_mgmn_cost, initiate_zona_cost " \
+        return "   select  id, region, tariffication_by_minutes, tariffication_full_first_minute, orig, local, local_network_config_id, initiate_mgmn_cost, initiate_zona_cost, price_include_vat " \
             "   from billing.pricelist " \
             "   order by id asc ";
     }
@@ -22,6 +22,7 @@ protected:
         item->local_network_config_id = row.get_i(6);
         item->initiate_mgmn_cost = row.get_d(7);
         item->initiate_zona_cost = row.get_d(8);
+        item->price_include_vat = row.get_b(9);
     }
 
     struct key_id {
