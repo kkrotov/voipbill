@@ -15,6 +15,6 @@ public:
         fields.push_back("organization_id");
         fields.push_back("actual_from");
         fields.push_back("actual_to");
-        fields.push_back("vat_rate");
+        fields.push_back("tax_rate");
     }
 };
