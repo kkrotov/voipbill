@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../data/DataCurrentCallsContainer.h"
+#include "../classes/Thread.h"
+#include "../classes/Repository.h"
 
 class ThreadCurrentCalls : public Thread {
 public:
     BDb db_calls;
-    DataCurrentCallsContainer * currentCalls;
+    Repository repository;
 
     void run();
 

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "BasePage.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Repository.h"
 
 class PageFmins : public BasePage {
 public:
@@ -12,9 +11,9 @@ public:
     void render(std::stringstream &html, map<string, string> &parameters) {
         renderHeader(html);
 
-        auto billingData = DataBillingContainer::instance();
+        Repository repository;
 
-        auto fminCounter = billingData->fminCounter.get();
+        auto fminCounter = repository.billingData->fminCounter.get();
 
         if (fminCounter == nullptr) return;
 

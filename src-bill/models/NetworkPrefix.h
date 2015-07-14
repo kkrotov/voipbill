@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct NetworkPrefix {
     int network_config_id;
     char prefix[20];

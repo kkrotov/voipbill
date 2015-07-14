@@ -1,8 +1,7 @@
 #pragma once
 
 #include "BasePage.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Repository.h"
 
 class PageLocks : public BasePage {
 public:
@@ -12,13 +11,12 @@ public:
     void render(std::stringstream &html, map<string, string> &parameters) {
         renderHeader(html);
 
-        auto data = DataContainer::instance();
-        auto billingData = DataBillingContainer::instance();
+        Repository repository;
 
-        auto clientList = data->client.get();
-        auto organizationList = data->organization.get();
-        auto clientCounter = billingData->clientCounter.get();
-        auto clientLock = billingData->clientLock.get();
+        auto clientList = repository.data->client.get();
+        auto organizationList = repository.data->organization.get();
+        auto clientCounter = repository.billingData->clientCounter.get();
+        auto clientLock = repository.billingData->clientLock.get();
 
         if (clientList == nullptr) return;
         if (organizationList == nullptr) return;
@@ -59,8 +57,8 @@ public:
 
 
             double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
-            if (data->globalCounters.ready()) {
-                auto globalCounter = data->globalCounters.get()->find(client_id);
+            if (repository.data->globalCounters.ready()) {
+                auto globalCounter = repository.data->globalCounters.get()->find(client_id);
                 if (globalCounter) {
                     sum_balance_global += globalCounter->sumBalance(vat_rate);
                     sum_day_global += globalCounter->sumDay(vat_rate);

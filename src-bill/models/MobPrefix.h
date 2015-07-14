@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct MobPrefix {
     char prefix[20];
     bool mob;

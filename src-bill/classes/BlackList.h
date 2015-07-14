@@ -4,7 +4,7 @@
 #include <map>
 #include <set>
 #include <string>
-#include "../../src/classes/Spinlock.h"
+#include "Spinlock.h"
 #include <vector>
 
 using namespace std;

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/Tariff.h"
+#include "../classes/AppBill.h"
 
 class TariffList : public ObjList<Tariff> {
 protected:
@@ -46,7 +47,7 @@ public:
 
         if (trace != nullptr) {
             if (result != nullptr) {
-                *trace << "FOUND|SEARCH TARIFF|BY ID '" << id << "'" << "\n";
+                *trace << "FOUND|TARIFF|BY ID '" << id << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
                 *trace << "\n";

@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "PageHome.h"
 #include "PageCalls.h"
 #include "PageData.h"
@@ -16,11 +17,13 @@
 #include "PageTestCalc.h"
 #include "PageTestCalcGui.h"
 #include "PageTestRoute.h"
+#include "http/request.hpp"
+#include "http/reply.hpp"
 
 class HttpHandler {
 private:
 
-    static void spawHandlers(vector<shared_ptr<BasePage>> &handlers) {
+    static void spawnHandlers(vector<shared_ptr<BasePage>> &handlers) {
         handlers.push_back(shared_ptr<BasePage>(new PageHome));
         handlers.push_back(shared_ptr<BasePage>(new PageCalls));
         handlers.push_back(shared_ptr<BasePage>(new PageData));
@@ -44,7 +47,7 @@ public:
     void operator()(const http::server4::request& req, http::server4::reply& rep) {
 
         vector<shared_ptr<BasePage>> handlers;
-        spawHandlers(handlers);
+        spawnHandlers(handlers);
 
         vector<string> uri;
         boost::algorithm::split(uri, req.uri, boost::algorithm::is_any_of("?"));

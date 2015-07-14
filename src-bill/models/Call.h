@@ -1,9 +1,16 @@
 #pragma once
 
+#include "../common.h"
+
 #include "Cdr.h"
 
 #define CALL_ORIG               true
 #define CALL_TERM               false
+
+struct DT {
+    time_t day;
+    time_t month;
+};
 
 struct Call {
     long long int id;

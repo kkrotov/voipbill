@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct GeoPrefix {
     char prefix[20];
     int geo_id;

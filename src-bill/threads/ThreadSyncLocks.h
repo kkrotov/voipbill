@@ -1,12 +1,11 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Thread.h"
+#include "../classes/Repository.h"
 
 class ThreadSyncLocks : public Thread {
     BDb db_main;
-
-    DataBillingContainer * billingData;
+    Repository repository;
 
     int last_sync_count;
     int total_sync_count;

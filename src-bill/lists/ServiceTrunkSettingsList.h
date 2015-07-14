@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/ServiceTrunkSettings.h"
 
 class ServiceTrunkSettingsList : public ObjList<ServiceTrunkSettings> {
@@ -49,41 +49,6 @@ protected:
     };
 
 public:
-    ServiceTrunkSettings * find(int trunk_id, int type, int order, stringstream *trace = nullptr) {
-        auto begin = this->data.begin();
-        auto end = this->data.end();
-        {
-            auto p = equal_range(begin, end, trunk_id, key_trunk_id());
-            begin = p.first;
-            end = p.second;
-        }
-        {
-            auto p = equal_range(begin, end, type, key_type());
-            begin = p.first;
-            end = p.second;
-        }
-        {
-            auto p = equal_range(begin, end, order, key_order());
-            begin = p.first;
-            end = p.second;
-        }
-        auto result = begin <  end ? &*begin : nullptr;
-
-        if (trace != nullptr) {
-
-            if (result != nullptr) {
-                *trace << "FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "', ORDER '" << order << "'" << "\n";
-                *trace << "||";
-                result->dump(*trace);
-                *trace << "\n";
-            } else {
-                *trace << "NOT FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "', ORDER '" << order << "'" << "\n";
-            }
-        }
-
-        return result;
-    }
-
     void findAll(vector<ServiceTrunkSettings *> &resultTrunkSettings, int trunk_id, int type, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();

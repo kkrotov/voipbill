@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct TrunkRule {
     int trunk_id;
     bool outgoing;

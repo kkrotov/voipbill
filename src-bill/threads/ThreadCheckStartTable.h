@@ -1,13 +1,14 @@
 #pragma once
 
 #include <set>
-#include "../../src/threads/Thread.h"
-#include "../../src/classes/BDb.h"
-#include "../data/DataCurrentCallsContainer.h"
+#include "../classes/Thread.h"
+#include "../classes/BDb.h"
+#include "../classes/Repository.h"
 
 
 class ThreadCheckStartTable : public Thread {
     BDb db_calls;
+    Repository repository;
 
     size_t countWaitingForFinishCalls;
     size_t countForceFinishedCalls;

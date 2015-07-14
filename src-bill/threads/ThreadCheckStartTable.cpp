@@ -15,9 +15,10 @@ ThreadCheckStartTable::ThreadCheckStartTable() {
 
 void ThreadCheckStartTable::run() {
     if (!UdpControlClient::ready()) return;
-    if (!DataCurrentCallsContainer::instance()->ready()) return;
+    if (!repository.currentCalls->ready()) return;
+    //return;
 
-    auto cdrs = DataCurrentCallsContainer::instance()->currentCdr.get();
+    auto cdrs = repository.currentCalls->currentCdr.get();
 
     set<long long int> opencaCalls;
     fetchOpencaCurrentCalls(opencaCalls);
@@ -58,7 +59,7 @@ void ThreadCheckStartTable::spawnWaitingForFinishCalls(set<long long int> &waiti
 
 void ThreadCheckStartTable::forceFinishCalls(set<long long int> &waitingForFinishCalls) {
 
-    auto newCdrs = DataCurrentCallsContainer::instance()->currentCdr.get();
+    auto newCdrs = repository.currentCalls->currentCdr.get();
 
     set<long long int> callsIds;
     for (size_t i = 0; i < newCdrs->size(); ++i) {

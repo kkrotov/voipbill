@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/common.h"
+#include "../common.h"
 
 struct ClientCounterObj {
     int client_id;
@@ -12,7 +12,7 @@ struct ClientCounterObj {
     time_t amount_date;
 
     double sumDay(double vat_rate) {
-        if (abs(amount_day - get_tday()) < 43200) {
+        if (abs(amount_day - get_tday(time(nullptr))) < 43200) {
             return sum_day * (1 + vat_rate);
         } else {
             return 0;
@@ -20,7 +20,7 @@ struct ClientCounterObj {
     }
 
     double sumMonth(double vat_rate) {
-        if (abs(amount_month - get_tmonth()) < 43200) {
+        if (abs(amount_month - get_tmonth(time(nullptr))) < 43200) {
             return sum_month * (1 + vat_rate);
         } else {
             return 0;

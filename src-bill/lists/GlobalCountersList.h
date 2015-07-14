@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/GlobalCounters.h"
 #include "../classes/AppBill.h"
 
@@ -8,8 +8,8 @@ class GlobalCountersList : public ObjList<GlobalCounters> {
 protected:
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
-        string sDay = string_date(get_tday());
-        string sMonth = string_date(get_tmonth());
+        string sDay = string_date(get_tday(time(nullptr)));
+        string sMonth = string_date(get_tmonth(time(nullptr)));
         return "   select client_id, sum(amount_sum), " \
            "          sum(case when amount_day = '" + sDay + "' then amount_day_sum else 0 end), " \
            "          sum(case when amount_month = '" + sMonth + "' then amount_month_sum else 0 end) " \

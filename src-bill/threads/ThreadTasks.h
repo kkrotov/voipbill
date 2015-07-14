@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../../src/tasks/Task.h"
+#include "../classes/Thread.h"
+#include "../classes/Task.h"
 
 class ThreadTasks : public Thread {
 protected:

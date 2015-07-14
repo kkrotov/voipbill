@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct RouteTableRoute {
     int route_table_id;
     int order;

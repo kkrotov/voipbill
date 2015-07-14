@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/classes/Conf.h"
+#include "Conf.h"
 #include <map>
 
 class ConfBill : public Conf {

@@ -1,14 +1,12 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../../src/classes/BDb.h"
-#include "../../src/classes/Timer.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Thread.h"
+#include "../classes/BDb.h"
+#include "../classes/Timer.h"
+#include "../classes/Repository.h"
 
 class ThreadLoader : public Thread {
-    DataContainer * data;
-    DataBillingContainer * billingData;
+    Repository repository;
     BDb db_calls;
 
     // флаг устанавливается когда счетчики посчитаны и загружены в память
@@ -21,9 +19,9 @@ class ThreadLoader : public Thread {
 
 public:
 
-    bool do_load_data(BDb *db = 0, DataContainer *data = 0);
+    bool do_load_data();
 
-    bool do_load_counters(BDb *db = 0, DataBillingContainer *billingData = 0);
+    bool do_load_counters();
 
     ThreadLoader();
     static const char* idName() { return "loader"; }

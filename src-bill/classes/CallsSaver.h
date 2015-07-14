@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../../src/classes/BDb.h"
-#include "../data/DataBillingContainer.h"
+#include "BDb.h"
+#include "Repository.h"
 
 class CallsSaver {
 protected:
     BDb * db;
-    DataBillingContainer * billingData;
+    Repository repository;
 public:
     CallsSaver();
     CallsSaver(BDb *db);

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "BasePage.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Repository.h"
 
 using namespace std;
 
@@ -14,223 +13,236 @@ public:
     void render(std::stringstream &html, map<string, string> &parameters) {
         renderHeader(html);
 
-        auto data = DataContainer::instance();
-        auto billingData = DataBillingContainer::instance();
+        Repository repository;
 
         html << "<table border=1 width=100%>";
         html << "<tr><th></th><th>Updated at</th><th>Size</th><th>Rows</th><th>Last time</th><th>Total time</th></tr>";
         {
-            auto dl = &data->server;
+            auto dl = &repository.data->server;
             html << "<tr><th>server</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->instanceSettings;
+            auto dl = &repository.data->instanceSettings;
             html << "<tr><th>instanceSettings</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->airp;
+            auto dl = &repository.data->airp;
             html << "<tr><th>airp</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->number;
+            auto dl = &repository.data->number;
             html << "<tr><th>number</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->outcome;
+            auto dl = &repository.data->outcome;
             html << "<tr><th>outcome</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->prefixlist;
+            auto dl = &repository.data->prefixlist;
             html << "<tr><th>prefixlist</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->prefixlistPrefix;
+            auto dl = &repository.data->prefixlistPrefix;
             html << "<tr><th>prefixlistPrefix</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->releaseReason;
+            auto dl = &repository.data->releaseReason;
             html << "<tr><th>releaseReason</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->routeCase;
+            auto dl = &repository.data->routeCase;
             html << "<tr><th>routeCase</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->routeTable;
+            auto dl = &repository.data->routeTable;
             html << "<tr><th>routeTable</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->routeTableRoute;
+            auto dl = &repository.data->routeTableRoute;
             html << "<tr><th>routeTableRoute</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->trunk;
+            auto dl = &repository.data->trunk;
             html << "<tr><th>trunk</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->trunkNumberPreprocessing;
+            auto dl = &repository.data->trunkNumberPreprocessing;
             html << "<tr><th>trunkNumberPreprocessing</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->trunkPriority;
+            auto dl = &repository.data->trunkPriority;
             html << "<tr><th>trunkPriority</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->trunkRule;
+            auto dl = &repository.data->trunkRule;
             html << "<tr><th>trunkRule</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->client;
+            auto dl = &repository.data->client;
             html << "<tr><th>client</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->organization;
+            auto dl = &repository.data->organization;
             html << "<tr><th>organization</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->voipOperator;
+            auto dl = &repository.data->voipOperator;
             html << "<tr><th>voipOperator</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->pricelist;
+            auto dl = &repository.data->pricelist;
             html << "<tr><th>pricelist</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->pricelistPrice;
+            auto dl = &repository.data->pricelistPrice;
             html << "<tr><th>pricelistPrice</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->networkPrefix;
+            auto dl = &repository.data->networkPrefix;
             html << "<tr><th>networkPrefix</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->geo;
+            auto dl = &repository.data->geo;
             html << "<tr><th>geo</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->geoPrefix;
+            auto dl = &repository.data->geoPrefix;
             html << "<tr><th>geoPrefix</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->mobPrefix;
+            auto dl = &repository.data->mobPrefix;
             html << "<tr><th>mobPrefix</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->serviceNumber;
+            auto dl = &repository.data->serviceNumber;
             html << "<tr><th>serviceNumber</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->serviceTrunk;
+            auto dl = &repository.data->servicePackage;
+            html << "<tr><th>servicePackage</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->serviceTrunk;
             html << "<tr><th>serviceTrunk</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->serviceTrunkSettings;
+            auto dl = &repository.data->serviceTrunkSettings;
             html << "<tr><th>serviceTrunkSettings</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->tariff;
+            auto dl = &repository.data->tariff;
             html << "<tr><th>tariff</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->tariffChangeLog;
+            auto dl = &repository.data->tariffPackage;
+            html << "<tr><th>tariffPackage</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->tariffChangeLog;
             html << "<tr><th>tariffChangeLog</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->globalCounters;
+            auto dl = &repository.data->globalCounters;
             html << "<tr><th>globalCounters</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
         }
         {
-            auto dl = &data->activeCounter;
+            auto dl = &repository.data->activeCounter;
             html << "<tr><th>Active counter</th>";
             if (dl != 0) {
                 html << "<td>" << string_time(dl->time()) << "</td><td></td><td>" <<
@@ -242,7 +254,7 @@ public:
             html << "</tr>\n";
         }
         {
-            auto dl = &billingData->clientCounter;
+            auto dl = &repository.billingData->clientCounter;
             html << "<tr><th>Client Counter</th>";
             if (dl != 0) {
                 html << "<td>" << string_time(dl->time()) << "</td><td></td><td>" <<
@@ -254,7 +266,7 @@ public:
             html << "</tr>\n";
         }
         {
-            auto dl = &billingData->fminCounter;
+            auto dl = &repository.billingData->fminCounter;
             html << "<tr><th>Fmin Counter</th>";
             if (dl != 0) {
                 html << "<td>" << string_time(dl->time()) << "</td><td></td><td>" <<
@@ -266,7 +278,7 @@ public:
             html << "</tr>\n";
         }
         {
-            auto dl = &billingData->clientLock;
+            auto dl = &repository.billingData->clientLock;
             html << "<tr><th>Client Lock</th>";
             if (dl != 0) {
                 html << "<td>" << string_time(dl->time()) << "</td><td></td><td>" <<

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
+#include "../classes/Thread.h"
 
 class ThreadLog : public Thread {
 private:

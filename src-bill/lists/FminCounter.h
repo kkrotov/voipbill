@@ -1,22 +1,14 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
-#include "../../src/classes/Spinlock.h"
+#include "../models/Call.h"
+#include "../classes/ObjList.h"
+#include "../classes/Spinlock.h"
 #include <map>
 using namespace std;
 
-class FminCounter : public ObjList<int> {
-protected:
-
-    string sql(BDb * db) {
-        return "";
-    }
-
-    inline void parse_item(BDbResult &row, int * item) {
-        *item = 0;
-    }
-
+class FminCounter : public BaseObjList {
 public:
+    long long int last_call_id;
     Spinlock lock;
 
     map<int, map<int, map<time_t, int>>> counter;

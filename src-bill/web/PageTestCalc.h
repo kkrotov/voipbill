@@ -74,18 +74,20 @@ public:
         cdr.dump(html);
         html << "\n";
 
-        PreparedData preparedData;
-        if (!DataContainer::instance()->prepareData(preparedData, cdr.connect_time)) {
+
+        Repository repository;
+        if (!repository.prepare(cdr.connect_time)) {
             html << "ERROR|BILLING NOT READY";
             return;
         }
 
         Billing billing;
-        BillingCall billingCall(&billing);
+        BillingCall billingCall(&repository);
         billingCall.setTrace(&html);
 
         Call call = Call(&cdr, orig == "true" ? CALL_ORIG : CALL_TERM);
-        billingCall.calc(&call, &cdr, &preparedData);
+        CallInfo callInfo;
+        billingCall.calc(&call, &callInfo, &cdr);
 
         html << "INFO|CALL|";
         call.dump(html);

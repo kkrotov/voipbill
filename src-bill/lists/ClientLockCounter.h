@@ -1,23 +1,16 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
-#include "../../src/classes/Spinlock.h"
+#include "../classes/ObjList.h"
+#include "../classes/Spinlock.h"
 #include "../models/ClientLockObj.h"
 #include <mutex>
 #include <map>
 
 using namespace std;
 
-class ClientLockCounter : public ObjList<ClientLockObj> {
-protected:
-    string sql(BDb * db) {
-        return "";
-    }
-    inline void parse_item(BDbResult &row, ClientLockObj * item) {
-        item->client_id = 0;
-    }
-
+class ClientLockCounter : public BaseObjList {
 public:
+    long long int last_call_id;
     Spinlock lock;
 
     unsigned long long int marker = 0;

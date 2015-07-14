@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BasePage.h"
-#include "../data/DataCurrentCallsContainer.h"
+#include "../classes/Repository.h"
 
 class PageCalls : public BasePage {
 public:
@@ -11,9 +11,9 @@ public:
     void render(std::stringstream &html, map<string, string> &parameters) {
         renderHeader(html);
 
-        auto currentCalls = DataCurrentCallsContainer::instance();
+        Repository repository;
 
-        shared_ptr<CurrentCdrList> cdrList = currentCalls->currentCdr.get();
+        shared_ptr<CurrentCdrList> cdrList = repository.currentCalls->currentCdr.get();
         if (cdrList == nullptr) {
             return;
         }
@@ -21,15 +21,15 @@ public:
         html << "<table width=100% border=0 cellspacing=0>\n";
         html << "<tr>\n";
         html << "<td>Current calls: <b>" << cdrList->size() << "</b>" << "</td>\n";
-        html << "<td>Call per second: <b>" << currentCalls->callPerSecond << "</b>" << "</td>\n";
-        html << "<td>Max call per second: <b>" << currentCalls->maxCallPerSecond << "</b>" << "</td>\n";
+        html << "<td>Call per second: <b>" << repository.currentCalls->callPerSecond << "</b>" << "</td>\n";
+        html << "<td>Max call per second: <b>" << repository.currentCalls->maxCallPerSecond << "</b>" << "</td>\n";
         html << "</td>\n";
         html << "</tr>\n";
         html << "</table>\n";
 
         html << "<br/>\n";
 
-        auto calls = currentCalls->getCallsWaitingSaving();
+        auto calls = repository.currentCalls->getCallsWaitingSaving();
         bool fullMode = calls->size() == cdrList->size() * 2;
 
         html << "<style>\n";
@@ -58,10 +58,10 @@ public:
             html << "<th nowrap rowspan=2>dest</th>\n";
             html << "<th nowrap rowspan=2>geo_id</th>\n";
         }
+        html << "<th nowrap>src_route</th>\n";
         html << "<th nowrap rowspan=2>call_id</th>\n";
         html << "<th nowrap>src / redirect</th>\n";
         html << "<th nowrap>noa</th>\n";
-        html << "<th nowrap>src_route</th>\n";
         html << "</tr>\n";
         html << "<tr>\n";
         if (fullMode) {
@@ -109,15 +109,14 @@ public:
                 html << "<td nowrap class=orig>" << callOrig->geo_id << "</td>\n";
             }
 
+            html << "<td nowrap class=orig>" << cdr->src_route << "</td>\n";
             html << "<td nowrap rowspan=2>" << cdr->call_id << "</td>\n";
-
             if (strlen(cdr->redirect_number) > 0) {
                 html << "<td nowrap class=orig>" << cdr->src_number << " / " << cdr->redirect_number[0] << "</td>\n";
             } else {
                 html << "<td nowrap class=orig>" << cdr->src_number << "</td>\n";
             }
             html << "<td nowrap class=orig>" << cdr->src_noa << "</td>\n";
-            html << "<td nowrap class=orig>" << cdr->src_route << "</td>\n";
 
             html << "</tr>\n";
 
@@ -146,13 +145,13 @@ public:
                 html << "<td nowrap class=term>" << callTerm->geo_id << "</td>\n";
             }
 
+            html << "<td nowrap class=term>" << cdr->dst_route << "</td>\n";
             if (strlen(cdr->redirect_number) > 0) {
                 html << "<td nowrap class=term>" << cdr->dst_number << "</td>\n";
             } else {
                 html << "<td nowrap class=term>" << cdr->dst_number << "</td>\n";
             }
             html << "<td nowrap class=term>" << cdr->dst_noa << "</td>\n";
-            html << "<td nowrap class=term>" << cdr->dst_route << "</td>\n";
 
             html << "</tr>\n";
         }

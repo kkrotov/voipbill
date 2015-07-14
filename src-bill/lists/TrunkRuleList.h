@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/TrunkRule.h"
 
 class TrunkRuleList : public ObjList<TrunkRule> {

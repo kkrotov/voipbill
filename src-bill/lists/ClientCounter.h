@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
-#include "../../src/classes/Spinlock.h"
+#include "../classes/ObjList.h"
+#include "../classes/Spinlock.h"
 #include "../models/ClientCounterObj.h"
 #include "../models/Client.h"
 #include "../models/Call.h"
@@ -10,16 +10,9 @@
 
 using namespace std;
 
-class ClientCounter : public ObjList<ClientCounterObj> {
-protected:
-    string sql(BDb * db) {
-        return "";
-    }
-    inline void parse_item(BDbResult &row, ClientCounterObj * item) {
-        item->client_id = 0;
-    }
-
+class ClientCounter : public BaseObjList {
 public:
+    long long int last_call_id;
     Spinlock lock;
 
     unsigned long long int marker = 0;
@@ -34,7 +27,7 @@ public:
         return counter[client_id];
     }
 
-    void add(Call * call, Client * client) {
+    void add(Call * call, Client * account) {
 
         if (abs(call->cost) < 0.000001) {
             return;
@@ -64,7 +57,7 @@ public:
             value.sum_day = call->cost;
         }
 
-        if (client != nullptr && call->connect_time >= client->amount_date) {
+        if (account != nullptr && call->connect_time >= account->amount_date) {
             value.sum += call->cost;
         }
 
@@ -115,8 +108,8 @@ public:
 
     void load(BDb * db) {
 
-        time_t d_date = get_tday();
-        time_t m_date = get_tmonth();
+        time_t d_date = get_tday(time(nullptr));
+        time_t m_date = get_tmonth(time(nullptr));
 
         string sDay = string_date(d_date);
         string sMonth = string_date(m_date);
@@ -196,7 +189,7 @@ public:
 
     void reload(BDb * db) {
 
-        time_t m_date = get_tmonth();
+        time_t m_date = get_tmonth(time(nullptr));
         string sPrevMonth = string_date(m_date - 32 * 86400);
 
         db->exec("UPDATE billing.clients set sync=2 where sync=1");

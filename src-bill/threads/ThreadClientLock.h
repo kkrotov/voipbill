@@ -1,14 +1,11 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Thread.h"
+#include "../classes/Repository.h"
 
 class ThreadClientLock : public Thread {
-    DataContainer *data;
-    DataBillingContainer *billingData;
 
-    PreparedData preparedData;
+    Repository repository;
 
     bool ready();
 

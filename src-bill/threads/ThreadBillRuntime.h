@@ -1,14 +1,14 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../../src/classes/BDb.h"
+#include "../classes/Thread.h"
+#include "../classes/BDb.h"
 #include "../classes/Billing.h"
 
 class ThreadBillRuntime : public Thread {
 protected:
     BDb db_calls;
     Billing billing;
-    DataBillingContainer *billingData;
+    Repository repository;
 public:
     void run();
 public:

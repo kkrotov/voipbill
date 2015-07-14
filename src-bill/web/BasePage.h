@@ -1,6 +1,14 @@
 #pragma once
 
 #include <string>
+#include <map>
+#include <sstream>
+#include "../classes/AppBill.h"
+#include "../web/http/server.hpp"
+#include "../web/http/reply.hpp"
+
+
+using namespace std;
 
 class BasePage {
 public:

@@ -1,11 +1,12 @@
 #include "TaskRecalc.h"
 
-#include "../../src/common.h"
+#include "../common.h"
 #include "../classes/AppBill.h"
 #include "../classes/CallsSaver.h"
 #include "../threads/ThreadLoader.h"
 #include "../threads/ThreadBillRuntime.h"
 #include "../classes/CdrLoader.h"
+#include "../web/PageDataBilling.h"
 
 TaskRecalc::TaskRecalc(time_t date_from, string server_id) : Task(server_id) {
     this->date_from = date_from;
@@ -18,10 +19,10 @@ void TaskRecalc::run() {
     BDb db_calls(app().conf.db_calls);
 
     setStatus("1. waiting save calls lock");
-    unique_lock<mutex> lock_save_calls(DataBillingContainer::instance()->saveCallsLock);
+    unique_lock<mutex> lock_save_calls(repository.billingData->saveLock);
 
     setStatus("2. waiting sync calls central lock");
-    unique_lock<mutex> lock_sync_calls_central(DataBillingContainer::instance()->syncCallsCentralLock);
+    unique_lock<mutex> lock_sync_calls_central(repository.billingData->syncCallsCentralLock);
 
 
     setStatus("3. getting min id");
@@ -50,7 +51,7 @@ void TaskRecalc::run() {
 
 
     setStatus("6. recalc temp counters");
-    billingData.loadAll(&db_calls);
+    newBillingData.loadAll(&db_calls);
 
 
 
@@ -58,15 +59,15 @@ void TaskRecalc::run() {
 
     CdrLoader cdrLoader;
     cdrLoader.setDb(&db_calls);
-    cdrLoader.setBillingData(&billingData);
+    cdrLoader.setBillingData(&newBillingData);
 
     Billing billing;
     billing.setData(&data);
-    billing.setBillingData(&billingData);
+    billing.setBillingData(&newBillingData);
 
     CallsSaver saver;
     saver.setDb(&db_calls);
-    saver.setBillingData(&billingData);
+    saver.setBillingData(&newBillingData);
 
 
     while (true) {
@@ -78,7 +79,7 @@ void TaskRecalc::run() {
             cdrLoader.load(rows_per_request);
         }
 
-        if (billingData.cdrsWaitProcessing.size() == 0) {
+        if (newBillingData.cdrs.size() == 0) {
             break;
         }
 
@@ -94,25 +95,25 @@ void TaskRecalc::run() {
         }
 
 
-        setStatus("7. calc " + lexical_cast<string>(billingData.savedCallsCount));
+        setStatus("7. calc " + lexical_cast<string>(newBillingData.calls.getStoredCounter()));
     }
 
 
 
     setStatus("8. waiting fetch cdr lock");
-    unique_lock<mutex> lock_fetch_cdr(DataBillingContainer::instance()->fetchCdrLock);
+    unique_lock<mutex> lock_fetch_cdr(repository.billingData->fetchCdrLock);
 
     setStatus("9. waiting calc calls lock");
-    unique_lock<mutex> lock_calc_calls(DataBillingContainer::instance()->calcCallsLock);
+    unique_lock<mutex> lock_calc_calls(repository.billingData->calcCallsLock);
 
     setStatus("10. waiting sync counters central lock");
-    unique_lock<mutex> lock_sync_counters_central(DataBillingContainer::instance()->syncCountersCentralLock);
+    unique_lock<mutex> lock_sync_counters_central(repository.billingData->syncCountersCentralLock);
 
     setStatus("11. waiting sync locks central lock");
-    unique_lock<mutex> lock_sync_locks_central(DataBillingContainer::instance()->syncLocksCentralLock);
+    unique_lock<mutex> lock_sync_locks_central(repository.billingData->syncLocksCentralLock);
 
     setStatus("12. recalc counters");
-    DataBillingContainer::instance()->loadAll(&db_calls);
+    repository.billingData->loadAll(&db_calls);
 
     lock_fetch_cdr.unlock();
     lock_calc_calls.unlock();
@@ -128,7 +129,7 @@ void TaskRecalc::run() {
 void TaskRecalc::html(stringstream &html) {
     html << "Recalc from call id: " << recalc_from_call_id << "<br/>\n";
     html << "<br/>\n";
-    billingData.html(html);
+    PageDataBilling::renderBillingData(html, &newBillingData);
     html << "<br/>\n";
     html << "Time load: " << t_load.sloop() << " / " << t_load.sfull() << "<br/>\n";
     html << "Time calc: " << t_calc.sloop() << " / " << t_calc.sfull() << "<br/>\n";

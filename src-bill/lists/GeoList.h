@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/Geo.h"
+#include "../classes/AppBill.h"
 
 class GeoList : public ObjList<Geo> {
 protected:

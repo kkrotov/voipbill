@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/common.h"
+#include "../common.h"
 
 struct Number {
     int id;

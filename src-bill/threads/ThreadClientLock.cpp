@@ -4,16 +4,14 @@ ThreadClientLock::ThreadClientLock() {
     id = idName();
     name = "Client lock";
 
-    data = DataContainer::instance();
-    billingData = DataBillingContainer::instance();
 }
 
 bool ThreadClientLock::ready() {
-    if (!billingData->ready()) {
+    if (!repository.billingData->ready()) {
         return false;
     }
 
-    if (!data->prepareData(preparedData, time(nullptr))) {
+    if (!repository.prepare()) {
         return false;
     }
 
@@ -22,27 +20,25 @@ bool ThreadClientLock::ready() {
 
 void ThreadClientLock::run() {
 
-    time_t now = time(nullptr);
-
-    if (!data->prepareData(preparedData, time(nullptr))) {
+    if (!repository.prepare()) {
         return;
     }
 
-    if (!billingData->ready()) {
+    if (!repository.billingData->ready()) {
         return;
     }
 
-    if (!data->globalCounters.ready()) {
+    if (!repository.data->globalCounters.ready()) {
         return;
     }
 
 
     map<int, ClientLockObj> client_locks;
 
-    auto clientCounter = billingData->clientCounter.get();
-    auto clientLock = billingData->clientLock.get();
+    auto clientCounter = repository.billingData->clientCounter.get();
+    auto clientLock = repository.billingData->clientLock.get();
 
-    for (int client_account_id : preparedData.activeCounter->activeClients) {
+    for (int client_account_id : repository.activeCounter->activeClients) {
 
         ClientCounterObj cc = clientCounter->get(client_account_id);
 
@@ -66,15 +62,15 @@ void ThreadClientLock::run() {
 bool ThreadClientLock::needLockLocal(ClientCounterObj &cc, int client_account_id) {
     bool result = false;
 
-    auto client = preparedData.client->find(client_account_id);
+    auto client = repository.getAccount(client_account_id);
     if (client != nullptr) {
-        double vat_rate = preparedData.getVatRate(client);
+        double vat_rate = repository.getVatRate(client);
 
-        auto globalCounter = data->globalCounters.get()->find(client->id);
+        auto globalCounter = repository.data->globalCounters.get()->find(client->id);
 
         double spentBalanceSum = cc.sumBalance(vat_rate) + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
 
-        if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth()) {
+        if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth(time(nullptr))) {
             result = true;
         }
     }
@@ -85,11 +81,11 @@ bool ThreadClientLock::needLockLocal(ClientCounterObj &cc, int client_account_id
 bool ThreadClientLock::needLockGlobal(ClientCounterObj &cc, int client_account_id) {
     bool result = false;
 
-    auto client = preparedData.client->find(client_account_id);
+    auto client = repository.getAccount(client_account_id);
     if (client != nullptr) {
-        double vat_rate = preparedData.getVatRate(client);
+        double vat_rate = repository.getVatRate(client);
 
-        auto globalCounter = data->globalCounters.get()->find(client->id);
+        auto globalCounter = repository.data->globalCounters.get()->find(client->id);
 
         double spentBalanceSum = cc.sumBalance(vat_rate) + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
         double spentDaySum = cc.sumDay(vat_rate) + (globalCounter ? globalCounter->sumDay(vat_rate) : 0.0);
@@ -116,7 +112,7 @@ bool ThreadClientLock::hasFullHtml() {
 void ThreadClientLock::htmlfull(stringstream &html) {
     this->html(html);
 
-    if (!data->prepareData(preparedData, time(nullptr))) {
+    if (!repository.prepare()) {
         return;
     }
 
@@ -128,12 +124,12 @@ void ThreadClientLock::htmlfull(stringstream &html) {
     html << "<th>Numbers</th>";
     html << "<th>Trunks</th>";
     html << "</tr>\n";
-    for (int clientId : preparedData.activeCounter->activeClients) {
+    for (int clientId : repository.activeCounter->activeClients) {
         html << "<tr>\n";
         html << "<td align=left valign=top>" << clientId << "</td>\n";
         html << "<td valign=top>\n";
         {
-            map<int, ServiceNumber> numbers = preparedData.activeCounter->clientNumbers[clientId];
+            map<int, ServiceNumber> numbers = repository.activeCounter->clientNumbers[clientId];
             html << "<table>\n";
             html << "<tr>";
             html << "<th align=left>Service ID</th>";
@@ -151,7 +147,7 @@ void ThreadClientLock::htmlfull(stringstream &html) {
         html << "</td>\n";
         html << "<td valign=top>\n";
         {
-            map<int, ServiceTrunk> trunks = preparedData.activeCounter->clientTrunks[clientId];
+            map<int, ServiceTrunk> trunks = repository.activeCounter->clientTrunks[clientId];
             html << "<table>\n";
             html << "<tr>";
             html << "<th align=left>Service ID</th>";
@@ -159,7 +155,7 @@ void ThreadClientLock::htmlfull(stringstream &html) {
             html << "<th align=left>Trunk Name</th>";
             html << "</tr>\n";
             for (auto it: trunks) {
-                Trunk * trunk = preparedData.trunk->find(it.second.trunk_id);
+                Trunk * trunk = repository.getTrunk(it.second.trunk_id);
                 html << "<tr>";
                 html << "<td align=left>" << it.second.id << "</td>";
                 html << "<td align=left>" << it.second.trunk_id << "</td>";

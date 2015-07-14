@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct InstanceSettings {
     int id;
     char region_id[100];

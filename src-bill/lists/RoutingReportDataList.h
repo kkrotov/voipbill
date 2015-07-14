@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/RoutingReportData.h"
 
 class RoutingReportDataList : public ObjList<RoutingReportData> {

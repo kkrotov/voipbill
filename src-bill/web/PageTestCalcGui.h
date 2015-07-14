@@ -5,7 +5,7 @@
 #include "../models/Call.h"
 #include "../classes/Billing.h"
 #include "../classes/BillingCall.h"
-#include "../data/DataCurrentCallsContainer.h"
+#include "../classes/Repository.h"
 #include <string>
 
 using namespace std;
@@ -28,7 +28,10 @@ public:
         if (parameters.find("orig") != parameters.end())
             orig = parameters["orig"] != "f";
 
-        auto currentCdr = DataCurrentCallsContainer::instance()->currentCdr.get();
+
+        Repository repository;
+
+        auto currentCdr = repository.currentCalls->currentCdr.get();
         if (currentCdr == nullptr) {
             html << "BILLING NOT READY";
             return;
@@ -46,8 +49,7 @@ public:
             return;
         }
 
-        PreparedData preparedData;
-        if (!DataContainer::instance()->prepareData(preparedData, cdr->connect_time)) {
+        if (!repository.prepare(cdr->connect_time)) {
             html << "BILLING NOT READY";
             return;
         }
@@ -61,19 +63,21 @@ public:
 
 
         Billing billing;
-        BillingCall billingCall(&billing);
+        BillingCall billingCall(&repository);
 
         Call call = Call(cdr, orig);
+        CallInfo callInfo;
 
         if (!orig) {
-            Call callOrig = Call(cdr, CALL_ORIG);
-            billingCall.calc(&callOrig, cdr, &preparedData);
-            call.src_number = callOrig.src_number;
-            call.dst_number = callOrig.dst_number;
+            Call origCall = Call(cdr, CALL_ORIG);
+            CallInfo origCallInfo;
+            billingCall.calc(&origCall, &origCallInfo, cdr);
+            call.src_number = origCall.src_number;
+            call.dst_number = origCall.dst_number;
         }
 
         billingCall.setTrace(&trace);
-        billingCall.calc(&call, cdr, &preparedData);
+        billingCall.calc(&call, &callInfo, cdr);
 
         trace << "INFO|CALL|";
         call.dump(trace);

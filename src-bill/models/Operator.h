@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct Operator {
     int id;
     int pricelist_id;
@@ -7,5 +9,4 @@ struct Operator {
     int local_network_pricelist_id;
     int client_7800_pricelist_id;
     int operator_7800_pricelist_id;
-
 };

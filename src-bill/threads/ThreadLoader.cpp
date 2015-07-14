@@ -36,54 +36,54 @@ void ThreadLoader::run() {
 
             if (event == "clients") {
 
-                data->client.load(&db_calls);
+                repository.data->client.load(&db_calls);
 
-                shared_ptr<ClientCounter> cc = billingData->clientCounter.get();
+                shared_ptr<ClientCounter> cc = repository.billingData->clientCounter.get();
                 if (cc != 0) cc->reload(&db_calls);
 
             } else if (event == "airp") {
 
-                data->airp.load(&db_calls);
+                repository.data->airp.load(&db_calls);
 
             } else if (event == "number") {
 
-                data->number.load(&db_calls);
+                repository.data->number.load(&db_calls);
 
             } else if (event == "outcome") {
 
-                data->outcome.load(&db_calls);
+                repository.data->outcome.load(&db_calls);
 
             } else if (event == "prefixlist") {
 
-                data->prefixlist.load(&db_calls);
+                repository.data->prefixlist.load(&db_calls);
 
             } else if (event == "prefixlist_prefix") {
 
-                data->prefixlistPrefix.load(&db_calls);
+                repository.data->prefixlistPrefix.load(&db_calls);
 
             } else if (event == "release_reason") {
 
-                data->releaseReason.load(&db_calls);
+                repository.data->releaseReason.load(&db_calls);
 
             } else if (event == "route_case") {
 
-                data->routeCase.load(&db_calls);
+                repository.data->routeCase.load(&db_calls);
 
             } else if (event == "route_table") {
 
-                data->routeTable.load(&db_calls);
+                repository.data->routeTable.load(&db_calls);
 
             } else if (event == "route_table") {
 
-                data->routeTable.load(&db_calls);
+                repository.data->routeTable.load(&db_calls);
 
             } else if (event == "route_table") {
 
-                data->routeTable.load(&db_calls);
+                repository.data->routeTable.load(&db_calls);
 
             } else if (event == "route_table_route") {
 
-                data->routeTableRoute.load(&db_calls);
+                repository.data->routeTableRoute.load(&db_calls);
 
             } else if (event == "routing_report_data") {
 
@@ -91,83 +91,83 @@ void ThreadLoader::run() {
 
             } else if (event == "trunk") {
 
-                data->trunk.load(&db_calls);
-                data->trunkByName.load(&db_calls);
-                data->trunkByAlias.load(&db_calls);
+                repository.data->trunk.load(&db_calls);
+                repository.data->trunkByName.load(&db_calls);
+                repository.data->trunkByAlias.load(&db_calls);
 
             } else if (event == "trunk_number_preprocessing") {
 
-                data->trunkNumberPreprocessing.load(&db_calls);
+                repository.data->trunkNumberPreprocessing.load(&db_calls);
 
             } else if (event == "trunk_priority") {
 
-                data->trunkPriority.load(&db_calls);
+                repository.data->trunkPriority.load(&db_calls);
 
             } else if (event == "trunk_rule") {
 
-                data->trunkRule.load(&db_calls);
+                repository.data->trunkRule.load(&db_calls);
 
             } else if (event == "defs") {
 
-                data->pricelistPrice.load(&db_calls);
+                repository.data->pricelistPrice.load(&db_calls);
 
             } else if (event == "geo") {
 
-                data->geo.load(&db_calls);
+                repository.data->geo.load(&db_calls);
 
             } else if (event == "prefix") {
 
-                data->geoPrefix.load(&db_calls);
+                repository.data->geoPrefix.load(&db_calls);
 
             } else if (event == "mob_prefix") {
 
-                data->mobPrefix.load(&db_calls);
+                repository.data->mobPrefix.load(&db_calls);
 
             } else if (event == "instance_settings") {
 
-                data->instanceSettings.load(&db_calls);
+                repository.data->instanceSettings.load(&db_calls);
 
             } else if (event == "network_prefix") {
 
-                data->networkPrefix.load(&db_calls);
+                repository.data->networkPrefix.load(&db_calls);
 
             } else if (event == "organization") {
 
-                data->organization.load(&db_calls);
+                repository.data->organization.load(&db_calls);
 
             } else if (event == "operator") {
 
-                data->voipOperator.load(&db_calls);
+                repository.data->voipOperator.load(&db_calls);
 
             } else if (event == "pricelist") {
 
-                data->pricelist.load(&db_calls);
+                repository.data->pricelist.load(&db_calls);
 
             } else if (event == "service_number") {
 
-                data->serviceNumber.load(&db_calls);
-                data->activeCounter.load(data->serviceNumber.get(), data->serviceTrunk.get());
+                repository.data->serviceNumber.load(&db_calls);
+                repository.data->activeCounter.load(repository.data->serviceNumber.get(), repository.data->serviceTrunk.get());
 
             } else if (event == "service_trunk") {
 
-                data->serviceTrunk.load(&db_calls);
-                data->activeCounter.load(data->serviceNumber.get(), data->serviceTrunk.get());
+                repository.data->serviceTrunk.load(&db_calls);
+                repository.data->activeCounter.load(repository.data->serviceNumber.get(), repository.data->serviceTrunk.get());
 
             } else if (event == "service_trunk_settings") {
 
-                data->serviceTrunkSettings.load(&db_calls);
+                repository.data->serviceTrunkSettings.load(&db_calls);
 
             } else if (event == "tariff") {
 
-                data->tariff.load(&db_calls);
+                repository.data->tariff.load(&db_calls);
 
             } else if (event == "tariff_change_log") {
 
-                data->tariffChangeLog.load(&db_calls);
+                repository.data->tariffChangeLog.load(&db_calls);
 
             } else if (event == "server") {
 
-                data->server.load(&db_calls);
+                repository.data->server.load(&db_calls);
 
             }
 
@@ -190,17 +190,13 @@ void ThreadLoader::run() {
 
 }
 
-bool ThreadLoader::do_load_data(BDb *db, DataContainer *data) {
+bool ThreadLoader::do_load_data() {
     bool success = true;
-
-    if (data == 0) data = this->data;
-    if (db == 0) db = &db_calls;
-
 
     try {
         db_calls.exec("DELETE from event.queue");
 
-        data->loadAll(db);
+        repository.data->loadAll(&db_calls);
 
     } catch (Exception &e) {
         e.addTrace("Loader::do_load_data");
@@ -211,15 +207,12 @@ bool ThreadLoader::do_load_data(BDb *db, DataContainer *data) {
     return success;
 }
 
-bool ThreadLoader::do_load_counters(BDb *db, DataBillingContainer *billingData) {
+bool ThreadLoader::do_load_counters() {
     bool success = true;
-
-    if (billingData == 0) billingData = this->billingData;
-    if (db == 0) db = &db_calls;
 
     try {
 
-        billingData->loadAll(db);
+        repository.billingData->loadAll(&db_calls);
 
     } catch (Exception &e) {
         e.addTrace("Loader::do_load_counters");
@@ -234,8 +227,6 @@ ThreadLoader::ThreadLoader() {
     id = idName();
     name = "Loader";
 
-    data = DataContainer::instance();
-    billingData = DataBillingContainer::instance();
     db_calls.setCS(app().conf.db_calls);
 
     init_load_counters_done = false;

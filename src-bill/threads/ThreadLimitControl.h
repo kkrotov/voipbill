@@ -1,13 +1,12 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Thread.h"
+#include "../classes/Repository.h"
 
 
 class ThreadLimitControl : public Thread {
 protected:
-    PreparedData preparedData;
+    Repository repository;
 
     bool ready();
 

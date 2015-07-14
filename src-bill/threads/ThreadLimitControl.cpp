@@ -1,8 +1,7 @@
 #include "ThreadLimitControl.h"
 #include "../classes/AppBill.h"
-#include "../data/DataCurrentCallsContainer.h"
 #include "../classes/UdpControlClient.h"
-#include "../../src/common.h"
+#include "../common.h"
 
 ThreadLimitControl::ThreadLimitControl() {
     id = idName();
@@ -10,11 +9,11 @@ ThreadLimitControl::ThreadLimitControl() {
 }
 
 bool ThreadLimitControl::ready() {
-    if (!DataBillingContainer::instance()->ready()) {
+    if (!repository.billingData->ready()) {
         return false;
     }
 
-    if (!DataCurrentCallsContainer::instance()->ready()) {
+    if (!repository.currentCalls->ready()) {
         return false;
     }
 
@@ -25,11 +24,11 @@ bool ThreadLimitControl::ready() {
 void ThreadLimitControl::run() {
 
 
-    if (!DataContainer::instance()->prepareData(preparedData, time(nullptr))) {
+    if (!repository.prepare()) {
         return;
     }
 
-    auto calls = DataCurrentCallsContainer::instance()->getCallsWaitingSaving();
+    auto calls = repository.currentCalls->getCallsWaitingSaving();
     for (auto &call : *calls.get()) {
 
         if (limitControlKillNeeded(call)) {
@@ -50,20 +49,17 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call) {
         return false;
     }
 
-    auto client = preparedData.client->find(call.account_id);
+    auto client = repository.getAccount(call.account_id);
     if (client == nullptr) {
         Log::error("Account #" + lexical_cast<string>(call.account_id) + " not found");
         return false;
     }
 
-    double vat_rate = preparedData.getVatRate(client);
+    double vat_rate = repository.getVatRate(client);
 
-    auto billingData = DataBillingContainer::instance();
-    auto currentCallsData = DataCurrentCallsContainer::instance();
-
-    auto clientCounter = billingData->clientCounter.get();
+    auto clientCounter = repository.billingData->clientCounter.get();
     ClientCounterObj c0 = clientCounter->get(call.account_id);
-    ClientCounterObj c2 = currentCallsData->getClientCounter()->get(call.account_id);
+    ClientCounterObj c2 = repository.currentCalls->getClientCounter()->get(call.account_id);
 
     double globalBalanceSum, globalDaySum, globalMonthSum;
     fetchGlobalCounters(call.account_id, globalBalanceSum, globalDaySum, globalMonthSum, vat_rate);
@@ -97,7 +93,7 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call) {
 
         if (client->isConsumedCreditLimit(spentBalanceSum)) {
 
-            if (!call.isLocal() || client->last_payed_month < get_tmonth()) {
+            if (!call.isLocal() || client->last_payed_month < get_tmonth(time(nullptr))) {
 
                 Log::notice(
                         "KILL: number " + lexical_cast<string>(call.src_number) + " -> " + lexical_cast<string>(call.dst_number) + " : Credit limit: " + string_fmt("%.2f", client->balance + client->credit + c0.sumBalance(vat_rate) + c2.sumBalance(vat_rate) + globalBalanceSum) + " = " +
@@ -137,8 +133,8 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call) {
 void ThreadLimitControl::fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double &globalMonthSum, double vat_rate) {
 
     GlobalCounters * globalCounter = nullptr;
-    if (DataContainer::instance()->globalCounters.ready()) {
-        globalCounter = DataContainer::instance()->globalCounters.get()->find(accountId);
+    if (repository.data->globalCounters.ready()) {
+        globalCounter = repository.data->globalCounters.get()->find(accountId);
     }
 
     if (globalCounter != nullptr) {

@@ -1,10 +1,9 @@
 #include "BlackList.h"
 
 #include "UdpControlClient.h"
-#include "../../src/classes/Log.h"
-#include "../../src/common.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "Log.h"
+#include "../common.h"
+#include "Repository.h"
 
 bool BlackList::fetch() {
     vector<string> curr_list;
@@ -82,24 +81,24 @@ void BlackList::push(set<string> &wanted_blacklist) {
 void BlackList::log_lock_phone(const string &phone) {
     string str = "LOCK " + phone;
 
-    PreparedData preparedData;
-    if (DataContainer::instance()->prepareData(preparedData, time(nullptr))) {
-        auto serviceNumber = preparedData.serviceNumber->find(atoll(phone.c_str()), time(nullptr));
+    Repository repository;
+    if (repository.prepare()) {
+        auto serviceNumber = repository.getServiceNumber(atoll(phone.c_str()));
         Client * client;
         if (serviceNumber != nullptr) {
             str = str + " / " + lexical_cast<string>(serviceNumber->client_account_id);
-            client = preparedData.client->find(serviceNumber->client_account_id);
+            client = repository.getAccount(serviceNumber->client_account_id);
         } else {
             client = nullptr;
         }
 
         if (client != nullptr) {
 
-            if (DataBillingContainer::instance()->ready()) {
+            if (repository.billingData->ready()) {
 
-                double vat_rate = preparedData.getVatRate(client);
+                double vat_rate = repository.getVatRate(client);
 
-                ClientCounterObj clientCounter = DataBillingContainer::instance()->clientCounter.get()->get(client->id);
+                ClientCounterObj clientCounter = repository.billingData->clientCounter.get()->get(client->id);
                 double sum_month = clientCounter.sumMonth(vat_rate);
                 double sum_day = clientCounter.sumDay(vat_rate);
                 double sum_balance = clientCounter.sumBalance(vat_rate);
@@ -140,10 +139,10 @@ void BlackList::log_lock_phone(const string &phone) {
 void BlackList::log_unlock_phone(const string &phone) {
     string str = "UNLOCK " + phone;
 
-    PreparedData preparedData;
-    if (DataContainer::instance()->prepareData(preparedData, time(nullptr))) {
+    Repository repository;
+    if (repository.prepare()) {
 
-        auto serviceNumber = preparedData.serviceNumber->find(atoll(phone.c_str()), time(nullptr));
+        auto serviceNumber = repository.getServiceNumber(atoll(phone.c_str()));
         if (serviceNumber != 0) {
             str = str + " / " + lexical_cast<string>(serviceNumber->client_account_id);
         }

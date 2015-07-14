@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/RouteTableRoute.h"
+#include "../classes/AppBill.h"
 
 class RouteTableRouteList : public ObjList<RouteTableRoute> {
 protected:

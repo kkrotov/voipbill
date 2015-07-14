@@ -4,7 +4,7 @@
 
 #include <map>
 
-#include "../../src/classes/BDb.h"
+#include "../classes/BDb.h"
 
 class BasePull;
 

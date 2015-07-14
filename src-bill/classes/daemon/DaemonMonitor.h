@@ -1,13 +1,11 @@
 #pragma once
 
-#include "../../../src/classes/LogWriterScreen.h"
-#include "../../../src/classes/LogWriterFile.h"
-#include "../../../src/classes/LogWriterSyslog.h"
+#include "../LogWriterScreen.h"
+#include "../LogWriterFile.h"
+#include "../LogWriterSyslog.h"
 
 #include "DaemonWorker.h"
 #include <sys/wait.h>
-
-
 
 class DaemonMonitor {
 

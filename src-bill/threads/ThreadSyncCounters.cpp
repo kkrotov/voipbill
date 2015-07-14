@@ -7,19 +7,17 @@ ThreadSyncCounters::ThreadSyncCounters() {
 
     db_main.setCS(app().conf.db_main);
 
-    billingData = DataBillingContainer::instance();
-
     last_sync_count = 0;
     total_sync_count = 0;
 }
 
 bool ThreadSyncCounters::ready() {
-    return billingData->ready();
+    return repository.billingData->ready();
 }
 
 void ThreadSyncCounters::run() {
 
-    unique_lock<mutex> lock(billingData->syncCountersCentralLock, try_to_lock);
+    unique_lock<mutex> lock(repository.billingData->syncCountersCentralLock, try_to_lock);
     if (!lock.owns_lock()) {
         return;
     }
@@ -32,7 +30,7 @@ void ThreadSyncCounters::save_client_counters() {
 
     string q;
 
-    auto clientCounter = billingData->clientCounter.get();
+    auto clientCounter = repository.billingData->clientCounter.get();
 
     vector<int> changes;
     unsigned long long int marker;

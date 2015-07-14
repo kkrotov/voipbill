@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct GlobalCounters {
     int client_id;
     double sum;

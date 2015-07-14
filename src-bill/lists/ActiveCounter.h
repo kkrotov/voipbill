@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "ServiceNumberList.h"
 #include "ServiceTrunkList.h"
 #include "../models/Client.h"
@@ -10,19 +10,16 @@
 
 using namespace std;
 
-class ActiveCounter : public ObjList<Client> {
-protected:
-    string sql(BDb * db) {
-        return "";
-    }
-    inline void parse_item(BDbResult &row, Client * item) {
-    }
+class ActiveCounter : public BaseObjList {
 public:
     set<int> activeNumbers;
     set<int> activeTrunks;
     set<int> activeClients;
     map<int, map<int, ServiceNumber>> clientNumbers;
     map<int, map<int, ServiceTrunk>> clientTrunks;
+
+    void load(BDb * db) {
+    }
 
     void load(shared_ptr<ServiceNumberList> serviceNumberList, shared_ptr<ServiceTrunkList> serviceTrunkList) {
 

@@ -1,46 +1,230 @@
 #include "BillingCall.h"
 #include "../classes/AppBill.h"
+#include "../classes/CalcException.h"
 
-BillingCall::BillingCall(Billing *billing) {
-    this->billing = billing;
+BillingCall::BillingCall(Repository *repository) {
+    this->repository = repository;
     this->trace = nullptr;
 }
 
 void BillingCall::setTrace(stringstream *trace) {
     this->trace = trace;
+    repository->trace = trace;
 }
 
-void BillingCall::calc(Call *call, Cdr *cdr, PreparedData *preparedData) {
-    this->call = call;
-    this->cdr = cdr;
-    this->data = preparedData;
+void BillingCall::calc(Call *call, CallInfo * callInfo, Cdr *cdr) {
+    try {
+        this->cdr = cdr;
+        this->call = call;
+        this->callInfo = callInfo;
+        this->callInfo->call = call;
 
-    trunk = data->trunkByName->find(getRoute(), trace);
-    if (trunk == nullptr) {
-        trunk = data->trunkByAlias->find(getRoute(), trace);
-        if (trunk == nullptr) {
-            if (trace != nullptr) {
-                *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TRUNK WAS NOT FOUND" << "\n";
-            }
-            return;
+        setupTrunk();
+
+        if (call->orig) {
+            numberPreprocessing();
+            processRedirectNumber();
         }
+
+        processGeo();
+        processDestinations();
+
+        if (callInfo->trunk->auth_by_number) {
+            calcByNumber();
+        } else {
+            calcByTrunk();
+        }
+    } catch (CalcException &e) {
+        if (trace != nullptr) {
+            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE " << e.message << "\n";
+        }
+        return;
     }
-    call->trunk_id = trunk->id;
-    call->operator_id = trunk->code;
+}
+
+void BillingCall::calcByTrunk() {
+
+    if (trace != nullptr) {
+        *trace << "INFO|TARIFFICATION BY TRUNK" << "\n";
+    }
+
+    setupEffectiveServiceTrunkPricelistPrice();
+
+    setupServiceTrunk();
+
+    setupAccount();
+
+    setupPricelist();
+
+    setupPrice();
+
+    setupCost();
+
+    setupBilledTime();
+
+    if (!call->orig && callInfo->pricelist->initiate_zona_cost > 0.00001 && call->destination_id == 0) {
+        call->interconnect_rate = callInfo->pricelist->initiate_zona_cost;
+        call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+    }
+    if (!call->orig && callInfo->pricelist->initiate_mgmn_cost > 0.00001 && call->destination_id > 0) {
+        call->interconnect_rate = callInfo->pricelist->initiate_mgmn_cost;
+        call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+    }
+}
+
+void BillingCall::calcByNumber() {
+
+    if (trace != nullptr) {
+        *trace << "INFO|TARIFFICATION BY NUMBER" << "\n";
+    }
 
     if (call->orig) {
-        numberPreprocessing();
-        processRedirectNumber();
+        processLineWithoutNumber(call, cdr);
     }
 
-    processGeo();
-    processDestinations();
+    setupServiceNumber();
 
-    if (trunk->auth_by_number) {
-        calcByNumber();
+    setupServiceTrunkForNumber();
+
+    setupAccount();
+
+    if (call->orig) {
+        calcOrigByNumber();
     } else {
-        calcByTrunk();
+        calcTermByNumber();
     }
+}
+
+void BillingCall::calcOrigByNumber() {
+
+    setupLogTariff();
+
+    setupMainTariff();
+
+    setupPackagePricelist();
+
+    if (callInfo->servicePackagePricelist == nullptr) {
+        setupTariff();
+
+        setupPricelist(callInfo->tariff->pricelist_id);
+
+        setupPrice(call->dst_number);
+    } else {
+        setupPricelist();
+
+        setupPrice();
+    }
+
+    setupCost();
+
+    setupBilledTime();
+
+    setupPackagePrepaid();
+
+    int freeSeconds = 60 * callInfo->mainTariff->freemin * (callInfo->mainTariff->freemin_for_number ? 1 : callInfo->serviceNumber->lines_count);
+    if (call->isLocal() && freeSeconds > 0) {
+        auto fminCounter = repository->billingData->fminCounter.get();
+        int used_free_seconds = fminCounter->get(call->number_service_id, 1, call->dt.month);
+        if (used_free_seconds + call->billed_time <= freeSeconds) {
+            call->service_package_id = 1;
+            call->package_time = call->billed_time;
+            call->package_credit = call->cost;
+            call->cost = 0;
+        }
+    }
+}
+
+void BillingCall::calcTermByNumber() {
+
+    setupLogTariff();
+
+    setupMainTariff();
+
+    setupBilledTime();
+
+    if (isUsage7800()) {
+        if (trace != nullptr) {
+            *trace << "INFO|TARIFFICATION 7800" << "\n";
+        }
+
+        setupPricelist(callInfo->mainTariff->pricelist_id);
+
+        setupPrice(call->src_number);
+
+        setupCost();
+
+        call->cost = - call->cost;
+    }
+}
+
+
+bool BillingCall::checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int type, Pricelist * &pricelist, PricelistPrice * &price) {
+
+    vector<ServiceTrunkSettings *> serviceTrunkSettings;
+    repository->getAllServiceTrunkSettings(serviceTrunkSettings, serviceTrunk->id, type);
+    for (auto trunkSettings : serviceTrunkSettings) {
+
+        if (trunkSettings->src_number_id > 0 && !repository->matchNumber(trunkSettings->src_number_id, call->src_number)) {
+            if (trace != nullptr) {
+                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE SRC_NUMBER NOT MATCHED" << "\n";
+            }
+            continue;
+        }
+
+        if (trunkSettings->dst_number_id > 0 && !repository->matchNumber(trunkSettings->dst_number_id, call->dst_number)) {
+            if (trace != nullptr) {
+                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE DST_NUMBER NOT MATCHED" << "\n";
+            }
+            continue;
+        }
+
+        pricelist = repository->getPricelist(trunkSettings->pricelist_id);
+        if (pricelist == nullptr) {
+            if (trace != nullptr) {
+                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST NOT FOUND" << "\n";
+            }
+            continue;
+        }
+
+        if (pricelist->local) {
+
+            auto networkPrefix = repository->getNetworkPrefix(pricelist->local_network_config_id, call->dst_number);
+            if (networkPrefix == nullptr) {
+                if (trace != nullptr) {
+                    *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE NETWORK PREFIX NOT FOUND" << "\n";
+                }
+                continue;
+            }
+
+            price = repository->getPrice(trunkSettings->pricelist_id, networkPrefix->network_type_id);
+            if (price == nullptr) {
+                if (trace != nullptr) {
+                    *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
+                }
+                continue;
+            }
+
+
+        } else {
+
+            price = repository->getPrice(trunkSettings->pricelist_id, call->dst_number);
+            if (price == nullptr) {
+                if (trace != nullptr) {
+                    *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
+                }
+                continue;
+            }
+
+        }
+
+        if (trace != nullptr) {
+            *trace << "INFO|SERVICE TRUNK SETTINGS MATCHED" << "\n";
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 void BillingCall::numberPreprocessing() {
@@ -49,7 +233,7 @@ void BillingCall::numberPreprocessing() {
     bool srcNumberPreprocessingDone = false;
     bool dstNumberPreprocessingDone = false;
     while (true) {
-        auto numberPreprocessing = data->trunkNumberPreprocessing->find(trunk->id, order, trace);
+        auto numberPreprocessing = repository->getTrunkNumberPreprocessing(callInfo->trunk->id, order);
         if (numberPreprocessing == nullptr) {
             break;
         }
@@ -91,7 +275,7 @@ void BillingCall::numberPreprocessing() {
 }
 
 void BillingCall::processRedirectNumber() {
-    if (trunk->use_redirect_number) {
+    if (callInfo->trunk->use_redirect_number) {
 
         long long int redirect_number =  atoll(cdr->redirect_number);
 
@@ -107,7 +291,7 @@ void BillingCall::processRedirectNumber() {
 
 void BillingCall::processGeo() {
 
-    auto mobPrefix = data->mobPrefix->find(call->orig ? call->dst_number : call->src_number, trace);
+    auto mobPrefix = repository->getMobPrefix(call->orig ? call->dst_number : call->src_number);
     if (mobPrefix != nullptr) {
         call->geo_mob = mobPrefix->mob;
         if (trace != nullptr) {
@@ -115,7 +299,7 @@ void BillingCall::processGeo() {
         }
     }
 
-    auto geoPrefix = data->geoPrefix->find(call->orig ? call->dst_number : call->src_number, trace);
+    auto geoPrefix = repository->getGeoPrefix(call->orig ? call->dst_number : call->src_number);
     if (geoPrefix != nullptr) {
         call->geo_id = geoPrefix->geo_id;
         call->geo_operator_id = geoPrefix->geo_operator_id;;
@@ -128,7 +312,7 @@ void BillingCall::processGeo() {
 
 void BillingCall::processDestinations() {
 
-    auto mobPrefix = data->mobPrefix->find(call->dst_number, trace);
+    auto mobPrefix = repository->getMobPrefix(call->dst_number);
     if (mobPrefix != nullptr) {
         call->mob = mobPrefix->mob;
         if (trace != nullptr) {
@@ -136,7 +320,7 @@ void BillingCall::processDestinations() {
         }
     }
 
-    auto geoPrefix = data->geoPrefix->find(call->dst_number, trace);
+    auto geoPrefix = repository->getGeoPrefix(call->dst_number);
     if (geoPrefix != nullptr) {
         call->destination_id = getDest(geoPrefix->geo_id);
         if (trace != nullptr) {
@@ -147,7 +331,7 @@ void BillingCall::processDestinations() {
 }
 
 int BillingCall::getDest(int geo_id) {
-    Geo * geo = data->geo->find(geo_id, trace);
+    Geo * geo = repository->getGeo(geo_id);
     if (geo == nullptr) {
         if (trace != nullptr) {
             *trace << "ERROR|GEO NOT FOUND" << "\n";
@@ -155,339 +339,22 @@ int BillingCall::getDest(int geo_id) {
         return 2;
     }
 
-    if (!call->mob && data->instanceSettings->city_id > 0 && geo->city_id == data->instanceSettings->city_id) {
+    if (!call->mob && repository->getInstanceSettings()->city_id > 0 && geo->city_id == repository->getInstanceSettings()->city_id) {
         return -1;
     }
 
-    auto regionIds = data->instanceSettings->getRegionIds();
+    auto regionIds = repository->getInstanceSettings()->getRegionIds();
     for (auto it = regionIds.begin(); it != regionIds.end(); ++it) {
         if (geo->region_id == *it) {
             return 0;
         }
     }
 
-    if (data->instanceSettings->country_id > 0 && geo->country_id == data->instanceSettings->country_id) {
+    if (repository->getInstanceSettings()->country_id > 0 && geo->country_id == repository->getInstanceSettings()->country_id) {
         return 1;
     }
 
     return 2;
-}
-
-void BillingCall::calcByTrunk() {
-
-    if (trace != nullptr) {
-        *trace << "INFO|TARIFFICATION BY TRUNK" << "\n";
-    }
-
-    vector<ServiceTrunk *> serviceTrunks;
-    data->serviceTrunk->findAll(serviceTrunks, trunk->id, call->connect_time, trace);
-    if (serviceTrunks.size() == 0) {
-        if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE SERVICE TRUNK WAS NOT FOUND" << "\n";
-        }
-        return;
-    }
-
-    ServiceTrunk * effectiveServiceTrunk = nullptr;
-    Pricelist * effectivePricelist = nullptr;
-    PricelistPrice * effectivePrice = nullptr;
-    for (auto serviceTrunk : serviceTrunks) {
-        Pricelist * pricelist;
-        PricelistPrice * price;
-        if (checkServiceTrunkAvailability(serviceTrunk, call->orig ? SERVICE_TRUNK_SETTINGS_ORIGINATION : SERVICE_TRUNK_SETTINGS_TERMINATION, pricelist, price)) {
-            if (effectiveServiceTrunk == nullptr || price->price < effectivePrice->price) {
-                effectiveServiceTrunk = serviceTrunk;
-                effectivePricelist = pricelist;
-                effectivePrice = price;
-            }
-        }
-    }
-
-    if (effectiveServiceTrunk == nullptr) {
-        if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE EFFECTIVE SERVICE TRUNK WAS NOT FOUND" << "\n";
-        }
-        return;
-    }
-
-    if (trace != nullptr) {
-        *trace << "INTO|EFFECTIVE PRICELIST|";
-        effectivePricelist->dump(*trace);
-        *trace << "\n";
-
-        *trace << "INTO|EFFECTIVE PRICELIST PRICE|";
-        effectivePrice->dump(*trace);
-        *trace << "\n";
-    }
-
-    call->account_id = effectiveServiceTrunk->client_account_id;
-    call->trunk_service_id = effectiveServiceTrunk->id;
-
-    call->pricelist_id = effectivePricelist->id;
-    call->prefix = atoll(effectivePrice->prefix);
-
-    call->billed_time = getCallLength(
-            cdr->session_time,
-            effectivePricelist->tariffication_by_minutes,
-            effectivePricelist->tariffication_full_first_minute,
-            false
-    );
-
-    call->rate = effectivePrice->price;
-    call->cost = call->billed_time * call->rate / 60.0;
-    call->cost = call->orig ? - call->cost : call->cost;
-
-    if (!call->orig && effectivePricelist->initiate_zona_cost > 0.00001 && call->destination_id == 0) {
-        call->interconnect_rate = effectivePricelist->initiate_zona_cost;
-        call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
-    }
-    if (!call->orig && effectivePricelist->initiate_mgmn_cost > 0.00001 && call->destination_id > 0) {
-        call->interconnect_rate = effectivePricelist->initiate_mgmn_cost;
-        call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
-    }
-}
-
-void BillingCall::calcByNumber() {
-
-    if (trace != nullptr) {
-        *trace << "INFO|TARIFFICATION BY NUMBER" << "\n";
-    }
-
-    if (call->orig) {
-        processLineWithoutNumber(call, cdr);
-    }
-
-    auto serviceNumber = data->serviceNumber->find(getNumber(), call->connect_time, trace);
-    if (serviceNumber == nullptr) {
-        if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE SERVICE NUMBER WAS NOT FOUND" << "\n";
-        }
-        return;
-    }
-
-    auto serviceTrunk = data->serviceTrunk->find(trunk->id, call->connect_time, trace);
-    if (serviceTrunk != nullptr) {
-        call->trunk_service_id = serviceTrunk->id;
-    }
-
-    if (!trunk->our_trunk) {
-
-        if (serviceTrunk == nullptr) {
-            if (trace != nullptr) {
-                *trace << "ERROR|TARIFFICATION STOPPED|CAUSE SERVICE TRUNK WAS NOT FOUND" << "\n";
-            }
-            return;
-        }
-
-        if (serviceNumber->client_account_id != serviceTrunk->client_account_id) {
-            if (trace != nullptr) {
-                *trace << "ERROR|TARIFFICATION STOPPED|CAUSE SERVICE NUMBER ACCOUNT DIFFERENT FROM SERVICE TRUNK_ACCOUNT" << "\n";
-            }
-            return;
-        }
-    }
-
-
-
-    call->account_id = serviceNumber->client_account_id;
-    call->number_service_id = serviceNumber->id;
-
-    if (call->orig) {
-        calcOrigByNumber(serviceNumber);
-    } else {
-        calcTermByNumber(serviceNumber);
-    }
-}
-
-bool BillingCall::checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int type, Pricelist * &pricelist, PricelistPrice * &price) {
-
-    vector<ServiceTrunkSettings *> serviceTrunkSettings;
-    data->serviceTrunkSettings->findAll(serviceTrunkSettings, serviceTrunk->id, type, trace);
-    for (auto trunkSettings : serviceTrunkSettings) {
-
-        if (trunkSettings->src_number_id > 0 && !filterByNumber(trunkSettings->src_number_id, call->src_number)) {
-            if (trace != nullptr) {
-                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE SRC_NUMBER NOT MATCHED" << "\n";
-            }
-            continue;
-        }
-
-        if (trunkSettings->dst_number_id > 0 && !filterByNumber(trunkSettings->dst_number_id, call->dst_number)) {
-            if (trace != nullptr) {
-                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE DST_NUMBER NOT MATCHED" << "\n";
-            }
-            continue;
-        }
-
-        pricelist = data->pricelist->find(trunkSettings->pricelist_id, trace);
-        if (pricelist == nullptr) {
-            if (trace != nullptr) {
-                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST NOT FOUND" << "\n";
-            }
-            continue;
-        }
-
-        if (pricelist->local) {
-
-            auto networkPrefix = data->networkPrefix->find(pricelist->local_network_config_id, call->dst_number, call->connect_time, trace);
-            if (networkPrefix == nullptr) {
-                if (trace != nullptr) {
-                    *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE NETWORK PREFIX NOT FOUND" << "\n";
-                }
-                continue;
-            }
-
-            price = data->pricelistPrice->find(trunkSettings->pricelist_id, networkPrefix->network_type_id, call->connect_time, trace);
-            if (price == nullptr) {
-                if (trace != nullptr) {
-                    *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
-                }
-                continue;
-            }
-
-
-        } else {
-
-            price = data->pricelistPrice->find(trunkSettings->pricelist_id, call->dst_number, call->connect_time, trace);
-            if (price == nullptr) {
-                if (trace != nullptr) {
-                    *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
-                }
-                continue;
-            }
-
-        }
-
-        if (trace != nullptr) {
-            *trace << "INFO|SERVICE TRUNK SETTINGS MATCHED" << "\n";
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-void BillingCall::calcOrigByNumber(ServiceNumber *serviceNumber) {
-
-    auto logTariff = data->tariffChangeLog->find(serviceNumber->id, call->connect_time, trace);
-    if (logTariff == nullptr) {
-        if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF CHANGE LOG NOT FOUND" << "\n";
-        }
-        return;
-    }
-
-    int tariffId = 0;
-    if (call->isLocal())
-        tariffId = logTariff->tariff_id_local;
-    else if (call->isZonaMob())
-        tariffId = logTariff->tariff_id_local_mob;
-    else if (call->isZonaStd())
-        tariffId = logTariff->tariff_id_russia;
-    else if (call->isRussianStd())
-        tariffId = logTariff->tariff_id_russia;
-    else if (call->isRussianMob())
-        tariffId = logTariff->tariff_id_russia_mob;
-    else if (call->isInternational())
-        tariffId = logTariff->tariff_id_intern;
-
-    auto mainTariff = data->tariff->find(logTariff->tariff_id_local, trace);
-    if (mainTariff == nullptr) {
-        if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF NOT FOUND" << "\n";
-        }
-        return;
-    }
-
-    auto tariff = data->tariff->find(tariffId, trace);
-    if (tariff == nullptr) {
-        if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF NOT FOUND" << "\n";
-        }
-        return;
-    }
-
-    call->pricelist_id = tariff->pricelist_id;
-
-    auto price = data->pricelistPrice->find(call->pricelist_id, call->dst_number, call->connect_time, trace);
-    if (price == nullptr) {
-        if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
-        }
-        return;
-    }
-
-    call->prefix = atoll(price->prefix);
-
-    call->billed_time = getCallLength(
-            cdr->session_time,
-            mainTariff->tariffication_by_minutes,
-            mainTariff->tariffication_full_first_minute,
-            mainTariff->tariffication_free_first_seconds
-    );
-
-    call->rate = price->price;
-    call->cost = - (call->billed_time * call->rate / 60.0);
-
-    int freeSeconds = 60 * mainTariff->freemin * (mainTariff->freemin_for_number ? 1 : serviceNumber->lines_count);
-    if (call->isLocal() && freeSeconds > 0) {
-        auto fminCounter = billing->billingData->fminCounter.get();
-        int used_free_seconds = fminCounter->get(call->number_service_id, 1, call->dt.month);
-        if (used_free_seconds + call->billed_time <= freeSeconds) {
-            call->service_package_id = 1;
-            call->package_time = call->billed_time;
-            call->package_credit = call->cost;
-            call->cost = 0;
-        }
-    }
-}
-
-void BillingCall::calcTermByNumber(ServiceNumber *serviceNumber) {
-
-    auto logTariff = data->tariffChangeLog->find(serviceNumber->id, call->connect_time, trace);
-    if (logTariff == nullptr) {
-        if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF CHANGE LOG NOT FOUND" << "\n";
-        }
-        return;
-    }
-
-    auto tariff = data->tariff->find(logTariff->tariff_id_local, trace);
-    if (tariff == nullptr) {
-        if (trace != nullptr) {
-            *trace << "ERROR|TARIFFICATION STOPPED|CAUSE TARIFF NOT FOUND" << "\n";
-        }
-        return;
-    }
-
-    call->billed_time = getCallLength(
-            cdr->session_time,
-            tariff->tariffication_by_minutes,
-            tariff->tariffication_full_first_minute,
-            tariff->tariffication_free_first_seconds
-    );
-
-    if (isUsage7800()) {
-        if (trace != nullptr) {
-            *trace << "INFO|TARIFFICATION 7800" << "\n";
-        }
-
-        call->pricelist_id = tariff->pricelist_id;
-
-        auto price = data->pricelistPrice->find(call->pricelist_id, call->src_number, call->connect_time, trace);
-        if (price == nullptr) {
-            if (trace != nullptr) {
-                *trace << "ERROR|TARIFFICATION STOPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
-            }
-            return;
-        }
-
-        call->prefix = atoll(price->prefix);
-
-        call->rate = price->price;
-        call->cost = - (call->billed_time * call->rate / 60.0);
-    }
 }
 
 void BillingCall::processLineWithoutNumber(Call *call, Cdr *cdr) {
@@ -532,36 +399,6 @@ char * BillingCall::getRemoteRoute() {
     return call->orig ? cdr->dst_route : cdr->src_route;
 }
 
-bool BillingCall::filterByNumber(int numberId, long long int numberPrefix) {
-    char tmpNumber[20];
-    sprintf(tmpNumber, "%lld", numberPrefix);
-
-    auto number = data->number->find(numberId);
-    if (number == nullptr) {
-        return false;
-    }
-
-    auto prefixlistIds = number->getPrefixlistIds();
-    for (auto it = prefixlistIds.begin(); it != prefixlistIds.end(); ++it) {
-        if (filterByPrefixlist(*it, tmpNumber)) {
-            return true;
-        }
-    }
-
-    return false;
-
-}
-
-bool BillingCall::filterByPrefixlist(int prefixlistId, char * str) {
-    auto prefixlist = data->prefixlist->find(prefixlistId);
-    if (prefixlist == nullptr) {
-        return false;
-    }
-
-    auto prefix = data->prefixlistPrefix->find(prefixlist->id, str);
-    return prefix != nullptr;
-}
-
 int BillingCall::getCallLength(int len, bool byMinutes, bool fullFirstMinute, bool freeFirstMinutes) {
 
     if (freeFirstMinutes && len <= app().conf.billing_free_seconds)
@@ -593,4 +430,266 @@ bool BillingCall::isUsage7800() {
     sprintf(tmpNumber, "%lld", getNumber());
 
     return tmpNumber[0] == '7' && tmpNumber[1] == '8' && tmpNumber[2] == '0' && tmpNumber[3] == '0';
+}
+
+void BillingCall::setupTrunk() {
+    callInfo->trunk = repository->getTrunkByName(getRoute());
+    if (callInfo->trunk == nullptr) {
+        throw CalcException("TRUNK WAS NOT FOUND");
+    }
+
+    call->trunk_id = callInfo->trunk->id;
+    call->operator_id = callInfo->trunk->code;
+}
+
+void BillingCall::setupEffectiveServiceTrunkPricelistPrice() {
+    vector<ServiceTrunk *> serviceTrunks;
+    repository->getAllServiceTrunk(serviceTrunks, callInfo->trunk->id);
+
+    for (auto serviceTrunk : serviceTrunks) {
+        Pricelist * pricelist;
+        PricelistPrice * price;
+        if (checkServiceTrunkAvailability(serviceTrunk, call->orig ? SERVICE_TRUNK_SETTINGS_ORIGINATION : SERVICE_TRUNK_SETTINGS_TERMINATION, pricelist, price)) {
+            if (callInfo->serviceTrunk == nullptr || price->price < callInfo->price->price) {
+                callInfo->serviceTrunk = serviceTrunk;
+                callInfo->pricelist = pricelist;
+                callInfo->price = price;
+            }
+        }
+    }
+}
+
+void BillingCall::setupServiceTrunk() {
+    if (callInfo->serviceTrunk == nullptr) {
+        throw CalcException("SERVICE TRUNK WAS NOT FOUND");
+    }
+    call->trunk_service_id = callInfo->serviceTrunk->id;
+}
+
+void BillingCall::setupServiceNumber() {
+    callInfo->serviceNumber = repository->getServiceNumber(getNumber());
+    if (callInfo->serviceNumber == nullptr) {
+        throw CalcException("SERVICE NUMBER WAS NOT FOUND");
+    }
+    call->number_service_id = callInfo->serviceNumber->id;
+}
+
+void BillingCall::setupServiceTrunkForNumber() {
+    callInfo->serviceTrunk = repository->getServiceTrunk(callInfo->trunk->id);
+
+    if (!callInfo->trunk->our_trunk) {
+        if (callInfo->serviceTrunk == nullptr) {
+            throw CalcException("SERVICE TRUNK WAS NOT FOUND");
+        }
+
+        if (callInfo->serviceNumber->client_account_id != callInfo->serviceTrunk->client_account_id) {
+            throw CalcException("SERVICE NUMBER ACCOUNT DIFFERENT FROM SERVICE TRUNK_ACCOUNT");
+        }
+    }
+
+    if (callInfo->serviceTrunk != nullptr) {
+        call->trunk_service_id = callInfo->serviceTrunk->id;
+    }
+}
+
+void BillingCall::setupAccount() {
+    if (callInfo->serviceNumber != nullptr) {
+        callInfo->account = repository->getAccount(callInfo->serviceNumber->client_account_id);
+    } else if (callInfo->serviceTrunk != nullptr) {
+        callInfo->account = repository->getAccount(callInfo->serviceTrunk->client_account_id);
+    }
+
+    if (callInfo->account == nullptr) {
+        throw CalcException("ACCOUNT WAS NOT FOUND");
+    }
+    call->account_id = callInfo->account->id;
+}
+
+void BillingCall::setupPricelist(int pricelist_id) {
+    if (pricelist_id != 0) {
+        callInfo->pricelist = repository->getPricelist(pricelist_id);
+    }
+    if (callInfo->pricelist == nullptr) {
+        throw CalcException("PRICELIST NOT FOUND");
+    }
+
+    if (trace != nullptr) {
+        *trace << "INTO|PRICELIST|";
+        callInfo->pricelist->dump(*trace);
+        *trace << "\n";
+    }
+
+    call->pricelist_id = callInfo->pricelist->id;
+}
+
+void BillingCall::setupPrice(long long int numberPrefix) {
+    if (numberPrefix != 0) {
+        callInfo->price = repository->getPrice(callInfo->pricelist->id, numberPrefix);
+    }
+    if (callInfo->price == nullptr) {
+        throw CalcException("PRICE NOT FOUND");
+    }
+
+    if (trace != nullptr) {
+        *trace << "INTO|PRICELIST|";
+        callInfo->pricelist->dump(*trace);
+        *trace << "\n";
+    }
+
+    call->prefix = atoll(callInfo->price->prefix);
+    call->rate = callInfo->price->price;
+}
+
+void BillingCall::setupBilledTime() {
+    if (callInfo->serviceNumber) {
+        call->billed_time = getCallLength(
+                cdr->session_time,
+                callInfo->mainTariff->tariffication_by_minutes,
+                callInfo->mainTariff->tariffication_full_first_minute,
+                callInfo->mainTariff->tariffication_free_first_seconds
+        );
+    } else {
+        call->billed_time = getCallLength(
+                cdr->session_time,
+                callInfo->pricelist->tariffication_by_minutes,
+                callInfo->pricelist->tariffication_full_first_minute,
+                false
+        );
+    }
+}
+
+void BillingCall::setupCost() {
+    call->cost = (call->billed_time - call->package_time) * call->rate / 60.0;
+    call->cost = call->orig ? - call->cost : call->cost;
+}
+
+void BillingCall::setupLogTariff() {
+    callInfo->logTariff = repository->getTariffLog(callInfo->serviceNumber->id);
+    if (callInfo->logTariff == nullptr) {
+        throw CalcException("TARIFF CHANGE LOG NOT FOUND");
+    }
+}
+
+void BillingCall::setupMainTariff() {
+    callInfo->mainTariff = repository->getTariff(callInfo->logTariff->tariff_id_local);
+    if (callInfo->mainTariff == nullptr) {
+        throw CalcException("TARIFF NOT FOUND");
+    }
+}
+
+void BillingCall::setupTariff() {
+    int tariffId = 0;
+    if (call->isLocal())
+        tariffId = callInfo->logTariff->tariff_id_local;
+    else if (call->isZonaMob())
+        tariffId = callInfo->logTariff->tariff_id_local_mob;
+    else if (call->isZonaStd())
+        tariffId = callInfo->logTariff->tariff_id_russia;
+    else if (call->isRussianStd())
+        tariffId = callInfo->logTariff->tariff_id_russia;
+    else if (call->isRussianMob())
+        tariffId = callInfo->logTariff->tariff_id_russia_mob;
+    else if (call->isInternational())
+        tariffId = callInfo->logTariff->tariff_id_intern;
+
+    callInfo->tariff = repository->getTariff(tariffId);
+    if (callInfo->tariff == nullptr) {
+        throw CalcException("TARIFF NOT FOUND");
+    }
+}
+
+void BillingCall::setupPackagePricelist() {
+    vector<ServicePackage *> packages;
+    repository->getAllServicePackage(packages, callInfo->serviceNumber->id);
+
+    Pricelist * pricelist;
+    PricelistPrice * price;
+
+
+    for(auto package : packages) {
+        auto tariff = repository->getTariffPackage(package->tariff_package_id);
+        if (tariff == nullptr) {
+            continue;
+        }
+
+        if (tariff->pricelist_id == 0) {
+            continue;
+        }
+
+        bool equalsDestination = tariff->destination_id != 0;
+        if (!equalsDestination) {
+            continue;
+        }
+
+        pricelist = repository->getPricelist(tariff->pricelist_id);
+        if (pricelist == nullptr) {
+            if (trace != nullptr) {
+                *trace << "INFO|SERVICE PACKAGE SKIPPED|CAUSE PRICELIST NOT FOUND" << "\n";
+            }
+            continue;
+        }
+
+        price = repository->getPrice(pricelist->id, call->dst_number);
+        if (price == nullptr) {
+            if (trace != nullptr) {
+                *trace << "INFO|SERVICE PACKAGE SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
+            }
+            continue;
+        }
+
+        callInfo->pricelist = pricelist;
+        callInfo->price = price;
+        callInfo->servicePackagePricelist = package;
+    }
+}
+
+void BillingCall::setupPackagePrepaid() {
+    vector<ServicePackage *> packages;
+    repository->getAllServicePackage(packages, callInfo->serviceNumber->id);
+
+    int packageSeconds = 0;
+    ServicePackage * servicePackage = nullptr;
+    TariffPackage * tariffPackage = nullptr;
+
+
+    for(auto package : packages) {
+        auto tariff = repository->getTariffPackage(package->tariff_package_id);
+        if (tariff == nullptr) {
+            continue;
+        }
+
+        if (tariff->prepaid_minutes == 0) {
+            continue;
+        }
+
+        bool equalsDestination = tariff->destination_id != 0;
+        if (!equalsDestination) {
+            continue;
+        }
+
+        int availableSeconds;
+        if (!repository->billingData->statsPackageCounter.get()->checkAvailableSeconds(package->id, call->connect_time, availableSeconds)) {
+            availableSeconds = tariff->getPrepaidSeconds();
+        }
+
+        if (availableSeconds >= call->billed_time) {
+            packageSeconds = call->billed_time;
+            servicePackage = package;
+            tariffPackage = tariff;
+            break;
+        } else {
+            if (availableSeconds > packageSeconds) {
+                packageSeconds = availableSeconds;
+                servicePackage = package;
+                tariffPackage = tariff;
+            }
+        }
+    }
+
+    if (servicePackage != nullptr) {
+        call->package_time = packageSeconds;
+        call->service_package_id = servicePackage->id;
+        callInfo->servicePackagePrepaid = servicePackage;
+        callInfo->tariffPackagePrepaid = tariffPackage;
+    }
 }

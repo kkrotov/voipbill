@@ -92,12 +92,10 @@ void insert_row(Call * call, stringstream &q) {
 
 CallsSaver::CallsSaver() {
     this->db = 0;
-    this->billingData = DataBillingContainer::instance();
 }
 
 CallsSaver::CallsSaver(BDb *db) {
     this->db = db;
-    this->billingData = DataBillingContainer::instance();
 }
 
 void CallsSaver::setDb(BDb *db) {
@@ -105,34 +103,16 @@ void CallsSaver::setDb(BDb *db) {
 }
 
 void CallsSaver::setBillingData(DataBillingContainer *billingData) {
-    this->billingData = billingData;
+    repository.billingData = billingData;
 }
 
 size_t CallsSaver::save(const size_t save_part_count) {
     map<time_t, stringstream> queryPerMonth;
 
-    size_t maxInsertCallsCount = save_part_count;
-
     vector<Call> callsForSave;
+
     try {
-        {
-            lock_guard<Spinlock> guard(billingData->callsWaitSavingLock);
-            if (billingData->callsWaitSaving.size() == 0) {
-                return 0;
-            }
-
-            maxInsertCallsCount = billingData->callsWaitSaving.size() < maxInsertCallsCount ? billingData->callsWaitSaving.size() : maxInsertCallsCount;
-            callsForSave.reserve(maxInsertCallsCount);
-
-            for (;;) {
-                if (billingData->callsWaitSaving.size() > 0 && callsForSave.size() < maxInsertCallsCount) {
-                    callsForSave.push_back(billingData->callsWaitSaving.front());
-                    billingData->callsWaitSaving.pop_front();
-                } else {
-                    break;
-                }
-            }
-        }
+        repository.billingData->calls.get(callsForSave, save_part_count);
 
         for (Call &call : callsForSave) {
 
@@ -175,19 +155,16 @@ size_t CallsSaver::save(const size_t save_part_count) {
 
         if (callsForSave.size() > 0) {
             Call &call = callsForSave.at(callsForSave.size() - 1);
-            billingData->lastSaveCallId = call.id;
-            billingData->lastSaveCallTime = call.connect_time;
-            billingData->savedCallsCount += callsForSave.size();
+            repository.billingData->calls.setStoredLastId(call.id);
+            repository.billingData->calls.setStoredLastTime(call.connect_time);
+            repository.billingData->calls.incStoredCounter(callsForSave.size());
         }
 
         return callsForSave.size();
 
     } catch (exception &e) {
-        lock_guard<Spinlock> guard(billingData->callsWaitSavingLock);
 
-        for (auto it = callsForSave.rbegin(); it!= callsForSave.rend(); ++it) {
-            billingData->callsWaitSaving.push_front(*it);
-        }
+        repository.billingData->calls.revert(callsForSave);
 
         throw e;
     }

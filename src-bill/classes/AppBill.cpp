@@ -8,7 +8,7 @@
 #include "../threads/ThreadCurrentCalls.h"
 #include "../threads/ThreadFetchCdr.h"
 #include "../threads/ThreadBillRuntime.h"
-#include "../threads/ThreadSaveCalls.h"
+#include "../threads/ThreadSave.h"
 #include "../threads/ThreadSyncCalls.h"
 #include "../threads/ThreadSyncCounters.h"
 #include "../threads/ThreadSyncLocks.h"
@@ -19,9 +19,9 @@
 #include "../threads/ThreadUpdateActiveClients.h"
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
-#include "../../src/classes/LogWriterScreen.h"
-#include "../../src/classes/LogWriterFile.h"
-#include "../../src/classes/LogWriterSyslog.h"
+#include "../classes/LogWriterScreen.h"
+#include "../classes/LogWriterFile.h"
+#include "../classes/LogWriterSyslog.h"
 
 AppBill & app() {
     static AppBill appVar;
@@ -67,7 +67,7 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadCurrentCalls>();
     registerThread<ThreadFetchCdr>();
     registerThread<ThreadBillRuntime>();
-    registerThread<ThreadSaveCalls>();
+    registerThread<ThreadSave>();
     registerThread<ThreadSyncCalls>();
     registerThread<ThreadSyncCounters>();
     registerThread<ThreadSyncLocks>();
@@ -90,7 +90,7 @@ void AppBill::runAppInSingleMode()
             "current_calls",
             "fetch_cdr",
             "runtime",
-            "save_calls",
+            "save",
             "sync_calls",
             "sync_counters",
             "sync_locks",

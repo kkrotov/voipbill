@@ -1,6 +1,6 @@
 #pragma once
 
-#include <time.h>
+#include "../common.h"
 
 struct PricelistPrice {
     int pricelist_id;

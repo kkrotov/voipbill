@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ManagerPull.h"
-#include "../../src/classes/Timer.h"
+#include "../classes/Timer.h"
 
 #include <string>
 #include <vector>

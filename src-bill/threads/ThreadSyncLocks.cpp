@@ -7,19 +7,17 @@ ThreadSyncLocks::ThreadSyncLocks() {
 
     db_main.setCS(app().conf.db_main);
 
-    billingData = DataBillingContainer::instance();
-
     last_sync_count = 0;
     total_sync_count = 0;
 }
 
 bool ThreadSyncLocks::ready() {
-    return billingData->ready();
+    return repository.billingData->ready();
 }
 
 void ThreadSyncLocks::run() {
 
-    unique_lock<mutex> lock(billingData->syncLocksCentralLock, try_to_lock);
+    unique_lock<mutex> lock(repository.billingData->syncLocksCentralLock, try_to_lock);
     if (!lock.owns_lock()) {
         return;
     }
@@ -32,7 +30,7 @@ void ThreadSyncLocks::save_client_locks() {
 
     string q;
 
-    auto clientLock = billingData->clientLock.get();
+    auto clientLock = repository.billingData->clientLock.get();
 
     vector<int> changes;
     unsigned long long int marker;

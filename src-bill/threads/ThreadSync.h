@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../../src/classes/BDb.h"
+#include "../classes/Thread.h"
+#include "../classes/BDb.h"
 #include <list>
 
-#include "../../src/classes/Timer.h"
+#include "../classes/Timer.h"
 #include "../sync/ManagerPull.h"
 
 class ThreadSync : public Thread {

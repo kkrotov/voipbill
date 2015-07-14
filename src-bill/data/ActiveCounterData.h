@@ -8,6 +8,7 @@ public:
     void load(shared_ptr<ServiceNumberList> serviceNumberList, shared_ptr<ServiceTrunkList> serviceTrunkList) {
         TimerScope timerScope(timer);
 
+        ActiveCounter *xxx = new ActiveCounter();
         shared_ptr<ActiveCounter> tmpData = shared_ptr<ActiveCounter>( new ActiveCounter() );
         tmpData.get()->load(serviceNumberList, serviceTrunkList);
 

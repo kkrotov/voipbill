@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/Client.h"
 
 class ClientList : public ObjList<Client> {
 protected:
 
     string sql(BDb * db) {
-        return "   select id, voip_limit_month, voip_limit_day, credit, balance, amount_date, last_payed_month, voip_disabled, organization_id, price_include_vat " \
+        return "   select id, voip_limit_month, voip_limit_day, credit, balance, amount_date, last_payed_month, voip_disabled, organization_id, price_include_vat, timezone_offset " \
                 "   from billing.clients " \
                 "   order by id asc ";
     }
@@ -23,6 +23,7 @@ protected:
         item->disabled = row.get_b(7);
         item->organization_id = row.get_i(8);
         item->price_include_vat = row.get_b(9);
+        item->timezone_offset = row.get_i(10);
     }
 
     struct key_id {
@@ -35,7 +36,7 @@ protected:
     };
 
 public:
-    Client * find(int id) {
+    Client * find(int id, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -43,7 +44,20 @@ public:
             begin = p.first;
             end = p.second;
         }
-        return begin <  end ? &*begin : nullptr;
+        auto result = begin <  end ? &*begin : nullptr;
+
+        if (trace != nullptr) {
+            if (result != nullptr) {
+                *trace << "FOUND|ACCOUNT|BY ID '" << id << "'" << "\n";
+                *trace << "||";
+                result->dump(*trace);
+                *trace << "\n";
+            } else {
+                *trace << "NOT FOUND|ACCOUNT|BY ID '" << id << "'" << "\n";
+            }
+        }
+
+        return result;
     }
 };
 

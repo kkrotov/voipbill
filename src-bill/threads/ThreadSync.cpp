@@ -11,7 +11,9 @@
 #include "../sync/PullOperator.h"
 #include "../sync/PullPricelist.h"
 #include "../sync/PullTariff.h"
+#include "../sync/PullTariffPackage.h"
 #include "../sync/PullServiceNumber.h"
+#include "../sync/PullServicePackage.h"
 #include "../sync/PullServiceTrunk.h"
 #include "../sync/PullServiceTrunkSettings.h"
 #include "../sync/PullTariffLog.h"
@@ -54,8 +56,10 @@ ThreadSync::ThreadSync() {
     manager->add(new PullOperator());
     manager->add(new PullPricelist());
     manager->add(new PullTariff());
+    manager->add(new PullTariffPackage());
     manager->add(new PullDefs());
     manager->add(new PullServiceNumber());
+    manager->add(new PullServicePackage());
     manager->add(new PullServiceTrunk());
     manager->add(new PullServiceTrunkSettings());
     manager->add(new PullLogTariff());

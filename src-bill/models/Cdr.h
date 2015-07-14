@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct Cdr {
     long long int id;
 
