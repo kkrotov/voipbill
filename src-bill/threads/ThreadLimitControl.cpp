@@ -64,7 +64,7 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call) {
     double globalBalanceSum, globalDaySum;
     fetchGlobalCounters(call.account_id, globalBalanceSum, globalDaySum, vat_rate);
 
-    double spentBalanceSum, spentDaySum, spentMonthSum;
+    double spentBalanceSum, spentDaySum;
     spentBalanceSum = c0.sumBalance(vat_rate) + c2.sumBalance(vat_rate) + globalBalanceSum;
     spentDaySum = c0.sumDay(vat_rate) + c2.sumDay(vat_rate) + globalDaySum;
 

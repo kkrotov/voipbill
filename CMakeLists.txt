@@ -4,6 +4,8 @@ project(voip)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+set(CMAKE_C_COMPILER /usr/local/bin/cc)
+set(CMAKE_CXX_COMPILER /usr/local/bin/c++)
 
 include_directories(/usr/include/postgresql)
 link_directories(/usr/pgsql-9.4/lib)
