@@ -157,6 +157,10 @@ void ThreadLoader::run() {
 
                 repository.data->serviceTrunkSettings.load(&db_calls);
 
+            } else if (event == "service_number_package") {
+
+                repository.data->servicePackage.load(&db_calls);
+
             } else if (event == "tariff") {
 
                 repository.data->tariff.load(&db_calls);
@@ -164,6 +168,10 @@ void ThreadLoader::run() {
             } else if (event == "tariff_change_log") {
 
                 repository.data->tariffChangeLog.load(&db_calls);
+
+            } else if (event == "tariff_package") {
+
+                repository.data->tariffPackage.load(&db_calls);
 
             } else if (event == "server") {
 

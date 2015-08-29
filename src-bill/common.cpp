@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#define UNIXTIME_40000101 64060588800
+#define UNIXTIME_40010101 64092211200
 
 string string_fmt(const string &fmt, ...) {
     int size = 100;
@@ -31,7 +31,7 @@ string string_fmt(const string &fmt, ...) {
 string string_date(const time_t dt) {
     char buff[20];
 
-    if (dt > UNIXTIME_40000101) {
+    if (dt > UNIXTIME_40010101) {
         Log::error("string_date: bad unix time");
         return string("4000-01-01");
     }
@@ -50,7 +50,7 @@ string string_date(const time_t dt) {
 string string_time(const time_t dt) {
     char buff[40];
 
-    if (dt > UNIXTIME_40000101) {
+    if (dt > UNIXTIME_40010101) {
         Log::error("string_time: bad unix time");
         return string("4000-01-01 00:00:00");
     }

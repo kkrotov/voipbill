@@ -17,7 +17,7 @@ protected:
     inline void parse_item(BDbResult &row, TariffPackage * item) {
         item->id = row.get_i(0);
         item->destination_id = row.get_i(1);
-        item->prepaid_minutes = row.get_b(2);
+        item->prepaid_minutes = row.get_i(2);
         item->pricelist_id = row.get_i(3);
     }
 

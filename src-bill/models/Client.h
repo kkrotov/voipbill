@@ -4,7 +4,6 @@
 
 struct Client {
     int id;
-    int limit_m;
     int limit_d;
     int credit;
     double balance;
@@ -14,11 +13,11 @@ struct Client {
     int organization_id;
     bool price_include_vat;
     short timezone_offset;
+    bool is_blocked;
 
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
-        trace << "limit_m: " << limit_m << ", ";
         trace << "limit_d: " << limit_d << ", ";
         trace << "credit: " << credit << ", ";
         trace << "balance: " << balance << ", ";
@@ -28,6 +27,7 @@ struct Client {
         trace << "organization_id: " << organization_id << ", ";
         trace << "price_include_vat: " << price_include_vat << ", ";
         trace << "timezone_offset: " << timezone_offset << ", ";
+        trace << "is_blocked: " << is_blocked << ", ";
         trace << ")";
     }
 
@@ -39,20 +39,12 @@ struct Client {
         return limit_d != 0;
     }
 
-    bool hasMonthlyLimit() {
-        return limit_m != 0;
-    }
-
     bool isConsumedCreditLimit(double value) {
         return hasCreditLimit() && (balance + credit + value < 0);
     }
 
     bool isConsumedDailyLimit(double value) {
         return hasDailyLimit() && (limit_d + value < 0);
-    }
-
-    bool isConsumedMonthlyLimit(double value) {
-        return hasMonthlyLimit() && (limit_m + value < 0);
     }
 
     double getPriceWithVat(double price, double vat_rate) {

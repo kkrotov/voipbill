@@ -58,9 +58,9 @@ void BillingCall::calcByTrunk() {
 
     setupPrice();
 
-    setupCost();
-
     setupBilledTime();
+
+    setupCost();
 
     if (!call->orig && callInfo->pricelist->initiate_zona_cost > 0.00001 && call->destination_id == 0) {
         call->interconnect_rate = callInfo->pricelist->initiate_zona_cost;
@@ -115,11 +115,11 @@ void BillingCall::calcOrigByNumber() {
         setupPrice();
     }
 
-    setupCost();
-
     setupBilledTime();
 
     setupPackagePrepaid();
+
+    setupCost();
 
     int freeSeconds = 60 * callInfo->mainTariff->freemin * (callInfo->mainTariff->freemin_for_number ? 1 : callInfo->serviceNumber->lines_count);
     if (call->isLocal() && freeSeconds > 0) {

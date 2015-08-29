@@ -21,5 +21,7 @@ public:
         fields.push_back("last_payed_month");
         fields.push_back("organization_id");
         fields.push_back("price_include_vat");
+        fields.push_back("timezone_offset");
+        fields.push_back("is_blocked");
     }
 };

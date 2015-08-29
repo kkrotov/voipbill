@@ -118,15 +118,12 @@ void BlackList::log_lock_phone(const string &phone) {
                             + string_fmt("%.2f", sum_day);
                 }
 
-                if (client->isConsumedMonthlyLimit(sum_month)) {
-                    str = str + " / Monthly limit "
-                            + string_fmt("%.2f", client->limit_m + sum_month) + " = "
-                            + lexical_cast<string>(client->limit_m) + " + "
-                            + string_fmt("%.2f", sum_month);
+                if (client->disabled) {
+                    str = str + " / Block MGMN ";
                 }
 
-                if (client->disabled) {
-                    str = str + " / Voip disabled ";
+                if (client->is_blocked) {
+                    str = str + " / Block Global ";
                 }
 
             }
