@@ -72,7 +72,7 @@ struct PreparedData {
 
     double getVatRate(Client * client)
     {
-        if (client != nullptr) {
+        if (client != nullptr && !client->price_include_vat) {
             auto org = organization->find(client->organization_id, time(nullptr));
             if (org != nullptr) {
                 return org->vat_rate;

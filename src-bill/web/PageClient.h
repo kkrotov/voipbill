@@ -71,10 +71,10 @@ public:
         html << "-----<br/>\n";
 
         if (clientLock.disabled_local)
-            html << "Client disabled LOCAL<br/>\n";
+            html << "Blocked MGMN<br/>\n";
 
         if (clientLock.disabled_global)
-            html << "Client disabled GLOBAL<br/>\n";
+            html << "Blocked Global<br/>\n";
 
         html << "-----<br/>\n";
 
@@ -137,15 +137,14 @@ public:
             html << string_fmt("%d", client->limit_d) << " (limit_d) + " << string_fmt("%.2f", sum_day) << " (local) + " << string_fmt("%.2f", sum_day2) << " (current) + " << string_fmt("%.2f", sum_day_global) << " (global) <br/>\n";
         }
 
-        if (client->hasMonthlyLimit()) {
-            html << "Monthly avaiable: <b>" << string_fmt("%.2f", client->limit_m + sum_month + sum_month2 + sum_month_global) << "</b> = ";
-            html << string_fmt("%d", client->limit_m) << " (limit_m) + " << string_fmt("%.2f", sum_month) << " (local) + " << string_fmt("%.2f", sum_month2) << " (current) + " << string_fmt("%.2f", sum_month_global) << " (global) <br/>\n";
-        }
-
         html << "-----<br/>\n";
 
+        if (client->is_blocked) {
+            html << "Manual Block Global Flag: <b>" << "true" << "</b><br/>\n";
+        }
+
         if (client->disabled) {
-            html << "Voip disabled: <b>" << "true" << "</b><br/>\n";
+            html << "Manual Block MGMN Flag: <b>" << "true" << "</b><br/>\n";
         }
 
         html << "-----<br/>\n";

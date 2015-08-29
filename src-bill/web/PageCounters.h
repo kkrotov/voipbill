@@ -37,8 +37,8 @@ public:
         html << "<th nowrap>Sum</th>\n";
         html << "<th nowrap>Balance avaiable</th>\n";
         html << "<th nowrap>Daily avaiable</th>\n";
-        html << "<th nowrap>Monthly avaiable</th>\n";
-        html << "<th nowrap>Voip disabled</th>\n";
+        html << "<th nowrap>Block MGMN Flag</th>\n";
+        html << "<th nowrap>Block Global Flag</th>\n";
         html << "</tr>\n";
         for (ClientCounterObj &cc : clients) {
             int client_id = cc.client_id;
@@ -93,17 +93,18 @@ public:
                 html << "<td nowrap>-</td>\n";
             }
 
-            if (client != nullptr && client->hasMonthlyLimit()) {
-                html << "<td nowrap>" << string_fmt("%.2f", client->limit_m + sum_month + sum_month_global) << "</td>\n";
+            if (client != nullptr && client->disabled) {
+                html << "<td nowrap>" << "BLOCK MGMN" << "</td>\n";
             } else {
                 html << "<td nowrap>-</td>\n";
             }
 
-            if (client != nullptr && client->disabled) {
-                html << "<td nowrap>" << "DISABLED" << "</td>\n";
+            if (client != nullptr && client->is_blocked) {
+                html << "<td nowrap>" << "BLOCK GLOBAL" << "</td>\n";
             } else {
                 html << "<td nowrap>-</td>\n";
             }
+
 
             html << "</tr>\n";
         }

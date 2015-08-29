@@ -28,12 +28,12 @@ public:
         html << "<table border=1>\n";
         html << "<tr>\n";
         html << "<th nowrap>Client</th>\n";
-        html << "<th nowrap>Lock Local</th>\n";
-        html << "<th nowrap>Lock Global</th>\n";
+        html << "<th nowrap>Block MGMN</th>\n";
+        html << "<th nowrap>Block Global</th>\n";
         html << "<th nowrap>Balance avaiable</th>\n";
         html << "<th nowrap>Daily avaiable</th>\n";
-        html << "<th nowrap>Monthly avaiable</th>\n";
-        html << "<th nowrap>Voip disabled</th>\n";
+        html << "<th nowrap>Block MGMN Flag</th>\n";
+        html << "<th nowrap>Block Global Flad</th>\n";
         html << "</tr>\n";
 
         vector<ClientLockObj> locks;
@@ -70,8 +70,8 @@ public:
 
             html << "<tr>\n";
             html << "<td nowrap><a href='/client?id=" << client_id << "'>" << client_id << "</a></td>\n";
-            html << "<td nowrap>" << (lock.disabled_local ? "LOCK" : "-")  << "</td>\n";
-            html << "<td nowrap>" << (lock.disabled_global ? "LOCK" : "-") << "</td>\n";
+            html << "<td nowrap>" << (lock.disabled_local ? "BLOCK MGNM" : "-")  << "</td>\n";
+            html << "<td nowrap>" << (lock.disabled_global ? "BLOCK GLOBAL" : "-") << "</td>\n";
 
             if (client != nullptr && client->hasCreditLimit()) {
                 html << "<td nowrap>" << string_fmt("%.2f", client->balance + client->credit + sum_balance + sum_balance_global) << "</td>\n";
@@ -85,18 +85,17 @@ public:
                 html << "<td nowrap>-</td>\n";
             }
 
-            if (client != nullptr && client->hasMonthlyLimit()) {
-                html << "<td nowrap>" << string_fmt("%.2f", client->limit_m + sum_month + sum_month_global) << "</td>\n";
-            } else {
-                html << "<td nowrap>-</td>\n";
-            }
-
             if (client != nullptr && client->disabled) {
-                html << "<td nowrap>" << "DISABLED" << "</td>\n";
+                html << "<td nowrap>" << "TRUE" << "</td>\n";
             } else {
                 html << "<td nowrap>-</td>\n";
             }
 
+            if (client != nullptr && client->is_blocked) {
+                html << "<td nowrap>" << "TRUE" << "</td>\n";
+            } else {
+                html << "<td nowrap>-</td>\n";
+            }
 
             html << "</tr>\n";
         }

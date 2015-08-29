@@ -2,7 +2,6 @@
 
 struct Client {
     int id;
-    int limit_m;
     int limit_d;
     int credit;
     double balance;
@@ -11,6 +10,8 @@ struct Client {
     time_t last_payed_month;
     int organization_id;
     bool price_include_vat;
+    short timezone_offset;
+    bool is_blocked;
 
     bool hasCreditLimit() {
         return credit >= 0;
@@ -20,20 +21,12 @@ struct Client {
         return limit_d != 0;
     }
 
-    bool hasMonthlyLimit() {
-        return limit_m != 0;
-    }
-
     bool isConsumedCreditLimit(double value) {
         return hasCreditLimit() && (balance + credit + value < 0);
     }
 
     bool isConsumedDailyLimit(double value) {
         return hasDailyLimit() && (limit_d + value < 0);
-    }
-
-    bool isConsumedMonthlyLimit(double value) {
-        return hasMonthlyLimit() && (limit_m + value < 0);
     }
 
     double getPriceWithVat(double price, double vat_rate) {

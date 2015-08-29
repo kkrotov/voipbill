@@ -64,47 +64,52 @@ void ThreadClientLock::run() {
 
 
 bool ThreadClientLock::needLockLocal(ClientCounterObj &cc, int client_account_id) {
-    bool result = false;
 
     auto client = preparedData.client->find(client_account_id);
     if (client != nullptr) {
-        double vat_rate = preparedData.getVatRate(client);
+
+        if (client->disabled) {
+            return true;
+        }
 
         auto globalCounter = data->globalCounters.get()->find(client->id);
-
+        double vat_rate = preparedData.getVatRate(client);
         double spentBalanceSum = cc.sumBalance(vat_rate) + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
+        double spentDaySum = cc.sumDay(vat_rate) + (globalCounter ? globalCounter->sumDay(vat_rate) : 0.0);
 
-        if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth()) {
-            result = true;
+        if (client->isConsumedCreditLimit(spentBalanceSum)) {
+            return true;
         }
+
+        if (client->isConsumedDailyLimit(spentDaySum)) {
+            return true;
+        }
+
     }
 
-    return result;
+    return false;
 }
 
 bool ThreadClientLock::needLockGlobal(ClientCounterObj &cc, int client_account_id) {
-    bool result = false;
 
     auto client = preparedData.client->find(client_account_id);
     if (client != nullptr) {
-        double vat_rate = preparedData.getVatRate(client);
+
+        if (client->is_blocked) {
+            return true;
+        }
 
         auto globalCounter = data->globalCounters.get()->find(client->id);
-
+        double vat_rate = preparedData.getVatRate(client);
         double spentBalanceSum = cc.sumBalance(vat_rate) + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
-        double spentDaySum = cc.sumDay(vat_rate) + (globalCounter ? globalCounter->sumDay(vat_rate) : 0.0);
-        double spentMonthSum = cc.sumMonth(vat_rate) + (globalCounter ? globalCounter->sumMonth(vat_rate) : 0.0);
 
-        if (client->isConsumedCreditLimit(spentBalanceSum) ||
-            client->isConsumedDailyLimit(spentDaySum) ||
-            client->isConsumedMonthlyLimit(spentMonthSum) ||
-            client->disabled
-                ) {
-            result = true;
+        if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth()) {
+            return true;
         }
+
     }
 
-    return result;
+    return false;
 }
 
 
