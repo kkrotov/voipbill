@@ -37,17 +37,16 @@ public:
 
         double sum_month, sum_day, sum_balance;
         double sum_month2, sum_day2, sum_balance2;
-        ClientCounterObj clientCounter = repository.billingData->clientCounter.get()->get(client_id);
         ClientLockObj clientLock = repository.billingData->clientLock.get()->get(client_id);
-        sum_month = clientCounter.sumMonth(vat_rate);
-        sum_day = clientCounter.sumDay(vat_rate);
-        sum_balance = clientCounter.sumBalance(vat_rate);
+        sum_month = repository.billingData->statsAccount.getSumMonth(client_id, vat_rate);
+        sum_day = repository.billingData->statsAccount.getSumDay(client_id, vat_rate);
+        sum_balance = repository.billingData->statsAccount.getSumBalance(client_id, vat_rate);
 
 
-        ClientCounterObj c2 = repository.currentCalls->getClientCounter()->get(client_id);
-        sum_balance2 = c2.sumBalance(vat_rate);
-        sum_day2 = c2.sumDay(vat_rate);
-        sum_month2 = c2.sumMonth(vat_rate);
+        auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
+        sum_balance2 = statsAccount2->getSumBalance(client_id, vat_rate);
+        sum_day2 = statsAccount2->getSumDay(client_id, vat_rate);
+        sum_month2 = statsAccount2->getSumMonth(client_id, vat_rate);
 
         double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
         if (repository.data->globalCounters.ready()) {

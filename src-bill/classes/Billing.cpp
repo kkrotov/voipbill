@@ -20,9 +20,9 @@ void Billing::calcCurrentCalls() {
     auto currentCdrs = repository.currentCalls->currentCdr.get();
 
     auto callsWaitSaving = shared_ptr<vector<Call>>(new vector<Call>());
-    auto clientCounter = shared_ptr<ClientCounter>(new ClientCounter());
-    auto fminCounter = shared_ptr<FminCounter>(new FminCounter());
-    auto statsPackagesCounter = shared_ptr<StatsPackageCounter>(new StatsPackageCounter());
+    auto statsAccount = shared_ptr<StatsAccountManager>(new StatsAccountManager());
+    auto statsFreemin = shared_ptr<StatsFreeminManager>(new StatsFreeminManager());
+    auto statsPackage = shared_ptr<StatsPackageManager>(new StatsPackageManager());
 
     for (size_t i = 0; i < currentCdrs->size(); i++) {
         auto cdr = currentCdrs->get(i);
@@ -44,16 +44,16 @@ void Billing::calcCurrentCalls() {
         callsWaitSaving->push_back(origCall);
         callsWaitSaving->push_back(termCall);
 
-        updateClientCounters(origCallInfo, clientCounter.get());
-        updateClientCounters(termCallInfo, clientCounter.get());
-        updateFreeMinsCounters(origCallInfo, fminCounter.get());
-        updatePackageStats(origCallInfo, statsPackagesCounter.get());
+        updateClientCounters(origCallInfo, statsAccount.get());
+        updateClientCounters(termCallInfo, statsAccount.get());
+        updateFreeMinsCounters(origCallInfo, statsFreemin.get());
+        updatePackageStats(origCallInfo, statsPackage.get());
     }
 
     repository.currentCalls->setCallsWaitingSaving(callsWaitSaving);
-    repository.currentCalls->setClientCounter(clientCounter);
-    repository.currentCalls->setFminCounter(fminCounter);
-    repository.currentCalls->setStatsPackagesCounter(statsPackagesCounter);
+    repository.currentCalls->setStatsAccount(statsAccount);
+    repository.currentCalls->setStatsFreemin(statsFreemin);
+    repository.currentCalls->setStatsPackage(statsPackage);
 }
 
 void Billing::calc() {
@@ -68,10 +68,6 @@ void Billing::calc() {
     }
 
     BillingCall billingCall(&repository);
-
-    auto fminCounter = repository.billingData->fminCounter.get();
-    auto clientCounter = repository.billingData->clientCounter.get();
-    auto statsPackagesCounter = repository.billingData->statsPackageCounter.get();
 
     bool calcLoop = true;
     Cdr cdr;
@@ -103,10 +99,10 @@ void Billing::calc() {
             termCall.peer_id = lastCallId + 1;
             billingCall.calc(&termCall, &termCallInfo, &cdr);
 
-            updateClientCounters(origCallInfo, clientCounter.get());
-            updateClientCounters(termCallInfo, clientCounter.get());
-            updateFreeMinsCounters(origCallInfo, fminCounter.get());
-            updatePackageStats(origCallInfo, statsPackagesCounter.get());
+            updateClientCounters(origCallInfo, &repository.billingData->statsAccount);
+            updateClientCounters(termCallInfo, &repository.billingData->statsAccount);
+            updateFreeMinsCounters(origCallInfo, &repository.billingData->statsFreemin);
+            updatePackageStats(origCallInfo, &repository.billingData->statsPackage);
 
             repository.billingData->calls.add(origCall, termCall);
 
@@ -129,15 +125,15 @@ void Billing::calc() {
 
 }
 
-void Billing::updateClientCounters(CallInfo &callInfo, ClientCounter * clientCounter) {
-    clientCounter->add(callInfo.call, callInfo.account);
+void Billing::updateClientCounters(CallInfo &callInfo, StatsAccountManager *statsAccount) {
+    statsAccount->add(&callInfo);
 }
 
-void Billing::updateFreeMinsCounters(CallInfo &callInfo, FminCounter * fminCounter) {
-    fminCounter->add(callInfo.call);
+void Billing::updateFreeMinsCounters(CallInfo &callInfo, StatsFreeminManager *statsFreemin) {
+    statsFreemin->add(callInfo.call);
 }
 
-void Billing::updatePackageStats(CallInfo &callInfo, StatsPackageCounter * statsPackageCounter) {
-    statsPackageCounter->add(&callInfo);
+void Billing::updatePackageStats(CallInfo &callInfo, StatsPackageManager *statsPackage) {
+    statsPackage->add(&callInfo);
 }
 

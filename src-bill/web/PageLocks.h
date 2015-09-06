@@ -15,12 +15,10 @@ public:
 
         auto clientList = repository.data->client.get();
         auto organizationList = repository.data->organization.get();
-        auto clientCounter = repository.billingData->clientCounter.get();
         auto clientLock = repository.billingData->clientLock.get();
 
         if (clientList == nullptr) return;
         if (organizationList == nullptr) return;
-        if (clientCounter == nullptr) return;
         if (clientLock == nullptr || !clientLock->isReady) return;
 
         html << "<table border=1>\n";
@@ -39,7 +37,6 @@ public:
 
         for (auto lock : locks) {
             int client_id = lock.client_id;
-            ClientCounterObj value = clientCounter->get(client_id);
 
             double vat_rate = 0;
 
@@ -51,9 +48,9 @@ public:
                 }
             }
 
-            double sum_month = value.sumMonth(vat_rate);
-            double sum_day = value.sumDay(vat_rate);
-            double sum_balance = value.sumBalance(vat_rate);
+            double sum_month = repository.billingData->statsAccount.getSumMonth(client_id, vat_rate);
+            double sum_day = repository.billingData->statsAccount.getSumDay(client_id, vat_rate);
+            double sum_balance = repository.billingData->statsAccount.getSumBalance(client_id, vat_rate);
 
 
             double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
@@ -62,7 +59,6 @@ public:
                 if (globalCounter) {
                     sum_balance_global += globalCounter->sumBalance(vat_rate);
                     sum_day_global += globalCounter->sumDay(vat_rate);
-                    sum_month_global += globalCounter->sumMonth(vat_rate);
                 }
             }
 

@@ -11,8 +11,8 @@ class ThreadClientLock : public Thread {
 
     void run();
 
-    bool needLockLocal(ClientCounterObj &cc, int client_account_id);
-    bool needLockGlobal(ClientCounterObj &cc, int client_account_id);
+    bool needLockLocal(int client_account_id);
+    bool needLockGlobal(int client_account_id);
 
 
 public:

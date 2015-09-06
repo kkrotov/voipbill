@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../classes/BDb.h"
 #include "../models/Call.h"
 #include "Spinlock.h"
 
@@ -7,14 +8,19 @@ class CallsManager
 {
 private:
     Spinlock lock;
-    deque<Call> queue;
+    deque<Call> realtimeQueue;
+    vector<Call> tmpQueue;
 
-    long long int lastId;
-    time_t lastTime;
-    size_t counter;
-
+    long long int realtimeLastId;
+    long long int tmpLastId;
     long long int storedLastId;
+
+    time_t realtimeLastTime;
+    time_t tmpLastTime;
     time_t storedLastTime;
+
+    size_t realtimeCounter;
+    size_t tmpCounter;
     size_t storedCounter;
 
 public:
@@ -25,6 +31,10 @@ public:
     void get(vector<Call> &calls, size_t maxCount);
     void revert(vector<Call> &calls);
     size_t size();
+
+    void save(BDb * dbCalls);
+    void moveRealtimeToTemp();
+    void moveTempToStored();
 
     long long int getLastId();
     time_t getLastTime();

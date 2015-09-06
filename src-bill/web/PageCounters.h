@@ -15,14 +15,12 @@ public:
 
         auto clientList = repository.data->client.get();
         auto organizationList = repository.data->organization.get();
-        auto clientCounter = repository.billingData->clientCounter.get();
 
         if (clientList == nullptr) return;
         if (organizationList == nullptr) return;
-        if (clientCounter == nullptr) return;
 
-        vector<ClientCounterObj> clients;
-        clientCounter->getClients(clients);
+        vector<StatsAccount> clients;
+        repository.billingData->statsAccount.getClients(clients);
 
         html << "<table border=1>\n";
         html << "<tr>\n";
@@ -38,8 +36,8 @@ public:
         html << "<th nowrap>Block MGMN Flag</th>\n";
         html << "<th nowrap>Block Global Flag</th>\n";
         html << "</tr>\n";
-        for (ClientCounterObj &cc : clients) {
-            int client_id = cc.client_id;
+        for (StatsAccount &cc : clients) {
+            int client_id = cc.account_id;
 
             double vat_rate = 0;
 
@@ -66,7 +64,6 @@ public:
                 if (globalCounter) {
                     sum_balance_global += globalCounter->sumBalance(vat_rate);
                     sum_day_global += globalCounter->sumDay(vat_rate);
-                    sum_month_global += globalCounter->sumMonth(vat_rate);
                 }
             }
 

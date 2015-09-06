@@ -14,6 +14,7 @@ ThreadCheckStartTable::ThreadCheckStartTable() {
 }
 
 void ThreadCheckStartTable::run() {
+    return;
     if (!UdpControlClient::ready()) return;
     if (!repository.currentCalls->ready()) return;
     //return;

@@ -20,22 +20,27 @@ private:
     map<int, StatsPackage> tmpStatsPackage;
     map<int, list<int>> tmpStatsByPackageId;
 
+    bool loaded = false;
 public:
     long long int lastSaveCallTime;
 
     Spinlock lock;
 
+    bool ready() { return loaded; };
     void load(BDb * db);
 
     int getSeconds(Call * call);
+    int getSeconds(int service_package_id, time_t connect_time);
     void add(CallInfo * callInfo);
     size_t size();
+
+    void save(BDb * dbCalls);
 
     void moveRealtimeToTemp();
     void moveTempToStored();
 
 private:
-    int getSeconds(Call * call, map<int, list<int>> &freeminsByServiceId, map<int, StatsPackage> &statsFreemin);
+    int getSeconds(int service_package_id, time_t connect_time, map<int, list<int>> &freeminsByServiceId, map<int, StatsPackage> &statsFreemin);
     void createStatsPackage(CallInfo *callInfo);
     bool updateStatsPackage(CallInfo *callInfo);
     void move(

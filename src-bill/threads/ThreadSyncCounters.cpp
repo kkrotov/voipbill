@@ -1,5 +1,6 @@
 #include "ThreadSyncCounters.h"
 #include "../classes/AppBill.h"
+#include "../data/ClientCounterData.h"
 
 ThreadSyncCounters::ThreadSyncCounters() {
     id = idName();
@@ -22,15 +23,18 @@ void ThreadSyncCounters::run() {
         return;
     }
 
-    save_client_counters();
+    return;
 
+    save_client_counters();
 }
 
 void ThreadSyncCounters::save_client_counters() {
 
     string q;
 
-    auto clientCounter = repository.billingData->clientCounter.get();
+    ClientCounterData clientCounterData;
+
+    auto clientCounter = clientCounterData.get();
 
     vector<int> changes;
     unsigned long long int marker;

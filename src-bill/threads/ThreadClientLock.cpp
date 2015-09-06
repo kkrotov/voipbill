@@ -35,15 +35,12 @@ void ThreadClientLock::run() {
 
     map<int, ClientLockObj> client_locks;
 
-    auto clientCounter = repository.billingData->clientCounter.get();
     auto clientLock = repository.billingData->clientLock.get();
 
     for (int client_account_id : repository.activeCounter->activeClients) {
 
-        ClientCounterObj cc = clientCounter->get(client_account_id);
-
-        bool need_lock_local = needLockLocal(cc, client_account_id);
-        bool need_lock_global = needLockGlobal(cc, client_account_id);
+        bool need_lock_local = needLockLocal(client_account_id);
+        bool need_lock_global = needLockGlobal(client_account_id);
 
         if (need_lock_local || need_lock_global) {
             ClientLockObj &client_lock = client_locks[client_account_id];
@@ -59,7 +56,7 @@ void ThreadClientLock::run() {
 }
 
 
-bool ThreadClientLock::needLockLocal(ClientCounterObj &cc, int client_account_id) {
+bool ThreadClientLock::needLockLocal(int client_account_id) {
 
     auto client = repository.getAccount(client_account_id);
     if (client != nullptr) {
@@ -70,8 +67,10 @@ bool ThreadClientLock::needLockLocal(ClientCounterObj &cc, int client_account_id
 
         auto globalCounter = repository.data->globalCounters.get()->find(client->id);
         double vat_rate = repository.getVatRate(client);
-        double spentBalanceSum = cc.sumBalance(vat_rate) + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
-        double spentDaySum = cc.sumDay(vat_rate) + (globalCounter ? globalCounter->sumDay(vat_rate) : 0.0);
+        double sumBalance = repository.billingData->statsAccount.getSumBalance(client->id, vat_rate);
+        double sumDay = repository.billingData->statsAccount.getSumDay(client->id, vat_rate);
+        double spentBalanceSum = sumBalance + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
+        double spentDaySum = sumDay + (globalCounter ? globalCounter->sumDay(vat_rate) : 0.0);
 
         if (client->isConsumedCreditLimit(spentBalanceSum)) {
             return true;
@@ -86,7 +85,7 @@ bool ThreadClientLock::needLockLocal(ClientCounterObj &cc, int client_account_id
     return false;
 }
 
-bool ThreadClientLock::needLockGlobal(ClientCounterObj &cc, int client_account_id) {
+bool ThreadClientLock::needLockGlobal(int client_account_id) {
 
     auto client = repository.getAccount(client_account_id);
     if (client != nullptr) {
@@ -97,7 +96,8 @@ bool ThreadClientLock::needLockGlobal(ClientCounterObj &cc, int client_account_i
 
         auto globalCounter = repository.data->globalCounters.get()->find(client->id);
         double vat_rate = repository.getVatRate(client);
-        double spentBalanceSum = cc.sumBalance(vat_rate) + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
+        double sumBalance = repository.billingData->statsAccount.getSumBalance(client->id, vat_rate);
+        double spentBalanceSum = sumBalance + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
 
         if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth(time(nullptr))) {
             return true;

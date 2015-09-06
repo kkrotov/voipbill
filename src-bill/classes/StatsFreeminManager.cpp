@@ -28,6 +28,8 @@ void StatsFreeminManager::load(BDb * db) {
 
         storedFreeminsByServiceId[stats.service_number_id].push_front(stats.id);
     }
+
+    loaded = true;
 }
 
 int StatsFreeminManager::getSeconds(Call * call) {
@@ -56,6 +58,31 @@ size_t StatsFreeminManager::size() {
     lock_guard<Spinlock> guard(lock);
 
     return storedStatsFreemin.size() + realtimeStatsFreemin.size() + tmpStatsFreemin.size();
+}
+
+void StatsFreeminManager::save(BDb * dbCalls) {
+
+    if (tmpStatsFreemin.size() == 0) {
+        return;
+    }
+
+    stringstream q;
+    q << "INSERT INTO billing.stats_freemin(id, month_dt, service_number_id, used_seconds, paid_seconds, used_credit) VALUES\n";
+    int i = 0;
+    for (auto it : tmpStatsFreemin) {
+        StatsFreemin &stats = it.second;
+        if (i > 0) q << ",\n";
+        q << "(";
+        q << "'" << stats.id << "',";
+        q << "'" << string_time(stats.month_dt) << "',";
+        q << "'" << stats.service_number_id << "',";
+        q << "'" << stats.used_seconds << "',";
+        q << "'" << stats.paid_seconds << "',";
+        q << "'" << stats.used_credit << "')";
+        i++;
+    }
+
+    dbCalls->exec(q.str());
 }
 
 void StatsFreeminManager::moveRealtimeToTemp() {

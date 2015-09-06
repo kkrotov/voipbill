@@ -10,6 +10,7 @@ class StatsFreeminManager
 {
 private:
     int lastStatsFreeminId = 0;
+    bool loaded = false;
 public:
     long long int lastStoredCallTime;
 
@@ -24,10 +25,13 @@ public:
     map<int, StatsFreemin> tmpStatsFreemin;
     map<int, list<int>> tmpFreeminsByServiceId;
 
+    bool ready() { return loaded; };
     void load(BDb * db);
     int getSeconds(Call * call);
     void add(Call * call);
     size_t size();
+
+    void save(BDb * dbCalls);
 
     void moveRealtimeToTemp();
     void moveTempToStored();

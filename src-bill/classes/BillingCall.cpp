@@ -123,8 +123,7 @@ void BillingCall::calcOrigByNumber() {
 
     int freeSeconds = 60 * callInfo->mainTariff->freemin * (callInfo->mainTariff->freemin_for_number ? 1 : callInfo->serviceNumber->lines_count);
     if (call->isLocal() && freeSeconds > 0) {
-        auto fminCounter = repository->billingData->fminCounter.get();
-        int used_free_seconds = fminCounter->get(call->number_service_id, 1, call->dt.month);
+        int used_free_seconds = repository->billingData->statsFreemin.getSeconds(call);
         if (used_free_seconds + call->billed_time <= freeSeconds) {
             call->service_package_id = 1;
             call->package_time = call->billed_time;
@@ -667,9 +666,9 @@ void BillingCall::setupPackagePrepaid() {
             continue;
         }
 
-        int availableSeconds;
-        if (!repository->billingData->statsPackageCounter.get()->checkAvailableSeconds(package->id, call->connect_time, availableSeconds)) {
-            availableSeconds = tariff->getPrepaidSeconds();
+        int availableSeconds = tariff->getPrepaidSeconds() - repository->billingData->statsPackage.getSeconds(package->id, call->connect_time);
+        if (availableSeconds < 0) {
+            availableSeconds = 0;
         }
 
         if (availableSeconds >= call->billed_time) {

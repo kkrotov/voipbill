@@ -254,30 +254,6 @@ public:
             html << "</tr>\n";
         }
         {
-            auto dl = &repository.billingData->clientCounter;
-            html << "<tr><th>Client Counter</th>";
-            if (dl != 0) {
-                html << "<td>" << string_time(dl->time()) << "</td><td></td><td>" <<
-                dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" <<
-                dl->timer.sfull() << "</td>";
-            } else {
-                html << "<td colspan=5></td>";
-            }
-            html << "</tr>\n";
-        }
-        {
-            auto dl = &repository.billingData->fminCounter;
-            html << "<tr><th>Fmin Counter</th>";
-            if (dl != 0) {
-                html << "<td>" << string_time(dl->time()) << "</td><td></td><td>" <<
-                dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() <<
-                "</td>";
-            } else {
-                html << "<td colspan=5></td>";
-            }
-            html << "</tr>\n";
-        }
-        {
             auto dl = &repository.billingData->clientLock;
             html << "<tr><th>Client Lock</th>";
             if (dl != 0) {

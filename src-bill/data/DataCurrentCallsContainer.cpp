@@ -2,9 +2,9 @@
 
 DataCurrentCallsContainer::DataCurrentCallsContainer() {
     callsWaitSaving = shared_ptr<vector<Call>>(new vector<Call>());
-    statsPackagesCounter = shared_ptr<StatsPackageCounter>(new StatsPackageCounter());
-    clientCounter = shared_ptr<ClientCounter>(new ClientCounter());
-    fminCounter = shared_ptr<FminCounter>(new FminCounter());
+    statsAccount = shared_ptr<StatsAccountManager>(new StatsAccountManager());
+    statsFreemin = shared_ptr<StatsFreeminManager>(new StatsFreeminManager());
+    statsPackage = shared_ptr<StatsPackageManager>(new StatsPackageManager());
 }
 
 DataCurrentCallsContainer * DataCurrentCallsContainer::instance() {
@@ -31,33 +31,33 @@ shared_ptr<vector<Call>> DataCurrentCallsContainer::getCallsWaitingSaving() {
     return callsWaitSaving;
 }
 
-void DataCurrentCallsContainer::setClientCounter(shared_ptr<ClientCounter> &newClientCounter) {
+void DataCurrentCallsContainer::setStatsAccount(shared_ptr<StatsAccountManager> &newStatsAccount) {
     lock_guard<Spinlock> guard(lock);
-    clientCounter = newClientCounter;
+    statsAccount = newStatsAccount;
 }
 
-shared_ptr<ClientCounter> DataCurrentCallsContainer::getClientCounter() {
+shared_ptr<StatsAccountManager> DataCurrentCallsContainer::getStatsAccount() {
     lock_guard<Spinlock> guard(lock);
-    return clientCounter;
+    return statsAccount;
 }
 
-void DataCurrentCallsContainer::setFminCounter(shared_ptr<FminCounter> &newFminCounter) {
+void DataCurrentCallsContainer::setStatsFreemin(shared_ptr<StatsFreeminManager> &newStatsFreemin) {
     lock_guard<Spinlock> guard(lock);
-    fminCounter = newFminCounter;
+    statsFreemin = newStatsFreemin;
 }
 
-shared_ptr<FminCounter> DataCurrentCallsContainer::getFminCounter() {
+shared_ptr<StatsFreeminManager> DataCurrentCallsContainer::getStatsFreemin() {
     lock_guard<Spinlock> guard(lock);
-    return fminCounter;
+    return statsFreemin;
 }
 
-void DataCurrentCallsContainer::setStatsPackagesCounter(shared_ptr<StatsPackageCounter> &newStatsPackagesCounter) {
+void DataCurrentCallsContainer::setStatsPackage(shared_ptr<StatsPackageManager> &newStatsPackage) {
     lock_guard<Spinlock> guard(lock);
-    statsPackagesCounter = newStatsPackagesCounter;
+    statsPackage = newStatsPackage;
 }
 
-shared_ptr<StatsPackageCounter> DataCurrentCallsContainer::getStatsPackagesCounter() {
+shared_ptr<StatsPackageManager> DataCurrentCallsContainer::getStatsPackage() {
     lock_guard<Spinlock> guard(lock);
-    return statsPackagesCounter;
+    return statsPackage;
 }
 

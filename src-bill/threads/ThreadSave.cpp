@@ -9,22 +9,10 @@ ThreadSave::ThreadSave() {
 }
 
 void ThreadSave::run() {
-    const size_t save_part_count = 50000;
-
     unique_lock<mutex> lock(repository.billingData->saveLock, try_to_lock);
     if (!lock.owns_lock()) {
         return;
     }
 
-    CallsSaver callsSaver;
-    callsSaver.setDb(&db_calls);
-    callsSaver.setBillingData(repository.billingData);
-
-    for(;;) {
-        size_t count = callsSaver.save(save_part_count);
-        if (count == 0) {
-            break;
-        }
-    }
-
+    repository.billingData->save(&db_calls);
 }

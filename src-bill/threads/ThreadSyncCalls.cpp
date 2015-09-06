@@ -16,6 +16,8 @@ void ThreadSyncCalls::run() {
         return;
     }
 
+    return;
+
     repository.billingData->prepareSyncCallsCentral(&db_main);
 
     string local_sync_month;

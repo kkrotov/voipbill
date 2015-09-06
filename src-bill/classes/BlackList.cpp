@@ -98,10 +98,9 @@ void BlackList::log_lock_phone(const string &phone) {
 
                 double vat_rate = repository.getVatRate(client);
 
-                ClientCounterObj clientCounter = repository.billingData->clientCounter.get()->get(client->id);
-                double sum_month = clientCounter.sumMonth(vat_rate);
-                double sum_day = clientCounter.sumDay(vat_rate);
-                double sum_balance = clientCounter.sumBalance(vat_rate);
+                double sum_month = repository.billingData->statsAccount.getSumMonth(client->id, vat_rate);
+                double sum_day = repository.billingData->statsAccount.getSumDay(client->id, vat_rate);
+                double sum_balance = repository.billingData->statsAccount.getSumBalance(client->id, vat_rate);
 
                 if (client->isConsumedCreditLimit(sum_balance)) {
                     str = str + " / Credit limit "

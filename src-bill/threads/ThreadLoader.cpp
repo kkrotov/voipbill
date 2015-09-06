@@ -38,8 +38,8 @@ void ThreadLoader::run() {
 
                 repository.data->client.load(&db_calls);
 
-                shared_ptr<ClientCounter> cc = repository.billingData->clientCounter.get();
-                if (cc != 0) cc->reload(&db_calls);
+//                shared_ptr<ClientCounter> cc = repository.billingData->clientCounter.get();
+//                if (cc != 0) cc->reload(&db_calls);
 
             } else if (event == "airp") {
 

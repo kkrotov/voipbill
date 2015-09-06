@@ -13,31 +13,28 @@ public:
 
         Repository repository;
 
-        auto fminCounter = repository.billingData->fminCounter.get();
+        auto statsFreemin = &repository.billingData->statsFreemin;
+        lock_guard<Spinlock> guard(statsFreemin->lock);
 
-        if (fminCounter == nullptr) return;
-
-        html << "<table><tr><th>usage_id</th><th>package_id</th><th>month</th><th>seconds</th></tr>";
-        for (auto itUsage : fminCounter->counter) {
+        html << "<table><tr><th>usage_id</th><th>month</th><th>used seconds</th><th>paid seconds</th></tr>";
+        for (auto itUsage : statsFreemin->storedFreeminsByServiceId) {
             int usage_id = itUsage.first;
-            map<int, map<time_t, int>> &counterUsage = itUsage.second;
+            list<int> &statIds = itUsage.second;
 
-            for (auto itPackage : counterUsage) {
-                int package_id = itPackage.first;
-                map<time_t, int> &counterMonth = itPackage.second;
+            for (auto statId : statIds) {
+                auto itFreemin = statsFreemin->storedStatsFreemin.find(statId);
+                if (itFreemin == statsFreemin->storedStatsFreemin.end()) {
+                    continue;
+                }
+                StatsFreemin &stats = itFreemin->second;
 
-                for (auto itMonth : counterMonth) {
-                    time_t tMonth = itMonth.first;
-                    int seconds = itMonth.second;
-
-                    html
+                html
                     << "<tr>"
                     << "<td>" << usage_id << "</td>"
-                    << "<td>" << package_id << "</td>"
-                    << "<td>" << string_time(tMonth) << "</td>"
-                    << "<td>" << seconds << "</td>"
+                    << "<td>" << string_time(stats.month_dt) << "</td>"
+                    << "<td>" << stats.used_seconds << "</td>"
+                    << "<td>" << stats.paid_seconds << "</td>"
                     << "</tr>";
-                }
             }
         }
         html << "</table>";

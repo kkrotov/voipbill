@@ -13,8 +13,8 @@ public:
     void calcCurrentCalls();
     void calc();
 private:
-    void updateClientCounters(CallInfo &callInfo, ClientCounter * clientCounter);
-    void updateFreeMinsCounters(CallInfo &callInfo, FminCounter * fminCounter);
-    void updatePackageStats(CallInfo &callInfo, StatsPackageCounter * statsPackageCounter);
+    void updateClientCounters(CallInfo &callInfo, StatsAccountManager *statsAccount);
+    void updateFreeMinsCounters(CallInfo &callInfo, StatsFreeminManager *statsFreemin);
+    void updatePackageStats(CallInfo &callInfo, StatsPackageManager *statsPackage);
 };
 

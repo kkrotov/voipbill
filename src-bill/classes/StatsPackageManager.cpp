@@ -29,14 +29,25 @@ void StatsPackageManager::load(BDb * db) {
 
         storedStatsByPackageId[stats.package_id].push_front(stats.id);
     }
+
+    loaded = true;
 }
 
 int StatsPackageManager::getSeconds(Call * call) {
     lock_guard<Spinlock> guard(lock);
 
-    return getSeconds(call, storedStatsByPackageId, storedStatsPackage)
-           + getSeconds(call, realtimeStatsByPackageId, realtimeStatsPackage)
-           + getSeconds(call, tmpStatsByPackageId, tmpStatsPackage);
+    return getSeconds(call->service_package_id, call->connect_time, storedStatsByPackageId, storedStatsPackage)
+           + getSeconds(call->service_package_id, call->connect_time, realtimeStatsByPackageId, realtimeStatsPackage)
+           + getSeconds(call->service_package_id, call->connect_time, tmpStatsByPackageId, tmpStatsPackage);
+
+}
+
+int StatsPackageManager::getSeconds(int service_package_id, time_t connect_time) {
+    lock_guard<Spinlock> guard(lock);
+
+    return getSeconds(service_package_id, connect_time, storedStatsByPackageId, storedStatsPackage)
+           + getSeconds(service_package_id, connect_time, realtimeStatsByPackageId, realtimeStatsPackage)
+           + getSeconds(service_package_id, connect_time, tmpStatsByPackageId, tmpStatsPackage);
 
 }
 
@@ -59,6 +70,34 @@ size_t StatsPackageManager::size() {
     return storedStatsPackage.size() + realtimeStatsPackage.size() + tmpStatsPackage.size();
 }
 
+void StatsPackageManager::save(BDb * dbCalls) {
+
+    if (tmpStatsPackage.size() == 0) {
+        return;
+    }
+
+    stringstream q;
+    q << "INSERT INTO billing.stats_package(id, package_id, used_seconds, used_credit, paid_seconds, activation_dt, expire_dt, min_call_id, max_call_id) VALUES\n";
+    int i = 0;
+    for (auto it : tmpStatsPackage) {
+        StatsPackage &stats = it.second;
+        if (i > 0) q << ",\n";
+        q << "(";
+        q << "'" << stats.id << "',";
+        q << "'" << stats.package_id << "',";
+        q << "'" << stats.used_seconds << "',";
+        q << "'" << stats.used_credit << "',";
+        q << "'" << stats.paid_seconds << "',";
+        q << "'" << string_time(stats.activation_dt) << "',";
+        q << "'" << string_time(stats.expire_dt) << "',";
+        q << "'" << stats.min_call_id << "',";
+        q << "'" << stats.max_call_id << "')";
+        i++;
+    }
+
+    dbCalls->exec(q.str());
+}
+
 void StatsPackageManager::moveRealtimeToTemp() {
     lock_guard<Spinlock> guard(lock);
 
@@ -71,20 +110,20 @@ void StatsPackageManager::moveTempToStored() {
     move(tmpStatsPackage, tmpStatsByPackageId, storedStatsPackage, storedStatsByPackageId);
 }
 
-int StatsPackageManager::getSeconds(Call * call, map<int, list<int>> &statsByPackageId, map<int, StatsPackage> &statsPackage) {
-    auto itStatsByPackageId= statsByPackageId.find(call->number_service_id);
+int StatsPackageManager::getSeconds(int service_package_id, time_t connect_time, map<int, list<int>> &statsByPackageId, map<int, StatsPackage> &statsPackage) {
+    auto itStatsByPackageId= statsByPackageId.find(service_package_id);
     if (itStatsByPackageId == statsByPackageId.end()) {
         return 0;
     }
 
-    for (int freeminId : itStatsByPackageId->second) {
-        auto itStatsPackage = statsPackage.find(freeminId);
+    for (int packageId : itStatsByPackageId->second) {
+        auto itStatsPackage = statsPackage.find(packageId);
         if (itStatsPackage == statsPackage.end()) continue;
 
         StatsPackage &stats = itStatsPackage->second;
 
-        if (stats.activation_dt > call->connect_time) continue;
-        if (stats.expire_dt < call->connect_time) continue;
+        if (stats.activation_dt > connect_time) continue;
+        if (stats.expire_dt < connect_time) continue;
 
         return stats.used_seconds;
     }

@@ -5,10 +5,7 @@
 #include "../classes/Spinlock.h"
 #include "../models/Cdr.h"
 #include "../models/Call.h"
-#include "StatsPackageData.h"
-#include "ClientCounterData.h"
 #include "ClientLockData.h"
-#include "FminCounterData.h"
 #include "../classes/AppBill.h"
 #include "../classes/CdrManager.h"
 #include "../classes/CallsManager.h"
@@ -31,9 +28,6 @@ public:
     StatsFreeminManager statsFreemin;
     StatsPackageManager statsPackage;
 
-    StatsPackageData    statsPackageCounter;
-    ClientCounterData   clientCounter;
-    FminCounterData     fminCounter;
     ClientLockData      clientLock;
 
     long long int lastSyncCentralCallId = -1;
@@ -44,6 +38,7 @@ public:
 
     void loadAll(BDb * db);
     bool ready();
+    void save(BDb * dbCalls);
 
     void prepareSyncCallsCentral(BDb * db_main);
 

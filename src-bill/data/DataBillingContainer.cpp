@@ -9,15 +9,10 @@ void DataBillingContainer::loadAll(BDb * db) {
 
     loadLastCallIdAndCdrIdAndTime(db);
 
-    if (calls.getStoredLastTime() >= 0) {
-        statsPackageCounter.lastSaveCallTime = calls.getStoredLastTime();
-        clientCounter.last_call_id = calls.getStoredLastId();
-        fminCounter.last_call_id = calls.getStoredLastId();
+    statsAccount.load(db);
+    statsFreemin.load(db);
+    statsPackage.load(db);
 
-        statsPackageCounter.load(db);
-        clientCounter.load(db);
-        fminCounter.load(db);
-    }
     clientLock.load(db);
 }
 
@@ -27,11 +22,15 @@ bool DataBillingContainer::ready() {
         return false;
     }
 
-    if (!clientCounter.ready()) {
+    if (!statsAccount.ready()) {
         return false;
     }
 
-    if (!fminCounter.ready()) {
+    if (!statsFreemin.ready()) {
+        return false;
+    }
+
+    if (!statsPackage.ready()) {
         return false;
     }
 
@@ -41,6 +40,33 @@ bool DataBillingContainer::ready() {
 
 
     return true;
+}
+
+void DataBillingContainer::save(BDb * dbCalls) {
+
+    try {
+        calls.moveRealtimeToTemp();
+        statsAccount.moveRealtimeToTemp();
+        statsFreemin.moveRealtimeToTemp();
+        statsPackage.moveRealtimeToTemp();
+
+        BDbTransaction trans(dbCalls);
+
+        calls.save(dbCalls);
+        statsAccount.save(dbCalls);
+        statsFreemin.save(dbCalls);
+        statsPackage.save(dbCalls);
+
+        trans.commit();
+
+        calls.moveTempToStored();
+        statsAccount.moveTempToStored();
+        statsFreemin.moveTempToStored();
+        statsPackage.moveTempToStored();
+    } catch (Exception &e) {
+        throw e;
+    }
+
 }
 
 void DataBillingContainer::prepareSyncCallsCentral(BDb * db_main) {

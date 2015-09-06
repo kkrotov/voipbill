@@ -1,12 +1,12 @@
 #pragma once
 
 #include "../classes/BDb.h"
+#include "../classes/StatsAccountManager.h"
+#include "../classes/StatsFreeminManager.h"
+#include "../classes/StatsPackageManager.h"
 #include "../common.h"
 #include "../models/Cdr.h"
 #include "../models/Call.h"
-#include "../lists/StatsPackageCounter.h"
-#include "../lists/ClientCounter.h"
-#include "../lists/FminCounter.h"
 #include "CurrentCdrData.h"
 
 class DataCurrentCallsContainer {
@@ -26,19 +26,19 @@ public:
     void setCallsWaitingSaving(shared_ptr<vector<Call>> &newCallsWaitSaving);
     shared_ptr<vector<Call>> getCallsWaitingSaving();
 
-    void setClientCounter(shared_ptr<ClientCounter> &newClientCounter);
-    shared_ptr<ClientCounter> getClientCounter();
+    void setStatsAccount(shared_ptr<StatsAccountManager> &newStatsAccount);
+    shared_ptr<StatsAccountManager> getStatsAccount();
 
-    void setFminCounter(shared_ptr<FminCounter> &newFminCounter);
-    shared_ptr<FminCounter> getFminCounter();
+    void setStatsFreemin(shared_ptr<StatsFreeminManager> &newStatsFreemin);
+    shared_ptr<StatsFreeminManager> getStatsFreemin();
 
-    void setStatsPackagesCounter(shared_ptr<StatsPackageCounter> &newStatsPackagesCounter);
-    shared_ptr<StatsPackageCounter> getStatsPackagesCounter();
+    void setStatsPackage(shared_ptr<StatsPackageManager> &newStatsPackage);
+    shared_ptr<StatsPackageManager> getStatsPackage();
 
 private:
     Spinlock lock;
     shared_ptr<vector<Call>> callsWaitSaving;
-    shared_ptr<StatsPackageCounter> statsPackagesCounter;
-    shared_ptr<ClientCounter> clientCounter;
-    shared_ptr<FminCounter> fminCounter;
+    shared_ptr<StatsAccountManager> statsAccount;
+    shared_ptr<StatsFreeminManager> statsFreemin;
+    shared_ptr<StatsPackageManager> statsPackage;
 };
