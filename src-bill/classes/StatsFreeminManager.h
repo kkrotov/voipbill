@@ -4,7 +4,7 @@
 #include "Spinlock.h"
 #include "BDb.h"
 #include "../models/StatsFreemin.h"
-#include "../models/Call.h"
+#include "../models/CallInfo.h"
 
 class StatsFreeminManager
 {
@@ -19,24 +19,25 @@ public:
     map<int, StatsFreemin> storedStatsFreemin;
     map<int, list<int>> storedFreeminsByServiceId;
 
-    map<int, StatsFreemin> realtimeStatsFreemin;
-    map<int, list<int>> realtimeFreeminsByServiceId;
+    vector<map<int, StatsFreemin>> realtimeStatsFreeminParts;
+    vector<map<int, list<int>>> realtimeFreeminsByServiceIdParts;
 
-    map<int, StatsFreemin> tmpStatsFreemin;
-    map<int, list<int>> tmpFreeminsByServiceId;
-
+    StatsFreeminManager();
     bool ready() { return loaded; };
     void load(BDb * db);
     int getSeconds(Call * call);
-    void add(Call * call);
-    size_t size();
 
     void save(BDb * dbCalls);
 
-    void moveRealtimeToTemp();
-    void moveTempToStored();
+    void createNewPartition();
+    void afterSave();
 
 private:
+    void add(CallInfo * callInfo);
+    size_t size();
+    friend class DataBillingContainer;
+    friend class Billing;
+
     int getSeconds(Call * call, map<int, list<int>> &freeminsByServiceId, map<int, StatsFreemin> &statsFreemin);
     void createStatsFreemin(Call * call);
     bool updateStatsFreemin(Call * call);

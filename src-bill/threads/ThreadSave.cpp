@@ -1,6 +1,5 @@
 #include "ThreadSave.h"
 #include "../classes/AppBill.h"
-#include "../classes/CallsSaver.h"
 
 ThreadSave::ThreadSave() {
     id = idName();

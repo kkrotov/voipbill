@@ -14,11 +14,8 @@ private:
     map<int, StatsPackage> storedStatsPackage;
     map<int, list<int>> storedStatsByPackageId;
 
-    map<int, StatsPackage> realtimeStatsPackage;
-    map<int, list<int>> realtimeStatsByPackageId;
-
-    map<int, StatsPackage> tmpStatsPackage;
-    map<int, list<int>> tmpStatsByPackageId;
+    vector<map<int, StatsPackage>> realtimeStatsPackageParts;
+    vector<map<int, list<int>>> realtimeStatsByPackageIdParts;
 
     bool loaded = false;
 public:
@@ -26,20 +23,24 @@ public:
 
     Spinlock lock;
 
+    StatsPackageManager();
     bool ready() { return loaded; };
     void load(BDb * db);
 
     int getSeconds(Call * call);
     int getSeconds(int service_package_id, time_t connect_time);
-    void add(CallInfo * callInfo);
-    size_t size();
 
     void save(BDb * dbCalls);
 
-    void moveRealtimeToTemp();
-    void moveTempToStored();
+    void createNewPartition();
+    void afterSave();
 
 private:
+    void add(CallInfo * callInfo);
+    size_t size();
+    friend class DataBillingContainer;
+    friend class Billing;
+
     int getSeconds(int service_package_id, time_t connect_time, map<int, list<int>> &freeminsByServiceId, map<int, StatsPackage> &statsFreemin);
     void createStatsPackage(CallInfo *callInfo);
     bool updateStatsPackage(CallInfo *callInfo);

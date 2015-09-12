@@ -19,10 +19,10 @@ void Billing::calcCurrentCalls() {
 
     auto currentCdrs = repository.currentCalls->currentCdr.get();
 
-    auto callsWaitSaving = shared_ptr<vector<Call>>(new vector<Call>());
-    auto statsAccount = shared_ptr<StatsAccountManager>(new StatsAccountManager());
-    auto statsFreemin = shared_ptr<StatsFreeminManager>(new StatsFreeminManager());
-    auto statsPackage = shared_ptr<StatsPackageManager>(new StatsPackageManager());
+    shared_ptr<vector<Call>> callsWaitSaving(new vector<Call>());
+    shared_ptr<StatsAccountManager> statsAccount(new StatsAccountManager());
+    shared_ptr<StatsFreeminManager> statsFreemin(new StatsFreeminManager());
+    shared_ptr<StatsPackageManager> statsPackage(new StatsPackageManager());
 
     for (size_t i = 0; i < currentCdrs->size(); i++) {
         auto cdr = currentCdrs->get(i);
@@ -32,22 +32,26 @@ void Billing::calcCurrentCalls() {
         }
 
         Call origCall = Call(cdr, CALL_ORIG);
+        Call termCall = Call(cdr, CALL_TERM);
+
         CallInfo origCallInfo;
+        CallInfo termCallInfo;
+
         billingCall.calc(&origCall, &origCallInfo, cdr);
 
-        Call termCall = Call(cdr, CALL_TERM);
-        CallInfo termCallInfo;
         termCall.src_number = origCall.src_number;
         termCall.dst_number = origCall.dst_number;
         billingCall.calc(&termCall, &termCallInfo, cdr);
 
         callsWaitSaving->push_back(origCall);
-        callsWaitSaving->push_back(termCall);
+        statsAccount.get()->add(&origCallInfo);
+        statsFreemin.get()->add(&origCallInfo);
+        statsPackage.get()->add(&origCallInfo);
 
-        updateClientCounters(origCallInfo, statsAccount.get());
-        updateClientCounters(termCallInfo, statsAccount.get());
-        updateFreeMinsCounters(origCallInfo, statsFreemin.get());
-        updatePackageStats(origCallInfo, statsPackage.get());
+        callsWaitSaving->push_back(termCall);
+        statsAccount.get()->add(&termCallInfo);
+        statsFreemin.get()->add(&termCallInfo);
+        statsPackage.get()->add(&termCallInfo);
     }
 
     repository.currentCalls->setCallsWaitingSaving(callsWaitSaving);
@@ -63,7 +67,7 @@ void Billing::calc() {
         return;
     }
 
-    if (repository.billingData->calls.size() >= calls_max_queue_length) {
+    if (repository.billingData->callsQueueSize() >= calls_max_queue_length) {
         return;
     }
 
@@ -83,30 +87,29 @@ void Billing::calc() {
                 break;
             }
 
-            long long int lastCallId = repository.billingData->calls.getLastId();
+            long long int lastCallId = repository.billingData->getCallsLastId();
 
             Call origCall = Call(&cdr, CALL_ORIG);
+            Call termCall = Call(&cdr, CALL_TERM);
+
             CallInfo origCallInfo;
+            CallInfo termCallInfo;
+
             origCall.id = lastCallId + 1;
             origCall.peer_id = lastCallId + 2;
-            billingCall.calc(&origCall, &origCallInfo, &cdr);
-
-            Call termCall = Call(&cdr, CALL_TERM);
-            CallInfo termCallInfo;
-            termCall.src_number = origCall.src_number;
-            termCall.dst_number = origCall.dst_number;
             termCall.id = lastCallId + 2;
             termCall.peer_id = lastCallId + 1;
+
+            billingCall.calc(&origCall, &origCallInfo, &cdr);
+
+            termCall.src_number = origCall.src_number;
+            termCall.dst_number = origCall.dst_number;
             billingCall.calc(&termCall, &termCallInfo, &cdr);
 
-            updateClientCounters(origCallInfo, &repository.billingData->statsAccount);
-            updateClientCounters(termCallInfo, &repository.billingData->statsAccount);
-            updateFreeMinsCounters(origCallInfo, &repository.billingData->statsFreemin);
-            updatePackageStats(origCallInfo, &repository.billingData->statsPackage);
+            repository.billingData->addCall(&origCallInfo);
+            repository.billingData->addCall(&termCallInfo);
 
-            repository.billingData->calls.add(origCall, termCall);
-
-            if (repository.billingData->calls.size() >= calls_max_queue_length) {
+            if (repository.billingData->callsQueueSize() >= calls_max_queue_length) {
                 calcLoop = false;
             }
 
@@ -124,16 +127,3 @@ void Billing::calc() {
     }
 
 }
-
-void Billing::updateClientCounters(CallInfo &callInfo, StatsAccountManager *statsAccount) {
-    statsAccount->add(&callInfo);
-}
-
-void Billing::updateFreeMinsCounters(CallInfo &callInfo, StatsFreeminManager *statsFreemin) {
-    statsFreemin->add(callInfo.call);
-}
-
-void Billing::updatePackageStats(CallInfo &callInfo, StatsPackageManager *statsPackage) {
-    statsPackage->add(&callInfo);
-}
-

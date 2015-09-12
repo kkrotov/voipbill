@@ -2,7 +2,6 @@
 
 #include "../common.h"
 #include "../classes/AppBill.h"
-#include "../classes/CallsSaver.h"
 #include "../threads/ThreadLoader.h"
 #include "../threads/ThreadBillRuntime.h"
 #include "../classes/CdrLoader.h"
@@ -65,21 +64,15 @@ void TaskRecalc::run() {
     billing.setData(&data);
     billing.setBillingData(&newBillingData);
 
-    CallsSaver saver;
-    saver.setDb(&db_calls);
-    saver.setBillingData(&newBillingData);
-
-
     while (true) {
         const size_t rows_per_request = 25000;
-        const size_t save_part_count = 50000;
 
         {
             TimerScope ts(t_load);
             cdrLoader.load(rows_per_request);
         }
 
-        if (newBillingData.cdrs.size() == 0) {
+        if (newBillingData.cdrsQueueSize() == 0) {
             break;
         }
 
@@ -91,11 +84,11 @@ void TaskRecalc::run() {
 
         {
             TimerScope ts(t_save);
-            saver.save(save_part_count);
+            newBillingData.save(&db_calls);
         }
 
 
-        setStatus("7. calc " + lexical_cast<string>(newBillingData.calls.getStoredCounter()));
+        setStatus("7. calc " + lexical_cast<string>(newBillingData.getCallsStoredCounter()));
     }
 
 

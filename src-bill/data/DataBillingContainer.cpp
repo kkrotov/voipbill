@@ -17,8 +17,13 @@ void DataBillingContainer::loadAll(BDb * db) {
 }
 
 bool DataBillingContainer::ready() {
+    lock_guard<Spinlock> guard(lock);
 
-    if (cdrs.getLastId() < 0 || calls.getLastId() < 0 || calls.getStoredLastId() < 0) {
+    if (!cdrs.ready()) {
+        return false;
+    }
+
+    if (!calls.ready()) {
         return false;
     }
 
@@ -38,18 +43,23 @@ bool DataBillingContainer::ready() {
         return false;
     }
 
-
     return true;
+}
+
+void DataBillingContainer::addCall(CallInfo * callInfo) {
+    lock_guard<Spinlock> guard(lock);
+
+    calls.add(*callInfo->call);
+    statsAccount.add(callInfo);
+    statsFreemin.add(callInfo);
+    statsPackage.add(callInfo);
+
+    createNewPartition();
 }
 
 void DataBillingContainer::save(BDb * dbCalls) {
 
     try {
-        calls.moveRealtimeToTemp();
-        statsAccount.moveRealtimeToTemp();
-        statsFreemin.moveRealtimeToTemp();
-        statsPackage.moveRealtimeToTemp();
-
         BDbTransaction trans(dbCalls);
 
         calls.save(dbCalls);
@@ -59,10 +69,11 @@ void DataBillingContainer::save(BDb * dbCalls) {
 
         trans.commit();
 
-        calls.moveTempToStored();
-        statsAccount.moveTempToStored();
-        statsFreemin.moveTempToStored();
-        statsPackage.moveTempToStored();
+        {
+            lock_guard<Spinlock> guard(lock);
+            afterSave();
+        }
+
     } catch (Exception &e) {
         throw e;
     }
@@ -104,4 +115,75 @@ void DataBillingContainer::loadSyncCentralCallIdAndTime(BDb * db_main) {
         lastSyncCentralCallId   = 0;
         lastSyncCentralCallTime = 0;
     }
+}
+
+void DataBillingContainer::createNewPartition() {
+    if (calls.getLastRealtimePartSize() >= CALLS_PARTITION_SIZE) {
+        calls.createNewPartition();
+        statsAccount.createNewPartition();
+        statsFreemin.createNewPartition();
+        statsPackage.createNewPartition();
+    }
+}
+
+void DataBillingContainer::afterSave() {
+    calls.afterSave();
+    statsAccount.afterSave();
+    statsFreemin.afterSave();
+    statsPackage.afterSave();
+}
+
+size_t DataBillingContainer::cdrsQueueSize() {
+    lock_guard<Spinlock> guard(lock);
+    return cdrs.queue.size();
+}
+
+long long int DataBillingContainer::getCdrsLastId() {
+    lock_guard<Spinlock> guard(lock);
+    return cdrs.lastId;
+}
+
+time_t DataBillingContainer::getCdrsLastTime() {
+    lock_guard<Spinlock> guard(lock);
+    return cdrs.lastTime;
+}
+
+size_t DataBillingContainer::getCdrsCounter() {
+    lock_guard<Spinlock> guard(lock);
+    return cdrs.counter;
+}
+
+size_t DataBillingContainer::callsQueueSize() {
+    lock_guard<Spinlock> guard(lock);
+    return calls.getQueueSize();
+}
+
+long long int DataBillingContainer::getCallsLastId() {
+    lock_guard<Spinlock> guard(lock);
+    return calls.getLastId();
+}
+
+time_t DataBillingContainer::getCallsLastTime() {
+    lock_guard<Spinlock> guard(lock);
+    return calls.getLastTime();
+}
+
+size_t DataBillingContainer::getCallsCounter() {
+    lock_guard<Spinlock> guard(lock);
+    return calls.getCounter();
+}
+
+long long int DataBillingContainer::getCallsStoredLastId() {
+    lock_guard<Spinlock> guard(lock);
+    return calls.getStoredLastId();
+}
+
+time_t DataBillingContainer::getCallsStoredLastTime() {
+    lock_guard<Spinlock> guard(lock);
+    return calls.getStoredLastTime();
+}
+
+size_t DataBillingContainer::getCallsStoredCounter() {
+    lock_guard<Spinlock> guard(lock);
+    return calls.getStoredCounter();
 }

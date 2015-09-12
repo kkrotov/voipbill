@@ -1,5 +1,9 @@
 #include "StatsAccountManager.h"
 
+StatsAccountManager::StatsAccountManager() {
+    realtimeStatsAccountParts.push_back(map<int, StatsAccount>());
+}
+
 void StatsAccountManager::load(BDb * db) {
 
     /*
@@ -46,17 +50,19 @@ void StatsAccountManager::load(BDb * db) {
     */
 
     BDbResult res = db->query(
-            "   select account_id, extract(epoch from amount_day), sum_day, extract(epoch from amount_date), sum " \
+            "   select account_id, extract(epoch from amount_month), sum_month, extract(epoch from amount_day), sum_day, extract(epoch from amount_date), sum " \
             "   from billing.stats_account"
     );
 
     while (res.next()) {
         StatsAccount &stats = storedStatsAccount[res.get_i(0)];
         stats.account_id = res.get_i(0);
-        stats.amount_day = res.get_ll(1);
-        stats.sum_day = res.get_d(2);
-        stats.amount_date = res.get_ll(3);
-        stats.sum = res.get_d(4);
+        stats.amount_month = res.get_ll(1);
+        stats.sum_month = res.get_d(2);
+        stats.amount_day = res.get_ll(3);
+        stats.sum_day = res.get_d(4);
+        stats.amount_date = res.get_ll(5);
+        stats.sum = res.get_d(6);
     }
 
     loaded = true;
@@ -102,19 +108,28 @@ void StatsAccountManager::reload(BDb * db) {
 }
 
 size_t StatsAccountManager::size() {
-    return storedStatsAccount.size() + realtimeStatsAccount.size() + tmpStatsAccount.size();
+    lock_guard<Spinlock> guard(lock);
+
+    size_t size = storedStatsAccount.size();
+
+    for (map<int, StatsAccount> &realtimeStatsAccount : realtimeStatsAccountParts) {
+        size += realtimeStatsAccount.size();
+    }
+
+    return size;
 }
 
 void StatsAccountManager::save(BDb * dbCalls) {
 
-    if (tmpStatsAccount.size() == 0) {
+    size_t parts = realtimeStatsAccountParts.size();
+    if (parts < 2) {
         return;
     }
 
     stringstream q;
     q << "INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum) VALUES\n";
     int i = 0;
-    for (auto it : tmpStatsAccount) {
+    for (auto it : realtimeStatsAccountParts[0]) {
         StatsAccount &stats = it.second;
         if (i > 0) q << ",\n";
         q << "(";
@@ -131,16 +146,23 @@ void StatsAccountManager::save(BDb * dbCalls) {
     dbCalls->exec(q.str());
 }
 
-void StatsAccountManager::moveRealtimeToTemp() {
+void StatsAccountManager::createNewPartition() {
     lock_guard<Spinlock> guard(lock);
 
-    move(realtimeStatsAccount, tmpStatsAccount);
+    realtimeStatsAccountParts.push_back(map<int, StatsAccount>());
 }
 
-void StatsAccountManager::moveTempToStored() {
+void StatsAccountManager::afterSave() {
     lock_guard<Spinlock> guard(lock);
 
-    move(tmpStatsAccount, realtimeStatsAccount);
+    size_t parts = realtimeStatsAccountParts.size();
+    if (parts > 1) {
+        if (parts == 2) {
+            realtimeStatsAccountParts.push_back(map<int, StatsAccount>());
+        }
+        move(realtimeStatsAccountParts[0], storedStatsAccount);
+        realtimeStatsAccountParts.erase(realtimeStatsAccountParts.begin());
+    }
 }
 
 void StatsAccountManager::add(CallInfo *callInfo) {
@@ -150,6 +172,9 @@ void StatsAccountManager::add(CallInfo *callInfo) {
     if (call->account_id > 0 && abs(call->cost) < 0.000001) {
         return;
     }
+
+    size_t parts = realtimeStatsAccountParts.size();
+    map<int, StatsAccount> &realtimeStatsAccount = realtimeStatsAccountParts.at(parts - 1);
 
     StatsAccount &stats = realtimeStatsAccount[call->account_id];
 
@@ -184,14 +209,13 @@ double StatsAccountManager::getSumMonth(int account_id, double vat_rate) {
         sum += it1->second.sumMonth(vat_rate);
     }
 
-    auto it2 = realtimeStatsAccount.find(account_id);
-    if (it2 != realtimeStatsAccount.end()) {
-        sum += it2->second.sumMonth(vat_rate);
-    }
+    for (map<int, StatsAccount> &realtimeStatsAccount : realtimeStatsAccountParts) {
 
-    auto it3 = tmpStatsAccount.find(account_id);
-    if (it3 != tmpStatsAccount.end()) {
-        sum += it3->second.sumMonth(vat_rate);
+        auto it2 = realtimeStatsAccount.find(account_id);
+        if (it2 != realtimeStatsAccount.end()) {
+            sum += it2->second.sumMonth(vat_rate);
+        }
+
     }
 
     return sum;
@@ -205,14 +229,13 @@ double StatsAccountManager::getSumDay(int account_id, double vat_rate) {
         sum += it1->second.sumDay(vat_rate);
     }
 
-    auto it2 = realtimeStatsAccount.find(account_id);
-    if (it2 != realtimeStatsAccount.end()) {
-        sum += it2->second.sumDay(vat_rate);
-    }
+    for (map<int, StatsAccount> &realtimeStatsAccount : realtimeStatsAccountParts) {
 
-    auto it3 = tmpStatsAccount.find(account_id);
-    if (it3 != tmpStatsAccount.end()) {
-        sum += it3->second.sumDay(vat_rate);
+        auto it2 = realtimeStatsAccount.find(account_id);
+        if (it2 != realtimeStatsAccount.end()) {
+            sum += it2->second.sumDay(vat_rate);
+        }
+
     }
 
     return sum;
@@ -226,14 +249,14 @@ double StatsAccountManager::getSumBalance(int account_id, double vat_rate) {
         sum += it1->second.sumBalance(vat_rate);
     }
 
-    auto it2 = realtimeStatsAccount.find(account_id);
-    if (it2 != realtimeStatsAccount.end()) {
-        sum += it2->second.sumBalance(vat_rate);
-    }
 
-    auto it3 = tmpStatsAccount.find(account_id);
-    if (it3 != tmpStatsAccount.end()) {
-        sum += it3->second.sumBalance(vat_rate);
+    for (map<int, StatsAccount> &realtimeStatsAccount : realtimeStatsAccountParts) {
+
+        auto it2 = realtimeStatsAccount.find(account_id);
+        if (it2 != realtimeStatsAccount.end()) {
+            sum += it2->second.sumBalance(vat_rate);
+        }
+
     }
 
     return sum;

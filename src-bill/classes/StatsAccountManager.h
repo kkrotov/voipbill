@@ -14,23 +14,20 @@ private:
     Spinlock lock;
 
     map<int, StatsAccount> storedStatsAccount;
-    map<int, StatsAccount> realtimeStatsAccount;
-    map<int, StatsAccount> tmpStatsAccount;
+    vector<map<int, StatsAccount>> realtimeStatsAccountParts;
 
     bool loaded = false;
 public:
+    StatsAccountManager();
     bool ready() { return loaded; };
     void load(BDb * db);
     void reload(BDb * db);
 
-    size_t size();
-
     void save(BDb * dbCalls);
 
-    void moveRealtimeToTemp();
-    void moveTempToStored();
+    void createNewPartition();
+    void afterSave();
 
-    void add(CallInfo *callInfo);
     double getSumMonth(int account_id, double vat_rate);
     double getSumDay(int account_id, double vat_rate);
     double getSumBalance(int account_id, double vat_rate);
@@ -45,5 +42,10 @@ public:
     }
 
 private:
+    void add(CallInfo * callInfo);
+    size_t size();
+    friend class DataBillingContainer;
+    friend class Billing;
+
     void move(map<int, StatsAccount> &fromStatsAccount, map<int, StatsAccount> &toStatsAccount);
 };

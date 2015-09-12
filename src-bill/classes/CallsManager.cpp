@@ -4,55 +4,49 @@ CallsManager::CallsManager() {
     realtimeLastId = -1;
     realtimeLastTime = 0;
     realtimeLastId = 0;
-    tmpLastId = -1;
-    tmpLastTime = 0;
-    tmpCounter = 0;
     storedLastId = -1;
     storedLastTime = 0;
     storedCounter = 0;
+
+    realtimeCallsParts.push_back(vector<Call>());
 }
 
 bool CallsManager::ready() {
-    lock_guard<Spinlock> guard(lock);
-
     return realtimeLastId >= 0 && storedLastId >= 0;
 }
 
-void CallsManager::add(Call &origCall, Call &termCall) {
-    lock_guard<Spinlock> guard(lock);
 
-    realtimeQueue.push_back(origCall);
-    realtimeQueue.push_back(termCall);
+void CallsManager::add(Call &call) {
+    size_t parts = realtimeCallsParts.size();
+    vector<Call>&realtimeCalls = realtimeCallsParts.at(parts - 1);
+
+    realtimeCalls.push_back(call);
+
+    realtimeLastId = call.id;
+    realtimeLastTime = call.connect_time;
+    realtimeCounter += 1;
+}
+
+void CallsManager::add(Call &origCall, Call &termCall) {
+    size_t parts = realtimeCallsParts.size();
+    vector<Call> &realtimeCalls = realtimeCallsParts.at(parts - 1);
+
+    realtimeCalls.push_back(origCall);
+    realtimeCalls.push_back(termCall);
 
     realtimeLastId = termCall.id;
     realtimeLastTime = termCall.connect_time;
     realtimeCounter += 2;
 }
 
-void CallsManager::get(vector<Call> &calls, size_t maxCount) {
-    lock_guard<Spinlock> guard(lock);
+size_t CallsManager::getQueueSize() {
+    size_t size = 0;
 
-    maxCount = realtimeQueue.size() < maxCount ? realtimeQueue.size() : maxCount;
-    calls.reserve(maxCount);
-
-    while (realtimeQueue.size() > 0 && calls.size() < maxCount) {
-        calls.push_back(realtimeQueue.front());
-        realtimeQueue.pop_front();
+    for (vector<Call> &realtimeCalls : realtimeCallsParts) {
+        size += realtimeCalls.size();
     }
-}
 
-void CallsManager::revert(vector<Call> &calls) {
-    lock_guard<Spinlock> guard(lock);
-
-    for (auto it = calls.rbegin(); it!= calls.rend(); ++it) {
-        realtimeQueue.push_front(*it);
-    }
-}
-
-size_t CallsManager::size() {
-    lock_guard<Spinlock> guard(lock);
-
-    return realtimeQueue.size();
+    return size;
 }
 
 
@@ -145,13 +139,14 @@ void calls_insert_row(Call * call, stringstream &q) {
 
 void CallsManager::save(BDb * dbCalls) {
 
-    if (tmpQueue.size() == 0) {
+    size_t parts = realtimeCallsParts.size();
+    if (parts < 2) {
         return;
     }
 
     map<time_t, stringstream> queryPerMonth;
 
-    for (Call &call : tmpQueue) {
+    for (Call &call : realtimeCallsParts[0]) {
 
         if (queryPerMonth.find(call.dt.month) == queryPerMonth.end()) {
             char buff[20];
@@ -184,84 +179,61 @@ void CallsManager::save(BDb * dbCalls) {
     }
 }
 
-void CallsManager::moveRealtimeToTemp() {
-    lock_guard<Spinlock> guard(lock);
-
-    while (realtimeQueue.size() > 0) {
-        tmpQueue.push_back(realtimeQueue.front());
-        realtimeQueue.pop_front();
-    }
-
-    tmpLastId = realtimeLastId;
-    tmpLastTime = realtimeLastTime;
-    tmpCounter += realtimeCounter;
-
-    realtimeCounter = 0;
+void CallsManager::createNewPartition() {
+    realtimeCallsParts.push_back(vector<Call>());
 }
 
-void CallsManager::moveTempToStored() {
-    lock_guard<Spinlock> guard(lock);
-
-    storedLastId = tmpLastId;
-    storedLastTime = tmpLastTime;
-    storedCounter += tmpCounter;
-
-    tmpCounter = 0;
-    tmpQueue.clear();
+void CallsManager::afterSave() {
+    size_t parts = realtimeCallsParts.size();
+    if (parts > 1) {
+        if (parts == 2) {
+            realtimeCallsParts.push_back(vector<Call>());
+        }
+        realtimeCallsParts.erase(realtimeCallsParts.begin());
+    }
 }
 
 long long int CallsManager::getLastId() {
-    lock_guard<Spinlock> guard(lock);
-
     return realtimeLastId;
 }
 
 time_t CallsManager::getLastTime() {
-    lock_guard<Spinlock> guard(lock);
-
     return realtimeLastTime;
 }
 
 size_t CallsManager::getCounter() {
-    lock_guard<Spinlock> guard(lock);
-
     return realtimeCounter;
 }
 
 void CallsManager::setLastId(long long int lastId) {
-    this->realtimeLastId = lastId;
+    realtimeLastId = lastId;
 }
 
 void CallsManager::setLastTime(time_t lastTime) {
-    this->realtimeLastTime = lastTime;
+    realtimeLastTime = lastTime;
 }
 
 long long int CallsManager::getStoredLastId() {
-    lock_guard<Spinlock> guard(lock);
-
     return storedLastId;
 }
 
 time_t CallsManager::getStoredLastTime() {
-    lock_guard<Spinlock> guard(lock);
-
     return storedLastTime;
 }
 
 size_t CallsManager::getStoredCounter() {
-    lock_guard<Spinlock> guard(lock);
-
     return storedCounter;
 }
 
-void CallsManager::setStoredLastId(long long int storedLastId) {
-    this->storedLastId = storedLastId;
+void CallsManager::setStoredLastId(long long int lastId) {
+    storedLastId = lastId;
 }
 
-void CallsManager::setStoredLastTime(time_t storedLastTime) {
-    this->storedLastTime = storedLastTime;
+void CallsManager::setStoredLastTime(time_t lastTime) {
+    storedLastTime = lastTime;
 }
 
-void CallsManager::incStoredCounter(size_t count) {
-    storedCounter += count;
+size_t CallsManager::getLastRealtimePartSize() {
+    size_t parts = realtimeCallsParts.size();
+    return realtimeCallsParts.at(parts - 1).size();
 }

@@ -1,5 +1,10 @@
 #include "StatsPackageManager.h"
 
+StatsPackageManager::StatsPackageManager() {
+    realtimeStatsPackageParts.push_back(map<int, StatsPackage>());
+    realtimeStatsByPackageIdParts.push_back(map<int, list<int>>());
+}
+
 void StatsPackageManager::load(BDb * db) {
     BDbResult resId = db->query("   select max(id) from billing.stats_package p ");
     lastPackageStatId = resId.next() ? resId.get_i(0) : 1;
@@ -36,19 +41,29 @@ void StatsPackageManager::load(BDb * db) {
 int StatsPackageManager::getSeconds(Call * call) {
     lock_guard<Spinlock> guard(lock);
 
-    return getSeconds(call->service_package_id, call->connect_time, storedStatsByPackageId, storedStatsPackage)
-           + getSeconds(call->service_package_id, call->connect_time, realtimeStatsByPackageId, realtimeStatsPackage)
-           + getSeconds(call->service_package_id, call->connect_time, tmpStatsByPackageId, tmpStatsPackage);
+    int seconds = getSeconds(call->service_package_id, call->connect_time, storedStatsByPackageId, storedStatsPackage);
 
+    size_t n = 0;
+    for (map<int, StatsPackage> &realtimeStatsPackage : realtimeStatsPackageParts) {
+        seconds += getSeconds(call->service_package_id, call->connect_time, realtimeStatsByPackageIdParts[n], realtimeStatsPackageParts[n]);
+        n++;
+    }
+
+    return seconds;
 }
 
 int StatsPackageManager::getSeconds(int service_package_id, time_t connect_time) {
     lock_guard<Spinlock> guard(lock);
 
-    return getSeconds(service_package_id, connect_time, storedStatsByPackageId, storedStatsPackage)
-           + getSeconds(service_package_id, connect_time, realtimeStatsByPackageId, realtimeStatsPackage)
-           + getSeconds(service_package_id, connect_time, tmpStatsByPackageId, tmpStatsPackage);
+    int seconds = getSeconds(service_package_id, connect_time, storedStatsByPackageId, storedStatsPackage);
 
+    size_t n = 0;
+    for (map<int, StatsPackage> &realtimeStatsPackage : realtimeStatsPackageParts) {
+        seconds += getSeconds(service_package_id, connect_time, realtimeStatsByPackageIdParts[n], realtimeStatsPackageParts[n]);
+        n++;
+    }
+
+    return seconds;
 }
 
 void StatsPackageManager::add(CallInfo * callInfo) {
@@ -67,19 +82,27 @@ void StatsPackageManager::add(CallInfo * callInfo) {
 size_t StatsPackageManager::size() {
     lock_guard<Spinlock> guard(lock);
 
-    return storedStatsPackage.size() + realtimeStatsPackage.size() + tmpStatsPackage.size();
+
+    size_t size = storedStatsPackage.size();
+
+    for (map<int, StatsPackage> &realtimeStatsPackage : realtimeStatsPackageParts) {
+        size += realtimeStatsPackage.size();
+    }
+
+    return size;
 }
 
 void StatsPackageManager::save(BDb * dbCalls) {
 
-    if (tmpStatsPackage.size() == 0) {
+    size_t parts = realtimeStatsPackageParts.size();
+    if (parts < 2) {
         return;
     }
 
     stringstream q;
     q << "INSERT INTO billing.stats_package(id, package_id, used_seconds, used_credit, paid_seconds, activation_dt, expire_dt, min_call_id, max_call_id) VALUES\n";
     int i = 0;
-    for (auto it : tmpStatsPackage) {
+    for (auto it : realtimeStatsPackageParts[0]) {
         StatsPackage &stats = it.second;
         if (i > 0) q << ",\n";
         q << "(";
@@ -98,16 +121,26 @@ void StatsPackageManager::save(BDb * dbCalls) {
     dbCalls->exec(q.str());
 }
 
-void StatsPackageManager::moveRealtimeToTemp() {
+void StatsPackageManager::createNewPartition() {
     lock_guard<Spinlock> guard(lock);
 
-    move(realtimeStatsPackage, realtimeStatsByPackageId, tmpStatsPackage, tmpStatsByPackageId);
+    realtimeStatsPackageParts.push_back(map<int, StatsPackage>());
+    realtimeStatsByPackageIdParts.push_back(map<int, list<int>>());
 }
 
-void StatsPackageManager::moveTempToStored() {
+void StatsPackageManager::afterSave() {
     lock_guard<Spinlock> guard(lock);
 
-    move(tmpStatsPackage, tmpStatsByPackageId, storedStatsPackage, storedStatsByPackageId);
+    size_t parts = realtimeStatsPackageParts.size();
+    if (parts > 1) {
+        if (parts == 2) {
+            realtimeStatsPackageParts.push_back(map<int, StatsPackage>());
+            realtimeStatsByPackageIdParts.push_back(map<int, list<int>>());
+        }
+        move(realtimeStatsPackageParts[0], realtimeStatsByPackageIdParts[0], storedStatsPackage, storedStatsByPackageId);
+        realtimeStatsPackageParts.erase(realtimeStatsPackageParts.begin());
+        realtimeStatsByPackageIdParts.erase(realtimeStatsByPackageIdParts.begin());
+    }
 }
 
 int StatsPackageManager::getSeconds(int service_package_id, time_t connect_time, map<int, list<int>> &statsByPackageId, map<int, StatsPackage> &statsPackage) {
@@ -132,6 +165,11 @@ int StatsPackageManager::getSeconds(int service_package_id, time_t connect_time,
 
 void StatsPackageManager::createStatsPackage(CallInfo *callInfo) {
     short timezone_offset = 0;
+
+
+    size_t parts = realtimeStatsPackageParts.size();
+    map<int, StatsPackage> &realtimeStatsPackage = realtimeStatsPackageParts.at(parts - 1);
+    map<int, list<int>> &realtimeStatsByPackageId = realtimeStatsByPackageIdParts.at(parts - 1);
 
     time_t activation_dt = get_tmonth(callInfo->call->connect_time, timezone_offset);
     time_t expire_dt = get_tmonth_end(callInfo->call->connect_time, timezone_offset);
@@ -161,6 +199,10 @@ void StatsPackageManager::createStatsPackage(CallInfo *callInfo) {
 }
 
 bool StatsPackageManager::updateStatsPackage(CallInfo *callInfo) {
+    size_t parts = realtimeStatsPackageParts.size();
+    map<int, StatsPackage> &realtimeStatsPackage = realtimeStatsPackageParts.at(parts - 1);
+    map<int, list<int>> &realtimeStatsByPackageId = realtimeStatsByPackageIdParts.at(parts - 1);
+
     auto itRealtimeStatsByPackageId = realtimeStatsByPackageId.find(callInfo->call->service_package_id);
     if (itRealtimeStatsByPackageId == realtimeStatsByPackageId.end()) {
         return false;

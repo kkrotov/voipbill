@@ -1,4 +1,10 @@
 #include "StatsFreeminManager.h"
+#include "../models/CallInfo.h"
+
+StatsFreeminManager::StatsFreeminManager() {
+    realtimeStatsFreeminParts.push_back(map<int, StatsFreemin>());
+    realtimeFreeminsByServiceIdParts.push_back(map<int, list<int>>());
+}
 
 void StatsFreeminManager::load(BDb * db) {
 
@@ -35,41 +41,53 @@ void StatsFreeminManager::load(BDb * db) {
 int StatsFreeminManager::getSeconds(Call * call) {
     lock_guard<Spinlock> guard(lock);
 
-    return getSeconds(call, storedFreeminsByServiceId, storedStatsFreemin)
-           + getSeconds(call, realtimeFreeminsByServiceId, realtimeStatsFreemin)
-           + getSeconds(call, tmpFreeminsByServiceId, tmpStatsFreemin);
+    int seconds = getSeconds(call, storedFreeminsByServiceId, storedStatsFreemin);
 
+    size_t n = 0;
+    for (map<int, StatsFreemin> &realtimeStatsFreemin : realtimeStatsFreeminParts) {
+        seconds += getSeconds(call, realtimeFreeminsByServiceIdParts[n], realtimeStatsFreeminParts[n]);
+        n++;
+    }
+
+    return seconds;
 }
 
-void StatsFreeminManager::add(Call * call) {
+void StatsFreeminManager::add(CallInfo * callInfo) {
 
-    if (call->number_service_id == 0 || call->service_package_id != 1 || call->package_time == 0) {
+    if (callInfo->call->number_service_id == 0 || callInfo->call->service_package_id != 1 || callInfo->call->package_time == 0) {
         return;
     }
 
     lock_guard<Spinlock> guard(lock);
 
-    if (!updateStatsFreemin(call)) {
-        createStatsFreemin(call);
+    if (!updateStatsFreemin(callInfo->call)) {
+        createStatsFreemin(callInfo->call);
     }
 }
 
 size_t StatsFreeminManager::size() {
     lock_guard<Spinlock> guard(lock);
 
-    return storedStatsFreemin.size() + realtimeStatsFreemin.size() + tmpStatsFreemin.size();
+    size_t size = storedStatsFreemin.size();
+
+    for (map<int, StatsFreemin> &realtimeStatsFreemin : realtimeStatsFreeminParts) {
+        size += realtimeStatsFreemin.size();
+    }
+
+    return size;
 }
 
 void StatsFreeminManager::save(BDb * dbCalls) {
 
-    if (tmpStatsFreemin.size() == 0) {
+    size_t parts = realtimeStatsFreeminParts.size();
+    if (parts < 2) {
         return;
     }
 
     stringstream q;
     q << "INSERT INTO billing.stats_freemin(id, month_dt, service_number_id, used_seconds, paid_seconds, used_credit) VALUES\n";
     int i = 0;
-    for (auto it : tmpStatsFreemin) {
+    for (auto it : realtimeStatsFreeminParts[0]) {
         StatsFreemin &stats = it.second;
         if (i > 0) q << ",\n";
         q << "(";
@@ -85,16 +103,26 @@ void StatsFreeminManager::save(BDb * dbCalls) {
     dbCalls->exec(q.str());
 }
 
-void StatsFreeminManager::moveRealtimeToTemp() {
+void StatsFreeminManager::createNewPartition() {
     lock_guard<Spinlock> guard(lock);
 
-    move(realtimeStatsFreemin, realtimeFreeminsByServiceId, tmpStatsFreemin, tmpFreeminsByServiceId);
+    realtimeStatsFreeminParts.push_back(map<int, StatsFreemin>());
+    realtimeFreeminsByServiceIdParts.push_back(map<int, list<int>>());
 }
 
-void StatsFreeminManager::moveTempToStored() {
+void StatsFreeminManager::afterSave() {
     lock_guard<Spinlock> guard(lock);
 
-    move(tmpStatsFreemin, tmpFreeminsByServiceId, storedStatsFreemin, storedFreeminsByServiceId);
+    size_t parts = realtimeStatsFreeminParts.size();
+    if (parts > 1) {
+        if (parts == 2) {
+            realtimeStatsFreeminParts.push_back(map<int, StatsFreemin>());
+            realtimeFreeminsByServiceIdParts.push_back(map<int, list<int>>());
+        }
+        move(realtimeStatsFreeminParts[0], realtimeFreeminsByServiceIdParts[0], storedStatsFreemin, storedFreeminsByServiceId);
+        realtimeStatsFreeminParts.erase(realtimeStatsFreeminParts.begin());
+        realtimeFreeminsByServiceIdParts.erase(realtimeFreeminsByServiceIdParts.begin());
+    }
 }
 
 int StatsFreeminManager::getSeconds(Call * call, map<int, list<int>> &freeminsByServiceId, map<int, StatsFreemin> &statsFreemin) {
@@ -120,6 +148,10 @@ void StatsFreeminManager::createStatsFreemin(Call * call) {
 
     lastStatsFreeminId += 1;
 
+    size_t parts = realtimeStatsFreeminParts.size();
+    map<int, StatsFreemin> &realtimeStatsFreemin = realtimeStatsFreeminParts.at(parts - 1);
+    map<int, list<int>> &realtimeFreeminsByServiceId = realtimeFreeminsByServiceIdParts.at(parts - 1);
+
     StatsFreemin &stats = realtimeStatsFreemin[lastStatsFreeminId];
     stats.id = lastStatsFreeminId;
     stats.service_number_id = call->number_service_id;
@@ -132,6 +164,10 @@ void StatsFreeminManager::createStatsFreemin(Call * call) {
 }
 
 bool StatsFreeminManager::updateStatsFreemin(Call * call) {
+    size_t parts = realtimeStatsFreeminParts.size();
+    map<int, StatsFreemin> &realtimeStatsFreemin = realtimeStatsFreeminParts.at(parts - 1);
+    map<int, list<int>> &realtimeFreeminsByServiceId = realtimeFreeminsByServiceIdParts.at(parts - 1);
+
     auto itRealtimeFreeminsByServiceId = realtimeFreeminsByServiceId.find(call->number_service_id);
     if (itRealtimeFreeminsByServiceId == realtimeFreeminsByServiceId.end()) {
         return false;

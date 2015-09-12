@@ -11,7 +11,7 @@ void CdrLoader::setBillingData(DataBillingContainer * billingData) {
 bool CdrLoader::load(const size_t rows_per_request) {
     const int cdr_max_queue_length = 50000;
 
-    if (repository.billingData->cdrs.size() >= cdr_max_queue_length) {
+    if (repository.billingData->cdrsQueueSize() >= cdr_max_queue_length) {
         return true;
     }
 
@@ -30,12 +30,14 @@ bool CdrLoader::load(const size_t rows_per_request) {
             "       call_id" \
             "	from calls_cdr.cdr " \
             "	where " \
-            "       id > '" + lexical_cast<string>(repository.billingData->cdrs.getLastId()) + "' " \
+            "       id > '" + lexical_cast<string>(repository.billingData->getCdrsLastId()) + "' " \
             "	order by id " \
             "	limit " + lexical_cast<string>(rows_per_request);
 
     BDbResult res = db_calls->query(query);
     if (res.size() > 0) {
+
+        lock_guard<Spinlock> guard(repository.billingData->lock);
 
         while (res.next()) {
 

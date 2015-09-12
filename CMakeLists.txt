@@ -29,7 +29,6 @@ set(BILL_SOURCES
     src-bill/classes/BlackListTrunk.cpp
     src-bill/classes/CalcException.cpp
     src-bill/classes/CallsManager.cpp
-    src-bill/classes/CallsSaver.cpp
     src-bill/classes/CdrManager.cpp
     src-bill/classes/Conf.cpp
     src-bill/classes/ConfBill.cpp

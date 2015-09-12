@@ -15,6 +15,8 @@
 
 class DataBillingContainer {
 public:
+    Spinlock lock;
+
     mutex fetchCdrLock;
     mutex calcCallsLock;
     mutex saveLock;
@@ -38,11 +40,30 @@ public:
 
     void loadAll(BDb * db);
     bool ready();
+    void addCall(CallInfo * callInfo);
     void save(BDb * dbCalls);
 
     void prepareSyncCallsCentral(BDb * db_main);
 
+    size_t cdrsQueueSize();
+
+    long long int getCdrsLastId();
+    time_t getCdrsLastTime();
+    size_t getCdrsCounter();
+
+    size_t callsQueueSize();
+
+    long long int getCallsLastId();
+    time_t getCallsLastTime();
+    size_t getCallsCounter();
+
+    long long int getCallsStoredLastId();
+    time_t getCallsStoredLastTime();
+    size_t getCallsStoredCounter();
+
 private:
     void loadLastCallIdAndCdrIdAndTime(BDb * db_calls);
     void loadSyncCentralCallIdAndTime(BDb * db_main);
+    void createNewPartition();
+    void afterSave();
 };

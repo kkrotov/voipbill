@@ -4,21 +4,26 @@ CdrManager::CdrManager() {
     lastId = -1;
     lastTime = 0;
     counter = 0;
+    cdrsParts.push_back(vector<Cdr>());
 }
 
 bool CdrManager::ready() {
-    lock_guard<Spinlock> guard(lock);
-
     return lastId >= 0;
 }
 
 void CdrManager::add(const Cdr &cdr) {
-    lock_guard<Spinlock> guard(lock);
+    size_t parts = cdrsParts.size();
 
-    queue.push_back(cdr);
+    vector<Cdr> &cdrs = cdrsParts.at(parts - 1);
+
+    cdrs.push_back(cdr);
     lastId = cdr.id;
     lastTime = cdr.connect_time;
     counter += 1;
+
+    if (cdrs.size() >= CDRS_PARTITION_SIZE) {
+        cdrsParts.push_back(vector<Cdr>());
+    }
 }
 
 
@@ -41,30 +46,6 @@ void CdrManager::revert(const Cdr &cdr) {
     queue.push_front(cdr);
 }
 
-size_t CdrManager::size() {
-    lock_guard<Spinlock> guard(lock);
-
-    return queue.size();
-}
-
-long long int CdrManager::getLastId() {
-    lock_guard<Spinlock> guard(lock);
-
-    return lastId;
-}
-
-time_t CdrManager::getLastTime() {
-    lock_guard<Spinlock> guard(lock);
-
-    return lastTime;
-}
-
-size_t CdrManager::getCounter() {
-    lock_guard<Spinlock> guard(lock);
-
-    return counter;
-}
-
 void CdrManager::setLastId(long long int lastId) {
     this->lastId = lastId;
 }
@@ -73,4 +54,7 @@ void CdrManager::setLastTime(time_t lastTime) {
     this->lastTime = lastTime;
 }
 
-
+size_t CdrManager::getLastPartSize() {
+    size_t parts = cdrsParts.size();
+    return cdrsParts.at(parts - 1).size();
+}
