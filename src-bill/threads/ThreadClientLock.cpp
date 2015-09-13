@@ -67,8 +67,8 @@ bool ThreadClientLock::needLockLocal(int client_account_id) {
 
         auto globalCounter = repository.data->globalCounters.get()->find(client->id);
         double vat_rate = repository.getVatRate(client);
-        double sumBalance = repository.billingData->statsAccount.getSumBalance(client->id, vat_rate);
-        double sumDay = repository.billingData->statsAccount.getSumDay(client->id, vat_rate);
+        double sumBalance = repository.billingData->statsAccountGetSumBalance(client->id, vat_rate);
+        double sumDay = repository.billingData->statsAccountGetSumDay(client->id, vat_rate);
         double spentBalanceSum = sumBalance + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
         double spentDaySum = sumDay + (globalCounter ? globalCounter->sumDay(vat_rate) : 0.0);
 
@@ -96,7 +96,7 @@ bool ThreadClientLock::needLockGlobal(int client_account_id) {
 
         auto globalCounter = repository.data->globalCounters.get()->find(client->id);
         double vat_rate = repository.getVatRate(client);
-        double sumBalance = repository.billingData->statsAccount.getSumBalance(client->id, vat_rate);
+        double sumBalance = repository.billingData->statsAccountGetSumBalance(client->id, vat_rate);
         double spentBalanceSum = sumBalance + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
 
         if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth(time(nullptr))) {

@@ -5,6 +5,7 @@
 #include "Spinlock.h"
 
 #define CALLS_PARTITION_SIZE 50000
+#define CALLS_MAX_QUEUE_SIZE 1000000
 
 class CallsManager
 {
@@ -23,7 +24,8 @@ private:
 public:
     CallsManager();
 
-    void save(BDb * dbCalls);
+    void prepareSaveQueries(map<time_t, stringstream> &queryPerMonth);
+    void executeSaveQueries(BDb * dbCalls, map<time_t, stringstream> &queryPerMonth);
 
 private:
     bool ready();
@@ -45,8 +47,12 @@ private:
     void setStoredLastId(long long int lastId);
     void setStoredLastTime(time_t lastTime);
 
+
+    bool isNeedSave();
+    bool isNeedCreatePartitionBeforeSave();
+    bool isNeedCreatePartitionAfterAdd();
     void createNewPartition();
-    void afterSave();
+    void removePartitionAfterSave();
 
     size_t getLastRealtimePartSize();
 

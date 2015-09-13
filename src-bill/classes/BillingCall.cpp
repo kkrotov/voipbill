@@ -101,6 +101,8 @@ void BillingCall::calcOrigByNumber() {
 
     setupMainTariff();
 
+    setupBilledTime();
+
     setupPackagePricelist();
 
     if (callInfo->servicePackagePricelist == nullptr) {
@@ -115,22 +117,11 @@ void BillingCall::calcOrigByNumber() {
         setupPrice();
     }
 
-    setupBilledTime();
+    setupFreemin();
 
     setupPackagePrepaid();
 
     setupCost();
-
-    int freeSeconds = 60 * callInfo->mainTariff->freemin * (callInfo->mainTariff->freemin_for_number ? 1 : callInfo->serviceNumber->lines_count);
-    if (call->isLocal() && freeSeconds > 0) {
-        int used_free_seconds = repository->billingData->statsFreemin.getSeconds(call);
-        if (used_free_seconds + call->billed_time <= freeSeconds) {
-            call->service_package_id = 1;
-            call->package_time = call->billed_time;
-            call->package_credit = call->cost;
-            call->cost = 0;
-        }
-    }
 }
 
 void BillingCall::calcTermByNumber() {
@@ -558,8 +549,21 @@ void BillingCall::setupBilledTime() {
 }
 
 void BillingCall::setupCost() {
-    call->cost = (call->billed_time - call->package_time) * call->rate / 60.0;
-    call->cost = call->orig ? - call->cost : call->cost;
+    int paid_time = call->billed_time - call->package_time;
+
+    if (paid_time > 0) {
+        call->cost = paid_time * call->rate / 60.0;
+        call->cost = call->orig ? -call->cost : call->cost;
+    } else {
+        call->cost = 0;
+    }
+
+    if (call->billed_time > 0) {
+        call->package_credit = call->package_time * call->rate / 60.0;
+        call->package_credit = call->orig ? -call->package_credit : call->package_credit;
+    } else {
+        call->package_credit = 0;
+    }
 }
 
 void BillingCall::setupLogTariff() {
@@ -642,7 +646,35 @@ void BillingCall::setupPackagePricelist() {
     }
 }
 
+
+void BillingCall::setupFreemin() {
+    if (call->billed_time == 0) {
+        return;
+    }
+
+    int tariffFreeSeconds = 60 * callInfo->mainTariff->freemin * (callInfo->mainTariff->freemin_for_number ? 1 : callInfo->serviceNumber->lines_count);
+    if (call->isLocal() && tariffFreeSeconds > 0) {
+        int usedFreeSeconds = repository->billingData->statsFreeminGetSeconds(call);
+        int availableFreeSeconds = tariffFreeSeconds - usedFreeSeconds;
+        if (availableFreeSeconds < 0) {
+            availableFreeSeconds = 0;
+        }
+        if (availableFreeSeconds > call->billed_time) {
+            availableFreeSeconds = call->billed_time;
+        }
+        if (availableFreeSeconds > 0) {
+            call->service_package_id = 1;
+            call->package_time = availableFreeSeconds;
+        }
+    }
+
+}
+
 void BillingCall::setupPackagePrepaid() {
+    if (call->billed_time == 0 || call->service_package_id > 0) {
+        return;
+    }
+
     vector<ServicePackage *> packages;
     repository->getAllServicePackage(packages, callInfo->serviceNumber->id);
 
@@ -666,7 +698,7 @@ void BillingCall::setupPackagePrepaid() {
             continue;
         }
 
-        int availableSeconds = tariff->getPrepaidSeconds() - repository->billingData->statsPackage.getSeconds(package->id, call->connect_time);
+        int availableSeconds = tariff->getPrepaidSeconds() - repository->billingData->statsPackageGetSeconds(package->id, call->connect_time);
         if (availableSeconds < 0) {
             availableSeconds = 0;
         }

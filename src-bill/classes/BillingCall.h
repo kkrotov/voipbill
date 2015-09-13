@@ -49,6 +49,7 @@ protected:
     void setupMainTariff();
     void setupTariff();
     void setupPackagePricelist();
+    void setupFreemin();
     void setupPackagePrepaid();
 
 };

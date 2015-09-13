@@ -11,29 +11,26 @@ class StatsPackageManager
 private:
     int lastPackageStatId = 0;
 
-    map<int, StatsPackage> storedStatsPackage;
-    map<int, list<int>> storedStatsByPackageId;
-
     vector<map<int, StatsPackage>> realtimeStatsPackageParts;
-    vector<map<int, list<int>>> realtimeStatsByPackageIdParts;
 
     bool loaded = false;
 public:
     long long int lastSaveCallTime;
 
-    Spinlock lock;
+    map<int, StatsPackage> statsPackage;
+    map<int, list<int>> statsByPackageId;
 
     StatsPackageManager();
     bool ready() { return loaded; };
     void load(BDb * db);
 
-    int getSeconds(Call * call);
     int getSeconds(int service_package_id, time_t connect_time);
 
-    void save(BDb * dbCalls);
+    void prepareSaveQuery(stringstream &query);
+    void executeSaveQuery(BDb * dbCalls, stringstream &query);
 
     void createNewPartition();
-    void afterSave();
+    void removePartitionAfterSave();
 
 private:
     void add(CallInfo * callInfo);
@@ -41,12 +38,7 @@ private:
     friend class DataBillingContainer;
     friend class Billing;
 
-    int getSeconds(int service_package_id, time_t connect_time, map<int, list<int>> &freeminsByServiceId, map<int, StatsPackage> &statsFreemin);
+    int getStatsPackageId(Call * call);
     void createStatsPackage(CallInfo *callInfo);
-    bool updateStatsPackage(CallInfo *callInfo);
-    void move(
-            map<int, StatsPackage> &fromStatsPackage, map<int, list<int>> &fromStatsByPackageId,
-            map<int, StatsPackage> &toStatsPackage, map<int, list<int>> &toStatsByPackageId
-    );
-
+    void updateStatsPackage(Call *call, int statPackageId);
 };

@@ -20,7 +20,7 @@ public:
         if (organizationList == nullptr) return;
 
         vector<StatsAccount> clients;
-        repository.billingData->statsAccount.getClients(clients);
+        repository.billingData->statsAccountGetClients(clients);
 
         html << "<table border=1>\n";
         html << "<tr>\n";

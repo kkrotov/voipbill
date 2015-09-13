@@ -137,14 +137,11 @@ void calls_insert_row(Call * call, stringstream &q) {
     q << ")\n";
 }
 
-void CallsManager::save(BDb * dbCalls) {
+void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth) {
 
-    size_t parts = realtimeCallsParts.size();
-    if (parts < 2) {
+    if (realtimeCallsParts[0].size() == 0) {
         return;
     }
-
-    map<time_t, stringstream> queryPerMonth;
 
     for (Call &call : realtimeCallsParts[0]) {
 
@@ -173,23 +170,45 @@ void CallsManager::save(BDb * dbCalls) {
         }
 
     }
+}
+
+void CallsManager::executeSaveQueries(BDb * dbCalls, map<time_t, stringstream> &queryPerMonth) {
 
     for (auto &it : queryPerMonth) {
         dbCalls->exec(it.second.str());
     }
+
+}
+
+bool CallsManager::isNeedSave() {
+    size_t parts = realtimeCallsParts.size();
+    size_t firstPartSize = realtimeCallsParts.at(0).size();
+    return firstPartSize > 0 || parts > 1;
+}
+
+bool CallsManager::isNeedCreatePartitionBeforeSave() {
+    size_t parts = realtimeCallsParts.size();
+    return parts == 1;
+}
+
+bool CallsManager::isNeedCreatePartitionAfterAdd() {
+    size_t parts = realtimeCallsParts.size();
+    size_t lastPartSize = realtimeCallsParts.at(parts - 1).size();
+    return lastPartSize >= CALLS_PARTITION_SIZE;
 }
 
 void CallsManager::createNewPartition() {
     realtimeCallsParts.push_back(vector<Call>());
 }
 
-void CallsManager::afterSave() {
-    size_t parts = realtimeCallsParts.size();
-    if (parts > 1) {
-        if (parts == 2) {
-            realtimeCallsParts.push_back(vector<Call>());
-        }
-        realtimeCallsParts.erase(realtimeCallsParts.begin());
+void CallsManager::removePartitionAfterSave() {
+    realtimeCallsParts.erase(realtimeCallsParts.begin());
+    vector<Call> &realtimeCalls = realtimeCallsParts.at(0);
+    size_t realtimeCallsSize = realtimeCalls.size();
+    if (realtimeCallsSize > 0) {
+        storedCounter += realtimeCallsSize;
+        storedLastId = realtimeCalls.at(realtimeCallsSize - 1).id;
+        storedLastTime = realtimeCalls.at(realtimeCallsSize - 1).connect_time;
     }
 }
 

@@ -54,28 +54,59 @@ void DataBillingContainer::addCall(CallInfo * callInfo) {
     statsFreemin.add(callInfo);
     statsPackage.add(callInfo);
 
-    createNewPartition();
+    if (calls.isNeedCreatePartitionAfterAdd()) {
+        createNewPartition();
+    }
 }
 
 void DataBillingContainer::save(BDb * dbCalls) {
 
-    try {
-        BDbTransaction trans(dbCalls);
+    {
+        lock_guard<Spinlock> guard(lock);
 
-        calls.save(dbCalls);
-        statsAccount.save(dbCalls);
-        statsFreemin.save(dbCalls);
-        statsPackage.save(dbCalls);
-
-        trans.commit();
-
-        {
-            lock_guard<Spinlock> guard(lock);
-            afterSave();
+        if (!calls.isNeedSave()) {
+            return;
         }
 
-    } catch (Exception &e) {
-        throw e;
+        if (calls.isNeedCreatePartitionBeforeSave()) {
+            createNewPartition();
+        }
+    }
+
+    BDbTransaction trans(dbCalls);
+
+    map<time_t, stringstream> callsQueryPerMonth;
+    stringstream statAccountQuery;
+    stringstream statFreeminQuery;
+    stringstream statPackageQuery;
+
+    {
+        lock_guard<Spinlock> guard(lock);
+        calls.prepareSaveQueries(callsQueryPerMonth);
+    }
+    {
+        lock_guard<Spinlock> guard(lock);
+        statsAccount.prepareSaveQuery(statAccountQuery);
+    }
+    {
+        lock_guard<Spinlock> guard(lock);
+        statsFreemin.prepareSaveQuery(statFreeminQuery);
+    }
+    {
+        lock_guard<Spinlock> guard(lock);
+        statsPackage.prepareSaveQuery(statPackageQuery);
+    }
+
+    calls.executeSaveQueries(dbCalls, callsQueryPerMonth);
+    statsAccount.executeSaveQuery(dbCalls, statAccountQuery);
+    statsFreemin.executeSaveQuery(dbCalls, statFreeminQuery);
+    statsPackage.executeSaveQuery(dbCalls, statPackageQuery);
+
+    trans.commit();
+
+    {
+        lock_guard<Spinlock> guard(lock);
+        removePartitionAfterSave();
     }
 
 }
@@ -118,39 +149,45 @@ void DataBillingContainer::loadSyncCentralCallIdAndTime(BDb * db_main) {
 }
 
 void DataBillingContainer::createNewPartition() {
-    if (calls.getLastRealtimePartSize() >= CALLS_PARTITION_SIZE) {
-        calls.createNewPartition();
-        statsAccount.createNewPartition();
-        statsFreemin.createNewPartition();
-        statsPackage.createNewPartition();
-    }
+    calls.createNewPartition();
+    statsAccount.createNewPartition();
+    statsFreemin.createNewPartition();
+    statsPackage.createNewPartition();
 }
 
-void DataBillingContainer::afterSave() {
-    calls.afterSave();
-    statsAccount.afterSave();
-    statsFreemin.afterSave();
-    statsPackage.afterSave();
+void DataBillingContainer::removePartitionAfterSave() {
+    calls.removePartitionAfterSave();
+    statsAccount.removePartitionAfterSave();
+    statsFreemin.removePartitionAfterSave();
+    statsPackage.removePartitionAfterSave();
+}
+
+bool DataBillingContainer::cdrsLoadPart(BDb * db_calls) {
+    return cdrs.loadPart(db_calls);
 }
 
 size_t DataBillingContainer::cdrsQueueSize() {
-    lock_guard<Spinlock> guard(lock);
-    return cdrs.queue.size();
+    return cdrs.getQueueSize();
+}
+
+Cdr * DataBillingContainer::getFirstCdr() {
+    return cdrs.getFirstCdr();
+}
+
+void DataBillingContainer::removeFirstCdr() {
+    cdrs.removeFirstCdr();
 }
 
 long long int DataBillingContainer::getCdrsLastId() {
-    lock_guard<Spinlock> guard(lock);
-    return cdrs.lastId;
+    return cdrs.getLastId();
 }
 
 time_t DataBillingContainer::getCdrsLastTime() {
-    lock_guard<Spinlock> guard(lock);
-    return cdrs.lastTime;
+    return cdrs.getLastTime();
 }
 
 size_t DataBillingContainer::getCdrsCounter() {
-    lock_guard<Spinlock> guard(lock);
-    return cdrs.counter;
+    return cdrs.getCounter();
 }
 
 size_t DataBillingContainer::callsQueueSize() {
@@ -186,4 +223,35 @@ time_t DataBillingContainer::getCallsStoredLastTime() {
 size_t DataBillingContainer::getCallsStoredCounter() {
     lock_guard<Spinlock> guard(lock);
     return calls.getStoredCounter();
+}
+
+void DataBillingContainer::statsAccountGetClients(vector<StatsAccount> &destClients) {
+    lock_guard<Spinlock> guard(lock);
+    statsAccount.getClients(destClients);
+}
+
+int DataBillingContainer::statsAccountGetSumMonth(int account_id, double vat_rate) {
+    lock_guard<Spinlock> guard(lock);
+    return statsAccount.getSumMonth(account_id, vat_rate);
+}
+
+int DataBillingContainer::statsAccountGetSumDay(int account_id, double vat_rate) {
+    lock_guard<Spinlock> guard(lock);
+    return statsAccount.getSumDay(account_id, vat_rate);
+}
+
+int DataBillingContainer::statsAccountGetSumBalance(int account_id, double vat_rate) {
+    lock_guard<Spinlock> guard(lock);
+    return statsAccount.getSumBalance(account_id, vat_rate);
+}
+
+int DataBillingContainer::statsFreeminGetSeconds(Call * call)
+{
+    lock_guard<Spinlock> guard(lock);
+    return statsFreemin.getSeconds(call);
+}
+
+int DataBillingContainer::statsPackageGetSeconds(int service_package_id, time_t connect_time) {
+    lock_guard<Spinlock> guard(lock);
+    return statsPackage.getSeconds(service_package_id, connect_time);
 }

@@ -14,23 +14,20 @@ private:
 public:
     long long int lastStoredCallTime;
 
-    Spinlock lock;
-
-    map<int, StatsFreemin> storedStatsFreemin;
-    map<int, list<int>> storedFreeminsByServiceId;
-
     vector<map<int, StatsFreemin>> realtimeStatsFreeminParts;
-    vector<map<int, list<int>>> realtimeFreeminsByServiceIdParts;
+    map<int, StatsFreemin> statsFreemin;
+    map<int, list<int>> freeminsByServiceId;
 
     StatsFreeminManager();
     bool ready() { return loaded; };
     void load(BDb * db);
     int getSeconds(Call * call);
 
-    void save(BDb * dbCalls);
+    void prepareSaveQuery(stringstream &query);
+    void executeSaveQuery(BDb * dbCalls, stringstream &query);
 
     void createNewPartition();
-    void afterSave();
+    void removePartitionAfterSave();
 
 private:
     void add(CallInfo * callInfo);
@@ -38,11 +35,7 @@ private:
     friend class DataBillingContainer;
     friend class Billing;
 
-    int getSeconds(Call * call, map<int, list<int>> &freeminsByServiceId, map<int, StatsFreemin> &statsFreemin);
+    int getStatsFreeminId(Call * call);
     void createStatsFreemin(Call * call);
-    bool updateStatsFreemin(Call * call);
-    void move(
-            map<int, StatsFreemin> &fromStatsFreemin, map<int, list<int>> &fromFreeminsByServiceId,
-            map<int, StatsFreemin> &toStatsFreemin, map<int, list<int>> &toFreeminsByServiceId
-    );
+    bool updateStatsFreemin(Call * call, int statFreeminId);
 };

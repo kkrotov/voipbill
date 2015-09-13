@@ -24,12 +24,13 @@ public:
     mutex syncCountersCentralLock;
     mutex syncLocksCentralLock;
 
+private:
     CdrManager          cdrs;
     CallsManager        calls;
     StatsAccountManager statsAccount;
     StatsFreeminManager statsFreemin;
     StatsPackageManager statsPackage;
-
+public:
     ClientLockData      clientLock;
 
     long long int lastSyncCentralCallId = -1;
@@ -45,7 +46,11 @@ public:
 
     void prepareSyncCallsCentral(BDb * db_main);
 
+
+    bool cdrsLoadPart(BDb * db_calls);
     size_t cdrsQueueSize();
+    Cdr * getFirstCdr();
+    void removeFirstCdr();
 
     long long int getCdrsLastId();
     time_t getCdrsLastTime();
@@ -61,9 +66,19 @@ public:
     time_t getCallsStoredLastTime();
     size_t getCallsStoredCounter();
 
+    void statsAccountGetClients(vector<StatsAccount> &destClients);
+    int statsAccountGetSumMonth(int account_id, double vat_rate);
+    int statsAccountGetSumDay(int account_id, double vat_rate);
+    int statsAccountGetSumBalance(int account_id, double vat_rate);
+    int statsFreeminGetSeconds(Call * call);
+    int statsPackageGetSeconds(int service_package_id, time_t connect_time);
+
 private:
     void loadLastCallIdAndCdrIdAndTime(BDb * db_calls);
     void loadSyncCentralCallIdAndTime(BDb * db_main);
     void createNewPartition();
-    void afterSave();
+    void removePartitionAfterSave();
+
+    friend class PageFmins;
+    friend class PagePackage;
 };

@@ -4,7 +4,6 @@
 #include "../classes/AppBill.h"
 #include "../threads/ThreadLoader.h"
 #include "../threads/ThreadBillRuntime.h"
-#include "../classes/CdrLoader.h"
 #include "../web/PageDataBilling.h"
 
 TaskRecalc::TaskRecalc(time_t date_from, string server_id) : Task(server_id) {
@@ -56,20 +55,14 @@ void TaskRecalc::run() {
 
     setStatus("7. calc");
 
-    CdrLoader cdrLoader;
-    cdrLoader.setDb(&db_calls);
-    cdrLoader.setBillingData(&newBillingData);
-
     Billing billing;
     billing.setData(&data);
     billing.setBillingData(&newBillingData);
 
     while (true) {
-        const size_t rows_per_request = 25000;
-
         {
             TimerScope ts(t_load);
-            cdrLoader.load(rows_per_request);
+            newBillingData.cdrsLoadPart(&db_calls);
         }
 
         if (newBillingData.cdrsQueueSize() == 0) {

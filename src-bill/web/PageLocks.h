@@ -48,9 +48,9 @@ public:
                 }
             }
 
-            double sum_month = repository.billingData->statsAccount.getSumMonth(client_id, vat_rate);
-            double sum_day = repository.billingData->statsAccount.getSumDay(client_id, vat_rate);
-            double sum_balance = repository.billingData->statsAccount.getSumBalance(client_id, vat_rate);
+            double sum_month = repository.billingData->statsAccountGetSumMonth(client_id, vat_rate);
+            double sum_day = repository.billingData->statsAccountGetSumDay(client_id, vat_rate);
+            double sum_balance = repository.billingData->statsAccountGetSumBalance(client_id, vat_rate);
 
 
             double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;

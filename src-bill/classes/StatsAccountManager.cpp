@@ -55,7 +55,7 @@ void StatsAccountManager::load(BDb * db) {
     );
 
     while (res.next()) {
-        StatsAccount &stats = storedStatsAccount[res.get_i(0)];
+        StatsAccount &stats = statsAccount[res.get_i(0)];
         stats.account_id = res.get_i(0);
         stats.amount_month = res.get_ll(1);
         stats.sum_month = res.get_d(2);
@@ -94,12 +94,12 @@ void StatsAccountManager::reload(BDb * db) {
 
     db->exec("UPDATE billing.clients set sync=0 where sync=2");
 
-    lock_guard<Spinlock> guard(lock);
+    // !!! lock_guard<Spinlock> guard(lock);
 
     while (res.next()) {
-        auto iCc = storedStatsAccount.find(res.get_i(0));
-        if (iCc != storedStatsAccount.end() || abs(res.get_d(1)) > 0.00001) {
-            StatsAccount &stats = storedStatsAccount[res.get_i(0)];
+        auto iCc = statsAccount.find(res.get_i(0));
+        if (iCc != statsAccount.end() || abs(res.get_d(1)) > 0.00001) {
+            StatsAccount &stats = statsAccount[res.get_i(0)];
             stats.account_id = res.get_i(0);
             stats.sum = res.get_d(1);
             stats.amount_date = parseDateTime(res.get(2));
@@ -108,75 +108,60 @@ void StatsAccountManager::reload(BDb * db) {
 }
 
 size_t StatsAccountManager::size() {
-    lock_guard<Spinlock> guard(lock);
-
-    size_t size = storedStatsAccount.size();
-
-    for (map<int, StatsAccount> &realtimeStatsAccount : realtimeStatsAccountParts) {
-        size += realtimeStatsAccount.size();
-    }
-
-    return size;
+    return statsAccount.size();
 }
 
-void StatsAccountManager::save(BDb * dbCalls) {
+void StatsAccountManager::prepareSaveQuery(stringstream &query) {
 
-    size_t parts = realtimeStatsAccountParts.size();
-    if (parts < 2) {
+    if (realtimeStatsAccountParts[0].size() == 0) {
         return;
     }
 
-    stringstream q;
-    q << "INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum) VALUES\n";
+    query << "INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum) VALUES\n";
     int i = 0;
     for (auto it : realtimeStatsAccountParts[0]) {
         StatsAccount &stats = it.second;
-        if (i > 0) q << ",\n";
-        q << "(";
-        q << "'" << stats.account_id << "',";
-        q << "'" << string_time(stats.amount_month) << "',";
-        q << "'" << stats.sum_month << "',";
-        q << "'" << string_time(stats.amount_day) << "',";
-        q << "'" << stats.sum_day << "',";
-        q << "'" << string_time(stats.amount_date) << "',";
-        q << "'" << stats.sum << "')";
+        if (i > 0) query << ",\n";
+        query << "(";
+        query << "'" << stats.account_id << "',";
+        query << "'" << string_time(stats.amount_month) << "',";
+        query << "'" << stats.sum_month << "',";
+        query << "'" << string_time(stats.amount_day) << "',";
+        query << "'" << stats.sum_day << "',";
+        query << "'" << string_time(stats.amount_date) << "',";
+        query << "'" << stats.sum << "')";
         i++;
     }
 
-    dbCalls->exec(q.str());
+}
+
+void StatsAccountManager::executeSaveQuery(BDb * dbCalls, stringstream &query) {
+    string q = query.str();
+    if (q.size() > 0) {
+
+        dbCalls->exec(q);
+
+    }
 }
 
 void StatsAccountManager::createNewPartition() {
-    lock_guard<Spinlock> guard(lock);
-
     realtimeStatsAccountParts.push_back(map<int, StatsAccount>());
 }
 
-void StatsAccountManager::afterSave() {
-    lock_guard<Spinlock> guard(lock);
-
-    size_t parts = realtimeStatsAccountParts.size();
-    if (parts > 1) {
-        if (parts == 2) {
-            realtimeStatsAccountParts.push_back(map<int, StatsAccount>());
-        }
-        move(realtimeStatsAccountParts[0], storedStatsAccount);
-        realtimeStatsAccountParts.erase(realtimeStatsAccountParts.begin());
-    }
+void StatsAccountManager::removePartitionAfterSave() {
+    realtimeStatsAccountParts.erase(realtimeStatsAccountParts.begin());
 }
 
 void StatsAccountManager::add(CallInfo *callInfo) {
 
-    Call * call = callInfo->call;
+    Call *call = callInfo->call;
 
     if (call->account_id > 0 && abs(call->cost) < 0.000001) {
         return;
     }
 
-    size_t parts = realtimeStatsAccountParts.size();
-    map<int, StatsAccount> &realtimeStatsAccount = realtimeStatsAccountParts.at(parts - 1);
 
-    StatsAccount &stats = realtimeStatsAccount[call->account_id];
+    StatsAccount &stats = statsAccount[call->account_id];
 
     stats.account_id = call->account_id;
 
@@ -199,92 +184,42 @@ void StatsAccountManager::add(CallInfo *callInfo) {
     if (callInfo->account != nullptr && call->connect_time >= callInfo->account->amount_date) {
         stats.sum += call->cost;
     }
+
+    size_t parts = realtimeStatsAccountParts.size();
+    map<int, StatsAccount> &realtimeStatsAccount = realtimeStatsAccountParts.at(parts - 1);
+    StatsAccount &stats2 = realtimeStatsAccount[call->account_id];
+    stats2.account_id = stats.account_id;
+    stats2.amount_month = stats.amount_month;
+    stats2.sum_month = stats.sum_month;
+    stats2.amount_day = stats.amount_day;
+    stats2.sum_day = stats.sum_day;
+    stats2.amount_date = stats.amount_date;
+    stats2.sum = stats.sum;
 }
 
 double StatsAccountManager::getSumMonth(int account_id, double vat_rate) {
-    double sum = 0;
-
-    auto it1 = storedStatsAccount.find(account_id);
-    if (it1 != storedStatsAccount.end()) {
-        sum += it1->second.sumMonth(vat_rate);
+    auto it1 = statsAccount.find(account_id);
+    if (it1 != statsAccount.end()) {
+        return it1->second.sumMonth(vat_rate);
+    } else {
+        return 0;
     }
-
-    for (map<int, StatsAccount> &realtimeStatsAccount : realtimeStatsAccountParts) {
-
-        auto it2 = realtimeStatsAccount.find(account_id);
-        if (it2 != realtimeStatsAccount.end()) {
-            sum += it2->second.sumMonth(vat_rate);
-        }
-
-    }
-
-    return sum;
 }
 
 double StatsAccountManager::getSumDay(int account_id, double vat_rate) {
-    double sum = 0;
-
-    auto it1 = storedStatsAccount.find(account_id);
-    if (it1 != storedStatsAccount.end()) {
-        sum += it1->second.sumDay(vat_rate);
+    auto it1 = statsAccount.find(account_id);
+    if (it1 != statsAccount.end()) {
+        return it1->second.sumDay(vat_rate);
+    } else {
+        return 0;
     }
-
-    for (map<int, StatsAccount> &realtimeStatsAccount : realtimeStatsAccountParts) {
-
-        auto it2 = realtimeStatsAccount.find(account_id);
-        if (it2 != realtimeStatsAccount.end()) {
-            sum += it2->second.sumDay(vat_rate);
-        }
-
-    }
-
-    return sum;
 }
 
 double StatsAccountManager::getSumBalance(int account_id, double vat_rate) {
-    double sum = 0;
-
-    auto it1 = storedStatsAccount.find(account_id);
-    if (it1 != storedStatsAccount.end()) {
-        sum += it1->second.sumBalance(vat_rate);
+    auto it1 = statsAccount.find(account_id);
+    if (it1 != statsAccount.end()) {
+        return it1->second.sumBalance(vat_rate);
+    } else {
+        return 0;
     }
-
-
-    for (map<int, StatsAccount> &realtimeStatsAccount : realtimeStatsAccountParts) {
-
-        auto it2 = realtimeStatsAccount.find(account_id);
-        if (it2 != realtimeStatsAccount.end()) {
-            sum += it2->second.sumBalance(vat_rate);
-        }
-
-    }
-
-    return sum;
-}
-
-
-void StatsAccountManager::move(map<int, StatsAccount> &fromStatsAccount, map<int, StatsAccount> &toStatsAccount) {
-    for (pair<const int, StatsAccount> &fromStats : fromStatsAccount) {
-        StatsAccount &toStats = toStatsAccount[fromStats.first];
-        if (toStats.account_id == 0) {
-            toStats.account_id = fromStats.second.account_id;
-            toStats.sum = fromStats.second.sum;
-            toStats.sum_day = fromStats.second.sum_day;
-            toStats.amount_day = fromStats.second.amount_day;
-            toStats.amount_date = fromStats.second.amount_date;
-        } else {
-            if (toStats.amount_day != fromStats.second.amount_day) {
-                toStats.sum_day = fromStats.second.sum_day;
-            } else {
-                toStats.sum_day += fromStats.second.sum_day;
-            }
-            if (toStats.amount_date != fromStats.second.amount_date) {
-                toStats.sum = fromStats.second.sum;
-            } else {
-                toStats.sum += fromStats.second.sum;
-            }
-        }
-    }
-
-    fromStatsAccount.clear();
 }

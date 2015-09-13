@@ -57,9 +57,8 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call) {
 
     double vat_rate = repository.getVatRate(client);
 
-    auto statsAccount = &repository.billingData->statsAccount;
-    double sumBalance = statsAccount->getSumBalance(call.account_id, vat_rate);
-    double sumDay = statsAccount->getSumDay(call.account_id, vat_rate);
+    double sumBalance = repository.billingData->statsAccountGetSumBalance(call.account_id, vat_rate);
+    double sumDay = repository.billingData->statsAccountGetSumDay(call.account_id, vat_rate);
 
     auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
     double sumBalance2 = statsAccount2->getSumBalance(call.account_id, vat_rate);

@@ -52,7 +52,6 @@ set(BILL_SOURCES
     src-bill/classes/ThreadPool.cpp
     src-bill/classes/Timer.cpp
     src-bill/classes/UdpControlClient.cpp
-    src-bill/classes/CdrLoader.cpp
     src-bill/classes/CdrManager.cpp
 #    src-bill/classes/UdpMessageProcessor.cpp
     src-bill/data/BaseData.cpp
@@ -250,6 +249,7 @@ set(BILL_SOURCES
     src-bill/web/PageData.cpp
     src-bill/web/PageDataBilling.cpp
     src-bill/web/PageFmins.cpp
+    src-bill/web/PagePackage.cpp
     src-bill/web/PageHome.cpp
     src-bill/web/PageLocks.cpp
     src-bill/web/PageLog.cpp

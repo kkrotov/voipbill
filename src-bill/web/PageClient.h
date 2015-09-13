@@ -38,9 +38,9 @@ public:
         double sum_month, sum_day, sum_balance;
         double sum_month2, sum_day2, sum_balance2;
         ClientLockObj clientLock = repository.billingData->clientLock.get()->get(client_id);
-        sum_month = repository.billingData->statsAccount.getSumMonth(client_id, vat_rate);
-        sum_day = repository.billingData->statsAccount.getSumDay(client_id, vat_rate);
-        sum_balance = repository.billingData->statsAccount.getSumBalance(client_id, vat_rate);
+        sum_month = repository.billingData->statsAccountGetSumMonth(client_id, vat_rate);
+        sum_day = repository.billingData->statsAccountGetSumDay(client_id, vat_rate);
+        sum_balance = repository.billingData->statsAccountGetSumBalance(client_id, vat_rate);
 
 
         auto statsAccount2 = repository.currentCalls->getStatsAccount().get();

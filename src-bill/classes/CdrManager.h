@@ -2,8 +2,10 @@
 
 #include "../models/Cdr.h"
 #include "Spinlock.h"
+#include "BDb.h"
 
 #define CDRS_PARTITION_SIZE 25000
+#define CDRS_MAX_QUEUE_SIZE 50000
 
 class CdrManager
 {
@@ -19,16 +21,14 @@ private:
 public:
     CdrManager();
 
-    void add(const Cdr &cdr);
-    bool get(Cdr &cdr);
-    void revert(const Cdr &cdr);
-
-private:
     bool ready();
+    bool loadPart(BDb * db_calls);
+    size_t getQueueSize();
+    long long int getLastId();
+    time_t getLastTime();
+    size_t getCounter();
+    Cdr * getFirstCdr();
+    void removeFirstCdr();
     void setLastId(long long int lastId);
     void setLastTime(time_t lastTime);
-
-    size_t getLastPartSize();
-
-    friend class DataBillingContainer;
 };

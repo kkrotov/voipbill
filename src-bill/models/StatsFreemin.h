@@ -9,5 +9,4 @@ struct StatsFreemin
     time_t month_dt;
     int used_seconds;
     double used_credit;
-    int paid_seconds;
 };

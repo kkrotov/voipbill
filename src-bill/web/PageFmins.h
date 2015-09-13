@@ -13,28 +13,27 @@ public:
 
         Repository repository;
 
+        lock_guard<Spinlock> guard(repository.billingData->lock);
         auto statsFreemin = &repository.billingData->statsFreemin;
-        lock_guard<Spinlock> guard(statsFreemin->lock);
 
-        html << "<table><tr><th>usage_id</th><th>month</th><th>used seconds</th><th>paid seconds</th></tr>";
-        for (auto itUsage : statsFreemin->storedFreeminsByServiceId) {
+
+        html << "<table><tr><th>usage_id</th><th>month</th><th>used seconds</th></tr>";
+        for (auto itUsage : statsFreemin->freeminsByServiceId) {
             int usage_id = itUsage.first;
             list<int> &statIds = itUsage.second;
 
             for (auto statId : statIds) {
-                auto itFreemin = statsFreemin->storedStatsFreemin.find(statId);
-                if (itFreemin == statsFreemin->storedStatsFreemin.end()) {
+                auto itStats = statsFreemin->statsFreemin.find(statId);
+                if (itStats == statsFreemin->statsFreemin.end()) {
                     continue;
                 }
-                StatsFreemin &stats = itFreemin->second;
+                StatsFreemin &stats = itStats->second;
 
-                html
-                    << "<tr>"
-                    << "<td>" << usage_id << "</td>"
-                    << "<td>" << string_time(stats.month_dt) << "</td>"
-                    << "<td>" << stats.used_seconds << "</td>"
-                    << "<td>" << stats.paid_seconds << "</td>"
-                    << "</tr>";
+                html << "<tr>";
+                html << "<td>" << usage_id << "</td>";
+                html << "<td>" << string_time(stats.month_dt) << "</td>";
+                html << "<td>" << stats.used_seconds << "</td>";
+                html << "</tr>";
             }
         }
         html << "</table>";
