@@ -41,7 +41,7 @@ public:
     RoutingReportData * find(char * prefix) {
         char tmpPrefix[20];
         strcpy(tmpPrefix, prefix);
-        int len = strlen(tmpPrefix);
+        size_t len = strlen(tmpPrefix);
         while (len > 0) {
             tmpPrefix[len] = 0;
             auto result = _find(tmpPrefix);

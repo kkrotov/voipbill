@@ -52,5 +52,7 @@ protected:
     void setupFreemin();
     void setupPackagePrepaid();
 
+    bool matchTariffPackageDestination(TariffPackage * tariff);
+
 };
 

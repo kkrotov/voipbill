@@ -156,6 +156,14 @@ bool Repository::prepare(time_t currentTime) {
         return false;
     }
 
+    if ((statDestinationPrefixlists = data->statDestinationPrefixlists.get()) == nullptr) {
+        return false;
+    }
+
+    if ((statPrefixlist = data->statPrefixlist.get()) == nullptr) {
+        return false;
+    }
+
     if ((activeCounter = data->activeCounter.get()) == nullptr) {
         return false;
     }

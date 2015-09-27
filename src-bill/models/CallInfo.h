@@ -14,6 +14,7 @@
 #include "TariffPackage.h"
 #include "Pricelist.h"
 #include "PricelistPrice.h"
+#include "Geo.h"
 
 struct CallInfo {
     Call * call;
@@ -29,6 +30,7 @@ struct CallInfo {
     TariffPackage * tariffPackagePrepaid;
     Pricelist * pricelist;
     PricelistPrice * price;
+    Geo * geo;
 
     CallInfo() {
         call = nullptr;
@@ -43,5 +45,6 @@ struct CallInfo {
         tariffPackagePrepaid = nullptr;
         pricelist = nullptr;
         price = nullptr;
+        geo = nullptr;
     }
 };

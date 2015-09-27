@@ -36,6 +36,8 @@
 #include "TariffPackageData.h"
 #include "TariffChangeLogData.h"
 #include "GlobalCountersData.h"
+#include "StatDestinationPrefixlistsData.h"
+#include "StatPrefixlistData.h"
 #include "ActiveCounterData.h"
 
 class DataContainer {
@@ -74,6 +76,8 @@ public:
     TariffPackageData tariffPackage;
     TariffChangeLogData tariffChangeLog;
     GlobalCountersData globalCounters;
+    StatDestinationPrefixlistsData statDestinationPrefixlists;
+    StatPrefixlistData statPrefixlist;
     ActiveCounterData activeCounter;
 
     static DataContainer * instance();

@@ -321,26 +321,26 @@ void BillingCall::processDestinations() {
 }
 
 int BillingCall::getDest(int geo_id) {
-    Geo * geo = repository->getGeo(geo_id);
-    if (geo == nullptr) {
+    callInfo->geo = repository->getGeo(geo_id);
+    if (callInfo->geo == nullptr) {
         if (trace != nullptr) {
             *trace << "ERROR|GEO NOT FOUND" << "\n";
         }
         return 2;
     }
 
-    if (!call->mob && repository->getInstanceSettings()->city_id > 0 && geo->city_id == repository->getInstanceSettings()->city_id) {
+    if (!call->mob && repository->getInstanceSettings()->city_id > 0 && callInfo->geo->city_id == repository->getInstanceSettings()->city_id) {
         return -1;
     }
 
     auto regionIds = repository->getInstanceSettings()->getRegionIds();
     for (auto it = regionIds.begin(); it != regionIds.end(); ++it) {
-        if (geo->region_id == *it) {
+        if (callInfo->geo->region_id == *it) {
             return 0;
         }
     }
 
-    if (repository->getInstanceSettings()->country_id > 0 && geo->country_id == repository->getInstanceSettings()->country_id) {
+    if (repository->getInstanceSettings()->country_id > 0 && callInfo->geo->country_id == repository->getInstanceSettings()->country_id) {
         return 1;
     }
 
@@ -619,8 +619,7 @@ void BillingCall::setupPackagePricelist() {
             continue;
         }
 
-        bool equalsDestination = tariff->destination_id != 0;
-        if (!equalsDestination) {
+        if (!matchTariffPackageDestination(tariff)) {
             continue;
         }
 
@@ -693,8 +692,7 @@ void BillingCall::setupPackagePrepaid() {
             continue;
         }
 
-        bool equalsDestination = tariff->destination_id != 0;
-        if (!equalsDestination) {
+        if (!matchTariffPackageDestination(tariff)) {
             continue;
         }
 
@@ -723,4 +721,58 @@ void BillingCall::setupPackagePrepaid() {
         callInfo->servicePackagePrepaid = servicePackage;
         callInfo->tariffPackagePrepaid = tariffPackage;
     }
+}
+
+bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
+    vector<int> prefixlistIds;
+    repository->getAllStatPrefixlistIdsByStatDestinationId(prefixlistIds, tariff->destination_id);
+
+    for (int prefixlistId : prefixlistIds) {
+        StatPrefixlist * prefixlist = repository->getStatPrefixlist(prefixlistId);
+        if (prefixlist != nullptr) {
+
+            if (prefixlist->type_id == STAT_PREFIXLIST_TYPE_MANUAL) {
+
+                for (long long int prefix : prefixlist->prefixes) {
+                    char tmpPrefix[20];
+                    sprintf(tmpPrefix, "%lld", call->dst_number);
+
+                    size_t len = strlen(tmpPrefix);
+                    while (len > 0) {
+                        tmpPrefix[len] = 0;
+                        if (prefix == atoll(tmpPrefix)) {
+                            return true;
+                        }
+                        len -= 1;
+                    }
+                }
+
+            } else if (prefixlist->type_id == STAT_PREFIXLIST_TYPE_ROSLINK) {
+
+                if (prefixlist->sub_type == STAT_PREFIXLIST_SUBTYPE_FIXED && call->mob) {
+                    continue;
+                }
+
+                if (prefixlist->sub_type == STAT_PREFIXLIST_SUBTYPE_MOBILE && !call->mob) {
+                    continue;
+                }
+
+                if (prefixlist->country_id > 0 && callInfo->geo != nullptr && callInfo->geo->country_id != prefixlist->country_id) {
+                    continue;
+                }
+
+                if (prefixlist->region_id > 0 && callInfo->geo != nullptr && callInfo->geo->region_id != prefixlist->region_id) {
+                    continue;
+                }
+
+                if (prefixlist->city_id > 0 && callInfo->geo != nullptr && callInfo->geo->city_id != prefixlist->city_id) {
+                    continue;
+                }
+
+                return true;
+            }
+
+        }
+    }
+    return false;
 }

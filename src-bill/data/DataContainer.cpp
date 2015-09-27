@@ -39,6 +39,8 @@ void DataContainer::loadAll(BDb * db) {
     tariff.load(db);
     tariffPackage.load(db);
     tariffChangeLog.load(db);
+    statDestinationPrefixlists.load(db);
+    statPrefixlist.load(db);
 
     activeCounter.load(serviceNumber.get(), serviceTrunk.get());
 }

@@ -78,7 +78,7 @@ void StatsFreeminManager::prepareSaveQuery(stringstream &query) {
         return;
     }
 
-    query << "INSERT INTO billing.stats_freemin(id, month_dt, service_number_id, used_seconds, used_credit) VALUES\n";
+    query << "INSERT INTO billing.stats_freemin(id, month_dt, service_number_id, used_seconds, used_credit, paid_seconds) VALUES\n";
     int i = 0;
     for (auto it : realtimeStatsFreeminParts[0]) {
         StatsFreemin &stats = it.second;
@@ -88,7 +88,8 @@ void StatsFreeminManager::prepareSaveQuery(stringstream &query) {
         query << "'" << string_time(stats.month_dt) << "',";
         query << "'" << stats.service_number_id << "',";
         query << "'" << stats.used_seconds << "',";
-        query << "'" << stats.used_credit << "')";
+        query << "'" << stats.used_credit << "',";
+        query << "'0')";
         i++;
     }
 }

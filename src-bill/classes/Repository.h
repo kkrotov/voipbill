@@ -46,6 +46,8 @@ private:
     shared_ptr<TariffList> tariff;
     shared_ptr<TariffPackageList> tariffPackage;
     shared_ptr<TariffChangeLogList> tariffChangeLog;
+    shared_ptr<StatDestinationPrefixlistsList> statDestinationPrefixlists;
+    shared_ptr<StatPrefixlistList> statPrefixlist;
 public:
     shared_ptr<ActiveCounter> activeCounter;
 
@@ -164,6 +166,15 @@ public:
 
     TrunkNumberPreprocessing * getTrunkNumberPreprocessing(int trunk_id, int order) {
         return trunkNumberPreprocessing->find(trunk_id, order, trace);
+    }
+
+
+    StatPrefixlist * getStatPrefixlist(int stat_prefixlist_id) {
+        return statPrefixlist->find(stat_prefixlist_id, trace);
+    }
+
+    void getAllStatPrefixlistIdsByStatDestinationId(vector<int> &resultPrefixlistIds, int destination_id) {
+        statDestinationPrefixlists->findAll(resultPrefixlistIds, destination_id, trace);
     }
 
     bool matchNumber(int number_id, long long int numberPrefix) {

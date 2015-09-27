@@ -86,6 +86,8 @@ set(BILL_SOURCES
     src-bill/data/ServicePackageData.cpp
     src-bill/data/ServiceTrunkData.cpp
     src-bill/data/ServiceTrunkSettingsData.cpp
+    src-bill/data/StatDestinationPrefixlistsData.cpp
+    src-bill/data/StatPrefixlistData.cpp
     src-bill/data/StatsPackageData.cpp
     src-bill/data/TariffChangeLogData.cpp
     src-bill/data/TariffData.cpp
@@ -130,6 +132,8 @@ set(BILL_SOURCES
     src-bill/lists/ServicePackageList.cpp
     src-bill/lists/ServiceTrunkList.cpp
     src-bill/lists/ServiceTrunkSettingsList.cpp
+    src-bill/lists/StatDestinationPrefixlistsList.cpp
+    src-bill/lists/StatPrefixlistList.cpp
     src-bill/lists/StatsPackageCounter.cpp
     src-bill/lists/TariffChangeLogList.cpp
     src-bill/lists/TariffList.cpp
@@ -171,6 +175,8 @@ set(BILL_SOURCES
     src-bill/models/ServicePackage.cpp
     src-bill/models/ServiceTrunk.cpp
     src-bill/models/ServiceTrunkSettings.cpp
+    src-bill/models/StatDestinationPrefixlists.cpp
+    src-bill/models/StatPrefixlist.cpp
     src-bill/models/StatsFreemin.cpp
     src-bill/models/StatsAccount.cpp
     src-bill/models/StatsPackage.cpp
@@ -208,6 +214,8 @@ set(BILL_SOURCES
     src-bill/sync/PullServicePackage.cpp
     src-bill/sync/PullServiceTrunk.cpp
     src-bill/sync/PullServiceTrunkSettings.cpp
+    src-bill/sync/PullStatDestinationPrefixlists.cpp
+    src-bill/sync/PullStatPrefixlist.cpp
     src-bill/sync/PullTariff.cpp
     src-bill/sync/PullTariffLog.cpp
     src-bill/sync/PullTariffPackage.cpp
