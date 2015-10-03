@@ -17,11 +17,14 @@ public:
     vector<map<int, StatsFreemin>> realtimeStatsFreeminParts;
     map<int, StatsFreemin> statsFreemin;
     map<int, list<int>> freeminsByServiceId;
+    set<int> forSync;
 
     StatsFreeminManager();
     bool ready() { return loaded; };
     void load(BDb * db);
     int getSeconds(Call * call);
+    void getChanges(map<int, StatsFreemin> &changes);
+    void addChanges(map<int, StatsFreemin> &changes);
 
     void prepareSaveQuery(stringstream &query);
     void executeSaveQuery(BDb * dbCalls, stringstream &query);
@@ -36,6 +39,6 @@ private:
     friend class Billing;
 
     int getStatsFreeminId(Call * call);
-    void createStatsFreemin(Call * call);
-    bool updateStatsFreemin(Call * call, int statFreeminId);
+    StatsFreemin * createStatsFreemin(Call * call);
+    StatsFreemin * updateStatsFreemin(Call * call, int statFreeminId);
 };

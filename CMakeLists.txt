@@ -57,7 +57,6 @@ set(BILL_SOURCES
     src-bill/data/BaseData.cpp
     src-bill/data/ActiveCounterData.cpp
     src-bill/data/AirpData.cpp
-    src-bill/data/ClientCounterData.cpp
     src-bill/data/ClientData.cpp
     src-bill/data/ClientLockData.cpp
     src-bill/data/CurrentCdrData.cpp
@@ -103,7 +102,6 @@ set(BILL_SOURCES
     src-bill/data/DataCurrentCallsContainer.cpp
     src-bill/lists/ActiveCounter.cpp
     src-bill/lists/AirpList.cpp
-    src-bill/lists/ClientCounter.cpp
     src-bill/lists/ClientList.cpp
     src-bill/lists/ClientLockCounter.cpp
     src-bill/lists/CurrentCdrList.cpp
@@ -149,7 +147,6 @@ set(BILL_SOURCES
     src-bill/models/CallInfo.cpp
     src-bill/models/Cdr.cpp
     src-bill/models/Client.cpp
-    src-bill/models/ClientCounterObj.cpp
     src-bill/models/ClientLockObj.cpp
     src-bill/models/Geo.cpp
     src-bill/models/GeoPrefix.cpp

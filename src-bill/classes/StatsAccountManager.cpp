@@ -6,51 +6,8 @@ StatsAccountManager::StatsAccountManager() {
 
 void StatsAccountManager::load(BDb * db) {
 
-    /*
-    time_t d_date = get_tday(time(nullptr));
-    time_t m_date = get_tmonth(time(nullptr));
-
-    string sDay = string_date(d_date);
-
-    string sPrevMonth = string_date(m_date - 32 * 86400);
-
     BDbResult res = db->query(
-            "   select " \
-            "       c.id, " \
-            "       COALESCE(d.d_sum, 0), " \
-            "       COALESCE(a.a_sum, 0), " \
-            "       c.amount_date " \
-            "   from billing.clients c  " \
-            "   left join " \
-            "       (   select account_id, sum(cost) d_sum from calls_raw.calls_raw c " \
-            "           where " \
-            "           c.connect_time >= '" + sDay + "'::date and " \
-            "           c.connect_time < '" + sDay + "'::date + '1 day'::interval " \
-            "           group by account_id " \
-            "       ) as d " \
-            "   on c.id = d.account_id " \
-            "   left join " \
-            "       (   select account_id, sum(cost) a_sum " \
-            "           from calls_raw.calls_raw c " \
-            "           left join billing.clients cl " \
-            "           on c.account_id=cl.id " \
-            "           where " \
-            "               c.connect_time >= '" + sPrevMonth + "' " \
-            "               and (c.connect_time >= cl.amount_date or cl.amount_date is null) " \
-            "           group by account_id " \
-            "       ) as a " \
-            "   on c.id = a.account_id " \
-            "   where " \
-            "       ( " \
-            "           COALESCE(d.d_sum, 0) != 0 OR " \
-            "           COALESCE(a.a_sum, 0) != 0 "  \
-            "       ) ");
-
-    db->exec("UPDATE billing.clients set sync=0 where sync > 0");
-    */
-
-    BDbResult res = db->query(
-            "   select account_id, extract(epoch from amount_month), sum_month, extract(epoch from amount_day), sum_day, extract(epoch from amount_date), sum " \
+            "   select account_id, extract(epoch from amount_month), sum_month, extract(epoch from amount_day), sum_day, extract(epoch from amount_date), sum, min_call_id, max_call_id " \
             "   from billing.stats_account"
     );
 
@@ -63,6 +20,8 @@ void StatsAccountManager::load(BDb * db) {
         stats.sum_day = res.get_d(4);
         stats.amount_date = res.get_ll(5);
         stats.sum = res.get_d(6);
+        stats.min_call_id = res.get_ll(7);
+        stats.max_call_id = res.get_ll(8);
     }
 
     loaded = true;
@@ -117,7 +76,7 @@ void StatsAccountManager::prepareSaveQuery(stringstream &query) {
         return;
     }
 
-    query << "INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum) VALUES\n";
+    query << "INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum, min_call_id, max_call_id) VALUES\n";
     int i = 0;
     for (auto it : realtimeStatsAccountParts[0]) {
         StatsAccount &stats = it.second;
@@ -129,7 +88,9 @@ void StatsAccountManager::prepareSaveQuery(stringstream &query) {
         query << "'" << string_time(stats.amount_day) << "',";
         query << "'" << stats.sum_day << "',";
         query << "'" << string_time(stats.amount_date) << "',";
-        query << "'" << stats.sum << "')";
+        query << "'" << stats.sum << "',";
+        query << "'" << stats.min_call_id << "',";
+        query << "'" << stats.max_call_id << "')";
         i++;
     }
 
@@ -163,7 +124,12 @@ void StatsAccountManager::add(CallInfo *callInfo) {
 
     StatsAccount &stats = statsAccount[call->account_id];
 
-    stats.account_id = call->account_id;
+    if (stats.account_id == 0) {
+        stats.account_id = call->account_id;
+        stats.min_call_id = call->id;
+    }
+
+    stats.max_call_id = call->id;
 
     if (abs(call->dt.month - stats.amount_month) < 43200) {
         stats.amount_month = call->dt.month;
@@ -188,13 +154,9 @@ void StatsAccountManager::add(CallInfo *callInfo) {
     size_t parts = realtimeStatsAccountParts.size();
     map<int, StatsAccount> &realtimeStatsAccount = realtimeStatsAccountParts.at(parts - 1);
     StatsAccount &stats2 = realtimeStatsAccount[call->account_id];
-    stats2.account_id = stats.account_id;
-    stats2.amount_month = stats.amount_month;
-    stats2.sum_month = stats.sum_month;
-    stats2.amount_day = stats.amount_day;
-    stats2.sum_day = stats.sum_day;
-    stats2.amount_date = stats.amount_date;
-    stats2.sum = stats.sum;
+    memcpy(&stats2, &stats, sizeof(StatsAccount));
+
+    forSync.insert(call->account_id);
 }
 
 double StatsAccountManager::getSumMonth(int account_id, double vat_rate) {
@@ -221,5 +183,18 @@ double StatsAccountManager::getSumBalance(int account_id, double vat_rate) {
         return it1->second.sumBalance(vat_rate);
     } else {
         return 0;
+    }
+}
+
+void StatsAccountManager::getChanges(map<int, StatsAccount> &changes) {
+    for (int id : forSync) {
+        changes[id] = statsAccount[id];
+    }
+    forSync.clear();
+}
+
+void StatsAccountManager::addChanges(map<int, StatsAccount> &changes) {
+    for (auto it : changes) {
+        forSync.insert(it.first);
     }
 }

@@ -49,6 +49,8 @@ public:
                 }
             }
 
+            double sum_month_raw = cc.sumMonth(vat_rate, false);
+            double sum_day_raw = cc.sumDay(vat_rate, false);
             double sum_month = cc.sumMonth(vat_rate);
             double sum_day = cc.sumDay(vat_rate);
             double sum_balance = cc.sumBalance(vat_rate);
@@ -70,9 +72,9 @@ public:
             html << "<tr>\n";
             html << "<td nowrap><a href='/client?id=" << client_id << "'>" << client_id << "</a></td>\n";
             html << "<td nowrap>" << string_date(cc.amount_month) << "</td>\n";
-            html << "<td nowrap>" << sum_month << "</td>\n";
+            html << "<td nowrap>" << sum_month_raw << "</td>\n";
             html << "<td nowrap>" << string_date(cc.amount_day) << "</td>\n";
-            html << "<td nowrap>" << sum_day << "</td>\n";
+            html << "<td nowrap>" << sum_day_raw << "</td>\n";
             html << "<td nowrap>" << string_time(cc.amount_date) << "</td>\n";
             html << "<td nowrap>" << sum_balance << "</td>\n";
 

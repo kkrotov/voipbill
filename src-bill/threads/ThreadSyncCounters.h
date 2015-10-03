@@ -8,14 +8,20 @@ class ThreadSyncCounters : public Thread {
 
     Repository repository;
 
-    int last_sync_count;
-    int total_sync_count;
+    size_t last_sync_account_count;
+    size_t last_sync_freemin_count;
+    size_t last_sync_package_count;
+    size_t total_sync_account_count;
+    size_t total_sync_freemin_count;
+    size_t total_sync_package_count;
 
     bool ready();
 
     void run();
 
-    void save_client_counters();
+    void do_sync_account();
+    void do_sync_freemin();
+    void do_sync_package();
 
     void htmlfull(stringstream &html);
 

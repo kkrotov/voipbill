@@ -255,3 +255,33 @@ int DataBillingContainer::statsPackageGetSeconds(int service_package_id, time_t 
     lock_guard<Spinlock> guard(lock);
     return statsPackage.getSeconds(service_package_id, connect_time);
 }
+
+void DataBillingContainer::statsAccountGetChanges(map<int, StatsAccount> &changes) {
+    lock_guard<Spinlock> guard(lock);
+    statsAccount.getChanges(changes);
+}
+
+void DataBillingContainer::statsAccountAddChanges(map<int, StatsAccount> &changes) {
+    lock_guard<Spinlock> guard(lock);
+    statsAccount.addChanges(changes);
+}
+
+void DataBillingContainer::statsFreeminGetChanges(map<int, StatsFreemin> &changes) {
+    lock_guard<Spinlock> guard(lock);
+    statsFreemin.getChanges(changes);
+}
+
+void DataBillingContainer::statsFreeminAddChanges(map<int, StatsFreemin> &changes) {
+    lock_guard<Spinlock> guard(lock);
+    statsFreemin.addChanges(changes);
+}
+
+void DataBillingContainer::statsPackageGetChanges(map<int, StatsPackage> &changes) {
+    lock_guard<Spinlock> guard(lock);
+    statsPackage.getChanges(changes);
+}
+
+void DataBillingContainer::statsPackageAddChanges(map<int, StatsPackage> &changes) {
+    lock_guard<Spinlock> guard(lock);
+    statsPackage.addChanges(changes);
+}

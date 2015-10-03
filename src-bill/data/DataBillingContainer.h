@@ -72,6 +72,12 @@ public:
     int statsAccountGetSumBalance(int account_id, double vat_rate);
     int statsFreeminGetSeconds(Call * call);
     int statsPackageGetSeconds(int service_package_id, time_t connect_time);
+    void statsAccountGetChanges(map<int, StatsAccount> &changes);
+    void statsAccountAddChanges(map<int, StatsAccount> &changes);
+    void statsFreeminGetChanges(map<int, StatsFreemin> &changes);
+    void statsFreeminAddChanges(map<int, StatsFreemin> &changes);
+    void statsPackageGetChanges(map<int, StatsPackage> &changes);
+    void statsPackageAddChanges(map<int, StatsPackage> &changes);
 
 private:
     void loadLastCallIdAndCdrIdAndTime(BDb * db_calls);

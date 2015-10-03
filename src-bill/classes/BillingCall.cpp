@@ -642,6 +642,7 @@ void BillingCall::setupPackagePricelist() {
         callInfo->pricelist = pricelist;
         callInfo->price = price;
         callInfo->servicePackagePricelist = package;
+        call->service_package_id = package->id;
     }
 }
 

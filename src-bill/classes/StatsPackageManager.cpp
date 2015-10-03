@@ -6,7 +6,7 @@ StatsPackageManager::StatsPackageManager() {
 
 void StatsPackageManager::load(BDb * db) {
     BDbResult resId = db->query("   select max(id) from billing.stats_package p ");
-    lastPackageStatId = resId.next() ? resId.get_i(0) : 1;
+    lastPackageStatId = resId.next() ? resId.get_i(0) : 0;
 
     time_t filterFrom = lastSaveCallTime;
     if (filterFrom > 0) {
@@ -38,7 +38,7 @@ void StatsPackageManager::load(BDb * db) {
 }
 
 int StatsPackageManager::getSeconds(int service_package_id, time_t connect_time) {
-    auto itStatsByPackageId= statsByPackageId.find(service_package_id);
+    auto itStatsByPackageId = statsByPackageId.find(service_package_id);
     if (itStatsByPackageId == statsByPackageId.end()) {
         return 0;
     }
@@ -59,16 +59,28 @@ int StatsPackageManager::getSeconds(int service_package_id, time_t connect_time)
 
 void StatsPackageManager::add(CallInfo * callInfo) {
 
-    if (callInfo->call->number_service_id == 0 || callInfo->call->service_package_id <= 1) {
+    if (
+            callInfo->call->number_service_id == 0 ||
+            callInfo->call->service_package_id <= 1 ||
+            callInfo->servicePackagePrepaid == nullptr
+    ) {
         return;
     }
 
     int statPackageId = getStatsPackageId(callInfo->call);
+    StatsPackage * stats;
     if (statPackageId > 0) {
-        updateStatsPackage(callInfo->call, statPackageId);
+        stats = updateStatsPackage(callInfo->call, statPackageId);
     } else {
-        createStatsPackage(callInfo);
+        stats = createStatsPackage(callInfo);
     }
+
+    size_t parts = realtimeStatsPackageParts.size();
+    map<int, StatsPackage> &realtimeStatsPackage = realtimeStatsPackageParts.at(parts - 1);
+    StatsPackage &stats2 = realtimeStatsPackage[stats->id];
+    memcpy(&stats2, stats, sizeof(StatsPackage));
+
+    forSync.insert(stats->id);
 }
 
 size_t StatsPackageManager::size() {
@@ -138,7 +150,7 @@ int StatsPackageManager::getStatsPackageId(Call * call) {
     return 0;
 }
 
-void StatsPackageManager::createStatsPackage(CallInfo *callInfo) {
+StatsPackage * StatsPackageManager::createStatsPackage(CallInfo *callInfo) {
     short timezone_offset = 0;
 
     time_t activation_dt = get_tmonth(callInfo->call->connect_time, timezone_offset);
@@ -167,13 +179,10 @@ void StatsPackageManager::createStatsPackage(CallInfo *callInfo) {
 
     statsByPackageId[stats.package_id].push_front(stats.id);
 
-    size_t parts = realtimeStatsPackageParts.size();
-    map<int, StatsPackage> &realtimeStatsPackage = realtimeStatsPackageParts.at(parts - 1);
-    StatsPackage &stats2 = realtimeStatsPackage[stats.id];
-    memcpy(&stats2, &stats, sizeof(StatsPackage));
+    return &stats;
 }
 
-void StatsPackageManager::updateStatsPackage(Call *call, int statPackageId) {
+StatsPackage * StatsPackageManager::updateStatsPackage(Call *call, int statPackageId) {
 
     StatsPackage &stats = statsPackage[statPackageId];
 
@@ -181,8 +190,18 @@ void StatsPackageManager::updateStatsPackage(Call *call, int statPackageId) {
     stats.used_credit += call->package_credit;
     stats.max_call_id = call->id;
 
-    size_t parts = realtimeStatsPackageParts.size();
-    map<int, StatsPackage> &realtimeStatsPackage = realtimeStatsPackageParts.at(parts - 1);
-    StatsPackage &stats2 = realtimeStatsPackage[stats.id];
-    memcpy(&stats2, &stats, sizeof(StatsPackage));
+    return &stats;
+}
+
+void StatsPackageManager::getChanges(map<int, StatsPackage> &changes) {
+    for (int id : forSync) {
+        changes[id] = statsPackage[id];
+    }
+    forSync.clear();
+}
+
+void StatsPackageManager::addChanges(map<int, StatsPackage> &changes) {
+    for (auto it : changes) {
+        forSync.insert(it.first);
+    }
 }

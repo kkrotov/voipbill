@@ -8,7 +8,7 @@ StatsFreeminManager::StatsFreeminManager() {
 void StatsFreeminManager::load(BDb * db) {
 
     BDbResult resId = db->query("   select max(id) from billing.stats_freemin ");
-    lastStatsFreeminId = resId.next() ? resId.get_i(0) : 1;
+    lastStatsFreeminId = resId.next() ? resId.get_i(0) : 0;
 
     time_t filterFrom = lastStoredCallTime;
     if (filterFrom > 0) {
@@ -16,7 +16,7 @@ void StatsFreeminManager::load(BDb * db) {
     }
 
     BDbResult res = db->query(
-            "   select id, service_number_id, extract(epoch from month_dt), used_seconds, used_credit " \
+            "   select id, service_number_id, extract(epoch from month_dt), used_seconds, used_credit, min_call_id, max_call_id " \
             "   from billing.stats_freemin " \
             "   where month_dt >= '" + string_time(filterFrom) + "'" \
             "   order by month_dt asc"
@@ -28,6 +28,8 @@ void StatsFreeminManager::load(BDb * db) {
         stats.month_dt = res.get_ll(2);
         stats.used_seconds = res.get_i(3);
         stats.used_credit = res.get_d(4);
+        stats.min_call_id = res.get_ll(5);
+        stats.max_call_id = res.get_ll(6);
 
         freeminsByServiceId[stats.service_number_id].push_front(stats.id);
     }
@@ -61,11 +63,20 @@ void StatsFreeminManager::add(CallInfo * callInfo) {
     }
 
     int statFreeminId = getStatsFreeminId(callInfo->call);
+    StatsFreemin * stats;
+
     if (statFreeminId > 0) {
-        updateStatsFreemin(callInfo->call, statFreeminId);
+        stats = updateStatsFreemin(callInfo->call, statFreeminId);
     } else {
-        createStatsFreemin(callInfo->call);
+        stats = createStatsFreemin(callInfo->call);
     }
+
+    size_t parts = realtimeStatsFreeminParts.size();
+    map<int, StatsFreemin> &realtimeStatsFreemin = realtimeStatsFreeminParts.at(parts - 1);
+    StatsFreemin &stats2 = realtimeStatsFreemin[stats->id];
+    memcpy(&stats2, stats, sizeof(StatsFreemin));
+
+    forSync.insert(stats->id);
 }
 
 size_t StatsFreeminManager::size() {
@@ -78,7 +89,7 @@ void StatsFreeminManager::prepareSaveQuery(stringstream &query) {
         return;
     }
 
-    query << "INSERT INTO billing.stats_freemin(id, month_dt, service_number_id, used_seconds, used_credit, paid_seconds) VALUES\n";
+    query << "INSERT INTO billing.stats_freemin(id, month_dt, service_number_id, used_seconds, used_credit, min_call_id, max_call_id) VALUES\n";
     int i = 0;
     for (auto it : realtimeStatsFreeminParts[0]) {
         StatsFreemin &stats = it.second;
@@ -89,7 +100,8 @@ void StatsFreeminManager::prepareSaveQuery(stringstream &query) {
         query << "'" << stats.service_number_id << "',";
         query << "'" << stats.used_seconds << "',";
         query << "'" << stats.used_credit << "',";
-        query << "'0')";
+        query << "'" << stats.min_call_id << "',";
+        query << "'" << stats.max_call_id << "')";
         i++;
     }
 }
@@ -131,7 +143,7 @@ int StatsFreeminManager::getStatsFreeminId(Call * call) {
     return 0;
 }
 
-void StatsFreeminManager::createStatsFreemin(Call * call) {
+StatsFreemin * StatsFreeminManager::createStatsFreemin(Call * call) {
 
     lastStatsFreeminId += 1;
 
@@ -141,24 +153,35 @@ void StatsFreeminManager::createStatsFreemin(Call * call) {
     stats.month_dt = call->dt.month;
     stats.used_seconds = call->package_time;
     stats.used_credit = call->package_credit;
+    stats.min_call_id = call->id;
+    stats.max_call_id = call->id;
+
 
     freeminsByServiceId[stats.service_number_id].push_front(stats.id);
 
-    size_t parts = realtimeStatsFreeminParts.size();
-    map<int, StatsFreemin> &realtimeStatsFreemin = realtimeStatsFreeminParts.at(parts - 1);
-    StatsFreemin &stats2 = realtimeStatsFreemin[stats.id];
-    memcpy(&stats2, &stats, sizeof(StatsFreemin));
+    return &stats;
 }
 
 
-bool StatsFreeminManager::updateStatsFreemin(Call * call, int statFreeminId) {
+StatsFreemin * StatsFreeminManager::updateStatsFreemin(Call * call, int statFreeminId) {
 
     StatsFreemin &stats = statsFreemin[statFreeminId];
     stats.used_seconds += call->package_time;
     stats.used_credit += call->package_credit;
+    stats.max_call_id = call->id;
 
-    size_t parts = realtimeStatsFreeminParts.size();
-    map<int, StatsFreemin> &realtimeStatsFreemin = realtimeStatsFreeminParts.at(parts - 1);
-    StatsFreemin &stats2 = realtimeStatsFreemin[stats.id];
-    memcpy(&stats2, &stats, sizeof(StatsFreemin));
+    return &stats;
+}
+
+void StatsFreeminManager::getChanges(map<int, StatsFreemin> &changes) {
+    for (int id : forSync) {
+        changes[id] = statsFreemin[id];
+    }
+    forSync.clear();
+}
+
+void StatsFreeminManager::addChanges(map<int, StatsFreemin> &changes) {
+    for (auto it : changes) {
+        forSync.insert(it.first);
+    }
 }

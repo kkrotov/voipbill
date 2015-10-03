@@ -9,12 +9,9 @@
 class StatsAccountManager
 {
 private:
-    long long int lastStoredCallTime;
-
-    map<int, StatsAccount> storedStatsAccount;
     vector<map<int, StatsAccount>> realtimeStatsAccountParts;
-
     map<int, StatsAccount> statsAccount;
+    set<int> forSync;
 
     bool loaded = false;
 public:
@@ -34,11 +31,14 @@ public:
     double getSumBalance(int account_id, double vat_rate);
 
     void getClients(vector<StatsAccount> &destClients) {
-        destClients.reserve(storedStatsAccount.size());
-        for (auto pair : storedStatsAccount) {
+        destClients.reserve(statsAccount.size());
+        for (auto pair : statsAccount) {
             destClients.push_back(pair.second);
         }
     }
+
+    void getChanges(map<int, StatsAccount> &changes);
+    void addChanges(map<int, StatsAccount> &changes);
 
 private:
     void add(CallInfo * callInfo);

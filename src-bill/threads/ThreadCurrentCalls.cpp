@@ -4,7 +4,7 @@
 
 void ThreadCurrentCalls::run() {
     repository.currentCalls->currentCdr.load(&db_calls);
-
+    return;
     Billing billing;
     billing.calcCurrentCalls();
 

@@ -202,7 +202,6 @@ void CallsManager::createNewPartition() {
 }
 
 void CallsManager::removePartitionAfterSave() {
-    realtimeCallsParts.erase(realtimeCallsParts.begin());
     vector<Call> &realtimeCalls = realtimeCallsParts.at(0);
     size_t realtimeCallsSize = realtimeCalls.size();
     if (realtimeCallsSize > 0) {
@@ -210,6 +209,7 @@ void CallsManager::removePartitionAfterSave() {
         storedLastId = realtimeCalls.at(realtimeCallsSize - 1).id;
         storedLastTime = realtimeCalls.at(realtimeCallsSize - 1).connect_time;
     }
+    realtimeCallsParts.erase(realtimeCallsParts.begin());
 }
 
 long long int CallsManager::getLastId() {

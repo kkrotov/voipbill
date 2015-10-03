@@ -9,4 +9,6 @@ struct StatsFreemin
     time_t month_dt;
     int used_seconds;
     double used_credit;
+    long long int min_call_id;
+    long long int max_call_id;
 };

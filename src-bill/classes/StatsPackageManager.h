@@ -19,12 +19,16 @@ public:
 
     map<int, StatsPackage> statsPackage;
     map<int, list<int>> statsByPackageId;
+    set<int> forSync;
 
     StatsPackageManager();
     bool ready() { return loaded; };
     void load(BDb * db);
 
     int getSeconds(int service_package_id, time_t connect_time);
+    void getChanges(map<int, StatsPackage> &changes);
+    void addChanges(map<int, StatsPackage> &changes);
+
 
     void prepareSaveQuery(stringstream &query);
     void executeSaveQuery(BDb * dbCalls, stringstream &query);
@@ -39,6 +43,6 @@ private:
     friend class Billing;
 
     int getStatsPackageId(Call * call);
-    void createStatsPackage(CallInfo *callInfo);
-    void updateStatsPackage(Call *call, int statPackageId);
+    StatsPackage * createStatsPackage(CallInfo *callInfo);
+    StatsPackage * updateStatsPackage(Call *call, int statPackageId);
 };
