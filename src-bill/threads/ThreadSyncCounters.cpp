@@ -36,10 +36,11 @@ void ThreadSyncCounters::run() {
 void ThreadSyncCounters::do_sync_account() {
 
     map<int, StatsAccount> changes;
-    repository.billingData->statsAccountGetChanges(changes);
+    bool needClear;
+    repository.billingData->statsAccountGetChanges(changes, needClear);
 
     stringstream query;
-    query << "INSERT INTO billing.stats_account(server_id, account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum, min_call_id, max_call_id) VALUES\n";
+    query << "INSERT INTO billing.stats_account(server_id, account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum) VALUES\n";
     int i = 0;
 
     for (auto it: changes) {
@@ -53,18 +54,26 @@ void ThreadSyncCounters::do_sync_account() {
         query << "'" << string_time(stats.amount_day) << "',";
         query << "'" << stats.sum_day << "',";
         query << "'" << string_time(stats.amount_date) << "',";
-        query << "'" << stats.sum << "',";
-        query << "'" << stats.min_call_id << "',";
-        query << "'" << stats.max_call_id << "')";
+        query << "'" << stats.sum << "')";
         i++;
     }
 
     if (changes.size() > 0) {
         try {
+            if (needClear) {
+                db_main.exec("BEGIN");
+                db_main.exec("DELETE FROM billing.stats_account WHERE server_id = " + app().conf.str_instance_id);
+            }
             db_main.exec(query.str());
+            if (needClear) {
+                db_main.exec("COMMIT");
+            }
         } catch (Exception &e) {
-            e.addTrace("ThreadSyncCounters::do_sync_account:");
             repository.billingData->statsAccountAddChanges(changes);
+            if (needClear) {
+                db_main.exec("ROLLBACK");
+            }
+            e.addTrace("ThreadSyncCounters::do_sync_account:");
             throw e;
         }
     }

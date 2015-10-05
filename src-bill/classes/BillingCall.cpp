@@ -770,6 +770,32 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
                     continue;
                 }
 
+                if (prefixlist->exclude_operators.size() > 0) {
+                    bool exclude = false;
+                    for (int excludeOperatorId : prefixlist->exclude_operators) {
+                        if (call->geo_operator_id == excludeOperatorId) {
+                            exclude = true;
+                            break;
+                        }
+                    }
+                    if (exclude) {
+                        continue;
+                    }
+                }
+
+                if (prefixlist->operators.size() > 0) {
+                    bool exclude = true;
+                    for (int includeOperatorId : prefixlist->operators) {
+                        if (call->geo_operator_id == includeOperatorId ) {
+                            exclude = false;
+                            break;
+                        }
+                    }
+                    if (exclude) {
+                        continue;
+                    }
+                }
+
                 return true;
             }
 

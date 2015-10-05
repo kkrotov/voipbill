@@ -24,7 +24,7 @@ public:
     StatsPackageManager();
     bool ready() { return loaded; };
     void load(BDb * db);
-
+    void recalc(BDb * db, long long int storedLastId);
     int getSeconds(int service_package_id, time_t connect_time);
     void getChanges(map<int, StatsPackage> &changes);
     void addChanges(map<int, StatsPackage> &changes);

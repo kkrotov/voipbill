@@ -37,6 +37,10 @@ void StatsFreeminManager::load(BDb * db) {
     loaded = true;
 }
 
+void StatsFreeminManager::recalc(BDb * db, long long int storedLastId) {
+    db->exec("DELETE FROM billing.stats_freemin WHERE max_call_id > " + lexical_cast<string>(storedLastId));
+}
+
 int StatsFreeminManager::getSeconds(Call * call) {
     auto itFreeminsByServiceId = freeminsByServiceId.find(call->number_service_id);
     if (itFreeminsByServiceId == freeminsByServiceId.end()) {

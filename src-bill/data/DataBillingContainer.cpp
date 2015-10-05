@@ -5,15 +5,25 @@ DataBillingContainer * DataBillingContainer::instance() {
     return &inst;
 }
 
-void DataBillingContainer::loadAll(BDb * db) {
+void DataBillingContainer::loadAll(BDb * db, bool recalc) {
 
     loadLastCallIdAndCdrIdAndTime(db);
+
+    if (recalc) {
+        statsAccount.recalc(db);
+        statsFreemin.recalc(db, getCallsStoredLastId());
+        statsPackage.recalc(db, getCallsStoredLastId());
+    }
 
     statsAccount.load(db);
     statsFreemin.load(db);
     statsPackage.load(db);
 
     clientLock.load(db);
+}
+
+void DataBillingContainer::reloadAccountSum(BDb * db) {
+    statsAccount.reloadSum(db, lock);
 }
 
 bool DataBillingContainer::ready() {
@@ -256,9 +266,9 @@ int DataBillingContainer::statsPackageGetSeconds(int service_package_id, time_t 
     return statsPackage.getSeconds(service_package_id, connect_time);
 }
 
-void DataBillingContainer::statsAccountGetChanges(map<int, StatsAccount> &changes) {
+void DataBillingContainer::statsAccountGetChanges(map<int, StatsAccount> &changes, bool &needClear) {
     lock_guard<Spinlock> guard(lock);
-    statsAccount.getChanges(changes);
+    statsAccount.getChanges(changes, needClear);
 }
 
 void DataBillingContainer::statsAccountAddChanges(map<int, StatsAccount> &changes) {

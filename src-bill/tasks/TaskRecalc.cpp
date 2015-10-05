@@ -49,7 +49,8 @@ void TaskRecalc::run() {
 
 
     setStatus("6. recalc temp counters");
-    newBillingData.loadAll(&db_calls);
+    newBillingData.loadAll(&db_calls, true);
+    long long int oldStoredLastId = newBillingData.getCallsStoredLastId();
 
 
 
@@ -108,8 +109,10 @@ void TaskRecalc::run() {
 
 
     setStatus("13. delete calls_raw from main");
-    db_main->exec("delete from calls_raw.calls_raw where server_id = " + app().conf.str_instance_id + " and id>=" + lexical_cast<string>(recalc_from_call_id));
-
+    db_main->exec("DELETE FROM calls_raw.calls_raw WHERE server_id = " + app().conf.str_instance_id + " and id >= " + lexical_cast<string>(recalc_from_call_id));
+    db_main->exec("DELETE FROM billing.stats_account WHERE server_id = " + app().conf.str_instance_id);
+    db_main->exec("DELETE FROM billing.stats_freemin WHERE server_id = " + app().conf.str_instance_id + " and max_call_id > " + lexical_cast<string>(oldStoredLastId));
+    db_main->exec("DELETE FROM billing.stats_package WHERE server_id = " + app().conf.str_instance_id + " and max_call_id > " + lexical_cast<string>(oldStoredLastId));
 }
 
 void TaskRecalc::html(stringstream &html) {

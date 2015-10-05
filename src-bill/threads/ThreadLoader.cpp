@@ -23,23 +23,20 @@ bool ThreadLoader::prepare() {
 
 void ThreadLoader::run() {
 
-    string event;
-
     try {
-        BDbResult res = db_calls.query("SELECT event from event.queue");
+        BDbResult res = db_calls.query("SELECT event, version from event.queue");
         while (res.next()) {
 
-            event = res.get_s(0);
-
-            db_calls.exec("DELETE from event.queue WHERE event='" + event + "'");
-
+            string event = res.get_s(0);
+            long long int version = res.get_ll(1);
 
             if (event == "clients") {
 
                 repository.data->client.load(&db_calls);
 
-//                shared_ptr<ClientCounter> cc = repository.billingData->clientCounter.get();
-//                if (cc != 0) cc->reload(&db_calls);
+            } else if (event == "clients_recalc") {
+
+                repository.billingData->reloadAccountSum(&db_calls);
 
             } else if (event == "airp") {
 
@@ -179,19 +176,10 @@ void ThreadLoader::run() {
 
             }
 
-
+            db_calls.exec("DELETE from event.queue WHERE event='" + event + "' and version = '" + lexical_cast<string>(version) + "'");
 
         }
     } catch (Exception &e) {
-
-        if (event.length() > 0) {
-            try {
-                db_calls.exec("INSERT INTO event.queue(event)VALUES('" + event + "')");
-            } catch (...) {
-            }
-            event.clear();
-        }
-
         e.addTrace("Loader::run");
         throw e;
     }

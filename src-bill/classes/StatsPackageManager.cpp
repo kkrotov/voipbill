@@ -37,6 +37,10 @@ void StatsPackageManager::load(BDb * db) {
     loaded = true;
 }
 
+void StatsPackageManager::recalc(BDb * db, long long int storedLastId) {
+    db->exec("DELETE FROM billing.stats_package WHERE max_call_id > " + lexical_cast<string>(storedLastId));
+}
+
 int StatsPackageManager::getSeconds(int service_package_id, time_t connect_time) {
     auto itStatsByPackageId = statsByPackageId.find(service_package_id);
     if (itStatsByPackageId == statsByPackageId.end()) {

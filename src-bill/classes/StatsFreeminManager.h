@@ -22,6 +22,7 @@ public:
     StatsFreeminManager();
     bool ready() { return loaded; };
     void load(BDb * db);
+    void recalc(BDb * db, long long int storedLastId);
     int getSeconds(Call * call);
     void getChanges(map<int, StatsFreemin> &changes);
     void addChanges(map<int, StatsFreemin> &changes);

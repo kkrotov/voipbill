@@ -13,12 +13,14 @@ private:
     map<int, StatsAccount> statsAccount;
     set<int> forSync;
 
+    bool needClear = false;
     bool loaded = false;
 public:
     StatsAccountManager();
     bool ready() { return loaded; };
     void load(BDb * db);
-    void reload(BDb * db);
+    void recalc(BDb * db);
+    void reloadSum(BDb * db, Spinlock &lock);
 
     void prepareSaveQuery(stringstream &query);
     void executeSaveQuery(BDb * dbCalls, stringstream &query);
@@ -37,7 +39,7 @@ public:
         }
     }
 
-    void getChanges(map<int, StatsAccount> &changes);
+    void getChanges(map<int, StatsAccount> &changes, bool &needClear);
     void addChanges(map<int, StatsAccount> &changes);
 
 private:

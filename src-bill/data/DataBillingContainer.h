@@ -39,7 +39,8 @@ public:
 
     static DataBillingContainer * instance();
 
-    void loadAll(BDb * db);
+    void loadAll(BDb * db, bool recalc = false);
+    void reloadAccountSum(BDb * db);
     bool ready();
     void addCall(CallInfo * callInfo);
     void save(BDb * dbCalls);
@@ -72,7 +73,7 @@ public:
     int statsAccountGetSumBalance(int account_id, double vat_rate);
     int statsFreeminGetSeconds(Call * call);
     int statsPackageGetSeconds(int service_package_id, time_t connect_time);
-    void statsAccountGetChanges(map<int, StatsAccount> &changes);
+    void statsAccountGetChanges(map<int, StatsAccount> &changes, bool &needClear);
     void statsAccountAddChanges(map<int, StatsAccount> &changes);
     void statsFreeminGetChanges(map<int, StatsFreemin> &changes);
     void statsFreeminAddChanges(map<int, StatsFreemin> &changes);

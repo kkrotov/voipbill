@@ -7,7 +7,7 @@ StatsAccountManager::StatsAccountManager() {
 void StatsAccountManager::load(BDb * db) {
 
     BDbResult res = db->query(
-            "   select account_id, extract(epoch from amount_month), sum_month, extract(epoch from amount_day), sum_day, extract(epoch from amount_date), sum, min_call_id, max_call_id " \
+            "   select account_id, extract(epoch from amount_month), sum_month, extract(epoch from amount_day), sum_day, extract(epoch from amount_date), sum " \
             "   from billing.stats_account"
     );
 
@@ -20,15 +20,74 @@ void StatsAccountManager::load(BDb * db) {
         stats.sum_day = res.get_d(4);
         stats.amount_date = res.get_ll(5);
         stats.sum = res.get_d(6);
-        stats.min_call_id = res.get_ll(7);
-        stats.max_call_id = res.get_ll(8);
     }
 
     loaded = true;
 }
 
+void StatsAccountManager::recalc(BDb * db) {
 
-void StatsAccountManager::reload(BDb * db) {
+    time_t d_date = get_tday(time(nullptr), 0);
+    time_t m_date = get_tmonth(time(nullptr), 0);
+
+    string sDay = string_date(d_date);
+    string sMonth = string_date(m_date);
+
+    string sPrevMonth = string_date(m_date - 32 * 86400);
+
+    db->exec("DELETE FROM billing.stats_account");
+
+    db->exec("UPDATE billing.clients set sync=0 where sync > 0");
+
+    db->exec(
+            "   INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum)"
+            "   select " \
+            "       c.id, " \
+            "       '" + sMonth + "', " \
+            "       COALESCE(m.m_sum, 0), " \
+            "       '" + sDay + "', " \
+            "       COALESCE(d.d_sum, 0), " \
+            "       c.amount_date, " \
+            "       COALESCE(a.a_sum, 0) " \
+            "   from billing.clients c  " \
+            "   left join " \
+            "       (   select account_id, sum(cost) m_sum from calls_raw.calls_raw c " \
+            "           where " \
+            "               c.connect_time >= '" + sMonth + "'::date and " \
+            "               c.connect_time < '" + sMonth + "'::date + '1 month'::interval " \
+            "           group by account_id " \
+            "       ) as m " \
+            "   on c.id = m.account_id " \
+            "   left join " \
+            "       (   select account_id, sum(cost) d_sum from calls_raw.calls_raw c " \
+            "           where " \
+            "           c.connect_time >= '" + sDay + "'::date and " \
+            "           c.connect_time < '" + sDay + "'::date + '1 day'::interval " \
+            "           group by account_id " \
+            "       ) as d " \
+            "   on c.id = d.account_id " \
+            "   left join " \
+            "       (   select account_id, sum(cost) a_sum " \
+            "           from calls_raw.calls_raw c " \
+            "           left join billing.clients cl " \
+            "           on c.account_id=cl.id " \
+            "           where " \
+            "               c.connect_time >= '" + sPrevMonth + "' " \
+            "               and (c.connect_time >= cl.amount_date or cl.amount_date is null) " \
+            "           group by account_id " \
+            "       ) as a " \
+            "   on c.id = a.account_id " \
+            "   where " \
+            "       ( " \
+            "           COALESCE(m.m_sum, 0) != 0 OR " \
+            "           COALESCE(d.d_sum, 0) != 0 OR " \
+            "           COALESCE(a.a_sum, 0) != 0 "  \
+            "       ) ");
+
+    needClear = true;
+}
+
+void StatsAccountManager::reloadSum(BDb * db, Spinlock &lock) {
 
     time_t m_date = get_tmonth(time(nullptr));
     string sPrevMonth = string_date(m_date - 32 * 86400);
@@ -53,7 +112,7 @@ void StatsAccountManager::reload(BDb * db) {
 
     db->exec("UPDATE billing.clients set sync=0 where sync=2");
 
-    // !!! lock_guard<Spinlock> guard(lock);
+    lock_guard<Spinlock> guard(lock);
 
     while (res.next()) {
         auto iCc = statsAccount.find(res.get_i(0));
@@ -62,6 +121,7 @@ void StatsAccountManager::reload(BDb * db) {
             stats.account_id = res.get_i(0);
             stats.sum = res.get_d(1);
             stats.amount_date = parseDateTime(res.get(2));
+            forSync.insert(stats.account_id);
         }
     }
 }
@@ -76,7 +136,7 @@ void StatsAccountManager::prepareSaveQuery(stringstream &query) {
         return;
     }
 
-    query << "INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum, min_call_id, max_call_id) VALUES\n";
+    query << "INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum) VALUES\n";
     int i = 0;
     for (auto it : realtimeStatsAccountParts[0]) {
         StatsAccount &stats = it.second;
@@ -88,9 +148,7 @@ void StatsAccountManager::prepareSaveQuery(stringstream &query) {
         query << "'" << string_time(stats.amount_day) << "',";
         query << "'" << stats.sum_day << "',";
         query << "'" << string_time(stats.amount_date) << "',";
-        query << "'" << stats.sum << "',";
-        query << "'" << stats.min_call_id << "',";
-        query << "'" << stats.max_call_id << "')";
+        query << "'" << stats.sum << "')";
         i++;
     }
 
@@ -124,12 +182,7 @@ void StatsAccountManager::add(CallInfo *callInfo) {
 
     StatsAccount &stats = statsAccount[call->account_id];
 
-    if (stats.account_id == 0) {
-        stats.account_id = call->account_id;
-        stats.min_call_id = call->id;
-    }
-
-    stats.max_call_id = call->id;
+    stats.account_id = call->account_id;
 
     if (abs(call->dt.month - stats.amount_month) < 43200) {
         stats.amount_month = call->dt.month;
@@ -186,9 +239,16 @@ double StatsAccountManager::getSumBalance(int account_id, double vat_rate) {
     }
 }
 
-void StatsAccountManager::getChanges(map<int, StatsAccount> &changes) {
-    for (int id : forSync) {
-        changes[id] = statsAccount[id];
+void StatsAccountManager::getChanges(map<int, StatsAccount> &changes, bool &needClear) {
+    needClear = this->needClear;
+    if (needClear) {
+        for (auto it : statsAccount) {
+            changes[it.first] = it.second;
+        }
+    } else {
+        for (int id : forSync) {
+            changes[id] = statsAccount[id];
+        }
     }
     forSync.clear();
 }
