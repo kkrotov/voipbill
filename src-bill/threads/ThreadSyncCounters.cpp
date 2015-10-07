@@ -148,9 +148,9 @@ void ThreadSyncCounters::do_sync_package() {
         query << "'" << res.get(3) << "',";
         query << "'" << res.get(4) << "',";
         query << "'" << res.get(5) << "',";
-        query << "'" << res.get(6) << "')";
+        query << "'" << res.get(6) << "',";
         query << "'" << res.get(7) << "',";
-        query << "'" << res.get(8) << "',";
+        query << "'" << res.get(8) << "')";
         i++;
     }
 

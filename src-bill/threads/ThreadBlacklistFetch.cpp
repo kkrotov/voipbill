@@ -31,7 +31,7 @@ bool ThreadBlacklistFetch::prepare() {
 }
 
 void ThreadBlacklistFetch::run() {
-    return;
+
     blacklist_local->fetch();
 
     blacklist_global->fetch();

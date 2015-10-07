@@ -25,8 +25,6 @@ bool ThreadBlacklistCalc::ready() {
 
 void ThreadBlacklistCalc::run() {
 
-    return;
-
     if (!repository.billingData->ready()) {
         return;
     }

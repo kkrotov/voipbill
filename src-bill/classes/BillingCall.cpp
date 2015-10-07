@@ -770,9 +770,9 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
                     continue;
                 }
 
-                if (prefixlist->exclude_operators.size() > 0) {
+                if (prefixlist->exclude_operators && prefixlist->operators.size() > 0) {
                     bool exclude = false;
-                    for (int excludeOperatorId : prefixlist->exclude_operators) {
+                    for (int excludeOperatorId : prefixlist->operators) {
                         if (call->geo_operator_id == excludeOperatorId) {
                             exclude = true;
                             break;
@@ -783,7 +783,7 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
                     }
                 }
 
-                if (prefixlist->operators.size() > 0) {
+                if (!prefixlist->exclude_operators && prefixlist->operators.size() > 0) {
                     bool exclude = true;
                     for (int includeOperatorId : prefixlist->operators) {
                         if (call->geo_operator_id == includeOperatorId ) {

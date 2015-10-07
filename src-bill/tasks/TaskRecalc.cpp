@@ -100,6 +100,7 @@ void TaskRecalc::run() {
     unique_lock<mutex> lock_sync_locks_central(repository.billingData->syncLocksCentralLock);
 
     setStatus("12. recalc counters");
+    repository.billingData->statsAccount.recalc(&db_calls);
     repository.billingData->loadAll(&db_calls);
 
     lock_fetch_cdr.unlock();

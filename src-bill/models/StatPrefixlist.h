@@ -18,7 +18,7 @@ struct StatPrefixlist
     int country_id;
     int region_id;
     int city_id;
-    vector<int> exclude_operators;
+    bool exclude_operators;
     vector<int> operators;
 
     void dump(stringstream &trace) {
@@ -28,6 +28,7 @@ struct StatPrefixlist
         trace << "country_id: " << country_id << ", ";
         trace << "region_id: " << region_id << ", ";
         trace << "city_id: " << city_id << ", ";
+        trace << "exclude_operators: " << exclude_operators << ", ";
         trace << ")";
     }
 };

@@ -27,10 +27,10 @@ public:
 private:
     CdrManager          cdrs;
     CallsManager        calls;
-    StatsAccountManager statsAccount;
     StatsFreeminManager statsFreemin;
     StatsPackageManager statsPackage;
 public:
+    StatsAccountManager statsAccount;
     ClientLockData      clientLock;
 
     long long int lastSyncCentralCallId = -1;

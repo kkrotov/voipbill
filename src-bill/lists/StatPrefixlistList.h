@@ -43,18 +43,7 @@ protected:
         item->region_id = row.get_i(5);
         item->city_id = row.get_i(6);
 
-        string str_exclude_operators(row.get(7));
-        if (str_exclude_operators.size() > 2) {
-            str_exclude_operators = str_exclude_operators.substr(1, str_exclude_operators.size() - 2);
-
-            vector<string> str_exclude_operators_array;
-            split(str_exclude_operators_array, str_exclude_operators, is_any_of(","));
-
-            item->exclude_operators.reserve(str_exclude_operators_array.size());
-            for (auto operatorId : str_exclude_operators_array) {
-                item->exclude_operators.push_back(atoi(operatorId.c_str()));
-            }
-        }
+        item->exclude_operators = row.get_b(7);
 
         string str_operators(row.get(8));
         if (str_operators.size() > 2) {
