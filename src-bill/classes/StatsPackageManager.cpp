@@ -4,7 +4,13 @@ StatsPackageManager::StatsPackageManager() {
     realtimeStatsPackageParts.push_back(map<int, StatsPackage>());
 }
 
-void StatsPackageManager::load(BDb * db) {
+void StatsPackageManager::load(BDb * db, time_t lastSaveCallTime) {
+    forSync.clear();
+    statsPackage.clear();
+    statsByPackageId.clear();
+    realtimeStatsPackageParts.clear();
+    realtimeStatsPackageParts.push_back(map<int, StatsPackage>());
+
     BDbResult resId = db->query("   select max(id) from billing.stats_package p ");
     lastPackageStatId = resId.next() ? resId.get_i(0) : 0;
 

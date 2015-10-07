@@ -10,6 +10,8 @@ struct StatsAccount {
     time_t amount_day;
     time_t amount_month;
     time_t amount_date;
+    long long int min_call_id;
+    long long int max_call_id;
 
     double sumDay(double vat_rate, bool filter_by_date = true) {
         if (!filter_by_date || abs(amount_day - get_tday(time(nullptr))) < 43200) {

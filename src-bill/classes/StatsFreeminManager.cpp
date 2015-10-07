@@ -5,7 +5,12 @@ StatsFreeminManager::StatsFreeminManager() {
     realtimeStatsFreeminParts.push_back(map<int, StatsFreemin>());
 }
 
-void StatsFreeminManager::load(BDb * db) {
+void StatsFreeminManager::load(BDb * db, time_t lastStoredCallTime) {
+    forSync.clear();
+    statsFreemin.clear();
+    freeminsByServiceId.clear();
+    realtimeStatsFreeminParts.clear();
+    realtimeStatsFreeminParts.push_back(map<int, StatsFreemin>());
 
     BDbResult resId = db->query("   select max(id) from billing.stats_freemin ");
     lastStatsFreeminId = resId.next() ? resId.get_i(0) : 0;

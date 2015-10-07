@@ -9,6 +9,9 @@ public:
         src_table = "billing.stat_destination_prefixlists";
         dst_table = "billing.stat_destination_prefixlists";
 
+        key = "id";
+
+        fields.push_back("id");
         fields.push_back("destination_id");
         fields.push_back("prefixlist_id");
     }

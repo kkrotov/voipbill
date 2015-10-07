@@ -24,6 +24,8 @@ private:
 public:
     CallsManager();
 
+    void clear();
+
     void prepareSaveQueries(map<time_t, stringstream> &queryPerMonth);
     void executeSaveQueries(BDb * dbCalls, map<time_t, stringstream> &queryPerMonth);
 

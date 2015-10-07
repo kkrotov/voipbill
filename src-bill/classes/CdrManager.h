@@ -17,9 +17,10 @@ private:
     long long int lastId;
     time_t lastTime;
     size_t counter;
-
 public:
     CdrManager();
+
+    void clear();
 
     bool ready();
     bool loadPart(BDb * db_calls);

@@ -12,8 +12,6 @@ private:
     int lastStatsFreeminId = 0;
     bool loaded = false;
 public:
-    long long int lastStoredCallTime;
-
     vector<map<int, StatsFreemin>> realtimeStatsFreeminParts;
     map<int, StatsFreemin> statsFreemin;
     map<int, list<int>> freeminsByServiceId;
@@ -21,7 +19,7 @@ public:
 
     StatsFreeminManager();
     bool ready() { return loaded; };
-    void load(BDb * db);
+    void load(BDb * db, time_t lastStoredCallTime);
     void recalc(BDb * db, long long int storedLastId);
     int getSeconds(Call * call);
     void getChanges(map<int, StatsFreemin> &changes);

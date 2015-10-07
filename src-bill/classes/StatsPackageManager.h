@@ -15,15 +15,13 @@ private:
 
     bool loaded = false;
 public:
-    long long int lastSaveCallTime;
-
     map<int, StatsPackage> statsPackage;
     map<int, list<int>> statsByPackageId;
     set<int> forSync;
 
     StatsPackageManager();
     bool ready() { return loaded; };
-    void load(BDb * db);
+    void load(BDb * db, time_t lastSaveCallTime);
     void recalc(BDb * db, long long int storedLastId);
     int getSeconds(int service_package_id, time_t connect_time);
     void getChanges(map<int, StatsPackage> &changes);

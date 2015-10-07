@@ -1,13 +1,20 @@
 #include "CallsManager.h"
 
 CallsManager::CallsManager() {
+    clear();
+}
+
+void CallsManager::clear()
+{
     realtimeLastId = -1;
     realtimeLastTime = 0;
-    realtimeLastId = 0;
     storedLastId = -1;
     storedLastTime = 0;
+
+    realtimeCounter = 0;
     storedCounter = 0;
 
+    realtimeCallsParts.clear();
     realtimeCallsParts.push_back(vector<Call>());
 }
 

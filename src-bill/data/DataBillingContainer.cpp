@@ -7,6 +7,9 @@ DataBillingContainer * DataBillingContainer::instance() {
 
 void DataBillingContainer::loadAll(BDb * db, bool recalc) {
 
+    cdrs.clear();
+    calls.clear();
+
     loadLastCallIdAndCdrIdAndTime(db);
 
     if (recalc) {
@@ -16,8 +19,8 @@ void DataBillingContainer::loadAll(BDb * db, bool recalc) {
     }
 
     statsAccount.load(db);
-    statsFreemin.load(db);
-    statsPackage.load(db);
+    statsFreemin.load(db, getCallsStoredLastTime());
+    statsPackage.load(db, getCallsStoredLastTime());
 
     clientLock.load(db);
 }

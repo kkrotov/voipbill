@@ -5,6 +5,10 @@ StatsAccountManager::StatsAccountManager() {
 }
 
 void StatsAccountManager::load(BDb * db) {
+    forSync.clear();
+    statsAccount.clear();
+    realtimeStatsAccountParts.clear();
+    realtimeStatsAccountParts.push_back(map<int, StatsAccount>());
 
     BDbResult res = db->query(
             "   select account_id, extract(epoch from amount_month), sum_month, extract(epoch from amount_day), sum_day, extract(epoch from amount_date), sum " \
@@ -38,6 +42,7 @@ void StatsAccountManager::recalc(BDb * db) {
     db->exec("DELETE FROM billing.stats_account");
 
     db->exec("UPDATE billing.clients set sync=0 where sync > 0");
+
 
     db->exec(
             "   INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum)"

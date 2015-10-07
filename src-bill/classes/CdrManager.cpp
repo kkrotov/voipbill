@@ -1,9 +1,17 @@
 #include "CdrManager.h"
 
 CdrManager::CdrManager() {
+    clear();
+}
+
+void CdrManager::clear() {
+    lock_guard<Spinlock> guard(lock);
+
     lastId = -1;
     lastTime = 0;
     counter = 0;
+    queue.clear();
+    cdrsParts.clear();
     cdrsParts.push_back(vector<Cdr>());
 }
 

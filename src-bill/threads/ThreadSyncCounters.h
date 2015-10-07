@@ -5,6 +5,7 @@
 
 class ThreadSyncCounters : public Thread {
     BDb db_main;
+    BDb db_calls;
 
     Repository repository;
 

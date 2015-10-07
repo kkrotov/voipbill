@@ -6,6 +6,7 @@ ThreadSyncCounters::ThreadSyncCounters() {
     name = "Sync Counters to central db";
 
     db_main.setCS(app().conf.db_main);
+    db_calls.setCS(app().conf.db_calls);
 
     last_sync_account_count = 0;
     last_sync_freemin_count = 0;
@@ -84,80 +85,86 @@ void ThreadSyncCounters::do_sync_account() {
 
 void ThreadSyncCounters::do_sync_freemin() {
 
-    map<int, StatsFreemin> changes;
-    repository.billingData->statsFreeminGetChanges(changes);
+    BDbResult resMax = db_main.query("SELECT max(max_call_id) FROM billing.stats_freemin WHERE server_id='" + app().conf.str_instance_id +"'");
+    long long int central_max_call_id = resMax.next() ? resMax.get_ll(0) : 0;
+
+    BDbResult res = db_calls.query(
+            " SELECT id, month_dt, service_number_id, used_seconds, used_credit, min_call_id, max_call_id " \
+            " from billing.stats_freemin " \
+            " where max_call_id > '" + lexical_cast<string>(central_max_call_id) + "'");
 
     stringstream query;
     query << "INSERT INTO billing.stats_freemin(server_id, id, month_dt, service_number_id, used_seconds, used_credit, min_call_id, max_call_id) VALUES\n";
 
     int i = 0;
-    for (auto it: changes) {
-        StatsFreemin &stats = it.second;
+    while (res.next()) {
         if (i > 0) query << ",\n";
         query << "(";
         query << "'" << app().conf.instance_id << "',";
-        query << "'" << stats.id << "',";
-        query << "'" << string_time(stats.month_dt) << "',";
-        query << "'" << stats.service_number_id << "',";
-        query << "'" << stats.used_seconds << "',";
-        query << "'" << stats.used_credit << "',";
-        query << "'" << stats.min_call_id << "',";
-        query << "'" << stats.max_call_id << "')";
+        query << "'" << res.get(0) << "',";
+        query << "'" << res.get(1) << "',";
+        query << "'" << res.get(2) << "',";
+        query << "'" << res.get(3) << "',";
+        query << "'" << res.get(4) << "',";
+        query << "'" << res.get(5) << "',";
+        query << "'" << res.get(6) << "')";
         i++;
     }
 
-    if (changes.size() > 0) {
+    if (res.size() > 0) {
         try {
             db_main.exec(query.str());
         } catch (Exception &e) {
             e.addTrace("ThreadSyncCounters::do_sync_freemin:");
-            repository.billingData->statsFreeminAddChanges(changes);
             throw e;
         }
     }
 
-    last_sync_freemin_count = changes.size();
-    total_sync_freemin_count += changes.size();
+    last_sync_freemin_count = res.size();
+    total_sync_freemin_count += res.size();
 }
 
 void ThreadSyncCounters::do_sync_package() {
 
-    map<int, StatsPackage> changes;
-    repository.billingData->statsPackageGetChanges(changes);
+    BDbResult resMax = db_main.query("SELECT max(max_call_id) FROM billing.stats_package WHERE server_id='" + app().conf.str_instance_id +"'");
+    long long int central_max_call_id = resMax.next() ? resMax.get_ll(0) : 0;
+
+    BDbResult res = db_calls.query(
+            " SELECT id, package_id, used_seconds, used_credit, paid_seconds, activation_dt, expire_dt, min_call_id, max_call_id " \
+            " from billing.stats_package " \
+            " where max_call_id > '" + lexical_cast<string>(central_max_call_id) + "'");
 
     stringstream query;
     query << "INSERT INTO billing.stats_package(server_id, id, package_id, used_seconds, used_credit, paid_seconds, activation_dt, expire_dt, min_call_id, max_call_id) VALUES\n";
 
     int i = 0;
-    for (auto it: changes) {
-        StatsPackage &stats = it.second;
+    while (res.next()) {
         if (i > 0) query << ",\n";
         query << "(";
         query << "'" << app().conf.instance_id << "',";
-        query << "'" << stats.id << "',";
-        query << "'" << stats.package_id << "',";
-        query << "'" << stats.used_seconds << "',";
-        query << "'" << stats.used_credit << "',";
-        query << "'" << stats.paid_seconds << "',";
-        query << "'" << string_time(stats.activation_dt) << "',";
-        query << "'" << string_time(stats.expire_dt) << "',";
-        query << "'" << stats.min_call_id << "',";
-        query << "'" << stats.max_call_id << "')";
+        query << "'" << res.get(0) << "',";
+        query << "'" << res.get(1) << "',";
+        query << "'" << res.get(2) << "',";
+        query << "'" << res.get(3) << "',";
+        query << "'" << res.get(4) << "',";
+        query << "'" << res.get(5) << "',";
+        query << "'" << res.get(6) << "')";
+        query << "'" << res.get(7) << "',";
+        query << "'" << res.get(8) << "',";
         i++;
     }
 
-    if (changes.size() > 0) {
+    if (res.size() > 0) {
         try {
             db_main.exec(query.str());
         } catch (Exception &e) {
             e.addTrace("ThreadSyncCounters::do_sync_package:");
-            repository.billingData->statsPackageAddChanges(changes);
             throw e;
         }
     }
 
-    last_sync_package_count = changes.size();
-    total_sync_package_count += changes.size();
+    last_sync_package_count = res.size();
+    total_sync_package_count += res.size();
 }
 
 void ThreadSyncCounters::htmlfull(stringstream &html) {
