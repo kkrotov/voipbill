@@ -24,7 +24,7 @@ void StatsPackageManager::load(BDb * db, time_t lastSaveCallTime) {
     BDbResult res = db->query(
             "   select id, package_id, used_seconds, used_credit, paid_seconds, extract(epoch from activation_dt), extract(epoch from expire_dt), min_call_id, max_call_id " \
             "   from billing.stats_package " \
-            "   where activation_dt >= '" + string_time(filterFrom) + "'" \
+            "   where activation_dt >= '" + string_time(filterFrom, 7) + "'" \
             "   order by package_id asc, activation_dt asc "
     );
     while (res.next()) {
@@ -152,8 +152,8 @@ void StatsPackageManager::prepareSaveQuery(stringstream &query) {
         query << "'" << stats.used_seconds << "',";
         query << "'" << stats.used_credit << "',";
         query << "'" << stats.paid_seconds << "',";
-        query << "'" << string_time(stats.activation_dt) << "',";
-        query << "'" << string_time(stats.expire_dt) << "',";
+        query << "'" << string_time(stats.activation_dt, 8) << "',";
+        query << "'" << string_time(stats.expire_dt, 9) << "',";
         query << "'" << stats.min_call_id << "',";
         query << "'" << stats.max_call_id << "')";
         i++;

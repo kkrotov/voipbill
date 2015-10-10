@@ -14,6 +14,7 @@ protected:
 public:
     BillingCall(Repository *repository);
     void setTrace(stringstream *trace);
+    void clearTrace();
     void calc(Call *call, CallInfo * callInfo, Cdr *cdr);
 
 protected:

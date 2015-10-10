@@ -57,6 +57,7 @@ private:
     void removePartitionAfterSave();
 
     size_t getLastRealtimePartSize();
+    void calls_insert_row(Call * call, stringstream &q);
 
 
     friend class DataBillingContainer;

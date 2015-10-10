@@ -38,6 +38,7 @@ struct CallInfo {
     Geo * geo;
 
     DT dt;
+    DT dtUtc;
 
     CallInfo() {
         call = nullptr;
@@ -56,11 +57,9 @@ struct CallInfo {
     }
 
     void make_dt() {
-        struct tm ttt;
-        time_t offset = 3600 * account->timezone_offset;
-        time_t connect_time = call->connect_time + offset;
-        gmtime_r(&connect_time, &ttt);
-        dt.day = connect_time - offset - ttt.tm_hour * 3600 - ttt.tm_min * 60 - ttt.tm_sec;
-        dt.month = dt.day - (ttt.tm_mday - 1)*86400;
+        dt.day = get_tday(call->connect_time, account->timezone_offset);
+        dt.month = get_tmonth(call->connect_time, account->timezone_offset);
+        dtUtc.day = get_tday(call->connect_time);
+        dtUtc.month = get_tmonth(call->connect_time);
     }
 };

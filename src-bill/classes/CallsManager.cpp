@@ -57,14 +57,15 @@ size_t CallsManager::getQueueSize() {
 }
 
 
-void calls_insert_row(Call * call, stringstream &q) {
+void CallsManager::calls_insert_row(Call * call, stringstream &q) {
 
     q << "(";
     q << "'" << call->id << "',";
     q << (call->orig ? "true" : "false") << ",";
+    q << (call->our ? "true" : "false") << ",";
     q << "'" << call->peer_id << "',";
     q << "'" << call->cdr_id << "',";
-    q << "'" << string_time(call->connect_time) << "',";
+    q << "'" << string_time(call->connect_time, 2) << "',";
     if (call->trunk_id != 0) {
         q << "'" << call->trunk_id << "',";
     } else {
@@ -165,7 +166,7 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth) 
 
             stringstream &q = queryPerMonth[dt_month];
             q << "INSERT INTO calls_raw.calls_raw_" + string(buff) + "(" \
-                    "id,orig,peer_id,cdr_id,connect_time,trunk_id,account_id,trunk_service_id,number_service_id," \
+                    "id,orig,our,peer_id,cdr_id,connect_time,trunk_id,account_id,trunk_service_id,number_service_id," \
                     "src_number,dst_number,billed_time,rate,cost,tax_cost,interconnect_rate,interconnect_cost," \
                     "service_package_id,service_package_stats_id,package_time,package_credit," \
                     "destination_id,pricelist_id,prefix,geo_id,geo_operator_id,operator_id,mob,geo_mob" \

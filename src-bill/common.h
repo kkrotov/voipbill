@@ -27,7 +27,7 @@ string string_fmt(const string &fmt, ...);
 
 string string_date(const time_t dt);
 
-string string_time(const time_t dt);
+string string_time(const time_t dt, int debugFlag = 0);
 
 time_t parseDate(char * str);
 

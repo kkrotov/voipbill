@@ -166,11 +166,11 @@ void StatsAccountManager::prepareSaveQuery(stringstream &query) {
         if (i > 0) query << ",\n";
         query << "(";
         query << "'" << stats.account_id << "',";
-        query << "'" << string_time(stats.amount_month) << "',";
+        query << "'" << string_date(stats.amount_month) << "',";
         query << "'" << stats.sum_month << "',";
-        query << "'" << string_time(stats.amount_day) << "',";
+        query << "'" << string_date(stats.amount_day) << "',";
         query << "'" << stats.sum_day << "',";
-        query << "'" << string_time(stats.amount_date) << "',";
+        query << "'" << string_time(stats.amount_date, 3) << "',";
         query << "'" << stats.sum << "')";
         i++;
     }
@@ -207,19 +207,19 @@ void StatsAccountManager::add(CallInfo *callInfo) {
 
     stats.account_id = call->account_id;
 
-    if (abs(callInfo->dt.month - stats.amount_month) < 43200) {
-        stats.amount_month = callInfo->dt.month;
+    if (abs(callInfo->dtUtc.month - stats.amount_month) < 43200) {
+        stats.amount_month = callInfo->dtUtc.month;
         stats.sum_month += call->cost;
-    } else if (callInfo->dt.month > stats.amount_month) {
-        stats.amount_month = callInfo->dt.month;
+    } else if (callInfo->dtUtc.month > stats.amount_month) {
+        stats.amount_month = callInfo->dtUtc.month;
         stats.sum_month = call->cost;
     }
 
-    if (abs(callInfo->dt.day - stats.amount_day) < 43200) {
-        stats.amount_day = callInfo->dt.day;
+    if (abs(callInfo->dtUtc.day - stats.amount_day) < 43200) {
+        stats.amount_day = callInfo->dtUtc.day;
         stats.sum_day += call->cost;
-    } else if (callInfo->dt.day > stats.amount_day) {
-        stats.amount_day = callInfo->dt.day;
+    } else if (callInfo->dtUtc.day > stats.amount_day) {
+        stats.amount_day = callInfo->dtUtc.day;
         stats.sum_day = call->cost;
     }
 
@@ -298,11 +298,11 @@ size_t StatsAccountManager::sync(BDb * db_main, DataBillingContainer * billingDa
         query << "(";
         query << "'" << app().conf.instance_id << "',";
         query << "'" << stats.account_id << "',";
-        query << "'" << string_time(stats.amount_month) << "',";
+        query << "'" << string_date(stats.amount_month) << "',";
         query << "'" << stats.sum_month << "',";
-        query << "'" << string_time(stats.amount_day) << "',";
+        query << "'" << string_date(stats.amount_day) << "',";
         query << "'" << stats.sum_day << "',";
-        query << "'" << string_time(stats.amount_date) << "',";
+        query << "'" << string_time(stats.amount_date, 4) << "',";
         query << "'" << stats.sum << "')";
         i++;
     }

@@ -25,7 +25,7 @@ void StatsFreeminManager::load(BDb * db, time_t lastStoredCallTime) {
     BDbResult res = db->query(
             "   select id, service_number_id, extract(epoch from month_dt), used_seconds, used_credit, min_call_id, max_call_id " \
             "   from billing.stats_freemin " \
-            "   where month_dt >= '" + string_time(filterFrom) + "'" \
+            "   where month_dt >= '" + string_time(filterFrom, 5) + "'" \
             "   order by month_dt asc"
     );
     while (res.next()) {
@@ -143,7 +143,7 @@ void StatsFreeminManager::prepareSaveQuery(stringstream &query) {
         if (i > 0) query << ",\n";
         query << "(";
         query << "'" << stats.id << "',";
-        query << "'" << string_time(stats.month_dt) << "',";
+        query << "'" << string_time(stats.month_dt, 6) << "',";
         query << "'" << stats.service_number_id << "',";
         query << "'" << stats.used_seconds << "',";
         query << "'" << stats.used_credit << "',";

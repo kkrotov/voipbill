@@ -56,7 +56,7 @@ void BaseLogWriter::afterPublish() {
 }
 
 string BaseLogWriter::stime(time_t time) {
-    return "[" + string_time(time) + "] ";
+    return "[" + string_time(time, 1) + "] ";
 }
 
 string BaseLogWriter::slevel(LogLevel level) {

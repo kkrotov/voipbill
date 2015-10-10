@@ -68,16 +68,25 @@ public:
         Call call = Call(cdr, orig);
         CallInfo callInfo;
 
-        if (!orig) {
+        if (orig) {
+
+            billingCall.setTrace(&trace);
+            billingCall.calc(&call, &callInfo, cdr);
+
+        } else {
+
             Call origCall = Call(cdr, CALL_ORIG);
             CallInfo origCallInfo;
+
             billingCall.calc(&origCall, &origCallInfo, cdr);
+
             call.src_number = origCall.src_number;
             call.dst_number = origCall.dst_number;
+
+            billingCall.setTrace(&trace);
+            billingCall.calc(&call, &callInfo, cdr);
         }
 
-        billingCall.setTrace(&trace);
-        billingCall.calc(&call, &callInfo, cdr);
 
         trace << "INFO|CALL|";
         call.dump(trace);

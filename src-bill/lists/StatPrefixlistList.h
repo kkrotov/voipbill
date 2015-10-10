@@ -17,10 +17,10 @@ protected:
         item->id = row.get_i(0);
         item->type_id = row.get_i(1);
 
-        string str_prefixes(row.get(2));
-        if (str_prefixes.size() > 0) {
+        item->str_prefixes = string(row.get(2));
+        if (item->str_prefixes.size() > 0) {
             vector<string> str_prefixes_array;
-            split(str_prefixes_array, str_prefixes, is_any_of(","));
+            split(str_prefixes_array, item->str_prefixes, is_any_of(","));
 
             item->prefixes.reserve(str_prefixes_array.size());
             for (auto prefix : str_prefixes_array) {
@@ -43,10 +43,10 @@ protected:
 
         item->exclude_operators = row.get_b(7);
 
-        string str_operators(row.get(8));
-        if (str_operators.size() > 0) {
+        item->str_operators = string(row.get(8));
+        if (item->str_operators.size() > 0) {
             vector<string> str_operators_array;
-            split(str_operators_array, str_operators, is_any_of(","));
+            split(str_operators_array, item->str_operators, is_any_of(","));
 
             item->operators.reserve(str_operators_array.size());
             for (auto operatorId : str_operators_array) {

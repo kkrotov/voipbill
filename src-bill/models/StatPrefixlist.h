@@ -20,15 +20,20 @@ struct StatPrefixlist
     int city_id;
     bool exclude_operators;
     vector<int> operators;
+    string str_prefixes;
+    string str_operators;
+
 
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
         trace << "type_id: " << type_id << ", ";
+        trace << "prefixes: " << str_prefixes << ", ";
         trace << "country_id: " << country_id << ", ";
         trace << "region_id: " << region_id << ", ";
         trace << "city_id: " << city_id << ", ";
         trace << "exclude_operators: " << exclude_operators << ", ";
+        trace << "operators: " << str_operators << ", ";
         trace << ")";
     }
 };

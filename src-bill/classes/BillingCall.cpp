@@ -12,6 +12,11 @@ void BillingCall::setTrace(stringstream *trace) {
     repository->trace = trace;
 }
 
+void BillingCall::clearTrace() {
+    this->trace = nullptr;
+    repository->trace = nullptr;
+}
+
 void BillingCall::calc(Call *call, CallInfo * callInfo, Cdr *cdr) {
     try {
         this->cdr = cdr;
@@ -430,6 +435,7 @@ void BillingCall::setupTrunk() {
 
     call->trunk_id = callInfo->trunk->id;
     call->operator_id = callInfo->trunk->code;
+    call->our = callInfo->trunk->our_trunk || callInfo->trunk->auth_by_number;
 }
 
 void BillingCall::setupEffectiveServiceTrunkPricelistPrice() {
@@ -760,7 +766,13 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
 
             } else if (prefixlist->type_id == STAT_PREFIXLIST_TYPE_ROSLINK) {
                 if (trace != nullptr) {
-                    *trace << "INFO|MATCH|TRY MATCH ROSLINK\n";
+                    *trace << "INFO|MATCH|TRY MATCH BY GEO\n";
+                    *trace << "|STAT PREFIXLIST|";
+                    prefixlist->dump(*trace);
+                    *trace << "\n";
+                    *trace << "|GEO|";
+                    callInfo->geo->dump(*trace);
+                    *trace << "\n";
                 }
 
                 if (prefixlist->sub_type == STAT_PREFIXLIST_SUBTYPE_FIXED && call->mob) {
@@ -830,6 +842,9 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
                     }
                 }
 
+                if (trace != nullptr) {
+                    *trace << "INFO|MATCH|OK. BY GEO\n";
+                }
                 return true;
             }
 

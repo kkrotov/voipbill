@@ -12,7 +12,8 @@ struct Call {
     long long int peer_id;
     long long int cdr_id;
     time_t connect_time;
-    char orig;
+    bool orig;
+    bool our;
 
     int trunk_id;
     int account_id;
@@ -48,12 +49,14 @@ struct Call {
 
 
     void dump(stringstream &trace) {
+
         trace << "(";
         trace << "id " << id << ", ";
         trace << "peer_id: " << peer_id << ", ";
         trace << "cdr_id: " << cdr_id << ", ";
         trace << "connect_time: " << string_time(connect_time) << ", ";
-        trace << "orig: " << orig << ", ";
+        trace << "orig: " << (orig ? "true" : "false") << ", ";
+        trace << "our: " << (our ? "true" : "false") << ", ";
         trace << "account_id: " << account_id << ", ";
         trace << "trunk_service_id: " << trunk_service_id << ", ";
         trace << "number_service_id: " << number_service_id << ", ";
@@ -72,9 +75,9 @@ struct Call {
         trace << "pricelist_id: " << pricelist_id << ", ";
         trace << "prefix: " << prefix << ", ";
         trace << "destination_id: " << destination_id << ", ";
-        trace << "mob: " << mob << ", ";
+        trace << "mob: " << (mob ? "true" : "false") << ", ";
         trace << "geo_id: " << geo_id << ", ";
-        trace << "geo_mob: " << geo_mob << ", ";
+        trace << "geo_mob: " << (geo_mob ? "true" : "false") << ", ";
         trace << "geo_operator_id: " << geo_operator_id << ", ";
         trace << "operator_id: " << operator_id << ", ";
         trace << ")";
@@ -82,6 +85,7 @@ struct Call {
 
     Call(Cdr * cdr, bool orig) {
         this->orig = orig;
+        our = false;
 
         id = 0;
         peer_id = 0;

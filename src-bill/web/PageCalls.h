@@ -35,6 +35,8 @@ public:
         html << "<style>\n";
         html << ".orig { color: #006000; }\n";
         html << ".term { color: #000060; }\n";
+        html << ".tr_orig td { border-top: 1px solid silver; padding-top: 5px; }\n";
+        html << ".tr_term td { padding-bottom: 5px; }\n";
         html << "</style>\n";
 
 
@@ -43,6 +45,7 @@ public:
         html << "<th nowrap rowspan=2 style='text-align: left'>connect_time</th>\n";
         html << "<th nowrap rowspan=2>len</th>\n";
         if (fullMode) {
+            html << "<th nowrap rowspan=2>&nbsp;</th>\n";
             html << "<th nowrap rowspan=2>&nbsp;</th>\n";
         }
         if (fullMode) {
@@ -82,14 +85,15 @@ public:
                 callTerm = &calls->at(i * 2 + 1);
             }
 
-            html << "<tr>\n";
+            html << "<tr class='tr_orig'>\n";
             html << "<td nowrap rowspan=2 style='text-align: left'>" << string_time(cdr->connect_time) << "</td>\n";
             html << "<td nowrap rowspan=2>" << cdr->session_time << "</td>\n";
             if (fullMode) {
                 html << "<td nowrap><a class=orig href='/test/calc/gui?call_id=" << cdr->call_id << "&orig=t'>orig</a></td>\n";
+                html << "<td nowrap>" << (callOrig->our ? "client" : "operator") << "</td>\n";
             }
             if (fullMode) {
-                string origService("&nbsp;");
+                string origService("<span style='color: red'>unknown</span>");
                 if (callOrig->trunk_service_id != 0) {
                     origService = "t " + lexical_cast<string>(callOrig->trunk_service_id);
                 } else if (callOrig->number_service_id != 0) {
@@ -120,12 +124,13 @@ public:
 
             html << "</tr>\n";
 
-            html << "<tr>\n";
+            html << "<tr class='tr_term'>\n";
             if (fullMode) {
                 html << "<td nowrap><a class=term href='/test/calc/gui?call_id=" << cdr->call_id << "&orig=f'>term</a></td>\n";
+                html << "<td nowrap>" << (callTerm->our ? "client" : "operator") << "</td>\n";
             }
             if (fullMode) {
-                string termService("-");
+                string termService("<span style='color: red'>unknown</span>");
                 if (callTerm->trunk_service_id != 0) {
                     termService = "t " + lexical_cast<string>(callTerm->trunk_service_id);
                 } else if (callTerm->number_service_id != 0) {

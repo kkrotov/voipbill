@@ -6,19 +6,19 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#define UNIXTIME_40010101 64092211200
+#define UNIXTIME_50010101 95649120000
 
 string string_fmt(const string &fmt, ...) {
     int size = 100;
     string str;
     va_list ap;
     while (1) {
-        str.resize(size);
+        str.resize((size_t)size);
         va_start(ap, fmt);
-        int n = vsnprintf((char *) str.c_str(), size, fmt.c_str(), ap);
+        int n = vsnprintf((char *) str.c_str(), (size_t)size, fmt.c_str(), ap);
         va_end(ap);
         if (n > -1 && n < size) {
-            str.resize(n);
+            str.resize((size_t)n);
             return str;
         }
         if (n > -1)
@@ -31,9 +31,9 @@ string string_fmt(const string &fmt, ...) {
 string string_date(const time_t dt) {
     char buff[20];
 
-    if (dt > UNIXTIME_40010101) {
+    if (dt > UNIXTIME_50010101) {
         Log::error("string_date: bad unix time");
-        return string("4000-01-01");
+        return string("5000-01-01");
     }
 
     struct tm timeinfo;
@@ -47,12 +47,12 @@ string string_date(const time_t dt) {
     return string(buff);
 }
 
-string string_time(const time_t dt) {
+string string_time(const time_t dt, int debugFlag) {
     char buff[40];
 
-    if (dt > UNIXTIME_40010101) {
-        Log::error("string_time: bad unix time");
-        return string("4000-01-01 00:00:00");
+    if (dt > UNIXTIME_50010101) {
+        Log::error("string_time: bad unix time " + lexical_cast<string>(debugFlag));
+        return string("5000-01-01 00:00:00");
     }
 
     struct tm timeinfo;
