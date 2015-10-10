@@ -1,4 +1,7 @@
 #include "StatsAccountManager.h"
+#include "Exception.h"
+#include "AppBill.h"
+#include "../data/DataBillingContainer.h"
 
 StatsAccountManager::StatsAccountManager() {
     realtimeStatsAccountParts.push_back(map<int, StatsAccount>());
@@ -40,9 +43,6 @@ void StatsAccountManager::recalc(BDb * db) {
     string sPrevMonth = string_date(m_date - 32 * 86400);
 
     db->exec("DELETE FROM billing.stats_account");
-
-    db->exec("UPDATE billing.clients set sync=0 where sync > 0");
-
 
     db->exec(
             "   INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum)"
@@ -92,12 +92,22 @@ void StatsAccountManager::recalc(BDb * db) {
     needClear = true;
 }
 
-void StatsAccountManager::reloadSum(BDb * db, Spinlock &lock) {
+void StatsAccountManager::reloadSum(BDb * db, list<int> accountIds, Spinlock &lock) {
+
+    if (accountIds.size() == 0) {
+        return;
+    }
+
+    string strIds = "";
+    for (int accountId : accountIds) {
+        if (strIds.size() > 0) {
+            strIds = strIds + ",";
+        }
+        strIds = strIds + lexical_cast<string>(accountId);
+    }
 
     time_t m_date = get_tmonth(time(nullptr));
     string sPrevMonth = string_date(m_date - 32 * 86400);
-
-    db->exec("UPDATE billing.clients set sync=2 where sync=1");
 
     BDbResult res = db->query(
             "   select c.id, COALESCE(a.a_sum,0), c.amount_date " \
@@ -109,13 +119,12 @@ void StatsAccountManager::reloadSum(BDb * db, Spinlock &lock) {
             "           where " \
             "               c.connect_time >= '" + sPrevMonth + "'::date " \
             "               and (c.connect_time >= cl.amount_date or cl.amount_date is null) " \
-            "               and cl.sync = 2 " \
+            "               and c.account_id in (" + strIds + ") " \
             "           group by account_id " \
             "       ) as a " \
             "   on c.id = a.account_id " \
-            "   where c.sync = 2 ");
+            "   where c.id in (" + strIds + ") ");
 
-    db->exec("UPDATE billing.clients set sync=0 where sync=2");
 
     lock_guard<Spinlock> guard(lock);
 
@@ -133,6 +142,15 @@ void StatsAccountManager::reloadSum(BDb * db, Spinlock &lock) {
 
 size_t StatsAccountManager::size() {
     return statsAccount.size();
+}
+
+StatsAccount * StatsAccountManager::get(int account_id) {
+    auto it = statsAccount.find(account_id);
+    if (it != statsAccount.end()) {
+        return &it->second;
+    } else {
+        return nullptr;
+    }
 }
 
 void StatsAccountManager::prepareSaveQuery(stringstream &query) {
@@ -189,19 +207,19 @@ void StatsAccountManager::add(CallInfo *callInfo) {
 
     stats.account_id = call->account_id;
 
-    if (abs(call->dt.month - stats.amount_month) < 43200) {
-        stats.amount_month = call->dt.month;
+    if (abs(callInfo->dt.month - stats.amount_month) < 43200) {
+        stats.amount_month = callInfo->dt.month;
         stats.sum_month += call->cost;
-    } else if (call->dt.month > stats.amount_month) {
-        stats.amount_month = call->dt.month;
+    } else if (callInfo->dt.month > stats.amount_month) {
+        stats.amount_month = callInfo->dt.month;
         stats.sum_month = call->cost;
     }
 
-    if (abs(call->dt.day - stats.amount_day) < 43200) {
-        stats.amount_day = call->dt.day;
+    if (abs(callInfo->dt.day - stats.amount_day) < 43200) {
+        stats.amount_day = callInfo->dt.day;
         stats.sum_day += call->cost;
-    } else if (call->dt.day > stats.amount_day) {
-        stats.amount_day = call->dt.day;
+    } else if (callInfo->dt.day > stats.amount_day) {
+        stats.amount_day = callInfo->dt.day;
         stats.sum_day = call->cost;
     }
 
@@ -262,4 +280,50 @@ void StatsAccountManager::addChanges(map<int, StatsAccount> &changes) {
     for (auto it : changes) {
         forSync.insert(it.first);
     }
+}
+
+size_t StatsAccountManager::sync(BDb * db_main, DataBillingContainer * billingData) {
+
+    map<int, StatsAccount> changes;
+    bool needClear;
+    billingData->statsAccountGetChanges(changes, needClear);
+
+    stringstream query;
+    query << "INSERT INTO billing.stats_account(server_id, account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum) VALUES\n";
+    int i = 0;
+
+    for (auto it: changes) {
+        StatsAccount &stats = it.second;
+        if (i > 0) query << ",\n";
+        query << "(";
+        query << "'" << app().conf.instance_id << "',";
+        query << "'" << stats.account_id << "',";
+        query << "'" << string_time(stats.amount_month) << "',";
+        query << "'" << stats.sum_month << "',";
+        query << "'" << string_time(stats.amount_day) << "',";
+        query << "'" << stats.sum_day << "',";
+        query << "'" << string_time(stats.amount_date) << "',";
+        query << "'" << stats.sum << "')";
+        i++;
+    }
+
+    if (changes.size() > 0) {
+        try {
+            if (needClear) {
+                BDbTransaction trans(db_main);
+                db_main->exec("DELETE FROM billing.stats_account WHERE server_id = " + app().conf.str_instance_id);
+                db_main->exec(query.str());
+                trans.commit();
+            } else {
+                db_main->exec(query.str());
+            }
+
+        } catch (Exception &e) {
+            billingData->statsAccountAddChanges(changes);
+            e.addTrace("StatsAccountManager::sync:");
+            throw e;
+        }
+    }
+
+    return changes.size();
 }

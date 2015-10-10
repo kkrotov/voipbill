@@ -34,9 +34,7 @@ void ThreadLoader::run() {
 
                 repository.data->client.load(&db_calls);
 
-            } else if (event == "clients_recalc") {
-
-                repository.billingData->reloadAccountSum(&db_calls);
+                repository.billingData->reloadAccountSum(&db_calls, repository.data->client.get());
 
             } else if (event == "airp") {
 

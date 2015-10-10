@@ -34,13 +34,15 @@ public:
     void createNewPartition();
     void removePartitionAfterSave();
 
+    size_t sync(BDb * db_main, BDb * db_calls);
+
 private:
     void add(CallInfo * callInfo);
     size_t size();
     friend class DataBillingContainer;
     friend class Billing;
 
-    int getStatsPackageId(Call * call);
+    int getStatsPackageId(CallInfo * callInfo);
     StatsPackage * createStatsPackage(CallInfo *callInfo);
-    StatsPackage * updateStatsPackage(Call *call, int statPackageId);
+    StatsPackage * updateStatsPackage(CallInfo *callInfo, int statPackageId);
 };

@@ -111,18 +111,9 @@ void UdpMessageProcessor::calculateCall() {
 }
 
 void UdpMessageProcessor::prepareCall() {
-    time_t rawtime;
-    time(&rawtime);
-    struct tm timeinfo;
-    gmtime_r(&rawtime, &timeinfo);
-
-
     strcpy((char*) &call.id, "0");
     call.id_num = 0;
     call.time[0] = 0;
-    call.dt.time = rawtime;
-    call.dt.day = call.dt.time - timeinfo->tm_hour * 3600 - timeinfo->tm_min * 60 - timeinfo->tm_sec;
-    call.dt.month = call.dt.day - (timeinfo->tm_mday - 1) * 86400;
     call.len = 60;
     call.out = true;
     strcpy((char*) &call.usage_num, aNumber.c_str());

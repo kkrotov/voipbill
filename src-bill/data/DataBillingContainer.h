@@ -5,6 +5,7 @@
 #include "../classes/Spinlock.h"
 #include "../models/Cdr.h"
 #include "../models/Call.h"
+#include "../lists/ClientList.h"
 #include "ClientLockData.h"
 #include "../classes/AppBill.h"
 #include "../classes/CdrManager.h"
@@ -27,10 +28,10 @@ public:
 private:
     CdrManager          cdrs;
     CallsManager        calls;
-    StatsFreeminManager statsFreemin;
-    StatsPackageManager statsPackage;
 public:
     StatsAccountManager statsAccount;
+    StatsFreeminManager statsFreemin;
+    StatsPackageManager statsPackage;
     ClientLockData      clientLock;
 
     long long int lastSyncCentralCallId = -1;
@@ -40,7 +41,7 @@ public:
     static DataBillingContainer * instance();
 
     void loadAll(BDb * db, bool recalc = false);
-    void reloadAccountSum(BDb * db);
+    void reloadAccountSum(BDb * db, shared_ptr<ClientList> clients);
     bool ready();
     void addCall(CallInfo * callInfo);
     void save(BDb * dbCalls);
@@ -71,7 +72,7 @@ public:
     int statsAccountGetSumMonth(int account_id, double vat_rate);
     int statsAccountGetSumDay(int account_id, double vat_rate);
     int statsAccountGetSumBalance(int account_id, double vat_rate);
-    int statsFreeminGetSeconds(Call * call);
+    int statsFreeminGetSeconds(CallInfo * callInfo);
     int statsPackageGetSeconds(int service_package_id, time_t connect_time);
     void statsAccountGetChanges(map<int, StatsAccount> &changes, bool &needClear);
     void statsAccountAddChanges(map<int, StatsAccount> &changes);

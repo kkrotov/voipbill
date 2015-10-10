@@ -21,7 +21,7 @@ public:
     bool ready() { return loaded; };
     void load(BDb * db, time_t lastStoredCallTime);
     void recalc(BDb * db, long long int storedLastId);
-    int getSeconds(Call * call);
+    int getSeconds(CallInfo * callInfo);
     void getChanges(map<int, StatsFreemin> &changes);
     void addChanges(map<int, StatsFreemin> &changes);
 
@@ -31,13 +31,15 @@ public:
     void createNewPartition();
     void removePartitionAfterSave();
 
+    size_t sync(BDb * db_main, BDb * db_calls);
+
 private:
     void add(CallInfo * callInfo);
     size_t size();
     friend class DataBillingContainer;
     friend class Billing;
 
-    int getStatsFreeminId(Call * call);
-    StatsFreemin * createStatsFreemin(Call * call);
-    StatsFreemin * updateStatsFreemin(Call * call, int statFreeminId);
+    int getStatsFreeminId(CallInfo * callInfo);
+    StatsFreemin * createStatsFreemin(CallInfo * callInfo);
+    StatsFreemin * updateStatsFreemin(CallInfo * call, int statFreeminId);
 };

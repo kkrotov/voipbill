@@ -6,6 +6,8 @@
 #include "../models/CallInfo.h"
 #include "../models/StatsAccount.h"
 
+class DataBillingContainer;
+
 class StatsAccountManager
 {
 private:
@@ -13,14 +15,14 @@ private:
     map<int, StatsAccount> statsAccount;
     set<int> forSync;
 
-    bool needClear = false;
     bool loaded = false;
 public:
+    bool needClear = false;
     StatsAccountManager();
     bool ready() { return loaded; };
     void load(BDb * db);
     void recalc(BDb * db);
-    void reloadSum(BDb * db, Spinlock &lock);
+    void reloadSum(BDb * db, list<int> accountIds, Spinlock &lock);
 
     void prepareSaveQuery(stringstream &query);
     void executeSaveQuery(BDb * dbCalls, stringstream &query);
@@ -41,6 +43,10 @@ public:
 
     void getChanges(map<int, StatsAccount> &changes, bool &needClear);
     void addChanges(map<int, StatsAccount> &changes);
+
+    StatsAccount * get(int account_id);
+
+    size_t sync(BDb * db_main, DataBillingContainer * billingData);
 
 private:
     void add(CallInfo * callInfo);

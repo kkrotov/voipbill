@@ -20,10 +20,6 @@ class ThreadSyncCounters : public Thread {
 
     void run();
 
-    void do_sync_account();
-    void do_sync_freemin();
-    void do_sync_package();
-
     void htmlfull(stringstream &html);
 
 

@@ -25,8 +25,22 @@ void DataBillingContainer::loadAll(BDb * db, bool recalc) {
     clientLock.load(db);
 }
 
-void DataBillingContainer::reloadAccountSum(BDb * db) {
-    statsAccount.reloadSum(db, lock);
+void DataBillingContainer::reloadAccountSum(BDb * db, shared_ptr<ClientList> clients) {
+
+    list<int> accountIds;
+
+    {
+        lock_guard<Spinlock> guard(lock);
+        for (size_t i = 0; i < clients->size(); i++) {
+            Client * client = clients->get(i);
+            StatsAccount * account = statsAccount.get(client->id);
+            if (account == nullptr || account->amount_date != client->amount_date) {
+                accountIds.push_back(client->id);
+            }
+        }
+    }
+
+    statsAccount.reloadSum(db, accountIds, lock);
 }
 
 bool DataBillingContainer::ready() {
@@ -62,10 +76,11 @@ bool DataBillingContainer::ready() {
 void DataBillingContainer::addCall(CallInfo * callInfo) {
     lock_guard<Spinlock> guard(lock);
 
-    calls.add(*callInfo->call);
     statsAccount.add(callInfo);
     statsFreemin.add(callInfo);
     statsPackage.add(callInfo);
+
+    calls.add(*callInfo->call);
 
     if (calls.isNeedCreatePartitionAfterAdd()) {
         createNewPartition();
@@ -258,10 +273,10 @@ int DataBillingContainer::statsAccountGetSumBalance(int account_id, double vat_r
     return statsAccount.getSumBalance(account_id, vat_rate);
 }
 
-int DataBillingContainer::statsFreeminGetSeconds(Call * call)
+int DataBillingContainer::statsFreeminGetSeconds(CallInfo * callInfo)
 {
     lock_guard<Spinlock> guard(lock);
-    return statsFreemin.getSeconds(call);
+    return statsFreemin.getSeconds(callInfo);
 }
 
 int DataBillingContainer::statsPackageGetSeconds(int service_package_id, time_t connect_time) {

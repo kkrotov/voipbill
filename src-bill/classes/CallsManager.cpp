@@ -106,8 +106,8 @@ void calls_insert_row(Call * call, stringstream &q) {
     } else {
         q << "NULL,";
     }
-    if (call->service_package_limit_id != 0) {
-        q << "'" << call->service_package_limit_id << "',";
+    if (call->service_package_stats_id != 0) {
+        q << "'" << call->service_package_stats_id << "',";
     } else {
         q << "NULL,";
     }
@@ -152,17 +152,22 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth) 
 
     for (Call &call : realtimeCallsParts[0]) {
 
-        if (queryPerMonth.find(call.dt.month) == queryPerMonth.end()) {
+        struct tm ttt;
+        gmtime_r(&call.connect_time, &ttt);
+        time_t dt_day = call.connect_time - ttt.tm_hour * 3600 - ttt.tm_min * 60 - ttt.tm_sec;
+        time_t dt_month = dt_day - (ttt.tm_mday - 1)*86400;
+
+        if (queryPerMonth.find(dt_month) == queryPerMonth.end()) {
             char buff[20];
             struct tm timeinfo;
-            gmtime_r(&call.dt.month, &timeinfo);
+            gmtime_r(&dt_month, &timeinfo);
             strftime(buff, 20, "%Y%m", &timeinfo);
 
-            stringstream &q = queryPerMonth[call.dt.month];
+            stringstream &q = queryPerMonth[dt_month];
             q << "INSERT INTO calls_raw.calls_raw_" + string(buff) + "(" \
                     "id,orig,peer_id,cdr_id,connect_time,trunk_id,account_id,trunk_service_id,number_service_id," \
                     "src_number,dst_number,billed_time,rate,cost,tax_cost,interconnect_rate,interconnect_cost," \
-                    "service_package_id,service_package_limit_id,package_time,package_credit," \
+                    "service_package_id,service_package_stats_id,package_time,package_credit," \
                     "destination_id,pricelist_id,prefix,geo_id,geo_operator_id,operator_id,mob,geo_mob" \
                  ")VALUES\n";
 
@@ -170,7 +175,7 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth) 
 
         } else {
 
-            stringstream &q = queryPerMonth[call.dt.month];
+            stringstream &q = queryPerMonth[dt_month];
             q << ",";
 
             calls_insert_row(&call, q);

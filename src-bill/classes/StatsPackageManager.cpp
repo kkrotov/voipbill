@@ -1,4 +1,6 @@
 #include "StatsPackageManager.h"
+#include "Exception.h"
+#include "AppBill.h"
 
 StatsPackageManager::StatsPackageManager() {
     realtimeStatsPackageParts.push_back(map<int, StatsPackage>());
@@ -44,7 +46,41 @@ void StatsPackageManager::load(BDb * db, time_t lastSaveCallTime) {
 }
 
 void StatsPackageManager::recalc(BDb * db, long long int storedLastId) {
-    db->exec("DELETE FROM billing.stats_package WHERE max_call_id > " + lexical_cast<string>(storedLastId));
+    string strStoredLastId = lexical_cast<string>(storedLastId);
+
+    db->exec("DELETE FROM billing.stats_package WHERE min_call_id > " + strStoredLastId);
+
+    BDbResult res = db->query("select min(min_call_id) from billing.stats_package where max_call_id >= " + strStoredLastId);
+    int minCallId = res.next() ? res.get_i(0) : 0;
+
+    if (minCallId > 0) {
+        string strMinCallId = lexical_cast<string>(minCallId);
+
+        BDbTransaction trans(db);
+
+        db->exec(    "    update billing.stats_package set min_call_id = 0 where max_call_id >= " + strStoredLastId);
+
+        db->exec(    "    update billing.stats_package p                                    " \
+                     "    set                                                               " \
+                     "        min_call_id = s.min_call_id,                                  " \
+                     "        max_call_id = s.max_call_id,                                  " \
+                     "        used_seconds = coalesce(s.used_seconds, 0),                   " \
+                     "        used_credit = coalesce(s.used_credit, 0)                      " \
+                     "    from (                                                            " \
+                     "        select  service_package_stats_id as id,                       " \
+                     "                sum(package_time) as used_seconds,                    " \
+                     "                sum(package_credit) as used_credit,                   " \
+                     "                max(id) as min_call_id, max(id) as max_call_id        " \
+                     "        from calls_raw.calls_raw                                      " \
+                     "        where id >= " + strMinCallId + " and service_package_id > 1   " \
+                     "        group by service_package_stats_id                             " \
+                     "    ) s                                                               " \
+                     "    where p.max_call_id >= " + strStoredLastId + " and p.id = s.id    ");
+
+        db->exec(    "    delete from billing.stats_package where min_call_id = 0           ");
+
+        trans.commit();
+    }
 }
 
 int StatsPackageManager::getSeconds(int service_package_id, time_t connect_time) {
@@ -77,13 +113,15 @@ void StatsPackageManager::add(CallInfo * callInfo) {
         return;
     }
 
-    int statPackageId = getStatsPackageId(callInfo->call);
+    int statPackageId = getStatsPackageId(callInfo);
     StatsPackage * stats;
     if (statPackageId > 0) {
-        stats = updateStatsPackage(callInfo->call, statPackageId);
+        stats = updateStatsPackage(callInfo, statPackageId);
     } else {
         stats = createStatsPackage(callInfo);
     }
+
+    callInfo->call->service_package_stats_id = stats->id;
 
     size_t parts = realtimeStatsPackageParts.size();
     map<int, StatsPackage> &realtimeStatsPackage = realtimeStatsPackageParts.at(parts - 1);
@@ -139,8 +177,8 @@ void StatsPackageManager::removePartitionAfterSave() {
     realtimeStatsPackageParts.erase(realtimeStatsPackageParts.begin());
 }
 
-int StatsPackageManager::getStatsPackageId(Call * call) {
-    auto itStatsByPackageId = statsByPackageId.find(call->service_package_id);
+int StatsPackageManager::getStatsPackageId(CallInfo * callInfo) {
+    auto itStatsByPackageId = statsByPackageId.find(callInfo->call->service_package_id);
     if (itStatsByPackageId == statsByPackageId.end()) {
         return 0;
     }
@@ -151,8 +189,8 @@ int StatsPackageManager::getStatsPackageId(Call * call) {
 
         StatsPackage &stats = itStatsFreemin->second;
 
-        if (stats.activation_dt > call->connect_time) continue;
-        if (stats.expire_dt < call->connect_time) continue;
+        if (stats.activation_dt > callInfo->call->connect_time) continue;
+        if (stats.expire_dt < callInfo->call->connect_time) continue;
 
         return stats.id;
     }
@@ -161,10 +199,9 @@ int StatsPackageManager::getStatsPackageId(Call * call) {
 }
 
 StatsPackage * StatsPackageManager::createStatsPackage(CallInfo *callInfo) {
-    short timezone_offset = 0;
 
-    time_t activation_dt = get_tmonth(callInfo->call->connect_time, timezone_offset);
-    time_t expire_dt = get_tmonth_end(callInfo->call->connect_time, timezone_offset);
+    time_t activation_dt = get_tmonth(callInfo->call->connect_time, callInfo->account->timezone_offset);
+    time_t expire_dt = get_tmonth_end(callInfo->call->connect_time, callInfo->account->timezone_offset);
 
     if (activation_dt < callInfo->servicePackagePrepaid->activation_dt) {
         activation_dt = callInfo->servicePackagePrepaid->activation_dt;
@@ -192,13 +229,13 @@ StatsPackage * StatsPackageManager::createStatsPackage(CallInfo *callInfo) {
     return &stats;
 }
 
-StatsPackage * StatsPackageManager::updateStatsPackage(Call *call, int statPackageId) {
+StatsPackage * StatsPackageManager::updateStatsPackage(CallInfo *callInfo, int statPackageId) {
 
     StatsPackage &stats = statsPackage[statPackageId];
 
-    stats.used_seconds += call->package_time;
-    stats.used_credit += call->package_credit;
-    stats.max_call_id = call->id;
+    stats.used_seconds += callInfo->call->package_time;
+    stats.used_credit += callInfo->call->package_credit;
+    stats.max_call_id = callInfo->call->id;
 
     return &stats;
 }
@@ -214,4 +251,46 @@ void StatsPackageManager::addChanges(map<int, StatsPackage> &changes) {
     for (auto it : changes) {
         forSync.insert(it.first);
     }
+}
+
+size_t StatsPackageManager::sync(BDb * db_main, BDb * db_calls) {
+
+    BDbResult resMax = db_main->query("SELECT max(max_call_id) FROM billing.stats_package WHERE server_id='" + app().conf.str_instance_id +"'");
+    long long int central_max_call_id = resMax.next() ? resMax.get_ll(0) : 0;
+
+    BDbResult res = db_calls->query(
+            " SELECT id, package_id, used_seconds, used_credit, paid_seconds, activation_dt, expire_dt, min_call_id, max_call_id " \
+        " from billing.stats_package " \
+        " where max_call_id > '" + lexical_cast<string>(central_max_call_id) + "'");
+
+    stringstream query;
+    query << "INSERT INTO billing.stats_package(server_id, id, package_id, used_seconds, used_credit, paid_seconds, activation_dt, expire_dt, min_call_id, max_call_id) VALUES\n";
+
+    int i = 0;
+    while (res.next()) {
+        if (i > 0) query << ",\n";
+        query << "(";
+        query << "'" << app().conf.instance_id << "',";
+        query << "'" << res.get(0) << "',";
+        query << "'" << res.get(1) << "',";
+        query << "'" << res.get(2) << "',";
+        query << "'" << res.get(3) << "',";
+        query << "'" << res.get(4) << "',";
+        query << "'" << res.get(5) << "',";
+        query << "'" << res.get(6) << "',";
+        query << "'" << res.get(7) << "',";
+        query << "'" << res.get(8) << "')";
+        i++;
+    }
+
+    if (res.size() > 0) {
+        try {
+            db_main->exec(query.str());
+        } catch (Exception &e) {
+            e.addTrace("StatsPackageManager::sync:");
+            throw e;
+        }
+    }
+
+    return res.size();
 }

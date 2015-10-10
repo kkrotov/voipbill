@@ -43,15 +43,15 @@ void Billing::calcCurrentCalls() {
         termCall.dst_number = origCall.dst_number;
         billingCall.calc(&termCall, &termCallInfo, cdr);
 
-        callsWaitSaving->push_back(origCall);
         statsAccount.get()->add(&origCallInfo);
         statsFreemin.get()->add(&origCallInfo);
         statsPackage.get()->add(&origCallInfo);
+        callsWaitSaving->push_back(origCall);
 
-        callsWaitSaving->push_back(termCall);
         statsAccount.get()->add(&termCallInfo);
         statsFreemin.get()->add(&termCallInfo);
         statsPackage.get()->add(&termCallInfo);
+        callsWaitSaving->push_back(termCall);
     }
 
     repository.currentCalls->setCallsWaitingSaving(callsWaitSaving);

@@ -60,7 +60,6 @@ set(BILL_SOURCES
     src-bill/data/ClientData.cpp
     src-bill/data/ClientLockData.cpp
     src-bill/data/CurrentCdrData.cpp
-    src-bill/data/FminCounterData.cpp
     src-bill/data/GeoData.cpp
     src-bill/data/GeoPrefixData.cpp
     src-bill/data/GlobalCountersData.cpp
@@ -87,7 +86,6 @@ set(BILL_SOURCES
     src-bill/data/ServiceTrunkSettingsData.cpp
     src-bill/data/StatDestinationPrefixlistsData.cpp
     src-bill/data/StatPrefixlistData.cpp
-    src-bill/data/StatsPackageData.cpp
     src-bill/data/TariffChangeLogData.cpp
     src-bill/data/TariffData.cpp
     src-bill/data/TariffPackageData.cpp
@@ -105,7 +103,6 @@ set(BILL_SOURCES
     src-bill/lists/ClientList.cpp
     src-bill/lists/ClientLockCounter.cpp
     src-bill/lists/CurrentCdrList.cpp
-    src-bill/lists/FminCounter.cpp
     src-bill/lists/GeoList.cpp
     src-bill/lists/GeoPrefixList.cpp
     src-bill/lists/GlobalCountersList.cpp
@@ -132,7 +129,6 @@ set(BILL_SOURCES
     src-bill/lists/ServiceTrunkSettingsList.cpp
     src-bill/lists/StatDestinationPrefixlistsList.cpp
     src-bill/lists/StatPrefixlistList.cpp
-    src-bill/lists/StatsPackageCounter.cpp
     src-bill/lists/TariffChangeLogList.cpp
     src-bill/lists/TariffList.cpp
     src-bill/lists/TariffPackageList.cpp

@@ -7,11 +7,6 @@
 #define CALL_ORIG               true
 #define CALL_TERM               false
 
-struct DT {
-    time_t day;
-    time_t month;
-};
-
 struct Call {
     long long int id;
     long long int peer_id;
@@ -35,7 +30,7 @@ struct Call {
     double interconnect_cost;
 
     int service_package_id;
-    int service_package_limit_id;
+    int service_package_stats_id;
     int package_time;
     double package_credit;
 
@@ -71,7 +66,7 @@ struct Call {
         trace << "interconnect_rate: " << interconnect_rate << ", ";
         trace << "interconnect_cost: " << interconnect_cost << ", ";
         trace << "service_package_id: " << service_package_id << ", ";
-        trace << "service_package_limit_id: " << service_package_limit_id << ", ";
+        trace << "service_package_stats_id: " << service_package_stats_id << ", ";
         trace << "package_time: " << package_time << ", ";
         trace << "package_credit " << package_credit << ", ";
         trace << "pricelist_id: " << pricelist_id << ", ";
@@ -108,7 +103,7 @@ struct Call {
         interconnect_cost = 0.0;
 
         service_package_id = 0;
-        service_package_limit_id = 0;
+        service_package_stats_id = 0;
         package_time = 0;
         package_credit = 0.0;
 
@@ -123,16 +118,6 @@ struct Call {
         operator_id = 0;
 
         cdr_call_id = cdr->call_id;
-
-        make_dt();
-    }
-
-    DT dt;
-    void make_dt() {
-        struct tm ttt;
-        gmtime_r(&connect_time, &ttt);
-        dt.day = connect_time - ttt.tm_hour * 3600 - ttt.tm_min * 60 - ttt.tm_sec;
-        dt.month = dt.day - (ttt.tm_mday - 1)*86400;
     }
 
     bool isLocal() {

@@ -1,5 +1,7 @@
 #include "StatsFreeminManager.h"
-#include "../models/CallInfo.h"
+#include "Exception.h"
+#include "AppBill.h"
+
 
 StatsFreeminManager::StatsFreeminManager() {
     realtimeStatsFreeminParts.push_back(map<int, StatsFreemin>());
@@ -40,14 +42,48 @@ void StatsFreeminManager::load(BDb * db, time_t lastStoredCallTime) {
     }
 
     loaded = true;
-}
+}\
 
 void StatsFreeminManager::recalc(BDb * db, long long int storedLastId) {
-    db->exec("DELETE FROM billing.stats_freemin WHERE max_call_id > " + lexical_cast<string>(storedLastId));
+    string strStoredLastId = lexical_cast<string>(storedLastId);
+
+    db->exec("DELETE FROM billing.stats_freemin WHERE min_call_id > " + strStoredLastId);
+
+    BDbResult res = db->query("select min(min_call_id) from billing.stats_freemin where max_call_id >= " + strStoredLastId);
+    int minCallId = res.next() ? res.get_i(0) : 0;
+
+    if (minCallId > 0) {
+        string strMinCallId = lexical_cast<string>(minCallId);
+
+        BDbTransaction trans(db);
+
+        db->exec(    "    update billing.stats_freemin set min_call_id = 0 where max_call_id >= " + strStoredLastId);
+
+        db->exec(    "    update billing.stats_freemin p                                    " \
+                     "    set                                                               " \
+                     "        min_call_id = s.min_call_id,                                  " \
+                     "        max_call_id = s.max_call_id,                                  " \
+                     "        used_seconds = coalesce(s.used_seconds, 0),                   " \
+                     "        used_credit = coalesce(s.used_credit, 0)                      " \
+                     "    from (                                                            " \
+                     "        select  service_package_stats_id as id,                       " \
+                     "                sum(package_time) as used_seconds,                    " \
+                     "                sum(package_credit) as used_credit,                   " \
+                     "                max(id) as min_call_id, max(id) as max_call_id        " \
+                     "        from calls_raw.calls_raw                                      " \
+                     "        where id >= " + strMinCallId + " and service_package_id = 1   " \
+                     "        group by service_package_stats_id                             " \
+                     "    ) s                                                               " \
+                     "    where p.max_call_id >= " + strStoredLastId + " and p.id = s.id    ");
+
+        db->exec(    "    delete from billing.stats_freemin where min_call_id = 0           ");
+
+        trans.commit();
+    }
 }
 
-int StatsFreeminManager::getSeconds(Call * call) {
-    auto itFreeminsByServiceId = freeminsByServiceId.find(call->number_service_id);
+int StatsFreeminManager::getSeconds(CallInfo * callInfo) {
+    auto itFreeminsByServiceId = freeminsByServiceId.find(callInfo->call->number_service_id);
     if (itFreeminsByServiceId == freeminsByServiceId.end()) {
         return 0;
     }
@@ -58,7 +94,7 @@ int StatsFreeminManager::getSeconds(Call * call) {
 
         StatsFreemin &stats = itStatsFreemin->second;
 
-        if (stats.month_dt != call->dt.month) continue;
+        if (stats.month_dt != callInfo->dt.month) continue;
 
         return stats.used_seconds;
     }
@@ -71,14 +107,16 @@ void StatsFreeminManager::add(CallInfo * callInfo) {
         return;
     }
 
-    int statFreeminId = getStatsFreeminId(callInfo->call);
+    int statFreeminId = getStatsFreeminId(callInfo);
     StatsFreemin * stats;
 
     if (statFreeminId > 0) {
-        stats = updateStatsFreemin(callInfo->call, statFreeminId);
+        stats = updateStatsFreemin(callInfo, statFreeminId);
     } else {
-        stats = createStatsFreemin(callInfo->call);
+        stats = createStatsFreemin(callInfo);
     }
+
+    callInfo->call->service_package_stats_id = stats->id;
 
     size_t parts = realtimeStatsFreeminParts.size();
     map<int, StatsFreemin> &realtimeStatsFreemin = realtimeStatsFreeminParts.at(parts - 1);
@@ -132,8 +170,8 @@ void StatsFreeminManager::removePartitionAfterSave() {
     realtimeStatsFreeminParts.erase(realtimeStatsFreeminParts.begin());
 }
 
-int StatsFreeminManager::getStatsFreeminId(Call * call) {
-    auto itFreeminsByServiceId = freeminsByServiceId.find(call->number_service_id);
+int StatsFreeminManager::getStatsFreeminId(CallInfo * callInfo) {
+    auto itFreeminsByServiceId = freeminsByServiceId.find(callInfo->call->number_service_id);
     if (itFreeminsByServiceId == freeminsByServiceId.end()) {
         return 0;
     }
@@ -144,7 +182,7 @@ int StatsFreeminManager::getStatsFreeminId(Call * call) {
 
         StatsFreemin &stats = itStatsFreemin->second;
 
-        if (stats.month_dt != call->dt.month) continue;
+        if (stats.month_dt != callInfo->dt.month) continue;
 
         return stats.id;
     }
@@ -152,18 +190,18 @@ int StatsFreeminManager::getStatsFreeminId(Call * call) {
     return 0;
 }
 
-StatsFreemin * StatsFreeminManager::createStatsFreemin(Call * call) {
+StatsFreemin * StatsFreeminManager::createStatsFreemin(CallInfo * callInfo) {
 
     lastStatsFreeminId += 1;
 
     StatsFreemin &stats = statsFreemin[lastStatsFreeminId];
     stats.id = lastStatsFreeminId;
-    stats.service_number_id = call->number_service_id;
-    stats.month_dt = call->dt.month;
-    stats.used_seconds = call->package_time;
-    stats.used_credit = call->package_credit;
-    stats.min_call_id = call->id;
-    stats.max_call_id = call->id;
+    stats.service_number_id = callInfo->call->number_service_id;
+    stats.month_dt = callInfo->dt.month;
+    stats.used_seconds = callInfo->call->package_time;
+    stats.used_credit = callInfo->call->package_credit;
+    stats.min_call_id = callInfo->call->id;
+    stats.max_call_id = callInfo->call->id;
 
 
     freeminsByServiceId[stats.service_number_id].push_front(stats.id);
@@ -172,12 +210,12 @@ StatsFreemin * StatsFreeminManager::createStatsFreemin(Call * call) {
 }
 
 
-StatsFreemin * StatsFreeminManager::updateStatsFreemin(Call * call, int statFreeminId) {
+StatsFreemin * StatsFreeminManager::updateStatsFreemin(CallInfo * callInfo, int statFreeminId) {
 
     StatsFreemin &stats = statsFreemin[statFreeminId];
-    stats.used_seconds += call->package_time;
-    stats.used_credit += call->package_credit;
-    stats.max_call_id = call->id;
+    stats.used_seconds += callInfo->call->package_time;
+    stats.used_credit += callInfo->call->package_credit;
+    stats.max_call_id = callInfo->call->id;
 
     return &stats;
 }
@@ -193,4 +231,44 @@ void StatsFreeminManager::addChanges(map<int, StatsFreemin> &changes) {
     for (auto it : changes) {
         forSync.insert(it.first);
     }
+}
+
+size_t StatsFreeminManager::sync(BDb * db_main, BDb * db_calls) {
+
+    BDbResult resMax = db_main->query("SELECT max(max_call_id) FROM billing.stats_freemin WHERE server_id='" + app().conf.str_instance_id +"'");
+    long long int central_max_call_id = resMax.next() ? resMax.get_ll(0) : 0;
+
+    BDbResult res = db_calls->query(
+            " SELECT id, month_dt, service_number_id, used_seconds, used_credit, min_call_id, max_call_id " \
+            " from billing.stats_freemin " \
+            " where max_call_id > '" + lexical_cast<string>(central_max_call_id) + "'");
+
+    stringstream query;
+    query << "INSERT INTO billing.stats_freemin(server_id, id, month_dt, service_number_id, used_seconds, used_credit, min_call_id, max_call_id) VALUES\n";
+
+    int i = 0;
+    while (res.next()) {
+        if (i > 0) query << ",\n";
+        query << "(";
+        query << "'" << app().conf.instance_id << "',";
+        query << "'" << res.get(0) << "',";
+        query << "'" << res.get(1) << "',";
+        query << "'" << res.get(2) << "',";
+        query << "'" << res.get(3) << "',";
+        query << "'" << res.get(4) << "',";
+        query << "'" << res.get(5) << "',";
+        query << "'" << res.get(6) << "')";
+        i++;
+    }
+
+    if (res.size() > 0) {
+        try {
+            db_main->exec(query.str());
+        } catch (Exception &e) {
+            e.addTrace("StatsFreeminManager::sync:");
+            throw e;
+        }
+    }
+
+    return res.size();
 }

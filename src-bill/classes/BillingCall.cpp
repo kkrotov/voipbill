@@ -492,6 +492,9 @@ void BillingCall::setupAccount() {
     if (callInfo->account == nullptr) {
         throw CalcException("ACCOUNT WAS NOT FOUND");
     }
+
+    callInfo->make_dt();
+
     call->account_id = callInfo->account->id;
 }
 
@@ -654,7 +657,7 @@ void BillingCall::setupFreemin() {
 
     int tariffFreeSeconds = 60 * callInfo->mainTariff->freemin * (callInfo->mainTariff->freemin_for_number ? 1 : callInfo->serviceNumber->lines_count);
     if (call->isLocal() && tariffFreeSeconds > 0) {
-        int usedFreeSeconds = repository->billingData->statsFreeminGetSeconds(call);
+        int usedFreeSeconds = repository->billingData->statsFreeminGetSeconds(callInfo);
         int availableFreeSeconds = tariffFreeSeconds - usedFreeSeconds;
         if (availableFreeSeconds < 0) {
             availableFreeSeconds = 0;
