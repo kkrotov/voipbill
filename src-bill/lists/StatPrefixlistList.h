@@ -18,9 +18,7 @@ protected:
         item->type_id = row.get_i(1);
 
         string str_prefixes(row.get(2));
-        if (str_prefixes.size() > 2) {
-            str_prefixes = str_prefixes.substr(1, str_prefixes.size() - 2);
-
+        if (str_prefixes.size() > 0) {
             vector<string> str_prefixes_array;
             split(str_prefixes_array, str_prefixes, is_any_of(","));
 
@@ -46,9 +44,7 @@ protected:
         item->exclude_operators = row.get_b(7);
 
         string str_operators(row.get(8));
-        if (str_operators.size() > 2) {
-            str_operators = str_operators.substr(1, str_operators.size() - 2);
-
+        if (str_operators.size() > 0) {
             vector<string> str_operators_array;
             split(str_operators_array, str_operators, is_any_of(","));
 

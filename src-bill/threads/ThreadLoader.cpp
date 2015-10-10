@@ -170,6 +170,14 @@ void ThreadLoader::run() {
 
                 repository.data->tariffPackage.load(&db_calls);
 
+            } else if (event == "stat_destination_prefixlists") {
+
+                repository.data->statDestinationPrefixlists.load(&db_calls);
+
+            } else if (event == "stat_prefixlist") {
+
+                repository.data->statPrefixlist.load(&db_calls);
+
             } else if (event == "server") {
 
                 repository.data->server.load(&db_calls);

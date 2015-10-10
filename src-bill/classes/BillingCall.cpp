@@ -735,6 +735,10 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
             if (prefixlist->type_id == STAT_PREFIXLIST_TYPE_MANUAL) {
 
                 for (long long int prefix : prefixlist->prefixes) {
+                    if (trace != nullptr) {
+                        *trace << "INFO|MATCH|TRY MATCH NUMBER " << call->dst_number << " BY PREFIX " << prefix << "\n";
+                    }
+
                     char tmpPrefix[20];
                     sprintf(tmpPrefix, "%lld", call->dst_number);
 
@@ -742,6 +746,9 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
                     while (len > 0) {
                         tmpPrefix[len] = 0;
                         if (prefix == atoll(tmpPrefix)) {
+                            if (trace != nullptr) {
+                                *trace << "INFO|MATCH|OK. PREFIX " << prefix << "\n";
+                            }
                             return true;
                         }
                         len -= 1;
@@ -749,24 +756,42 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
                 }
 
             } else if (prefixlist->type_id == STAT_PREFIXLIST_TYPE_ROSLINK) {
+                if (trace != nullptr) {
+                    *trace << "INFO|MATCH|TRY MATCH ROSLINK\n";
+                }
 
                 if (prefixlist->sub_type == STAT_PREFIXLIST_SUBTYPE_FIXED && call->mob) {
+                    if (trace != nullptr) {
+                        *trace << "INFO|MATCH|EXIT. NOT FIXED\n";
+                    }
                     continue;
                 }
 
                 if (prefixlist->sub_type == STAT_PREFIXLIST_SUBTYPE_MOBILE && !call->mob) {
+                    if (trace != nullptr) {
+                        *trace << "INFO|MATCH|EXIT. NOT MOBILE\n";
+                    }
                     continue;
                 }
 
                 if (prefixlist->country_id > 0 && callInfo->geo != nullptr && callInfo->geo->country_id != prefixlist->country_id) {
+                    if (trace != nullptr) {
+                        *trace << "INFO|MATCH|EXIT. NOT MATCH COUNTRY\n";
+                    }
                     continue;
                 }
 
                 if (prefixlist->region_id > 0 && callInfo->geo != nullptr && callInfo->geo->region_id != prefixlist->region_id) {
+                    if (trace != nullptr) {
+                        *trace << "INFO|MATCH|EXIT. NOT MATCH REGION\n";
+                    }
                     continue;
                 }
 
                 if (prefixlist->city_id > 0 && callInfo->geo != nullptr && callInfo->geo->city_id != prefixlist->city_id) {
+                    if (trace != nullptr) {
+                        *trace << "INFO|MATCH|EXIT. NOT MATCH CITY\n";
+                    }
                     continue;
                 }
 
@@ -779,6 +804,9 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
                         }
                     }
                     if (exclude) {
+                        if (trace != nullptr) {
+                            *trace << "INFO|MATCH|EXIT. NOT MATCH EXCULDE OPERATORS\n";
+                        }
                         continue;
                     }
                 }
@@ -792,6 +820,9 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
                         }
                     }
                     if (exclude) {
+                        if (trace != nullptr) {
+                            *trace << "INFO|MATCH|EXIT. NOT MATCH INCLUDE OPERATORS\n";
+                        }
                         continue;
                     }
                 }

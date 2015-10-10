@@ -52,7 +52,7 @@ void StatsAccountManager::recalc(BDb * db) {
             "       COALESCE(m.m_sum, 0), " \
             "       '" + sDay + "', " \
             "       COALESCE(d.d_sum, 0), " \
-            "       c.amount_date, " \
+            "       COALESCE(c.amount_date, '1970-01-01'), " \
             "       COALESCE(a.a_sum, 0) " \
             "   from billing.clients c  " \
             "   left join " \
