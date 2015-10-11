@@ -1,5 +1,5 @@
 #include "ThreadUdpServer.h"
-#include "../classes/AppAuth.h"
+#include "../classes/AppBill.h"
 #include "../classes/UdpMessageProcessor.h"
 
 #include <boost/array.hpp>
@@ -14,7 +14,7 @@ void ThreadUdpServer::run() {
 
     boost::asio::io_service io_service;
 
-    udp::socket socket(io_service, udp::endpoint(udp::v4(), app().conf.api_port));
+    udp::socket socket(io_service, udp::endpoint(udp::v4(), app().conf.radius_port));
 
     for (;;) {
         boost::array<char, 1024> recv_buf;
@@ -49,20 +49,8 @@ void ThreadUdpServer::run() {
 
 }
 
-void ThreadUdpServer::htmlfull(stringstream &html) {
-    this->html(html);
-
-    html << "Time loop: <b>" << t.sloop() + "</b><br/>\n";
-    html << "Time full loop: <b>" << t.sfull() + "</b><br/>\n";
-    html << "loops: <b>" << t.count << "</b><br/>\n";
-    html << "<br/>\n";
-
-    html << "Errors count: <b>" << errors << "</b><br/>\n";
-}
 
 ThreadUdpServer::ThreadUdpServer() {
-    id = "udp_server";
+    id = idName();
     name = "Udp Server";
-
-    errors = 0;
 }

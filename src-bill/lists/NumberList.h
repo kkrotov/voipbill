@@ -31,7 +31,7 @@ protected:
     };
 
 public:
-    Number * find(int id) {
+    Number * find(int id, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -39,6 +39,19 @@ public:
             begin = p.first;
             end = p.second;
         }
-        return begin <  end ? &*begin : nullptr;
+        auto result = begin < end ? &*begin : nullptr;
+
+        if (trace != nullptr) {
+            if (result != nullptr) {
+                *trace << "FOUND|NUMBER|BY ID '" << id << "'" << "\n";
+                *trace << "||";
+                result->dump(*trace);
+                *trace << "\n";
+            } else {
+                *trace << "NOT FOUND|NUMBER|BY ID '" << id << "'" << "\n";
+            }
+        }
+
+        return result;
     }
 };

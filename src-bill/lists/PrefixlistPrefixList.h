@@ -52,7 +52,7 @@ protected:
     }
 
 public:
-    PrefixlistPrefix * find(int prefixlist_id, char * prefix) {
+    PrefixlistPrefix * find(int prefixlist_id, const char * prefix, stringstream *trace = nullptr) {
         char tmpPrefix[20];
         strcpy(tmpPrefix, prefix);
         size_t len = strlen(tmpPrefix);
@@ -60,11 +60,24 @@ public:
             tmpPrefix[len] = 0;
             auto result = _find(prefixlist_id, tmpPrefix);
             if (result != nullptr) {
+
+                if (trace != nullptr) {
+                    *trace << "FOUND|PREFIXLIST PREFIX|BY PREFIXLIST_ID '" << prefixlist_id << "', PREFIX '" << prefix << "'" << "\n";
+                    *trace << "||";
+                    result->dump(*trace);
+                    *trace << "\n";
+                }
+
                 return result;
             }
 
             len -= 1;
         }
+
+        if (trace != nullptr) {
+            *trace << "NOT FOUND|PREFIXLIST PREFIX|BY PREFIXLIST_ID '" << prefixlist_id << "', PREFIX '" << prefix << "'" << "\n";
+        }
+
         return nullptr;
     }
 };

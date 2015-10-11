@@ -24,4 +24,10 @@ struct Number {
         return intPrefixlistIds;
     }
 
+    void dump(stringstream &trace) {
+        trace << "(";
+        trace << "id: " << id << ", ";
+        trace << "name: " << name << ", ";
+        trace << ")";
+    }
 };

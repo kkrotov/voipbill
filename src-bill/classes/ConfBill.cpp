@@ -6,6 +6,8 @@
 bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
 
     web_port = pt.get<unsigned short>("main.web_port", 8032);
+    radius_port = pt.get<unsigned short>("main.radius", 8033);
+
 
     db_main = pt.get<string>("db.main");
     db_calls = pt.get<string>("db.calls");

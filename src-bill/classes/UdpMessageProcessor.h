@@ -1,32 +1,49 @@
 #pragma once
 
-#include "../models/obj.h"
-#include "../../src/classes/BDb.h"
 #include <string>
+
+#include "Repository.h"
 
 using namespace std;
 
 class UdpMessageProcessor {
 public:
 
-    UdpMessageProcessor(const string &message, BDb * db_calls);
+    UdpMessageProcessor(const string &message);
 
     string process();
 
 private:
-    BDb * db_calls;
     string message;
+    string prefix;
     string aNumber;
+    string aNumberForAuth;
     string bNumber;
-    int trunkNumber;
-    CallObj call;
+    string redirectionNumber;
+    string trunkName;
 
+    Repository repository;
+    Server * server;
+    Trunk * trunk;
 
+    void init();
     void parseRequest();
     bool validateRequest();
 
-    void prepareCall();
-    void calculateCall();
-    string analyzeCall();
+    int processRouteTable(const int routeTableId);
+
+    bool filterByNumber(const int numberId, string strNumber);
+
+    string processOutcome(int outcomeId);
+
+    string processAutoOutcome(Outcome * outcome);
+    string processRouteCaseOutcome(Outcome * outcome);
+    string processReleaseReasonOutcome(Outcome * outcome);
+    string processAirpOutcome(Outcome * outcome);
+
+    bool isLocalTrunk();
+    bool needSwapCallingAndRedirectionNumber();
+    bool canRouteForOperator(Trunk * oper);
+    bool isOperatorRulesMatched(Trunk * oper, bool outgoing, string strNumber);
 };
 

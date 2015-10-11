@@ -19,6 +19,7 @@
 #include "../threads/ThreadUpdateActiveClients.h"
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
+#include "../threads/ThreadUdpServer.h"
 #include "../classes/LogWriterScreen.h"
 #include "../classes/LogWriterFile.h"
 #include "../classes/LogWriterSyslog.h"
@@ -78,6 +79,7 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadUpdateActiveClients>();
     registerThread<ThreadCheckStartTable>();
     registerThread<ThreadTasks>();
+    registerThread<ThreadUdpServer>();
 }
 
 void AppBill::runAppInSingleMode()
@@ -101,6 +103,7 @@ void AppBill::runAppInSingleMode()
             "update_active_clients",
             "checkstarttable",
             "tasks",
+            "udp_server",
     };
 
     for (auto thread: standardThreads) {

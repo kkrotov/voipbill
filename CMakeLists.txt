@@ -53,7 +53,9 @@ set(BILL_SOURCES
     src-bill/classes/Timer.cpp
     src-bill/classes/UdpControlClient.cpp
     src-bill/classes/CdrManager.cpp
-#    src-bill/classes/UdpMessageProcessor.cpp
+    src-bill/classes/UdpMessageProcessor.cpp
+    src-bill/classes/UdpMessageProcessorBill.cpp
+    src-bill/classes/BillClient.cpp
     src-bill/data/BaseData.cpp
     src-bill/data/ActiveCounterData.cpp
     src-bill/data/AirpData.cpp
@@ -231,11 +233,12 @@ set(BILL_SOURCES
     src-bill/threads/ThreadLimitControl.cpp
     src-bill/threads/ThreadUpdateActiveClients.cpp
     src-bill/threads/ThreadTasks.cpp
-    src-bill/tasks/TaskRecalc.cpp
     src-bill/threads/ThreadSyncCalls.cpp
     src-bill/threads/ThreadSyncCounters.cpp
     src-bill/threads/ThreadSyncLocks.cpp
     src-bill/threads/ThreadWeb.cpp
+    src-bill/threads/ThreadUdpServer.cpp
+    src-bill/tasks/TaskRecalc.cpp
     src-bill/web/http/mime_types.cpp
     src-bill/web/http/reply.cpp
     src-bill/web/http/request_parser.cpp

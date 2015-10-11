@@ -9,6 +9,7 @@ public:
     string db_calls;
 
     unsigned short web_port;
+    unsigned short radius_port;
 
     unsigned short instance_id;
     string str_instance_id;
