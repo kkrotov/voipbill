@@ -37,10 +37,10 @@ void StatsAccountManager::recalc(BDb * db) {
     time_t d_date = get_tday(time(nullptr), 0);
     time_t m_date = get_tmonth(time(nullptr), 0);
 
-    string sDay = string_date(d_date);
-    string sMonth = string_date(m_date);
+    string sDay = string_date(d_date, 3);
+    string sMonth = string_date(m_date, 4);
 
-    string sPrevMonth = string_date(m_date - 32 * 86400);
+    string sPrevMonth = string_date(m_date - 32 * 86400, 5);
 
     db->exec("DELETE FROM billing.stats_account");
 
@@ -52,7 +52,7 @@ void StatsAccountManager::recalc(BDb * db) {
             "       COALESCE(m.m_sum, 0), " \
             "       '" + sDay + "', " \
             "       COALESCE(d.d_sum, 0), " \
-            "       COALESCE(c.amount_date, '1970-01-01'), " \
+            "       c.amount_date, " \
             "       COALESCE(a.a_sum, 0) " \
             "   from billing.clients c  " \
             "   left join " \
@@ -78,7 +78,7 @@ void StatsAccountManager::recalc(BDb * db) {
             "           on c.account_id=cl.id " \
             "           where " \
             "               c.connect_time >= '" + sPrevMonth + "' " \
-            "               and (c.connect_time >= cl.amount_date or cl.amount_date is null) " \
+            "               and c.connect_time >= cl.amount_date " \
             "           group by account_id " \
             "       ) as a " \
             "   on c.id = a.account_id " \
@@ -107,7 +107,7 @@ void StatsAccountManager::reloadSum(BDb * db, list<int> accountIds, Spinlock &lo
     }
 
     time_t m_date = get_tmonth(time(nullptr));
-    string sPrevMonth = string_date(m_date - 32 * 86400);
+    string sPrevMonth = string_date(m_date - 32 * 86400, 6);
 
     BDbResult res = db->query(
             "   select c.id, COALESCE(a.a_sum,0), c.amount_date " \
@@ -118,7 +118,7 @@ void StatsAccountManager::reloadSum(BDb * db, list<int> accountIds, Spinlock &lo
             "           left join billing.clients cl on c.account_id=cl.id " \
             "           where " \
             "               c.connect_time >= '" + sPrevMonth + "'::date " \
-            "               and (c.connect_time >= cl.amount_date or cl.amount_date is null) " \
+            "               and c.connect_time >= cl.amount_date " \
             "               and c.account_id in (" + strIds + ") " \
             "           group by account_id " \
             "       ) as a " \
@@ -166,9 +166,9 @@ void StatsAccountManager::prepareSaveQuery(stringstream &query) {
         if (i > 0) query << ",\n";
         query << "(";
         query << "'" << stats.account_id << "',";
-        query << "'" << string_date(stats.amount_month) << "',";
+        query << "'" << string_date(stats.amount_month, 1) << "',";
         query << "'" << stats.sum_month << "',";
-        query << "'" << string_date(stats.amount_day) << "',";
+        query << "'" << string_date(stats.amount_day, 2) << "',";
         query << "'" << stats.sum_day << "',";
         query << "'" << string_time(stats.amount_date, 3) << "',";
         query << "'" << stats.sum << "')";
@@ -198,17 +198,21 @@ void StatsAccountManager::add(CallInfo *callInfo) {
 
     Call *call = callInfo->call;
 
-    if (call->account_id > 0 && abs(call->cost) < 0.000001) {
+    if (callInfo->account != nullptr || abs(call->cost) < 0.000001) {
         return;
     }
 
 
     StatsAccount &stats = statsAccount[call->account_id];
 
-    stats.account_id = call->account_id;
+    if (stats.account_id == 0) {
+        stats.account_id = call->account_id;
+        stats.amount_month = callInfo->dtUtc.month;
+        stats.amount_day = callInfo->dtUtc.day;
+        stats.amount_date = callInfo->account->amount_date;
+    }
 
     if (abs(callInfo->dtUtc.month - stats.amount_month) < 43200) {
-        stats.amount_month = callInfo->dtUtc.month;
         stats.sum_month += call->cost;
     } else if (callInfo->dtUtc.month > stats.amount_month) {
         stats.amount_month = callInfo->dtUtc.month;
@@ -216,14 +220,13 @@ void StatsAccountManager::add(CallInfo *callInfo) {
     }
 
     if (abs(callInfo->dtUtc.day - stats.amount_day) < 43200) {
-        stats.amount_day = callInfo->dtUtc.day;
         stats.sum_day += call->cost;
     } else if (callInfo->dtUtc.day > stats.amount_day) {
         stats.amount_day = callInfo->dtUtc.day;
         stats.sum_day = call->cost;
     }
 
-    if (callInfo->account != nullptr && call->connect_time >= callInfo->account->amount_date) {
+    if (call->connect_time >= callInfo->account->amount_date) {
         stats.sum += call->cost;
     }
 
@@ -298,9 +301,9 @@ size_t StatsAccountManager::sync(BDb * db_main, DataBillingContainer * billingDa
         query << "(";
         query << "'" << app().conf.instance_id << "',";
         query << "'" << stats.account_id << "',";
-        query << "'" << string_date(stats.amount_month) << "',";
+        query << "'" << string_date(stats.amount_month, 7) << "',";
         query << "'" << stats.sum_month << "',";
-        query << "'" << string_date(stats.amount_day) << "',";
+        query << "'" << string_date(stats.amount_day, 8) << "',";
         query << "'" << stats.sum_day << "',";
         query << "'" << string_time(stats.amount_date, 4) << "',";
         query << "'" << stats.sum << "')";

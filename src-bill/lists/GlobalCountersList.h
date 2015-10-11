@@ -8,8 +8,8 @@ class GlobalCountersList : public ObjList<GlobalCounters> {
 protected:
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
-        string sDay = string_date(get_tday(time(nullptr)));
-        string sMonth = string_date(get_tmonth(time(nullptr)));
+        string sDay = string_date(get_tday(time(nullptr)), 9);
+        string sMonth = string_date(get_tmonth(time(nullptr)), 10);
         return "   select account_id, sum(sum), " \
            "          sum(case when amount_day = '" + sDay + "' then sum_day else 0 end), " \
            "          sum(case when amount_month = '" + sMonth + "' then sum_month else 0 end) " \

@@ -28,11 +28,11 @@ string string_fmt(const string &fmt, ...) {
     }
 }
 
-string string_date(const time_t dt) {
+string string_date(const time_t dt, int debugFlag) {
     char buff[20];
 
     if (dt > UNIXTIME_50010101) {
-        Log::error("string_date: bad unix time");
+        Log::error("string_date: bad unix time" + lexical_cast<string>(debugFlag));
         return string("5000-01-01");
     }
 
