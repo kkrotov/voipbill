@@ -53,7 +53,22 @@ bool BDb::connect() {
             disconnect();
             throw Exception("Can not lock key" + lexical_cast<string>(need_advisory_lock), "BDb::try_advisory_lock");
         }
-        PQclear(res);
+        if (res != nullptr) {
+            PQclear(res);
+        }
+    }
+
+    {
+        PGresult *res = PQexec(conn, "set session time zone '+00'");
+        if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+            DbException e(conn, "BDb::connect set timezone");
+            PQclear(res);
+            disconnect();
+            throw e;
+        }
+        if (res != nullptr) {
+            PQclear(res);
+        }
     }
 
     return true;
