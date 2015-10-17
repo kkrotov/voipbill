@@ -58,7 +58,7 @@ public:
         size_t len = strlen(tmpPrefix);
         while (len > 0) {
             tmpPrefix[len] = 0;
-            auto result = _find(prefixlist_id, tmpPrefix);
+            PrefixlistPrefix * result = _find(prefixlist_id, tmpPrefix);
             if (result != nullptr) {
 
                 if (trace != nullptr) {

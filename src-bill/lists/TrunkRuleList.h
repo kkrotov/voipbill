@@ -88,11 +88,12 @@ public:
                 *trace << "FOUND|TRUNK RULES|BY TRUNK_ID '" << trunk_id << "', OUTGOING '" << outgoing << "'" << "\n";
             }
             for (auto it = begin; it != end; ++it) {
-                resultRules.push_back(&*it);
+                TrunkRule * rule = &*it;
+                resultRules.push_back(rule);
 
                 if (trace != nullptr) {
                     *trace << "||";
-                    it->dump(*trace);
+                    rule->dump(*trace);
                     *trace << "\n";
                 }
             }

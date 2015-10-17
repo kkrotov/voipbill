@@ -79,7 +79,7 @@ public:
         while (len > 0) {
             tmpPrefix[len] = 0;
 
-            auto result = _find(network_config_id, tmpPrefix, timestamp);
+            NetworkPrefix * result = _find(network_config_id, tmpPrefix, timestamp);
             if (result != nullptr) {
 
                 if (trace != nullptr) {

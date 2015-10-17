@@ -56,7 +56,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        auto result = begin <  end ? &*begin : nullptr;
+        ServicePackage * result = begin <  end ? &*begin : nullptr;
 
         if (begin < end) {
             if (trace != nullptr) {

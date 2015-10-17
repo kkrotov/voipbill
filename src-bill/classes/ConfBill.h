@@ -8,20 +8,23 @@ public:
     string db_main;
     string db_calls;
 
-    unsigned short web_port;
-    unsigned short radius_port;
+    uint16_t web_port;
 
-    unsigned short instance_id;
+    uint16_t instance_id;
     string str_instance_id;
 
     string openca_udp_host;
-    unsigned short openca_udp_port;
-    unsigned short udp_openca_select_interval;
-    unsigned short udp_force_finish_call_interval;
+    uint16_t openca_udp_port;
+    uint16_t udp_openca_select_interval;
+    uint16_t udp_force_finish_call_interval;
 
-    unsigned short billing_free_seconds;
+    uint16_t billing_free_seconds;
 
-    unsigned short global_counters_select_interval;
+    uint16_t global_counters_select_interval;
+
+    uint16_t radius_auth_port;
+    uint16_t radius_acct_port;
+    string radius_secret;
 
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);

@@ -44,7 +44,7 @@ public:
         size_t len = strlen(tmpPrefix);
         while (len > 0) {
             tmpPrefix[len] = 0;
-            auto result = _find(tmpPrefix);
+            MobPrefix * result = _find(tmpPrefix);
             if (result != 0) {
 
                 if (trace != nullptr) {

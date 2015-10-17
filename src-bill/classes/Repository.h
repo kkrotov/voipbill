@@ -197,6 +197,9 @@ public:
         trunkRule->findAll(resultRules, trunk_id, outgoing, trace);
     }
 
+    void getAllAutoRoutingTrunks(vector<Trunk *> &resultTrunks) {
+        trunk->findAllAutorouting(resultTrunks, trace);
+    }
     StatPrefixlist * getStatPrefixlist(int stat_prefixlist_id) {
         return statPrefixlist->find(stat_prefixlist_id, trace);
     }

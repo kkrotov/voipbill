@@ -17,14 +17,13 @@ private:
     string message;
     string prefix;
     string aNumber;
-    string aNumberForAuth;
     string bNumber;
     string redirectionNumber;
     string trunkName;
 
     Repository repository;
     Server * server;
-    Trunk * trunk;
+    Trunk * origTrunk;
 
     void init();
     void parseRequest();
@@ -36,14 +35,17 @@ private:
 
     string processOutcome(int outcomeId);
 
-    string processAutoOutcome(Outcome * outcome);
+    string processAutoOutcome();
     string processRouteCaseOutcome(Outcome * outcome);
     string processReleaseReasonOutcome(Outcome * outcome);
     string processAirpOutcome(Outcome * outcome);
 
     bool isLocalTrunk();
     bool needSwapCallingAndRedirectionNumber();
-    bool canRouteForOperator(Trunk * oper);
-    bool isOperatorRulesMatched(Trunk * oper, bool outgoing, string strNumber);
+
+    bool autoTrunkFilterSrcNumber(Trunk * termTrunk);
+    bool autoTrunkFilterDstNumber(Trunk * termTrunk);
+    bool matchPrefixlist(const int prefixlistId, string strNumber);
+    bool checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int type, Pricelist * &pricelist, PricelistPrice * &price);
 };
 

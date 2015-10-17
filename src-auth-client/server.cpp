@@ -1,30 +1,30 @@
-#include "ThreadUdpServer.h"
-#include "../classes/AppBill.h"
-#include "../classes/UdpMessageProcessor.h"
+/*
+ * This source file is part of the ace-radius library.  This code was
+ * written by Alex Agranov in 2004-2009, and is covered by the BSD open source
+ * license. Refer to the accompanying documentation for details on usage and
+ * license.
+ */
 
-void ThreadUdpServer::run() {
-    // create instance of server stack
-    RadiusServerStack l_stack(RadiusSecret(app().conf.radius_secret.c_str()));
-    if (!l_stack.isValid())
-    {
-        Log::error("Can not create RADIUS server stack\n");
-        return;
-    }
+#include <stdio.h>
+#include <string.h>
 
-    // reference to request packet
-    RadiusPacket & l_request = l_stack.getRequest();
-    while (1)
-    {
-        int l_rc = l_stack.receiveRequest();
-        if (l_rc == RC_SUCCESS)
-        {
-            if (verifyRequest(l_stack.getRequest()) == RC_SUCCESS)
-                sendResponse(l_stack);
-        }
-    }
-}
+#include "../libs/ace-radius/RadiusServerStack.h"
 
-int ThreadUdpServer::verifyRequest(RadiusPacket & p_request)
+/*
+ * A sample RADIUS server.
+ *
+ * Usage:
+ *     server
+ *
+ * Notes:
+ *   - server listens on authentication port (1812)
+ *   - it answers only Access-Requests with user="nemo" and password="arctangent"
+ */
+
+// ----------------------
+// verify request packet
+// ----------------------
+int verifyRequest(RadiusPacket & p_request)
 {
     RadiusAttribute l_attr;
     const char * l_data;
@@ -81,7 +81,7 @@ int ThreadUdpServer::verifyRequest(RadiusPacket & p_request)
 }
 
 
-int ThreadUdpServer::sendResponse(RadiusServerStack &p_stack)
+int sendResponse(RadiusServerStack &p_stack)
 {
     // ----------------------
     // build response packet
@@ -116,7 +116,39 @@ int ThreadUdpServer::sendResponse(RadiusServerStack &p_stack)
     return RC_SUCCESS;
 }
 
-ThreadUdpServer::ThreadUdpServer() {
-    id = idName();
-    name = "Udp Server";
+int main (int argc, char *argv[])
+{
+    int l_rc;
+
+    printf("Test RADIUS Server application\n");
+
+    // create instance of server stack
+    RadiusServerStack l_stack(RadiusSecret("427a7663dbd035c5f7611c9545e9d0"));
+    if (!l_stack.isValid())
+    {
+        printf("Can not create RADIUS server stack\n");
+        return 1;
+    }
+
+    // reference to request packet
+    RadiusPacket & l_request = l_stack.getRequest();
+
+    while (1)
+    {
+        l_rc = l_stack.receiveRequest();
+        if (l_rc == RC_SUCCESS)
+        {
+            printf("---\nReceived request packet from ");
+            l_stack.getClientAddress().dump();
+            printf("\n---\n");
+            l_request.dump();
+
+            if (verifyRequest(l_stack.getRequest()) == RC_SUCCESS)
+                sendResponse(l_stack);
+        }
+        else
+            printf("Error 1\n");
+    }
+
+    return 0;
 }

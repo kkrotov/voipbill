@@ -4,58 +4,15 @@
 #include "Log.h"
 #include "UdpMessageProcessorBill.h"
 
-UdpMessageProcessorBill::UdpMessageProcessorBill(const string &message, BDb * db_calls) {
-    this->message = message;
-    this->db_calls = db_calls;
-}
-
-void UdpMessageProcessorBill::parseRequest() {
-
-    vector<string> parameters;
-    split(parameters, message, boost::algorithm::is_any_of(";"));
-
-    for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-        vector<string> pair;
-        split(pair, *it, boost::algorithm::is_any_of(":"));
-
-        if (pair.size() == 2) {
-            string name = pair.at(0);
-            string value = pair.at(1);
-
-            if (name == "calling") {
-                aNumber = value;
-            } else if (name == "called") {
-                bNumber = value;
-            } else if (name == "trunk") {
-                trunkNumber = atoi(value.c_str());
-            }
-        }
-    }
-}
-
-bool UdpMessageProcessorBill::validateRequest() {
-
-    if (aNumber == "") {
-        throw new Exception("Udp request validation: bad calling: " + message, "UdpMessageProcessorBill::validateRequest");
-    }
-
-    if (bNumber == "") {
-        throw new Exception("Udp request validation: bad called: " + message, "UdpMessageProcessorBill::validateRequest");
-    }
-
-    if (trunkNumber < 80) {
-        throw new Exception("Udp request validation: bad trunk: " + lexical_cast<string>(trunkNumber), "UdpMessageProcessorBill::validateRequest");
-    }
-
+UdpMessageProcessorBill::UdpMessageProcessorBill(const string &aNumber, const string &bNumber, const string &trunkName) {
+    this->aNumber = aNumber;
+    this->bNumber = bNumber;
+    this->trunkName = trunkName;
 }
 
 string UdpMessageProcessorBill::process() {
 
     try {
-
-        parseRequest();
-
-        validateRequest();
 
         calculateCall();
 

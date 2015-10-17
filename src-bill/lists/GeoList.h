@@ -38,7 +38,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        auto result = begin < end ? &*begin : nullptr;
+        Geo * result = begin < end ? &*begin : nullptr;
 
         if (trace != nullptr) {
             if (result != nullptr) {

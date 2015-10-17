@@ -1,6 +1,5 @@
 #pragma once
 
-#include "BDb.h"
 #include <string>
 
 using namespace std;
@@ -8,20 +7,14 @@ using namespace std;
 class UdpMessageProcessorBill {
 public:
 
-    UdpMessageProcessorBill(const string &message, BDb * db_calls);
+    UdpMessageProcessorBill(const string &aNumber, const string &bNumber, const string &trunkName);
 
     string process();
 
 private:
-    BDb * db_calls;
-    string message;
     string aNumber;
     string bNumber;
-    int trunkNumber;
-
-
-    void parseRequest();
-    bool validateRequest();
+    string trunkName;
 
     void prepareCall();
     void calculateCall();
