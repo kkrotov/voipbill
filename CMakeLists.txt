@@ -272,7 +272,7 @@ set(BILL_SOURCES
     libs/boost/program_options/src/value_semantic.cpp
     libs/boost/program_options/src/variables_map.cpp
     libs/boost/program_options/src/winmain.cpp
-)
+        src-bill/threads/ThreadCdrParser.cpp src-bill/threads/ThreadCdrParser.h src-bill/classes/FTPClient.cpp src-bill/classes/FTPClient.h)
 
 add_executable(app_bill ${BILL_SOURCES})
 target_link_libraries(app_bill rt pthread pq)

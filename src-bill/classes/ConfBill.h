@@ -22,6 +22,14 @@ public:
 
     unsigned short global_counters_select_interval;
 
+    string cdr_ftp_host;
+    string cdr_ftp_user;
+    string cdr_ftp_password;
+    int cdr_ftp_port;
+    std::string cdr_nasip;
+    string cdr_local_data_storage;
+    int cdr_ftp_responce_port;
+
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);
 };

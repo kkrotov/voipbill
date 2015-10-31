@@ -22,4 +22,11 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
 
     global_counters_select_interval = pt.get<unsigned short>("billing.global_counters_select_interval", 10);
 
+    cdr_ftp_host = pt.get<string>("cdrftp.cdr_ftp_host", "");
+    cdr_ftp_user = pt.get<string>("cdrftp.cdr_ftp_user", "");
+    cdr_ftp_password = pt.get<string>("cdrftp.cdr_ftp_password", "");
+    cdr_ftp_port = pt.get<int>("cdrftp.cdr_ftp_port", 20);
+    cdr_local_data_storage = pt.get<string>("cdrftp.cdr_local_data_storage", "/tmp");
+    cdr_nasip = pt.get<string>("cdrftp.cdr_nasip", "127.0.0.1");
+    cdr_ftp_responce_port = pt.get<int>("cdrftp.cdr_ftp_responce_port", 21);
 }

@@ -13,8 +13,6 @@ ThreadBlacklistFetch::ThreadBlacklistFetch() {
 
 bool ThreadBlacklistFetch::prepare() {
 
-    return true;
-
     if (!blacklist_local->fetch()) {
         return false;
     }

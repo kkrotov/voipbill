@@ -170,7 +170,7 @@ class CdrParser(Daemon):
 
     def insertCall(self, cur, call):
         cur.execute(
-            "select public.insert_cdr(%s,%s,%s,%s,%s,'%s',%s,%s,%s,'%s',%s,%s,%s,%s)",
+                "select public.insert_cdr(%s,%s,%s,%s,%s,'%s',%s,%s,%s,'%s',%s,%s,%s,%s)",
             (call['call_id'], main_nasip, call['src_number'], call['dst_number'], call['redirect_number'], call['session_time'], call['setup_time'], call['connect_time'], call['disconnect_time'], call['disconnect_cause'], call['src_route'], call['dst_route'], call['src_noa'], call['dst_noa'],)
         )
 
