@@ -3,7 +3,7 @@
 #include "../classes/Thread.h"
 #include "../../libs/ace-radius/RadiusServerStack.h"
 
-class ThreadUdpServer : public Thread {
+class ThreadRadiusAuthServer : public Thread {
 
     void run();
     int verifyRequest(RadiusPacket & p_request);
@@ -11,6 +11,6 @@ class ThreadUdpServer : public Thread {
 
 public:
 
-    ThreadUdpServer();
+    ThreadRadiusAuthServer();
     static const char* idName() { return "udp_server"; }
 };

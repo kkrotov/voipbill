@@ -1,8 +1,8 @@
-#include "ThreadUdpServer.h"
+#include "ThreadRadiusAuthServer.h"
 #include "../classes/AppBill.h"
 #include "../classes/UdpMessageProcessor.h"
 
-void ThreadUdpServer::run() {
+void ThreadRadiusAuthServer::run() {
     // create instance of server stack
     RadiusServerStack l_stack(RadiusSecret(app().conf.radius_secret.c_str()));
     if (!l_stack.isValid())
@@ -24,7 +24,7 @@ void ThreadUdpServer::run() {
     }
 }
 
-int ThreadUdpServer::verifyRequest(RadiusPacket & p_request)
+int ThreadRadiusAuthServer::verifyRequest(RadiusPacket & p_request)
 {
     RadiusAttribute l_attr;
     const char * l_data;
@@ -81,7 +81,7 @@ int ThreadUdpServer::verifyRequest(RadiusPacket & p_request)
 }
 
 
-int ThreadUdpServer::sendResponse(RadiusServerStack &p_stack)
+int ThreadRadiusAuthServer::sendResponse(RadiusServerStack &p_stack)
 {
     // ----------------------
     // build response packet
@@ -116,7 +116,7 @@ int ThreadUdpServer::sendResponse(RadiusServerStack &p_stack)
     return RC_SUCCESS;
 }
 
-ThreadUdpServer::ThreadUdpServer() {
+ThreadRadiusAuthServer::ThreadRadiusAuthServer() {
     id = idName();
     name = "Udp Server";
 }

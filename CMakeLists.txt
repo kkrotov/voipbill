@@ -58,6 +58,7 @@ set(BILL_SOURCES
     src-bill/classes/LogWriterScreen.cpp
     src-bill/classes/LogWriterSyslog.cpp
     src-bill/classes/ObjList.cpp
+    src-bill/classes/RadiusAuthServer.cpp
     src-bill/classes/StatsPackageManager.cpp
     src-bill/classes/Repository.cpp
     src-bill/classes/Spinlock.cpp
@@ -233,6 +234,7 @@ set(BILL_SOURCES
     src-bill/sync/PullTrunkPriority.cpp
     src-bill/sync/PullTrunkRule.cpp
     src-bill/threads/ThreadLog.cpp
+    src-bill/threads/ThreadRadiusAuthServer.cpp
     src-bill/threads/ThreadSync.cpp
     src-bill/threads/ThreadLoader.cpp
     src-bill/threads/ThreadRemoteLoader.cpp
@@ -251,7 +253,6 @@ set(BILL_SOURCES
     src-bill/threads/ThreadSyncCounters.cpp
     src-bill/threads/ThreadSyncLocks.cpp
     src-bill/threads/ThreadWeb.cpp
-    src-bill/threads/ThreadUdpServer.cpp
     src-bill/tasks/TaskRecalc.cpp
     src-bill/web/http/mime_types.cpp
     src-bill/web/http/reply.cpp

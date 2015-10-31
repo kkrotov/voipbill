@@ -8,6 +8,7 @@
 #include "../threads/ThreadCurrentCalls.h"
 #include "../threads/ThreadFetchCdr.h"
 #include "../threads/ThreadBillRuntime.h"
+#include "../threads/ThreadRadiusAuthServer.h"
 #include "../threads/ThreadSave.h"
 #include "../threads/ThreadSyncCalls.h"
 #include "../threads/ThreadSyncCounters.h"
@@ -19,7 +20,6 @@
 #include "../threads/ThreadUpdateActiveClients.h"
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
-#include "../threads/ThreadUdpServer.h"
 #include "../classes/LogWriterScreen.h"
 #include "../classes/LogWriterFile.h"
 #include "../classes/LogWriterSyslog.h"
@@ -79,7 +79,7 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadUpdateActiveClients>();
     registerThread<ThreadCheckStartTable>();
     registerThread<ThreadTasks>();
-    registerThread<ThreadUdpServer>();
+    registerThread<ThreadRadiusAuthServer>();
 }
 
 void AppBill::runAppInSingleMode()

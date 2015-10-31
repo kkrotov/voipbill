@@ -51,31 +51,6 @@ int verifyRequest(RadiusPacket & p_request)
         return RC_FAIL;
     }
 
-//    if ((l_length != 4) || (memcmp(l_data, "nemo", 4) != 0))
-//    {
-//        printf("ERROR: Wrong User-Name attribute value\n");
-//        return RC_FAIL;
-//    }
-
-    // verify User-Password attribute
-    if (p_request.findAttribute(D_ATTR_USER_PASSWORD, l_attr) != RC_SUCCESS)
-    {
-        printf("ERROR: Can't find User-Password attribute\n");
-        return RC_FAIL;
-    }
-
-    if (l_attr.getUserPassword(l_password, l_length) != RC_SUCCESS)
-    {
-        printf("ERROR: Can't parse User-Password attribute\n");
-        return RC_FAIL;
-    }
-
-//    if ((l_length != 10) || (memcmp(l_password, "arctangent", 10) != 0))
-//    {
-//        printf("ERROR: Wrong User-Password attribute value\n");
-//        return RC_FAIL;
-//    }
-
     // everything looks OK
     return RC_SUCCESS;
 }
@@ -89,19 +64,16 @@ int sendResponse(RadiusServerStack &p_stack)
     RadiusPacket l_response(D_PACKET_ACCESS_ACCEPT, p_stack.getRequest());
     RadiusAttribute l_attr;
 
-    // add Service-Type attribute
-    l_response.addAttribute(D_ATTR_SERVICE_TYPE, l_attr);
-    l_attr.setNumber(1);
+    l_response.addAttribute(D_ATTR_CALLING_STATION_ID, l_attr);
+    l_attr.setString("74992130001");
 
-    // add Login-Service attribute
-    l_response.addAttribute(D_ATTR_LOGIN_SERVICE, l_attr);
-    l_attr.setNumber(0);
+    l_response.addAttribute(D_ATTR_CALLED_STATION_ID, l_attr);
+    l_attr.setString("79091521337");
 
-    // add Login-IP-Host attribute
-    l_response.addAttribute(D_ATTR_LOGIN_IP_HOST, l_attr);
-    struct in_addr l_addr;
-    inet_aton("192.168.1.3", &l_addr);
-    l_attr.setIPAddress(l_addr);
+    l_response.addAttribute(D_ATTR_VENDOR_SPECIFIC, l_attr);
+    l_attr.setVendorId(9);
+    l_attr.setVendorType(1);
+    l_attr.setVendorString("RTCASE=RU_Beeline_sip");
 
     // ----------------------
     // send response packet

@@ -129,20 +129,19 @@ int main (int argc, const char * const *argv)
     l_attr.setString(dstNumber.c_str());
 
     l_packet.addAttribute(D_ATTR_VENDOR_SPECIFIC, l_attr);
-    l_attr.setVendorType(1);
     l_attr.setVendorId(9);
+    l_attr.setVendorType(1);
     l_attr.setVendorString(("INCOMING-CALLING-ADDRESS-NOA=" + srcNoa).c_str());
 
     l_packet.addAttribute(D_ATTR_VENDOR_SPECIFIC, l_attr);
-    l_attr.setVendorType(1);
     l_attr.setVendorId(9);
+    l_attr.setVendorType(1);
     l_attr.setVendorString(("INCOMING-CALLED-ADDRESS-NOA=" + srcNoa).c_str());
 
     l_packet.addAttribute(D_ATTR_VENDOR_SPECIFIC, l_attr);
-    l_attr.setVendorType(1);
     l_attr.setVendorId(9);
+    l_attr.setVendorType(1);
     l_attr.setVendorString(("INCOMING-ROUTEID=" + trunk).c_str());
-
 
     l_packet.dump();
 
