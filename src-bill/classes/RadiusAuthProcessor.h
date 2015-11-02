@@ -3,18 +3,16 @@
 #include <string>
 
 #include "Repository.h"
+#include "RadiusAuthServer.h"
 
 using namespace std;
 
-class UdpMessageProcessor {
+class RadiusAuthProcessor {
 public:
 
-    UdpMessageProcessor(const string &message);
-
-    string process();
+    void process(RadiusAuthRequest &request, RadiusAuthResponse &response);
 
 private:
-    string message;
     string prefix;
     string aNumber;
     string bNumber;
@@ -26,21 +24,18 @@ private:
     Trunk * origTrunk;
 
     void init();
-    void parseRequest();
-    bool validateRequest();
 
     int processRouteTable(const int routeTableId);
 
     bool filterByNumber(const int numberId, string strNumber);
 
-    string processOutcome(int outcomeId);
+    void processOutcome(RadiusAuthResponse &response, int outcomeId);
 
-    string processAutoOutcome();
-    string processRouteCaseOutcome(Outcome * outcome);
-    string processReleaseReasonOutcome(Outcome * outcome);
-    string processAirpOutcome(Outcome * outcome);
+    void processAutoOutcome(RadiusAuthResponse &response);
+    void processRouteCaseOutcome(RadiusAuthResponse &response, Outcome * outcome);
+    void processReleaseReasonOutcome(RadiusAuthResponse &response, Outcome * outcome);
+    void processAirpOutcome(RadiusAuthResponse &response, Outcome * outcome);
 
-    bool isLocalTrunk();
     bool needSwapCallingAndRedirectionNumber();
 
     bool autoTrunkFilterSrcNumber(Trunk * termTrunk);

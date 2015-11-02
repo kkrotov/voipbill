@@ -2,15 +2,15 @@
 
 #include "../classes/Exception.h"
 #include "../classes/Log.h"
+#include "RadiusAuthProcessor.h"
 
 void RadiusAuthServer::run(string secret, uint16_t port) {
-    // create instance of server stack
+
     RadiusServerStack l_stack(RadiusSecret(secret.c_str()), port);
     if (!l_stack.isValid()){
         throw Exception("Can not create RADIUS server stack");
     }
 
-    // reference to request packet
     RadiusPacket & l_request = l_stack.getRequest();
     while (true) {
         try {
@@ -84,11 +84,18 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
 void RadiusAuthServer::processRequest(RadiusAuthRequest &request, RadiusAuthResponse &response) {
     response.id = request.id;
     response.routeCase = "RU_Beeline_sip";
+
+    RadiusAuthProcessor processor;
+    processor.process(request, response);
+
 }
 
 void RadiusAuthServer::sendResponse(RadiusServerStack &p_stack, RadiusAuthResponse &response)
 {
-    RadiusPacket l_response(D_PACKET_ACCESS_ACCEPT, p_stack.getRequest());
+    RadiusPacket l_response(
+        response.accept ? D_PACKET_ACCESS_ACCEPT : D_PACKET_ACCESS_REJECT,
+        p_stack.getRequest()
+    );
 
     if (response.srcNumber.size() > 0) {
         RadiusAttribute attr;

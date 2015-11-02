@@ -1,6 +1,5 @@
 #include "ThreadSyncLocks.h"
 #include "../classes/AppBill.h"
-#include "../classes/UdpMessageProcessor.h"
 
 ThreadSyncLocks::ThreadSyncLocks() {
     id = idName();
@@ -87,15 +86,6 @@ void ThreadSyncLocks::save_client_locks() {
 void ThreadSyncLocks::htmlfull(stringstream &html) {
     this->html(html);
 
-    Timer t;
-
-    t.start();
-    UdpMessageProcessor processor("calling:74996851300;called:74955186024;trunk:mcn_msk_ast244_99");
-    string response = processor.process();
-    t.stop();
-
-    html << "response: " << response << "<br/>\n";
-    html << "response: " << t.sloop() << "<br/>\n";
     html << "Last sync count: " << last_sync_count << "<br/>\n";
     html << "Last sync count: " << total_sync_count << "<br/>\n";
 }

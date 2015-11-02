@@ -58,6 +58,8 @@ set(BILL_SOURCES
     src-bill/classes/LogWriterScreen.cpp
     src-bill/classes/LogWriterSyslog.cpp
     src-bill/classes/ObjList.cpp
+    src-bill/classes/RadiusAuthProcessor.cpp
+    src-bill/classes/RadiusAuthProcessorBill.cpp
     src-bill/classes/RadiusAuthServer.cpp
     src-bill/classes/StatsPackageManager.cpp
     src-bill/classes/Repository.cpp
@@ -69,8 +71,6 @@ set(BILL_SOURCES
     src-bill/classes/Timer.cpp
     src-bill/classes/UdpControlClient.cpp
     src-bill/classes/CdrManager.cpp
-    src-bill/classes/UdpMessageProcessor.cpp
-    src-bill/classes/UdpMessageProcessorBill.cpp
     src-bill/data/BaseData.cpp
     src-bill/data/ActiveCounterData.cpp
     src-bill/data/AirpData.cpp

@@ -2,15 +2,15 @@
 
 #include "../common.h"
 #include "Log.h"
-#include "UdpMessageProcessorBill.h"
+#include "RadiusAuthProcessorBill.h"
 
-UdpMessageProcessorBill::UdpMessageProcessorBill(const string &aNumber, const string &bNumber, const string &trunkName) {
+RadiusAuthProcessorBill::RadiusAuthProcessorBill(const string &aNumber, const string &bNumber, const string &trunkName) {
     this->aNumber = aNumber;
     this->bNumber = bNumber;
     this->trunkName = trunkName;
 }
 
-string UdpMessageProcessorBill::process() {
+string RadiusAuthProcessorBill::process() {
 
     try {
 
@@ -19,18 +19,18 @@ string UdpMessageProcessorBill::process() {
         return analyzeCall();
 
     } catch (Exception &e) {
-        e.addTrace("UdpMessageProcessorBill ");
+        e.addTrace("RadiusAuthProcessorBill ");
         Log::exception(e);
     } catch (std::exception &e) {
-        Log::error("UdpMessageProcessorBill: " + string(e.what()));
+        Log::error("RadiusAuthProcessorBill: " + string(e.what()));
     } catch (...) {
-        Log::error("UdpMessageProcessorBill: ERROR");
+        Log::error("RadiusAuthProcessorBill: ERROR");
     }
 
     return string("accept");
 }
 
-string UdpMessageProcessorBill::analyzeCall() {
+string RadiusAuthProcessorBill::analyzeCall() {
     /*
     if (call.kill_call_reason == 0) {
         return "accept";
@@ -49,7 +49,7 @@ string UdpMessageProcessorBill::analyzeCall() {
     return "";
 }
 
-void UdpMessageProcessorBill::calculateCall() {
+void RadiusAuthProcessorBill::calculateCall() {
 /*
     shared_ptr<CurrentCallsObjList> splist = ThreadSelectCurrentCalls::getList();
     CurrentCallsObjList * list = splist.get();
@@ -68,7 +68,7 @@ void UdpMessageProcessorBill::calculateCall() {
     */
 }
 
-void UdpMessageProcessorBill::prepareCall() {
+void RadiusAuthProcessorBill::prepareCall() {
     /*
     strcpy((char*) &call.id, "0");
     call.id_num = 0;

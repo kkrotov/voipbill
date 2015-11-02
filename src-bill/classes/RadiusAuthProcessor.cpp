@@ -2,8 +2,8 @@
 
 #include "../common.h"
 #include "Log.h"
-#include "UdpMessageProcessor.h"
-#include "UdpMessageProcessorBill.h"
+#include "RadiusAuthProcessor.h"
+#include "RadiusAuthProcessorBill.h"
 
 struct ServiceTrunkOrder {
     Trunk * trunk;
@@ -12,134 +12,105 @@ struct ServiceTrunkOrder {
     PricelistPrice * price;
 };
 
-UdpMessageProcessor::UdpMessageProcessor(const string &message) {
-    this->message = message;
-}
-
-void UdpMessageProcessor::parseRequest() {
-
-    vector<string> parameters;
-    split(parameters, message, boost::algorithm::is_any_of(";"));
-
-    for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-        vector<string> pair;
-        split(pair, *it, boost::algorithm::is_any_of(":"));
-
-        if (pair.size() == 2) {
-            string name = pair.at(0);
-            string value = pair.at(1);
-
-            if (name == "calling") {
-                aNumber = value;
-            } else if (name == "called") {
-                if (value.substr(0, 1) == "0") {
-                    prefix = value.substr(0, 3);
-                    bNumber = value.substr(3);
-                } else {
-                    prefix = "";
-                    bNumber = value;
-                }
-            } else if (name == "redirnum") {
-                redirectionNumber = value;
-            } else if (name == "trunk") {
-                trunkName = value;
-            }
-        }
-    }
-
-    origTrunk = repository.getTrunkByName(trunkName.c_str());
-    if (origTrunk == nullptr) {
-        throw new Exception("Udp request validation: trunk not found: " + message, "UdpMessageProcessor::parseRequest");
-    }
-
-    if (needSwapCallingAndRedirectionNumber()) {
-        string tmp = redirectionNumber;
-        redirectionNumber = aNumber;
-        aNumber = tmp;
-    }
-
-    if (origTrunk->our_trunk
-            && server->calling_station_id_for_line_without_number[0] != 0
-            && aNumber.substr(0, 11) == string(server->calling_station_id_for_line_without_number)
-            && (aNumber.substr(11, 1) == "*" || aNumber.substr(11, 1) == "+")
-    ) {
-        aNumber = aNumber.substr(0, 11);
-    }
-}
-
-bool UdpMessageProcessor::validateRequest() {
-
-    if (aNumber == "") {
-        throw new Exception("Udp request validation: bad calling: " + message, "UdpMessageProcessor::validateRequest");
-    }
-
-    if (bNumber == "") {
-        throw new Exception("Udp request validation: bad called: " + message, "UdpMessageProcessor::validateRequest");
-    }
-}
-
-void UdpMessageProcessor::init() {
+void RadiusAuthProcessor::init() {
     if (!repository.prepare(time(nullptr))) {
-        throw new Exception("Billing not ready.", "UdpMessageProcessor::init");
+        throw new Exception("Billing not ready.", "RadiusAuthProcessor::init");
     }
 
     server = repository.getServer();
 }
 
-string UdpMessageProcessor::process() {
+void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse &response) {
 
     try {
         init();
 
-        parseRequest();
+        aNumber = request.srcNumber;
+        if (request.dstNumber.substr(0, 1) == "0") {
+            prefix = request.dstNumber.substr(0, 3);
+            bNumber = request.dstNumber.substr(3);
+        } else {
+            prefix = "";
+            bNumber = request.dstNumber;
+        }
 
-        validateRequest();
+        redirectionNumber = request.redirectNumber;
+        trunkName = request.trunkName;
+
+        origTrunk = repository.getTrunkByName(trunkName.c_str());
+        if (origTrunk == nullptr) {
+            throw new Exception("Udp request validation: trunk not found: " + trunkName, "RadiusAuthProcessor::process");
+        }
+
+        if (needSwapCallingAndRedirectionNumber()) {
+            string tmp = redirectionNumber;
+            redirectionNumber = aNumber;
+            aNumber = tmp;
+        }
+
+        if (origTrunk->our_trunk
+            && server->calling_station_id_for_line_without_number[0] != 0
+            && aNumber.substr(0, 11) == string(server->calling_station_id_for_line_without_number)
+            && (aNumber.substr(11, 1) == "*" || aNumber.substr(11, 1) == "+")
+                ) {
+            aNumber = aNumber.substr(0, 11);
+        }
 
         int outcomeId;
 
-        UdpMessageProcessorBill billProcessor(aNumber, bNumber, trunkName);
+        RadiusAuthProcessorBill billProcessor(aNumber, bNumber, trunkName);
         string billResponse = billProcessor.process();
 
         if (billResponse == "voip_disabled") {
             outcomeId = server->blocked_outcome_id;
-            if (outcomeId == 0) return "0";
+            if (outcomeId == 0) {
+                response.setReject();
+                return;
+            }
         } else if (billResponse == "low_balance") {
             outcomeId = server->low_balance_outcome_id;
-            if (outcomeId == 0) return "0";
+            if (outcomeId == 0) {
+                response.setReject();
+                return;
+            }
         } else if (billResponse == "reject") {
-            return "0";
+            response.setReject();
+            return;
         } else {
             outcomeId = processRouteTable(origTrunk->route_table_id);
             if (outcomeId == 0) {
-                Log::warning("Outcome not found for request: " + message);
-                return "1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION";
+                Log::warning("Route table: Outcome not found");
+                response.setReleaseReason("NO_ROUTE_TO_DESTINATION");
+                return;
             }
         }
 
-        return processOutcome(outcomeId);
+        processOutcome(response, outcomeId);
+        return;
 
     } catch (Exception &e) {
-        e.addTrace("UdpMessageProcessor ");
+        e.addTrace("RadiusAuthProcessor ");
         Log::exception(e);
     } catch (std::exception &e) {
-        Log::error("UdpMessageProcessor: " + string(e.what()));
+        Log::error("RadiusAuthProcessor: " + string(e.what()));
     } catch (...) {
-        Log::error("UdpMessageProcessor: ERROR");
+        Log::error("RadiusAuthProcessor: ERROR");
     }
 
     if (origTrunk == nullptr) {
-        return "1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION";
+        response.setReleaseReason("NO_ROUTE_TO_DESTINATION");
+        return;
     }
 
-    Log::warning("Fallback to default route for request: " + message);
-    return string("1");
+    Log::warning("Fallback to default route");
+    response.setAccept();
 }
 
-int UdpMessageProcessor::processRouteTable(const int routeTableId) {
+int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
 
     auto routeTable = repository.getRouteTable(routeTableId);
     if (routeTable == nullptr) {
-        throw new Exception("Route table #" + lexical_cast<string>(routeTableId) + " not found", "UdpMessageProcessor::processRouteTable");
+        throw new Exception("Route table #" + lexical_cast<string>(routeTableId) + " not found", "RadiusAuthProcessor::processRouteTable");
     }
 
     vector<RouteTableRoute *> routes;
@@ -170,34 +141,38 @@ int UdpMessageProcessor::processRouteTable(const int routeTableId) {
     return 0;
 }
 
-string UdpMessageProcessor::processOutcome(int outcomeId) {
+void RadiusAuthProcessor::processOutcome(RadiusAuthResponse &response, int outcomeId) {
     auto outcome = repository.getOutcome(outcomeId);
     if (outcome == nullptr) {
-        throw new Exception("Outcome #" + lexical_cast<string>(outcomeId) + " not found", "UdpMessageProcessor::processOutcome");
+        throw new Exception("Outcome #" + lexical_cast<string>(outcomeId) + " not found", "RadiusAuthProcessor::processOutcome");
     }
 
     if (outcome->isAuto()) {
 
-        return processAutoOutcome();
+        processAutoOutcome(response);
+        return;
 
     } else if (outcome->isRouteCase()) {
 
-        return processRouteCaseOutcome(outcome);
+        processRouteCaseOutcome(response, outcome);
+        return;
 
     } else if (outcome->isReleaseReason()) {
 
-        return processReleaseReasonOutcome(outcome);
+        processReleaseReasonOutcome(response, outcome);
+        return;
 
     } else if (outcome->isAirp()) {
 
-        return processAirpOutcome(outcome);
+        processAirpOutcome(response, outcome);
+        return;
 
     }
 
-    throw new Exception("Unexpected type of outcome #" + lexical_cast<string>(outcome->id), "UdpMessageProcessor::processOutcome");
+    throw new Exception("Unexpected type of outcome #" + lexical_cast<string>(outcome->id), "RadiusAuthProcessor::processOutcome");
 }
 
-string UdpMessageProcessor::processAutoOutcome() {
+void RadiusAuthProcessor::processAutoOutcome(RadiusAuthResponse &response) {
 
     vector<ServiceTrunk *> origServiceTrunks;
     repository.getAllServiceTrunk(origServiceTrunks, origTrunk->id);
@@ -261,8 +236,9 @@ string UdpMessageProcessor::processAutoOutcome() {
     sort(termOrders.begin(), termOrders.end(), service_trunk_order());
 
     if (termOrders.size() == 0) {
-        Log::warning("Auto Route not contains operators for request: " + message);
-        return "1;Cisco-AVPair=Reason=NO_ROUTE_TO_DESTINATION";
+        Log::warning("Auto Route not contains operators");
+        response.setReleaseReason("NO_ROUTE_TO_DESTINATION");
+        return;
     }
 
     string routeCase;
@@ -274,54 +250,54 @@ string UdpMessageProcessor::processAutoOutcome() {
         routeCase += "_" + lexical_cast<string>(trunkOrder.trunk->id);
     }
 
-    return string("1;Cisco-AVPair=RTCASE=rc_auto") + routeCase;
+    response.setRouteCase("rc_auto" + routeCase);
 }
 
-string UdpMessageProcessor::processRouteCaseOutcome(Outcome * outcome) {
+void RadiusAuthProcessor::processRouteCaseOutcome(RadiusAuthResponse &response, Outcome * outcome) {
     auto routeCase = repository.getRouteCase(outcome->route_case_id);
     if (routeCase == nullptr) {
-        throw new Exception("Route case #" + lexical_cast<string>(outcome->route_case_id) + " not found", "UdpMessageProcessor::processRouteCaseOutcome");
+        throw new Exception("Route case #" + lexical_cast<string>(outcome->route_case_id) + " not found", "RadiusAuthProcessor::processRouteCaseOutcome");
     }
 
-    string response = string("1;Cisco-AVPair=RTCASE=") + string(routeCase->name);
+    response.setRouteCase(routeCase->name);
+
     if (outcome->calling_station_id[0] != 0) {
-        response += ";Calling-Station-Id:" + string(outcome->calling_station_id);
+        response.srcNumber = outcome->calling_station_id;
     }
     if (outcome->called_station_id[0] != 0) {
-        response += ";Called-Station-Id:" + string(outcome->called_station_id);
+        response.dstNumber = outcome->called_station_id;
     }
-    return response;
 }
 
-string UdpMessageProcessor::processReleaseReasonOutcome(Outcome * outcome) {
+void RadiusAuthProcessor::processReleaseReasonOutcome(RadiusAuthResponse &response, Outcome * outcome) {
     auto releaseReason = repository.getReleaseReason(outcome->release_reason_id);
     if (releaseReason == nullptr) {
-        throw new Exception("Release reason #" + lexical_cast<string>(outcome->release_reason_id) + " not found", "UdpMessageProcessor::processReleaseReasonOutcome");
+        throw new Exception("Release reason #" + lexical_cast<string>(outcome->release_reason_id) + " not found", "RadiusAuthProcessor::processReleaseReasonOutcome");
     }
 
-    return string("1;Cisco-AVPair=Reason=") + string(releaseReason->name);
+    response.setReleaseReason(releaseReason->name);
 }
 
-string UdpMessageProcessor::processAirpOutcome(Outcome * outcome) {
+void RadiusAuthProcessor::processAirpOutcome(RadiusAuthResponse &response, Outcome * outcome) {
     auto airp = repository.getAirp(outcome->airp_id);
     if (airp == nullptr) {
-        throw new Exception("Airp #" + lexical_cast<string>(outcome->airp_id) + " not found", "UdpMessageProcessor::processAirpOutcome");
+        throw new Exception("Airp #" + lexical_cast<string>(outcome->airp_id) + " not found", "RadiusAuthProcessor::processAirpOutcome");
     }
 
-    string response = string("1;Cisco-AVPair=AIRP=") + string(airp->name);
+    response.setAirp(airp->name);
+
     if (outcome->calling_station_id[0] != 0) {
-        response += ";Calling-Station-Id:" + string(outcome->calling_station_id);
+        response.srcNumber = outcome->calling_station_id;
     }
     if (outcome->called_station_id[0] != 0) {
-        response += ";Called-Station-Id:" + string(outcome->called_station_id);
+        response.dstNumber = outcome->called_station_id;
     }
-    return response;
 }
 
-bool UdpMessageProcessor::filterByNumber(const int numberId, string strNumber) {
+bool RadiusAuthProcessor::filterByNumber(const int numberId, string strNumber) {
     auto number = repository.getNumber(numberId);
     if (number == nullptr) {
-        throw new Exception("Number #" + lexical_cast<string>(numberId) + " not found", "UdpMessageProcessor::filterByNumber");
+        throw new Exception("Number #" + lexical_cast<string>(numberId) + " not found", "RadiusAuthProcessor::filterByNumber");
     }
 
     auto prefixlistIds = number->getPrefixlistIds();
@@ -329,7 +305,7 @@ bool UdpMessageProcessor::filterByNumber(const int numberId, string strNumber) {
 
         auto prefixlist = repository.getPrefixlist(*it);
         if (prefixlist == nullptr) {
-            throw new Exception("Prefixlist #" + lexical_cast<string>(*it) + " not found", "UdpMessageProcessor::filterByNumber");
+            throw new Exception("Prefixlist #" + lexical_cast<string>(*it) + " not found", "RadiusAuthProcessor::filterByNumber");
         }
 
         auto prefix = repository.getPrefixlistPrefix(prefixlist->id, strNumber.c_str());
@@ -341,11 +317,11 @@ bool UdpMessageProcessor::filterByNumber(const int numberId, string strNumber) {
     return false;
 }
 
-bool UdpMessageProcessor::needSwapCallingAndRedirectionNumber() {
+bool RadiusAuthProcessor::needSwapCallingAndRedirectionNumber() {
     return origTrunk->our_trunk && prefix != "" && prefix.substr(2, 1) == "1";
 }
 
-bool UdpMessageProcessor::autoTrunkFilterSrcNumber(Trunk * termTrunk) {
+bool RadiusAuthProcessor::autoTrunkFilterSrcNumber(Trunk * termTrunk) {
     vector<TrunkRule *> rules;
     repository.getAllTrunkRules(rules, termTrunk->id, false);
     if (termTrunk->source_rule_default_allowed) {
@@ -365,7 +341,7 @@ bool UdpMessageProcessor::autoTrunkFilterSrcNumber(Trunk * termTrunk) {
     }
 }
 
-bool UdpMessageProcessor::autoTrunkFilterDstNumber(Trunk * termTrunk) {
+bool RadiusAuthProcessor::autoTrunkFilterDstNumber(Trunk * termTrunk) {
     vector<TrunkRule *> rules;
     repository.getAllTrunkRules(rules, termTrunk->id, true);
     if (termTrunk->destination_rule_default_allowed) {
@@ -385,17 +361,17 @@ bool UdpMessageProcessor::autoTrunkFilterDstNumber(Trunk * termTrunk) {
     }
 }
 
-bool UdpMessageProcessor::matchPrefixlist(const int prefixlistId, string strNumber) {
+bool RadiusAuthProcessor::matchPrefixlist(const int prefixlistId, string strNumber) {
     auto prefixlist = repository.getPrefixlist(prefixlistId);
     if (prefixlist == nullptr) {
-        throw new Exception("Prefixlist #" + lexical_cast<string>(prefixlistId) + " not found", "UdpMessageProcessor::matchPrefixlist");
+        throw new Exception("Prefixlist #" + lexical_cast<string>(prefixlistId) + " not found", "RadiusAuthProcessor::matchPrefixlist");
     }
 
     auto prefix = repository.getPrefixlistPrefix(prefixlist->id, strNumber.c_str());
     return prefix != nullptr;
 }
 
-bool UdpMessageProcessor::checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int type, Pricelist * &pricelist, PricelistPrice * &price) {
+bool RadiusAuthProcessor::checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int type, Pricelist * &pricelist, PricelistPrice * &price) {
 
     vector<ServiceTrunkSettings *> serviceTrunkSettings;
     repository.getAllServiceTrunkSettings(serviceTrunkSettings, serviceTrunk->id, type);

@@ -1,16 +1,16 @@
 #pragma once
 
 #include "../classes/Thread.h"
-#include "../../libs/ace-radius/RadiusServerStack.h"
+#include "../classes/RadiusAuthServer.h"
 
 class ThreadRadiusAuthServer : public Thread {
 
+    RadiusAuthServer server;
+
     void run();
-    int verifyRequest(RadiusPacket & p_request);
-    int sendResponse(RadiusServerStack &p_stack);
 
 public:
 
     ThreadRadiusAuthServer();
-    static const char* idName() { return "udp_server"; }
+    static const char* idName() { return "radius_auth_server"; }
 };

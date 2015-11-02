@@ -4,10 +4,10 @@
 
 using namespace std;
 
-class UdpMessageProcessorBill {
+class RadiusAuthProcessorBill {
 public:
 
-    UdpMessageProcessorBill(const string &aNumber, const string &bNumber, const string &trunkName);
+    RadiusAuthProcessorBill(const string &aNumber, const string &bNumber, const string &trunkName);
 
     string process();
 
