@@ -235,6 +235,20 @@ public:
             html << "</tr>\n";
         }
         {
+            auto dl = &repository.data->statPrefixlist;
+            html << "<tr><th>statPrefixlist</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->statDestinationPrefixlists;
+            html << "<tr><th>statDestinationPrefixlists</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+        }
+        {
             auto dl = &repository.data->globalCounters;
             html << "<tr><th>globalCounters</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<

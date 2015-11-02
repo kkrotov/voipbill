@@ -273,15 +273,15 @@ int DataBillingContainer::statsAccountGetSumBalance(int account_id, double vat_r
     return statsAccount.getSumBalance(account_id, vat_rate);
 }
 
-int DataBillingContainer::statsFreeminGetSeconds(CallInfo * callInfo)
+StatsFreemin * DataBillingContainer::statsFreeminGetCurrent(CallInfo * callInfo)
 {
     lock_guard<Spinlock> guard(lock);
-    return statsFreemin.getSeconds(callInfo);
+    return statsFreemin.getCurrent(callInfo);
 }
 
-int DataBillingContainer::statsPackageGetSeconds(int service_package_id, time_t connect_time) {
+StatsPackage * DataBillingContainer::statsPackageGetCurrent(CallInfo * callInfo, ServicePackage * servicePackage, TariffPackage * tariffPackage) {
     lock_guard<Spinlock> guard(lock);
-    return statsPackage.getSeconds(service_package_id, connect_time);
+    return statsPackage.getCurrent(callInfo, servicePackage, tariffPackage);
 }
 
 void DataBillingContainer::statsAccountGetChanges(map<int, StatsAccount> &changes, bool &needClear) {

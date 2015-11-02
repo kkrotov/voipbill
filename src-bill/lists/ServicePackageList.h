@@ -9,7 +9,7 @@ protected:
 
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
-        return "    select id, service_number_id, tariff_package_id, extract(epoch from activation_dt), extract(epoch from expire_dt) " \
+        return "    select id, service_number_id, tariff_package_id, periodical, extract(epoch from activation_dt), extract(epoch from expire_dt) " \
             "       from billing.service_number_package " \
             "       order by service_number_id asc, activation_dt asc ";
         //  and expire_dt > now()
@@ -19,8 +19,9 @@ protected:
         item->id = row.get_i(0);
         item->service_number_id = row.get_i(1);
         item->tariff_package_id = row.get_i(2);
-        item->activation_dt = row.get_ll(3);
-        item->expire_dt = row.get_ll(4);
+        item->periodical = row.get_b(3);
+        item->activation_dt = row.get_ll(4);
+        item->expire_dt = row.get_ll(5);
     }
 
     struct key_service_number_id {

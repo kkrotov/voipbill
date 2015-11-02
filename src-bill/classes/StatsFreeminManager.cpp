@@ -82,48 +82,52 @@ void StatsFreeminManager::recalc(BDb * db, long long int storedLastId) {
     }
 }
 
-int StatsFreeminManager::getSeconds(CallInfo * callInfo) {
+StatsFreemin * StatsFreeminManager::getCurrent(CallInfo * callInfo) {
     auto itFreeminsByServiceId = freeminsByServiceId.find(callInfo->call->number_service_id);
-    if (itFreeminsByServiceId == freeminsByServiceId.end()) {
-        return 0;
+    if (itFreeminsByServiceId != freeminsByServiceId.end()) {
+        for (int freeminId : itFreeminsByServiceId->second) {
+            auto itStatsFreemin = statsFreemin.find(freeminId);
+            if (itStatsFreemin == statsFreemin.end()) continue;
+
+            StatsFreemin &stats = itStatsFreemin->second;
+
+            if (stats.month_dt != callInfo->dt.month) continue;
+
+            return &stats;
+        }
     }
 
-    for (int freeminId : itFreeminsByServiceId->second) {
-        auto itStatsFreemin = statsFreemin.find(freeminId);
-        if (itStatsFreemin == statsFreemin.end()) continue;
+    StatsFreemin * stats = createStatsFreemin(callInfo);
+    if (stats != nullptr) {
+        size_t parts = realtimeStatsFreeminParts.size();
+        map<int, StatsFreemin> &realtimeStatsFreemin = realtimeStatsFreeminParts.at(parts - 1);
+        StatsFreemin &stats2 = realtimeStatsFreemin[stats->id];
+        memcpy(&stats2, stats, sizeof(StatsFreemin));
 
-        StatsFreemin &stats = itStatsFreemin->second;
-
-        if (stats.month_dt != callInfo->dt.month) continue;
-
-        return stats.used_seconds;
+        forSync.insert(stats->id);
     }
-    return 0;
+
+    return stats;
 }
 
 void StatsFreeminManager::add(CallInfo * callInfo) {
 
-    if (callInfo->call->number_service_id == 0 || callInfo->call->service_package_id != 1) {
+    if (    callInfo->call->number_service_id == 0 ||
+            callInfo->call->service_package_id != 1 ||
+            callInfo->call->service_package_stats_id == 0
+    ) {
         return;
     }
 
-    int statFreeminId = getStatsFreeminId(callInfo);
-    StatsFreemin * stats;
+    StatsFreemin * stats = updateStatsFreemin(callInfo, callInfo->call->service_package_stats_id);
+    if (stats != nullptr) {
+        size_t parts = realtimeStatsFreeminParts.size();
+        map<int, StatsFreemin> &realtimeStatsFreemin = realtimeStatsFreeminParts.at(parts - 1);
+        StatsFreemin &stats2 = realtimeStatsFreemin[stats->id];
+        memcpy(&stats2, stats, sizeof(StatsFreemin));
 
-    if (statFreeminId > 0) {
-        stats = updateStatsFreemin(callInfo, statFreeminId);
-    } else {
-        stats = createStatsFreemin(callInfo);
+        forSync.insert(stats->id);
     }
-
-    callInfo->call->service_package_stats_id = stats->id;
-
-    size_t parts = realtimeStatsFreeminParts.size();
-    map<int, StatsFreemin> &realtimeStatsFreemin = realtimeStatsFreeminParts.at(parts - 1);
-    StatsFreemin &stats2 = realtimeStatsFreemin[stats->id];
-    memcpy(&stats2, stats, sizeof(StatsFreemin));
-
-    forSync.insert(stats->id);
 }
 
 size_t StatsFreeminManager::size() {
@@ -170,26 +174,6 @@ void StatsFreeminManager::removePartitionAfterSave() {
     realtimeStatsFreeminParts.erase(realtimeStatsFreeminParts.begin());
 }
 
-int StatsFreeminManager::getStatsFreeminId(CallInfo * callInfo) {
-    auto itFreeminsByServiceId = freeminsByServiceId.find(callInfo->call->number_service_id);
-    if (itFreeminsByServiceId == freeminsByServiceId.end()) {
-        return 0;
-    }
-
-    for (int freeminId : itFreeminsByServiceId->second) {
-        auto itStatsFreemin = statsFreemin.find(freeminId);
-        if (itStatsFreemin == statsFreemin.end()) continue;
-
-        StatsFreemin &stats = itStatsFreemin->second;
-
-        if (stats.month_dt != callInfo->dt.month) continue;
-
-        return stats.id;
-    }
-
-    return 0;
-}
-
 StatsFreemin * StatsFreeminManager::createStatsFreemin(CallInfo * callInfo) {
 
     lastStatsFreeminId += 1;
@@ -198,8 +182,8 @@ StatsFreemin * StatsFreeminManager::createStatsFreemin(CallInfo * callInfo) {
     stats.id = lastStatsFreeminId;
     stats.service_number_id = callInfo->call->number_service_id;
     stats.month_dt = callInfo->dt.month;
-    stats.used_seconds = callInfo->call->package_time;
-    stats.used_credit = callInfo->call->package_credit;
+    stats.used_seconds = 0;
+    stats.used_credit = 0;
     stats.min_call_id = callInfo->call->id;
     stats.max_call_id = callInfo->call->id;
 
@@ -212,7 +196,12 @@ StatsFreemin * StatsFreeminManager::createStatsFreemin(CallInfo * callInfo) {
 
 StatsFreemin * StatsFreeminManager::updateStatsFreemin(CallInfo * callInfo, int statFreeminId) {
 
-    StatsFreemin &stats = statsFreemin[statFreeminId];
+    auto itStatsFreemin = statsFreemin.find(statFreeminId);
+    if (itStatsFreemin == statsFreemin.end()) {
+        return nullptr;
+    }
+
+    StatsFreemin &stats = itStatsFreemin->second;
     stats.used_seconds += callInfo->call->package_time;
     stats.used_credit += callInfo->call->package_credit;
     stats.max_call_id = callInfo->call->id;
