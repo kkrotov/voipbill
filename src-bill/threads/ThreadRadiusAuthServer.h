@@ -9,6 +9,7 @@ class ThreadRadiusAuthServer : public Thread {
 
     void run();
 
+    bool hasFullHtml() override;
     void htmlfull(stringstream &html);
 
 

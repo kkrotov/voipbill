@@ -5,6 +5,10 @@ void ThreadRadiusAuthServer::run() {
     server.run(app().conf.radius_secret, app().conf.radius_auth_port);
 }
 
+bool ThreadRadiusAuthServer::hasFullHtml() {
+    return true;
+}
+
 void ThreadRadiusAuthServer::htmlfull(stringstream & html) {
     this->html(html);
 
