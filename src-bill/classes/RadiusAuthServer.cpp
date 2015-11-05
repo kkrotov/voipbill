@@ -80,7 +80,7 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
                 request.srcNoa = atoi(attrValue.c_str());
             } else if (attrName == "INCOMING-CALLED-ADDRESS-NOA") {
                 request.dstNoa = atoi(attrValue.c_str());
-            } else if (attrName == "INCOMING-ROUTEID=MCN_Transit_99") {
+            } else if (attrName == "INCOMING-ROUTEID") {
                 request.trunkName = attrValue;
             }
         }
@@ -89,7 +89,7 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
 
 void RadiusAuthServer::processRequest(RadiusAuthRequest &request, RadiusAuthResponse &response) {
     response.id = request.id;
-    response.routeCase = "RU_Beeline_sip";
+    //response.routeCase = "RU_Beeline_sip";
 
     RadiusAuthProcessor processor;
     processor.process(request, response);
@@ -136,7 +136,7 @@ void RadiusAuthServer::sendResponse(RadiusServerStack &p_stack, RadiusAuthRespon
         l_response.addAttribute(D_ATTR_VENDOR_SPECIFIC, attr);
         attr.setVendorId(9);
         attr.setVendorType(1);
-        attr.setVendorString(("ReleaseReason" + response.releaseReason).c_str());
+        attr.setVendorString(("ReleaseReason=" + response.releaseReason).c_str());
     }
 
     // ----------------------
@@ -175,12 +175,11 @@ void RadiusAuthServer::readRequestVendorString(RadiusAttribute &attr, string &at
     strncpy(buffer, pData, length);
     buffer[length] = 0;
 
-    char * pAttrName = &buffer[0];
-    char * pAttrValue = strchr(pAttrName, '=');
+    char * pAttrValue = strchr(buffer, '=');
     if (pAttrValue != nullptr) {
         *pAttrValue = 0;
         pAttrValue++;
-        attrName = string(pAttrValue);
+        attrName = string(buffer);
         attrValue = string(pAttrValue);
     }
 }
