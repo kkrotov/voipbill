@@ -14,10 +14,12 @@ void ThreadRadiusAuthServer::htmlfull(stringstream & html) {
 
     html << "Request count: <b>" << server.request_count << "</b><br/>\n";
     html << "Response count: <b>" << server.response_count << "</b><br/>\n";
-    html << "<table>\n";
-    html << "<tr><th>last request</th><th>last response</th></tr>";
-    html << "<tr><td><pre>" + server.last_request + "</pre></td><td><pre>" + server.last_response + "</pre></td></tr>";
-    html << "</table>\n";
+    html << "\n";
+    html << "<b>last request</b><br/>\n";
+    html << "<pre>" + server.last_request + "</pre>\n";
+    html << "\n";
+    html << "<b>last response</b><br/>\n";
+    html << "<pre>" + server.last_response + "</pre>\n";
 }
 
 ThreadRadiusAuthServer::ThreadRadiusAuthServer() {
