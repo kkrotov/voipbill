@@ -224,6 +224,131 @@ void RadiusAttribute::dump(AttributeFormat_e p_format)
     printf(")\n");
 }
 
+void RadiusAttribute::dump(char * buffer, AttributeFormat_e p_format)
+{
+    if (!isValid())
+        return;
+    char buffer2[1024];
+
+    // first print attribute type and description
+    sprintf(buffer2, "%2u  %s (%u) = ", getLength(), getTypeDescription(), getType());
+    strcat(buffer, buffer2);
+
+    // then print data in human-readable format
+    switch (p_format)
+    {
+        case E_ATTR_FORMAT_INTEGER:
+            sprintf(buffer2, "%u ", getNumber());
+            strcat(buffer, buffer2);
+            break;
+
+        case E_ATTR_FORMAT_IP_ADDRESS:
+        {
+            struct in_addr l_addr = getIPAddress();
+            sprintf(buffer2, "%s ", inet_ntoa(l_addr));
+            strcat(buffer, buffer2);
+        }
+            break;
+
+        case E_ATTR_FORMAT_STRING:
+        {
+            const char * l_data;
+            uint16_t l_length;
+            getString(l_data, l_length);
+
+            sprintf(buffer2, "\"");
+            strcat(buffer, buffer2);
+
+            for (int i=0; i<l_length; i++)
+            {
+                // if the data character is printable - print it
+                if ((l_data[i] >= ' ') && (l_data[i] <= 'z')) {
+                    sprintf(buffer2, "%c", l_data[i]);
+                    strcat(buffer, buffer2);
+                } else {
+                    sprintf(buffer2, ".");
+                    strcat(buffer, buffer2);
+                }
+            }
+            sprintf(buffer2, "\" ");
+            strcat(buffer, buffer2);
+
+        }
+            break;
+
+        case E_ATTR_FORMAT_USER_PASSWORD:
+        {
+            char l_data[D_USER_PASSWORD_MAX_LENGTH];
+            uint16_t l_length;
+            getUserPassword(l_data, l_length);
+
+            sprintf(buffer2, "\"");
+            strcat(buffer, buffer2);
+            for (int i=0; i<l_length; i++)
+            {
+                // if the data character is printable - print it
+                if ((l_data[i] >= ' ') && (l_data[i] <= 'z')) {
+                    sprintf(buffer2, "%c", l_data[i]);
+                    strcat(buffer, buffer2);
+                } else {
+                    sprintf(buffer2, ".");
+                    strcat(buffer, buffer2);
+                }
+            }
+            sprintf(buffer2, "\" ");
+            strcat(buffer, buffer2);
+
+        }
+            break;
+
+        case E_ATTR_FORMAT_CHAP_PASSWORD:
+        {
+            // TBD
+        }
+            break;
+
+        case E_ATTR_FORMAT_VENDOR_SPECIFIC:
+        {
+            const char * l_data;
+            uint16_t l_length;
+
+            getVendorString(l_data, l_length);
+
+            sprintf(buffer2, "%u \"", getVendorId());
+            strcat(buffer, buffer2);
+            for (int i=0; i<l_length; i++) {
+                // if the data character is printable - print it
+                if ((l_data[i] >= ' ') && (l_data[i] <= 'z')) {
+                    sprintf(buffer2, "%c", l_data[i]);
+                    strcat(buffer, buffer2);
+                } else {
+                    sprintf(buffer2, ".");
+                    strcat(buffer, buffer2);
+                }
+            }
+            sprintf(buffer2, "\" ");
+            strcat(buffer, buffer2);
+
+        }
+            break;
+    }
+
+    // then print data in HEX format
+    uint32_t l_length = getLength() - 2;
+    unsigned char * l_data = getRawData();
+
+    sprintf(buffer2, "( ");
+    strcat(buffer, buffer2);
+    for (uint32_t i=0; i<l_length; i++)
+    {
+        sprintf(buffer2, "%02x ", l_data[i]);
+        strcat(buffer, buffer2);
+    }
+    sprintf(buffer2, ")\n");
+    strcat(buffer, buffer2);
+
+}
+
 
 // ---------------------------
 // dump attribute in readable text format to the text buffer
@@ -278,6 +403,59 @@ void RadiusAttribute::dump()
         break;
     default:
         dump(E_ATTR_FORMAT_STRING);
+    }
+}
+
+void RadiusAttribute::dump(char * buffer)
+{
+    switch (getType())
+    {
+        case D_ATTR_NAS_PORT:
+        case D_ATTR_SERVICE_TYPE:
+        case D_ATTR_FRAMED_PROTOCOL:
+        case D_ATTR_FRAMED_ROUTING:
+        case D_ATTR_FRAMED_MTU:
+        case D_ATTR_FRAMED_COMPRESSION:
+        case D_ATTR_LOGIN_SERVICE:
+        case D_ATTR_LOGIN_TCP_PORT:
+        case D_ATTR_FRAMED_IPX_NETWORK:
+        case D_ATTR_SESSION_TIMEOUT:
+        case D_ATTR_IDLE_TIMEOUT:
+        case D_ATTR_TERMINATION_ACTION:
+        case D_ATTR_FRAMED_APPLETALK_LINK:
+        case D_ATTR_FRAMED_APPLETALK_NETWORK:
+        case D_ATTR_NAS_PORT_TYPE:
+        case D_ATTR_PORT_LIMIT:
+        case D_ATTR_ACCT_STATUS_TYPE:
+        case D_ATTR_ACCT_DELAY_TIME:
+        case D_ATTR_ACCT_INPUT_OCTETS:
+        case D_ATTR_ACCT_OUTPUT_OCTETS:
+        case D_ATTR_ACCT_AUTHENTIC:
+        case D_ATTR_ACCT_SESSION_TIME:
+        case D_ATTR_ACCT_INPUT_PACKETS:
+        case D_ATTR_ACCT_OUTPUT_PACKETS:
+        case D_ATTR_ACCT_TERMINATE_CAUSE:
+        case D_ATTR_ACCT_LINK_COUNT:
+
+            dump(buffer, E_ATTR_FORMAT_INTEGER);
+            break;
+        case D_ATTR_NAS_IP_ADDRESS:
+        case D_ATTR_FRAMED_IP_ADDRESS:
+        case D_ATTR_FRAMED_IP_NETMASK:
+        case D_ATTR_LOGIN_IP_HOST:
+            dump(buffer, E_ATTR_FORMAT_IP_ADDRESS);
+            break;
+        case D_ATTR_USER_PASSWORD:
+            dump(buffer, E_ATTR_FORMAT_USER_PASSWORD);
+            break;
+        case D_ATTR_CHAP_PASSWORD:
+            dump(buffer, E_ATTR_FORMAT_CHAP_PASSWORD);
+            break;
+        case D_ATTR_VENDOR_SPECIFIC:
+            dump(buffer, E_ATTR_FORMAT_VENDOR_SPECIFIC);
+            break;
+        default:
+            dump(buffer, E_ATTR_FORMAT_STRING);
     }
 }
 

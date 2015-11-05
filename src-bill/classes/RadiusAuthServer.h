@@ -52,6 +52,8 @@ class RadiusAuthServer {
 public:
     size_t request_count = 0;
     size_t response_count = 0;
+    string last_request;
+    string last_response;
 
     void run(string secret, uint16_t port);
 

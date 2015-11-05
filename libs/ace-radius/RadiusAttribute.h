@@ -117,6 +117,7 @@ public:
     
     /// Dump attribute in readable text format to the STDOUT
     void dump();
+    void dump(char * buffer);
 
     
     /// Init attribute
@@ -601,6 +602,7 @@ private:
      * @param[in] p_format - attribute format; 
      */
     void dump(AttributeFormat_e p_format);
+    void dump(char * buffer, AttributeFormat_e p_format);
 
     //////////////////////////////////////////////////////////////////////
 

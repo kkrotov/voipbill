@@ -45,6 +45,10 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
         throw Exception("Wrong request code");
     }
 
+    char buffer[66000] = "";
+    p_request.dump(buffer);
+    last_request = string(buffer);
+    last_response = "";
     request_count++;
 
     request.id = p_request.getID();
@@ -140,6 +144,9 @@ void RadiusAuthServer::sendResponse(RadiusServerStack &p_stack, RadiusAuthRespon
     // ----------------------
     p_stack.sendResponse(l_response);
 
+    char buffer[66000] = "";
+    l_response.dump(buffer);
+    last_response = string(buffer);
     response_count++;
 }
 

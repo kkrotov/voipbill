@@ -155,6 +155,7 @@ public:
 
     /// Dump radius packet in readable text format to the STDOUT
     void dump();
+    void dump(char * buffer);
     
     
     /// Get first attribute in the packet
