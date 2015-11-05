@@ -103,7 +103,7 @@ void AppBill::runAppInSingleMode()
             "update_active_clients",
             "checkstarttable",
             "tasks",
-            "udp_server",
+            "radius_auth_server",
     };
 
     for (auto thread: standardThreads) {

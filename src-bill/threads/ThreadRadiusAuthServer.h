@@ -9,6 +9,9 @@ class ThreadRadiusAuthServer : public Thread {
 
     void run();
 
+    void htmlfull(stringstream &html);
+
+
 public:
 
     ThreadRadiusAuthServer();

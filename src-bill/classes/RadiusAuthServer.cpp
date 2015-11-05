@@ -45,6 +45,8 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
         throw Exception("Wrong request code");
     }
 
+    request_count++;
+
     request.id = p_request.getID();
 
     for(p_request.getFirstAttribute(attr); attr.isValid(); p_request.getNextAttribute(attr)) {
@@ -137,6 +139,8 @@ void RadiusAuthServer::sendResponse(RadiusServerStack &p_stack, RadiusAuthRespon
     // send response packet
     // ----------------------
     p_stack.sendResponse(l_response);
+
+    response_count++;
 }
 
 void RadiusAuthServer::readRequestString(RadiusAttribute &attr, string &attrValue)
