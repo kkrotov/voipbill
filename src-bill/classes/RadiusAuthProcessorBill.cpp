@@ -3,6 +3,9 @@
 #include "../common.h"
 #include "Log.h"
 #include "RadiusAuthProcessorBill.h"
+#include "../models/Call.h"
+#include "../models/CallInfo.h"
+
 
 RadiusAuthProcessorBill::RadiusAuthProcessorBill(const string &aNumber, const string &bNumber, const string &trunkName) {
     this->aNumber = aNumber;
@@ -31,7 +34,7 @@ string RadiusAuthProcessorBill::process() {
 }
 
 string RadiusAuthProcessorBill::analyzeCall() {
-
+/*
     if (call.kill_call_reason == 0) {
         return "accept";
     } else if (call.kill_call_reason == KILL_REASON_CREDIT_LIMIT) {
@@ -45,10 +48,12 @@ string RadiusAuthProcessorBill::analyzeCall() {
     } else {
         return "reject";
     }
+    */
+    return "accept";
 }
 
 void RadiusAuthProcessorBill::calculateCall() {
-
+/*
     shared_ptr<CurrentCallsObjList> splist = ThreadSelectCurrentCalls::getList();
     CurrentCallsObjList * list = splist.get();
 
@@ -63,6 +68,7 @@ void RadiusAuthProcessorBill::calculateCall() {
     calculator.calc_call(&call);
 
     calculator.calc_process_call(&call);
+    */
 }
 
 void RadiusAuthProcessorBill::prepareCall() {
