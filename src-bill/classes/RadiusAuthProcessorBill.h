@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include "../models/Call.h"
+#include "../models/CallInfo.h"
 
 using namespace std;
 
@@ -15,6 +17,10 @@ private:
     string aNumber;
     string bNumber;
     string trunkName;
+    Call origCall;
+    Call termCall;
+    CallInfo origCallInfo;
+    CallInfo termCallInfo;
 
     void prepareCall();
     void calculateCall();

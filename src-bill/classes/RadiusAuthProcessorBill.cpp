@@ -31,7 +31,7 @@ string RadiusAuthProcessorBill::process() {
 }
 
 string RadiusAuthProcessorBill::analyzeCall() {
-    /*
+
     if (call.kill_call_reason == 0) {
         return "accept";
     } else if (call.kill_call_reason == KILL_REASON_CREDIT_LIMIT) {
@@ -45,12 +45,10 @@ string RadiusAuthProcessorBill::analyzeCall() {
     } else {
         return "reject";
     }
-    */
-    return "";
 }
 
 void RadiusAuthProcessorBill::calculateCall() {
-/*
+
     shared_ptr<CurrentCallsObjList> splist = ThreadSelectCurrentCalls::getList();
     CurrentCallsObjList * list = splist.get();
 
@@ -65,7 +63,6 @@ void RadiusAuthProcessorBill::calculateCall() {
     calculator.calc_call(&call);
 
     calculator.calc_process_call(&call);
-    */
 }
 
 void RadiusAuthProcessorBill::prepareCall() {
