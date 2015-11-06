@@ -198,7 +198,7 @@ void StatsAccountManager::add(CallInfo *callInfo) {
 
     Call *call = callInfo->call;
 
-    if (callInfo->account != nullptr || abs(call->cost) < 0.000001) {
+    if (callInfo->account == nullptr || abs(call->cost) < 0.000001) {
         return;
     }
 
