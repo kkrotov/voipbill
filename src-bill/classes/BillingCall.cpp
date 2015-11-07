@@ -270,7 +270,7 @@ void BillingCall::numberPreprocessing() {
 }
 
 void BillingCall::processRedirectNumber() {
-    if (callInfo->trunk->use_redirect_number) {
+    if (callInfo->trunk->orig_redirect_number) {
 
         long long int redirect_number =  atoll(cdr->redirect_number);
 
