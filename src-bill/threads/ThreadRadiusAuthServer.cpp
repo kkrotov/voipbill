@@ -20,6 +20,11 @@ void ThreadRadiusAuthServer::htmlfull(stringstream & html) {
     html << "\n";
     html << "<b>last response</b><br/>\n";
     html << "<pre>" + server.last_response + "</pre>\n";
+    if (server.last_error.size() > 0) {
+        html << "\n";
+        html << "<b>last error</b><br/>\n";
+        html << "<pre>" + server.last_error + "</pre>\n";
+    }
 }
 
 ThreadRadiusAuthServer::ThreadRadiusAuthServer() {

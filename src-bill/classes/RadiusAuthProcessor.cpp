@@ -88,11 +88,11 @@ void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse
         return;
 
     } catch (Exception &e) {
-        response.error = e.getFullMessage();
+        response.error += " " + e.getFullMessage();
         e.addTrace("RadiusAuthProcessor ");
         Log::exception(e);
     } catch (std::exception &e) {
-        response.error = e.what();
+        response.error += " " + string(e.what());
         Log::error("RadiusAuthProcessor: " + string(e.what()));
     } catch (...) {
         Log::error("RadiusAuthProcessor: ERROR");

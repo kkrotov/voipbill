@@ -50,5 +50,7 @@ public:
                 *trace << "NOT FOUND|ROUTE TABLE|BY ID '" << id << "'" << "\n";
             }
         }
+
+        return result;
     }
 };

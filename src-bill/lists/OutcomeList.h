@@ -56,5 +56,7 @@ public:
                 *trace << "NOT FOUND|OUTCOME|BY ID '" << id << "'" << "\n";
             }
         }
+
+        return result;
     }
 };

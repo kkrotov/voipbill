@@ -26,7 +26,7 @@ protected:
         item->term_enabled = row.get_b(4);
         item->orig_min_payment = row.get_d(5);
         item->term_min_payment = row.get_d(6);
-        item->operator_id = row.get_d(7);
+        item->operator_id = row.get_i(7);
         item->activation_dt = row.get_ll(8);
         item->expire_dt = row.get_ll(9);
     }

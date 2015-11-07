@@ -55,6 +55,7 @@ public:
     size_t response_count = 0;
     string last_request;
     string last_response;
+    string last_error;
 
     void run(string secret, uint16_t port);
 
