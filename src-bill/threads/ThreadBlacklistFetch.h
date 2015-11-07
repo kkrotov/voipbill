@@ -11,8 +11,6 @@ class ThreadBlacklistFetch : public Thread {
     BlackListGlobal *blacklist_global;
     BlackListTrunk *blacklist_trunk;
 
-    bool prepare();
-
     void run();
 
 public:

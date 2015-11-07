@@ -23,6 +23,7 @@ struct RadiusAuthResponse {
     string routeCase;
     string releaseReason;
     string airp;
+    string error;
 
     void setRouteCase(string routeCase) {
         this->accept = true;

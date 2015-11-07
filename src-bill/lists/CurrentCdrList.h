@@ -17,7 +17,7 @@ protected:
             "       src_noa, " \
             "       dst_noa," \
             "       call_id " \
-            "	from calls_cdr.start where false " \
+            "	from calls_cdr.start " \
             "   order by call_id ";
     }
 

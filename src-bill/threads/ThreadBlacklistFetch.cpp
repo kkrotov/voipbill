@@ -11,25 +11,6 @@ ThreadBlacklistFetch::ThreadBlacklistFetch() {
     threadSleepSeconds = 3600;
 }
 
-bool ThreadBlacklistFetch::prepare() {
-
-    return true;
-
-    if (!blacklist_local->fetch()) {
-        return false;
-    }
-
-    if (!blacklist_global->fetch()) {
-        return false;
-    }
-
-    if (!blacklist_trunk->fetch()) {
-        return false;
-    }
-
-    return true;
-}
-
 void ThreadBlacklistFetch::run() {
 
     blacklist_local->fetch();

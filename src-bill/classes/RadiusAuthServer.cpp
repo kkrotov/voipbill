@@ -128,7 +128,7 @@ void RadiusAuthServer::sendResponse(RadiusServerStack &p_stack, RadiusAuthRespon
         l_response.addAttribute(D_ATTR_VENDOR_SPECIFIC, attr);
         attr.setVendorId(9);
         attr.setVendorType(1);
-        attr.setVendorString(("AIRP=" + response.routeCase).c_str());
+        attr.setVendorString(("AIRP=" + response.airp).c_str());
     }
 
     if (response.releaseReason.size() > 0) {

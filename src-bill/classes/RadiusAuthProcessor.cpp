@@ -14,7 +14,7 @@ struct ServiceTrunkOrder {
 
 void RadiusAuthProcessor::init() {
     if (!repository.prepare(time(nullptr))) {
-        throw new Exception("Billing not ready.", "RadiusAuthProcessor::init");
+        throw Exception("Billing not ready.", "RadiusAuthProcessor::init");
     }
 
     server = repository.getServer();
@@ -39,9 +39,8 @@ void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse
 
         origTrunk = repository.getTrunkByName(trunkName.c_str());
         if (origTrunk == nullptr) {
-            throw new Exception("Udp request validation: trunk not found: " + trunkName, "RadiusAuthProcessor::process");
+            throw Exception("Udp request validation: trunk not found: " + trunkName, "RadiusAuthProcessor::process");
         }
-
         if (needSwapCallingAndRedirectionNumber()) {
             string tmp = redirectionNumber;
             redirectionNumber = aNumber;
@@ -89,9 +88,11 @@ void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse
         return;
 
     } catch (Exception &e) {
+        response.error = e.getFullMessage();
         e.addTrace("RadiusAuthProcessor ");
         Log::exception(e);
     } catch (std::exception &e) {
+        response.error = e.what();
         Log::error("RadiusAuthProcessor: " + string(e.what()));
     } catch (...) {
         Log::error("RadiusAuthProcessor: ERROR");
@@ -110,7 +111,7 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
 
     auto routeTable = repository.getRouteTable(routeTableId);
     if (routeTable == nullptr) {
-        throw new Exception("Route table #" + lexical_cast<string>(routeTableId) + " not found", "RadiusAuthProcessor::processRouteTable");
+        throw Exception("Route table #" + lexical_cast<string>(routeTableId) + " not found", "RadiusAuthProcessor::processRouteTable");
     }
 
     vector<RouteTableRoute *> routes;
@@ -144,7 +145,7 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
 void RadiusAuthProcessor::processOutcome(RadiusAuthResponse &response, int outcomeId) {
     auto outcome = repository.getOutcome(outcomeId);
     if (outcome == nullptr) {
-        throw new Exception("Outcome #" + lexical_cast<string>(outcomeId) + " not found", "RadiusAuthProcessor::processOutcome");
+        throw Exception("Outcome #" + lexical_cast<string>(outcomeId) + " not found", "RadiusAuthProcessor::processOutcome");
     }
 
     if (outcome->isAuto()) {
@@ -169,7 +170,7 @@ void RadiusAuthProcessor::processOutcome(RadiusAuthResponse &response, int outco
 
     }
 
-    throw new Exception("Unexpected type of outcome #" + lexical_cast<string>(outcome->id), "RadiusAuthProcessor::processOutcome");
+    throw Exception("Unexpected type of outcome #" + lexical_cast<string>(outcome->id), "RadiusAuthProcessor::processOutcome");
 }
 
 void RadiusAuthProcessor::processAutoOutcome(RadiusAuthResponse &response) {
@@ -256,7 +257,7 @@ void RadiusAuthProcessor::processAutoOutcome(RadiusAuthResponse &response) {
 void RadiusAuthProcessor::processRouteCaseOutcome(RadiusAuthResponse &response, Outcome * outcome) {
     auto routeCase = repository.getRouteCase(outcome->route_case_id);
     if (routeCase == nullptr) {
-        throw new Exception("Route case #" + lexical_cast<string>(outcome->route_case_id) + " not found", "RadiusAuthProcessor::processRouteCaseOutcome");
+        throw Exception("Route case #" + lexical_cast<string>(outcome->route_case_id) + " not found", "RadiusAuthProcessor::processRouteCaseOutcome");
     }
 
     response.setRouteCase(routeCase->name);
@@ -272,7 +273,7 @@ void RadiusAuthProcessor::processRouteCaseOutcome(RadiusAuthResponse &response, 
 void RadiusAuthProcessor::processReleaseReasonOutcome(RadiusAuthResponse &response, Outcome * outcome) {
     auto releaseReason = repository.getReleaseReason(outcome->release_reason_id);
     if (releaseReason == nullptr) {
-        throw new Exception("Release reason #" + lexical_cast<string>(outcome->release_reason_id) + " not found", "RadiusAuthProcessor::processReleaseReasonOutcome");
+        throw Exception("Release reason #" + lexical_cast<string>(outcome->release_reason_id) + " not found", "RadiusAuthProcessor::processReleaseReasonOutcome");
     }
 
     response.setReleaseReason(releaseReason->name);
@@ -281,7 +282,7 @@ void RadiusAuthProcessor::processReleaseReasonOutcome(RadiusAuthResponse &respon
 void RadiusAuthProcessor::processAirpOutcome(RadiusAuthResponse &response, Outcome * outcome) {
     auto airp = repository.getAirp(outcome->airp_id);
     if (airp == nullptr) {
-        throw new Exception("Airp #" + lexical_cast<string>(outcome->airp_id) + " not found", "RadiusAuthProcessor::processAirpOutcome");
+        throw Exception("Airp #" + lexical_cast<string>(outcome->airp_id) + " not found", "RadiusAuthProcessor::processAirpOutcome");
     }
 
     response.setAirp(airp->name);
@@ -297,7 +298,7 @@ void RadiusAuthProcessor::processAirpOutcome(RadiusAuthResponse &response, Outco
 bool RadiusAuthProcessor::filterByNumber(const int numberId, string strNumber) {
     auto number = repository.getNumber(numberId);
     if (number == nullptr) {
-        throw new Exception("Number #" + lexical_cast<string>(numberId) + " not found", "RadiusAuthProcessor::filterByNumber");
+        throw Exception("Number #" + lexical_cast<string>(numberId) + " not found", "RadiusAuthProcessor::filterByNumber");
     }
 
     auto prefixlistIds = number->getPrefixlistIds();
@@ -305,7 +306,7 @@ bool RadiusAuthProcessor::filterByNumber(const int numberId, string strNumber) {
 
         auto prefixlist = repository.getPrefixlist(*it);
         if (prefixlist == nullptr) {
-            throw new Exception("Prefixlist #" + lexical_cast<string>(*it) + " not found", "RadiusAuthProcessor::filterByNumber");
+            throw Exception("Prefixlist #" + lexical_cast<string>(*it) + " not found", "RadiusAuthProcessor::filterByNumber");
         }
 
         auto prefix = repository.getPrefixlistPrefix(prefixlist->id, strNumber.c_str());
@@ -364,7 +365,7 @@ bool RadiusAuthProcessor::autoTrunkFilterDstNumber(Trunk * termTrunk) {
 bool RadiusAuthProcessor::matchPrefixlist(const int prefixlistId, string strNumber) {
     auto prefixlist = repository.getPrefixlist(prefixlistId);
     if (prefixlist == nullptr) {
-        throw new Exception("Prefixlist #" + lexical_cast<string>(prefixlistId) + " not found", "RadiusAuthProcessor::matchPrefixlist");
+        throw Exception("Prefixlist #" + lexical_cast<string>(prefixlistId) + " not found", "RadiusAuthProcessor::matchPrefixlist");
     }
 
     auto prefix = repository.getPrefixlistPrefix(prefixlist->id, strNumber.c_str());
