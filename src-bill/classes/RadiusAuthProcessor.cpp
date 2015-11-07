@@ -233,6 +233,11 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
         if (!autoTrunkFilterDstNumber(termTrunk)) {
             continue;
         }
+
+        if (origTrunk->orig_redirect_number && redirectionNumber.size() > 0 && !termTrunk->term_redirect_number) {
+            continue;
+        }
+
         filteredTermTrunks.push_back(termTrunk);
     }
 
