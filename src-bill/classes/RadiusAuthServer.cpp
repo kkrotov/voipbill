@@ -52,18 +52,8 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
     last_error = "";
     request_count++;
 
-    request.id = p_request.getID();
-
     for(p_request.getFirstAttribute(attr); attr.isValid(); p_request.getNextAttribute(attr)) {
         if (attr.getType() == D_ATTR_CALLING_STATION_ID) {
-
-            request.nasIp = attr.getIPAddress();
-
-        } else if (attr.getType() == D_ATTR_ACCT_SESSION_ID) {
-
-            readRequestString(attr, request.callId);
-
-        } else if (attr.getType() == D_ATTR_CALLING_STATION_ID) {
 
             readRequestString(attr, request.srcNumber);
 
@@ -89,9 +79,6 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
 }
 
 void RadiusAuthServer::processRequest(RadiusAuthRequest &request, RadiusAuthResponse &response) {
-    response.id = request.id;
-    //response.routeCase = "RU_Beeline_sip";
-
     RadiusAuthProcessor processor;
     processor.process(request, response);
 

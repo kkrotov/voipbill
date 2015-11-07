@@ -8,6 +8,7 @@
 class ThreadLoader : public Thread {
     Repository repository;
     BDb db_calls;
+    string current_event;
 
     // флаг устанавливается когда счетчики посчитаны и загружены в память
     bool init_load_counters_done;
@@ -16,6 +17,12 @@ class ThreadLoader : public Thread {
 
     bool prepare();
     void run();
+
+
+public:
+    virtual bool hasFullHtml() override;
+
+    virtual void htmlfull(stringstream &html) override;
 
 public:
 

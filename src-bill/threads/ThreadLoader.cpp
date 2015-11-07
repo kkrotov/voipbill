@@ -29,6 +29,7 @@ void ThreadLoader::run() {
 
             string event = res.get_s(0);
             long long int version = res.get_ll(1);
+            current_event = event;
 
             if (event == "clients") {
 
@@ -190,6 +191,8 @@ void ThreadLoader::run() {
         throw e;
     }
 
+    current_event = "";
+
 }
 
 bool ThreadLoader::do_load_data() {
@@ -233,4 +236,14 @@ ThreadLoader::ThreadLoader() {
 
     init_load_counters_done = false;
     init_load_data_done = false;
+}
+
+bool ThreadLoader::hasFullHtml() {
+    return true;
+}
+
+void ThreadLoader::htmlfull(stringstream &html) {
+    this->html(html);
+
+    html << "Current event: <b>" << current_event << "</b><br/>\n";
 }

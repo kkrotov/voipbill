@@ -4,9 +4,6 @@
 #include "../../libs/ace-radius/RadiusServerStack.h"
 
 struct RadiusAuthRequest {
-    uint8_t id;
-    struct in_addr nasIp;
-    string callId;
     string srcNumber;
     string dstNumber;
     string redirectNumber;
@@ -17,7 +14,6 @@ struct RadiusAuthRequest {
 
 struct RadiusAuthResponse {
     bool accept;
-    uint8_t id;
     string srcNumber;
     string dstNumber;
     string routeCase;
