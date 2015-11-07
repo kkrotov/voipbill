@@ -3,7 +3,6 @@
 #include "../common.h"
 #include "Log.h"
 #include "RadiusAuthProcessor.h"
-#include "Billing.h"
 #include "BillingCall.h"
 
 struct service_trunk_order {
