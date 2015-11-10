@@ -73,6 +73,8 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
                 request.dstNoa = atoi(attrValue.c_str());
             } else if (attrName == "INCOMING-ROUTEID") {
                 request.trunkName = attrValue;
+            } else if (attrName == "INCOMING-REDIRECTING-ADDRESS") {
+                request.redirectNumber = attrValue;
             }
         }
     }

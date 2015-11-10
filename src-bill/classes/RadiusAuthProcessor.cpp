@@ -40,6 +40,23 @@ void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse
         if (origTrunk == nullptr) {
             throw Exception("Udp request validation: trunk not found: " + trunkName, "RadiusAuthProcessor::process");
         }
+
+
+
+        Cdr cdr;
+        cdr.id = 0;
+        cdr.connect_time = time(nullptr);
+        cdr.session_time = 60;
+        strncpy(cdr.src_number, aNumber.c_str(), sizeof(cdr.src_number) - 1);
+        strncpy(cdr.dst_number, bNumber.c_str(), sizeof(cdr.dst_number) - 1);
+        strncpy(cdr.redirect_number, redirectionNumber.c_str(), sizeof(cdr.redirect_number) - 1);
+        strncpy(cdr.src_route, trunkName.c_str(), sizeof(cdr.src_route) - 1);
+        strncpy(cdr.dst_route, trunkName.c_str(), sizeof(cdr.dst_route) - 1);
+        cdr.src_noa = request.srcNoa;
+        cdr.dst_noa = request.dstNoa;
+        cdr.call_id = 0;
+
+
         if (needSwapCallingAndRedirectionNumber()) {
             string tmp = redirectionNumber;
             redirectionNumber = aNumber;
@@ -56,18 +73,6 @@ void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse
 
         int outcomeId;
 
-        Cdr cdr;
-        cdr.id = 0;
-        cdr.connect_time = time(nullptr);
-        cdr.session_time = 60;
-        strncpy(cdr.src_number, aNumber.c_str(), sizeof(cdr.src_number) - 1);
-        strncpy(cdr.dst_number, bNumber.c_str(), sizeof(cdr.dst_number) - 1);
-        strncpy(cdr.redirect_number, redirectionNumber.c_str(), sizeof(cdr.redirect_number) - 1);
-        strncpy(cdr.src_route, trunkName.c_str(), sizeof(cdr.src_route) - 1);
-        strncpy(cdr.dst_route, trunkName.c_str(), sizeof(cdr.dst_route) - 1);
-        cdr.src_noa = request.srcNoa;
-        cdr.dst_noa = request.dstNoa;
-        cdr.call_id = 0;
 
         BillingCall billingCall(&repository);
 
