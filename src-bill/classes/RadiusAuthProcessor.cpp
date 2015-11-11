@@ -69,6 +69,7 @@ void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse
             && (aNumber.substr(11, 1) == "*" || aNumber.substr(11, 1) == "+")
                 ) {
             aNumber = aNumber.substr(0, 11);
+            response.srcNumber = server->calling_station_id_for_line_without_number;
         }
 
         int outcomeId;
