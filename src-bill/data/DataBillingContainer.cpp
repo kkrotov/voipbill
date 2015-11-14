@@ -25,22 +25,29 @@ void DataBillingContainer::loadAll(BDb * db, bool recalc) {
     clientLock.load(db);
 }
 
-void DataBillingContainer::reloadAccountSum(BDb * db, shared_ptr<ClientList> clients) {
+void DataBillingContainer::getAccountIdsForRecalcAccountSum(DataContainer *data, list<int> &accountIds) {
+    lock_guard<Spinlock> guard(lock);
 
-    list<int> accountIds;
+    shared_ptr<ActiveCounter> activeCounter = data->activeCounter.get();
+    shared_ptr<ClientList> clients = data->client.get();
 
-    {
-        lock_guard<Spinlock> guard(lock);
-        for (size_t i = 0; i < clients->size(); i++) {
-            Client * client = clients->get(i);
-            StatsAccount * account = statsAccount.get(client->id);
-            if (account == nullptr || account->amount_date != client->amount_date) {
-                accountIds.push_back(client->id);
-            }
+    for (int accountId : activeCounter->activeClients) {
+        Client * client = clients->find(accountId);
+        if (client == nullptr) {
+            continue;
+        }
+
+        StatsAccount * account = statsAccount.get(client->id);
+        if (account == nullptr || account->amount_date != client->amount_date) {
+            accountIds.push_back(client->id);
         }
     }
+}
+
+void DataBillingContainer::recalcAccountSum(BDb * db, list<int> &accountIds) {
 
     statsAccount.reloadSum(db, accountIds, lock);
+
 }
 
 bool DataBillingContainer::ready() {

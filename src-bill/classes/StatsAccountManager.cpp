@@ -81,13 +81,7 @@ void StatsAccountManager::recalc(BDb * db) {
             "               and c.connect_time >= cl.amount_date " \
             "           group by account_id " \
             "       ) as a " \
-            "   on c.id = a.account_id " \
-            "   where " \
-            "       ( " \
-            "           COALESCE(m.m_sum, 0) != 0 OR " \
-            "           COALESCE(d.d_sum, 0) != 0 OR " \
-            "           COALESCE(a.a_sum, 0) != 0 "  \
-            "       ) ");
+            "   on c.id = a.account_id ");
 
     needClear = true;
 }
@@ -129,14 +123,11 @@ void StatsAccountManager::reloadSum(BDb * db, list<int> accountIds, Spinlock &lo
     lock_guard<Spinlock> guard(lock);
 
     while (res.next()) {
-        auto iCc = statsAccount.find(res.get_i(0));
-        if (iCc != statsAccount.end() || abs(res.get_d(1)) > 0.00001) {
-            StatsAccount &stats = statsAccount[res.get_i(0)];
-            stats.account_id = res.get_i(0);
-            stats.sum = res.get_d(1);
-            stats.amount_date = parseDateTime(res.get(2));
-            forSync.insert(stats.account_id);
-        }
+        StatsAccount &stats = statsAccount[res.get_i(0)];
+        stats.account_id = res.get_i(0);
+        stats.sum = res.get_d(1);
+        stats.amount_date = parseDateTime(res.get(2));
+        forSync.insert(stats.account_id);
     }
 }
 

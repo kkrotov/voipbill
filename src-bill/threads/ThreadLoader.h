@@ -20,15 +20,14 @@ class ThreadLoader : public Thread {
 
 
 public:
-    virtual bool hasFullHtml() override;
-
-    virtual void htmlfull(stringstream &html) override;
-
-public:
 
     bool do_load_data();
 
     bool do_load_counters();
+
+    virtual bool hasFullHtml() override;
+
+    virtual void htmlfull(stringstream &html) override;
 
     ThreadLoader();
     static const char* idName() { return "loader"; }

@@ -236,6 +236,7 @@ set(BILL_SOURCES
     src-bill/threads/ThreadRadiusAuthServer.cpp
     src-bill/threads/ThreadSync.cpp
     src-bill/threads/ThreadLoader.cpp
+    src-bill/threads/ThreadAccountBalanceRecalc.cpp
     src-bill/threads/ThreadRemoteLoader.cpp
     src-bill/threads/ThreadCurrentCalls.cpp
     src-bill/threads/ThreadFetchCdr.cpp

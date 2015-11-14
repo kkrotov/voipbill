@@ -42,6 +42,8 @@ struct RadiusAuthResponse {
 
     void setReject() {
         this->accept = false;
+        this->srcNumber = "";
+        this->dstNumber = "";
     }
 };
 
