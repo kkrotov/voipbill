@@ -1,141 +1,27 @@
-//#include "../classes/AppBill.h"
 #include "Exception.h"
-#include <string>
+//#include <string>
 #include <iostream>
-#include <ostream>
+//#include <ostream>
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
+//#include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 #include "FTPClient.h"
 #include <regex>
+//#include <unistd.h>
+//#include <boost/thread.hpp>
+#include <thread>
 
 using namespace boost::asio;
 using namespace boost::asio::ip;
-
-FTPClientReceiver::FTPClientReceiver(boost::asio::io_service& service, unsigned short port)
-        : strand_(service)
-        , acceptor_(service, tcp::endpoint(tcp::v4(), port))
-        , socket_(service)
-        , index_(0) {
-}
-
-FTPClientReceiver::time_stamps& FTPClientReceiver::Stamps()
-{
-    return stamps_;
-}
-
-void FTPClientReceiver::Start()
-{
-    buffer_.fill(0);
-    datafromserver.clear();
-    acceptor_.async_accept(socket_, boost::bind(&FTPClientReceiver::HandleAccept, this, boost::asio::placeholders::error));
-}
-
-void FTPClientReceiver::Stop() {
-    acceptor_.close();
-    socket_.close();
-}
-
-void FTPClientReceiver::HandleAccept(const boost::system::error_code& error)
-{
-//    datafromserver.clear();
-    if(error)
-    {
-        std::cout << error.message() << std::endl;
-        return;
-    }
-//    read_header();
-    Read();
-}
-/*
-void FTPClientReceiver::ReadHeader()
-{
-    boost::asio::async_read(
-            socket_,
-            boost::asio::buffer(buffer_, header_size),
-            boost::bind( &FTPClientReceiver::HandleReadHeader, this,
-                         boost::asio::placeholders::error,
-                         boost::asio::placeholders::bytes_transferred));
-}
-*/
-void FTPClientReceiver::Read()
-{
-    buffer_.fill(0);
-    boost::asio::async_read(
-            socket_,
-            boost::asio::buffer(buffer_, buffer_size - 1),
-            boost::bind( &FTPClientReceiver::HandleReadData, this,
-                         boost::asio::placeholders::error,
-                         boost::asio::placeholders::bytes_transferred));
-}
-/*
-void  FTPClientReceiver::HandleReadHeader(const boost::system::error_code &error, std::size_t bytes_transferred)
-{
-    if(error)
-    {
-        std::cout << error.message() << std::endl;
-        return;
-    }
-    if(!RecordStamp()) {
-        socket_.get_io_service().stop();
-        return;
-    }
-    boost::asio::async_read(
-            socket_,
-            boost::asio::buffer(buffer_, data_size),
-            boost::bind( &FTPClientReceiver::HandleReadData, this,
-                         boost::asio::placeholders::error,
-                         boost::asio::placeholders::bytes_transferred));
-
-}
-*/
-void FTPClientReceiver::HandleReadData(const boost::system::error_code &error, std::size_t bytes_transferred)
-{
-    int ec = error.value();
-    switch(ec) {
-        case boost::asio::error::eof:
-            if(bytes_transferred > 0) {
-                datafromserver += buffer_.c_array();
-            }
-            std::cout << "FTP Data received. Size " << datafromserver.length() << "bytes." << std::endl;
-            socket_.get_io_service().stop();
-            break;
-        case boost::system::errc::success:
-            datafromserver += buffer_.c_array();
-            if(!RecordStamp()) {
-                socket_.get_io_service().stop();
-                return;
-            }
-            break;
-        default:
-            std::cout << error.message() << std::endl;
-            socket_.get_io_service().stop();
-            return;
-    }
-//    read_header();
-    Read();
-}
-
-
-bool FTPClientReceiver::RecordStamp()
-{
-    stamps_[ index_++ ] = boost::posix_time::microsec_clock::local_time();
-    return index_ < max_stamp;
-}
-
-std::string FTPClientReceiver::GetDataFromServer() {
-    return datafromserver;
-}
-//----------------------------------------------------------------------------------------
 
 FTPClient::FTPClient()
 {
 }
 
-bool FTPClient::ConnectToFTP(const std::string &Server, int Port, const std::string &User, const std::string &Password) {
+bool FTPClient::ConnectToFTP(const std::string &Server, const std::string &User, const std::string &Password) {
     try {
         tcp::resolver ftpresolver(ftpservice);
         tcp::resolver::query query(Server, "ftp");
@@ -155,14 +41,11 @@ bool FTPClient::ConnectToFTP(const std::string &Server, int Port, const std::str
             std::string passwordncommand;
             passwordncommand = (boost::format("PASS %1%") % Password).str();
             std::string result;
-            ExecuteCommand(usercommand);
-            if(IsResponceCode(331) || IsResponceCode(220)) {
-                ExecuteCommand(passwordncommand);
-                if(IsResponceCode(230) || IsResponceCode(331)) {
-                    ExecuteCommand("PASV");
-                    if(IsResponceCode(127) || IsResponceCode(230)) {
-                        return true;
-                    }
+            ExecuteCommand(usercommand, 331);
+            if(IsResponceCode(331)/* || IsResponceCode(220)*/) {
+                ExecuteCommand(passwordncommand, 230);
+                if(IsResponceCode(230)) {
+                    return true;
                 }
             }
         }
@@ -174,11 +57,44 @@ bool FTPClient::ConnectToFTP(const std::string &Server, int Port, const std::str
 
 bool FTPClient::Disconnect() {
     ftpsocket->close();
+    return true;
 }
 
-void FTPClient::ReceiveResponce(boost::asio::ip::tcp::socket *Receiver) {
+void FTPClient::ReceiveResponce(int DesiredResponceCode) {
+//    usleep(50000);
+//    sleep(1);
+    lastresponces.clear();
+    bool codefound(false);
+    int attemptcout(100 * 30); // 30 seconds
+    do {
+        usleep(10000);
+        std::string responce;
+        size_t avail = ftpsocket->available();
+        while (avail > 0){
+            boost::asio::streambuf responsebuffer;
+            boost::asio::read_until(*ftpsocket, responsebuffer, "\0");
+            boost::asio::streambuf::const_buffers_type bufs = responsebuffer.data();
+            std::string tmp(boost::asio::buffers_begin(bufs), boost::asio::buffers_begin(bufs) + responsebuffer.size());
+            responce += tmp;
+            avail = ftpsocket->available();
+        };
+        boost::replace_all(responce, "\r", "");
+        std::list<std::string> tmp;
+        boost::split(tmp, responce, boost::is_any_of("\n"));
+        for (auto message : tmp) {
+            if (message.length() > 3) {
+                int responcesode = boost::lexical_cast<int>(message.substr(0, 3));
+                message.erase(0, 3);
+                lastresponces[responcesode] = message;
+                if (responcesode == DesiredResponceCode)
+                    codefound = true;
+                std::cout << responcesode << message << std::endl;
+            }
+        }
+    } while(!codefound && (--attemptcout > 0));
+/*
     boost::asio::streambuf responsebuffer;
-    boost::asio::read_until(*Receiver, responsebuffer, "\r\n");
+    boost::asio::read_until(*Receiver, responsebuffer, "\0");
     std::istream response_stream(&responsebuffer);
     while (!response_stream.eof()) {
         std::string responce;
@@ -188,25 +104,43 @@ void FTPClient::ReceiveResponce(boost::asio::ip::tcp::socket *Receiver) {
             int responcesode = boost::lexical_cast<int>(responce.substr(0, 3));
             responce.erase(0, 3);
             lastresponces[responcesode] = responce;
+            std::cout << responcesode << responce << std::endl;
         }
-    }
+    }*/
+    std::cout << std::endl;
 }
 
-std::string FTPClient::ReceiveRaw(boost::asio::ip::tcp::socket *Receiver) {
+void FTPClient::ReceiveRaw(std::string &Responce, unsigned long DataSize) {
     std::string responce;
-    boost::asio::streambuf responsebuffer;
-    boost::asio::read_until(*Receiver, responsebuffer, "\0");
-    std::istream response_stream(&responsebuffer);
-    while (!response_stream.eof()) {
-        std::string tmp;
-        response_stream >> tmp;
-        responce += tmp;
+    if(DataSize == 0) {
+        size_t avail = receiversocket->available();
+        while (avail > 0) {
+            boost::asio::streambuf responsebuffer;
+            boost::asio::read_until(*receiversocket, responsebuffer, "\0");
+            boost::asio::streambuf::const_buffers_type bufs = responsebuffer.data();
+            std::string tmp(boost::asio::buffers_begin(bufs), boost::asio::buffers_begin(bufs) + responsebuffer.size());
+            responce += tmp;
+            avail = receiversocket->available();
+        }
+    } else {
+        while (DataSize != responce.length()) {
+            size_t avail = receiversocket->available();
+            if(avail > 0) {
+                boost::asio::streambuf responsebuffer;
+                boost::asio::read_until(*receiversocket, responsebuffer, "\0");
+                boost::asio::streambuf::const_buffers_type bufs = responsebuffer.data();
+                std::string tmp(boost::asio::buffers_begin(bufs),
+                                boost::asio::buffers_begin(bufs) + responsebuffer.size());
+                responce += tmp;
+            }
+            //        avail = receiversocket->available();
+        }
     }
-    return responce;
+    Responce = responce;
 }
 
 bool FTPClient::IsResponceCode(int ResponceCode) {
-    return (lastresponces.find(ResponceCode) != lastresponces.end());
+    return (lastresponces.end() != lastresponces.find(ResponceCode));
 }
 
 std::string FTPClient::GetResponceData(int ResponceCode) {
@@ -215,37 +149,20 @@ std::string FTPClient::GetResponceData(int ResponceCode) {
     return (responce != lastresponces.end()) ? responce->second : "" ;
 }
 
-void FTPClient::ExecuteCommand(const std::string &Command) {
+void FTPClient::ExecuteCommand(const std::string &Command, int DesiredResponceCode) {
     std::string buffer;
     buffer = Command + "\r\n";
     boost::asio::write(*ftpsocket, boost::asio::buffer(buffer, buffer.length()));
-    ReceiveResponce(ftpsocket);
+    ReceiveResponce(DesiredResponceCode);
 }
 
-void FTPClient::ExecuteCommand(const std::string &Command, std::string &Responce) {
+void FTPClient::ExecuteCommand(const std::string &Command, std::string &Responce, int DesiredResponceCode, unsigned long DataSize) {
     std::string buffer;
     buffer = Command + "\r\n";
     boost::asio::write(*ftpsocket, boost::asio::buffer(buffer, buffer.length()));
-    Responce = ReceiveRaw(receiversocket);
-    ReceiveResponce(ftpsocket);
+    ReceiveResponce(DesiredResponceCode);
+    ReceiveRaw(Responce, DataSize);
 }
-/*
-bool FTPClient::Login(const std::string &User, const std::string &Password, int ResponcePort) {
-    responeceport = ResponcePort;
-    std::string usercommand;
-    usercommand = (boost::format("USER %1%") % User).str();
-    std::string passwordncommand;
-    passwordncommand = (boost::format("PASS %1%") % Password).str();
-    std::string result;
-    ExecuteCommand(usercommand);
-    if(lasterrorcode == 331) {
-        ExecuteCommand(passwordncommand);
-        return (lasterrorcode == 220) ? true : false;
-    } else {
-        return false;
-    }
-}
-*/
 
 bool FTPClient::EnterPassiveMode(const std::string &Host, unsigned short Port) {
     tcp::resolver ftpreceiver(receiverservice);
@@ -263,80 +180,87 @@ bool FTPClient::EnterPassiveMode(const std::string &Host, unsigned short Port) {
     return (error == boost::system::errc::success);
 }
 
-int FTPClient::GetLileList(const std::string &Path, std::list<std::string> &FileList) {
+void FTPClient::LeavePassiveMode() {
+    receiversocket->close();
+    delete receiversocket;
+}
+
+unsigned long FTPClient::GetLileList(const std::string &Path, std::list<std::string> &FileList) {
+    unsigned long filescount(0);
     try {
-//        std::string command = (boost::format("CWD %1%") % Path).str();
-//        ExecuteCommand(command);
-//        if(IsResponceCode(250)) {
+        if(!Path.empty()) {
+            std::string command = (boost::format("CWD %1%") % Path).str();
+            ExecuteCommand(command, 250);
+            if(!IsResponceCode(250))
+                return 0;
+        }
+        ExecuteCommand("PASV", 227);
+        if(IsResponceCode(227)) {
             std::string host;
             std::string connectdata = GetResponceData(227);
-            if(!connectdata.empty()) {
+            if (!connectdata.empty()) {
                 unsigned short port = ParseForPort(connectdata, host);
                 if (EnterPassiveMode(host, port)) {
                     std::string fileleist;
-                    ExecuteCommand("NLST", fileleist);
-                    if (IsResponceCode(250)) {
+                    ExecuteCommand("NLST", fileleist, 226, 0);
+                    if (IsResponceCode(226)) {
                         boost::replace_all(fileleist, "\r", "");
                         boost::split(FileList, fileleist, boost::is_any_of("\n"));
-                        return FileList.size();
+                        filescount = FileList.size();
                     }
+                    LeavePassiveMode();
                 }
             }
-           return 0;
-//        }
+        }
     } catch(Exception &e) {
-        return 0;
+        filescount = 0;
     }
+    return filescount;
 }
 
 bool FTPClient::GetFile(const std::string &Filename, std::string &FileContent) {
-    ExecuteCommand("TYPE A");
-    if(IsResponceCode(226)) {
-        ExecuteCommand("STRU F");
-        if(IsResponceCode(200)) {
-            boost::asio::io_service service;
-            std::string command = (boost::format("RETR %1%") % Filename).str();
-            currentfilename = Filename;
-            ExecuteCommand(command, FileContent);
-            return true;
+    bool result(false);
+    ExecuteCommand("PASV", 227);
+    if(IsResponceCode(227)) {
+        std::string host;
+        std::string connectdata = GetResponceData(227);
+        if (!connectdata.empty()) {
+            unsigned short port = ParseForPort(connectdata, host);
+            std::string getsizecommand = (boost::format("SIZE %1%") % Filename).str();
+            ExecuteCommand(getsizecommand, 213);
+            if (IsResponceCode(213)) {
+                std::string filesizestr = GetResponceData(213);
+                boost::replace_all(filesizestr, " ", "");
+            if (EnterPassiveMode(host, port)) {
+//                ExecuteCommand("TYPE A", 200);
+//                ExecuteCommand("TYPE A", 200);
+//                if (IsResponceCode(200)) {
+//                    ExecuteCommand("STRU F", 200);
+//                    if (IsResponceCode(200)) {
+                        unsigned long filesize = boost::lexical_cast<unsigned long>(filesizestr);
+                        std::string command = (boost::format("RETR %1%") % Filename).str();
+                        ExecuteCommand(command, FileContent, 150, filesize);
+                        if(IsResponceCode(150)) {
+                            result = true;
+//                        }
+                    }
+                }
+            }
         }
     }
-    return false;
-}
-
-bool FTPClient::ExecuteCommandWithResponce(const std::string &Command, std::string &Responce) {
-
-//    std::string portcommand = "PASV";
-//    std::string portcommand = (boost::format("PORT 10,0,2,15,%1%,%2%") % (responeceport / 256) % (responeceport % 256)).str();
-//    ExecuteCommand(portcommand);
-//    std::string host;
-//    unsigned short port = ParseForPort(lastmessage, host);
-
-//    boost::asio::io_service service;
-//    boost::shared_ptr<FTPClientReceiver> receiver = boost::make_shared<FTPClientReceiver>(boost::ref(service), port);
-//    receiver->Start();
-//    if(lasterrorcode == 227) {
-//        ExecuteCommand(Command);
-//        if(lasterrorcode == 150) {
-//            service.run();
-//            receiver->Stop();
-//            Responce = receiver->GetDataFromServer();
-//            return true;
-//        }
-//    }
-    return false;
+    return result;
 }
 
 unsigned short FTPClient::ParseForPort(const std::string &Message, std::string &Host) {
     std::regex re("([0-9]*),([0-9]*),([0-9]*),([0-9]*),([0-9]*),([0-9]*)");
     std::smatch match;
     if (std::regex_search(Message, match, re) && (match.size() >= 7)) {
-        int first = boost::lexical_cast<int>(match[5]);
-        int second = boost::lexical_cast<int>(match[6]);
-        int hostfirst = boost::lexical_cast<int>(match[1]);
-        int hostsecond = boost::lexical_cast<int>(match[2]);
-        int hostthird = boost::lexical_cast<int>(match[3]);
-        int hostfourth = boost::lexical_cast<int>(match[4]);
+        unsigned short first = boost::lexical_cast<unsigned short>(match[5]);
+        unsigned short second = boost::lexical_cast<unsigned short>(match[6]);
+        unsigned short hostfirst = boost::lexical_cast<unsigned short>(match[1]);
+        unsigned short hostsecond = boost::lexical_cast<unsigned short>(match[2]);
+        unsigned short hostthird = boost::lexical_cast<unsigned short>(match[3]);
+        unsigned short hostfourth = boost::lexical_cast<unsigned short>(match[4]);
         Host = (boost::format("%1%.%2%.%3%.%4%") % hostfirst % hostsecond % hostthird % hostfourth).str();
         return (first << 8) + second;
     } else {
