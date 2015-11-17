@@ -296,9 +296,9 @@ void DataBillingContainer::statsAccountGetChanges(map<int, StatsAccount> &change
     statsAccount.getChanges(changes, needClear);
 }
 
-void DataBillingContainer::statsAccountAddChanges(map<int, StatsAccount> &changes) {
+void DataBillingContainer::statsAccountAddChanges(map<int, StatsAccount> &changes, bool needClear) {
     lock_guard<Spinlock> guard(lock);
-    statsAccount.addChanges(changes);
+    statsAccount.addChanges(changes, needClear);
 }
 
 void DataBillingContainer::statsFreeminGetChanges(map<int, StatsFreemin> &changes) {

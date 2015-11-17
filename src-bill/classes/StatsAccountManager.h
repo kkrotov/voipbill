@@ -42,7 +42,7 @@ public:
     }
 
     void getChanges(map<int, StatsAccount> &changes, bool &needClear);
-    void addChanges(map<int, StatsAccount> &changes);
+    void addChanges(map<int, StatsAccount> &changes, bool needClear);
 
     StatsAccount * get(int account_id);
 

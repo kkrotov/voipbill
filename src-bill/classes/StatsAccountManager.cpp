@@ -258,6 +258,8 @@ double StatsAccountManager::getSumBalance(int account_id, double vat_rate) {
 
 void StatsAccountManager::getChanges(map<int, StatsAccount> &changes, bool &needClear) {
     needClear = this->needClear;
+    this->needClear = false;
+
     if (needClear) {
         for (auto it : statsAccount) {
             changes[it.first] = it.second;
@@ -270,9 +272,12 @@ void StatsAccountManager::getChanges(map<int, StatsAccount> &changes, bool &need
     forSync.clear();
 }
 
-void StatsAccountManager::addChanges(map<int, StatsAccount> &changes) {
+void StatsAccountManager::addChanges(map<int, StatsAccount> &changes, bool needClear) {
     for (auto it : changes) {
         forSync.insert(it.first);
+    }
+    if (needClear) {
+        this->needClear = true;
     }
 }
 
@@ -313,7 +318,7 @@ size_t StatsAccountManager::sync(BDb * db_main, DataBillingContainer * billingDa
             }
 
         } catch (Exception &e) {
-            billingData->statsAccountAddChanges(changes);
+            billingData->statsAccountAddChanges(changes, needClear);
             e.addTrace("StatsAccountManager::sync:");
             throw e;
         }

@@ -78,7 +78,7 @@ public:
     StatsFreemin * statsFreeminGetCurrent(CallInfo * callInfo);
     StatsPackage * statsPackageGetCurrent(CallInfo * callInfo, ServicePackage * servicePackage, TariffPackage * tariffPackage);
     void statsAccountGetChanges(map<int, StatsAccount> &changes, bool &needClear);
-    void statsAccountAddChanges(map<int, StatsAccount> &changes);
+    void statsAccountAddChanges(map<int, StatsAccount> &changes, bool needClear);
     void statsFreeminGetChanges(map<int, StatsFreemin> &changes);
     void statsFreeminAddChanges(map<int, StatsFreemin> &changes);
     void statsPackageGetChanges(map<int, StatsPackage> &changes);
