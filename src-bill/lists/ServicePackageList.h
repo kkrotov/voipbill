@@ -74,7 +74,7 @@ public:
             }
         } else {
             if (trace != nullptr) {
-                *trace << "NOT FOUND|SERVICE NUMBER PACKAGE|BY SERVICE_NUMBER_ID'" << service_number_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
+                *trace << "NOT FOUND|SERVICE NUMBER PACKAGE|BY SERVICE_NUMBER_ID '" << service_number_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
             }
         }
     }

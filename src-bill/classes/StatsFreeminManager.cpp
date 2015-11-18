@@ -98,14 +98,12 @@ StatsFreemin * StatsFreeminManager::getCurrent(CallInfo * callInfo) {
     }
 
     StatsFreemin * stats = createStatsFreemin(callInfo);
-    if (stats != nullptr) {
-        size_t parts = realtimeStatsFreeminParts.size();
-        map<int, StatsFreemin> &realtimeStatsFreemin = realtimeStatsFreeminParts.at(parts - 1);
-        StatsFreemin &stats2 = realtimeStatsFreemin[stats->id];
-        memcpy(&stats2, stats, sizeof(StatsFreemin));
 
-        forSync.insert(stats->id);
-    }
+    size_t parts = realtimeStatsFreeminParts.size();
+    map<int, StatsFreemin> &realtimeStatsFreemin = realtimeStatsFreeminParts.at(parts - 1);
+    StatsFreemin &stats2 = realtimeStatsFreemin[stats->id];
+    memcpy(&stats2, stats, sizeof(StatsFreemin));
+    forSync.insert(stats->id);
 
     return stats;
 }

@@ -18,6 +18,8 @@ struct ServiceNumber {
         trace << "lines_count: " << lines_count << ", ";
         trace << "activation_dt: " << string_time(activation_dt) << ", ";
         trace << "expire_dt: " << string_time(expire_dt) << ", ";
+        trace << "activation_dt_raw: " << activation_dt << ", ";
+        trace << "expire_dt_raw: " << expire_dt << ", ";
         trace << ")";
     }
 };
