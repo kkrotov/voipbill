@@ -23,7 +23,7 @@ public:
     bool ready() { return loaded; };
     void load(BDb * db, time_t lastSaveCallTime);
     void recalc(BDb * db, long long int storedLastId);
-    int getSeconds(int service_package_id, time_t connect_time);
+    StatsPackage * getCurrent(CallInfo * callInfo, ServicePackage * servicePackage, TariffPackage * tariffPackage);
     void getChanges(map<int, StatsPackage> &changes);
     void addChanges(map<int, StatsPackage> &changes);
 
@@ -42,7 +42,6 @@ private:
     friend class DataBillingContainer;
     friend class Billing;
 
-    int getStatsPackageId(CallInfo * callInfo);
-    StatsPackage * createStatsPackage(CallInfo *callInfo);
+    StatsPackage * createStatsPackage(CallInfo * callInfo, ServicePackage * servicePackage, TariffPackage * tariffPackage);
     StatsPackage * updateStatsPackage(CallInfo *callInfo, int statPackageId);
 };

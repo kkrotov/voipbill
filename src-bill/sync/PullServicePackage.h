@@ -16,5 +16,6 @@ public:
         fields.push_back("expire_dt");
         fields.push_back("tariff_package_id");
         fields.push_back("service_number_id");
+        fields.push_back("periodical");
     }
 };

@@ -83,24 +83,34 @@ void StatsPackageManager::recalc(BDb * db, long long int storedLastId) {
     }
 }
 
-int StatsPackageManager::getSeconds(int service_package_id, time_t connect_time) {
-    auto itStatsByPackageId = statsByPackageId.find(service_package_id);
-    if (itStatsByPackageId == statsByPackageId.end()) {
-        return 0;
+
+StatsPackage * StatsPackageManager::getCurrent(CallInfo * callInfo, ServicePackage * servicePackage, TariffPackage * tariffPackage) {
+    auto itStatsByPackageId = statsByPackageId.find(servicePackage->id);
+    if (itStatsByPackageId != statsByPackageId.end()) {
+        for (int packageId : itStatsByPackageId->second) {
+            auto itStatsPackage = statsPackage.find(packageId);
+            if (itStatsPackage == statsPackage.end()) continue;
+
+            StatsPackage &stats = itStatsPackage->second;
+
+            if (stats.activation_dt > callInfo->call->connect_time) continue;
+            if (stats.expire_dt < callInfo->call->connect_time) continue;
+
+            return &stats;
+        }
     }
 
-    for (int packageId : itStatsByPackageId->second) {
-        auto itStatsPackage = statsPackage.find(packageId);
-        if (itStatsPackage == statsPackage.end()) continue;
+    StatsPackage * stats = createStatsPackage(callInfo, servicePackage, tariffPackage);
+    if (stats != nullptr) {
+        size_t parts = realtimeStatsPackageParts.size();
+        map<int, StatsPackage> &realtimeStatsPackage = realtimeStatsPackageParts.at(parts - 1);
+        StatsPackage &stats2 = realtimeStatsPackage[stats->id];
+        memcpy(&stats2, stats, sizeof(StatsPackage));
 
-        StatsPackage &stats = itStatsPackage->second;
-
-        if (stats.activation_dt > connect_time) continue;
-        if (stats.expire_dt < connect_time) continue;
-
-        return stats.used_seconds;
+        forSync.insert(stats->id);
     }
-    return 0;
+
+    return stats;
 }
 
 void StatsPackageManager::add(CallInfo * callInfo) {
@@ -108,27 +118,21 @@ void StatsPackageManager::add(CallInfo * callInfo) {
     if (
             callInfo->call->number_service_id == 0 ||
             callInfo->call->service_package_id <= 1 ||
+            callInfo->call->service_package_stats_id == 0 ||
             callInfo->servicePackagePrepaid == nullptr
     ) {
         return;
     }
 
-    int statPackageId = getStatsPackageId(callInfo);
-    StatsPackage * stats;
-    if (statPackageId > 0) {
-        stats = updateStatsPackage(callInfo, statPackageId);
-    } else {
-        stats = createStatsPackage(callInfo);
+    StatsPackage * stats = updateStatsPackage(callInfo, callInfo->call->service_package_stats_id);
+    if (stats != nullptr) {
+        size_t parts = realtimeStatsPackageParts.size();
+        map<int, StatsPackage> &realtimeStatsPackage = realtimeStatsPackageParts.at(parts - 1);
+        StatsPackage &stats2 = realtimeStatsPackage[stats->id];
+        memcpy(&stats2, stats, sizeof(StatsPackage));
+
+        forSync.insert(stats->id);
     }
-
-    callInfo->call->service_package_stats_id = stats->id;
-
-    size_t parts = realtimeStatsPackageParts.size();
-    map<int, StatsPackage> &realtimeStatsPackage = realtimeStatsPackageParts.at(parts - 1);
-    StatsPackage &stats2 = realtimeStatsPackage[stats->id];
-    memcpy(&stats2, stats, sizeof(StatsPackage));
-
-    forSync.insert(stats->id);
 }
 
 size_t StatsPackageManager::size() {
@@ -177,50 +181,45 @@ void StatsPackageManager::removePartitionAfterSave() {
     realtimeStatsPackageParts.erase(realtimeStatsPackageParts.begin());
 }
 
-int StatsPackageManager::getStatsPackageId(CallInfo * callInfo) {
-    auto itStatsByPackageId = statsByPackageId.find(callInfo->call->service_package_id);
-    if (itStatsByPackageId == statsByPackageId.end()) {
-        return 0;
-    }
+StatsPackage * StatsPackageManager::createStatsPackage(CallInfo * callInfo, ServicePackage * servicePackage, TariffPackage * tariffPackage) {
 
-    for (int freeminId : itStatsByPackageId->second) {
-        auto itStatsFreemin = statsPackage.find(freeminId);
-        if (itStatsFreemin == statsPackage.end()) continue;
+    time_t activation_dt;
+    time_t expire_dt;
+    int paid_seconds;
 
-        StatsPackage &stats = itStatsFreemin->second;
+    if (servicePackage->periodical) {
+        activation_dt = get_tmonth(callInfo->call->connect_time, callInfo->account->timezone_offset);
+        expire_dt = get_tmonth_end(callInfo->call->connect_time, callInfo->account->timezone_offset);
+        double month_seconds = expire_dt + 1 - activation_dt;
 
-        if (stats.activation_dt > callInfo->call->connect_time) continue;
-        if (stats.expire_dt < callInfo->call->connect_time) continue;
+        if (activation_dt < servicePackage->activation_dt) {
+            activation_dt = servicePackage->activation_dt;
+        }
 
-        return stats.id;
-    }
+        if (expire_dt > servicePackage->expire_dt) {
+            expire_dt = servicePackage->expire_dt;
+        }
 
-    return 0;
-}
+        double package_seconds = expire_dt + 1 - activation_dt;
 
-StatsPackage * StatsPackageManager::createStatsPackage(CallInfo *callInfo) {
+        paid_seconds = (int)round(package_seconds * tariffPackage->getPrepaidSeconds() / month_seconds);
 
-    time_t activation_dt = get_tmonth(callInfo->call->connect_time, callInfo->account->timezone_offset);
-    time_t expire_dt = get_tmonth_end(callInfo->call->connect_time, callInfo->account->timezone_offset);
-
-    if (activation_dt < callInfo->servicePackagePrepaid->activation_dt) {
-        activation_dt = callInfo->servicePackagePrepaid->activation_dt;
-    }
-
-    if (expire_dt > callInfo->servicePackagePrepaid->expire_dt) {
-        expire_dt = callInfo->servicePackagePrepaid->expire_dt;
+    } else {
+        activation_dt = servicePackage->activation_dt;
+        expire_dt = servicePackage->expire_dt;
+        paid_seconds = tariffPackage->getPrepaidSeconds();
     }
 
     lastPackageStatId += 1;
 
     StatsPackage &stats = statsPackage[lastPackageStatId];
     stats.id = lastPackageStatId;
-    stats.package_id = callInfo->call->service_package_id;
+    stats.package_id = servicePackage->id;
     stats.activation_dt = activation_dt;
     stats.expire_dt = expire_dt;
-    stats.used_seconds = callInfo->call->package_time;
-    stats.used_credit = callInfo->call->package_credit;
-    stats.paid_seconds = callInfo->tariffPackagePrepaid->getPrepaidSeconds();
+    stats.used_seconds = 0;
+    stats.used_credit = 0;
+    stats.paid_seconds = paid_seconds;
     stats.min_call_id = callInfo->call->id;
     stats.max_call_id = callInfo->call->id;
 
@@ -231,7 +230,12 @@ StatsPackage * StatsPackageManager::createStatsPackage(CallInfo *callInfo) {
 
 StatsPackage * StatsPackageManager::updateStatsPackage(CallInfo *callInfo, int statPackageId) {
 
-    StatsPackage &stats = statsPackage[statPackageId];
+    auto itStatsPackage = statsPackage.find(statPackageId);
+    if (itStatsPackage == statsPackage.end()) {
+        return nullptr;
+    }
+
+    StatsPackage &stats = itStatsPackage->second;
 
     stats.used_seconds += callInfo->call->package_time;
     stats.used_credit += callInfo->call->package_credit;

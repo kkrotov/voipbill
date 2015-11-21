@@ -68,4 +68,39 @@ public:
         return begin <  end ? &*begin : nullptr;
     }
 
+
+    void findAll(vector<TrunkRule *> &resultRules, int trunk_id, bool outgoing, stringstream *trace = nullptr) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, trunk_id, key_trunk_id());
+            begin = p.first;
+            end = p.second;
+        }
+        {
+            auto p = equal_range(begin, end, outgoing, key_outgoing());
+            begin = p.first;
+            end = p.second;
+        }
+
+        if (begin < end) {
+            if (trace != nullptr) {
+                *trace << "FOUND|TRUNK RULES|BY TRUNK_ID '" << trunk_id << "', OUTGOING '" << outgoing << "'" << "\n";
+            }
+            for (auto it = begin; it != end; ++it) {
+                TrunkRule * rule = &*it;
+                resultRules.push_back(rule);
+
+                if (trace != nullptr) {
+                    *trace << "||";
+                    rule->dump(*trace);
+                    *trace << "\n";
+                }
+            }
+        } else {
+            if (trace != nullptr) {
+                *trace << "NOT FOUND|TRUNK RULES|BY TRUNK_ID '" << trunk_id << "', OUTGOING '" << outgoing << "'" << "\n";
+            }
+        }
+    }
 };

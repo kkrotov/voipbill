@@ -82,7 +82,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        auto result = begin <  end ? &*begin : nullptr;
+        TariffChangeLog * result = begin <  end ? &*begin : nullptr;
 
         if (trace != nullptr) {
             if (result != nullptr) {

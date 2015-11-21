@@ -30,7 +30,7 @@ protected:
     };
 
 public:
-    RouteTable * find(int id) {
+    RouteTable * find(int id, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -38,6 +38,19 @@ public:
             begin = p.first;
             end = p.second;
         }
-        return begin <  end ? &*begin : nullptr;
+        RouteTable * result = begin < end ? &*begin : nullptr;
+
+        if (trace != nullptr) {
+            if (result != nullptr) {
+                *trace << "FOUND|ROUTE TABLE|BY ID '" << id << "'" << "\n";
+                *trace << "||";
+                result->dump(*trace);
+                *trace << "\n";
+            } else {
+                *trace << "NOT FOUND|ROUTE TABLE|BY ID '" << id << "'" << "\n";
+            }
+        }
+
+        return result;
     }
 };

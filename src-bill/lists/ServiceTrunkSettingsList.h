@@ -68,11 +68,12 @@ public:
                 *trace << "FOUND|SERVICE TRUNK SETTINGS|BY TRUNK_ID '" << trunk_id << "', TYPE '" << type << "'" << "\n";
             }
             for (auto it = begin; it != end; ++it) {
-                resultTrunkSettings.push_back(&*it);
+                ServiceTrunkSettings * trunkSettings = &*it;
+                resultTrunkSettings.push_back(trunkSettings);
 
                 if (trace != nullptr) {
                     *trace << "||";
-                    it->dump(*trace);
+                    trunkSettings->dump(*trace);
                     *trace << "\n";
                 }
             }

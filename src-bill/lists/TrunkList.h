@@ -48,7 +48,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        auto result = begin <  end ? &*begin : nullptr;
+        Trunk * result = begin <  end ? &*begin : nullptr;
 
         if (trace != nullptr) {
             if (result != nullptr) {
@@ -64,4 +64,34 @@ public:
         return result;
     }
 
+    void findAllAutorouting(vector<Trunk *> &resultTrunks, stringstream *trace = nullptr) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+
+        for (auto it = begin; it != end; ++it) {
+            Trunk * trunk = &*it;
+
+            if (trunk->auto_routing) {
+                if (resultTrunks.size() == 0) {
+                    if (trace != nullptr) {
+                        *trace << "FOUND|TRUNKS|BY AUTOROUTING" << "\n";
+                    }
+                }
+
+                resultTrunks.push_back(trunk);
+
+                if (trace != nullptr) {
+                    *trace << "||";
+                    trunk->dump(*trace);
+                    *trace << "\n";
+                }
+            }
+        }
+
+        if (resultTrunks.size() == 0) {
+            if (trace != nullptr) {
+                *trace << "NOT FOUND|TRUNKS|BY AUTOROUTING" << "\n";
+            }
+        }
+    }
 };

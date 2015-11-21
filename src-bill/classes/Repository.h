@@ -140,18 +140,6 @@ public:
         return tariffPackage->find(tariff_id, trace);
     }
 
-    Number * getNumber(int number_id) {
-        return number->find(number_id);
-    }
-
-    Prefixlist * getPrefixlist(int prefixlist_id) {
-        return prefixlist->find(prefixlist_id);
-    }
-
-    PrefixlistPrefix * getPrefixlistPrefix(int prefixlist_id, char * prefix) {
-        return prefixlistPrefix->find(prefixlist_id, prefix);
-    }
-
     MobPrefix * getMobPrefix(long long int prefix) {
         return mobPrefix->find(prefix, trace);
     }
@@ -169,6 +157,49 @@ public:
     }
 
 
+    RouteTable * getRouteTable(int id) {
+        return routeTable->find(id, trace);
+    }
+
+    void getAllRouteTableRoutes(vector<RouteTableRoute *> &resultRoutes, int route_table_id) {
+        routeTableRoute->findAll(resultRoutes, route_table_id, trace);
+    }
+
+    Outcome * getOutcome(int id) {
+        return outcome->find(id, trace);
+    }
+
+    RouteCase * getRouteCase(int id) {
+        return routeCase->find(id, trace);
+    }
+
+    ReleaseReason * getReleaseReason(int id) {
+        return releaseReason->find(id, trace);
+    }
+
+    Airp * getAirp(int id) {
+        return airp->find(id, trace);
+    }
+
+    Number * getNumber(int id) {
+        return number->find(id, trace);
+    }
+
+    Prefixlist * getPrefixlist(int id) {
+        return prefixlist->find(id, trace);
+    }
+
+    PrefixlistPrefix * getPrefixlistPrefix(int prefixlist_id, const char * prefix) {
+        return prefixlistPrefix->find(prefixlist_id, prefix, trace);
+    }
+
+    void getAllTrunkRules(vector<TrunkRule *> &resultRules, int trunk_id, bool outgoing) {
+        trunkRule->findAll(resultRules, trunk_id, outgoing, trace);
+    }
+
+    void getAllAutoRoutingTrunks(vector<Trunk *> &resultTrunks) {
+        trunk->findAllAutorouting(resultTrunks, trace);
+    }
     StatPrefixlist * getStatPrefixlist(int stat_prefixlist_id) {
         return statPrefixlist->find(stat_prefixlist_id, trace);
     }

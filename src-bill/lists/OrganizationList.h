@@ -52,7 +52,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        auto result = begin <  end ? &*begin : nullptr;
+        Organization * result = begin <  end ? &*begin : nullptr;
 
         if (trace != nullptr) {
 

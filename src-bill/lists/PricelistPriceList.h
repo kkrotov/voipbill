@@ -76,11 +76,11 @@ public:
         char tmpPrefix[20];
         sprintf(tmpPrefix, "%lld", numberPrefix);
 
-        int len = strlen(tmpPrefix);
+        int len = (int)strlen(tmpPrefix);
         while (len > 0) {
             tmpPrefix[len] = 0;
 
-            auto result = _find(pricelist_id, tmpPrefix, timestamp);
+            PricelistPrice * result = _find(pricelist_id, tmpPrefix, timestamp);
             if (result != nullptr) {
 
                 if (trace != nullptr) {

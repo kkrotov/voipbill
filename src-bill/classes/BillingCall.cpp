@@ -663,17 +663,20 @@ void BillingCall::setupFreemin() {
 
     int tariffFreeSeconds = 60 * callInfo->mainTariff->freemin * (callInfo->mainTariff->freemin_for_number ? 1 : callInfo->serviceNumber->lines_count);
     if (call->isLocal() && tariffFreeSeconds > 0) {
-        int usedFreeSeconds = repository->billingData->statsFreeminGetSeconds(callInfo);
-        int availableFreeSeconds = tariffFreeSeconds - usedFreeSeconds;
-        if (availableFreeSeconds < 0) {
-            availableFreeSeconds = 0;
-        }
-        if (availableFreeSeconds > call->billed_time) {
-            availableFreeSeconds = call->billed_time;
-        }
-        if (availableFreeSeconds > 0) {
-            call->service_package_id = 1;
-            call->package_time = availableFreeSeconds;
+        StatsFreemin * stats = repository->billingData->statsFreeminGetCurrent(callInfo);
+        if (stats != nullptr) {
+            int availableFreeSeconds = tariffFreeSeconds - stats->used_seconds;
+            if (availableFreeSeconds < 0) {
+                availableFreeSeconds = 0;
+            }
+            if (availableFreeSeconds > call->billed_time) {
+                availableFreeSeconds = call->billed_time;
+            }
+            if (availableFreeSeconds > 0) {
+                call->service_package_id = 1;
+                call->service_package_stats_id = stats->id;
+                call->package_time = availableFreeSeconds;
+            }
         }
     }
 
@@ -690,6 +693,7 @@ void BillingCall::setupPackagePrepaid() {
     int packageSeconds = 0;
     ServicePackage * servicePackage = nullptr;
     TariffPackage * tariffPackage = nullptr;
+    StatsPackage * statsPackage = nullptr;
 
 
     for(auto package : packages) {
@@ -706,7 +710,12 @@ void BillingCall::setupPackagePrepaid() {
             continue;
         }
 
-        int availableSeconds = tariff->getPrepaidSeconds() - repository->billingData->statsPackageGetSeconds(package->id, call->connect_time);
+        StatsPackage * stats = repository->billingData->statsPackageGetCurrent(callInfo, package, tariff);
+        if (stats == nullptr) {
+            continue;
+        }
+
+        int availableSeconds = stats->paid_seconds - stats->used_seconds;
         if (availableSeconds < 0) {
             availableSeconds = 0;
         }
@@ -715,12 +724,14 @@ void BillingCall::setupPackagePrepaid() {
             packageSeconds = call->billed_time;
             servicePackage = package;
             tariffPackage = tariff;
+            statsPackage = stats;
             break;
         } else {
             if (availableSeconds > packageSeconds) {
                 packageSeconds = availableSeconds;
                 servicePackage = package;
                 tariffPackage = tariff;
+                statsPackage = stats;
             }
         }
     }
@@ -728,6 +739,7 @@ void BillingCall::setupPackagePrepaid() {
     if (servicePackage != nullptr) {
         call->package_time = packageSeconds;
         call->service_package_id = servicePackage->id;
+        call->service_package_stats_id = statsPackage->id;
         callInfo->servicePackagePrepaid = servicePackage;
         callInfo->tariffPackagePrepaid = tariffPackage;
     }

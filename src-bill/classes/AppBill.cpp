@@ -8,6 +8,7 @@
 #include "../threads/ThreadCurrentCalls.h"
 #include "../threads/ThreadFetchCdr.h"
 #include "../threads/ThreadBillRuntime.h"
+#include "../threads/ThreadRadiusAuthServer.h"
 #include "../threads/ThreadSave.h"
 #include "../threads/ThreadSyncCalls.h"
 #include "../threads/ThreadSyncCounters.h"
@@ -80,6 +81,7 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadCheckStartTable>();
     registerThread<ThreadTasks>();
     registerThread<ThreadCdrParser>();
+    registerThread<ThreadRadiusAuthServer>();
 }
 
 void AppBill::runAppInSingleMode()
@@ -104,6 +106,7 @@ void AppBill::runAppInSingleMode()
             "checkstarttable",
             "tasks",
             "cdr_parser",
+            "radius_auth_server",
     };
 
     for (auto thread: standardThreads) {

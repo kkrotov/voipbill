@@ -21,7 +21,7 @@ public:
     bool ready() { return loaded; };
     void load(BDb * db, time_t lastStoredCallTime);
     void recalc(BDb * db, long long int storedLastId);
-    int getSeconds(CallInfo * callInfo);
+    StatsFreemin * getCurrent(CallInfo * callInfo);
     void getChanges(map<int, StatsFreemin> &changes);
     void addChanges(map<int, StatsFreemin> &changes);
 
@@ -39,7 +39,6 @@ private:
     friend class DataBillingContainer;
     friend class Billing;
 
-    int getStatsFreeminId(CallInfo * callInfo);
     StatsFreemin * createStatsFreemin(CallInfo * callInfo);
-    StatsFreemin * updateStatsFreemin(CallInfo * call, int statFreeminId);
+    StatsFreemin * updateStatsFreemin(CallInfo * callInfo, int statFreeminId);
 };

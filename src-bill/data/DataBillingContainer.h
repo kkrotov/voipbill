@@ -72,8 +72,8 @@ public:
     int statsAccountGetSumMonth(int account_id, double vat_rate);
     int statsAccountGetSumDay(int account_id, double vat_rate);
     int statsAccountGetSumBalance(int account_id, double vat_rate);
-    int statsFreeminGetSeconds(CallInfo * callInfo);
-    int statsPackageGetSeconds(int service_package_id, time_t connect_time);
+    StatsFreemin * statsFreeminGetCurrent(CallInfo * callInfo);
+    StatsPackage * statsPackageGetCurrent(CallInfo * callInfo, ServicePackage * servicePackage, TariffPackage * tariffPackage);
     void statsAccountGetChanges(map<int, StatsAccount> &changes, bool &needClear);
     void statsAccountAddChanges(map<int, StatsAccount> &changes);
     void statsFreeminGetChanges(map<int, StatsFreemin> &changes);

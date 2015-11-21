@@ -8,6 +8,21 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-
 include_directories(/usr/include/postgresql)
 link_directories(/usr/pgsql-9.4/lib)
 
+set(BOOST_SOURCES
+        libs/boost/system/src/error_code.cpp
+        libs/boost/program_options/src/cmdline.cpp
+        libs/boost/program_options/src/config_file.cpp
+        libs/boost/program_options/src/convert.cpp
+        libs/boost/program_options/src/options_description.cpp
+        libs/boost/program_options/src/parsers.cpp
+        libs/boost/program_options/src/positional_options.cpp
+        libs/boost/program_options/src/split.cpp
+        libs/boost/program_options/src/utf8_codecvt_facet.cpp
+        libs/boost/program_options/src/value_semantic.cpp
+        libs/boost/program_options/src/variables_map.cpp
+        libs/boost/program_options/src/winmain.cpp
+)
+
 set(BILL_SOURCES
     src-bill/common.cpp
     src-bill/version.cpp
@@ -35,6 +50,7 @@ set(BILL_SOURCES
     src-bill/classes/StatsAccountManager.cpp
     src-bill/classes/DbException.cpp
     src-bill/classes/Exception.cpp
+    src-bill/classes/FTPClient.cpp
     src-bill/classes/StatsFreeminManager.cpp
     src-bill/classes/Loader.cpp
     src-bill/classes/Log.cpp
@@ -43,6 +59,9 @@ set(BILL_SOURCES
     src-bill/classes/LogWriterScreen.cpp
     src-bill/classes/LogWriterSyslog.cpp
     src-bill/classes/ObjList.cpp
+    src-bill/classes/RadiusAuthProcessor.cpp
+    src-bill/classes/RadiusAuthProcessorBill.cpp
+    src-bill/classes/RadiusAuthServer.cpp
     src-bill/classes/StatsPackageManager.cpp
     src-bill/classes/Repository.cpp
     src-bill/classes/Spinlock.cpp
@@ -53,7 +72,6 @@ set(BILL_SOURCES
     src-bill/classes/Timer.cpp
     src-bill/classes/UdpControlClient.cpp
     src-bill/classes/CdrManager.cpp
-#    src-bill/classes/UdpMessageProcessor.cpp
     src-bill/data/BaseData.cpp
     src-bill/data/ActiveCounterData.cpp
     src-bill/data/AirpData.cpp
@@ -217,9 +235,11 @@ set(BILL_SOURCES
     src-bill/sync/PullTrunkPriority.cpp
     src-bill/sync/PullTrunkRule.cpp
     src-bill/threads/ThreadLog.cpp
+    src-bill/threads/ThreadRadiusAuthServer.cpp
     src-bill/threads/ThreadSync.cpp
     src-bill/threads/ThreadLoader.cpp
     src-bill/threads/ThreadRemoteLoader.cpp
+    src-bill/threads/ThreadCdrParser.cpp
     src-bill/threads/ThreadCurrentCalls.cpp
     src-bill/threads/ThreadFetchCdr.cpp
     src-bill/threads/ThreadBillRuntime.cpp
@@ -231,11 +251,11 @@ set(BILL_SOURCES
     src-bill/threads/ThreadLimitControl.cpp
     src-bill/threads/ThreadUpdateActiveClients.cpp
     src-bill/threads/ThreadTasks.cpp
-    src-bill/tasks/TaskRecalc.cpp
     src-bill/threads/ThreadSyncCalls.cpp
     src-bill/threads/ThreadSyncCounters.cpp
     src-bill/threads/ThreadSyncLocks.cpp
     src-bill/threads/ThreadWeb.cpp
+    src-bill/tasks/TaskRecalc.cpp
     src-bill/web/http/mime_types.cpp
     src-bill/web/http/reply.cpp
     src-bill/web/http/request_parser.cpp
@@ -260,19 +280,15 @@ set(BILL_SOURCES
     src-bill/web/PageTestCalcGui.cpp
     src-bill/web/PageTestRoute.cpp
     src-bill/main.cpp
-    libs/boost/system/src/error_code.cpp
-    libs/boost/program_options/src/cmdline.cpp
-    libs/boost/program_options/src/config_file.cpp
-    libs/boost/program_options/src/convert.cpp
-    libs/boost/program_options/src/options_description.cpp
-    libs/boost/program_options/src/parsers.cpp
-    libs/boost/program_options/src/positional_options.cpp
-    libs/boost/program_options/src/split.cpp
-    libs/boost/program_options/src/utf8_codecvt_facet.cpp
-    libs/boost/program_options/src/value_semantic.cpp
-    libs/boost/program_options/src/variables_map.cpp
-    libs/boost/program_options/src/winmain.cpp
-        src-bill/threads/ThreadCdrParser.cpp src-bill/threads/ThreadCdrParser.h src-bill/classes/FTPClient.cpp src-bill/classes/FTPClient.h)
+)
 
-add_executable(app_bill ${BILL_SOURCES})
+add_definitions(-DHAVE_SYS_IOCTL_H -DHAVE_SOCKLEN_T)
+file(GLOB_RECURSE ACE_RADIUS_SOURCES "libs/ace-radius/*.cpp")
+
+add_executable(app_bill ${BILL_SOURCES} ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
 target_link_libraries(app_bill rt pthread pq)
+
+add_executable(auth-client src-auth-client/client.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
+
+add_executable(auth-server src-auth-client/server.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
+
