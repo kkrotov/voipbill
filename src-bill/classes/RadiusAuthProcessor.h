@@ -17,7 +17,7 @@ struct ServiceTrunkOrder {
 class RadiusAuthProcessor {
 public:
 
-    void process(RadiusAuthRequest &request, RadiusAuthResponse &response);
+    void process(RadiusAuthRequest &request, RadiusAuthResponse &response, pLogMessage &logRequest);
 
 private:
     string prefix;

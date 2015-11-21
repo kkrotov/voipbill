@@ -19,7 +19,7 @@ void RadiusAuthProcessor::init() {
     server = repository.getServer();
 }
 
-void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse &response) {
+void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse &response, pLogMessage &logRequest) {
 
     try {
         init();
@@ -80,6 +80,21 @@ void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse
         CallInfo callInfo;
         billingCall.calc(&call, &callInfo, &cdr);
         string billResponse = analyzeCall(call);
+
+        logRequest->params["orig"] = "true";
+        logRequest->params["src"] = lexical_cast<string>(call.src_number);
+        logRequest->params["dst"] = lexical_cast<string>(call.dst_number);
+        logRequest->params["trunk_id"] = lexical_cast<string>(call.trunk_id);
+        logRequest->params["account_id"] = lexical_cast<string>(call.account_id);
+        logRequest->params["trunk_service_id"] = lexical_cast<string>(call.trunk_service_id);
+        logRequest->params["number_service_id"] = lexical_cast<string>(call.number_service_id);
+        logRequest->params["service_package_id"] = lexical_cast<string>(call.service_package_id);
+        logRequest->params["pricelist_id"] = lexical_cast<string>(call.pricelist_id);
+        logRequest->params["pricelist_prefix"] = lexical_cast<string>(call.prefix);
+        logRequest->params["rate"] = lexical_cast<string>(call.rate);
+        logRequest->params["est_cost"] = lexical_cast<string>(call.cost);
+
+        logRequest->params["resp_bill"] = billResponse;
 
         if (billResponse == "voip_disabled") {
             outcomeId = server->blocked_outcome_id;

@@ -1,11 +1,15 @@
 #include "Log.h"
-#include <stdio.h>
 #include "AppBill.h"
 
 void Log::info(const string &text) {
     pLogMessage message(new LogMessage);
     message->level = LogLevel::INFO;
     message->message = text;
+    app().logger.logMessage(message);
+}
+
+void Log::info(pLogMessage message) {
+    message->level = LogLevel::INFO;
     app().logger.logMessage(message);
 }
 

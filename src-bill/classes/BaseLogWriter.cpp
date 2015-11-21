@@ -8,21 +8,6 @@ BaseLogWriter::BaseLogWriter(LogLevel minLevel, LogLevel maxLevel) {
 
 }
 
-void BaseLogWriter::publish(pLogMessage message) {
-
-    if (message->level >= minLevel && message->level <= maxLevel) {
-
-        if (beforePublish()) {
-
-            doPublish(message);
-
-            afterPublish();
-        }
-
-    }
-
-}
-
 void BaseLogWriter::massPublish(list<pLogMessage> messages) {
 
     short publishStarted = -1;
@@ -82,5 +67,23 @@ string BaseLogWriter::scount(int count) {
         return "[" + lexical_cast<string>(count) + "] ";
     } else {
         return "";
+    }
+}
+
+int BaseLogWriter::getSyslogLevel(LogLevel level) {
+    switch (level) {
+        case LogLevel::DEBUG:
+            return LOG_DEBUG;
+        case LogLevel::INFO:
+            return LOG_INFO;
+        case LogLevel::NOTICE:
+            return LOG_NOTICE;
+        case LogLevel::WARNING:
+            return LOG_WARNING;
+        case LogLevel::ERROR:
+            return LOG_ERR;
+        case LogLevel::CRITICAL:
+            return LOG_CRIT;
+        default: return 0;
     }
 }

@@ -63,7 +63,9 @@ void Logger::processLogQueue() {
     }
 
     for (auto it = writers.begin(); it != writers.end(); ++it) {
-        (*it)->massPublish(messages);
+        try {
+            (*it)->massPublish(messages);
+        } catch (...) {}
     }
 
 }

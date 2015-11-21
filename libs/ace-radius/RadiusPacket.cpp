@@ -333,52 +333,10 @@ void RadiusPacket::dump(char * buffer)
 {
     int i;
     char buffer2[1024];
-/*
-    // first dump packet raw data in HEX format
-    uint16_t l_length = getLength();
-    for (i=0; i<l_length; i++)
-    {
-        if (i%16 == 0) {
-            sprintf(buffer2, "\n");
-            strcat(buffer, buffer2);
-        }
-        sprintf(buffer2, "%02x ", m_data[i]);
-        strcat(buffer, buffer2);
-    }
-
-    sprintf(buffer2, "\n\n");
-    strcat(buffer, buffer2);
-*/
 
     // dump packet code and code description
-    sprintf(buffer2, " 1  Code = %s (%u)\n", getCodeDescription(), getCode());
+    sprintf(buffer2, "%s\n", getCodeDescription());
     strcat(buffer, buffer2);
-
-
-    // dump packet identifier
-    sprintf(buffer2, " 1  ID = %u\n", getID());
-    strcat(buffer, buffer2);
-
-    // dump packet length
-    sprintf(buffer2, " 2  Length = %u\n", getLength());
-    strcat(buffer, buffer2);
-
-
-    // dump request authenticator
-    sprintf(buffer2, "16  Request Authenticator = ( ");
-    strcat(buffer, buffer2);
-
-
-    const unsigned char * l_auth = getAuthenticator();
-    for (i=0; i<D_AUTHENTICATOR_LENGTH; i++)
-    {
-        sprintf(buffer2, "%02x ", *l_auth++);
-        strcat(buffer, buffer2);
-    }
-
-    sprintf(buffer2, ")\n");
-    strcat(buffer, buffer2);
-
 
     RadiusAttribute l_attr;
     for (getFirstAttribute(l_attr);

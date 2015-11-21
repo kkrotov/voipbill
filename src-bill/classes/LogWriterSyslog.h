@@ -10,7 +10,6 @@ protected:
     bool beforePublish();
     void doPublish(pLogMessage message);
     void afterPublish();
-    int getSyslogLevel(LogLevel level);
 };
 
 

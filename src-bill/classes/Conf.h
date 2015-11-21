@@ -21,7 +21,11 @@ public:
     LogLevel log_syslog_min_level;
     LogLevel log_syslog_max_level;
 
-    unsigned short log_grouping_interval;
+    string log_graylog_host;
+    uint16_t log_graylog_port;
+    string log_graylog_source;
+
+    uint16_t log_grouping_interval;
 
     bool readConfig(string config_file, string pid_file);
 protected:
