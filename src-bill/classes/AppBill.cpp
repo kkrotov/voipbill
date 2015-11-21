@@ -4,6 +4,7 @@
 #include "../threads/ThreadLog.h"
 #include "../threads/ThreadSync.h"
 #include "../threads/ThreadLoader.h"
+#include "../threads/ThreadAccountBalanceRecalc.h"
 #include "../threads/ThreadRemoteLoader.h"
 #include "../threads/ThreadCurrentCalls.h"
 #include "../threads/ThreadFetchCdr.h"
@@ -62,6 +63,7 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadLog>();
     registerThread<ThreadSync>();
     registerThread<ThreadLoader>();
+    registerThread<ThreadAccountBalanceRecalc>();
     registerThread<ThreadRemoteLoader>();
     registerThread<ThreadCurrentCalls>();
     registerThread<ThreadFetchCdr>();
@@ -87,6 +89,7 @@ void AppBill::runAppInSingleMode()
             "log",
             "sync",
             "loader",
+            "account_balance_recalc",
             "remote_loader",
             "current_calls",
             "fetch_cdr",

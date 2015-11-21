@@ -14,6 +14,8 @@
 #include "../classes/StatsFreeminManager.h"
 #include "../classes/StatsPackageManager.h"
 
+#include "DataContainer.h"
+
 class DataBillingContainer {
 public:
     Spinlock lock;
@@ -41,7 +43,8 @@ public:
     static DataBillingContainer * instance();
 
     void loadAll(BDb * db, bool recalc = false);
-    void reloadAccountSum(BDb * db, shared_ptr<ClientList> clients);
+    void getAccountIdsForRecalcAccountSum(DataContainer *data, list<int> &accountIds);
+    void recalcAccountSum(BDb * db, list<int> &accountIds);
     bool ready();
     void addCall(CallInfo * callInfo);
     void save(BDb * dbCalls);
@@ -75,7 +78,7 @@ public:
     StatsFreemin * statsFreeminGetCurrent(CallInfo * callInfo);
     StatsPackage * statsPackageGetCurrent(CallInfo * callInfo, ServicePackage * servicePackage, TariffPackage * tariffPackage);
     void statsAccountGetChanges(map<int, StatsAccount> &changes, bool &needClear);
-    void statsAccountAddChanges(map<int, StatsAccount> &changes);
+    void statsAccountAddChanges(map<int, StatsAccount> &changes, bool needClear);
     void statsFreeminGetChanges(map<int, StatsFreemin> &changes);
     void statsFreeminAddChanges(map<int, StatsFreemin> &changes);
     void statsPackageGetChanges(map<int, StatsPackage> &changes);

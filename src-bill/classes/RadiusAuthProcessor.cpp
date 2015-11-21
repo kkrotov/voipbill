@@ -3,13 +3,12 @@
 #include "../common.h"
 #include "Log.h"
 #include "RadiusAuthProcessor.h"
-#include "RadiusAuthProcessorBill.h"
+#include "BillingCall.h"
 
-struct ServiceTrunkOrder {
-    Trunk * trunk;
-    ServiceTrunk * serviceTrunk;
-    Pricelist * pricelist;
-    PricelistPrice * price;
+struct service_trunk_order {
+    bool operator() (const ServiceTrunkOrder & left, const ServiceTrunkOrder & right) {
+        return left.price->price < right.price->price;
+    }
 };
 
 void RadiusAuthProcessor::init() {
@@ -41,6 +40,23 @@ void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse
         if (origTrunk == nullptr) {
             throw Exception("Udp request validation: trunk not found: " + trunkName, "RadiusAuthProcessor::process");
         }
+
+
+
+        Cdr cdr;
+        cdr.id = 0;
+        cdr.connect_time = time(nullptr);
+        cdr.session_time = 60;
+        strncpy(cdr.src_number, aNumber.c_str(), sizeof(cdr.src_number) - 1);
+        strncpy(cdr.dst_number, bNumber.c_str(), sizeof(cdr.dst_number) - 1);
+        strncpy(cdr.redirect_number, redirectionNumber.c_str(), sizeof(cdr.redirect_number) - 1);
+        strncpy(cdr.src_route, trunkName.c_str(), sizeof(cdr.src_route) - 1);
+        strncpy(cdr.dst_route, trunkName.c_str(), sizeof(cdr.dst_route) - 1);
+        cdr.src_noa = request.srcNoa;
+        cdr.dst_noa = request.dstNoa;
+        cdr.call_id = 0;
+
+
         if (needSwapCallingAndRedirectionNumber()) {
             string tmp = redirectionNumber;
             redirectionNumber = aNumber;
@@ -49,16 +65,21 @@ void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse
 
         if (origTrunk->our_trunk
             && server->calling_station_id_for_line_without_number[0] != 0
-            && aNumber.substr(0, 11) == string(server->calling_station_id_for_line_without_number)
             && (aNumber.substr(11, 1) == "*" || aNumber.substr(11, 1) == "+")
                 ) {
             aNumber = aNumber.substr(0, 11);
+            response.srcNumber = server->calling_station_id_for_line_without_number;
         }
 
         int outcomeId;
 
-        RadiusAuthProcessorBill billProcessor(aNumber, bNumber, trunkName);
-        string billResponse = billProcessor.process();
+
+        BillingCall billingCall(&repository);
+
+        Call call = Call(&cdr, CALL_ORIG);
+        CallInfo callInfo;
+        billingCall.calc(&call, &callInfo, &cdr);
+        string billResponse = analyzeCall(call);
 
         if (billResponse == "voip_disabled") {
             outcomeId = server->blocked_outcome_id;
@@ -175,13 +196,24 @@ void RadiusAuthProcessor::processOutcome(RadiusAuthResponse &response, int outco
 
 void RadiusAuthProcessor::processAutoOutcome(RadiusAuthResponse &response) {
 
-    vector<ServiceTrunk *> origServiceTrunks;
-    repository.getAllServiceTrunk(origServiceTrunks, origTrunk->id);
-
     ServiceTrunk * origServiceTrunk = nullptr;
     Pricelist * origPricelist = nullptr;
     PricelistPrice * origPrice = nullptr;
-    for (auto serviceTrunk : origServiceTrunks) {
+    getAvailableOrigServiceTrunk(origServiceTrunk, origPricelist, origPrice);
+
+
+    vector<ServiceTrunkOrder> termServiceTrunks;
+    getAvailableTermServiceTrunk(termServiceTrunks);
+
+
+    processAutoRouteResponse(response, termServiceTrunks);
+}
+
+void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk * origServiceTrunk, Pricelist * origPricelist, PricelistPrice * origPrice) {
+    vector<ServiceTrunk *> serviceTrunks;
+    repository.getAllServiceTrunk(serviceTrunks, origTrunk->id);
+
+    for (auto serviceTrunk : serviceTrunks) {
         Pricelist * pricelist;
         PricelistPrice * price;
         if (checkServiceTrunkAvailability(serviceTrunk, SERVICE_TRUNK_SETTINGS_ORIGINATION, pricelist, price)) {
@@ -192,8 +224,9 @@ void RadiusAuthProcessor::processAutoOutcome(RadiusAuthResponse &response) {
             }
         }
     }
+}
 
-
+void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks) {
     vector<Trunk *> termTrunks;
     repository.getAllAutoRoutingTrunks(termTrunks);
 
@@ -205,16 +238,19 @@ void RadiusAuthProcessor::processAutoOutcome(RadiusAuthResponse &response) {
         if (!autoTrunkFilterDstNumber(termTrunk)) {
             continue;
         }
+
+        if (origTrunk->orig_redirect_number && redirectionNumber.size() > 0 && !termTrunk->term_redirect_number) {
+            continue;
+        }
+
         filteredTermTrunks.push_back(termTrunk);
     }
 
-    vector<ServiceTrunkOrder> termOrders;
-
     for (auto termTrunk : filteredTermTrunks) {
-        vector<ServiceTrunk *> termServiceTrunks;
-        repository.getAllServiceTrunk(termServiceTrunks, termTrunk->id);
+        vector<ServiceTrunk *> serviceTrunks;
+        repository.getAllServiceTrunk(serviceTrunks, termTrunk->id);
 
-        for (auto serviceTrunk : termServiceTrunks) {
+        for (auto serviceTrunk : serviceTrunks) {
             Pricelist * pricelist;
             PricelistPrice * price;
             if (checkServiceTrunkAvailability(serviceTrunk, SERVICE_TRUNK_SETTINGS_TERMINATION, pricelist, price)) {
@@ -223,18 +259,16 @@ void RadiusAuthProcessor::processAutoOutcome(RadiusAuthResponse &response) {
                 termOrder.serviceTrunk = serviceTrunk;
                 termOrder.pricelist = pricelist;
                 termOrder.price = price;
-                termOrders.push_back(termOrder);
+                termServiceTrunks.push_back(termOrder);
             }
         }
     }
 
-    struct service_trunk_order {
-        bool operator() (const ServiceTrunkOrder & left, const ServiceTrunkOrder & right) {
-            return left.price->price < right.price->price;
-        }
-    };
+    sort(termServiceTrunks.begin(), termServiceTrunks.end(), service_trunk_order());
+}
 
-    sort(termOrders.begin(), termOrders.end(), service_trunk_order());
+void RadiusAuthProcessor::processAutoRouteResponse(RadiusAuthResponse &response, vector<ServiceTrunkOrder> &termOrders) {
+
 
     if (termOrders.size() == 0) {
         Log::warning("Auto Route not contains operators");
@@ -417,4 +451,87 @@ bool RadiusAuthProcessor::checkServiceTrunkAvailability(ServiceTrunk *serviceTru
     }
 
     return false;
+}
+
+
+string RadiusAuthProcessor::analyzeCall(Call &call) {
+
+    if (call.account_id == 0) {
+        return "reject";
+    }
+
+    auto client = repository.getAccount(call.account_id);
+    if (client == nullptr) {
+        return "reject";
+    }
+
+    double vat_rate = repository.getVatRate(client);
+
+    double sumBalance = repository.billingData->statsAccountGetSumBalance(call.account_id, vat_rate);
+    double sumDay = repository.billingData->statsAccountGetSumDay(call.account_id, vat_rate);
+
+    auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
+    double sumBalance2 = statsAccount2->getSumBalance(call.account_id, vat_rate);
+    double sumDay2 = statsAccount2->getSumDay(call.account_id, vat_rate);
+
+    double globalBalanceSum, globalDaySum;
+    fetchGlobalCounters(call.account_id, globalBalanceSum, globalDaySum, vat_rate);
+
+    double spentBalanceSum, spentDaySum;
+    spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
+    spentDaySum = sumDay + sumDay2 + globalDaySum;
+
+    if (call.trunk_service_id != 0) {
+
+        if (client->isConsumedCreditLimit(spentBalanceSum)) {
+            return "low_balance";
+        }
+
+    } else if (call.number_service_id != 0 && call.orig) {
+
+        // Глобальная блокировка
+        if (client->is_blocked) {
+            return "voip_disabled";
+        }
+
+        // Блокировка МГМН
+        if (!call.isLocal() && client->disabled) {
+            return "voip_disabled";
+        }
+
+        // Глобальная блокировка если превышен лимит кредита и не оплачен последний счет
+        if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth(time(nullptr))) {
+            return "low_balance";
+        }
+
+        // Блокировка МГМН если превышен лимит кредита
+        if (!call.isLocal()  && client->isConsumedCreditLimit(spentBalanceSum)) {
+            return "low_balance";
+        }
+
+        // Блокировка МГМН если превышен дневной лимит
+        if (!call.isLocal() && client->isConsumedDailyLimit(spentDaySum)) {
+            return "voip_disabled";
+        }
+
+    }
+
+    return "accept";
+}
+
+
+void RadiusAuthProcessor::fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double vat_rate) {
+
+    GlobalCounters * globalCounter = nullptr;
+    if (repository.data->globalCounters.ready()) {
+        globalCounter = repository.data->globalCounters.get()->find(accountId);
+    }
+
+    if (globalCounter != nullptr) {
+        globalBalanceSum = globalCounter->sumBalance(vat_rate);
+        globalDaySum = globalCounter->sumDay(vat_rate);
+    } else {
+        globalBalanceSum = 0.0;
+        globalDaySum = 0.0;
+    }
 }

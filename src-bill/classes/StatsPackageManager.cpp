@@ -101,14 +101,12 @@ StatsPackage * StatsPackageManager::getCurrent(CallInfo * callInfo, ServicePacka
     }
 
     StatsPackage * stats = createStatsPackage(callInfo, servicePackage, tariffPackage);
-    if (stats != nullptr) {
-        size_t parts = realtimeStatsPackageParts.size();
-        map<int, StatsPackage> &realtimeStatsPackage = realtimeStatsPackageParts.at(parts - 1);
-        StatsPackage &stats2 = realtimeStatsPackage[stats->id];
-        memcpy(&stats2, stats, sizeof(StatsPackage));
 
-        forSync.insert(stats->id);
-    }
+    size_t parts = realtimeStatsPackageParts.size();
+    map<int, StatsPackage> &realtimeStatsPackage = realtimeStatsPackageParts.at(parts - 1);
+    StatsPackage &stats2 = realtimeStatsPackage[stats->id];
+    memcpy(&stats2, stats, sizeof(StatsPackage));
+    forSync.insert(stats->id);
 
     return stats;
 }

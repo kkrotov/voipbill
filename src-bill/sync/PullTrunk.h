@@ -24,6 +24,7 @@ public:
         fields.push_back("route_table_id");
         fields.push_back("our_trunk");
         fields.push_back("auth_by_number");
-        fields.push_back("use_redirect_number");
+        fields.push_back("orig_redirect_number");
+        fields.push_back("term_redirect_number");
     }
 };
