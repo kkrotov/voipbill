@@ -230,20 +230,22 @@ void RadiusAttribute::dump(char * buffer, AttributeFormat_e p_format)
         return;
     char buffer2[1024];
 
-    // first print attribute type and description
-    sprintf(buffer2, "%2u  %s (%u) = ", getLength(), getTypeDescription(), getType());
-    strcat(buffer, buffer2);
-
     // then print data in human-readable format
     switch (p_format)
     {
         case E_ATTR_FORMAT_INTEGER:
+            sprintf(buffer2, "%s = ", getTypeDescription());
+            strcat(buffer, buffer2);
+
             sprintf(buffer2, "%u ", getNumber());
             strcat(buffer, buffer2);
             break;
 
         case E_ATTR_FORMAT_IP_ADDRESS:
         {
+            sprintf(buffer2, "%s = ", getTypeDescription());
+            strcat(buffer, buffer2);
+
             struct in_addr l_addr = getIPAddress();
             sprintf(buffer2, "%s ", inet_ntoa(l_addr));
             strcat(buffer, buffer2);
@@ -252,6 +254,9 @@ void RadiusAttribute::dump(char * buffer, AttributeFormat_e p_format)
 
         case E_ATTR_FORMAT_STRING:
         {
+            sprintf(buffer2, "%s = ", getTypeDescription());
+            strcat(buffer, buffer2);
+
             const char * l_data;
             uint16_t l_length;
             getString(l_data, l_length);
@@ -278,6 +283,9 @@ void RadiusAttribute::dump(char * buffer, AttributeFormat_e p_format)
 
         case E_ATTR_FORMAT_USER_PASSWORD:
         {
+            sprintf(buffer2, "%s = ", getTypeDescription());
+            strcat(buffer, buffer2);
+
             char l_data[D_USER_PASSWORD_MAX_LENGTH];
             uint16_t l_length;
             getUserPassword(l_data, l_length);
@@ -314,8 +322,6 @@ void RadiusAttribute::dump(char * buffer, AttributeFormat_e p_format)
 
             getVendorString(l_data, l_length);
 
-            sprintf(buffer2, "%u \"", getVendorId());
-            strcat(buffer, buffer2);
             for (int i=0; i<l_length; i++) {
                 // if the data character is printable - print it
                 if ((l_data[i] >= ' ') && (l_data[i] <= 'z')) {
@@ -326,25 +332,12 @@ void RadiusAttribute::dump(char * buffer, AttributeFormat_e p_format)
                     strcat(buffer, buffer2);
                 }
             }
-            sprintf(buffer2, "\" ");
-            strcat(buffer, buffer2);
 
         }
             break;
     }
 
-    // then print data in HEX format
-    uint32_t l_length = getLength() - 2;
-    unsigned char * l_data = getRawData();
-
-    sprintf(buffer2, "( ");
-    strcat(buffer, buffer2);
-    for (uint32_t i=0; i<l_length; i++)
-    {
-        sprintf(buffer2, "%02x ", l_data[i]);
-        strcat(buffer, buffer2);
-    }
-    sprintf(buffer2, ")\n");
+    sprintf(buffer2, "\n");
     strcat(buffer, buffer2);
 
 }

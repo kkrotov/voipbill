@@ -5,7 +5,7 @@ project(voip)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
 
-include_directories(/usr/include/postgresql)
+include_directories(/usr/include/postgresql libs/jsoncpp-master/include)
 link_directories(/usr/pgsql-9.4/lib)
 
 set(BOOST_SOURCES
@@ -21,6 +21,12 @@ set(BOOST_SOURCES
         libs/boost/program_options/src/value_semantic.cpp
         libs/boost/program_options/src/variables_map.cpp
         libs/boost/program_options/src/winmain.cpp
+)
+
+set(JSON_SOURCES
+        libs/jsoncpp-master/src/lib_json/json_value.cpp
+        libs/jsoncpp-master/src/lib_json/json_reader.cpp
+        libs/jsoncpp-master/src/lib_json/json_writer.cpp
 )
 
 set(BILL_SOURCES
@@ -59,6 +65,7 @@ set(BILL_SOURCES
     src-bill/classes/LogWriterFile.cpp
     src-bill/classes/LogWriterScreen.cpp
     src-bill/classes/LogWriterSyslog.cpp
+    src-bill/classes/LogWriterGraylog.cpp
     src-bill/classes/ObjList.cpp
     src-bill/classes/RadiusAuthProcessor.cpp
     src-bill/classes/RadiusAuthServer.cpp
@@ -286,7 +293,7 @@ set(BILL_SOURCES
 add_definitions(-DHAVE_SYS_IOCTL_H -DHAVE_SOCKLEN_T)
 file(GLOB_RECURSE ACE_RADIUS_SOURCES "libs/ace-radius/*.cpp")
 
-add_executable(app_bill ${BILL_SOURCES} ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
+add_executable(app_bill ${BILL_SOURCES} ${BOOST_SOURCES} ${JSON_SOURCES} ${ACE_RADIUS_SOURCES})
 target_link_libraries(app_bill rt pthread pq)
 
 add_executable(auth-client src-auth-client/client.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})

@@ -2,6 +2,7 @@
 
 #include "../common.h"
 #include "../../libs/ace-radius/RadiusServerStack.h"
+#include "../classes/Log.h"
 
 struct RadiusAuthRequest {
     string srcNumber;
@@ -58,9 +59,9 @@ public:
     void run(string secret, uint16_t port);
 
 private:
-    void spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &request);
-    void processRequest(RadiusAuthRequest &request, RadiusAuthResponse &response);
-    void sendResponse(RadiusServerStack &p_stack, RadiusAuthResponse &response);
+    void spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &request, pLogMessage &logRequest);
+    void processRequest(RadiusAuthRequest &request, RadiusAuthResponse &response, pLogMessage &logRequest);
+    void sendResponse(RadiusServerStack &p_stack, RadiusAuthResponse &response, pLogMessage &logRequest);
     void readRequestString(RadiusAttribute &attr, string &attrValue);
     void readRequestVendorString(RadiusAttribute &attr, string &attrName, string &attrValue);
 };

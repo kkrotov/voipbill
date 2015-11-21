@@ -16,14 +16,18 @@ bool Conf::readConfig(string config_file, string pid_file) {
         boost::property_tree::ini_parser::read_ini(config_file, pt);
 
         log_file_filename = pt.get<string>("log.file_filename", "");
-        log_file_min_level = static_cast<LogLevel> (pt.get<unsigned short>("log.file_min_level", 0));
-        log_file_max_level = static_cast<LogLevel> (pt.get<unsigned short>("log.file_max_level", 5));
+        log_file_min_level = static_cast<LogLevel> (pt.get<uint8_t>("log.file_min_level", 0));
+        log_file_max_level = static_cast<LogLevel> (pt.get<uint8_t>("log.file_max_level", 5));
 
         log_syslog_ident = pt.get<string>("log.syslog_ident", "");
-        log_syslog_min_level = static_cast<LogLevel> (pt.get<unsigned short>("log.syslog_min_level", 0));
-        log_syslog_max_level = static_cast<LogLevel> (pt.get<unsigned short>("log.syslog_max_level", 5));
+        log_syslog_min_level = static_cast<LogLevel> (pt.get<uint8_t>("log.syslog_min_level", 0));
+        log_syslog_max_level = static_cast<LogLevel> (pt.get<uint8_t>("log.syslog_max_level", 5));
 
-        log_grouping_interval = pt.get<unsigned short>("log.grouping_interval", 60);
+        log_graylog_host = pt.get<string>("log.graylog_host", "");
+        log_graylog_port = pt.get<uint16_t>("log.graylog_port", 12201);
+        log_graylog_source = pt.get<string>("log.graylog_source", "dev");
+
+        log_grouping_interval = pt.get<uint16_t>("log.grouping_interval", 60);
 
         parse_config_variables(pt);
 

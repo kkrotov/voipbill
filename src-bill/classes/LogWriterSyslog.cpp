@@ -25,20 +25,3 @@ void LogWriterSyslog::afterPublish() {
 
 }
 
-int LogWriterSyslog::getSyslogLevel(LogLevel level) {
-    switch (level) {
-        case LogLevel::DEBUG:
-            return LOG_DEBUG;
-        case LogLevel::INFO:
-            return LOG_INFO;
-        case LogLevel::NOTICE:
-            return LOG_NOTICE;
-        case LogLevel::WARNING:
-            return LOG_WARNING;
-        case LogLevel::ERROR:
-            return LOG_ERR;
-        case LogLevel::CRITICAL:
-            return LOG_CRIT;
-        default: return 0;
-    }
-}
