@@ -1,8 +1,7 @@
 #include "ThreadTasks.h"
 #include "../classes/AppBill.h"
 #include "../tasks/TaskRecalc.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Repository.h"
 
 ThreadTasks::ThreadTasks() {
     id = idName();
@@ -14,12 +13,12 @@ ThreadTasks::ThreadTasks() {
 
 bool ThreadTasks::ready() {
 
-    PreparedData preparedData;
-    if (!DataContainer::instance()->prepareData(preparedData, time(nullptr))) {
+    Repository repository;
+    if (!repository.prepare()) {
         return false;
     }
 
-    if (!DataBillingContainer::instance()->ready()) {
+    if (!repository.billingData->ready()) {
         return false;
     }
 

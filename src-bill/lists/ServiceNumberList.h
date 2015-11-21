@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/ServiceNumber.h"
 #include "../classes/AppBill.h"
 
@@ -69,7 +69,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        auto result = begin <  end ? &*begin : nullptr;
+        ServiceNumber * result = begin <  end ? &*begin : nullptr;
 
         if (trace != nullptr) {
 

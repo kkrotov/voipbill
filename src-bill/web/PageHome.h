@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BasePage.h"
-#include "../../src/threads/Thread.h"
+#include "../classes/Thread.h"
 
 class PageHome : public BasePage {
 public:

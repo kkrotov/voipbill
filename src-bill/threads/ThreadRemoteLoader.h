@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../../src/classes/Spinlock.h"
+#include "../classes/Thread.h"
+#include "../classes/Spinlock.h"
 #include "../lists/GlobalCountersList.h"
-#include "../data/DataContainer.h"
+#include "../classes/Repository.h"
 
 class ThreadRemoteLoader : public Thread {
 private:
-    DataContainer *data;
+    Repository repository;
     BDb db_main;
 
     void run();

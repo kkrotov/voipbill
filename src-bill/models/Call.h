@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 #include "Cdr.h"
 
 #define CALL_ORIG               true
@@ -10,7 +12,8 @@ struct Call {
     long long int peer_id;
     long long int cdr_id;
     time_t connect_time;
-    char orig;
+    bool orig;
+    bool our;
 
     int trunk_id;
     int account_id;
@@ -28,7 +31,7 @@ struct Call {
     double interconnect_cost;
 
     int service_package_id;
-    int service_package_limit_id;
+    int service_package_stats_id;
     int package_time;
     double package_credit;
 
@@ -46,12 +49,14 @@ struct Call {
 
 
     void dump(stringstream &trace) {
+
         trace << "(";
         trace << "id " << id << ", ";
         trace << "peer_id: " << peer_id << ", ";
         trace << "cdr_id: " << cdr_id << ", ";
         trace << "connect_time: " << string_time(connect_time) << ", ";
-        trace << "orig: " << orig << ", ";
+        trace << "orig: " << (orig ? "true" : "false") << ", ";
+        trace << "our: " << (our ? "true" : "false") << ", ";
         trace << "account_id: " << account_id << ", ";
         trace << "trunk_service_id: " << trunk_service_id << ", ";
         trace << "number_service_id: " << number_service_id << ", ";
@@ -64,15 +69,15 @@ struct Call {
         trace << "interconnect_rate: " << interconnect_rate << ", ";
         trace << "interconnect_cost: " << interconnect_cost << ", ";
         trace << "service_package_id: " << service_package_id << ", ";
-        trace << "service_package_limit_id: " << service_package_limit_id << ", ";
+        trace << "service_package_stats_id: " << service_package_stats_id << ", ";
         trace << "package_time: " << package_time << ", ";
-        trace << "package_credit " << package_credit << ", ";
+        trace << "package_credit: " << package_credit << ", ";
         trace << "pricelist_id: " << pricelist_id << ", ";
         trace << "prefix: " << prefix << ", ";
         trace << "destination_id: " << destination_id << ", ";
-        trace << "mob: " << mob << ", ";
+        trace << "mob: " << (mob ? "true" : "false") << ", ";
         trace << "geo_id: " << geo_id << ", ";
-        trace << "geo_mob: " << geo_mob << ", ";
+        trace << "geo_mob: " << (geo_mob ? "true" : "false") << ", ";
         trace << "geo_operator_id: " << geo_operator_id << ", ";
         trace << "operator_id: " << operator_id << ", ";
         trace << ")";
@@ -80,6 +85,7 @@ struct Call {
 
     Call(Cdr * cdr, bool orig) {
         this->orig = orig;
+        our = false;
 
         id = 0;
         peer_id = 0;
@@ -101,7 +107,7 @@ struct Call {
         interconnect_cost = 0.0;
 
         service_package_id = 0;
-        service_package_limit_id = 0;
+        service_package_stats_id = 0;
         package_time = 0;
         package_credit = 0.0;
 
@@ -116,16 +122,6 @@ struct Call {
         operator_id = 0;
 
         cdr_call_id = cdr->call_id;
-
-        make_dt();
-    }
-
-    DT dt;
-    void make_dt() {
-        struct tm ttt;
-        gmtime_r(&connect_time, &ttt);
-        dt.day = connect_time - ttt.tm_hour * 3600 - ttt.tm_min * 60 - ttt.tm_sec;
-        dt.month = dt.day - (ttt.tm_mday - 1)*86400;
     }
 
     bool isLocal() {

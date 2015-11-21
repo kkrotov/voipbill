@@ -1,8 +1,8 @@
 #include "BasePull.h"
 
-#include "../../src/common.h"
-#include "../../src/classes/Exception.h"
-#include "../../src/classes/Log.h"
+#include "../common.h"
+#include "../classes/Exception.h"
+#include "../classes/Log.h"
 
 BasePull::BasePull() {
     pull_count_full = 0;
@@ -88,7 +88,7 @@ void BasePull::pullPartial() {
 
         while (res.next()) {
 
-            if (res.index > 0) ins.append(",");
+            if (res.position() > 0) ins.append(",");
             ins.append("(");
 
             for (size_t col = 0; col < fields.size(); col++) {

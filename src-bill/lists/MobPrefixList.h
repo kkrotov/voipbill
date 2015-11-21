@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/MobPrefix.h"
 
 class MobPrefixList : public ObjList<MobPrefix> {
@@ -41,10 +41,10 @@ public:
     MobPrefix * find(long long int prefix, stringstream *trace = nullptr) {
         char tmpPrefix[20];
         sprintf(tmpPrefix, "%lld", prefix);
-        int len = strlen(tmpPrefix);
+        size_t len = strlen(tmpPrefix);
         while (len > 0) {
             tmpPrefix[len] = 0;
-            auto result = _find(tmpPrefix);
+            MobPrefix * result = _find(tmpPrefix);
             if (result != 0) {
 
                 if (trace != nullptr) {

@@ -3,8 +3,8 @@
 #include <map>
 #include <string>
 #include <boost/asio.hpp>
-#include "../../src/http/reply.hpp"
-#include "../../src/http/request.hpp"
+#include "../web/http/reply.hpp"
+#include "../web/http/request.hpp"
 
 using namespace std;
 

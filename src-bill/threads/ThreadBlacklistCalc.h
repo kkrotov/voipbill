@@ -1,17 +1,15 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Thread.h"
+#include "../classes/Repository.h"
 #include "../classes/BlackListLocal.h"
 #include "../classes/BlackListGlobal.h"
 #include "../classes/BlackListTrunk.h"
+#include "../classes/Repository.h"
 
 class ThreadBlacklistCalc : public Thread {
-    DataContainer *data;
-    DataBillingContainer *billingData;
 
-    PreparedData preparedData;
+    Repository repository;
 
     BlackListLocal *blacklist_local;
     BlackListGlobal *blacklist_global;

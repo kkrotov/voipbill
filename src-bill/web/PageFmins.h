@@ -1,8 +1,7 @@
 #pragma once
 
 #include "BasePage.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Repository.h"
 
 class PageFmins : public BasePage {
 public:
@@ -12,33 +11,29 @@ public:
     void render(std::stringstream &html, map<string, string> &parameters) {
         renderHeader(html);
 
-        auto billingData = DataBillingContainer::instance();
+        Repository repository;
 
-        auto fminCounter = billingData->fminCounter.get();
+        lock_guard<Spinlock> guard(repository.billingData->lock);
+        auto statsFreemin = &repository.billingData->statsFreemin;
 
-        if (fminCounter == nullptr) return;
 
-        html << "<table><tr><th>usage_id</th><th>package_id</th><th>month</th><th>seconds</th></tr>";
-        for (auto itUsage : fminCounter->counter) {
+        html << "<table><tr><th>usage_id</th><th>month</th><th>used seconds</th></tr>";
+        for (auto itUsage : statsFreemin->freeminsByServiceId) {
             int usage_id = itUsage.first;
-            map<int, map<time_t, int>> &counterUsage = itUsage.second;
+            list<int> &statIds = itUsage.second;
 
-            for (auto itPackage : counterUsage) {
-                int package_id = itPackage.first;
-                map<time_t, int> &counterMonth = itPackage.second;
-
-                for (auto itMonth : counterMonth) {
-                    time_t tMonth = itMonth.first;
-                    int seconds = itMonth.second;
-
-                    html
-                    << "<tr>"
-                    << "<td>" << usage_id << "</td>"
-                    << "<td>" << package_id << "</td>"
-                    << "<td>" << string_time(tMonth) << "</td>"
-                    << "<td>" << seconds << "</td>"
-                    << "</tr>";
+            for (auto statId : statIds) {
+                auto itStats = statsFreemin->statsFreemin.find(statId);
+                if (itStats == statsFreemin->statsFreemin.end()) {
+                    continue;
                 }
+                StatsFreemin &stats = itStats->second;
+
+                html << "<tr>";
+                html << "<td>" << usage_id << "</td>";
+                html << "<td>" << string_time(stats.month_dt) << "</td>";
+                html << "<td>" << stats.used_seconds << "</td>";
+                html << "</tr>";
             }
         }
         html << "</table>";

@@ -4,9 +4,6 @@ ThreadBlacklistCalc::ThreadBlacklistCalc() {
     id = idName();
     name = "Blacklist Calc";
 
-    data = DataContainer::instance();
-    billingData = DataBillingContainer::instance();
-
     blacklist_global = BlackListGlobal::instance();
     blacklist_local = BlackListLocal::instance();
     blacklist_trunk = BlackListTrunk::instance();
@@ -15,11 +12,11 @@ ThreadBlacklistCalc::ThreadBlacklistCalc() {
 
 bool ThreadBlacklistCalc::ready() {
 
-    if (!billingData->ready()) {
+    if (!repository.billingData->ready()) {
         return false;
     }
 
-    if (!data->prepareData(preparedData, time(nullptr))) {
+    if (!repository.prepare()) {
         return false;
     }
 
@@ -28,15 +25,15 @@ bool ThreadBlacklistCalc::ready() {
 
 void ThreadBlacklistCalc::run() {
 
-    if (!billingData->ready()) {
+    if (!repository.billingData->ready()) {
         return;
     }
 
-    if (!data->prepareData(preparedData, time(nullptr))) {
+    if (!repository.prepare()) {
         return;
     }
 
-    auto clientLock = billingData->clientLock.get();
+    auto clientLock = repository.billingData->clientLock.get();
     if (!clientLock->isReady) {
         return;
     }
@@ -51,7 +48,7 @@ void ThreadBlacklistCalc::run() {
     for (ClientLockObj & lock : locks) {
 
         if (lock.disabled_local || lock.disabled_global) {
-            map<int, ServiceNumber> &numbers = preparedData.activeCounter->clientNumbers[lock.client_id];
+            map<int, ServiceNumber> &numbers = repository.activeCounter->clientNumbers[lock.client_id];
             for (auto number : numbers) {
                 if (lock.disabled_local) {
                     wanted_blacklist_local.insert(number.second.did);
@@ -63,9 +60,9 @@ void ThreadBlacklistCalc::run() {
         }
 
         if (lock.disabled_global) {
-            map<int, ServiceTrunk> &trunks = preparedData.activeCounter->clientTrunks[lock.client_id];
+            map<int, ServiceTrunk> &trunks = repository.activeCounter->clientTrunks[lock.client_id];
             for (auto pairTrunk : trunks) {
-                auto trunk = preparedData.trunk->find(pairTrunk.second.trunk_id);
+                auto trunk = repository.getTrunk(pairTrunk.second.trunk_id);
                 if (trunk != nullptr) {
                     wanted_blacklist_trunk.insert(trunk->trunk_name);
                 }

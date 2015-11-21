@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/NetworkPrefix.h"
 
 class NetworkPrefixList : public ObjList<NetworkPrefix> {
@@ -75,11 +75,11 @@ public:
         char tmpPrefix[20];
         sprintf(tmpPrefix, "%lld", numberPrefix);
 
-        int len = strlen(tmpPrefix);
+        size_t len = strlen(tmpPrefix);
         while (len > 0) {
             tmpPrefix[len] = 0;
 
-            auto result = _find(network_config_id, tmpPrefix, timestamp);
+            NetworkPrefix * result = _find(network_config_id, tmpPrefix, timestamp);
             if (result != nullptr) {
 
                 if (trace != nullptr) {

@@ -1,11 +1,13 @@
 #pragma once
 
+
 #include "PageHome.h"
 #include "PageCalls.h"
 #include "PageData.h"
 #include "PageDataBilling.h"
 #include "PageCounters.h"
 #include "PageFmins.h"
+#include "PagePackage.h"
 #include "PageLocks.h"
 #include "PageBlacklist.h"
 #include "PageSync.h"
@@ -16,17 +18,20 @@
 #include "PageTestCalc.h"
 #include "PageTestCalcGui.h"
 #include "PageTestRoute.h"
+#include "http/request.hpp"
+#include "http/reply.hpp"
 
 class HttpHandler {
 private:
 
-    static void spawHandlers(vector<shared_ptr<BasePage>> &handlers) {
+    static void spawnHandlers(vector<shared_ptr<BasePage>> &handlers) {
         handlers.push_back(shared_ptr<BasePage>(new PageHome));
         handlers.push_back(shared_ptr<BasePage>(new PageCalls));
         handlers.push_back(shared_ptr<BasePage>(new PageData));
         handlers.push_back(shared_ptr<BasePage>(new PageDataBilling));
         handlers.push_back(shared_ptr<BasePage>(new PageCounters));
         handlers.push_back(shared_ptr<BasePage>(new PageFmins));
+        handlers.push_back(shared_ptr<BasePage>(new PagePackage));
         handlers.push_back(shared_ptr<BasePage>(new PageLocks));
         handlers.push_back(shared_ptr<BasePage>(new PageBlacklist));
         handlers.push_back(shared_ptr<BasePage>(new PageSync));
@@ -44,7 +49,7 @@ public:
     void operator()(const http::server4::request& req, http::server4::reply& rep) {
 
         vector<shared_ptr<BasePage>> handlers;
-        spawHandlers(handlers);
+        spawnHandlers(handlers);
 
         vector<string> uri;
         boost::algorithm::split(uri, req.uri, boost::algorithm::is_any_of("?"));

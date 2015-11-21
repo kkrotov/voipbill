@@ -1,11 +1,12 @@
 #pragma once
 
-#include "../../src/classes/BDb.h"
-#include "../../src/common.h"
+#include "../classes/BDb.h"
+#include "../classes/StatsAccountManager.h"
+#include "../classes/StatsFreeminManager.h"
+#include "../classes/StatsPackageManager.h"
+#include "../common.h"
 #include "../models/Cdr.h"
 #include "../models/Call.h"
-#include "../lists/ClientCounter.h"
-#include "../lists/FminCounter.h"
 #include "CurrentCdrData.h"
 
 class DataCurrentCallsContainer {
@@ -16,62 +17,28 @@ public:
     int callPerSecond = -1;
     int maxCallPerSecond = -1;
 
-    DataCurrentCallsContainer() {
-        callsWaitSaving = shared_ptr<vector<Call>>(new vector<Call>());
-        clientCounter = shared_ptr<ClientCounter>(new ClientCounter());
-        fminCounter = shared_ptr<FminCounter>(new FminCounter());
-    }
+    DataCurrentCallsContainer();
 
-    static DataCurrentCallsContainer * instance() {
-        static DataCurrentCallsContainer inst;
-        return &inst;
-    }
+    static DataCurrentCallsContainer * instance();
 
-    void setCallsWaitingSaving(shared_ptr<vector<Call>> &newCallsWaitSaving) {
-        lock_guard<Spinlock> guard(callsWaitSavingLock);
-        callsWaitSaving = newCallsWaitSaving;
-    }
+    bool ready();
 
-    shared_ptr<vector<Call>> getCallsWaitingSaving() {
-        lock_guard<Spinlock> guard(callsWaitSavingLock);
-        return callsWaitSaving;
-    }
+    void setCallsWaitingSaving(shared_ptr<vector<Call>> &newCallsWaitSaving);
+    shared_ptr<vector<Call>> getCallsWaitingSaving();
 
-    void setClientCounter(shared_ptr<ClientCounter> &newClientCounter) {
-        lock_guard<Spinlock> guard(clientCounterLock);
-        clientCounter = newClientCounter;
-    }
+    void setStatsAccount(shared_ptr<StatsAccountManager> &newStatsAccount);
+    shared_ptr<StatsAccountManager> getStatsAccount();
 
-    shared_ptr<ClientCounter> getClientCounter() {
-        lock_guard<Spinlock> guard(clientCounterLock);
-        return clientCounter;
-    }
+    void setStatsFreemin(shared_ptr<StatsFreeminManager> &newStatsFreemin);
+    shared_ptr<StatsFreeminManager> getStatsFreemin();
 
-    void setFminCounter(shared_ptr<FminCounter> &newFminCounter) {
-        lock_guard<Spinlock> guard(fminCounterLock);
-        fminCounter = newFminCounter;
-    }
-
-    shared_ptr<FminCounter> getFminCounter() {
-        lock_guard<Spinlock> guard(fminCounterLock);
-        return fminCounter;
-    }
-
-
-    bool ready() {
-
-        if (!currentCdr.ready()) {
-            return false;
-        }
-
-        return true;
-    }
+    void setStatsPackage(shared_ptr<StatsPackageManager> &newStatsPackage);
+    shared_ptr<StatsPackageManager> getStatsPackage();
 
 private:
-    Spinlock callsWaitSavingLock;
+    Spinlock lock;
     shared_ptr<vector<Call>> callsWaitSaving;
-    Spinlock clientCounterLock;
-    shared_ptr<ClientCounter> clientCounter;
-    Spinlock fminCounterLock;
-    shared_ptr<FminCounter> fminCounter;
+    shared_ptr<StatsAccountManager> statsAccount;
+    shared_ptr<StatsFreeminManager> statsFreemin;
+    shared_ptr<StatsPackageManager> statsPackage;
 };

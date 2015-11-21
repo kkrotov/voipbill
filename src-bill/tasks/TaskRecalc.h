@@ -1,13 +1,14 @@
 #pragma once
 
-#include "../../src/classes/Timer.h"
-#include "../../src/tasks/Task.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Timer.h"
+#include "../classes/Task.h"
+#include "../classes/Repository.h"
 
 class TaskRecalc : public Task {
 protected:
     time_t date_from;
-    DataBillingContainer billingData;
+    Repository repository;
+    DataBillingContainer newBillingData;
     long long int recalc_from_call_id;
 
     Timer t_load;

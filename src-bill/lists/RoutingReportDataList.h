@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/RoutingReportData.h"
 
 class RoutingReportDataList : public ObjList<RoutingReportData> {
@@ -41,10 +41,10 @@ public:
     RoutingReportData * find(char * prefix) {
         char tmpPrefix[20];
         strcpy(tmpPrefix, prefix);
-        int len = strlen(tmpPrefix);
+        size_t len = strlen(tmpPrefix);
         while (len > 0) {
             tmpPrefix[len] = 0;
-            auto result = _find(tmpPrefix);
+            RoutingReportData * result = _find(tmpPrefix);
             if (result != nullptr) {
                 return result;
             }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct Geo {
     int id;
     int country_id;

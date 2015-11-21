@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/Geo.h"
+#include "../classes/AppBill.h"
 
 class GeoList : public ObjList<Geo> {
 protected:
@@ -37,7 +38,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        auto result =  begin <  end ? &*begin : nullptr;
+        Geo * result = begin < end ? &*begin : nullptr;
 
         if (trace != nullptr) {
             if (result != nullptr) {

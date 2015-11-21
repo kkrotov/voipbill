@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/TariffChangeLog.h"
 
 class TariffChangeLogList : public ObjList<TariffChangeLog> {
@@ -82,7 +82,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        auto result = begin <  end ? &*begin : nullptr;
+        TariffChangeLog * result = begin <  end ? &*begin : nullptr;
 
         if (trace != nullptr) {
             if (result != nullptr) {

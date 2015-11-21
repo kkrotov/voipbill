@@ -1,10 +1,10 @@
 #pragma once
 
 #include "BasePage.h"
-#include "../data/DataContainer.h"
 #include "../classes/BlackListLocal.h"
 #include "../classes/BlackListGlobal.h"
 #include "../classes/BlackListTrunk.h"
+#include "../classes/Repository.h"
 
 class PageBlacklist : public BasePage {
 public:
@@ -14,8 +14,8 @@ public:
     void render(std::stringstream &html, map<string, string> &parameters) {
         renderHeader(html);
 
-        PreparedData preparedData;
-        if (!DataContainer::instance()->prepareData(preparedData, time(nullptr))) {
+        Repository repository;
+        if (!repository.prepare(time(nullptr))) {
             return;
         }
 
@@ -26,7 +26,6 @@ public:
         html << "<table>\n";
         html << "<tr>\n";
 
-        auto usages = preparedData.serviceNumber;
         ServiceNumber * usage;
         {
             lock_guard<Spinlock> guard(blacklist_local->lock);
@@ -37,7 +36,7 @@ public:
                 for (auto phone : blacklist_local->list_to_add) {
                     html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                     html << "<b>" << phone << "</b>";
-                    if ((usage = usages->find(atoll(phone.c_str()), time(nullptr))) != 0)
+                    if ((usage = repository.getServiceNumber(phone.c_str())) != 0)
                         html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                     html << "<br/>\n";
                 }
@@ -50,7 +49,7 @@ public:
                 for (auto phone : blacklist_local->list_to_del) {
                     html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                     html << "<b>" << phone << "</b>";
-                    if ((usage = usages->find(atoll(phone.c_str()), time(nullptr))) != 0)
+                    if ((usage = repository.getServiceNumber(phone.c_str())) != 0)
                         html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                     html << "<br/>\n";
                 }
@@ -67,7 +66,7 @@ public:
                 for (auto phone : blacklist_global->list_to_add) {
                     html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                     html << "<b>" << phone << "</b>";
-                    if ((usage = usages->find(atoll(phone.c_str()), time(nullptr))) != 0)
+                    if ((usage = repository.getServiceNumber(phone.c_str())) != 0)
                         html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                     html << "<br/>\n";
                 }
@@ -80,7 +79,7 @@ public:
                 for (auto phone : blacklist_global->list_to_del) {
                     html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                     html << "<b>" << phone << "</b>";
-                    if ((usage = usages->find(atoll(phone.c_str()), time(nullptr))) != 0)
+                    if ((usage = repository.getServiceNumber(phone.c_str())) != 0)
                         html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                     html << "<br/>\n";
                 }
@@ -97,12 +96,9 @@ public:
                 for (auto phone : blacklist_trunk->list_to_add) {
                     html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                     html << "<b>" << phone << "</b>";
-                    auto trunk = preparedData.trunkByName->find(phone.c_str());
-                    if (trunk == nullptr) {
-                        trunk = preparedData.trunkByAlias->find(phone.c_str());
-                    }
+                    auto trunk = repository.getTrunkByName(phone.c_str());
                     if (trunk != nullptr) {
-                        auto serviceTrunk = preparedData.serviceTrunk->find(trunk->id, time(nullptr));
+                        auto serviceTrunk = repository.getServiceTrunk(trunk->id);
                         if (serviceTrunk != nullptr)
                             html << " / " << "<a href='/client?id=" << serviceTrunk->client_account_id << "'>" << serviceTrunk->client_account_id << "</a>";
                     }
@@ -117,12 +113,9 @@ public:
                 for (auto phone : blacklist_trunk->list_to_del) {
                     html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                     html << "<b>" << phone << "</b>";
-                    auto trunk = preparedData.trunkByName->find(phone.c_str());
-                    if (trunk == nullptr) {
-                        trunk = preparedData.trunkByAlias->find(phone.c_str());
-                    }
+                    auto trunk = repository.getTrunkByName(phone.c_str());
                     if (trunk != nullptr) {
-                        auto serviceTrunk = preparedData.serviceTrunk->find(trunk->id, time(nullptr));
+                        auto serviceTrunk = repository.getServiceTrunk(trunk->id);
                         if (serviceTrunk != nullptr)
                             html << " / " << "<a href='/client?id=" << serviceTrunk->client_account_id << "'>" << serviceTrunk->client_account_id << "</a>";
                     }
@@ -141,7 +134,7 @@ public:
                 for (auto phone : blacklist_local->blacklist) {
                     html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                     html << "<b>" << phone << "</b>";
-                    if ((usage = usages->find(atoll(phone.c_str()), time(nullptr))) != 0)
+                    if ((usage = repository.getServiceNumber(phone.c_str())) != 0)
                         html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                     html << "<br/>\n";
                 }
@@ -158,7 +151,7 @@ public:
                 for (auto phone : blacklist_global->blacklist) {
                     html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                     html << "<b>" << phone << "</b>";
-                    if ((usage = usages->find(atoll(phone.c_str()), time(nullptr))) != 0)
+                    if ((usage = repository.getServiceNumber(phone.c_str())) != 0)
                         html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                     html << "<br/>\n";
                 }
@@ -175,12 +168,9 @@ public:
                 for (auto phone : blacklist_trunk->blacklist) {
                     html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                     html << "<b>" << phone << "</b>";
-                    auto trunk = preparedData.trunkByName->find(phone.c_str());
-                    if (trunk == nullptr) {
-                        trunk = preparedData.trunkByAlias->find(phone.c_str());
-                    }
+                    auto trunk = repository.getTrunkByName(phone.c_str());
                     if (trunk != nullptr) {
-                        auto serviceTrunk = preparedData.serviceTrunk->find(trunk->id, time(nullptr));
+                        auto serviceTrunk = repository.getServiceTrunk(trunk->id);
                         if (serviceTrunk != nullptr)
                             html << " / " << "<a href='/client?id=" << serviceTrunk->client_account_id << "'>" << serviceTrunk->client_account_id << "</a>";
                     }

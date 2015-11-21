@@ -1,15 +1,10 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Thread.h"
+#include "../classes/Repository.h"
 
 class ThreadUpdateActiveClients : public Thread {
-    DataContainer *data;
-
-    PreparedData preparedData;
-
-    bool ready();
+    Repository repository;
 
     void run();
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct Organization {
     int id;
     int organization_id;

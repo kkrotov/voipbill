@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/Organization.h"
 
 class OrganizationList : public ObjList<Organization> {
@@ -52,7 +52,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        auto result = begin <  end ? &*begin : nullptr;
+        Organization * result = begin <  end ? &*begin : nullptr;
 
         if (trace != nullptr) {
 

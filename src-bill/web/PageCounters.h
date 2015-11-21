@@ -1,8 +1,7 @@
 #pragma once
 
 #include "BasePage.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Repository.h"
 
 class PageCounters : public BasePage {
 public:
@@ -12,19 +11,16 @@ public:
     void render(std::stringstream &html, map<string, string> &parameters) {
         renderHeader(html);
 
-        auto data = DataContainer::instance();
-        auto billingData = DataBillingContainer::instance();
+        Repository repository;
 
-        auto clientList = data->client.get();
-        auto organizationList = data->organization.get();
-        auto clientCounter = billingData->clientCounter.get();
+        auto clientList = repository.data->client.get();
+        auto organizationList = repository.data->organization.get();
 
         if (clientList == nullptr) return;
         if (organizationList == nullptr) return;
-        if (clientCounter == nullptr) return;
 
-        vector<ClientCounterObj> clients;
-        clientCounter->getClients(clients);
+        vector<StatsAccount> clients;
+        repository.billingData->statsAccountGetClients(clients);
 
         html << "<table border=1>\n";
         html << "<tr>\n";
@@ -40,8 +36,8 @@ public:
         html << "<th nowrap>Block MGMN Flag</th>\n";
         html << "<th nowrap>Block Global Flag</th>\n";
         html << "</tr>\n";
-        for (ClientCounterObj &cc : clients) {
-            int client_id = cc.client_id;
+        for (StatsAccount &cc : clients) {
+            int client_id = cc.account_id;
 
             double vat_rate = 0;
 
@@ -53,6 +49,8 @@ public:
                 }
             }
 
+            double sum_month_raw = cc.sumMonth(vat_rate, false);
+            double sum_day_raw = cc.sumDay(vat_rate, false);
             double sum_month = cc.sumMonth(vat_rate);
             double sum_day = cc.sumDay(vat_rate);
             double sum_balance = cc.sumBalance(vat_rate);
@@ -63,21 +61,20 @@ public:
 
 
             double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
-            if (data->globalCounters.ready()) {
-                auto globalCounter = data->globalCounters.get()->find(client_id);
+            if (repository.data->globalCounters.ready()) {
+                auto globalCounter = repository.data->globalCounters.get()->find(client_id);
                 if (globalCounter) {
                     sum_balance_global += globalCounter->sumBalance(vat_rate);
                     sum_day_global += globalCounter->sumDay(vat_rate);
-                    sum_month_global += globalCounter->sumMonth(vat_rate);
                 }
             }
 
             html << "<tr>\n";
             html << "<td nowrap><a href='/client?id=" << client_id << "'>" << client_id << "</a></td>\n";
-            html << "<td nowrap>" << string_date(cc.amount_month) << "</td>\n";
-            html << "<td nowrap>" << sum_month << "</td>\n";
-            html << "<td nowrap>" << string_date(cc.amount_day) << "</td>\n";
-            html << "<td nowrap>" << sum_day << "</td>\n";
+            html << "<td nowrap>" << string_date(cc.amount_month, 12) << "</td>\n";
+            html << "<td nowrap>" << sum_month_raw << "</td>\n";
+            html << "<td nowrap>" << string_date(cc.amount_day, 13) << "</td>\n";
+            html << "<td nowrap>" << sum_day_raw << "</td>\n";
             html << "<td nowrap>" << string_time(cc.amount_date) << "</td>\n";
             html << "<td nowrap>" << sum_balance << "</td>\n";
 

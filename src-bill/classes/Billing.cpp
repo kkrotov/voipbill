@@ -1,165 +1,112 @@
 #include "Billing.h"
 #include "BillingCall.h"
-#include "../data/DataCurrentCallsContainer.h"
-
-
-Billing::Billing() {
-    data = DataContainer::instance();
-    billingData = DataBillingContainer::instance();
-}
 
 void Billing::setData(DataContainer *data) {
-    this->data = data;
+    repository.data = data;
 }
 
 void Billing::setBillingData(DataBillingContainer *billingData) {
-    this->billingData = billingData;
+    repository.billingData = billingData;
 }
 
 void Billing::calcCurrentCalls() {
 
-    auto dataCurrentCalls = DataCurrentCallsContainer::instance();
-    if (!dataCurrentCalls->ready()) {
+    if (!repository.currentCalls->ready()) {
         return;
     }
 
-    BillingCall billingCall(this);
+    BillingCall billingCall(&repository);
 
-    auto currentCdrs = dataCurrentCalls->currentCdr.get();
+    auto currentCdrs = repository.currentCalls->currentCdr.get();
 
-    PreparedData preparedData;
-
-    auto callsWaitSaving = shared_ptr<vector<Call>>(new vector<Call>());
-    auto clientCounter = shared_ptr<ClientCounter>(new ClientCounter());
-    auto fminCounter = shared_ptr<FminCounter>(new FminCounter());
+    shared_ptr<vector<Call>> callsWaitSaving(new vector<Call>());
+    shared_ptr<StatsAccountManager> statsAccount(new StatsAccountManager());
+    shared_ptr<StatsFreeminManager> statsFreemin(new StatsFreeminManager());
+    shared_ptr<StatsPackageManager> statsPackage(new StatsPackageManager());
 
     for (size_t i = 0; i < currentCdrs->size(); i++) {
         auto cdr = currentCdrs->get(i);
 
-        if (!data->prepareData(preparedData, cdr->connect_time)) {
+        if (!repository.prepare(cdr->connect_time)) {
             break;
         }
 
         Call origCall = Call(cdr, CALL_ORIG);
-        billingCall.calc(&origCall, cdr, &preparedData);
-
         Call termCall = Call(cdr, CALL_TERM);
+
+        CallInfo origCallInfo;
+        CallInfo termCallInfo;
+
+        billingCall.calc(&origCall, &origCallInfo, cdr);
+
         termCall.src_number = origCall.src_number;
         termCall.dst_number = origCall.dst_number;
-        billingCall.calc(&termCall, cdr, &preparedData);
+        billingCall.calc(&termCall, &termCallInfo, cdr);
 
+        statsAccount.get()->add(&origCallInfo);
+        statsFreemin.get()->add(&origCallInfo);
+        statsPackage.get()->add(&origCallInfo);
         callsWaitSaving->push_back(origCall);
-        callsWaitSaving->push_back(termCall);
 
-        updateClientCounters(origCall, preparedData, clientCounter.get());
-        updateClientCounters(termCall, preparedData, clientCounter.get());
-        updateFreeMinsCounters(origCall, fminCounter.get());
+        statsAccount.get()->add(&termCallInfo);
+        statsFreemin.get()->add(&termCallInfo);
+        statsPackage.get()->add(&termCallInfo);
+        callsWaitSaving->push_back(termCall);
     }
 
-    dataCurrentCalls->setCallsWaitingSaving(callsWaitSaving);
-    dataCurrentCalls->setClientCounter(clientCounter);
-    dataCurrentCalls->setFminCounter(fminCounter);
+    repository.currentCalls->setCallsWaitingSaving(callsWaitSaving);
+    repository.currentCalls->setStatsAccount(statsAccount);
+    repository.currentCalls->setStatsFreemin(statsFreemin);
+    repository.currentCalls->setStatsPackage(statsPackage);
 }
 
 void Billing::calc() {
-    const int calls_max_queue_length = 1000000;
 
-    if (!billingData->ready()) {
+    if (!repository.billingData->ready()) {
         return;
     }
 
-    {
-        lock_guard<Spinlock> guard(billingData->callsWaitSavingLock);
-        if (billingData->callsWaitSaving.size() >= calls_max_queue_length) {
-            return;
-        }
-    }
+    BillingCall billingCall(&repository);
 
-    BillingCall billingCall(this);
 
-    PreparedData preparedData;
+    while (true) {
 
-    auto fminCounter = billingData->fminCounter.get();
-    auto clientCounter = billingData->clientCounter.get();
-
-    bool calcLoop = true;
-    Cdr cdr;
-    while (calcLoop) {
-        {
-            lock_guard<Spinlock> guard(billingData->cdrsWaitProcessingLock);
-            if (billingData->cdrsWaitProcessing.size() == 0) {
-                break;
-            }
-            cdr = billingData->cdrsWaitProcessing.front();
-            billingData->cdrsWaitProcessing.pop_front();
+        if (repository.billingData->callsQueueSize() >= CALLS_MAX_QUEUE_SIZE) {
+            break;
         }
 
-        try {
-
-
-            if (!data->prepareData(preparedData, cdr.connect_time)) {
-                lock_guard<Spinlock> guard(billingData->cdrsWaitProcessingLock);
-                billingData->cdrsWaitProcessing.push_front(cdr);
-                break;
-            }
-
-            Call origCall = Call(&cdr, CALL_ORIG);
-            origCall.id = billingData->lastCalcCallId + 1;
-            origCall.peer_id = billingData->lastCalcCallId + 2;
-            billingCall.calc(&origCall, &cdr, &preparedData);
-
-            Call termCall = Call(&cdr, CALL_TERM);
-            termCall.src_number = origCall.src_number;
-            termCall.dst_number = origCall.dst_number;
-            termCall.id = billingData->lastCalcCallId + 2;
-            termCall.peer_id = billingData->lastCalcCallId + 1;
-            billingCall.calc(&termCall, &cdr, &preparedData);
-
-            billingData->calcedCdrsCount += 1;
-            billingData->lastCalcCallId += 2;
-            billingData->lastCalcCallTime = origCall.connect_time;
-
-            updateClientCounters(origCall, preparedData, clientCounter.get());
-            updateClientCounters(termCall, preparedData, clientCounter.get());
-            updateFreeMinsCounters(origCall, fminCounter.get());
-
-            {
-                lock_guard<Spinlock> guard(billingData->callsWaitSavingLock);
-                billingData->callsWaitSaving.push_back(origCall);
-                billingData->callsWaitSaving.push_back(termCall);
-
-                if (billingData->callsWaitSaving.size() >= calls_max_queue_length) {
-                    calcLoop = false;
-                }
-            }
-
-        } catch (Exception &e) {
-            e.addTrace("Billing::calc");
-            lock_guard<Spinlock> guard(billingData->cdrsWaitProcessingLock);
-            billingData->cdrsWaitProcessing.push_front(cdr);
-            throw e;
-        } catch (std::exception &e) {
-            lock_guard<Spinlock> guard(billingData->cdrsWaitProcessingLock);
-            billingData->cdrsWaitProcessing.push_front(cdr);
-            throw e;
-        } catch (...) {
-            lock_guard<Spinlock> guard(billingData->cdrsWaitProcessingLock);
-            billingData->cdrsWaitProcessing.push_front(cdr);
-            throw Exception("Unknown error", "Billing::calc");
+        Cdr *cdr = repository.billingData->getFirstCdr();
+        if (cdr == nullptr) {
+            break;
         }
+
+        if (!repository.prepare(cdr->connect_time)) {
+            break;
+        }
+
+        long long int lastCallId = repository.billingData->getCallsLastId();
+
+        Call origCall = Call(cdr, CALL_ORIG);
+        Call termCall = Call(cdr, CALL_TERM);
+
+        CallInfo origCallInfo;
+        CallInfo termCallInfo;
+
+        origCall.id = lastCallId + 1;
+        origCall.peer_id = lastCallId + 2;
+        termCall.id = lastCallId + 2;
+        termCall.peer_id = lastCallId + 1;
+
+        billingCall.calc(&origCall, &origCallInfo, cdr);
+
+        termCall.src_number = origCall.src_number;
+        termCall.dst_number = origCall.dst_number;
+        billingCall.calc(&termCall, &termCallInfo, cdr);
+
+        repository.billingData->addCall(&origCallInfo);
+        repository.billingData->addCall(&termCallInfo);
+
+        repository.billingData->removeFirstCdr();
     }
 
 }
-
-void Billing::updateClientCounters(Call &call, PreparedData &preparedData, ClientCounter * clientCounter) {
-
-    auto client = preparedData.client->find(call.account_id);
-
-    clientCounter->add(&call, client);
-
-}
-
-void Billing::updateFreeMinsCounters(Call &call, FminCounter * fminCounter) {
-    fminCounter->add(&call);
-}
-

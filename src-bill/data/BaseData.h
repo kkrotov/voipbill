@@ -2,11 +2,11 @@
 
 #include <mutex>
 
-#include "../../src/common.h"
-#include "../../src/classes/Spinlock.h"
-#include "../../src/lists/ObjList.h"
-#include "../../src/classes/BDb.h"
-#include "../../src/classes/Timer.h"
+#include "../common.h"
+#include "../classes/Spinlock.h"
+#include "../classes/ObjList.h"
+#include "../classes/BDb.h"
+#include "../classes/Timer.h"
 
 using namespace std;
 
@@ -35,11 +35,17 @@ public:
     void load(BDb * db) {
         TimerScope timerScope(timer);
 
-        shared_ptr<T> tmpData = shared_ptr<T>( new T() );
+        T * item = new T();
+        init(item);
+        shared_ptr<T> tmpData = shared_ptr<T>( item );
         static_cast<BaseObjList*>(tmpData.get())->load(db);
 
         lock_guard<Spinlock> guard(lock);
         data.swap(tmpData);
+    }
+
+    void init(T * item) {
+
     }
 
     void swap(shared_ptr<T> tmpData) {

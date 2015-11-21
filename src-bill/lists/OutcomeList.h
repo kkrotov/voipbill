@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/Outcome.h"
 #include "../classes/AppBill.h"
 
@@ -36,7 +36,7 @@ protected:
     };
 
 public:
-    Outcome * find(int id) {
+    Outcome * find(int id, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -44,6 +44,19 @@ public:
             begin = p.first;
             end = p.second;
         }
-        return begin <  end ? &*begin : nullptr;
+        Outcome * result = begin < end ? &*begin : nullptr;
+
+        if (trace != nullptr) {
+            if (result != nullptr) {
+                *trace << "FOUND|OUTCOME|BY ID '" << id << "'" << "\n";
+                *trace << "||";
+                result->dump(*trace);
+                *trace << "\n";
+            } else {
+                *trace << "NOT FOUND|OUTCOME|BY ID '" << id << "'" << "\n";
+            }
+        }
+
+        return result;
     }
 };

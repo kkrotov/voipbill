@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/Trunk.h"
 #include "../classes/AppBill.h"
 
@@ -9,7 +9,7 @@ protected:
 
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
-        return "   select id, name, trunk_name_alias, code, source_rule_default_allowed, destination_rule_default_allowed, default_priority, auto_routing, route_table_id, our_trunk, auth_by_number, use_redirect_number " \
+        return "   select id, name, trunk_name_alias, code, source_rule_default_allowed, destination_rule_default_allowed, default_priority, auto_routing, route_table_id, our_trunk, auth_by_number, orig_redirect_number, term_redirect_number " \
             "   from auth.trunk " \
             "   where server_id = " + server_id + " and trunk_name_alias is not null "
             "   order by trunk_name_alias asc ";
@@ -27,7 +27,8 @@ protected:
         item->route_table_id = row.get_i(8);
         item->our_trunk = row.get_b(9);
         item->auth_by_number = row.get_b(10);
-        item->use_redirect_number = row.get_b(11);
+        item->orig_redirect_number = row.get_b(11);
+        item->term_redirect_number = row.get_b(12);
     }
 
     struct key_trunk_name {
@@ -51,7 +52,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        auto result = begin <  end ? &*begin : nullptr;
+        Trunk * result = begin <  end ? &*begin : nullptr;
 
         if (trace != nullptr) {
 

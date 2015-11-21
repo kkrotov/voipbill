@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/TrunkNumberPreprocessing.h"
 
 class TrunkNumberPreprocessingList : public ObjList<TrunkNumberPreprocessing> {
@@ -53,7 +53,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        auto result = begin <  end ? &*begin : nullptr;
+        TrunkNumberPreprocessing * result = begin <  end ? &*begin : nullptr;
 
         if (trace != nullptr) {
 

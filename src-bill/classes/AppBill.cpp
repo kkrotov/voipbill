@@ -4,11 +4,13 @@
 #include "../threads/ThreadLog.h"
 #include "../threads/ThreadSync.h"
 #include "../threads/ThreadLoader.h"
+#include "../threads/ThreadAccountBalanceRecalc.h"
 #include "../threads/ThreadRemoteLoader.h"
 #include "../threads/ThreadCurrentCalls.h"
 #include "../threads/ThreadFetchCdr.h"
 #include "../threads/ThreadBillRuntime.h"
-#include "../threads/ThreadSaveCalls.h"
+#include "../threads/ThreadRadiusAuthServer.h"
+#include "../threads/ThreadSave.h"
 #include "../threads/ThreadSyncCalls.h"
 #include "../threads/ThreadSyncCounters.h"
 #include "../threads/ThreadSyncLocks.h"
@@ -19,9 +21,9 @@
 #include "../threads/ThreadUpdateActiveClients.h"
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
-#include "../../src/classes/LogWriterScreen.h"
-#include "../../src/classes/LogWriterFile.h"
-#include "../../src/classes/LogWriterSyslog.h"
+#include "../classes/LogWriterScreen.h"
+#include "../classes/LogWriterFile.h"
+#include "../classes/LogWriterSyslog.h"
 
 AppBill & app() {
     static AppBill appVar;
@@ -63,11 +65,12 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadLog>();
     registerThread<ThreadSync>();
     registerThread<ThreadLoader>();
+    registerThread<ThreadAccountBalanceRecalc>();
     registerThread<ThreadRemoteLoader>();
     registerThread<ThreadCurrentCalls>();
     registerThread<ThreadFetchCdr>();
     registerThread<ThreadBillRuntime>();
-    registerThread<ThreadSaveCalls>();
+    registerThread<ThreadSave>();
     registerThread<ThreadSyncCalls>();
     registerThread<ThreadSyncCounters>();
     registerThread<ThreadSyncLocks>();
@@ -78,6 +81,7 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadUpdateActiveClients>();
     registerThread<ThreadCheckStartTable>();
     registerThread<ThreadTasks>();
+    registerThread<ThreadRadiusAuthServer>();
 }
 
 void AppBill::runAppInSingleMode()
@@ -86,11 +90,12 @@ void AppBill::runAppInSingleMode()
             "log",
             "sync",
             "loader",
+            "account_balance_recalc",
             "remote_loader",
             "current_calls",
             "fetch_cdr",
             "runtime",
-            "save_calls",
+            "save",
             "sync_calls",
             "sync_counters",
             "sync_locks",
@@ -101,6 +106,7 @@ void AppBill::runAppInSingleMode()
             "update_active_clients",
             "checkstarttable",
             "tasks",
+            "radius_auth_server",
     };
 
     for (auto thread: standardThreads) {

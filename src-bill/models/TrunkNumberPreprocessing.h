@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct TrunkNumberPreprocessing {
     int trunk_id;
     int order;

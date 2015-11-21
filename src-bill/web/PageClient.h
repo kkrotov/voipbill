@@ -6,9 +6,7 @@
 #include "../classes/BlackListTrunk.h"
 #include "../threads/ThreadCurrentCalls.h"
 #include "../threads/ThreadRemoteLoader.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
-#include "../data/DataCurrentCallsContainer.h"
+#include "../classes/Repository.h"
 
 class PageClient : public BasePage {
 public:
@@ -20,45 +18,39 @@ public:
 
         int client_id = atoi(parameters["id"].c_str());
 
-        PreparedData preparedData;
-        auto data = DataContainer::instance();
-        if (!data->prepareData(preparedData, time(nullptr))) {
+        Repository repository;
+        if (!repository.prepare(time(nullptr))) {
             return;
         };
 
-        auto billingData = DataBillingContainer::instance();
-        if (!billingData->ready()) {
+        if (!repository.billingData->ready()) {
             return;
         }
 
-        auto currentCallsData = DataCurrentCallsContainer::instance();
-
-
-        auto client = preparedData.client->find(client_id);
+        auto client = repository.getAccount(client_id);
         if (client == nullptr) {
             html << "Client " << client_id << " not found";
             return;
         }
 
-        double vat_rate = preparedData.getVatRate(client);
+        double vat_rate = repository.getVatRate(client);
 
         double sum_month, sum_day, sum_balance;
         double sum_month2, sum_day2, sum_balance2;
-        ClientCounterObj clientCounter = billingData->clientCounter.get()->get(client_id);
-        ClientLockObj clientLock = billingData->clientLock.get()->get(client_id);
-        sum_month = clientCounter.sumMonth(vat_rate);
-        sum_day = clientCounter.sumDay(vat_rate);
-        sum_balance = clientCounter.sumBalance(vat_rate);
+        ClientLockObj clientLock = repository.billingData->clientLock.get()->get(client_id);
+        sum_month = repository.billingData->statsAccountGetSumMonth(client_id, vat_rate);
+        sum_day = repository.billingData->statsAccountGetSumDay(client_id, vat_rate);
+        sum_balance = repository.billingData->statsAccountGetSumBalance(client_id, vat_rate);
 
 
-        ClientCounterObj c2 = currentCallsData->getClientCounter()->get(client_id);
-        sum_balance2 = c2.sumBalance(vat_rate);
-        sum_day2 = c2.sumDay(vat_rate);
-        sum_month2 = c2.sumMonth(vat_rate);
+        auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
+        sum_balance2 = statsAccount2->getSumBalance(client_id, vat_rate);
+        sum_day2 = statsAccount2->getSumDay(client_id, vat_rate);
+        sum_month2 = statsAccount2->getSumMonth(client_id, vat_rate);
 
         double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
-        if (data->globalCounters.ready()) {
-            auto globalCounter = data->globalCounters.get()->find(client_id);
+        if (repository.data->globalCounters.ready()) {
+            auto globalCounter = repository.data->globalCounters.get()->find(client_id);
             if (globalCounter) {
                 sum_balance_global += globalCounter->sumBalance(vat_rate);
                 sum_day_global += globalCounter->sumDay(vat_rate);
@@ -74,7 +66,7 @@ public:
             html << "Blocked MGMN<br/>\n";
 
         if (clientLock.disabled_global)
-            html << "Blocked Global<br/>\n";
+            html << "Blocked GLOBAL<br/>\n";
 
         html << "-----<br/>\n";
 
@@ -83,7 +75,7 @@ public:
             auto bl = BlackListLocal::instance();
             lock_guard<Spinlock> guard(bl->lock);
             for (auto phone : bl->blacklist) {
-                auto serviceNumber = preparedData.serviceNumber->find(atoll(phone.c_str()), time(nullptr));
+                auto serviceNumber = repository.getServiceNumber(atoll(phone.c_str()));
                 if (serviceNumber != nullptr && serviceNumber->client_account_id == client_id) {
                     html << "Locked Local <b>number</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
                     html << phone;
@@ -96,7 +88,7 @@ public:
             auto bl = BlackListGlobal::instance();
             lock_guard<Spinlock> guard(bl->lock);
             for (auto phone : bl->blacklist) {
-                auto serviceNumber = preparedData.serviceNumber->find(atoll(phone.c_str()), time(nullptr));
+                auto serviceNumber = repository.getServiceNumber(atoll(phone.c_str()));
                 if (serviceNumber != nullptr && serviceNumber->client_account_id == client_id) {
                     html << "Locked Global <b>number</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
                     html << phone;
@@ -109,12 +101,9 @@ public:
             auto bl = BlackListTrunk::instance();
             lock_guard<Spinlock> guard(bl->lock);
             for (auto phone : bl->blacklist) {
-                auto trunk = preparedData.trunkByName->find(phone.c_str());
-                if (trunk == nullptr) {
-                    trunk = preparedData.trunkByAlias->find(phone.c_str());
-                }
+                auto trunk = repository.getTrunkByName(phone.c_str());
                 if (trunk != nullptr) {
-                    auto serviceTrunk = preparedData.serviceTrunk->find(trunk->id, time(nullptr));
+                    auto serviceTrunk = repository.getServiceTrunk(trunk->id);
                     if (serviceTrunk != nullptr && serviceTrunk->client_account_id == client_id) {
                         html << "Locked Trunk <b>trunk</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>";
                         html << phone;
@@ -150,7 +139,7 @@ public:
         html << "-----<br/>\n";
 
         html << "Last account date: <b>" << string_time(client->amount_date) << "</b><br/>\n";
-        html << "Last payed month: <b>" << string_date(client->last_payed_month) << "</b><br/>\n";
+        html << "Last payed month: <b>" << string_date(client->last_payed_month, 11) << "</b><br/>\n";
 
         html << "-----<br/>\n";
 
@@ -163,7 +152,7 @@ public:
 
 
         int calls_count = 0;
-        auto calls = DataCurrentCallsContainer::instance()->getCallsWaitingSaving();
+        auto calls = repository.currentCalls->getCallsWaitingSaving();
         for (auto &call : *calls.get()) {
             if (call.account_id != client_id) continue;
             calls_count++;
@@ -189,7 +178,7 @@ public:
             html << "<th>dest</th>";
             html << "<th>geo_id</th>";
             html << "</tr>\n";
-            auto calls = DataCurrentCallsContainer::instance()->getCallsWaitingSaving();
+            auto calls = repository.currentCalls->getCallsWaitingSaving();
             for (auto &call : *calls.get()) {
                 if (call.account_id != client_id) continue;
                 html << "<tr>";

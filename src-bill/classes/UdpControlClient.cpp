@@ -1,7 +1,7 @@
 #include "UdpControlClient.h"
 
 #include "AppBill.h"
-#include "../../src/classes/Log.h"
+#include "Log.h"
 
 void UdpControlClient::handle_receive(const boost::system::error_code& error, size_t bytes_recvd, size_t *nread) {
     if (error) {

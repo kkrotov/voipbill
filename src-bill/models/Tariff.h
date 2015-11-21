@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct Tariff {
     int id;
     int freemin;

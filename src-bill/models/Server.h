@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common.h"
+
 struct Server {
     int id;
     int low_balance_outcome_id;

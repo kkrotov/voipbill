@@ -1,8 +1,7 @@
 #pragma once
 
 #include "BasePage.h"
-#include "../data/DataContainer.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Repository.h"
 
 class PageLocks : public BasePage {
 public:
@@ -12,17 +11,14 @@ public:
     void render(std::stringstream &html, map<string, string> &parameters) {
         renderHeader(html);
 
-        auto data = DataContainer::instance();
-        auto billingData = DataBillingContainer::instance();
+        Repository repository;
 
-        auto clientList = data->client.get();
-        auto organizationList = data->organization.get();
-        auto clientCounter = billingData->clientCounter.get();
-        auto clientLock = billingData->clientLock.get();
+        auto clientList = repository.data->client.get();
+        auto organizationList = repository.data->organization.get();
+        auto clientLock = repository.billingData->clientLock.get();
 
         if (clientList == nullptr) return;
         if (organizationList == nullptr) return;
-        if (clientCounter == nullptr) return;
         if (clientLock == nullptr || !clientLock->isReady) return;
 
         html << "<table border=1>\n";
@@ -33,7 +29,7 @@ public:
         html << "<th nowrap>Balance avaiable</th>\n";
         html << "<th nowrap>Daily avaiable</th>\n";
         html << "<th nowrap>Block MGMN Flag</th>\n";
-        html << "<th nowrap>Block Global Flad</th>\n";
+        html << "<th nowrap>Block Global Flag</th>\n";
         html << "</tr>\n";
 
         vector<ClientLockObj> locks;
@@ -41,7 +37,6 @@ public:
 
         for (auto lock : locks) {
             int client_id = lock.client_id;
-            ClientCounterObj value = clientCounter->get(client_id);
 
             double vat_rate = 0;
 
@@ -53,24 +48,23 @@ public:
                 }
             }
 
-            double sum_month = value.sumMonth(vat_rate);
-            double sum_day = value.sumDay(vat_rate);
-            double sum_balance = value.sumBalance(vat_rate);
+            double sum_month = repository.billingData->statsAccountGetSumMonth(client_id, vat_rate);
+            double sum_day = repository.billingData->statsAccountGetSumDay(client_id, vat_rate);
+            double sum_balance = repository.billingData->statsAccountGetSumBalance(client_id, vat_rate);
 
 
             double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
-            if (data->globalCounters.ready()) {
-                auto globalCounter = data->globalCounters.get()->find(client_id);
+            if (repository.data->globalCounters.ready()) {
+                auto globalCounter = repository.data->globalCounters.get()->find(client_id);
                 if (globalCounter) {
                     sum_balance_global += globalCounter->sumBalance(vat_rate);
                     sum_day_global += globalCounter->sumDay(vat_rate);
-                    sum_month_global += globalCounter->sumMonth(vat_rate);
                 }
             }
 
             html << "<tr>\n";
             html << "<td nowrap><a href='/client?id=" << client_id << "'>" << client_id << "</a></td>\n";
-            html << "<td nowrap>" << (lock.disabled_local ? "BLOCK MGNM" : "-")  << "</td>\n";
+            html << "<td nowrap>" << (lock.disabled_local ? "BLOCK MGMN" : "-")  << "</td>\n";
             html << "<td nowrap>" << (lock.disabled_global ? "BLOCK GLOBAL" : "-") << "</td>\n";
 
             if (client != nullptr && client->hasCreditLimit()) {

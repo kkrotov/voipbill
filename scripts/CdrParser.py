@@ -136,6 +136,13 @@ class CdrParser(Daemon):
         disconnect_cause    = self.parseDisconnectCause(cdr, 'CauseIndicator', True)
         setup_time_raw      = self.getValue(cdr, 'StartTimeStamp')
 
+        if src_number is not None:
+            src_number = src_number[:32];
+        if dst_number is not None:
+            dst_number = dst_number[:32];
+        if redirect_number is not None:
+            redirect_number = redirect_number[:32];
+
         hash = call_id + setup_time_raw[:14]
         hash = hashlib.md5(hash).hexdigest()
 

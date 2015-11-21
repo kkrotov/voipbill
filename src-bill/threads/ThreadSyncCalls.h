@@ -1,15 +1,15 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../../src/classes/BDb.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Thread.h"
+#include "../classes/BDb.h"
+#include "../classes/Repository.h"
 
 class ThreadSyncCalls : public Thread {
     BDb db_main;   
     BDb db_calls;
 
-    DataBillingContainer * billingData;
-    
+    Repository repository;
+
     void run();
     
     void copyCallsPart(string month);

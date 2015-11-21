@@ -1,6 +1,7 @@
 #pragma once
 
 #include <execinfo.h>
+#include <signal.h>
 #include <sys/resource.h>
 #include "../AppBill.h"
 

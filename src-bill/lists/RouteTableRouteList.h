@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/RouteTableRoute.h"
+#include "../classes/AppBill.h"
 
 class RouteTableRouteList : public ObjList<RouteTableRoute> {
 protected:
@@ -42,7 +43,7 @@ protected:
     };
 
 public:
-    RouteTableRoute * find(int route_table_id, int order) {
+    void findAll(vector<RouteTableRoute *> &resultRoutes, int route_table_id, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -50,10 +51,25 @@ public:
             begin = p.first;
             end = p.second;
         }
-        {
-            auto p = equal_range(begin, end, order, key_order());
-            begin = p.first;
-            end = p.second;
+
+
+        if (begin < end) {
+            if (trace != nullptr) {
+                *trace << "FOUND|ROUTE TABLE ROUTES|BY ROUTE_TABLE_ID '" << route_table_id << "'" << "\n";
+            }
+            for (auto it = begin; it != end; ++it) {
+                resultRoutes.push_back(&*it);
+
+                if (trace != nullptr) {
+                    *trace << "||";
+                    it->dump(*trace);
+                    *trace << "\n";
+                }
+            }
+        } else {
+            if (trace != nullptr) {
+                *trace << "NOT FOUND|ROUTE TABLE ROUTES|BY ROUTE_TABLE_ID '" << route_table_id << "'" << "\n";
+            }
         }
-        return begin <  end ? &*begin : nullptr;    }
+    }
 };

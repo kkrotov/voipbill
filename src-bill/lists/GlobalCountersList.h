@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/lists/ObjList.h"
+#include "../classes/ObjList.h"
 #include "../models/GlobalCounters.h"
 #include "../classes/AppBill.h"
 
@@ -8,15 +8,15 @@ class GlobalCountersList : public ObjList<GlobalCounters> {
 protected:
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
-        string sDay = string_date(get_tday());
-        string sMonth = string_date(get_tmonth());
-        return "   select client_id, sum(amount_sum), " \
-           "          sum(case when amount_day = '" + sDay + "' then amount_day_sum else 0 end), " \
-           "          sum(case when amount_month = '" + sMonth + "' then amount_month_sum else 0 end) " \
-           "   from billing.clients_counters " \
-           "     where region_id<>" + server_id + " and (amount_sum<>0 or amount_day_sum<>0 or amount_month_sum<>0) " \
-           "     group by client_id " \
-           "     order by client_id asc ";
+        string sDay = string_date(get_tday(time(nullptr)), 9);
+        string sMonth = string_date(get_tmonth(time(nullptr)), 10);
+        return "   select account_id, sum(sum), " \
+           "          sum(case when amount_day = '" + sDay + "' then sum_day else 0 end), " \
+           "          sum(case when amount_month = '" + sMonth + "' then sum_month else 0 end) " \
+           "   from billing.stats_account " \
+           "     where server_id<>" + server_id + " and (sum<>0 or sum_day<>0 or sum_month<>0) " \
+           "     group by account_id " \
+           "     order by account_id asc ";
     }
 
     inline void parse_item(BDbResult &row, GlobalCounters * item) {

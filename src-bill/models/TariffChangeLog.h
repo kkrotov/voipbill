@@ -1,6 +1,6 @@
 #pragma once
 
-#include <time.h>
+#include "../common.h"
 
 struct TariffChangeLog {
     int usage_id;

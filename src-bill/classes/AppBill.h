@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/classes/App.h"
+#include "App.h"
 #include "ConfBill.h"
 
 class AppBill : public App {

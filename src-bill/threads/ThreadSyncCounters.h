@@ -1,21 +1,24 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../data/DataBillingContainer.h"
+#include "../classes/Thread.h"
+#include "../classes/Repository.h"
 
 class ThreadSyncCounters : public Thread {
     BDb db_main;
+    BDb db_calls;
 
-    DataBillingContainer * billingData;
+    Repository repository;
 
-    int last_sync_count;
-    int total_sync_count;
+    size_t last_sync_account_count;
+    size_t last_sync_freemin_count;
+    size_t last_sync_package_count;
+    size_t total_sync_account_count;
+    size_t total_sync_freemin_count;
+    size_t total_sync_package_count;
 
     bool ready();
 
     void run();
-
-    void save_client_counters();
 
     void htmlfull(stringstream &html);
 

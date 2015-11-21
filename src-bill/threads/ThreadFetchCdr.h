@@ -1,14 +1,12 @@
 #pragma once
 
-#include "../../src/threads/Thread.h"
-#include "../data/DataBillingContainer.h"
-#include "../classes/CdrLoader.h"
+#include "../classes/Thread.h"
+#include "../classes/Repository.h"
 
 class ThreadFetchCdr : public Thread {
 protected:
     BDb db_calls;
-    DataBillingContainer * billingData;
-    CdrLoader cdrLoader;
+    Repository repository;
 
 
 public:

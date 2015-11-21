@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../src/common.h"
+#include "../common.h"
 
 struct Number {
     int id;
@@ -24,4 +24,10 @@ struct Number {
         return intPrefixlistIds;
     }
 
+    void dump(stringstream &trace) {
+        trace << "(";
+        trace << "id: " << id << ", ";
+        trace << "name: " << name << ", ";
+        trace << ")";
+    }
 };
