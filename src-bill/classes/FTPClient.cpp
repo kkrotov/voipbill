@@ -1,17 +1,11 @@
 #include "Exception.h"
-//#include <string>
-#include <iostream>
-//#include <ostream>
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-//#include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 #include "FTPClient.h"
 #include <regex>
-//#include <unistd.h>
-//#include <boost/thread.hpp>
 #include <thread>
 
 using namespace boost::asio;
@@ -19,6 +13,11 @@ using namespace boost::asio::ip;
 
 FTPClient::FTPClient()
 {
+    ftpsocket = nullptr;
+}
+
+FTPClient::~FTPClient() {
+    Disconnect();
 }
 
 bool FTPClient::ConnectToFTP(const std::string &Server, const std::string &User, const std::string &Password) {
@@ -42,7 +41,7 @@ bool FTPClient::ConnectToFTP(const std::string &Server, const std::string &User,
             passwordncommand = (boost::format("PASS %1%") % Password).str();
             std::string result;
             ExecuteCommand(usercommand, 331);
-            if(IsResponceCode(331)/* || IsResponceCode(220)*/) {
+            if(IsResponceCode(331)) {
                 ExecuteCommand(passwordncommand, 230);
                 if(IsResponceCode(230)) {
                     return true;
@@ -55,14 +54,13 @@ bool FTPClient::ConnectToFTP(const std::string &Server, const std::string &User,
     return false;
 }
 
-bool FTPClient::Disconnect() {
-    ftpsocket->close();
-    return true;
+void FTPClient::Disconnect() {
+    if (ftpsocket != nullptr) {
+        ftpsocket->close();
+    }
 }
 
 void FTPClient::ReceiveResponce(int DesiredResponceCode) {
-//    usleep(50000);
-//    sleep(1);
     lastresponces.clear();
     bool codefound(false);
     int attemptcout(100 * 30); // 30 seconds
@@ -88,26 +86,9 @@ void FTPClient::ReceiveResponce(int DesiredResponceCode) {
                 lastresponces[responcesode] = message;
                 if (responcesode == DesiredResponceCode)
                     codefound = true;
-                std::cout << responcesode << message << std::endl;
             }
         }
     } while(!codefound && (--attemptcout > 0));
-/*
-    boost::asio::streambuf responsebuffer;
-    boost::asio::read_until(*Receiver, responsebuffer, "\0");
-    std::istream response_stream(&responsebuffer);
-    while (!response_stream.eof()) {
-        std::string responce;
-        std::getline(response_stream, responce);
-        boost::replace_all(responce, "\r", "");
-        if(responce.length() > 3) {
-            int responcesode = boost::lexical_cast<int>(responce.substr(0, 3));
-            responce.erase(0, 3);
-            lastresponces[responcesode] = responce;
-            std::cout << responcesode << responce << std::endl;
-        }
-    }*/
-    std::cout << std::endl;
 }
 
 void FTPClient::ReceiveRaw(std::string &Responce, unsigned long DataSize) {
@@ -133,7 +114,6 @@ void FTPClient::ReceiveRaw(std::string &Responce, unsigned long DataSize) {
                                 boost::asio::buffers_begin(bufs) + responsebuffer.size());
                 responce += tmp;
             }
-            //        avail = receiversocket->available();
         }
     }
     Responce = responce;
@@ -231,18 +211,12 @@ bool FTPClient::GetFile(const std::string &Filename, std::string &FileContent) {
             if (IsResponceCode(213)) {
                 std::string filesizestr = GetResponceData(213);
                 boost::replace_all(filesizestr, " ", "");
-            if (EnterPassiveMode(host, port)) {
-//                ExecuteCommand("TYPE A", 200);
-//                ExecuteCommand("TYPE A", 200);
-//                if (IsResponceCode(200)) {
-//                    ExecuteCommand("STRU F", 200);
-//                    if (IsResponceCode(200)) {
-                        unsigned long filesize = boost::lexical_cast<unsigned long>(filesizestr);
-                        std::string command = (boost::format("RETR %1%") % Filename).str();
-                        ExecuteCommand(command, FileContent, 150, filesize);
-                        if(IsResponceCode(150)) {
-                            result = true;
-//                        }
+                if (EnterPassiveMode(host, port)) {
+                    unsigned long filesize = boost::lexical_cast<unsigned long>(filesizestr);
+                    std::string command = (boost::format("RETR %1%") % Filename).str();
+                    ExecuteCommand(command, FileContent, 150, filesize);
+                    if(IsResponceCode(150)) {
+                        result = true;
                     }
                 }
             }

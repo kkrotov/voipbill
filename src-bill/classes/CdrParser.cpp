@@ -1,7 +1,6 @@
 #include "CdrParser.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "../classes/LogWriterSyslog.h"
 #include "../classes/Log.h"
 #include <boost/lexical_cast.hpp>
 #include <regex>
@@ -157,7 +156,6 @@ bool CdrParser::ParseCall(const std::string &RawCallData, CallData &Call) {
         Call.setup_time_raw = GetValue(datatagname, RawCallData);
     } catch(...) {
         std::string errstr = (boost::format("Call %1% parsing error for parameter %2% with value %3%") % Call.call_id % datatagname % value).str();
-        LogWriterSyslog syslog(errstr, LogLevel::ERROR);
         Log::error(errstr);
         return false;
     }
@@ -170,7 +168,7 @@ std::string CdrParser::GetValue(const std::string &Name, const std::string &Data
     std::regex re(searchstring);
     std::smatch match;
     if (std::regex_search(Data, match, re) && (match.size() >= 2)) {
-        value = match[1];
+        value = (string)match[1];
     }
     return value;
 }

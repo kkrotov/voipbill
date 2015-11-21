@@ -32,5 +32,5 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     cdr_ftp_password = pt.get<string>("cdr_parcer.cdr_ftp_password", "");
     cdr_ftp_dir = pt.get<string>("cdr_parcer.cdr_ftp_dir", "");
     cdr_nasip = pt.get<string>("cdr_parcer.cdr_nasip", "127.0.0.1");
-    cdr_parcer_timeout = pt.get<long>("cdr_parcer.timeout", 1800);
+    cdr_parcer_interval = pt.get<int>("cdr_parcer.interval", 1800);
 }

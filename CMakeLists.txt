@@ -45,6 +45,7 @@ set(BILL_SOURCES
     src-bill/classes/CalcException.cpp
     src-bill/classes/CallsManager.cpp
     src-bill/classes/CdrManager.cpp
+    src-bill/classes/CdrParser.cpp
     src-bill/classes/Conf.cpp
     src-bill/classes/ConfBill.cpp
     src-bill/classes/StatsAccountManager.cpp

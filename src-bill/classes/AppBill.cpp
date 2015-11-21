@@ -21,9 +21,6 @@
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
 #include "../threads/ThreadCdrParser.h"
-#include "../classes/LogWriterScreen.h"
-#include "../classes/LogWriterFile.h"
-#include "../classes/LogWriterSyslog.h"
 
 AppBill & app() {
     static AppBill appVar;

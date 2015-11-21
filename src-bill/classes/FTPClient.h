@@ -17,8 +17,9 @@ private:
     std::map<int, std::string> lastresponces;
 public:
     FTPClient();
+    virtual ~FTPClient();
     bool ConnectToFTP(const std::string &Server, const std::string &User, const std::string &Password);
-    bool Disconnect();
+    void Disconnect();
 
     unsigned long GetLileList(const std::string &Path, std::list<std::string> &FileList);
     bool GetFile(const std::string &Filename, std::string &FileContent);

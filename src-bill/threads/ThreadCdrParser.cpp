@@ -3,7 +3,7 @@
 #include "../classes/AppBill.h"
 #include <boost/format.hpp>
 #include "../classes/FTPClient.h"
-#include "../classes/LogWriterSyslog.h"
+#include "../classes/DbException.h"
 #include <regex>
 #include <iostream>
 
@@ -11,7 +11,7 @@ ThreadCdrParser::ThreadCdrParser() : Thread()
 {
     name ="CDR Parser";
     id = idName();
-    threadSleepSeconds = app().conf.cdr_parcer_timeout;
+    threadSleepSeconds = app().conf.cdr_parcer_interval;
 }
 
 bool ThreadCdrParser::prepare() {
@@ -19,81 +19,81 @@ bool ThreadCdrParser::prepare() {
 }
 
 void ThreadCdrParser::run() {
+    if (app().conf.cdr_ftp_host == "") {
+        return;
+    }
+
     try {
         db_calls.setCS(app().conf.db_calls);
-        Log::info("Start CDR parsing process...");
         FTPClient dataclient;
-        Log::info((boost::format("Connecting to CDR FTP server with parameters %1% %2% %3%") % app().conf.cdr_ftp_host % app().conf.cdr_ftp_user % app().conf.cdr_ftp_password).str());
+
         bool result = dataclient.ConnectToFTP(app().conf.cdr_ftp_host, app().conf.cdr_ftp_user, app().conf.cdr_ftp_password);
-        if(result) {
-            Log::info("OK");
-            std::string filecontent;
-            std::list<std::string> filelist;
-            Log::info("Loading CDR files list...");
-            unsigned long filescount = dataclient.GetLileList(app().conf.cdr_ftp_dir, filelist);
-            Log::info((boost::format("%1% files found") % filescount).str());
-            for (auto filename : filelist) {
-                Log::info((boost::format("Processing %1%") % filename).str());
-                if (!isFileProcessed(filename)) {
-                    Log::info("Loading file content...");
-                    result = dataclient.GetFile(filename, filecontent);
-                    if(result) {
-                        CdrParser parser(filecontent);
-                        std::list<CallData> calls;
-                        if (parser.Parse(calls)) {
-                            for (auto calldata : calls) {
-                                std::string insertcallquery;
-                                insertcallquery = (boost::format(
-                                        "select public.insert_cdr('%1%','%2%','%3%','%4%','%5%','%6%','%7%','%8%','%9%','%10%','%11%','%12%','%13%','%14%')")
-                                                   % calldata.call_id % app().conf.cdr_nasip
-                                                   % calldata.src_number % calldata.dst_number
-                                                   % calldata.redirect_number % calldata.session_time
-                                                   % calldata.setup_time % calldata.connect_time
-                                                   % calldata.disconnect_time % calldata.disconnect_cause
-                                                   % calldata.src_route % calldata.dst_route
-                                                   % calldata.src_noa % calldata.dst_noa).str();
-                                BDbResult res = db_calls.query(insertcallquery);
-                                if (res.next()) {
-                                    LogWriterSyslog syslog((boost::format("File %1% CDR with id %2% database writing error") % filename % calldata.call_id).str(), LogLevel::ERROR);
-                                }
-                            }
-                            std::string insertfilequery;
-                            insertfilequery = (boost::format(
-                                    "insert into calls_cdr.cdr_file(file_name, total_count, insert_count, error_count, error_ids)values('%1%', '%2%', '%3%', '%4%', '%5%')")
-                                               % filename % calls.size() %
-                                               (calls.size() - parser.GetErrorCallsCount()) %
-                                               parser.GetErrorCallsCount() % parser.GetErrorIDs()).str();
-                            if(parser.GetErrorCallsCount() > 0) {
-                                LogWriterSyslog syslog((boost::format("File %1% has %2% errors. ID %3%") % filename % (calls.size() - parser.GetErrorCallsCount()) % parser.GetErrorIDs()).str(), LogLevel::ERROR);
-                            }
-                            try {
-                                BDbResult res = db_calls.query(insertfilequery);
-                                if (res.next()) {
-                                    LogWriterSyslog syslog((boost::format("File %1% database writing error") % filename).str(), LogLevel::ERROR);
-                                }
-                            } catch(Exception &e) {
-                                LogWriterSyslog syslog((boost::format("File %1% database writing error. Reason: %2%") % filename % e.what()).str(), LogLevel::ERROR);
-                            }
-                        }
-                    } else {
-                        Log::error((boost::format("%1% loading error") % filename).str());
-                    }
-                } else {
-                    Log::info("File processed");
-                }
-            }
-            dataclient.Disconnect();
-        } else {
-            Log::error("CDR FTP connection error");
+        if (!result) {
+            Log::error((boost::format("Can not connecting to CDR FTP server with parameters %1% %2% %3%") % app().conf.cdr_ftp_host % app().conf.cdr_ftp_user % app().conf.cdr_ftp_password).str());
+            return;
         }
-        db_calls.disconnect();
+
+        std::string filecontent;
+        std::list<std::string> filelist;
+        unsigned long filescount = dataclient.GetLileList(app().conf.cdr_ftp_dir, filelist);
+
+        files_on_server_count = filescount;
+
+        for (auto filename : filelist) {
+            if (isFileProcessed(filename)) {
+                continue;
+            }
+
+            last_file_name = filename;
+            last_file_calls_count = 0;
+
+            result = dataclient.GetFile(filename, filecontent);
+            if (!result) {
+                throw Exception((boost::format("Error loading file content %1%") % filename).str(), "ThreadCdrParser::run");
+            }
+
+            CdrParser parser(filecontent);
+            std::list<CallData> calls;
+            if (!parser.Parse(calls)) {
+                throw Exception((boost::format("Can not parse file %1%") % filename).str(), "ThreadCdrParser::run");
+            }
+
+            last_file_calls_count = calls.size();
+
+            for (auto calldata : calls) {
+                std::string insertcallquery;
+                insertcallquery = (boost::format(
+                        "select public.insert_cdr('%1%','%2%','%3%','%4%','%5%','%6%','%7%','%8%','%9%','%10%','%11%','%12%','%13%','%14%')")
+                                   % calldata.call_id % app().conf.cdr_nasip
+                                   % calldata.src_number % calldata.dst_number
+                                   % calldata.redirect_number % calldata.session_time
+                                   % calldata.setup_time % calldata.connect_time
+                                   % calldata.disconnect_time % calldata.disconnect_cause
+                                   % calldata.src_route % calldata.dst_route
+                                   % calldata.src_noa % calldata.dst_noa).str();
+                db_calls.query(insertcallquery);
+                processed_calls_count++;
+            }
+
+            std::string insertfilequery;
+            insertfilequery = (boost::format(
+                    "insert into calls_cdr.cdr_file(file_name, total_count, insert_count, error_count, error_ids)values('%1%', '%2%', '%3%', '%4%', '%5%')")
+                               % filename % calls.size() %
+                               (calls.size() - parser.GetErrorCallsCount()) %
+                               parser.GetErrorCallsCount() % parser.GetErrorIDs()).str();
+            db_calls.exec(insertfilequery);
+            processed_files_count++;
+
+            if (parser.GetErrorCallsCount() > 0) {
+                Log::error((boost::format("File %1% has %2% errors. ID %3%") % filename %
+                            (calls.size() - parser.GetErrorCallsCount()) % parser.GetErrorIDs()).str());
+            }
+
+        }
     } catch(Exception &e) {
-        Log::error((boost::format("CDR parsing error. Reason: %1%") % e.what()).str());
-    } catch(...) {
-        LogWriterSyslog syslog("CDR parsing general error", LogLevel::ERROR);
-        Log::error("CDR parsing general error");
+        e.addTrace("CDR parsing error.");
+        throw e;
     }
-    Log::info("End of CDR parsing process...");
 }
 
 bool ThreadCdrParser::isFileProcessed(const std::string &Filename) {
@@ -104,8 +104,21 @@ bool ThreadCdrParser::isFileProcessed(const std::string &Filename) {
         return (res.size() != 0);
     } catch (Exception &e) {
         std::string message((boost::format("File %1% status error") % Filename).str());
-        LogWriterSyslog syslog(message, LogLevel::ERROR);
         Log::error(message);
         return true;
     }
 };
+
+bool ThreadCdrParser::hasFullHtml() {
+    return true;
+}
+
+void ThreadCdrParser::htmlfull(stringstream & html) {
+    this->html(html);
+
+    html << "Files on server count: <b>" << files_on_server_count << "</b><br/>\n";
+    html << "Processed files: <b>" << processed_files_count << "</b><br/>\n";
+    html << "Processed calls count: <b>" << processed_calls_count << "</b><br/>\n";
+    html << "Last file name: <b>" << last_file_name << "</b><br/>\n";
+    html << "Last file calls count: <b>" << last_file_calls_count << "</b><br/>\n";
+}

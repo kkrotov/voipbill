@@ -31,7 +31,7 @@ public:
     std::string cdr_ftp_password;
     std::string cdr_ftp_dir;
     std::string cdr_nasip;
-    int cdr_parcer_timeout;
+    int cdr_parcer_interval;
 
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);
