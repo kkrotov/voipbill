@@ -59,7 +59,6 @@ set(BILL_SOURCES
     src-bill/classes/LogWriterSyslog.cpp
     src-bill/classes/ObjList.cpp
     src-bill/classes/RadiusAuthProcessor.cpp
-    src-bill/classes/RadiusAuthProcessorBill.cpp
     src-bill/classes/RadiusAuthServer.cpp
     src-bill/classes/StatsPackageManager.cpp
     src-bill/classes/Repository.cpp
@@ -237,6 +236,7 @@ set(BILL_SOURCES
     src-bill/threads/ThreadRadiusAuthServer.cpp
     src-bill/threads/ThreadSync.cpp
     src-bill/threads/ThreadLoader.cpp
+    src-bill/threads/ThreadAccountBalanceRecalc.cpp
     src-bill/threads/ThreadRemoteLoader.cpp
     src-bill/threads/ThreadCurrentCalls.cpp
     src-bill/threads/ThreadFetchCdr.cpp

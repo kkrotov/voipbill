@@ -71,7 +71,7 @@ struct Call {
         trace << "service_package_id: " << service_package_id << ", ";
         trace << "service_package_stats_id: " << service_package_stats_id << ", ";
         trace << "package_time: " << package_time << ", ";
-        trace << "package_credit " << package_credit << ", ";
+        trace << "package_credit: " << package_credit << ", ";
         trace << "pricelist_id: " << pricelist_id << ", ";
         trace << "prefix: " << prefix << ", ";
         trace << "destination_id: " << destination_id << ", ";

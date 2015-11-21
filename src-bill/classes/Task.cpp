@@ -16,6 +16,8 @@ void Task::setStatus(string str) {
         status = str;
     }
     db_main->exec("update billing.tasks set status='" + str + "' where region_id=" + server_id + " and id=" + id);
+
+    Log::info(name + " on " + server_id + ": " + str);
 }
 
 string Task::getStatus() {

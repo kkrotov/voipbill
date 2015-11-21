@@ -7,6 +7,13 @@
 
 using namespace std;
 
+struct ServiceTrunkOrder {
+    Trunk * trunk;
+    ServiceTrunk * serviceTrunk;
+    Pricelist * pricelist;
+    PricelistPrice * price;
+};
+
 class RadiusAuthProcessor {
 public:
 
@@ -35,6 +42,11 @@ private:
     void processRouteCaseOutcome(RadiusAuthResponse &response, Outcome * outcome);
     void processReleaseReasonOutcome(RadiusAuthResponse &response, Outcome * outcome);
     void processAirpOutcome(RadiusAuthResponse &response, Outcome * outcome);
+    void getAvailableOrigServiceTrunk(ServiceTrunk * origServiceTrunk, Pricelist * origPricelist, PricelistPrice * origPrice);
+    void getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks);
+    void processAutoRouteResponse(RadiusAuthResponse &response, vector<ServiceTrunkOrder> &termOrders);
+    string analyzeCall(Call &call);
+    void fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double vat_rate);
 
     bool needSwapCallingAndRedirectionNumber();
 

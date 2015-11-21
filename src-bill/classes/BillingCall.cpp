@@ -270,7 +270,7 @@ void BillingCall::numberPreprocessing() {
 }
 
 void BillingCall::processRedirectNumber() {
-    if (callInfo->trunk->use_redirect_number) {
+    if (callInfo->trunk->orig_redirect_number) {
 
         long long int redirect_number =  atoll(cdr->redirect_number);
 
@@ -661,23 +661,40 @@ void BillingCall::setupFreemin() {
         return;
     }
 
+    if (!call->isLocal()) {
+        return;
+    }
+
     int tariffFreeSeconds = 60 * callInfo->mainTariff->freemin * (callInfo->mainTariff->freemin_for_number ? 1 : callInfo->serviceNumber->lines_count);
-    if (call->isLocal() && tariffFreeSeconds > 0) {
-        StatsFreemin * stats = repository->billingData->statsFreeminGetCurrent(callInfo);
-        if (stats != nullptr) {
-            int availableFreeSeconds = tariffFreeSeconds - stats->used_seconds;
-            if (availableFreeSeconds < 0) {
-                availableFreeSeconds = 0;
-            }
-            if (availableFreeSeconds > call->billed_time) {
-                availableFreeSeconds = call->billed_time;
-            }
-            if (availableFreeSeconds > 0) {
-                call->service_package_id = 1;
-                call->service_package_stats_id = stats->id;
-                call->package_time = availableFreeSeconds;
-            }
+    if (trace != nullptr) {
+        *trace << "INFO|FREEMIN|TARIFF " << tariffFreeSeconds << " SECONDS, TARIFF_ID: " << callInfo->mainTariff->id << "\n";
+    }
+
+    if (tariffFreeSeconds <= 0) {
+        return;
+    }
+
+    StatsFreemin * stats = repository->billingData->statsFreeminGetCurrent(callInfo);
+
+    if (trace != nullptr) {
+        *trace << "INFO|FREEMIN|USED " << stats->used_seconds << " SECONDS, STAT_ID: " << stats->id << "\n";
+    }
+
+    int availableFreeSeconds = tariffFreeSeconds - stats->used_seconds;
+    if (availableFreeSeconds < 0) {
+        availableFreeSeconds = 0;
+    }
+    if (availableFreeSeconds > call->billed_time) {
+        availableFreeSeconds = call->billed_time;
+    }
+    if (availableFreeSeconds > 0) {
+        if (trace != nullptr) {
+            *trace << "INFO|FREEMIN|APPLY " << availableFreeSeconds << " SECONDS, STAT_ID: " << stats->id << "\n";
         }
+
+        call->service_package_id = 1;
+        call->service_package_stats_id = stats->id;
+        call->package_time = availableFreeSeconds;
     }
 
 }
@@ -711,9 +728,6 @@ void BillingCall::setupPackagePrepaid() {
         }
 
         StatsPackage * stats = repository->billingData->statsPackageGetCurrent(callInfo, package, tariff);
-        if (stats == nullptr) {
-            continue;
-        }
 
         int availableSeconds = stats->paid_seconds - stats->used_seconds;
         if (availableSeconds < 0) {
