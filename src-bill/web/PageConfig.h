@@ -35,5 +35,14 @@ public:
         html << "<br/>\n";
         html << "billing.free_seconds: " << app().conf.billing_free_seconds << "<br/>\n";
         html << "billing.global_counters_select_interval: " << app().conf.global_counters_select_interval << "<br/>\n";
+
+        html << "<br/>\n";
+        html << "cdr_parcer.cdr_ftp_host: " << app().conf.cdr_ftp_host<< "<br/>\n";
+        html << "cdr_parcer.cdr_ftp_user: " << app().conf.cdr_ftp_user<< "<br/>\n";
+        html << "cdr_parcer.cdr_ftp_password: " << app().conf.cdr_ftp_password<< "<br/>\n";
+        html << "cdr_parcer.cdr_ftp_dir: " << app().conf.cdr_ftp_dir << "<br/>\n";
+        html << "cdr_parcer.cdr_nasip: " << app().conf.cdr_nasip << "<br/>\n";
+        html << "cdr_parcer.interval: " << app().conf.cdr_parcer_interval<< "<br/>\n";
+
     }
 };
