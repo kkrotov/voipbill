@@ -21,9 +21,7 @@
 #include "../threads/ThreadUpdateActiveClients.h"
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
-#include "../classes/LogWriterScreen.h"
-#include "../classes/LogWriterFile.h"
-#include "../classes/LogWriterSyslog.h"
+#include "../threads/ThreadCdrParser.h"
 
 AppBill & app() {
     static AppBill appVar;
@@ -81,6 +79,7 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadUpdateActiveClients>();
     registerThread<ThreadCheckStartTable>();
     registerThread<ThreadTasks>();
+    registerThread<ThreadCdrParser>();
     registerThread<ThreadRadiusAuthServer>();
 }
 
@@ -106,6 +105,7 @@ void AppBill::runAppInSingleMode()
             "update_active_clients",
             "checkstarttable",
             "tasks",
+            "cdr_parser",
             "radius_auth_server",
     };
 
