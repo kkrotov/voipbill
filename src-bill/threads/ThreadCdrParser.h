@@ -2,6 +2,17 @@
 
 #include "../classes/Thread.h"
 #include "../classes/BDb.h"
+#include <list>
+
+using namespace std;
+
+struct CdrFile {
+    std::string file_name;
+    size_t total_count;
+    size_t insert_count;
+    size_t error_count;
+    string error_ids;
+};
 
 class ThreadCdrParser : public Thread {
 private:
@@ -9,8 +20,9 @@ private:
     size_t files_on_server_count;
     size_t processed_files_count;
     size_t processed_calls_count;
-    string last_file_name;
-    size_t last_file_calls_count;
+    string current_file_name;
+    size_t current_file_calls_count;
+    list<CdrFile> last_files;
 public:
     ThreadCdrParser();
     bool prepare();

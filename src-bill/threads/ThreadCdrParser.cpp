@@ -23,6 +23,9 @@ void ThreadCdrParser::run() {
         return;
     }
 
+    current_file_name = "";
+    current_file_calls_count = 0;
+
     try {
         db_calls.setCS(app().conf.db_calls);
         FTPClient dataclient;
@@ -44,8 +47,7 @@ void ThreadCdrParser::run() {
                 continue;
             }
 
-            last_file_name = filename;
-            last_file_calls_count = 0;
+            current_file_name = filename;
 
             result = dataclient.GetFile(filename, filecontent);
             if (!result) {
@@ -58,7 +60,7 @@ void ThreadCdrParser::run() {
                 throw Exception((boost::format("Can not parse file %1%") % filename).str(), "ThreadCdrParser::run");
             }
 
-            last_file_calls_count = calls.size();
+            current_file_calls_count = calls.size();
 
             for (auto calldata : calls) {
                 std::string insertcallquery;
@@ -75,14 +77,23 @@ void ThreadCdrParser::run() {
                 processed_calls_count++;
             }
 
+            CdrFile file;
+            file.file_name = filename;
+            file.total_count = calls.size();
+            file.insert_count = calls.size() - parser.GetErrorCallsCount();
+            file.error_count = parser.GetErrorCallsCount();
+            file.error_ids = parser.GetErrorIDs();
+
             std::string insertfilequery;
             insertfilequery = (boost::format(
                     "insert into calls_cdr.cdr_file(file_name, total_count, insert_count, error_count, error_ids)values('%1%', '%2%', '%3%', '%4%', '%5%')")
-                               % filename % calls.size() %
-                               (calls.size() - parser.GetErrorCallsCount()) %
-                               parser.GetErrorCallsCount() % parser.GetErrorIDs()).str();
+                               % file.file_name % file.total_count % file.insert_count % file.error_count % file.error_ids).str();
             db_calls.exec(insertfilequery);
+
+            last_files.push_back(file);
+
             processed_files_count++;
+
 
             if (parser.GetErrorCallsCount() > 0) {
                 Log::error((boost::format("File %1% has %2% errors. ID %3%") % filename %
@@ -94,6 +105,10 @@ void ThreadCdrParser::run() {
         e.addTrace("CDR parsing error.");
         throw e;
     }
+
+
+    current_file_name = "";
+    current_file_calls_count = 0;
 }
 
 bool ThreadCdrParser::isFileProcessed(const std::string &Filename) {
@@ -119,6 +134,29 @@ void ThreadCdrParser::htmlfull(stringstream & html) {
     html << "Files on server count: <b>" << files_on_server_count << "</b><br/>\n";
     html << "Processed files: <b>" << processed_files_count << "</b><br/>\n";
     html << "Processed calls count: <b>" << processed_calls_count << "</b><br/>\n";
-    html << "Last file name: <b>" << last_file_name << "</b><br/>\n";
-    html << "Last file calls count: <b>" << last_file_calls_count << "</b><br/>\n";
+    html << "Current file name: <b>" << current_file_name << "</b><br/>\n";
+    html << "Current file calls count: <b>" << current_file_calls_count << "</b><br/>\n";
+
+    html << "<br/>\n";
+
+    html << "Last uploaded files\n";
+    html << "<table>\n";
+    html << "<tr>\n";
+    html << "<th>File name</th>\n";
+    html << "<th>total</th>\n";
+    html << "<th>inserted</th>\n";
+    html << "<th>errors</th>\n";
+    html << "<th>errors ids</th>\n";
+    html << "</tr>\n";
+    for (CdrFile &file : last_files) {
+        html << "<tr>\n";
+        html << "<td>" << file.file_name << "</td>\n";
+        html << "<td>" << file.total_count << "</td>\n";
+        html << "<td>" << file.insert_count << "</td>\n";
+        html << "<td>" << file.error_count << "</td>\n";
+        html << "<td>" << file.error_ids << "</td>\n";
+        html << "</tr>\n";
+    }
+    html << "</table>\n";
+
 }
