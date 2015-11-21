@@ -45,11 +45,13 @@ set(BILL_SOURCES
     src-bill/classes/CalcException.cpp
     src-bill/classes/CallsManager.cpp
     src-bill/classes/CdrManager.cpp
+    src-bill/classes/CdrParser.cpp
     src-bill/classes/Conf.cpp
     src-bill/classes/ConfBill.cpp
     src-bill/classes/StatsAccountManager.cpp
     src-bill/classes/DbException.cpp
     src-bill/classes/Exception.cpp
+    src-bill/classes/FTPClient.cpp
     src-bill/classes/StatsFreeminManager.cpp
     src-bill/classes/Loader.cpp
     src-bill/classes/Log.cpp
@@ -238,6 +240,7 @@ set(BILL_SOURCES
     src-bill/threads/ThreadLoader.cpp
     src-bill/threads/ThreadAccountBalanceRecalc.cpp
     src-bill/threads/ThreadRemoteLoader.cpp
+    src-bill/threads/ThreadCdrParser.cpp
     src-bill/threads/ThreadCurrentCalls.cpp
     src-bill/threads/ThreadFetchCdr.cpp
     src-bill/threads/ThreadBillRuntime.cpp

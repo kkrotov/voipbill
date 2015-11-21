@@ -26,6 +26,13 @@ public:
     uint16_t radius_acct_port;
     string radius_secret;
 
+    std::string cdr_ftp_host;
+    std::string cdr_ftp_user;
+    std::string cdr_ftp_password;
+    std::string cdr_ftp_dir;
+    std::string cdr_nasip;
+    int cdr_parcer_interval;
+
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);
 };

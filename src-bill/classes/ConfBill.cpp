@@ -27,4 +27,10 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     radius_acct_port = pt.get<uint16_t>("radius.acct_port", 1813);
     radius_secret = pt.get<string>("radius.secret", "");
 
+    cdr_ftp_host = pt.get<string>("cdr_parcer.cdr_ftp_host", "");
+    cdr_ftp_user = pt.get<string>("cdr_parcer.cdr_ftp_user", "");
+    cdr_ftp_password = pt.get<string>("cdr_parcer.cdr_ftp_password", "");
+    cdr_ftp_dir = pt.get<string>("cdr_parcer.cdr_ftp_dir", "");
+    cdr_nasip = pt.get<string>("cdr_parcer.cdr_nasip", "127.0.0.1");
+    cdr_parcer_interval = pt.get<int>("cdr_parcer.interval", 1800);
 }
