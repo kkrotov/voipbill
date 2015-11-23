@@ -11,6 +11,7 @@ public:
     static void info(pLogMessage message);
     static void error(const string &text);
     static void notice(const string &text);
+    static void notice(pLogMessage message);
     static void warning(const string &text);
     static void debug(const string &text);
 

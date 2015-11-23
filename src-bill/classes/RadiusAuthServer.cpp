@@ -93,8 +93,8 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
 }
 
 void RadiusAuthServer::processRequest(RadiusAuthRequest &request, RadiusAuthResponse &response, pLogMessage &logRequest) {
-    RadiusAuthProcessor processor;
-    processor.process(request, response, logRequest);
+    RadiusAuthProcessor processor(&request, &response, logRequest);
+    processor.process();
 
 }
 

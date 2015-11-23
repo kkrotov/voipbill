@@ -12,7 +12,7 @@ protected:
 
     void run();
 
-    bool limitControlKillNeeded(Call &call);
+    bool limitControlKillNeeded(Call &call, pLogMessage &logRequest);
     void fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double vat_rate);
 
 public:

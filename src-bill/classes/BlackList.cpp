@@ -1,9 +1,6 @@
 #include "BlackList.h"
 
 #include "UdpControlClient.h"
-#include "Log.h"
-#include "../common.h"
-#include "Repository.h"
 
 bool BlackList::fetch() {
     vector<string> curr_list;
@@ -79,69 +76,114 @@ void BlackList::push(set<string> &wanted_blacklist) {
 }
 
 void BlackList::log_lock_phone(const string &phone) {
-    string str = "LOCK " + phone;
+    pLogMessage logRequest = pLogMessage(new LogMessage());
+    logRequest->type = "unlock";
+    logRequest->message = "LOCK " + phone;
 
-    Repository repository;
-    if (repository.prepare()) {
-        auto serviceNumber = repository.getServiceNumber(atoll(phone.c_str()));
-        Client * client;
-        if (serviceNumber != nullptr) {
-            str = str + " / " + lexical_cast<string>(serviceNumber->client_account_id);
-            client = repository.getAccount(serviceNumber->client_account_id);
-        } else {
-            client = nullptr;
-        }
+    log_info(phone, logRequest);
 
-        if (client != nullptr) {
-
-            if (repository.billingData->ready()) {
-
-                double vat_rate = repository.getVatRate(client);
-
-                double sum_day = repository.billingData->statsAccountGetSumDay(client->id, vat_rate);
-                double sum_balance = repository.billingData->statsAccountGetSumBalance(client->id, vat_rate);
-
-                if (client->isConsumedCreditLimit(sum_balance)) {
-                    str = str + " / Credit limit "
-                            + string_fmt("%.2f", client->balance + client->credit + sum_balance) + " = "
-                            + string_fmt("%.2f", client->balance) + " + "
-                            + lexical_cast<string>(client->credit) + " + "
-                            + string_fmt("%.2f", sum_balance);
-                }
-
-                if (client->isConsumedDailyLimit(sum_day)) {
-                    str = str + " / Daily limit "
-                            + string_fmt("%.2f", client->limit_d + sum_day) + " = "
-                            + lexical_cast<string>(client->limit_d) + " + "
-                            + string_fmt("%.2f", sum_day);
-                }
-
-                if (client->disabled) {
-                    str = str + " / Block MGMN ";
-                }
-
-                if (client->is_blocked) {
-                    str = str + " / Block Global ";
-                }
-
-            }
-        }
-    }
-
-    Log::notice(str);
+    Log::notice(logRequest);
 }
 
 void BlackList::log_unlock_phone(const string &phone) {
-    string str = "UNLOCK " + phone;
+    pLogMessage logRequest = pLogMessage(new LogMessage());
+    logRequest->type = "unlock";
+    logRequest->message = "UNLOCK " + phone;
+
+    log_info(phone, logRequest);
+
+    Log::notice(logRequest);
+}
+
+void BlackList::log_info(const string &phone, pLogMessage &logRequest) {
 
     Repository repository;
-    if (repository.prepare()) {
 
-        auto serviceNumber = repository.getServiceNumber(atoll(phone.c_str()));
-        if (serviceNumber != 0) {
-            str = str + " / " + lexical_cast<string>(serviceNumber->client_account_id);
-        }
+    if (!repository.prepare() || repository.billingData->ready()) {
+        return;
     }
 
-    Log::notice(str);
+    Log::notice(logRequest);
+    logRequest->params["number"] = phone;
+
+    auto serviceNumber = repository.getServiceNumber(atoll(phone.c_str()));
+    if (serviceNumber == nullptr) {
+        return;
+    }
+
+    logRequest->message += " / " + lexical_cast<string>(serviceNumber->client_account_id);
+    logRequest->params["account_id"] = lexical_cast<string>(serviceNumber->client_account_id);
+
+    auto client = repository.getAccount(serviceNumber->client_account_id);
+    if (client == nullptr) {
+        return;
+    }
+
+    double vat_rate = repository.getVatRate(client);
+
+    double sumBalance = repository.billingData->statsAccountGetSumBalance(client->id, vat_rate);
+    double sumDay = repository.billingData->statsAccountGetSumDay(client->id, vat_rate);
+
+    auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
+    double sumBalance2 = statsAccount2->getSumBalance(client->id, vat_rate);
+    double sumDay2 = statsAccount2->getSumDay(client->id, vat_rate);
+
+    double globalBalanceSum, globalDaySum;
+    fetchGlobalCounters(repository, client->id, globalBalanceSum, globalDaySum, vat_rate);
+
+    double spentBalanceSum, spentDaySum;
+    spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
+    spentDaySum = sumDay + sumDay2 + globalDaySum;
+
+    logRequest->params["balance_stat"] = lexical_cast<string>(client->balance);
+    logRequest->params["balance_local"] = lexical_cast<string>(sumBalance);
+    logRequest->params["balance_current"] = lexical_cast<string>(sumBalance2);
+    logRequest->params["balance_global"] = lexical_cast<string>(globalBalanceSum);
+    logRequest->params["balance_realtime"] = lexical_cast<string>(client->balance + spentBalanceSum);
+    if (client->hasCreditLimit()) {
+        logRequest->params["credit_limit"] = lexical_cast<string>(client->credit);
+        logRequest->params["credit_available"] = lexical_cast<string>(client->balance + client->credit + sumBalance + sumBalance2 + globalBalanceSum);
+    }
+
+    logRequest->params["daily_local"] = lexical_cast<string>(sumDay);
+    logRequest->params["daily_current"] = lexical_cast<string>(sumDay2);
+    logRequest->params["daily_global"] = lexical_cast<string>(globalDaySum);
+    logRequest->params["daily_total"] = lexical_cast<string>(spentDaySum);
+    if (client->hasDailyLimit()) {
+        logRequest->params["daily_limit"] = lexical_cast<string>(client->limit_d);
+        logRequest->params["daily_available"] = lexical_cast<string>(client->limit_d + spentDaySum);
+    }
+
+    if (client->is_blocked) {
+        logRequest->params["block_full_flag"] = "true";
+    }
+
+    if (client->disabled) {
+        logRequest->params["block_mgmn_flag"] = "true";
+    }
+
+    if (client->isConsumedCreditLimit(spentBalanceSum)) {
+        logRequest->params["block_credit_flag"] = "true";
+    }
+
+    if (client->isConsumedDailyLimit(spentDaySum)) {
+        logRequest->params["block_daily_flag"] = "true";
+    }
+
+}
+
+void BlackList::fetchGlobalCounters(Repository &repository, int accountId, double &globalBalanceSum, double &globalDaySum, double vat_rate) {
+
+    GlobalCounters * globalCounter = nullptr;
+    if (repository.data->globalCounters.ready()) {
+        globalCounter = repository.data->globalCounters.get()->find(accountId);
+    }
+
+    if (globalCounter != nullptr) {
+        globalBalanceSum = globalCounter->sumBalance(vat_rate);
+        globalDaySum = globalCounter->sumDay(vat_rate);
+    } else {
+        globalBalanceSum = 0.0;
+        globalDaySum = 0.0;
+    }
 }

@@ -17,59 +17,45 @@ void RadiusAuthProcessor::init() {
     }
 
     server = repository.getServer();
+
+    origTrunk = repository.getTrunkByName(request->trunkName.c_str());
+    if (origTrunk == nullptr) {
+        throw Exception("Udp request validation: trunk not found: " + request->trunkName, "RadiusAuthProcessor::process");
+    }
+
+    aNumber = request->srcNumber;
+    bNumber = request->dstNumber;
+
 }
 
-void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse &response, pLogMessage &logRequest) {
+RadiusAuthProcessor::RadiusAuthProcessor(RadiusAuthRequest * request, RadiusAuthResponse *response, pLogMessage &logRequest) {
+    this->request = request;
+    this->response = response;
+    this->logRequest = logRequest;
+
+}
+
+void RadiusAuthProcessor::process() {
 
     try {
         init();
 
-        aNumber = request.srcNumber;
-        if (request.dstNumber.substr(0, 1) == "0") {
-            prefix = request.dstNumber.substr(0, 3);
-            bNumber = request.dstNumber.substr(3);
-        } else {
-            prefix = "";
-            bNumber = request.dstNumber;
-        }
-
-        redirectionNumber = request.redirectNumber;
-        trunkName = request.trunkName;
-
-        origTrunk = repository.getTrunkByName(trunkName.c_str());
-        if (origTrunk == nullptr) {
-            throw Exception("Udp request validation: trunk not found: " + trunkName, "RadiusAuthProcessor::process");
-        }
-
-
+        processRedirectNumber();
+        processLineWithoutNumber();
 
         Cdr cdr;
         cdr.id = 0;
         cdr.connect_time = time(nullptr);
         cdr.session_time = 60;
-        strncpy(cdr.src_number, aNumber.c_str(), sizeof(cdr.src_number) - 1);
-        strncpy(cdr.dst_number, bNumber.c_str(), sizeof(cdr.dst_number) - 1);
-        strncpy(cdr.redirect_number, redirectionNumber.c_str(), sizeof(cdr.redirect_number) - 1);
-        strncpy(cdr.src_route, trunkName.c_str(), sizeof(cdr.src_route) - 1);
-        strncpy(cdr.dst_route, trunkName.c_str(), sizeof(cdr.dst_route) - 1);
-        cdr.src_noa = request.srcNoa;
-        cdr.dst_noa = request.dstNoa;
+        strncpy(cdr.src_number, request->srcNumber.c_str(), sizeof(cdr.src_number) - 1);
+        strncpy(cdr.dst_number, request->dstNumber.c_str(), sizeof(cdr.dst_number) - 1);
+        strncpy(cdr.redirect_number, request->redirectNumber.c_str(), sizeof(cdr.redirect_number) - 1);
+        strncpy(cdr.src_route, request->trunkName.c_str(), sizeof(cdr.src_route) - 1);
+        strncpy(cdr.dst_route, request->trunkName.c_str(), sizeof(cdr.dst_route) - 1);
+        cdr.src_noa = request->srcNoa;
+        cdr.dst_noa = request->dstNoa;
         cdr.call_id = 0;
 
-
-        if (needSwapCallingAndRedirectionNumber()) {
-            string tmp = redirectionNumber;
-            redirectionNumber = aNumber;
-            aNumber = tmp;
-        }
-
-        if (origTrunk->our_trunk
-            && server->calling_station_id_for_line_without_number[0] != 0
-            && (aNumber.substr(11, 1) == "*" || aNumber.substr(11, 1) == "+")
-                ) {
-            aNumber = aNumber.substr(0, 11);
-            response.srcNumber = server->calling_station_id_for_line_without_number;
-        }
 
         int outcomeId;
 
@@ -81,9 +67,10 @@ void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse
         billingCall.calc(&call, &callInfo, &cdr);
         string billResponse = analyzeCall(call);
 
-        logRequest->params["orig"] = "true";
+        logRequest->params["orig"] = call.orig ? "true" : "false";
         logRequest->params["src"] = lexical_cast<string>(call.src_number);
         logRequest->params["dst"] = lexical_cast<string>(call.dst_number);
+        logRequest->params["number"] = lexical_cast<string>(call.src_number) + " " + lexical_cast<string>(call.dst_number);
         logRequest->params["trunk_id"] = lexical_cast<string>(call.trunk_id);
         logRequest->params["account_id"] = lexical_cast<string>(call.account_id);
         logRequest->params["trunk_service_id"] = lexical_cast<string>(call.trunk_service_id);
@@ -91,56 +78,57 @@ void RadiusAuthProcessor::process(RadiusAuthRequest &request, RadiusAuthResponse
         logRequest->params["service_package_id"] = lexical_cast<string>(call.service_package_id);
         logRequest->params["pricelist_id"] = lexical_cast<string>(call.pricelist_id);
         logRequest->params["pricelist_prefix"] = lexical_cast<string>(call.prefix);
+        logRequest->params["geo_id"] = lexical_cast<string>(call.geo_id);
         logRequest->params["rate"] = lexical_cast<string>(call.rate);
-        logRequest->params["est_cost"] = lexical_cast<string>(call.cost);
+        logRequest->params["cost"] = lexical_cast<string>(call.cost);
 
         logRequest->params["resp_bill"] = billResponse;
 
         if (billResponse == "voip_disabled") {
             outcomeId = server->blocked_outcome_id;
             if (outcomeId == 0) {
-                response.setReject();
+                response->setReject();
                 return;
             }
         } else if (billResponse == "low_balance") {
             outcomeId = server->low_balance_outcome_id;
             if (outcomeId == 0) {
-                response.setReject();
+                response->setReject();
                 return;
             }
         } else if (billResponse == "reject") {
-            response.setReject();
+            response->setReject();
             return;
         } else {
             outcomeId = processRouteTable(origTrunk->route_table_id);
             if (outcomeId == 0) {
                 Log::warning("Route table: Outcome not found");
-                response.setReleaseReason("NO_ROUTE_TO_DESTINATION");
+                response->setReleaseReason("NO_ROUTE_TO_DESTINATION");
                 return;
             }
         }
 
-        processOutcome(response, outcomeId);
+        processOutcome(outcomeId);
         return;
 
     } catch (Exception &e) {
-        response.error += " " + e.getFullMessage();
+        response->error += " " + e.getFullMessage();
         e.addTrace("RadiusAuthProcessor ");
         Log::exception(e);
     } catch (std::exception &e) {
-        response.error += " " + string(e.what());
+        response->error += " " + string(e.what());
         Log::error("RadiusAuthProcessor: " + string(e.what()));
     } catch (...) {
         Log::error("RadiusAuthProcessor: ERROR");
     }
 
     if (origTrunk == nullptr) {
-        response.setReleaseReason("NO_ROUTE_TO_DESTINATION");
+        response->setReleaseReason("NO_ROUTE_TO_DESTINATION");
         return;
     }
 
     Log::warning("Fallback to default route");
-    response.setAccept();
+    response->setAccept();
 }
 
 int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
@@ -178,7 +166,7 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
     return 0;
 }
 
-void RadiusAuthProcessor::processOutcome(RadiusAuthResponse &response, int outcomeId) {
+void RadiusAuthProcessor::processOutcome(int outcomeId) {
     auto outcome = repository.getOutcome(outcomeId);
     if (outcome == nullptr) {
         throw Exception("Outcome #" + lexical_cast<string>(outcomeId) + " not found", "RadiusAuthProcessor::processOutcome");
@@ -186,22 +174,22 @@ void RadiusAuthProcessor::processOutcome(RadiusAuthResponse &response, int outco
 
     if (outcome->isAuto()) {
 
-        processAutoOutcome(response);
+        processAutoOutcome();
         return;
 
     } else if (outcome->isRouteCase()) {
 
-        processRouteCaseOutcome(response, outcome);
+        processRouteCaseOutcome(outcome);
         return;
 
     } else if (outcome->isReleaseReason()) {
 
-        processReleaseReasonOutcome(response, outcome);
+        processReleaseReasonOutcome(outcome);
         return;
 
     } else if (outcome->isAirp()) {
 
-        processAirpOutcome(response, outcome);
+        processAirpOutcome(outcome);
         return;
 
     }
@@ -209,7 +197,7 @@ void RadiusAuthProcessor::processOutcome(RadiusAuthResponse &response, int outco
     throw Exception("Unexpected type of outcome #" + lexical_cast<string>(outcome->id), "RadiusAuthProcessor::processOutcome");
 }
 
-void RadiusAuthProcessor::processAutoOutcome(RadiusAuthResponse &response) {
+void RadiusAuthProcessor::processAutoOutcome() {
 
     ServiceTrunk * origServiceTrunk = nullptr;
     Pricelist * origPricelist = nullptr;
@@ -221,7 +209,7 @@ void RadiusAuthProcessor::processAutoOutcome(RadiusAuthResponse &response) {
     getAvailableTermServiceTrunk(termServiceTrunks);
 
 
-    processAutoRouteResponse(response, termServiceTrunks);
+    processAutoRouteResponse(termServiceTrunks);
 }
 
 void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk * origServiceTrunk, Pricelist * origPricelist, PricelistPrice * origPrice) {
@@ -254,7 +242,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
             continue;
         }
 
-        if (origTrunk->orig_redirect_number && redirectionNumber.size() > 0 && !termTrunk->term_redirect_number) {
+        if (origTrunk->orig_redirect_number && request->redirectNumber.size() > 0 && !termTrunk->term_redirect_number) {
             continue;
         }
 
@@ -282,12 +270,12 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
     sort(termServiceTrunks.begin(), termServiceTrunks.end(), service_trunk_order());
 }
 
-void RadiusAuthProcessor::processAutoRouteResponse(RadiusAuthResponse &response, vector<ServiceTrunkOrder> &termOrders) {
+void RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders) {
 
 
     if (termOrders.size() == 0) {
         Log::warning("Auto Route not contains operators");
-        response.setReleaseReason("NO_ROUTE_TO_DESTINATION");
+        response->setReleaseReason("NO_ROUTE_TO_DESTINATION");
         return;
     }
 
@@ -300,47 +288,47 @@ void RadiusAuthProcessor::processAutoRouteResponse(RadiusAuthResponse &response,
         routeCase += "_" + lexical_cast<string>(trunkOrder.trunk->id);
     }
 
-    response.setRouteCase("rc_auto" + routeCase);
+    response->setRouteCase("rc_auto" + routeCase);
 }
 
-void RadiusAuthProcessor::processRouteCaseOutcome(RadiusAuthResponse &response, Outcome * outcome) {
+void RadiusAuthProcessor::processRouteCaseOutcome(Outcome * outcome) {
     auto routeCase = repository.getRouteCase(outcome->route_case_id);
     if (routeCase == nullptr) {
         throw Exception("Route case #" + lexical_cast<string>(outcome->route_case_id) + " not found", "RadiusAuthProcessor::processRouteCaseOutcome");
     }
 
-    response.setRouteCase(routeCase->name);
+    response->setRouteCase(routeCase->name);
 
     if (outcome->calling_station_id[0] != 0) {
-        response.srcNumber = outcome->calling_station_id;
+        response->srcNumber = outcome->calling_station_id;
     }
     if (outcome->called_station_id[0] != 0) {
-        response.dstNumber = outcome->called_station_id;
+        response->dstNumber = outcome->called_station_id;
     }
 }
 
-void RadiusAuthProcessor::processReleaseReasonOutcome(RadiusAuthResponse &response, Outcome * outcome) {
+void RadiusAuthProcessor::processReleaseReasonOutcome(Outcome * outcome) {
     auto releaseReason = repository.getReleaseReason(outcome->release_reason_id);
     if (releaseReason == nullptr) {
         throw Exception("Release reason #" + lexical_cast<string>(outcome->release_reason_id) + " not found", "RadiusAuthProcessor::processReleaseReasonOutcome");
     }
 
-    response.setReleaseReason(releaseReason->name);
+    response->setReleaseReason(releaseReason->name);
 }
 
-void RadiusAuthProcessor::processAirpOutcome(RadiusAuthResponse &response, Outcome * outcome) {
+void RadiusAuthProcessor::processAirpOutcome(Outcome * outcome) {
     auto airp = repository.getAirp(outcome->airp_id);
     if (airp == nullptr) {
         throw Exception("Airp #" + lexical_cast<string>(outcome->airp_id) + " not found", "RadiusAuthProcessor::processAirpOutcome");
     }
 
-    response.setAirp(airp->name);
+    response->setAirp(airp->name);
 
     if (outcome->calling_station_id[0] != 0) {
-        response.srcNumber = outcome->calling_station_id;
+        response->srcNumber = outcome->calling_station_id;
     }
     if (outcome->called_station_id[0] != 0) {
-        response.dstNumber = outcome->called_station_id;
+        response->dstNumber = outcome->called_station_id;
     }
 }
 
@@ -367,8 +355,20 @@ bool RadiusAuthProcessor::filterByNumber(const int numberId, string strNumber) {
     return false;
 }
 
-bool RadiusAuthProcessor::needSwapCallingAndRedirectionNumber() {
-    return origTrunk->our_trunk && prefix != "" && prefix.substr(2, 1) == "1";
+void RadiusAuthProcessor::processRedirectNumber() {
+    if (origTrunk->orig_redirect_number && request->redirectNumber.size() > 0) {
+        aNumber = request->redirectNumber;
+    }
+}
+
+void RadiusAuthProcessor::processLineWithoutNumber() {
+    if (origTrunk->our_trunk
+        && origTrunk->auth_by_number
+        && server->calling_station_id_for_line_without_number[0] != 0
+        && (aNumber.substr(11, 1) == "*" || aNumber.substr(11, 1) == "+")
+    ) {
+        response->srcNumber = server->calling_station_id_for_line_without_number;
+    }
 }
 
 bool RadiusAuthProcessor::autoTrunkFilterSrcNumber(Trunk * termTrunk) {

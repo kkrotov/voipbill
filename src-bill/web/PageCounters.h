@@ -31,8 +31,8 @@ public:
         html << "<th nowrap>Day Sum</th>\n";
         html << "<th nowrap>Date</th>\n";
         html << "<th nowrap>Sum</th>\n";
-        html << "<th nowrap>Balance avaiable</th>\n";
-        html << "<th nowrap>Daily avaiable</th>\n";
+        html << "<th nowrap>Balance available</th>\n";
+        html << "<th nowrap>Daily available</th>\n";
         html << "<th nowrap>Block MGMN Flag</th>\n";
         html << "<th nowrap>Block Global Flag</th>\n";
         html << "</tr>\n";

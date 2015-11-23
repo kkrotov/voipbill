@@ -27,6 +27,11 @@ void Log::notice(const string &text) {
     app().logger.logMessage(message);
 }
 
+void Log::notice(pLogMessage message) {
+    message->level = LogLevel::NOTICE;
+    app().logger.logMessage(message);
+}
+
 void Log::warning(const string &text) {
     pLogMessage message(new LogMessage);
     message->level = LogLevel::WARNING;

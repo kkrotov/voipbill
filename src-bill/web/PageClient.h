@@ -117,12 +117,12 @@ public:
         html << "-----<br/>\n";
 
         if (client->hasCreditLimit()) {
-            html << "Balance avaiable: <b>" << string_fmt("%.2f", client->balance + client->credit + sum_balance + sum_balance2 + sum_balance_global) << "</b> = ";
+            html << "Balance available: <b>" << string_fmt("%.2f", client->balance + client->credit + sum_balance + sum_balance2 + sum_balance_global) << "</b> = ";
             html << string_fmt("%.2f", client->balance) << " (balance) + " << string_fmt("%d", client->credit) << " (credit) + " << string_fmt("%.2f", sum_balance) << " (local) + " << string_fmt("%.2f", sum_balance2) << " (current) + " << string_fmt("%.2f", sum_balance_global) << " (global) <br/>\n";
         }
 
         if (client->hasDailyLimit()) {
-            html << "Daily avaiable: <b>" << string_fmt("%.2f", client->limit_d + sum_day + sum_day2 + sum_day_global) << "</b> = ";
+            html << "Daily available: <b>" << string_fmt("%.2f", client->limit_d + sum_day + sum_day2 + sum_day_global) << "</b> = ";
             html << string_fmt("%d", client->limit_d) << " (limit_d) + " << string_fmt("%.2f", sum_day) << " (local) + " << string_fmt("%.2f", sum_day2) << " (current) + " << string_fmt("%.2f", sum_day_global) << " (global) <br/>\n";
         }
 
