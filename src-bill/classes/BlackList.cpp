@@ -77,7 +77,7 @@ void BlackList::push(set<string> &wanted_blacklist) {
 
 void BlackList::log_lock_phone(const string &phone) {
     pLogMessage logRequest = pLogMessage(new LogMessage());
-    logRequest->type = "unlock";
+    logRequest->type = "lock";
     logRequest->message = "LOCK " + phone;
 
     log_info(phone, logRequest);
@@ -97,14 +97,12 @@ void BlackList::log_unlock_phone(const string &phone) {
 
 void BlackList::log_info(const string &phone, pLogMessage &logRequest) {
 
-    Repository repository;
+    logRequest->params["number"] = phone;
 
-    if (!repository.prepare() || repository.billingData->ready()) {
+    Repository repository;
+    if (!repository.prepare() || !repository.billingData->ready()) {
         return;
     }
-
-    Log::notice(logRequest);
-    logRequest->params["number"] = phone;
 
     auto serviceNumber = repository.getServiceNumber(atoll(phone.c_str()));
     if (serviceNumber == nullptr) {
