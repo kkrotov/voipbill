@@ -140,7 +140,7 @@ void BlackList::log_info(const string &phone, pLogMessage &logRequest) {
     logRequest->params["balance_realtime"] = lexical_cast<string>(client->balance + spentBalanceSum);
     if (client->hasCreditLimit()) {
         logRequest->params["credit_limit"] = lexical_cast<string>(client->credit);
-        logRequest->params["credit_available"] = lexical_cast<string>(client->balance + client->credit + sumBalance + sumBalance2 + globalBalanceSum);
+        logRequest->params["credit_available"] = lexical_cast<string>(client->balance + client->credit + spentBalanceSum);
     }
 
     logRequest->params["daily_local"] = lexical_cast<string>(sumDay);

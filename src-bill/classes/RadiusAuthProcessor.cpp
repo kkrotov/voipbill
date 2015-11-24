@@ -12,7 +12,7 @@ struct service_trunk_order {
 };
 
 void RadiusAuthProcessor::init() {
-    if (!repository.prepare(time(nullptr))) {
+    if (!repository.prepare() || !repository.billingData->ready()) {
         throw Exception("Billing not ready.", "RadiusAuthProcessor::init");
     }
 
@@ -81,6 +81,59 @@ void RadiusAuthProcessor::process() {
         logRequest->params["geo_id"] = lexical_cast<string>(call.geo_id);
         logRequest->params["rate"] = lexical_cast<string>(call.rate);
         logRequest->params["cost"] = lexical_cast<string>(call.cost);
+
+        if (callInfo.account != nullptr) {
+            double vat_rate = repository.getVatRate(callInfo.account);
+
+            double sumBalance = repository.billingData->statsAccountGetSumBalance(callInfo.account->id, vat_rate);
+            double sumDay = repository.billingData->statsAccountGetSumDay(callInfo.account->id, vat_rate);
+
+            auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
+            double sumBalance2 = statsAccount2->getSumBalance(callInfo.account->id, vat_rate) + call.cost;
+            double sumDay2 = statsAccount2->getSumDay(callInfo.account->id, vat_rate) + call.cost;
+
+            double globalBalanceSum, globalDaySum;
+            fetchGlobalCounters(callInfo.account->id, globalBalanceSum, globalDaySum, vat_rate);
+
+            double spentBalanceSum, spentDaySum;
+            spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
+            spentDaySum = sumDay + sumDay2 + globalDaySum;
+
+            logRequest->params["balance_stat"] = lexical_cast<string>(callInfo.account->balance);
+            logRequest->params["balance_local"] = lexical_cast<string>(sumBalance);
+            logRequest->params["balance_current"] = lexical_cast<string>(sumBalance2);
+            logRequest->params["balance_global"] = lexical_cast<string>(globalBalanceSum);
+            logRequest->params["balance_realtime"] = lexical_cast<string>(callInfo.account->balance + spentBalanceSum);
+            if (callInfo.account->hasCreditLimit()) {
+                logRequest->params["credit_limit"] = lexical_cast<string>(callInfo.account->credit);
+                logRequest->params["credit_available"] = lexical_cast<string>(callInfo.account->balance + callInfo.account->credit + spentBalanceSum);
+            }
+
+            logRequest->params["daily_local"] = lexical_cast<string>(sumDay);
+            logRequest->params["daily_current"] = lexical_cast<string>(sumDay2);
+            logRequest->params["daily_global"] = lexical_cast<string>(globalDaySum);
+            logRequest->params["daily_total"] = lexical_cast<string>(spentDaySum);
+            if (callInfo.account->hasDailyLimit()) {
+                logRequest->params["daily_limit"] = lexical_cast<string>(callInfo.account->limit_d);
+                logRequest->params["daily_available"] = lexical_cast<string>(callInfo.account->limit_d + spentDaySum);
+            }
+
+            if (callInfo.account->is_blocked) {
+                logRequest->params["block_full_flag"] = "true";
+            }
+
+            if (callInfo.account->disabled) {
+                logRequest->params["block_mgmn_flag"] = "true";
+            }
+
+            if (callInfo.account->isConsumedCreditLimit(spentBalanceSum)) {
+                logRequest->params["block_credit_flag"] = "true";
+            }
+
+            if (callInfo.account->isConsumedDailyLimit(spentDaySum)) {
+                logRequest->params["block_daily_flag"] = "true";
+            }
+        }
 
         logRequest->params["resp_bill"] = billResponse;
 
@@ -486,8 +539,8 @@ string RadiusAuthProcessor::analyzeCall(Call &call) {
     double sumDay = repository.billingData->statsAccountGetSumDay(call.account_id, vat_rate);
 
     auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
-    double sumBalance2 = statsAccount2->getSumBalance(call.account_id, vat_rate);
-    double sumDay2 = statsAccount2->getSumDay(call.account_id, vat_rate);
+    double sumBalance2 = statsAccount2->getSumBalance(call.account_id, vat_rate) + call.cost;
+    double sumDay2 = statsAccount2->getSumDay(call.account_id, vat_rate) + call.cost;
 
     double globalBalanceSum, globalDaySum;
     fetchGlobalCounters(call.account_id, globalBalanceSum, globalDaySum, vat_rate);
