@@ -556,17 +556,7 @@ string RadiusAuthProcessor::analyzeCall(Call &call) {
         }
 
     } else if (call.number_service_id != 0 && call.orig) {
-
-        // Глобальная блокировка
-        if (client->is_blocked) {
-            return "voip_disabled";
-        }
-
-        // Блокировка МГМН
-        if (!call.isLocal() && client->disabled) {
-            return "voip_disabled";
-        }
-
+        
         // Глобальная блокировка если превышен лимит кредита и не оплачен последний счет
         if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth(time(nullptr))) {
             return "low_balance";
@@ -582,6 +572,15 @@ string RadiusAuthProcessor::analyzeCall(Call &call) {
             return "voip_disabled";
         }
 
+        // Глобальная блокировка
+        if (client->is_blocked) {
+            return "voip_disabled";
+        }
+
+        // Блокировка МГМН
+        if (!call.isLocal() && client->disabled) {
+            return "voip_disabled";
+        }
     }
 
     return "accept";
