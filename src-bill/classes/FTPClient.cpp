@@ -1,4 +1,3 @@
-#include "Exception.h"
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/format.hpp>
@@ -21,35 +20,30 @@ FTPClient::~FTPClient() {
 }
 
 bool FTPClient::ConnectToFTP(const std::string &Server, const std::string &User, const std::string &Password) {
-    try {
-        tcp::resolver ftpresolver(ftpservice);
-        tcp::resolver::query query(Server, "ftp");
-        tcp::resolver::iterator endpoint_iterator = ftpresolver.resolve(query);
-        tcp::resolver::iterator end;
-        ftpsocket = new tcp::socket(ftpservice);
-        boost::system::error_code error = boost::asio::error::host_not_found;
-        while (error && endpoint_iterator != end)
-        {
-            ftpsocket->close();
-            ftpsocket->open(ip::tcp::v4());
-            ftpsocket->connect(*endpoint_iterator++, error);
-        }
-        if (!error) {
-            std::string usercommand;
-            usercommand = (boost::format("USER %1%") % User).str();
+    tcp::resolver ftpresolver(ftpservice);
+    tcp::resolver::query query(Server, "ftp");
+    tcp::resolver::iterator endpoint_iterator = ftpresolver.resolve(query);
+    tcp::resolver::iterator end;
+    ftpsocket = new tcp::socket(ftpservice);
+    boost::system::error_code error = boost::asio::error::host_not_found;
+    while (error && endpoint_iterator != end)
+    {
+        ftpsocket->close();
+        ftpsocket->open(ip::tcp::v4());
+        ftpsocket->connect(*endpoint_iterator++, error);
+    }
+    if (!error) {
+        std::string usercommand;
+        usercommand = (boost::format("USER %1%") % User).str();
+        ExecuteCommand(usercommand, 331);
+        if(IsResponceCode(331)) {
             std::string passwordncommand;
             passwordncommand = (boost::format("PASS %1%") % Password).str();
-            std::string result;
-            ExecuteCommand(usercommand, 331);
-            if(IsResponceCode(331)) {
-                ExecuteCommand(passwordncommand, 230);
-                if(IsResponceCode(230)) {
-                    return true;
-                }
+            ExecuteCommand(passwordncommand, 230);
+            if(IsResponceCode(230)) {
+                return true;
             }
         }
-    } catch (Exception &e) {
-        e.addTrace("ThreadCdrParser: Can't open FTP connection. Reason: " + e.message);
     }
     return false;
 }
@@ -167,34 +161,32 @@ void FTPClient::LeavePassiveMode() {
 
 unsigned long FTPClient::GetLileList(const std::string &Path, std::list<std::string> &FileList) {
     unsigned long filescount(0);
-    try {
-        if(!Path.empty()) {
-            std::string command = (boost::format("CWD %1%") % Path).str();
-            ExecuteCommand(command, 250);
-            if(!IsResponceCode(250))
-                return 0;
-        }
-        ExecuteCommand("PASV", 227);
-        if(IsResponceCode(227)) {
-            std::string host;
-            std::string connectdata = GetResponceData(227);
-            if (!connectdata.empty()) {
-                unsigned short port = ParseForPort(connectdata, host);
-                if (EnterPassiveMode(host, port)) {
-                    std::string fileleist;
-                    ExecuteCommand("NLST", fileleist, 226, 0);
-                    if (IsResponceCode(226)) {
-                        boost::replace_all(fileleist, "\r", "");
-                        boost::split(FileList, fileleist, boost::is_any_of("\n"));
-                        filescount = FileList.size();
-                    }
-                    LeavePassiveMode();
+
+    if(!Path.empty()) {
+        std::string command = (boost::format("CWD %1%") % Path).str();
+        ExecuteCommand(command, 250);
+        if(!IsResponceCode(250))
+            return 0;
+    }
+    ExecuteCommand("PASV", 227);
+    if(IsResponceCode(227)) {
+        std::string host;
+        std::string connectdata = GetResponceData(227);
+        if (!connectdata.empty()) {
+            unsigned short port = ParseForPort(connectdata, host);
+            if (EnterPassiveMode(host, port)) {
+                std::string fileleist;
+                ExecuteCommand("NLST", fileleist, 226, 0);
+                if (IsResponceCode(226)) {
+                    boost::replace_all(fileleist, "\r", "");
+                    boost::split(FileList, fileleist, boost::is_any_of("\n"));
+                    filescount = FileList.size();
                 }
+                LeavePassiveMode();
             }
         }
-    } catch(Exception &e) {
-        filescount = 0;
     }
+
     return filescount;
 }
 

@@ -15,6 +15,8 @@ ThreadCdrParser::ThreadCdrParser() : Thread()
 }
 
 void ThreadCdrParser::run() {
+    parser_log = "";
+
     if (app().conf.cdr_ftp_host == "") {
         return;
     }
@@ -22,26 +24,26 @@ void ThreadCdrParser::run() {
     current_file_name = "";
     current_file_calls_count = 0;
 
+    parser_log += string_time(time(nullptr)) + " start parsing\n";
+
     try {
         db_calls.setCS(app().conf.db_calls);
         FTPClient dataclient;
 
-        status = "connecting ftp";
+        parser_log += string_time(time(nullptr)) + " connecting ftp\n";
         bool result = dataclient.ConnectToFTP(app().conf.cdr_ftp_host, app().conf.cdr_ftp_user, app().conf.cdr_ftp_password);
         if (!result) {
-            status = "error connecting ftp";
+            parser_log += string_time(time(nullptr)) + " error connecting ftp\n";
             Log::error((boost::format("Can not connecting to CDR FTP server with parameters %1% %2% %3%") % app().conf.cdr_ftp_host % app().conf.cdr_ftp_user % app().conf.cdr_ftp_password).str());
             return;
         }
 
         std::string filecontent;
         std::list<std::string> filelist;
-        status = "getting files list";
+        parser_log += string_time(time(nullptr)) + " getting files list\n";
         unsigned long filescount = dataclient.GetLileList(app().conf.cdr_ftp_dir, filelist);
+        parser_log += string_time(time(nullptr)) + " found " + lexical_cast<string>(filescount) + " files\n";
 
-        for (auto filename : filelist) {
-            cout << filename << "\n";
-        }
         files_on_server_count = filescount;
 
         for (auto filename : filelist) {
@@ -51,24 +53,24 @@ void ThreadCdrParser::run() {
 
             current_file_name = filename;
 
-            status = "getting file " + filename;
+            parser_log += string_time(time(nullptr)) + " getting file " + filename + "\n";
             result = dataclient.GetFile(filename, filecontent);
             if (!result) {
-                status = "error getting file " + filename;
+                parser_log += string_time(time(nullptr)) + " error getting file " + filename + "\n";
                 throw Exception((boost::format("Error loading file content %1%") % filename).str(), "ThreadCdrParser::run");
             }
 
             CdrParser parser(filecontent);
             std::list<CallData> calls;
-            status = "parsing file " + filename;
+            parser_log += string_time(time(nullptr)) + " parsing file " + filename + "\n";
             if (!parser.Parse(calls)) {
-                status = "error parsing file " + filename;
+                parser_log += string_time(time(nullptr)) + " error parsing file " + filename + "\n";
                 throw Exception((boost::format("Can not parse file %1%") % filename).str(), "ThreadCdrParser::run");
             }
 
             current_file_calls_count = calls.size();
 
-            status = "inserting calls";
+            parser_log += string_time(time(nullptr)) + " inserting calls " + filename + "\n";
 
             for (auto calldata : calls) {
                 std::string insertcallquery;
@@ -92,7 +94,7 @@ void ThreadCdrParser::run() {
             file.error_count = parser.GetErrorCallsCount();
             file.error_ids = parser.GetErrorIDs();
 
-            status = "inserting cdr file " + filename;
+            parser_log += string_time(time(nullptr)) + " inserting cdr file " + filename + "\n";
 
             std::string insertfilequery;
             insertfilequery = (boost::format(
@@ -112,12 +114,12 @@ void ThreadCdrParser::run() {
 
         }
     } catch(Exception &e) {
-        status = "parser error";
+        parser_log += string_time(time(nullptr)) + " parser error\n";
         e.addTrace("CDR parsing error.");
         throw e;
     }
 
-    status = "idle";
+    parser_log += string_time(time(nullptr)) + " finish parsing\n";
 
     current_file_name = "";
     current_file_calls_count = 0;
@@ -171,5 +173,11 @@ void ThreadCdrParser::htmlfull(stringstream & html) {
         html << "</tr>\n";
     }
     html << "</table>\n";
+
+    html << "<br/>\n";
+    html << "Parser log:<br/>\n";
+    string log = parser_log;
+    replace_all(log, "\n", "<br/>\n");
+    html << log;
 
 }
