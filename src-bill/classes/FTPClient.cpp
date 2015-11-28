@@ -77,15 +77,16 @@ void FTPClient::ReceiveResponce(int DesiredResponceCode) {
             boost::asio::read_until(*ftpsocket, responsebuffer, "\0");
             boost::asio::streambuf::const_buffers_type bufs = responsebuffer.data();
             std::string tmp(boost::asio::buffers_begin(bufs), boost::asio::buffers_begin(bufs) + responsebuffer.size());
+            log.push_back(string_time(time(nullptr)) + " R " + lexical_cast<string>(responsebuffer.size()));
             responce += tmp;
             avail = ftpsocket->available();
         };
-        boost::replace_all(responce, "\r", "");
-        log.push_back(string_time(time(nullptr)) + " <- " + responce);
         std::list<std::string> tmp;
         boost::split(tmp, responce, boost::is_any_of("\n"));
         for (auto message : tmp) {
             if (message.length() > 3) {
+                log.push_back(string_time(time(nullptr)) + " <- " + message);
+
                 int responcesode = boost::lexical_cast<int>(message.substr(0, 3));
                 message.erase(0, 3);
                 lastresponces[responcesode] = message;
@@ -105,6 +106,7 @@ void FTPClient::ReceiveRaw(std::string &Responce, unsigned long DataSize) {
             boost::asio::read_until(*receiversocket, responsebuffer, "\0");
             boost::asio::streambuf::const_buffers_type bufs = responsebuffer.data();
             std::string tmp(boost::asio::buffers_begin(bufs), boost::asio::buffers_begin(bufs) + responsebuffer.size());
+            log.push_back(string_time(time(nullptr)) + " RR " + lexical_cast<string>(responsebuffer.size()));
             responce += tmp;
             avail = receiversocket->available();
         }
@@ -117,6 +119,7 @@ void FTPClient::ReceiveRaw(std::string &Responce, unsigned long DataSize) {
                 boost::asio::streambuf::const_buffers_type bufs = responsebuffer.data();
                 std::string tmp(boost::asio::buffers_begin(bufs),
                                 boost::asio::buffers_begin(bufs) + responsebuffer.size());
+                log.push_back(string_time(time(nullptr)) + " RR " + lexical_cast<string>(responsebuffer.size()));
                 responce += tmp;
             }
         }
@@ -151,6 +154,8 @@ void FTPClient::ExecuteCommand(const std::string &Command, std::string &Responce
 }
 
 bool FTPClient::EnterPassiveMode(const std::string &Host, unsigned short Port) {
+    log.push_back(string_time(time(nullptr)) + " EnterPassiveMode " + Host + ":" + lexical_cast<string>(Port));
+
     tcp::resolver ftpreceiver(receiverservice);
     tcp::resolver::query receiverquery(Host, boost::lexical_cast<std::string>(Port));
     tcp::resolver::iterator endpoint_iterator = ftpreceiver.resolve(receiverquery);
