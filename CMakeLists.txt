@@ -294,7 +294,7 @@ add_definitions(-DHAVE_SYS_IOCTL_H -DHAVE_SOCKLEN_T)
 file(GLOB_RECURSE ACE_RADIUS_SOURCES "libs/ace-radius/*.cpp")
 
 add_executable(app_bill ${BILL_SOURCES} ${BOOST_SOURCES} ${JSON_SOURCES} ${ACE_RADIUS_SOURCES})
-target_link_libraries(app_bill rt pthread pq curl)
+target_link_libraries(app_bill rt pthread pq curl crypto)
 
 add_executable(auth-client src-auth-client/client.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
 

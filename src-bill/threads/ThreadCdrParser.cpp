@@ -1,7 +1,5 @@
 #include "ThreadCdrParser.h"
-#include "../classes/CdrParser.h"
 #include "../classes/AppBill.h"
-#include "../classes/FtpClient.h"
 #include <boost/format.hpp>
 #include <regex>
 #include <iostream>
@@ -11,128 +9,169 @@ ThreadCdrParser::ThreadCdrParser() : Thread()
     name ="CDR Parser";
     id = idName();
     threadSleepSeconds = app().conf.cdr_parcer_interval;
+
+    ftpClient.setHost(app().conf.cdr_ftp_host);
+    ftpClient.setUserName(app().conf.cdr_ftp_user);
+    ftpClient.setPassword(app().conf.cdr_ftp_password);
+
+    db_calls.setCS(app().conf.db_calls);
 }
 
 void ThreadCdrParser::run() {
     parser_log = "";
+    cdrFile.clear();
 
     if (app().conf.cdr_ftp_host == "") {
         return;
     }
 
-
-    current_file_name = "";
-    current_file_calls_count = 0;
-    FtpClient ftpClient(app().conf.cdr_ftp_host, app().conf.cdr_ftp_user, app().conf.cdr_ftp_password);
-
     try {
-        db_calls.setCS(app().conf.db_calls);
 
-        parser_log += string_time(time(nullptr)) + " getting files list\n";
+        string fileName = getFileNameForParse();
+        while (fileName.size() > 0) {
 
-        std::list<std::string> fileList;
-        ftpClient.ls("/", fileList);
+            processFile(fileName);
 
-        parser_log += string_time(time(nullptr)) + " found " + lexical_cast<string>(fileList.size()) + " files\n";
-        files_on_server_count = fileList.size();
-
-        for (auto filename : fileList) {
-            if (isFileProcessed(filename)) {
-                continue;
-            }
-
-            current_file_name = filename;
-
-            parser_log += string_time(time(nullptr)) + " getting file " + filename + "\n";
-            string fileContent;
-            ftpClient.fetch("/" + filename, fileContent);
-
-            parser_log += string_time(time(nullptr)) + " parsing file " + filename + "\n";
-            CdrParser parser(fileContent);
-            std::list<CallData> calls;
-            if (!parser.Parse(calls)) {
-                parser_log += string_time(time(nullptr)) + " error parsing file " + filename + "\n";
-                throw Exception((boost::format("Can not parse file %1%") % filename).str(), "ThreadCdrParser::run");
-            }
-
-            current_file_calls_count = calls.size();
-
-            parser_log += string_time(time(nullptr)) + " inserting calls " + filename + "\n";
-
-            for (auto calldata : calls) {
-                std::string insertcallquery;
-                insertcallquery = (boost::format(
-                        "select public.insert_cdr('%1%','%2%','%3%','%4%','%5%','%6%','%7%','%8%','%9%','%10%','%11%','%12%','%13%','%14%')")
-                                   % calldata.call_id % app().conf.cdr_nasip
-                                   % calldata.src_number % calldata.dst_number
-                                   % calldata.redirect_number % calldata.session_time
-                                   % calldata.setup_time % calldata.connect_time
-                                   % calldata.disconnect_time % calldata.disconnect_cause
-                                   % calldata.src_route % calldata.dst_route
-                                   % calldata.src_noa % calldata.dst_noa).str();
-                db_calls.query(insertcallquery);
-                processed_calls_count++;
-            }
-
-            CdrFile file;
-            file.file_name = filename;
-            file.total_count = calls.size();
-            file.insert_count = calls.size() - parser.GetErrorCallsCount();
-            file.error_count = parser.GetErrorCallsCount();
-            file.error_ids = parser.GetErrorIDs();
-
-            parser_log += string_time(time(nullptr)) + " inserting cdr file " + filename + "\n";
-
-            std::string insertfilequery;
-            insertfilequery = (boost::format(
-                    "insert into calls_cdr.cdr_file(file_name, total_count, insert_count, error_count, error_ids)values('%1%', '%2%', '%3%', '%4%', '%5%')")
-                               % file.file_name % file.total_count % file.insert_count % file.error_count % file.error_ids).str();
-            db_calls.exec(insertfilequery);
-
-            last_files.push_back(file);
-
-            processed_files_count++;
-
-
-            if (parser.GetErrorCallsCount() > 0) {
-                Log::error((boost::format("File %1% has %2% errors. ID %3%") % filename %
-                            (calls.size() - parser.GetErrorCallsCount()) % parser.GetErrorIDs()).str());
-            }
+            fileName = getFileNameForParse();
 
         }
 
     } catch(Exception &e) {
-        parser_log += string_time(time(nullptr)) + " parser error\n";
+        logParser("parser error: " + e.message);
         e.addTrace("CDR parsing error.");
         throw e;
     }
 
-    parser_log += string_time(time(nullptr)) + " finish parsing\n";
+    cdrFile.clear();
+}
 
-    current_file_name = "";
-    current_file_calls_count = 0;
+void ThreadCdrParser::processFile(const string &fileName) {
+
+    cdrFile.clear();
+    cdrFile.file_name = fileName;
+
+    string fileContent;
+    fetchFile(fileContent);
+
+    std::list<CallData> calls;
+    parseFile(calls, fileContent);
+
+    saveCalls(calls);
+
+    saveCdrFile(calls);
+}
+
+void ThreadCdrParser::fetchFile(string &fileContent) {
+    logParser("getting file " + cdrFile.file_name);
+
+    ftpClient.fetch("/" + cdrFile.file_name, fileContent);
+}
+
+void ThreadCdrParser::parseFile(std::list<CallData> &calls, const string &fileContent) {
+    logParser("parsing file " + cdrFile.file_name);
+
+    if (!parser.Parse(calls, fileContent)) {
+        throw Exception((boost::format("Can not parse file %1%") % cdrFile.file_name).str(), "ThreadCdrParser::run");
+    }
+
+    if (parser.GetErrorCallsCount() > 0) {
+        Log::error((boost::format("File %1% has %2% errors. ID %3%") % cdrFile.file_name %
+                    (calls.size() - parser.GetErrorCallsCount()) % parser.GetErrorIDs()).str());
+    }
+
+    cdrFile.total_count = calls.size();
+    cdrFile.error_count = parser.GetErrorCallsCount();
+    cdrFile.error_ids = parser.GetErrorIDs();
+}
+
+void ThreadCdrParser::saveCalls(const std::list<CallData> &calls) {
+    logParser("saving calls " + cdrFile.file_name);
+
+    for (auto call : calls) {
+        cdrFile.progress++;
+
+        if (!isCallExists(call.hash)) {
+            saveCall(call);
+        }
+
+    }
+}
+
+void ThreadCdrParser::saveCall(const CallData &call) {
+    std::string query = (boost::format(
+            "select public.insert_cdr('%1%','%2%','%3%','%4%','%5%','%6%','%7%','%8%','%9%','%10%','%11%','%12%','%13%','%14%')")
+                       % call.call_id % app().conf.cdr_nasip
+                       % call.src_number % call.dst_number
+                       % call.redirect_number % call.session_time
+                       % call.setup_time % call.connect_time
+                       % call.disconnect_time % call.disconnect_cause
+                       % call.src_route % call.dst_route
+                       % call.src_noa % call.dst_noa).str();
+    db_calls.query(query);
+
+    cdrFile.insert_count++;
+}
+
+bool ThreadCdrParser::isCallExists(const string &hash) {
+    BDbResult res = db_calls.query("select hash from calls_cdr.cdr where hash='" + hash + "' limit 1");
+    return (res.next() && res.get_s(0).size() > 0);
+}
+
+void ThreadCdrParser::saveCdrFile(const std::list<CallData> &calls) {
+    logParser("saving cdr file " + cdrFile.file_name);
+
+    std::string query = (boost::format(
+            "insert into calls_cdr.cdr_file(file_name, total_count, insert_count, error_count, error_ids)values('%1%', '%2%', '%3%', '%4%', '%5%')")
+                       % cdrFile.file_name % cdrFile.total_count % cdrFile.insert_count % cdrFile.error_count % cdrFile.error_ids).str();
+    db_calls.exec(query);
+
+    last_files.push_back(cdrFile);
+}
+
+string ThreadCdrParser::getFileNameForParse() {
+    logParser("getting files list");
+
+    std::vector<std::string> fileList;
+    ftpClient.ls("/", fileList);
+
+    logParser(lexical_cast<string>(fileList.size()) + " files found");
+
+    files_total = fileList.size();
+    files_progres = files_total;
+
+    string lastNotParsedFileName = "";
+    size_t n = fileList.size() - 1;
+    while (n >= 0) {
+        string fileName = fileList.at(n);
+
+        if (isFileProcessed(fileName)) {
+            break;
+        }
+
+        lastNotParsedFileName = fileName;
+        n = n - 1;
+        files_progres--;
+    }
+
+    return lastNotParsedFileName;
 }
 
 bool ThreadCdrParser::isFileProcessed(const std::string &Filename) {
-    if (processedFiles.find(Filename) != processedFiles.end()) {
-        return true;
-    }
-
     try {
         std::string query = (boost::format("select file_name from calls_cdr.cdr_file where file_name='%1%'") %
                              Filename).str();
         BDbResult res = db_calls.query(query);
-        bool fileProcessed = (res.size() != 0);
-        if (fileProcessed) {
-            processedFiles.insert(Filename);
-        }
-        return fileProcessed;
+        return (res.size() != 0);
     } catch (Exception &e) {
         std::string message((boost::format("File %1% status error") % Filename).str());
         Log::error(message);
         return true;
     }
 };
+
+void ThreadCdrParser::logParser(const std::string &message) {
+    parser_log += string_time(time(nullptr)) + " " + message + "\n";
+}
 
 bool ThreadCdrParser::hasFullHtml() {
     return true;
@@ -141,12 +180,13 @@ bool ThreadCdrParser::hasFullHtml() {
 void ThreadCdrParser::htmlfull(stringstream & html) {
     this->html(html);
 
-    html << "Files on server count: <b>" << files_on_server_count << "</b><br/>\n";
-    html << "Total processed files: <b>" << processedFiles.size() << "</b><br/>\n";
-    html << "Processed files: <b>" << processed_files_count << "</b><br/>\n";
-    html << "Processed calls count: <b>" << processed_calls_count << "</b><br/>\n";
-    html << "Current file name: <b>" << current_file_name << "</b><br/>\n";
-    html << "Current file calls count: <b>" << current_file_calls_count << "</b><br/>\n";
+    html << "Files total: <b>" << files_total << "</b><br/>\n";
+    html << "Files progress: <b>" << files_progres << "</b><br/>\n";
+    html << "Current file name: <b>" << cdrFile.file_name << "</b><br/>\n";
+    html << "Current file total count: <b>" << cdrFile.total_count << "</b><br/>\n";
+    html << "Current file inserted count: <b>" << cdrFile.insert_count << "</b><br/>\n";
+    html << "Current file error count: <b>" << cdrFile.error_count << "</b><br/>\n";
+    html << "Current progress: <b>" << cdrFile.progress << "</b><br/>\n";
 
     html << "<br/>\n";
 
@@ -177,3 +217,4 @@ void ThreadCdrParser::htmlfull(stringstream & html) {
     html << log;
 
 }
+

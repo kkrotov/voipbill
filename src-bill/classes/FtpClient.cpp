@@ -34,7 +34,7 @@ ftp_client_write_data(void *ptr, size_t size, size_t nmemb, void *data)
     return size * nmemb;
 }
 
-void FtpClient::ls(std::string uri, std::list<std::string> &files) {
+void FtpClient::ls(std::string uri, std::vector<std::string> &files) {
     std::string data;
 
     fetch(uri, data);
@@ -45,7 +45,10 @@ void FtpClient::ls(std::string uri, std::list<std::string> &files) {
     for (auto tmpFile : tmpFiles) {
         std::vector<std::string> tmpColumns;
         boost::split(tmpColumns, tmpFile, boost::is_any_of(" "));
-        files.push_back(tmpColumns.at(tmpColumns.size() - 1));
+        string fileName = tmpColumns.at(tmpColumns.size() - 1);
+        if (fileName.size() > 0) {
+            files.push_back(tmpColumns.at(tmpColumns.size() - 1));
+        }
     }
 }
 

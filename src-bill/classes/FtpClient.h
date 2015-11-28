@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <bits/stl_list.h>
+#include <vector>
 
 class FtpClient {
 private:
@@ -15,6 +15,6 @@ public:
     void setUserName(std::string username);
     void setPassword(std::string password);
 
-    void ls(std::string uri, std::list<std::string> &files);
+    void ls(std::string uri, std::vector<std::string> &files);
     void fetch(std::string uri, std::string &data);
 };
