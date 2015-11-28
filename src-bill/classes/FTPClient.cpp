@@ -4,6 +4,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include "FTPClient.h"
+#include "../common.h"
 #include <regex>
 #include <thread>
 
@@ -13,6 +14,7 @@ using namespace boost::asio::ip;
 FTPClient::FTPClient()
 {
     ftpsocket = nullptr;
+    receiversocket = nullptr;
 }
 
 FTPClient::~FTPClient() {
@@ -20,6 +22,9 @@ FTPClient::~FTPClient() {
 }
 
 bool FTPClient::ConnectToFTP(const std::string &Server, const std::string &User, const std::string &Password) {
+    Disconnect();
+    log.clear();
+
     tcp::resolver ftpresolver(ftpservice);
     tcp::resolver::query query(Server, "ftp");
     tcp::resolver::iterator endpoint_iterator = ftpresolver.resolve(query);
@@ -52,6 +57,11 @@ void FTPClient::Disconnect() {
     if (ftpsocket != nullptr) {
         ftpsocket->close();
     }
+    if (receiversocket != nullptr) {
+        receiversocket->close();
+        delete receiversocket;
+        receiversocket = nullptr;
+    }
 }
 
 void FTPClient::ReceiveResponce(int DesiredResponceCode) {
@@ -71,6 +81,7 @@ void FTPClient::ReceiveResponce(int DesiredResponceCode) {
             avail = ftpsocket->available();
         };
         boost::replace_all(responce, "\r", "");
+        log.push_back(string_time(time(nullptr)) + " <- " + responce);
         std::list<std::string> tmp;
         boost::split(tmp, responce, boost::is_any_of("\n"));
         for (auto message : tmp) {
@@ -126,6 +137,7 @@ std::string FTPClient::GetResponceData(int ResponceCode) {
 void FTPClient::ExecuteCommand(const std::string &Command, int DesiredResponceCode) {
     std::string buffer;
     buffer = Command + "\r\n";
+    log.push_back(string_time(time(nullptr)) + " -> " + Command);
     boost::asio::write(*ftpsocket, boost::asio::buffer(buffer, buffer.length()));
     ReceiveResponce(DesiredResponceCode);
 }
@@ -157,6 +169,7 @@ bool FTPClient::EnterPassiveMode(const std::string &Host, unsigned short Port) {
 void FTPClient::LeavePassiveMode() {
     receiversocket->close();
     delete receiversocket;
+    receiversocket = nullptr;
 }
 
 unsigned long FTPClient::GetLileList(const std::string &Path, std::list<std::string> &FileList) {

@@ -16,6 +16,7 @@ private:
     boost::asio::io_service receiverservice;
     std::map<int, std::string> lastresponces;
 public:
+    std::list<std::string> log;
     FTPClient();
     virtual ~FTPClient();
     bool ConnectToFTP(const std::string &Server, const std::string &User, const std::string &Password);
