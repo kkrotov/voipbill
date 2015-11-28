@@ -1,8 +1,8 @@
 #include "ThreadCdrParser.h"
 #include "../classes/CdrParser.h"
 #include "../classes/AppBill.h"
+#include "../classes/FtpClient.h"
 #include <boost/format.hpp>
-#include "../classes/DbException.h"
 #include <regex>
 #include <iostream>
 
@@ -20,31 +20,23 @@ void ThreadCdrParser::run() {
         return;
     }
 
+
     current_file_name = "";
     current_file_calls_count = 0;
-
-    parser_log += string_time(time(nullptr)) + " start parsing\n";
+    FtpClient ftpClient(app().conf.cdr_ftp_host, app().conf.cdr_ftp_user, app().conf.cdr_ftp_password);
 
     try {
         db_calls.setCS(app().conf.db_calls);
 
-        parser_log += string_time(time(nullptr)) + " connecting ftp\n";
-        bool result = ftpclient.ConnectToFTP(app().conf.cdr_ftp_host, app().conf.cdr_ftp_user, app().conf.cdr_ftp_password);
-        if (!result) {
-            parser_log += string_time(time(nullptr)) + " error connecting ftp\n";
-            Log::error((boost::format("Can not connecting to CDR FTP server with parameters %1% %2% %3%") % app().conf.cdr_ftp_host % app().conf.cdr_ftp_user % app().conf.cdr_ftp_password).str());
-            return;
-        }
-
-        std::string filecontent;
-        std::list<std::string> filelist;
         parser_log += string_time(time(nullptr)) + " getting files list\n";
-        unsigned long filescount = ftpclient.GetLileList(app().conf.cdr_ftp_dir, filelist);
-        parser_log += string_time(time(nullptr)) + " found " + lexical_cast<string>(filescount) + " files\n";
 
-        files_on_server_count = filescount;
+        std::list<std::string> fileList;
+        ftpClient.ls("/", fileList);
 
-        for (auto filename : filelist) {
+        parser_log += string_time(time(nullptr)) + " found " + lexical_cast<string>(fileList.size()) + " files\n";
+        files_on_server_count = fileList.size();
+
+        for (auto filename : fileList) {
             if (isFileProcessed(filename)) {
                 continue;
             }
@@ -52,15 +44,12 @@ void ThreadCdrParser::run() {
             current_file_name = filename;
 
             parser_log += string_time(time(nullptr)) + " getting file " + filename + "\n";
-            result = ftpclient.GetFile(filename, filecontent);
-            if (!result) {
-                parser_log += string_time(time(nullptr)) + " error getting file " + filename + "\n";
-                throw Exception((boost::format("Error loading file content %1%") % filename).str(), "ThreadCdrParser::run");
-            }
+            string fileContent;
+            ftpClient.fetch("/" + filename, fileContent);
 
-            CdrParser parser(filecontent);
-            std::list<CallData> calls;
             parser_log += string_time(time(nullptr)) + " parsing file " + filename + "\n";
+            CdrParser parser(fileContent);
+            std::list<CallData> calls;
             if (!parser.Parse(calls)) {
                 parser_log += string_time(time(nullptr)) + " error parsing file " + filename + "\n";
                 throw Exception((boost::format("Can not parse file %1%") % filename).str(), "ThreadCdrParser::run");
@@ -111,6 +100,7 @@ void ThreadCdrParser::run() {
             }
 
         }
+
     } catch(Exception &e) {
         parser_log += string_time(time(nullptr)) + " parser error\n";
         e.addTrace("CDR parsing error.");
@@ -124,11 +114,19 @@ void ThreadCdrParser::run() {
 }
 
 bool ThreadCdrParser::isFileProcessed(const std::string &Filename) {
+    if (processedFiles.find(Filename) != processedFiles.end()) {
+        return true;
+    }
+
     try {
         std::string query = (boost::format("select file_name from calls_cdr.cdr_file where file_name='%1%'") %
                              Filename).str();
         BDbResult res = db_calls.query(query);
-        return (res.size() != 0);
+        bool fileProcessed = (res.size() != 0);
+        if (fileProcessed) {
+            processedFiles.insert(Filename);
+        }
+        return fileProcessed;
     } catch (Exception &e) {
         std::string message((boost::format("File %1% status error") % Filename).str());
         Log::error(message);
@@ -144,6 +142,7 @@ void ThreadCdrParser::htmlfull(stringstream & html) {
     this->html(html);
 
     html << "Files on server count: <b>" << files_on_server_count << "</b><br/>\n";
+    html << "Total processed files: <b>" << processedFiles.size() << "</b><br/>\n";
     html << "Processed files: <b>" << processed_files_count << "</b><br/>\n";
     html << "Processed calls count: <b>" << processed_calls_count << "</b><br/>\n";
     html << "Current file name: <b>" << current_file_name << "</b><br/>\n";
@@ -176,11 +175,5 @@ void ThreadCdrParser::htmlfull(stringstream & html) {
     string log = parser_log;
     replace_all(log, "\n", "<br/>\n");
     html << log;
-
-    html << "<br/>\n";
-    html << "Ftp client log:<br/>\n";
-    for (string ftplog : ftpclient.log) {
-        html << ftplog << "<br/>\n";
-    }
 
 }

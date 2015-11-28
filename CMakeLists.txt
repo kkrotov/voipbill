@@ -57,7 +57,7 @@ set(BILL_SOURCES
     src-bill/classes/StatsAccountManager.cpp
     src-bill/classes/DbException.cpp
     src-bill/classes/Exception.cpp
-    src-bill/classes/FTPClient.cpp
+    src-bill/classes/FtpClient.cpp
     src-bill/classes/StatsFreeminManager.cpp
     src-bill/classes/Loader.cpp
     src-bill/classes/Log.cpp
@@ -294,7 +294,7 @@ add_definitions(-DHAVE_SYS_IOCTL_H -DHAVE_SOCKLEN_T)
 file(GLOB_RECURSE ACE_RADIUS_SOURCES "libs/ace-radius/*.cpp")
 
 add_executable(app_bill ${BILL_SOURCES} ${BOOST_SOURCES} ${JSON_SOURCES} ${ACE_RADIUS_SOURCES})
-target_link_libraries(app_bill rt pthread pq)
+target_link_libraries(app_bill rt pthread pq curl)
 
 add_executable(auth-client src-auth-client/client.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
 

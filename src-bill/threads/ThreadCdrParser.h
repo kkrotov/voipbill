@@ -2,7 +2,6 @@
 
 #include "../classes/Thread.h"
 #include "../classes/BDb.h"
-#include "../classes/FTPClient.h"
 #include <list>
 
 using namespace std;
@@ -17,7 +16,6 @@ struct CdrFile {
 
 class ThreadCdrParser : public Thread {
 private:
-    FTPClient ftpclient;
     BDb db_calls;
     size_t files_on_server_count;
     size_t processed_files_count;
@@ -26,6 +24,7 @@ private:
     size_t current_file_calls_count;
     string parser_log;
     list<CdrFile> last_files;
+    set<string> processedFiles;
 public:
     ThreadCdrParser();
     void run();
