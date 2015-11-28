@@ -106,7 +106,7 @@ void FTPClient::ReceiveRaw(std::string &Responce, unsigned long DataSize) {
             boost::asio::read_until(*receiversocket, responsebuffer, "\0");
             boost::asio::streambuf::const_buffers_type bufs = responsebuffer.data();
             std::string tmp(boost::asio::buffers_begin(bufs), boost::asio::buffers_begin(bufs) + responsebuffer.size());
-            log.push_back(string_time(time(nullptr)) + " RR " + lexical_cast<string>(responsebuffer.size()));
+            log.push_back(string_time(time(nullptr)) + " RD " + tmp);
             responce += tmp;
             avail = receiversocket->available();
         }
