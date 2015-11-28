@@ -9,6 +9,7 @@ struct CallData
     std::string src_number;
     std::string dst_number;
     std::string redirect_number;
+    std::string dst_replace;
     std::string setup_time;
     std::string connect_time;
     std::string disconnect_time;

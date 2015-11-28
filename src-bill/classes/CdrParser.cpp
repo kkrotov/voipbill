@@ -137,6 +137,8 @@ bool CdrParser::ParseCall(const std::string &RawCallData, CallData &Call) {
 
         ParseNumber("IncomingRedirectingAddress", RawCallData, Call.redirect_number, dummy_noa, true);
 
+        ParseNumber("OutgoingCalledAddress", RawCallData, Call.dst_replace, dummy_noa);
+
         Call.setup_time = ParseDateTime("StartTimeStamp", RawCallData);
 
         Call.connect_time = ParseDateTime("AnswerTimeStamp", RawCallData, true);

@@ -99,14 +99,15 @@ void ThreadCdrParser::saveCalls(const std::list<CallData> &calls) {
 
 void ThreadCdrParser::saveCall(const CallData &call) {
     std::string query = (boost::format(
-            "select public.insert_cdr('%1%','%2%','%3%','%4%','%5%','%6%','%7%','%8%','%9%','%10%','%11%','%12%','%13%','%14%')")
+            "select public.insert_cdr('%1%','%2%','%3%','%4%','%5%','%6%','%7%','%8%','%9%','%10%','%11%','%12%','%13%','%14%','%15%')")
                        % call.call_id % app().conf.cdr_nasip
                        % call.src_number % call.dst_number
                        % call.redirect_number % call.session_time
                        % call.setup_time % call.connect_time
                        % call.disconnect_time % call.disconnect_cause
                        % call.src_route % call.dst_route
-                       % call.src_noa % call.dst_noa).str();
+                       % call.src_noa % call.dst_noa
+                       % call.dst_replace).str();
     db_calls.query(query);
 
     cdrFile.insert_count++;
