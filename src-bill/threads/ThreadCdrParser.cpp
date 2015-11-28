@@ -12,7 +12,6 @@ ThreadCdrParser::ThreadCdrParser() : Thread()
     name ="CDR Parser";
     id = idName();
     threadSleepSeconds = app().conf.cdr_parcer_interval;
-    threadSleepSeconds = 1;
 }
 
 void ThreadCdrParser::run() {
