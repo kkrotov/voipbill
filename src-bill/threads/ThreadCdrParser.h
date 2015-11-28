@@ -22,10 +22,10 @@ private:
     size_t processed_calls_count;
     string current_file_name;
     size_t current_file_calls_count;
+    string status;
     list<CdrFile> last_files;
 public:
     ThreadCdrParser();
-    bool prepare();
     void run();
 
     bool hasFullHtml() override;
