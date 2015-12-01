@@ -64,6 +64,10 @@ void ThreadLimitControl::run() {
 
 bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequest) {
 
+    if (call.is_service_number) {
+        return false;
+    }
+
     if (call.account_id == 0) {
         return false;
     }

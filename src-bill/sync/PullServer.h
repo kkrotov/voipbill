@@ -17,5 +17,6 @@ public:
         fields.push_back("calling_station_id_for_line_without_number");
         fields.push_back("min_price_for_autorouting");
         fields.push_back("our_numbers_id");
+        fields.push_back("service_numbers");
     }
 };

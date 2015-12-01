@@ -44,7 +44,6 @@ void RadiusAuthProcessor::process() {
         processLineWithoutNumber();
 
         Cdr cdr;
-        cdr.id = 0;
         cdr.connect_time = time(nullptr);
         cdr.session_time = 60;
         strncpy(cdr.src_number, request->srcNumber.c_str(), sizeof(cdr.src_number) - 1);
@@ -54,7 +53,6 @@ void RadiusAuthProcessor::process() {
         strncpy(cdr.dst_route, request->trunkName.c_str(), sizeof(cdr.dst_route) - 1);
         cdr.src_noa = request->srcNoa;
         cdr.dst_noa = request->dstNoa;
-        cdr.call_id = 0;
 
 
         int outcomeId;

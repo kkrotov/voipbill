@@ -94,6 +94,16 @@ void BillingCall::calcByNumber() {
     setupAccount();
 
     if (call->orig) {
+
+        if (cdr->dst_replace[0] != 0) {
+            for (auto srvNumber : repository->getServer()->service_numbers) {
+                if (srvNumber.compare(cdr->dst_replace)) {
+                    call->is_service_number = true;
+                    return;
+                }
+            }
+        }
+
         calcOrigByNumber();
     } else {
         calcTermByNumber();

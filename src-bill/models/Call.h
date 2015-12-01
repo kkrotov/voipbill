@@ -47,6 +47,8 @@ struct Call {
 
     long long int cdr_call_id;
 
+    bool is_service_number;
+
 
     void dump(stringstream &trace) {
 
@@ -80,6 +82,7 @@ struct Call {
         trace << "geo_mob: " << (geo_mob ? "true" : "false") << ", ";
         trace << "geo_operator_id: " << geo_operator_id << ", ";
         trace << "operator_id: " << operator_id << ", ";
+        trace << "is_service_number: " << (is_service_number ? "true" : "false") << ", ";
         trace << ")";
     }
 
@@ -122,6 +125,8 @@ struct Call {
         operator_id = 0;
 
         cdr_call_id = cdr->call_id;
+
+        is_service_number = false;
     }
 
     bool isLocal() {

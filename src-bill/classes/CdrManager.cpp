@@ -33,12 +33,13 @@ bool CdrManager::loadPart(BDb * db_calls) {
             "       connect_time, " \
             "       session_time, " \
             "       src_number, " \
-            "       dst_number," \
-            "       redirect_number," \
+            "       dst_number, " \
+            "       dst_replace, " \
+            "       redirect_number, " \
             "       src_route, " \
-            "       dst_route," \
+            "       dst_route, " \
             "       src_noa, " \
-            "       dst_noa," \
+            "       dst_noa, " \
             "       call_id" \
             "	from calls_cdr.cdr " \
             "	where " \
@@ -59,12 +60,13 @@ bool CdrManager::loadPart(BDb * db_calls) {
             cdr.session_time = res.get_i(2);
             strcpy((char *) &cdr.src_number, res.get(3));
             strcpy((char *) &cdr.dst_number, res.get(4));
-            strcpy((char *) &cdr.redirect_number, res.get(5));
-            strcpy((char *) &cdr.src_route, res.get(6));
-            strcpy((char *) &cdr.dst_route, res.get(7));
-            cdr.src_noa = res.get_i(8);
-            cdr.dst_noa = res.get_i(9);
-            cdr.call_id = res.get_ll(10);
+            strcpy((char *) &cdr.dst_replace, res.get(5));
+            strcpy((char *) &cdr.redirect_number, res.get(6));
+            strcpy((char *) &cdr.src_route, res.get(7));
+            strcpy((char *) &cdr.dst_route, res.get(8));
+            cdr.src_noa = res.get_i(9);
+            cdr.dst_noa = res.get_i(10);
+            cdr.call_id = res.get_ll(11);
 
             queue.push_back(cdr);
 

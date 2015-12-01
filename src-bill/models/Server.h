@@ -9,4 +9,5 @@ struct Server {
     char calling_station_id_for_line_without_number[100];
     int min_price_for_autorouting;
     int our_numbers_id;
+    vector<string> service_numbers;
 };
