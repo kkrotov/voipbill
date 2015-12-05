@@ -18,9 +18,11 @@ class RadiusAuthProcessor {
 public:
 
     RadiusAuthProcessor(RadiusAuthRequest * request, RadiusAuthResponse * response, pLogMessage &logRequest);
+    void setTrace(stringstream *trace);
     void process();
 
 private:
+    stringstream *trace;
     RadiusAuthRequest * request;
     RadiusAuthResponse * response;
     pLogMessage logRequest;

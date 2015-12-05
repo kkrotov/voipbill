@@ -298,7 +298,7 @@ set(BILL_SOURCES
     src-bill/web/PageTask.cpp
     src-bill/web/PageTestCalc.cpp
     src-bill/web/PageTestCalcGui.cpp
-    src-bill/web/PageTestRoute.cpp
+    src-bill/web/PageTestAuth.cpp
     src-bill/main.cpp
 )
 

@@ -5,12 +5,23 @@
 #include "../classes/Log.h"
 
 struct RadiusAuthRequest {
+    string trunkName;
     string srcNumber;
     string dstNumber;
     string redirectNumber;
-    string trunkName;
     int srcNoa = 3;
     int dstNoa = 3;
+
+    void dump(stringstream &trace) {
+        trace << "(";
+        trace << "trunk_name: " << trunkName << ", ";
+        trace << "src_number: " << srcNumber << ", ";
+        trace << "dst_number: " << dstNumber << ", ";
+        trace << "redirect_number: " << redirectNumber << ", ";
+        trace << "src_noa: " << srcNoa << ", ";
+        trace << "dst_noa: " << dstNoa << ", ";
+        trace << ")";
+    }
 };
 
 struct RadiusAuthResponse {

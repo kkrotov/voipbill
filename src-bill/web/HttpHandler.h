@@ -17,7 +17,7 @@
 #include "PageTask.h"
 #include "PageTestCalc.h"
 #include "PageTestCalcGui.h"
-#include "PageTestRoute.h"
+#include "PageTestAuth.h"
 #include "http/request.hpp"
 #include "http/reply.hpp"
 
@@ -41,7 +41,7 @@ private:
         handlers.push_back(shared_ptr<BasePage>(new PageTask));
         handlers.push_back(shared_ptr<BasePage>(new PageTestCalc));
         handlers.push_back(shared_ptr<BasePage>(new PageTestCalcGui));
-        handlers.push_back(shared_ptr<BasePage>(new PageTestRoute));
+        handlers.push_back(shared_ptr<BasePage>(new PageTestAuth));
     }
 
 public:

@@ -89,6 +89,14 @@ void ThreadLoader::run() {
                 repository.data->trunkByName.load(&db_calls);
                 repository.data->trunkByAlias.load(&db_calls);
 
+            } else if (event == "trunk_group") {
+
+                repository.data->trunkGroup.load(&db_calls);
+
+            } else if (event == "trunk_group_item") {
+
+                repository.data->trunkGroupItem.load(&db_calls);
+
             } else if (event == "trunk_number_preprocessing") {
 
                 repository.data->trunkNumberPreprocessing.load(&db_calls);
@@ -100,6 +108,10 @@ void ThreadLoader::run() {
             } else if (event == "trunk_rule") {
 
                 repository.data->trunkRule.load(&db_calls);
+
+            } else if (event == "trunk_trunk_rule") {
+
+                repository.data->trunkTrunkRule.load(&db_calls);
 
             } else if (event == "defs") {
 
