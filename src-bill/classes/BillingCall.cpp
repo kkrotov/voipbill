@@ -97,7 +97,7 @@ void BillingCall::calcByNumber() {
 
         if (cdr->dst_replace[0] != 0) {
             for (auto srvNumber : repository->getServer()->service_numbers) {
-                if (srvNumber.compare(cdr->dst_replace)) {
+                if (srvNumber.compare(cdr->dst_replace) == 0) {
                     call->is_service_number = true;
                     return;
                 }
