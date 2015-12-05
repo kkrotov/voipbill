@@ -19,6 +19,7 @@ public:
         fields.push_back("name");
         fields.push_back("source_rule_default_allowed");
         fields.push_back("destination_rule_default_allowed");
+        fields.push_back("source_trunk_rule_default_allowed");
         fields.push_back("default_priority");
         fields.push_back("auto_routing");
         fields.push_back("route_table_id");

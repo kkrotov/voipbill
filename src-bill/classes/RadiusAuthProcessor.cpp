@@ -77,8 +77,8 @@ void RadiusAuthProcessor::process() {
         logRequest->params["pricelist_id"] = lexical_cast<string>(call.pricelist_id);
         logRequest->params["pricelist_prefix"] = lexical_cast<string>(call.prefix);
         logRequest->params["geo_id"] = lexical_cast<string>(call.geo_id);
-        logRequest->params["rate"] = lexical_cast<string>(call.rate);
-        logRequest->params["cost"] = lexical_cast<string>(call.cost);
+        logRequest->params["rate"] = call.rate;
+        logRequest->params["cost"] = call.cost;
 
         if (callInfo.account != nullptr) {
             double vat_rate = repository.getVatRate(callInfo.account);
@@ -97,23 +97,23 @@ void RadiusAuthProcessor::process() {
             spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
             spentDaySum = sumDay + sumDay2 + globalDaySum;
 
-            logRequest->params["balance_stat"] = lexical_cast<string>(callInfo.account->balance);
-            logRequest->params["balance_local"] = lexical_cast<string>(sumBalance);
-            logRequest->params["balance_current"] = lexical_cast<string>(sumBalance2);
-            logRequest->params["balance_global"] = lexical_cast<string>(globalBalanceSum);
-            logRequest->params["balance_realtime"] = lexical_cast<string>(callInfo.account->balance + spentBalanceSum);
+            logRequest->params["balance_stat"] = callInfo.account->balance;
+            logRequest->params["balance_local"] = sumBalance;
+            logRequest->params["balance_current"] = sumBalance2;
+            logRequest->params["balance_global"] = globalBalanceSum;
+            logRequest->params["balance_realtime"] = callInfo.account->balance + spentBalanceSum;
             if (callInfo.account->hasCreditLimit()) {
-                logRequest->params["credit_limit"] = lexical_cast<string>(callInfo.account->credit);
-                logRequest->params["credit_available"] = lexical_cast<string>(callInfo.account->balance + callInfo.account->credit + spentBalanceSum);
+                logRequest->params["credit_limit"] = callInfo.account->credit;
+                logRequest->params["credit_available"] = callInfo.account->balance + callInfo.account->credit + spentBalanceSum;
             }
 
-            logRequest->params["daily_local"] = lexical_cast<string>(sumDay);
-            logRequest->params["daily_current"] = lexical_cast<string>(sumDay2);
-            logRequest->params["daily_global"] = lexical_cast<string>(globalDaySum);
-            logRequest->params["daily_total"] = lexical_cast<string>(spentDaySum);
+            logRequest->params["daily_local"] = sumDay;
+            logRequest->params["daily_current"] = sumDay2;
+            logRequest->params["daily_global"] = globalDaySum;
+            logRequest->params["daily_total"] = spentDaySum;
             if (callInfo.account->hasDailyLimit()) {
-                logRequest->params["daily_limit"] = lexical_cast<string>(callInfo.account->limit_d);
-                logRequest->params["daily_available"] = lexical_cast<string>(callInfo.account->limit_d + spentDaySum);
+                logRequest->params["daily_limit"] = callInfo.account->limit_d;
+                logRequest->params["daily_available"] = callInfo.account->limit_d + spentDaySum;
             }
 
             if (callInfo.account->is_blocked) {
@@ -286,6 +286,9 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
 
     vector<Trunk *> filteredTermTrunks;
     for (auto termTrunk : termTrunks) {
+        if (!autoTrunkFilterSrcTrunk(termTrunk)) {
+            continue;
+        }
         if (!autoTrunkFilterSrcNumber(termTrunk)) {
             continue;
         }
@@ -323,7 +326,6 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
 
 void RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders) {
 
-
     if (termOrders.size() == 0) {
         Log::warning("Auto Route not contains operators");
         response->setReleaseReason("NO_ROUTE_TO_DESTINATION");
@@ -331,12 +333,19 @@ void RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
     }
 
     string routeCase;
+    set<int> trunkIds;
 
-    int n = 0;
     for (ServiceTrunkOrder &trunkOrder : termOrders) {
-        if (++n > 3) break;
+        if (trunkIds.find(trunkOrder.trunk->id) != trunkIds.end()) {
+            continue;
+        }
+        trunkIds.insert(trunkOrder.trunk->id);
 
         routeCase += "_" + lexical_cast<string>(trunkOrder.trunk->id);
+
+        if (trunkIds.size() == 3) {
+            break;
+        }
     }
 
     response->setRouteCase("rc_auto" + routeCase);
@@ -422,6 +431,27 @@ void RadiusAuthProcessor::processLineWithoutNumber() {
     }
 }
 
+bool RadiusAuthProcessor::autoTrunkFilterSrcTrunk(Trunk * termTrunk) {
+    vector<int> resultTrunkGroupIds;
+    repository.getAllTrunkTrunkRulesTrunkGroupIds(resultTrunkGroupIds, termTrunk->id);
+
+    if (termTrunk->source_trunk_rule_default_allowed) {
+        for (int trunkGroupId : resultTrunkGroupIds) {
+            if (matchTrunkGroup(trunkGroupId, termTrunk->id)) {
+                return false;
+            }
+        }
+        return true;
+    } else {
+        for (int trunkGroupId : resultTrunkGroupIds) {
+            if (matchTrunkGroup(trunkGroupId, termTrunk->id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
 bool RadiusAuthProcessor::autoTrunkFilterSrcNumber(Trunk * termTrunk) {
     vector<TrunkRule *> rules;
     repository.getAllTrunkRules(rules, termTrunk->id, false);
@@ -460,6 +490,24 @@ bool RadiusAuthProcessor::autoTrunkFilterDstNumber(Trunk * termTrunk) {
         }
         return false;
     }
+}
+
+bool RadiusAuthProcessor::matchTrunkGroup(const int trunkGroupId, const int matchTrunkId) {
+
+    auto trunkGroup = repository.getTrunkGroup(trunkGroupId);
+    if (trunkGroup == nullptr) {
+        throw Exception("TrunkGroup #" + lexical_cast<string>(trunkGroupId) + " not found", "RadiusAuthProcessor::matchTrunkGroup");
+    }
+
+    vector<int> trunkIds;
+    repository.getAllTrunkGroupTrunkIds(trunkIds, trunkGroupId);
+    for (int trunkId : trunkIds) {
+        if (trunkId == matchTrunkId) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool RadiusAuthProcessor::matchPrefixlist(const int prefixlistId, string strNumber) {

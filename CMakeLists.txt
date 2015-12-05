@@ -117,9 +117,12 @@ set(BILL_SOURCES
     src-bill/data/TrunkByAliasData.cpp
     src-bill/data/TrunkByNameData.cpp
     src-bill/data/TrunkData.cpp
+    src-bill/data/TrunkGroupData.cpp
+    src-bill/data/TrunkGroupItemData.cpp
     src-bill/data/TrunkNumberPreprocessingData.cpp
     src-bill/data/TrunkPriorityData.cpp
     src-bill/data/TrunkRuleData.cpp
+    src-bill/data/TrunkTrunkRuleData.cpp
     src-bill/data/DataContainer.cpp
     src-bill/data/DataBillingContainer.cpp
     src-bill/data/DataCurrentCallsContainer.cpp
@@ -160,9 +163,12 @@ set(BILL_SOURCES
     src-bill/lists/TrunkByAliasList.cpp
     src-bill/lists/TrunkByNameList.cpp
     src-bill/lists/TrunkList.cpp
+    src-bill/lists/TrunkGroupList.cpp
+    src-bill/lists/TrunkGroupItemList.cpp
     src-bill/lists/TrunkNumberPreprocessingList.cpp
     src-bill/lists/TrunkPriorityList.cpp
     src-bill/lists/TrunkRuleList.cpp
+    src-bill/lists/TrunkTrunkRuleList.cpp
     src-bill/models/Airp.cpp
     src-bill/models/Call.cpp
     src-bill/models/CallInfo.cpp
@@ -202,9 +208,12 @@ set(BILL_SOURCES
     src-bill/models/TariffChangeLog.cpp
     src-bill/models/TariffPackage.cpp
     src-bill/models/Trunk.cpp
+    src-bill/models/TrunkGroup.cpp
+    src-bill/models/TrunkGroupItem.cpp
     src-bill/models/TrunkNumberPreprocessing.cpp
     src-bill/models/TrunkPriority.cpp
     src-bill/models/TrunkRule.cpp
+    src-bill/models/TrunkTrunkRule.cpp
     src-bill/sync/BasePull.cpp
     src-bill/sync/ManagerPull.cpp
     src-bill/sync/PullAirp.cpp
@@ -238,9 +247,12 @@ set(BILL_SOURCES
     src-bill/sync/PullTariffLog.cpp
     src-bill/sync/PullTariffPackage.cpp
     src-bill/sync/PullTrunk.cpp
+    src-bill/sync/PullTrunkGroup.cpp
+    src-bill/sync/PullTrunkGroupItem.cpp
     src-bill/sync/PullTrunkNumberPreprocessing.cpp
     src-bill/sync/PullTrunkPriority.cpp
     src-bill/sync/PullTrunkRule.cpp
+    src-bill/sync/PullTrunkTrunkRule.cpp
     src-bill/threads/ThreadLog.cpp
     src-bill/threads/ThreadRadiusAuthServer.cpp
     src-bill/threads/ThreadSync.cpp

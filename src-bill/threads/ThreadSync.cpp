@@ -32,9 +32,12 @@
 #include "../sync/PullRouteTableRoute.h"
 #include "../sync/PullRoutingReportData.h"
 #include "../sync/PullTrunk.h"
+#include "../sync/PullTrunkGroup.h"
+#include "../sync/PullTrunkGroupItem.h"
 #include "../sync/PullTrunkNumberPreprocessing.h"
 #include "../sync/PullTrunkPriority.h"
 #include "../sync/PullTrunkRule.h"
+#include "../sync/PullTrunkTrunkRule.h"
 
 void ThreadSync::run() {
 
@@ -80,7 +83,10 @@ ThreadSync::ThreadSync() {
     manager->add(new PullRouteTableRoute());
     manager->add(new PullRoutingReportData());
     manager->add(new PullTrunk());
+    manager->add(new PullTrunkGroup());
+    manager->add(new PullTrunkGroupItem());
     manager->add(new PullTrunkNumberPreprocessing());
     manager->add(new PullTrunkPriority());
     manager->add(new PullTrunkRule());
+    manager->add(new PullTrunkTrunkRule());
 }

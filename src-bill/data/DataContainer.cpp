@@ -18,11 +18,14 @@ void DataContainer::loadAll(BDb * db) {
     routeTable.load(db);
     routeTableRoute.load(db);
     trunk.load(db);
+    trunkGroup.load(db);
+    trunkGroupItem.load(db);
     trunkByName.load(db);
     trunkByAlias.load(db);
     trunkNumberPreprocessing.load(db);
     trunkPriority.load(db);
     trunkRule.load(db);
+    trunkTrunkRule.load(db);
     client.load(db);
     organization.load(db);
     voipOperator.load(db);

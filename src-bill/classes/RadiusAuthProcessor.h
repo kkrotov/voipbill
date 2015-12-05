@@ -53,8 +53,10 @@ private:
     void processRedirectNumber();
     void processLineWithoutNumber();
 
+    bool autoTrunkFilterSrcTrunk(Trunk * termTrunk);
     bool autoTrunkFilterSrcNumber(Trunk * termTrunk);
     bool autoTrunkFilterDstNumber(Trunk * termTrunk);
+    bool matchTrunkGroup(const int trunkGroupId, const int trunkId);
     bool matchPrefixlist(const int prefixlistId, string strNumber);
     bool checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int type, Pricelist * &pricelist, PricelistPrice * &price);
 };

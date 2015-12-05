@@ -25,11 +25,14 @@ private:
     shared_ptr<RouteTableList> routeTable;
     shared_ptr<RouteTableRouteList> routeTableRoute;
     shared_ptr<TrunkList> trunk;
+    shared_ptr<TrunkGroupList> trunkGroup;
+    shared_ptr<TrunkGroupItemList> trunkGroupItem;
     shared_ptr<TrunkByNameList> trunkByName;
     shared_ptr<TrunkByAliasList> trunkByAlias;
     shared_ptr<TrunkNumberPreprocessingList> trunkNumberPreprocessing;
     shared_ptr<TrunkPriorityList> trunkPriority;
     shared_ptr<TrunkRuleList> trunkRule;
+    shared_ptr<TrunkTrunkRuleList> trunkTrunkRule;
     shared_ptr<ClientList> client;
     shared_ptr<OrganizationList> organization;
     shared_ptr<OperatorList> voipOperator;
@@ -90,6 +93,14 @@ public:
         }
 
         return nullptr;
+    }
+
+    TrunkGroup * getTrunkGroup(int trunk_group_id) {
+        return trunkGroup->find(trunk_group_id, trace);
+    }
+
+    void getAllTrunkGroupTrunkIds(vector<int> &resultTrunkIds, int trunk_group_id) {
+        trunkGroupItem->findTrunkIds(resultTrunkIds, trunk_group_id, trace);
     }
 
     ServiceNumber * getServiceNumber(long long int numberPrefix) {
@@ -197,9 +208,14 @@ public:
         trunkRule->findAll(resultRules, trunk_id, outgoing, trace);
     }
 
+    void getAllTrunkTrunkRulesTrunkGroupIds(vector<int> &resultTrunkGroupIds, int trunk_id) {
+        trunkTrunkRule->findTrunkGroupIds(resultTrunkGroupIds, trunk_id, trace);
+    }
+
     void getAllAutoRoutingTrunks(vector<Trunk *> &resultTrunks) {
         trunk->findAllAutorouting(resultTrunks, trace);
     }
+
     StatPrefixlist * getStatPrefixlist(int stat_prefixlist_id) {
         return statPrefixlist->find(stat_prefixlist_id, trace);
     }

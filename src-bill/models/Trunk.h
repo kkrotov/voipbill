@@ -9,6 +9,7 @@ struct Trunk {
     int code;
     bool source_rule_default_allowed;
     bool destination_rule_default_allowed;
+    bool source_trunk_rule_default_allowed;
     int default_priority;
     bool auto_routing;
     int route_table_id;
@@ -24,6 +25,7 @@ struct Trunk {
         trace << "code: " << code << ", ";
         trace << "source_rule_default_allowed: " << source_rule_default_allowed << ", ";
         trace << "destination_rule_default_allowed: " << destination_rule_default_allowed << ", ";
+        trace << "source_trunk_rule_default_allowed: " << source_trunk_rule_default_allowed << ", ";
         trace << "default_priority: " << default_priority << ", ";
         trace << "auto_routing: " << auto_routing << ", ";
         trace << "route_table_id: " << route_table_id << ", ";

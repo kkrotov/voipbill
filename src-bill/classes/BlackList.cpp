@@ -133,23 +133,23 @@ void BlackList::log_info(const string &phone, pLogMessage &logRequest) {
     spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
     spentDaySum = sumDay + sumDay2 + globalDaySum;
 
-    logRequest->params["balance_stat"] = lexical_cast<string>(client->balance);
-    logRequest->params["balance_local"] = lexical_cast<string>(sumBalance);
-    logRequest->params["balance_current"] = lexical_cast<string>(sumBalance2);
-    logRequest->params["balance_global"] = lexical_cast<string>(globalBalanceSum);
-    logRequest->params["balance_realtime"] = lexical_cast<string>(client->balance + spentBalanceSum);
+    logRequest->params["balance_stat"] = client->balance;
+    logRequest->params["balance_local"] = sumBalance;
+    logRequest->params["balance_current"] = sumBalance2;
+    logRequest->params["balance_global"] = globalBalanceSum;
+    logRequest->params["balance_realtime"] = client->balance + spentBalanceSum;
     if (client->hasCreditLimit()) {
-        logRequest->params["credit_limit"] = lexical_cast<string>(client->credit);
-        logRequest->params["credit_available"] = lexical_cast<string>(client->balance + client->credit + spentBalanceSum);
+        logRequest->params["credit_limit"] = client->credit;
+        logRequest->params["credit_available"] = client->balance + client->credit + spentBalanceSum;
     }
 
-    logRequest->params["daily_local"] = lexical_cast<string>(sumDay);
-    logRequest->params["daily_current"] = lexical_cast<string>(sumDay2);
-    logRequest->params["daily_global"] = lexical_cast<string>(globalDaySum);
-    logRequest->params["daily_total"] = lexical_cast<string>(spentDaySum);
+    logRequest->params["daily_local"] = sumDay;
+    logRequest->params["daily_current"] = sumDay2;
+    logRequest->params["daily_global"] = globalDaySum;
+    logRequest->params["daily_total"] = spentDaySum;
     if (client->hasDailyLimit()) {
-        logRequest->params["daily_limit"] = lexical_cast<string>(client->limit_d);
-        logRequest->params["daily_available"] = lexical_cast<string>(client->limit_d + spentDaySum);
+        logRequest->params["daily_limit"] = client->limit_d;
+        logRequest->params["daily_available"] = client->limit_d + spentDaySum;
     }
 
     if (client->is_blocked) {

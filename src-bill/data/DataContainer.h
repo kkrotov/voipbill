@@ -14,11 +14,14 @@
 #include "RouteTableData.h"
 #include "RouteTableRouteData.h"
 #include "TrunkData.h"
+#include "TrunkGroupData.h"
+#include "TrunkGroupItemData.h"
 #include "TrunkByNameData.h"
 #include "TrunkByAliasData.h"
 #include "TrunkNumberPreprocessingData.h"
 #include "TrunkPriorityData.h"
 #include "TrunkRuleData.h"
+#include "TrunkTrunkRuleData.h"
 #include "ClientData.h"
 #include "OrganizationData.h"
 #include "OperatorData.h"
@@ -54,11 +57,14 @@ public:
     RouteTableData routeTable;
     RouteTableRouteData routeTableRoute;
     TrunkData trunk;
+    TrunkGroupData trunkGroup;
+    TrunkGroupItemData trunkGroupItem;
     TrunkByNameData trunkByName;
     TrunkByAliasData trunkByAlias;
     TrunkNumberPreprocessingData trunkNumberPreprocessing;
     TrunkPriorityData trunkPriority;
     TrunkRuleData trunkRule;
+    TrunkTrunkRuleData trunkTrunkRule;
     ClientData client;
     OrganizationData organization;
     OperatorData voipOperator;

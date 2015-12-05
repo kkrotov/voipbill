@@ -102,6 +102,20 @@ public:
             html << "</tr>\n";
         }
         {
+            auto dl = &repository.data->trunkGroup;
+            html << "<tr><th>trunkGroup</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->trunkGroupItem;
+            html << "<tr><th>trunkGroupItem</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+        }
+        {
             auto dl = &repository.data->trunkNumberPreprocessing;
             html << "<tr><th>trunkNumberPreprocessing</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
@@ -118,6 +132,13 @@ public:
         {
             auto dl = &repository.data->trunkRule;
             html << "<tr><th>trunkRule</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->trunkTrunkRule;
+            html << "<tr><th>trunkTrunkRule</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";

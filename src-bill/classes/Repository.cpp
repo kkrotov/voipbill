@@ -72,6 +72,14 @@ bool Repository::prepare(time_t currentTime) {
         return false;
     }
 
+    if ((trunkGroup = data->trunkGroup.get()) == nullptr) {
+        return false;
+    }
+
+    if ((trunkGroupItem = data->trunkGroupItem.get()) == nullptr) {
+        return false;
+    }
+
     if ((trunkByName = data->trunkByName.get()) == nullptr) {
         return false;
     }
@@ -89,6 +97,10 @@ bool Repository::prepare(time_t currentTime) {
     }
 
     if ((trunkRule = data->trunkRule.get()) == nullptr) {
+        return false;
+    }
+
+    if ((trunkTrunkRule = data->trunkTrunkRule.get()) == nullptr) {
         return false;
     }
 
