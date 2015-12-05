@@ -3,6 +3,7 @@
 #include "../common.h"
 #include "../../libs/ace-radius/RadiusServerStack.h"
 #include "../classes/Log.h"
+#include "../classes/Timer.h"
 
 struct RadiusAuthRequest {
     string trunkName;
@@ -25,6 +26,7 @@ struct RadiusAuthRequest {
 };
 
 struct RadiusAuthResponse {
+    Timer timer;
     bool accept;
     string srcNumber;
     string dstNumber;

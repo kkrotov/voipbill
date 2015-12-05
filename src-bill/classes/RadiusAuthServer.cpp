@@ -25,8 +25,12 @@ void RadiusAuthServer::run(string secret, uint16_t port) {
             RadiusAuthRequest request;
             RadiusAuthResponse response;
 
+            response.timer.start();
+
             spawnRequest(l_stack.getRequest(), request, logRequest);
             processRequest(request, response, logRequest);
+
+            response.timer.stop();
 
             sendResponse(l_stack, response, logRequest);
 
@@ -105,6 +109,7 @@ void RadiusAuthServer::sendResponse(RadiusServerStack &p_stack, RadiusAuthRespon
         p_stack.getRequest()
     );
     logRequest->params["resp"] = response.accept ? "accept" : "reject";
+    logRequest->params["duration"] = response.timer.tloop();
 
     if (response.srcNumber.size() > 0) {
         RadiusAttribute attr;

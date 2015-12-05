@@ -36,17 +36,16 @@ void ThreadLimitControl::run() {
         if (limitControlKillNeeded(call, logRequest)) {
             logRequest->type = "kill";
             logRequest->params["orig"] = call.orig ? "true" : "false";
-            logRequest->params["src"] = lexical_cast<string>(call.src_number);
-            logRequest->params["dst"] = lexical_cast<string>(call.dst_number);
-            logRequest->params["number"] = lexical_cast<string>(call.src_number) + " " + lexical_cast<string>(call.dst_number);
-            logRequest->params["trunk_id"] = lexical_cast<string>(call.trunk_id);
-            logRequest->params["account_id"] = lexical_cast<string>(call.account_id);
-            logRequest->params["trunk_service_id"] = lexical_cast<string>(call.trunk_service_id);
-            logRequest->params["number_service_id"] = lexical_cast<string>(call.number_service_id);
-            logRequest->params["service_package_id"] = lexical_cast<string>(call.service_package_id);
-            logRequest->params["pricelist_id"] = lexical_cast<string>(call.pricelist_id);
+            logRequest->params["src"] = call.src_number;
+            logRequest->params["dst"] = call.dst_number;
+            logRequest->params["trunk_id"] = call.trunk_id;
+            logRequest->params["account_id"] = call.account_id;
+            logRequest->params["trunk_service_id"] = call.trunk_service_id;
+            logRequest->params["number_service_id"] = call.number_service_id;
+            logRequest->params["service_package_id"] = call.service_package_id;
+            logRequest->params["pricelist_id"] = call.pricelist_id;
             logRequest->params["pricelist_prefix"] = lexical_cast<string>(call.prefix);
-            logRequest->params["geo_id"] = lexical_cast<string>(call.geo_id);
+            logRequest->params["geo_id"] = call.geo_id;
             logRequest->params["rate"] = call.rate;
             logRequest->params["cost"] = call.cost;
 

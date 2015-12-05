@@ -110,7 +110,7 @@ void BlackList::log_info(const string &phone, pLogMessage &logRequest) {
     }
 
     logRequest->message += " / " + lexical_cast<string>(serviceNumber->client_account_id);
-    logRequest->params["account_id"] = lexical_cast<string>(serviceNumber->client_account_id);
+    logRequest->params["account_id"] = serviceNumber->client_account_id;
 
     auto client = repository.getAccount(serviceNumber->client_account_id);
     if (client == nullptr) {
