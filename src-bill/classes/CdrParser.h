@@ -21,6 +21,12 @@ struct CallData
     int disconnect_cause;
     std::string setup_time_raw;
     std::string hash;
+
+    CallData() {
+        session_time = 0;
+        src_noa = 0;
+        dst_noa = 0;
+    }
 };
 
 class CdrParser {

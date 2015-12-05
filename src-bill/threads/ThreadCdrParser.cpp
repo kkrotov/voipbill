@@ -140,17 +140,16 @@ string ThreadCdrParser::getFileNameForParse() {
     files_total = fileList.size();
     files_progres = files_total;
 
+    reverse(fileList.begin(), fileList.end());
+
     string lastNotParsedFileName = "";
-    size_t n = fileList.size() - 1;
-    while (n >= 0) {
-        string fileName = fileList.at(n);
+    for (auto fileName : fileList) {
 
         if (isFileProcessed(fileName)) {
             break;
         }
 
         lastNotParsedFileName = fileName;
-        n = n - 1;
         files_progres--;
     }
 
