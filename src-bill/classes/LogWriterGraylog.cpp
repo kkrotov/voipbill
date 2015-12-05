@@ -36,21 +36,17 @@ void LogWriterGraylog::massPublish(list<pLogMessage> messages) {
         std::ostream stream_buffer(&buffer);
 
         for (auto message : messages) {
-            Json::Value json;
-            json["source"] = graylogSource;
-            json["server"] = serverId;
-            json["timestamp"] = boost::lexical_cast<string>(message->time);
-            json["message"] = scount(message->count) + message->message;
-            json["level"] = getSyslogLevel(message->level);
+
+            message->params["source"] = graylogSource;
+            message->params["server"] = serverId;
+            message->params["timestamp"] = boost::lexical_cast<string>(message->time);
+            message->params["message"] = scount(message->count) + message->message;
+            message->params["level"] = getSyslogLevel(message->level);
             if (!message->type.empty()) {
-                json["type"] = message->type;
+                message->params["type"] = message->type;
             }
 
-            for (auto pair : message->params) {
-                json[pair.first] = pair.second;
-            }
-
-            stream_buffer << json;
+            stream_buffer << message->params;
             stream_buffer << '\0';
         }
 

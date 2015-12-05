@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <json/json.h>
 
 enum LogLevel {
     DEBUG, INFO, NOTICE, WARNING, ERROR, CRITICAL
@@ -16,7 +17,7 @@ struct LogMessage {
     time_t timeInGroup;
     int count;
     int countInGroup;
-    std::map<std::string, std::string> params;
+    Json::Value params;
 };
 
 typedef std::shared_ptr<LogMessage> pLogMessage;
