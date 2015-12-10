@@ -162,17 +162,6 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
             return true;
         }
 
-        // Глобальная блокировка если превышен лимит кредита и не оплачен последний счет
-        if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth(time(nullptr))) {
-            logRequest->params["kill_reason"] = "credit_limit";
-
-            logRequest->message =
-                    "KILL: number " + lexical_cast<string>(call.src_number) + " -> " + lexical_cast<string>(call.dst_number) + " : Credit limit: " + string_fmt("%.2f", client->balance + client->credit + sumBalance + sumBalance2 + globalBalanceSum) + " = " +
-                    string_fmt("%.2f", client->balance) + " (balance) + " + string_fmt("%d", client->credit) + " (credit) + " + string_fmt("%.2f", sumBalance) + " (local) + " + string_fmt("%.2f", sumBalance2) + " (current) + " + string_fmt("%.2f", globalBalanceSum) + " (global) <br/>\n";
-
-            return true;
-        }
-
         // Блокировка МГМН если превышен лимит кредита
         if (!call.isLocal()  && client->isConsumedCreditLimit(spentBalanceSum)) {
             logRequest->params["kill_reason"] = "credit_limit";

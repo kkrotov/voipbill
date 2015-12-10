@@ -733,11 +733,6 @@ string RadiusAuthProcessor::analyzeCall(Call &call) {
 
     } else if (call.number_service_id != 0 && call.orig) {
         
-        // Глобальная блокировка если превышен лимит кредита и не оплачен последний счет
-        if (client->isConsumedCreditLimit(spentBalanceSum) && client->last_payed_month < get_tmonth(time(nullptr))) {
-            return "low_balance";
-        }
-
         // Блокировка МГМН если превышен лимит кредита
         if (!call.isLocal()  && client->isConsumedCreditLimit(spentBalanceSum)) {
             return "low_balance";
