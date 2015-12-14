@@ -7,7 +7,7 @@ class ClientList : public ObjList<Client> {
 protected:
 
     string sql(BDb * db) {
-        return "   select id, voip_limit_day, credit, balance, amount_date, voip_disabled, organization_id, price_include_vat, timezone_offset, is_blocked " \
+        return "   select id, voip_limit_day, credit, balance, amount_date, voip_disabled, organization_id, price_include_vat, timezone_offset, is_blocked, anti_froud_disabled " \
                 "   from billing.clients " \
                 "   order by id asc ";
     }
@@ -23,6 +23,7 @@ protected:
         item->price_include_vat = row.get_b(7);
         item->timezone_offset = (short)row.get_i(8);
         item->is_blocked = row.get_b(9);
+        item->anti_froud_disabled = row.get_b(10);
     }
 
     struct key_id {
