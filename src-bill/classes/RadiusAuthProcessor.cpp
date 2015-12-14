@@ -33,6 +33,7 @@ RadiusAuthProcessor::RadiusAuthProcessor(RadiusAuthRequest * request, RadiusAuth
     this->response = response;
     this->logRequest = logRequest;
     this->trace = nullptr;
+    this->account = nullptr;
 }
 
 void RadiusAuthProcessor::setTrace(stringstream *trace) {
@@ -67,6 +68,8 @@ void RadiusAuthProcessor::process() {
         Call call = Call(&cdr, CALL_ORIG);
         CallInfo callInfo;
         billingCall.calc(&call, &callInfo, &cdr);
+
+        account = callInfo.account;
 
         if (trace != nullptr) {
             *trace << "INFO|CALL|";
@@ -359,14 +362,25 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
             Pricelist * pricelist;
             PricelistPrice * price;
             if (checkServiceTrunkAvailability(serviceTrunk, SERVICE_TRUNK_SETTINGS_TERMINATION, pricelist, price)) {
-                ServiceTrunkOrder termOrder;
-                termOrder.trunk = termTrunk;
-                termOrder.serviceTrunk = serviceTrunk;
-                termOrder.pricelist = pricelist;
-                termOrder.price = price;
-                termServiceTrunks.push_back(termOrder);
-                if (trace != nullptr) {
-                    *trace << "INFO|TERM SERVICE TRUNK ACCEPT|" << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << serviceTrunk->id << "\n";
+                if (
+                    server->min_price_for_autorouting > 0
+                    && price->price > server->min_price_for_autorouting
+                    && account != nullptr
+                    && !account->anti_froud_disabled)
+                {
+                    if (trace != nullptr) {
+                        *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE ANTI FROUD: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << serviceTrunk->id << "\n";
+                    }
+                } else {
+                    ServiceTrunkOrder termOrder;
+                    termOrder.trunk = termTrunk;
+                    termOrder.serviceTrunk = serviceTrunk;
+                    termOrder.pricelist = pricelist;
+                    termOrder.price = price;
+                    termServiceTrunks.push_back(termOrder);
+                    if (trace != nullptr) {
+                        *trace << "INFO|TERM SERVICE TRUNK ACCEPT|" << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << serviceTrunk->id << "\n";
+                    }
                 }
             } else {
                 if (trace != nullptr) {
