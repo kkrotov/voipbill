@@ -38,7 +38,7 @@ string string_date(const time_t dt, int debugFlag) {
 
     struct tm timeinfo;
     gmtime_r(&dt, &timeinfo);
-    if (timeinfo.tm_year < 0 || timeinfo.tm_year > 1000) {
+    if (timeinfo.tm_year < 0 || timeinfo.tm_year > 3000) {
         timeinfo.tm_year = 0;
         timeinfo.tm_mon = 0;
         timeinfo.tm_mday = 1;
@@ -57,7 +57,7 @@ string string_time(const time_t dt, int debugFlag) {
 
     struct tm timeinfo;
     gmtime_r(&dt, &timeinfo);
-    if (timeinfo.tm_year < 0 || timeinfo.tm_year > 1000) {
+    if (timeinfo.tm_year < 0 || timeinfo.tm_year > 3000) {
         timeinfo.tm_year = 0;
         timeinfo.tm_mon = 0;
         timeinfo.tm_mday = 1;

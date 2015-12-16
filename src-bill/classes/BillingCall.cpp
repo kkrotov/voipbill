@@ -739,6 +739,12 @@ void BillingCall::setupPackagePrepaid() {
 
         StatsPackage * stats = repository->billingData->statsPackageGetCurrent(callInfo, package, tariff);
 
+        if (trace != nullptr) {
+            *trace << "DEBUG|STATS PACKAGE|";
+            stats->dump(*trace);
+            *trace << "\n";
+        }
+
         int availableSeconds = stats->paid_seconds - stats->used_seconds;
         if (availableSeconds < 0) {
             availableSeconds = 0;

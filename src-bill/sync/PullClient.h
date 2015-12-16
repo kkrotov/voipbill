@@ -23,5 +23,6 @@ public:
         fields.push_back("price_include_vat");
         fields.push_back("timezone_offset");
         fields.push_back("is_blocked");
+        fields.push_back("anti_fraud_disabled");
     }
 };

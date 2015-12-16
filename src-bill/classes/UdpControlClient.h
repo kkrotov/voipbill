@@ -19,15 +19,13 @@ public:
 
     static bool kill(string &phones, string &ids);
 
-    static bool blacklist(vector<string> &list);
-
     static bool blacklist_local(vector<string> &list);
 
     static bool blacklist_global(vector<string> &list);
 
     static bool blacklist_trunk(vector<string> &list);
 
-    static bool lock(const string &phone);
+    static bool blacklist_anti_fraud_disable(vector<string> &list);
 
     static bool lock_local(const string &phone);
 
@@ -35,11 +33,13 @@ public:
 
     static bool lock_trunk(const string &phone);
 
-    static bool unlock(const string &trunk);
+    static bool add_anti_fraud_disable(const string &phone);
 
     static bool unlock_local(const string &phone);
 
     static bool unlock_global(const string &phone);
 
     static bool unlock_trunk(const string &trunk);
+
+    static bool del_anti_fraud_disable(const string &phone);
 };

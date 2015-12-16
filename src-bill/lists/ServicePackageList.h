@@ -12,7 +12,6 @@ protected:
         return "    select id, service_number_id, tariff_package_id, periodical, extract(epoch from activation_dt), extract(epoch from expire_dt) " \
             "       from billing.service_number_package " \
             "       order by service_number_id asc, activation_dt asc ";
-        //  and expire_dt > now()
     }
 
     inline void parse_item(BDbResult &row, ServicePackage * item) {
@@ -33,49 +32,15 @@ protected:
         }
     };
 
-    struct key_timestamp {
-        bool operator() (const ServicePackage & left, time_t timestamp) {
-            return left.expire_dt < timestamp;
+    struct key_activation_dt {
+        bool operator() (const ServicePackage & left, time_t activation_dt) {
+            return left.activation_dt < activation_dt;
         }
-        bool operator() (time_t timestamp, const ServicePackage & right) {
-            return timestamp < right.activation_dt;
+        bool operator() (time_t activation_dt, const ServicePackage & right) {
+            return activation_dt < right.activation_dt;
         }
     };
 
 public:
-    void findAll(vector<ServicePackage *> &resultPackages, int service_number_id, time_t timestamp, stringstream *trace = nullptr) {
-
-        auto begin = this->data.begin();
-        auto end = this->data.end();
-        {
-            auto p = equal_range(begin, end, service_number_id, key_service_number_id());
-            begin = p.first;
-            end = p.second;
-        }
-        {
-            auto p = equal_range(begin, end, timestamp, key_timestamp());
-            begin = p.first;
-            end = p.second;
-        }
-        ServicePackage * result = begin <  end ? &*begin : nullptr;
-
-        if (begin < end) {
-            if (trace != nullptr) {
-                *trace << "FOUND|SERVICE NUMBER PACKAGE|BY SERVICE_NUMBER_ID '" << service_number_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
-            }
-            for (auto it = begin; it != end; ++it) {
-                resultPackages.push_back(&*it);
-
-                if (trace != nullptr) {
-                    *trace << "||";
-                    it->dump(*trace);
-                    *trace << "\n";
-                }
-            }
-        } else {
-            if (trace != nullptr) {
-                *trace << "NOT FOUND|SERVICE NUMBER PACKAGE|BY SERVICE_NUMBER_ID '" << service_number_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
-            }
-        }
-    }
+    void findAll(vector<ServicePackage *> &resultPackages, int service_number_id, time_t timestamp, stringstream *trace = nullptr);
 };
