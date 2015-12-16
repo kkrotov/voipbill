@@ -7,6 +7,7 @@ ThreadBlacklistCalc::ThreadBlacklistCalc() {
     blacklist_global = BlackListGlobal::instance();
     blacklist_local = BlackListLocal::instance();
     blacklist_trunk = BlackListTrunk::instance();
+    blacklist_anti_fraud_disable = BlackListAntiFraudDisable::instance();
 
 }
 
@@ -41,6 +42,7 @@ void ThreadBlacklistCalc::run() {
     set<string> wanted_blacklist_local;
     set<string> wanted_blacklist_global;
     set<string> wanted_blacklist_trunk;
+    set<string> wanted_blacklist_anti_fraud_disable;
 
     vector<ClientLockObj> locks;
     clientLock->getLocks(locks);
@@ -70,8 +72,25 @@ void ThreadBlacklistCalc::run() {
         }
     }
 
+    for (int client_account_id : repository.activeCounter->activeClients) {
+        auto client = repository.getAccount(client_account_id);
+        if (client == nullptr) {
+            continue;
+        }
+
+        if (!client->anti_fraud_disabled) {
+            continue;
+        }
+
+        map<int, ServiceNumber> &numbers = repository.activeCounter->clientNumbers[client->id];
+        for (auto number : numbers) {
+            wanted_blacklist_anti_fraud_disable.insert(number.second.did);
+        }
+    }
+
     blacklist_local->push(wanted_blacklist_local);
     blacklist_global->push(wanted_blacklist_global);
     blacklist_trunk->push(wanted_blacklist_trunk);
+    blacklist_anti_fraud_disable->push(wanted_blacklist_anti_fraud_disable);
 
 }

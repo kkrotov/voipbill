@@ -48,7 +48,6 @@ void BlackList::push(set<string> &wanted_blacklist) {
 
     for (auto phone : list_to_add) {
         if (!udp_lock(phone)) {
-            Log::error("Cant lock phone " + phone);
             continue;
         }
 
@@ -62,7 +61,6 @@ void BlackList::push(set<string> &wanted_blacklist) {
 
     for (auto phone : list_to_del) {
         if (!udp_unlock(phone)) {
-            Log::error("Cant unlock phone " + phone);
             continue;
         }
 

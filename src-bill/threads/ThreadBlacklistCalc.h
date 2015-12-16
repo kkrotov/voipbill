@@ -5,6 +5,7 @@
 #include "../classes/BlackListLocal.h"
 #include "../classes/BlackListGlobal.h"
 #include "../classes/BlackListTrunk.h"
+#include "../classes/BlackListAntiFraudDisable.h"
 #include "../classes/Repository.h"
 
 class ThreadBlacklistCalc : public Thread {
@@ -14,6 +15,7 @@ class ThreadBlacklistCalc : public Thread {
     BlackListLocal *blacklist_local;
     BlackListGlobal *blacklist_global;
     BlackListTrunk *blacklist_trunk;
+    BlackListAntiFraudDisable *blacklist_anti_fraud_disable;
 
     bool ready();
 

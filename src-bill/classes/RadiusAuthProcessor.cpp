@@ -366,10 +366,10 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
                     server->min_price_for_autorouting > 0
                     && price->price > server->min_price_for_autorouting
                     && account != nullptr
-                    && !account->anti_froud_disabled)
+                    && !account->anti_fraud_disabled)
                 {
                     if (trace != nullptr) {
-                        *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE ANTI FROUD: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << serviceTrunk->id << "\n";
+                        *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE ANTI FRAUD: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << serviceTrunk->id << "\n";
                     }
                 } else {
                     ServiceTrunkOrder termOrder;
