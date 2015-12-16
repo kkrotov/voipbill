@@ -15,7 +15,6 @@ protected:
             "       from billing.service_trunk " \
             "       where server_id='" + server_id + "' " \
             "       order by trunk_id asc, activation_dt asc ";
-        //  and expire_dt > now()
     }
 
     inline void parse_item(BDbResult &row, ServiceTrunk * item) {
@@ -41,80 +40,19 @@ protected:
         }
     };
 
-    struct key_timestamp {
-        bool operator() (const ServiceTrunk & left, time_t timestamp) {
-            return left.expire_dt < timestamp;
+    struct key_activation_dt {
+        bool operator() (const ServiceTrunk & left, time_t activation_dt) {
+            return left.activation_dt < activation_dt;
         }
-        bool operator() (time_t timestamp, const ServiceTrunk & right) {
-            return timestamp < right.activation_dt;
+        bool operator() (time_t activation_dt, const ServiceTrunk & right) {
+            return activation_dt < right.activation_dt;
         }
     };
 
-
 public:
-    ServiceTrunk * find(int trunk_id, time_t timestamp, stringstream *trace = nullptr) {
-        auto begin = this->data.begin();
-        auto end = this->data.end();
-        {
-            auto p = equal_range(begin, end, trunk_id, key_trunk_id());
-            begin = p.first;
-            end = p.second;
-        }
-        {
-            auto p = equal_range(begin, end, timestamp, key_timestamp());
-            begin = p.first;
-            end = p.second;
-        }
-        ServiceTrunk * result = begin <  end ? &*begin : nullptr;
+    ServiceTrunk * find(int trunk_id, time_t timestamp, stringstream *trace = nullptr);
 
-        if (trace != nullptr) {
-
-            if (result != nullptr) {
-                *trace << "FOUND|SERVICE TRUNK|BY TRUNK ID '" << trunk_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
-                *trace << "||";
-                result->dump(*trace);
-                *trace << "\n";
-            } else {
-                *trace << "NOT FOUND|SERVICE TRUNK|BY TRUNK ID '" << trunk_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
-            }
-        }
-
-        return result;
-    }
-
-    void findAll(vector<ServiceTrunk *> &resultTrunks, int trunk_id, time_t timestamp, stringstream *trace = nullptr) {
-        auto begin = this->data.begin();
-        auto end = this->data.end();
-        {
-            auto p = equal_range(begin, end, trunk_id, key_trunk_id());
-            begin = p.first;
-            end = p.second;
-        }
-        {
-            auto p = equal_range(begin, end, timestamp, key_timestamp());
-            begin = p.first;
-            end = p.second;
-        }
-
-        if (begin < end) {
-            if (trace != nullptr) {
-                *trace << "FOUND|SERVICE TRUNK|BY TRUNK ID '" << trunk_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
-            }
-            for (auto it = begin; it != end; ++it) {
-                resultTrunks.push_back(&*it);
-
-                if (trace != nullptr) {
-                    *trace << "||";
-                    it->dump(*trace);
-                    *trace << "\n";
-                }
-            }
-        } else {
-            if (trace != nullptr) {
-                *trace << "NOT FOUND|SERVICE TRUNK|BY TRUNK ID '" << trunk_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
-            }
-        }
-    }
+    void findAll(vector<ServiceTrunk *> &resultTrunks, int trunk_id, time_t timestamp, stringstream *trace = nullptr);
 };
 
 

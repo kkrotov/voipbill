@@ -4,6 +4,7 @@
 #include "../classes/BlackListLocal.h"
 #include "../classes/BlackListGlobal.h"
 #include "../classes/BlackListTrunk.h"
+#include "../classes/BlackListAntiFraudDisable.h"
 #include "../classes/Repository.h"
 
 class PageBlacklist : public BasePage {
@@ -22,6 +23,7 @@ public:
         auto blacklist_global = BlackListGlobal::instance();
         auto blacklist_local = BlackListLocal::instance();
         auto blacklist_trunk = BlackListTrunk::instance();
+        auto blacklist_anti_fraud_disable = BlackListAntiFraudDisable::instance();
 
         html << "<table>\n";
         html << "<tr>\n";
@@ -126,6 +128,36 @@ public:
         }
 
         {
+            lock_guard<Spinlock> guard(blacklist_global->lock);
+
+            if (blacklist_anti_fraud_disable->list_to_add.size() > 0) {
+                html << "<td nowrap valign=top>\n";
+                html << "BlackListAntiFraudDisable to Add: <b>" << blacklist_anti_fraud_disable->list_to_add.size() << "</b><br/>\n";
+                for (auto phone : blacklist_anti_fraud_disable->list_to_add) {
+                    html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                    html << "<b>" << phone << "</b>";
+                    if ((usage = repository.getServiceNumber(phone.c_str())) != 0)
+                        html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
+                    html << "<br/>\n";
+                }
+                html << "</td>\n";
+            }
+
+            if (blacklist_anti_fraud_disable->list_to_del.size() > 0) {
+                html << "<td nowrap valign=top>\n";
+                html << "BlackListAntiFraudDisable to Del: <b>" << blacklist_anti_fraud_disable->list_to_del.size() << "</b><br/>\n";
+                for (auto phone : blacklist_global->list_to_del) {
+                    html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                    html << "<b>" << phone << "</b>";
+                    if ((usage = repository.getServiceNumber(phone.c_str())) != 0)
+                        html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
+                    html << "<br/>\n";
+                }
+                html << "</td>\n";
+            }
+        }
+
+        {
             lock_guard<Spinlock> guard(blacklist_local->lock);
 
             if (blacklist_local->blacklist.size() > 0) {
@@ -174,6 +206,23 @@ public:
                         if (serviceTrunk != nullptr)
                             html << " / " << "<a href='/client?id=" << serviceTrunk->client_account_id << "'>" << serviceTrunk->client_account_id << "</a>";
                     }
+                    html << "<br/>\n";
+                }
+                html << "</td>\n";
+            }
+        }
+
+        {
+            lock_guard<Spinlock> guard(blacklist_global->lock);
+
+            if (blacklist_anti_fraud_disable->blacklist.size() > 0) {
+                html << "<td nowrap valign=top>\n";
+                html << "BlackListAntiFraudDisable: <b>" << blacklist_anti_fraud_disable->blacklist.size() << "</b><br/>\n";
+                for (auto phone : blacklist_anti_fraud_disable->blacklist) {
+                    html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                    html << "<b>" << phone << "</b>";
+                    if ((usage = repository.getServiceNumber(phone.c_str())) != 0)
+                        html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
                     html << "<br/>\n";
                 }
                 html << "</td>\n";

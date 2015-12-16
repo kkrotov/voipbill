@@ -13,6 +13,7 @@ struct Client {
     bool price_include_vat;
     short timezone_offset;
     bool is_blocked;
+    bool anti_fraud_disabled;
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -26,6 +27,7 @@ struct Client {
         trace << "price_include_vat: " << price_include_vat << ", ";
         trace << "timezone_offset: " << timezone_offset << ", ";
         trace << "is_blocked: " << is_blocked << ", ";
+        trace << "anti_fraud_disabled: " << anti_fraud_disabled << ", ";
         trace << ")";
     }
 

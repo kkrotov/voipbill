@@ -128,38 +128,78 @@ bool UdpControlClient::blacklist_trunk(vector<string> &list) {
     return true;
 }
 
+bool UdpControlClient::blacklist_anti_fraud_disable(vector<string> &list) {
+    string msg("READ_BLACKLIST_ANTI_FRAUD_DISABLE");
+    string res;
+    if (!sendrecv(msg, res) || res == "0") return false;
+    if (res == "") {
+        list.empty();
+        return true;
+    }
+    boost::algorithm::split(list, res, boost::algorithm::is_any_of(","), boost::token_compress_on);
+    return true;
+}
+
 bool UdpControlClient::lock_local(const string &phone) {
     string msg("LOCK_LOCAL " + phone);
     string res;
-    return sendrecv(msg, res) && res == "1";
+    bool result = sendrecv(msg, res) && res == "1";
+    if (!result) Log::error("OpenCA Sync Error: " + msg);
+    return result;
 }
 
 bool UdpControlClient::lock_global(const string &phone) {
     string msg("LOCK_GLOBAL " + phone);
     string res;
-    return sendrecv(msg, res) && res == "1";
+    bool result = sendrecv(msg, res) && res == "1";
+    if (!result) Log::error("OpenCA Sync Error: " + msg);
+    return result;
 }
 
 bool UdpControlClient::lock_trunk(const string &trunk) {
     string msg("LOCK_TRUNK " + trunk);
     string res;
-    return sendrecv(msg, res) && res == "1";
+    bool result = sendrecv(msg, res) && res == "1";
+    if (!result) Log::error("OpenCA Sync Error: " + msg);
+    return result;
+}
+
+bool UdpControlClient::add_anti_fraud_disable(const string &phone) {
+    string msg("ADD_ANTI_FRAUD_DISABLE " + phone);
+    string res;
+    bool result = sendrecv(msg, res) && res == "1";
+    if (!result) Log::error("OpenCA Sync Error: " + msg);
+    return result;
 }
 
 bool UdpControlClient::unlock_local(const string &phone) {
     string msg("UNLOCK_LOCAL " + phone);
     string res;
-    return sendrecv(msg, res) && res == "1";
+    bool result = sendrecv(msg, res) && res == "1";
+    if (!result) Log::error("OpenCA Sync Error: " + msg);
+    return result;
 }
 
 bool UdpControlClient::unlock_global(const string &phone) {
     string msg("UNLOCK_GLOBAL " + phone);
     string res;
-    return sendrecv(msg, res) && res == "1";
+    bool result = sendrecv(msg, res) && res == "1";
+    if (!result) Log::error("OpenCA Sync Error: " + msg);
+    return result;
 }
 
 bool UdpControlClient::unlock_trunk(const string &trunk) {
     string msg("UNLOCK_TRUNK " + trunk);
     string res;
-    return sendrecv(msg, res) && res == "1";
+    bool result = sendrecv(msg, res) && res == "1";
+    if (!result) Log::error("OpenCA Sync Error: " + msg);
+    return result;
+}
+
+bool UdpControlClient::del_anti_fraud_disable(const string &phone) {
+    string msg("DEL_ANTI_FRAUD_DISABLE " + phone);
+    string res;
+    bool result = sendrecv(msg, res) && res == "1";
+    if (!result) Log::error("OpenCA Sync Error: " + msg);
+    return result;
 }

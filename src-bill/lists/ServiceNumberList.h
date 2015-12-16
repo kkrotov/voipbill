@@ -60,7 +60,7 @@ public:
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
-            auto p = equal_range(begin, end, did, key_did());
+            auto p = equal_range(begin, end, &did[0], key_did());
             begin = p.first;
             end = p.second;
         }
