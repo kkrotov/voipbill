@@ -28,6 +28,10 @@ struct Outcome {
         return type_id == 4;
     }
 
+    bool isAccept() {
+        return type_id == 5;
+    }
+
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
