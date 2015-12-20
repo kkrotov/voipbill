@@ -279,6 +279,11 @@ void RadiusAuthProcessor::processOutcome(int outcomeId) {
         processAirpOutcome(outcome);
         return;
 
+    } else if (outcome->isAccept()) {
+
+        response->setAccept();
+        return;
+
     }
 
     throw Exception("Unexpected type of outcome #" + lexical_cast<string>(outcome->id), "RadiusAuthProcessor::processOutcome");
