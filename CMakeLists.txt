@@ -107,8 +107,8 @@ set(BILL_SOURCES
     src-bill/data/ServerData.cpp
     src-bill/data/ServiceNumberData.cpp
     src-bill/data/ServiceNumberPackageData.cpp
-    src-bill/data/ServiceTrunkPackageData.cpp
     src-bill/data/ServiceTrunkData.cpp
+    src-bill/data/ServiceTrunkPackageData.cpp
     src-bill/data/ServiceTrunkSettingsData.cpp
     src-bill/data/StatDestinationPrefixlistsData.cpp
     src-bill/data/StatPrefixlistData.cpp

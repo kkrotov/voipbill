@@ -24,9 +24,9 @@ void ServiceNumberPackageList::findAll(vector<ServicePackage *> &resultPackages,
 
     if (trace != nullptr) {
         if (resultPackages.size() == 0) {
-            *trace << "FOUND|SERVICE PACKAGE|BY SERVICE_NUMBER_ID '" << service_number_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
-        } else {
             *trace << "NOT FOUND|SERVICE PACKAGE|BY SERVICE_NUMBER_ID '" << service_number_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
+        } else {
+            *trace << "FOUND|SERVICE PACKAGE|BY SERVICE_NUMBER_ID '" << service_number_id << "', TIME '" << string_time(timestamp) << "'" << "\n";
         }
         for (auto servicePackage : resultPackages) {
             *trace << "||";
