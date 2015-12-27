@@ -214,8 +214,8 @@ public:
             html << "</tr>\n";
         }
         {
-            auto dl = &repository.data->servicePackage;
-            html << "<tr><th>servicePackage</th>";
+            auto dl = &repository.data->serviceNumberPackage;
+            html << "<tr><th>serviceNumberPackage</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";
@@ -223,6 +223,13 @@ public:
         {
             auto dl = &repository.data->serviceTrunk;
             html << "<tr><th>serviceTrunk</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->serviceTrunkPackage;
+            html << "<tr><th>serviceTrunkPackage</th>";
             html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
             dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
             html << "</tr>\n";

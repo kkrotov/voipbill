@@ -106,7 +106,8 @@ set(BILL_SOURCES
     src-bill/data/RoutingReportDataData.cpp
     src-bill/data/ServerData.cpp
     src-bill/data/ServiceNumberData.cpp
-    src-bill/data/ServicePackageData.cpp
+    src-bill/data/ServiceNumberPackageData.cpp
+    src-bill/data/ServiceTrunkPackageData.cpp
     src-bill/data/ServiceTrunkData.cpp
     src-bill/data/ServiceTrunkSettingsData.cpp
     src-bill/data/StatDestinationPrefixlistsData.cpp
@@ -152,7 +153,8 @@ set(BILL_SOURCES
     src-bill/lists/RoutingReportDataList.cpp
     src-bill/lists/ServerList.cpp
     src-bill/lists/ServiceNumberList.cpp
-    src-bill/lists/ServicePackageList.cpp
+    src-bill/lists/ServiceNumberPackageList.cpp
+    src-bill/lists/ServiceTrunkPackageList.cpp
     src-bill/lists/ServiceTrunkList.cpp
     src-bill/lists/ServiceTrunkSettingsList.cpp
     src-bill/lists/StatDestinationPrefixlistsList.cpp
