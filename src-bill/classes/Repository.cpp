@@ -144,11 +144,15 @@ bool Repository::prepare(time_t currentTime) {
         return false;
     }
 
-    if ((servicePackage = data->servicePackage.get()) == nullptr) {
+    if ((serviceNumberPackage = data->serviceNumberPackage.get()) == nullptr) {
         return false;
     }
 
     if ((serviceTrunk = data->serviceTrunk.get()) == nullptr) {
+        return false;
+    }
+
+    if ((serviceTrunkPackage = data->serviceTrunkPackage.get()) == nullptr) {
         return false;
     }
 

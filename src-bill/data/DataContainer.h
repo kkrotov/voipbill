@@ -32,8 +32,9 @@
 #include "MobPrefixData.h"
 #include "GeoPrefixData.h"
 #include "ServiceNumberData.h"
-#include "ServicePackageData.h"
+#include "ServiceNumberPackageData.h"
 #include "ServiceTrunkData.h"
+#include "ServiceTrunkPackageData.h"
 #include "ServiceTrunkSettingsData.h"
 #include "TariffData.h"
 #include "TariffPackageData.h"
@@ -75,8 +76,9 @@ public:
     MobPrefixData mobPrefix;
     GeoPrefixData geoPrefix;
     ServiceNumberData serviceNumber;
-    ServicePackageData servicePackage;
+    ServiceNumberPackageData serviceNumberPackage;
     ServiceTrunkData serviceTrunk;
+    ServiceTrunkPackageData serviceTrunkPackage;
     ServiceTrunkSettingsData serviceTrunkSettings;
     TariffData tariff;
     TariffPackageData tariffPackage;

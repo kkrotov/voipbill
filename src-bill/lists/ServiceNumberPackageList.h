@@ -4,19 +4,21 @@
 #include "../models/ServicePackage.h"
 #include "../classes/AppBill.h"
 
-class ServicePackageList : public ObjList<ServicePackage> {
+class ServiceNumberPackageList : public ObjList<ServicePackage> {
 protected:
 
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
         return "    select id, service_number_id, tariff_package_id, periodical, extract(epoch from activation_dt), extract(epoch from expire_dt) " \
-            "       from billing.service_number_package " \
+            "       from billing.service_package " \
+            "       where service_number_id > 0 " \
             "       order by service_number_id asc, activation_dt asc ";
     }
 
     inline void parse_item(BDbResult &row, ServicePackage * item) {
         item->id = row.get_i(0);
         item->service_number_id = row.get_i(1);
+        item->service_trunk_id = 0;
         item->tariff_package_id = row.get_i(2);
         item->periodical = row.get_b(3);
         item->activation_dt = row.get_ll(4);
