@@ -36,8 +36,9 @@ void DataContainer::loadAll(BDb * db) {
     mobPrefix.load(db);
     geoPrefix.load(db);
     serviceNumber.load(db);
-    servicePackage.load(db);
+    serviceNumberPackage.load(db);
     serviceTrunk.load(db);
+    serviceTrunkPackage.load(db);
     serviceTrunkSettings.load(db);
     tariff.load(db);
     tariffPackage.load(db);

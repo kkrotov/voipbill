@@ -59,11 +59,19 @@ void BillingCall::calcByTrunk() {
 
     setupAccount();
 
+    if (call->orig) {
+        setupPackagePricelist();
+    }
+
     setupPricelist();
 
     setupPrice();
 
     setupBilledTime();
+
+    if (call->orig) {
+        setupPackagePrepaid();
+    }
 
     setupCost();
 
@@ -622,7 +630,14 @@ void BillingCall::setupTariff() {
 
 void BillingCall::setupPackagePricelist() {
     vector<ServicePackage *> packages;
-    repository->getAllServicePackage(packages, callInfo->serviceNumber->id);
+
+    if (callInfo->serviceNumber != nullptr) {
+        repository->getAllServiceNumberPackage(packages, callInfo->serviceNumber->id);
+    } else if (callInfo->serviceTrunk != nullptr) {
+        repository->getAllServiceTrunkPackage(packages, callInfo->serviceTrunk->id);
+    } else {
+        return;
+    }
 
     Pricelist * pricelist;
     PricelistPrice * price;
@@ -715,7 +730,14 @@ void BillingCall::setupPackagePrepaid() {
     }
 
     vector<ServicePackage *> packages;
-    repository->getAllServicePackage(packages, callInfo->serviceNumber->id);
+
+    if (callInfo->serviceNumber != nullptr) {
+        repository->getAllServiceNumberPackage(packages, callInfo->serviceNumber->id);
+    } else if (callInfo->serviceTrunk != nullptr) {
+        repository->getAllServiceTrunkPackage(packages, callInfo->serviceTrunk->id);
+    } else {
+        return;
+    }
 
     int packageSeconds = 0;
     ServicePackage * servicePackage = nullptr;
@@ -738,6 +760,12 @@ void BillingCall::setupPackagePrepaid() {
         }
 
         StatsPackage * stats = repository->billingData->statsPackageGetCurrent(callInfo, package, tariff);
+
+        if (trace != nullptr) {
+            *trace << "DEBUG|STATS PACKAGE|";
+            stats->dump(*trace);
+            *trace << "\n";
+        }
 
         int availableSeconds = stats->paid_seconds - stats->used_seconds;
         if (availableSeconds < 0) {

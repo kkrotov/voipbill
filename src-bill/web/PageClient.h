@@ -139,7 +139,6 @@ public:
         html << "-----<br/>\n";
 
         html << "Last account date: <b>" << string_time(client->amount_date) << "</b><br/>\n";
-        html << "Last payed month: <b>" << string_date(client->last_payed_month, 11) << "</b><br/>\n";
 
         html << "-----<br/>\n";
 

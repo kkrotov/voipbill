@@ -42,12 +42,12 @@ protected:
         }
     };
 
-    struct key_timestamp {
-        bool operator() (const ServiceNumber & left, time_t timestamp) {
-            return left.expire_dt < timestamp;
+    struct key_activation_dt {
+        bool operator() (const ServiceNumber & left, time_t activation_dt) {
+            return left.activation_dt < activation_dt;
         }
-        bool operator() (time_t timestamp, const ServiceNumber & right) {
-            return timestamp < right.activation_dt;
+        bool operator() (time_t activation_dt, const ServiceNumber & right) {
+            return activation_dt < right.activation_dt;
         }
     };
 
@@ -60,16 +60,24 @@ public:
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
-            auto p = equal_range(begin, end, did, key_did());
+            auto p = equal_range(begin, end, &did[0], key_did());
             begin = p.first;
             end = p.second;
         }
         {
-            auto p = equal_range(begin, end, timestamp, key_timestamp());
-            begin = p.first;
-            end = p.second;
+            end = upper_bound(begin, end, timestamp, key_activation_dt());
         }
-        ServiceNumber * result = begin <  end ? &*begin : nullptr;
+
+        ServiceNumber * result = nullptr;
+        if (begin < end) {
+            for (auto it = begin; it != end; ++it) {
+                ServiceNumber * serviceNumber = &*it;
+                if (serviceNumber->expire_dt >= timestamp) {
+                    result = serviceNumber;
+                    break;
+                }
+            }
+        }
 
         if (trace != nullptr) {
 

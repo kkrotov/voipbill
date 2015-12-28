@@ -7,6 +7,7 @@ ThreadBlacklistFetch::ThreadBlacklistFetch() {
     blacklist_global = BlackListGlobal::instance();
     blacklist_local = BlackListLocal::instance();
     blacklist_trunk = BlackListTrunk::instance();
+    blacklist_anti_fraud_disable = BlackListAntiFraudDisable::instance();
 
     threadSleepSeconds = 3600;
 }
@@ -19,4 +20,5 @@ void ThreadBlacklistFetch::run() {
 
     blacklist_trunk->fetch();
 
+    blacklist_anti_fraud_disable->fetch();
 }

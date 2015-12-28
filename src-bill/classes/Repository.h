@@ -43,8 +43,9 @@ private:
     shared_ptr<MobPrefixList> mobPrefix;
     shared_ptr<GeoPrefixList> geoPrefix;
     shared_ptr<ServiceNumberList> serviceNumber;
-    shared_ptr<ServicePackageList> servicePackage;
+    shared_ptr<ServiceNumberPackageList> serviceNumberPackage;
     shared_ptr<ServiceTrunkList> serviceTrunk;
+    shared_ptr<ServiceTrunkPackageList> serviceTrunkPackage;
     shared_ptr<ServiceTrunkSettingsList> serviceTrunkSettings;
     shared_ptr<TariffList> tariff;
     shared_ptr<TariffPackageList> tariffPackage;
@@ -123,8 +124,12 @@ public:
         serviceTrunkSettings->findAll(resultTrunkSettings, trunk_id, type, trace);
     }
 
-    void getAllServicePackage(vector<ServicePackage *> &resultPackages, int service_number_id) {
-        servicePackage->findAll(resultPackages, service_number_id, currentTime, trace);
+    void getAllServiceNumberPackage(vector<ServicePackage *> &resultPackages, int service_number_id) {
+        serviceNumberPackage->findAll(resultPackages, service_number_id, currentTime, trace);
+    }
+
+    void getAllServiceTrunkPackage(vector<ServicePackage *> &resultPackages, int service_trunk_id) {
+        serviceTrunkPackage->findAll(resultPackages, service_trunk_id, currentTime, trace);
     }
 
     Pricelist * getPricelist(int pricelist_id) {

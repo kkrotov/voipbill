@@ -33,6 +33,7 @@ private:
     Repository repository;
     Server * server;
     Trunk * origTrunk;
+    Client * account;
 
     void init();
 

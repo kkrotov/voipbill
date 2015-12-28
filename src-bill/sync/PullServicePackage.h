@@ -5,9 +5,9 @@
 class PullServicePackage : public BasePull {
 public:
     void init() {
-        event = "service_number_package";
-        src_table = "billing.service_number_package";
-        dst_table = "billing.service_number_package";
+        event = "service_package";
+        src_table = "billing.service_package";
+        dst_table = "billing.service_package";
 
         key = "id";
 
@@ -16,6 +16,7 @@ public:
         fields.push_back("expire_dt");
         fields.push_back("tariff_package_id");
         fields.push_back("service_number_id");
+        fields.push_back("service_trunk_id");
         fields.push_back("periodical");
     }
 };
