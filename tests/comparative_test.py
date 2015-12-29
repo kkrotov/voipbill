@@ -121,8 +121,8 @@ class TestComparativeResults(unittest2.TestCase):
         currOk = False
 
       if cost_diff is None or cost_is is None or abs(cost_is) < 0.0000001 :
-        # Пропускаем нашу часть 7800-х - они бесплатные, разумеется.
-        if str(dst_number).startswith('7800') and not orig and our:
+        # Пропускаем терминацию наших звонков на наши транки - кроме 800-х.
+        if not str(dst_number).startswith('7800') and not orig and our:
           continue
 
         errorlog += 'ERROR: A call cost is absent or zero for region %(region)d with %(A)s %(orig)s %(B)s. Cost should be %(cost_should)s, pricelist %(pricelist_id)s\n' % {
