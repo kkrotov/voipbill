@@ -317,6 +317,8 @@ def determineAlienTrunk(number, region) :
   if number not in ourDialNumbers :
     return localTrunk[region] if isLocalFor(number, region) else mgmnTrunk[region]
   else :
+    # TODO: Процедура неправильная, нужны местные локальные транки с указанным регионом,
+    # (выбирать их по trunk.code??? - стрёмно), поэтому пока не используем.
     ourTrunkRegion = ourDialNumbers[number]
     return myTrunk[ourTrunkRegion]
 
@@ -373,6 +375,11 @@ for (regConn, region_id) in regConnections :
 
         # Исходящие звонки с 800-х вообще не должны делаться, для них используются "короткие" номера.
         if A.startswith('7800') :
+          continue
+
+        if number in ourDialNumbers :
+          # Не генерим звонки между нашими абонентами,
+          # т.к. определение нашего транка - либо нетривиально, либо требует решения.
           continue
 
         '''
