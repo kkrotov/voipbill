@@ -392,7 +392,8 @@ for (regConn, region_id) in regConnections :
           '%(srcTrunk)s', '%(dstTrunk)s',
           3::smallint, 3::smallint,
           '')
-          ''' % {'A': A, 'B': B, 'callId': callId, 'srcTrunk': srcTrunk, 'dstTrunk': dstTrunk}
+          ''' % {'A': A, 'B': B, 'callId': callId, 'srcTrunk': srcTrunk, 'dstTrunk': dstTrunk,
+                 'nowTime': nowTimeStr}
 
         # print statement
 
