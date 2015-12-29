@@ -78,24 +78,24 @@ class TestComparativeResults(unittest2.TestCase):
 
     reportTable = '<table style="width:100%%%%">%(header)s%(reportRows)s</table>'
     reportRowFormat = '<tr>\
-        <th>%(Region)s</th>\
-        <th>%(A)s</th>\
-        <th>%(B)s</th>\
-        <th>%(Trunk)s</th>\
-        <th>%(Our)s</th>\
-        <th>%(Orig/Term)s</th>\
-        <th>%(Pricelist)s</th>\
-        <th>%(Type)s</th>\
-        <th>%(Prefix)s</th>\
-        <th>%(Mobile)s</th>\
-        <th>%(Price Should)s</th>\
-        <th>%(Price Is)s</th>\
-        <th>%(Cost Should)s</th>\
-        <th>%(Cost Is)s</th>\
-        <th>%(Cost Diff)s</th>\
+        <td>%(Region)s</td>\
+        <td>%(A)s</td>\
+        <td>%(B)s</td>\
+        <td>%(Trunk)s</td>\
+        <td>%(Our)s</td>\
+        <td>%(Orig/Term)s</td>\
+        <td>%(Pricelist)s</td>\
+        <td>%(Type)s</td>\
+        <td>%(Prefix)s</td>\
+        <td>%(Mobile)s</td>\
+        <td>%(Price Should)s</td>\
+        <td>%(Price Is)s</td>\
+        <td>%(Cost Should)s</td>\
+        <td>%(Cost Is)s</td>\
+        <td>%(Cost Diff)s</td>\
       </tr>'
 
-    reportHeader = reportRowFormat.replace('%(', '').replace(')s', '')
+    reportHeader = reportRowFormat.replace('%(', '').replace(')s', '').replace('td>', 'th>')
     reportTable = reportTable % {'header': reportHeader, 'reportRows': '%(reportRows)s'}
 
     reportRows = ''

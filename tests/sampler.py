@@ -156,6 +156,25 @@ for region_id, did in rows:
 
   regionDids[region_id].append(did)
 
+
+# Определяем, какие номера из списка - наши, и определяем их регион
+
+ourDialNumbers = {}
+
+cur.execute('''
+  SET search_path = billing, pg_catalog;
+  SELECT server_id, did FROM billing.service_number WHERE did IN (%(numbers)s)
+  AND activation_dt <= '%(nowTime)s' AND '%(nowTime)s' < expire_dt
+  ORDER BY server_id;
+''' % {'numbers': ','.join(["'%s'" % num for num in DIAL_NUMBERS]), 'nowTime': nowTimeStr})
+
+rows = cur.fetchall()
+for region_id, did in rows:
+  ourDialNumbers[did] = region_id
+
+print ourDialNumbers
+
+
 # Вытаскиваем актуальный список префиксов для определения местных транков
 
 localPrefix = {
@@ -294,6 +313,13 @@ def isLocalFor(number, region) :
       return True
   return False
 
+def determineAlienTrunk(number, region) :
+  if number not in ourDialNumbers :
+    return localTrunk[region] if isLocalFor(number, region) else mgmnTrunk[region]
+  else :
+    ourTrunkRegion = ourDialNumbers[number]
+    return myTrunk[ourTrunkRegion]
+
 
 print 'Вставляем тестовые звонки в регионы:'
 print regionsList
@@ -380,12 +406,12 @@ for (regConn, region_id) in regConnections :
 
         if B == did :
           # Входящий звонок
-          srcTrunk = localTrunk[region_id] if isLocalFor(A, region_id) else mgmnTrunk[region_id]
+          srcTrunk = determineAlienTrunk(A, region_id)
           dstTrunk = myTrunk[region_id]
         else :
           # Исходящий звонок
           srcTrunk = myTrunk[region_id]
-          dstTrunk = localTrunk[region_id] if isLocalFor(B, region_id) else mgmnTrunk[region_id]
+          dstTrunk = determineAlienTrunk(B, region_id)
 
         statement = '''
           SELECT insert_cdr(%(callId)d::bigint, '85.94.32.233'::inet, '%(A)s', '%(B)s',
