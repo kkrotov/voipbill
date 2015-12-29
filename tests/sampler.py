@@ -209,7 +209,7 @@ cur.execute('''
     AFTER DELETE ON queue
     FOR EACH ROW
     EXECUTE PROCEDURE notify_queue_delete();
-''' % {'dbPartTime': nowTimeDbPartition)
+''' % {'dbPartTime': nowTimeDbPartition})
 
 conn.commit()
 
