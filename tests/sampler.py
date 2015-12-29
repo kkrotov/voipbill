@@ -132,6 +132,11 @@ conn = psycopg2.connect(database='nispd_test', user='postgres')
 cur = conn.cursor()
 
 
+nowTime = datetime.datetime.now()
+nowTimeStr = datetime.datetime.strftime(nowTime, '%Y-%m-%d %H:%M:%S')
+nowTimeDbPartition = datetime.datetime.strftime(nowTime, '%Y%m')
+
+
 # Вытаскиваем актуальный список DID'ов тестового клиента
 
 # Ключ - регион. Значение - список DID'ов этого региона
@@ -139,8 +144,10 @@ regionDids = {}
 
 cur.execute('''
   SET search_path = billing, pg_catalog;
-  SELECT server_id, did FROM billing.service_number WHERE client_account_id = %s ORDER BY server_id;
-''' % TEST_CLIENT_ID)
+  SELECT server_id, did FROM billing.service_number WHERE client_account_id = %(clientId)s
+  AND activation_dt <= '%(nowTime)s' AND '%(nowTime)s' < expire_dt
+  ORDER BY server_id;
+''' % {'clientId': TEST_CLIENT_ID, 'nowTime': nowTimeStr})
 
 rows = cur.fetchall()
 for region_id, did in rows:
@@ -166,10 +173,6 @@ for region_id, prefixes in rows:
 
 # Навешиваем триггеры для нотификаций завершения синхронизации
 # "центр->регион" до генерации тестовых звонков и "регион->центр" - после
-
-nowTime = datetime.datetime.now()
-nowTimeStr = datetime.datetime.strftime(nowTime, '%Y-%m-%d %H:%M:%S')
-nowTimeDbPartition = datetime.datetime.strftime(nowTime, '%Y%m')
 
 cur.execute('''
   SET search_path = calls_raw, pg_catalog;
