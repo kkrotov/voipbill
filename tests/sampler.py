@@ -164,7 +164,6 @@ ourDialNumbers = {}
 cur.execute('''
   SET search_path = billing, pg_catalog;
   SELECT server_id, did FROM billing.service_number WHERE did IN (%(numbers)s)
-  AND activation_dt <= '%(nowTime)s' AND '%(nowTime)s' < expire_dt
   ORDER BY server_id;
 ''' % {'numbers': ','.join(["'%s'" % num for num in DIAL_NUMBERS]), 'nowTime': nowTimeStr})
 
@@ -371,6 +370,10 @@ for (regConn, region_id) in regConnections :
 
         # Входящие не на 800-й пропускаем - они все бесплатные.
         if B == did and not B.startswith('7800') :
+          continue
+
+        # Входящие иностранные на 800-е пропускаем
+        if not A.startswith('7') and B.startswith('7800') :
           continue
 
         # Исходящие звонки с 800-х вообще не должны делаться, для них используются "короткие" номера.
