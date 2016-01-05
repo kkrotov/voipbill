@@ -18,7 +18,10 @@ struct Number {
         intPrefixlistIds.reserve(strPrefixlistIds.size());
 
         for (auto it = strPrefixlistIds.begin(); it != strPrefixlistIds.end(); ++it) {
-            intPrefixlistIds.push_back(atoi((*it).c_str()));
+            int prefixlistId = atoi((*it).c_str());
+            if (prefixlistId > 0) {
+                intPrefixlistIds.push_back(prefixlistId);
+            }
         }
 
         return intPrefixlistIds;
