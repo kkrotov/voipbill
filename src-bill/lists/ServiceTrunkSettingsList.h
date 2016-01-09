@@ -7,18 +7,21 @@ class ServiceTrunkSettingsList : public ObjList<ServiceTrunkSettings> {
 protected:
 
     string sql(BDb * db) {
-        return "    select trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id " \
+        return "    select id, trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id, minimum_minutes, minimum_cost " \
             "       from billing.service_trunk_settings " \
             "       order by trunk_id asc, \"type\" asc, \"order\" asc ";
     }
 
     inline void parse_item(BDbResult &row, ServiceTrunkSettings * item) {
-        item->trunk_id = row.get_i(0);
-        item->type = row.get_i(1);
-        item->order = row.get_i(2);
-        item->src_number_id = row.get_i(3);
-        item->dst_number_id = row.get_i(4);
-        item->pricelist_id = row.get_i(5);
+        item->id = row.get_i(0);
+        item->trunk_id = row.get_i(1);
+        item->type = row.get_i(2);
+        item->order = row.get_i(3);
+        item->src_number_id = row.get_i(4);
+        item->dst_number_id = row.get_i(5);
+        item->pricelist_id = row.get_i(6);
+        item->minimum_minutes = row.get_i(7);
+        item->minimum_cost = row.get_i(8);
     }
 
     struct key_trunk_id {
