@@ -528,11 +528,24 @@ void RadiusAuthProcessor::processRedirectNumber() {
 }
 
 void RadiusAuthProcessor::processLineWithoutNumber() {
-    if (origTrunk->our_trunk
-        && origTrunk->auth_by_number
-        && server->calling_station_id_for_line_without_number[0] != 0
-        && (aNumber.substr(11, 1) == "*" || aNumber.substr(11, 1) == "+")
+    if (!origTrunk->our_trunk
+        || !origTrunk->auth_by_number
+        || !server->calling_station_id_for_line_without_number[0] != 0
     ) {
+        return;
+    }
+
+    bool lineWithoutNumber = false;
+
+    if (aNumber.find("*") != string::npos) {
+        lineWithoutNumber = true;
+    }
+
+    if (aNumber.find("+") != string::npos) {
+        lineWithoutNumber = true;
+    }
+
+    if (lineWithoutNumber) {
         response->srcNumber = server->calling_station_id_for_line_without_number;
         if (trace != nullptr) {
             *trace << "INFO|LINE WITH NUMBER|SET RESPONSE.CALLING = " << response->srcNumber << "\n";
