@@ -19,7 +19,10 @@ struct InstanceSettings {
         split(strRegionIds, temp, boost::algorithm::is_any_of(","));
 
         for (auto it = strRegionIds.begin(); it != strRegionIds.end(); ++it) {
-            regionIds.push_back(atoi((*it).c_str()));
+            int regionId = atoi((*it).c_str());
+            if (regionId > 0) {
+                regionIds.push_back(atoi((*it).c_str()));
+            }
         }
 
         return regionIds;

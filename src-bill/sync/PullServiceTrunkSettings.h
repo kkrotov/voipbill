@@ -18,5 +18,7 @@ public:
         fields.push_back("src_number_id");
         fields.push_back("dst_number_id");
         fields.push_back("pricelist_id");
+        fields.push_back("minimum_minutes");
+        fields.push_back("minimum_cost");
     }
 };
