@@ -69,6 +69,7 @@ set(BILL_SOURCES
     src-bill/classes/RadiusAuthProcessor.cpp
     src-bill/classes/RadiusAuthServer.cpp
     src-bill/classes/StatsPackageManager.cpp
+    src-bill/classes/StatsTrunkSettingsManager.cpp
     src-bill/classes/Repository.cpp
     src-bill/classes/Spinlock.cpp
     src-bill/classes/Task.cpp
@@ -209,6 +210,7 @@ set(BILL_SOURCES
     src-bill/models/StatsFreemin.cpp
     src-bill/models/StatsAccount.cpp
     src-bill/models/StatsPackage.cpp
+    src-bill/models/StatsTrunkSettings.cpp
     src-bill/models/Tariff.cpp
     src-bill/models/TariffChangeLog.cpp
     src-bill/models/TariffPackage.cpp
@@ -298,6 +300,7 @@ set(BILL_SOURCES
     src-bill/web/PageDataBilling.cpp
     src-bill/web/PageFmins.cpp
     src-bill/web/PagePackage.cpp
+    src-bill/web/PageTrunkSettingsCounters.cpp
     src-bill/web/PageHome.cpp
     src-bill/web/PageLocks.cpp
     src-bill/web/PageLog.cpp

@@ -16,11 +16,13 @@ void DataBillingContainer::loadAll(BDb * db, bool recalc) {
         statsAccount.recalc(db);
         statsFreemin.recalc(db, getCallsStoredLastId());
         statsPackage.recalc(db, getCallsStoredLastId());
+        statsTrunkSettings.recalc(db, getCallsStoredLastId());
     }
 
     statsAccount.load(db);
     statsFreemin.load(db, getCallsStoredLastTime());
     statsPackage.load(db, getCallsStoredLastTime());
+    statsTrunkSettings.load(db, getCallsStoredLastTime());
 
     clientLock.load(db);
 }
@@ -73,6 +75,10 @@ bool DataBillingContainer::ready() {
         return false;
     }
 
+    if (!statsTrunkSettings.ready()) {
+        return false;
+    }
+
     if (!clientLock.ready()) {
         return false;
     }
@@ -86,6 +92,7 @@ void DataBillingContainer::addCall(CallInfo * callInfo) {
     statsAccount.add(callInfo);
     statsFreemin.add(callInfo);
     statsPackage.add(callInfo);
+    statsTrunkSettings.add(callInfo);
 
     calls.add(*callInfo->call);
 
@@ -114,6 +121,7 @@ void DataBillingContainer::save(BDb * dbCalls) {
     stringstream statAccountQuery;
     stringstream statFreeminQuery;
     stringstream statPackageQuery;
+    stringstream statTrunkSettingsQuery;
 
     {
         lock_guard<Spinlock> guard(lock);
@@ -131,11 +139,16 @@ void DataBillingContainer::save(BDb * dbCalls) {
         lock_guard<Spinlock> guard(lock);
         statsPackage.prepareSaveQuery(statPackageQuery);
     }
+    {
+        lock_guard<Spinlock> guard(lock);
+        statsTrunkSettings.prepareSaveQuery(statTrunkSettingsQuery);
+    }
 
     calls.executeSaveQueries(dbCalls, callsQueryPerMonth);
     statsAccount.executeSaveQuery(dbCalls, statAccountQuery);
     statsFreemin.executeSaveQuery(dbCalls, statFreeminQuery);
     statsPackage.executeSaveQuery(dbCalls, statPackageQuery);
+    statsTrunkSettings.executeSaveQuery(dbCalls, statTrunkSettingsQuery);
 
     trans.commit();
 
@@ -188,6 +201,7 @@ void DataBillingContainer::createNewPartition() {
     statsAccount.createNewPartition();
     statsFreemin.createNewPartition();
     statsPackage.createNewPartition();
+    statsTrunkSettings.createNewPartition();
 }
 
 void DataBillingContainer::removePartitionAfterSave() {
@@ -195,6 +209,7 @@ void DataBillingContainer::removePartitionAfterSave() {
     statsAccount.removePartitionAfterSave();
     statsFreemin.removePartitionAfterSave();
     statsPackage.removePartitionAfterSave();
+    statsTrunkSettings.removePartitionAfterSave();
 }
 
 bool DataBillingContainer::cdrsLoadPart(BDb * db_calls) {
@@ -291,6 +306,11 @@ StatsPackage * DataBillingContainer::statsPackageGetCurrent(CallInfo * callInfo,
     return statsPackage.getCurrent(callInfo, servicePackage, tariffPackage);
 }
 
+StatsTrunkSettings * DataBillingContainer::statsTrunkSettingsGetCurrent(time_t connect_time, Client * account, ServiceTrunkSettings * trunkSettings) {
+    lock_guard<Spinlock> guard(lock);
+    return statsTrunkSettings.getCurrent(connect_time, account, trunkSettings);
+}
+
 void DataBillingContainer::statsAccountGetChanges(map<int, StatsAccount> &changes, bool &needClear) {
     lock_guard<Spinlock> guard(lock);
     statsAccount.getChanges(changes, needClear);
@@ -320,3 +340,14 @@ void DataBillingContainer::statsPackageAddChanges(map<int, StatsPackage> &change
     lock_guard<Spinlock> guard(lock);
     statsPackage.addChanges(changes);
 }
+
+void DataBillingContainer::statsTrunkSettingsGetChanges(map<int, StatsTrunkSettings> &changes) {
+    lock_guard<Spinlock> guard(lock);
+    statsTrunkSettings.getChanges(changes);
+}
+
+void DataBillingContainer::statsTrunkSettingsAddChanges(map<int, StatsTrunkSettings> &changes) {
+    lock_guard<Spinlock> guard(lock);
+    statsTrunkSettings.addChanges(changes);
+}
+

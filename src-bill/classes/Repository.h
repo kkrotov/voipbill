@@ -358,8 +358,41 @@ public:
         sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
     }
 
-    void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList) const {
-        sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
+    void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, time_t connect_time) const {
+
+        vector<ServiceTrunkOrder> trunkSettingsOrderFreeList;
+        vector<ServiceTrunkOrder> trunkSettingsOrderPayList;
+
+        for (auto order : trunkSettingsOrderList) {
+            order.statsTrunkSettings = billingData->statsTrunkSettingsGetCurrent(connect_time, order.account, order.trunkSettings);
+
+            if (order.trunkSettings->minimum_minutes > 0) {
+                if (order.statsTrunkSettings->used_seconds < order.trunkSettings->minimum_minutes * 60) {
+                    trunkSettingsOrderFreeList.push_back(order);
+                }
+                continue;
+            }
+
+            if (order.trunkSettings->minimum_cost > 0) {
+                if (order.statsTrunkSettings->used_credit <= order.trunkSettings->minimum_cost * 60) {
+                    trunkSettingsOrderFreeList.push_back(order);
+                }
+                continue;
+            }
+
+            trunkSettingsOrderPayList.push_back(order);
+        }
+
+        sort(trunkSettingsOrderFreeList.begin(), trunkSettingsOrderFreeList.end(), trunk_settings_order_desc_price(*this));
+        sort(trunkSettingsOrderPayList.begin(), trunkSettingsOrderPayList.end(), trunk_settings_order_asc_price(*this));
+
+        trunkSettingsOrderList.clear();
+        for (auto order : trunkSettingsOrderFreeList) {
+            trunkSettingsOrderList.push_back(order);
+        }
+        for (auto order : trunkSettingsOrderPayList) {
+            trunkSettingsOrderList.push_back(order);
+        }
     }
 
     bool checkTrunkSettingsConditions(ServiceTrunkSettings * &trunkSettings, long long int srcNumber, long long int dstNumber, Pricelist * &pricelist, PricelistPrice * &price) {
@@ -452,8 +485,10 @@ public:
                     }
                     ServiceTrunkOrder order;
                     order.trunk = trunk;
+                    order.account = account;
                     order.serviceTrunk = serviceTrunk;
                     order.trunkSettings = trunkSettings;
+                    order.statsTrunkSettings = nullptr;
                     order.pricelist = pricelist;
                     order.price = price;
                     resultTrunkSettingsTrunkOrderList.push_back(order);
@@ -465,6 +500,14 @@ public:
         if (resultTrunkSettingsTrunkOrderList.size() > 0) {
             if (trace != nullptr) {
                 *trace << "FOUND|TRUNK SETTING ORDER LIST|" << "\n";
+            }
+
+            for (auto order : resultTrunkSettingsTrunkOrderList) {
+                if (trace != nullptr) {
+                    *trace << "||";
+                    order.dump(*trace);
+                    *trace << "\n";
+                }
             }
         } else {
             if (trace != nullptr) {

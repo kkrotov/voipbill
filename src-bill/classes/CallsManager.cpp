@@ -114,6 +114,11 @@ void CallsManager::calls_insert_row(Call * call, stringstream &q) {
     }
     q << "'" << call->package_time << "',";
     q << "'" << call->package_credit << "',";
+    if (call->trunk_settings_stats_id != 0) {
+        q << "'" << call->trunk_settings_stats_id << "',";
+    } else {
+        q << "NULL,";
+    }
     q << "'" << call->destination_id << "',";
     if (call->pricelist_id != 0) {
         q << "'" << call->pricelist_id << "',";
@@ -163,7 +168,7 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth) 
             q << "INSERT INTO calls_raw.calls_raw_" + string(buff) + "(" \
                     "id,orig,our,peer_id,cdr_id,connect_time,trunk_id,account_id,trunk_service_id,number_service_id," \
                     "src_number,dst_number,billed_time,rate,cost,tax_cost,interconnect_rate,interconnect_cost," \
-                    "service_package_id,service_package_stats_id,package_time,package_credit," \
+                    "service_package_id,service_package_stats_id,package_time,package_credit,trunk_settings_stats_id," \
                     "destination_id,pricelist_id,prefix,geo_id,geo_operator_id,mob,geo_mob" \
                  ")VALUES\n";
 
