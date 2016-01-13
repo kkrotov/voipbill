@@ -112,13 +112,13 @@ class TestComparativeResults(unittest2.TestCase):
       
       # Пока не залит прайс Ростелекома для Владивостока и не обновлён прайс Ростелекома для Новосибирска,
       # эти номера добавляем в "чёрный список" (криво специально, чтобы выпилить):
-      if region = 89 and str(src_number) = '74232060498' and str(dst_number) = '74232080075' :
+      if region == 89 and str(src_number) == '74232060498' and str(dst_number) == '74232080075' :
         continue
-      if region = 89 and str(src_number) = '74232060490' and str(dst_number) = '74232080075' :
+      if region == 89 and str(src_number) == '74232060490' and str(dst_number) == '74232080075' :
         continue
-      if region = 94 and str(src_number) = '73833120493' and str(dst_number) = '73833833000' :
+      if region == 94 and str(src_number) == '73833120493' and str(dst_number) == '73833833000' :
         continue
-      if region = 94 and str(src_number) = '73833120496' and str(dst_number) = '73833833000' :
+      if region == 94 and str(src_number) == '73833120496' and str(dst_number) == '73833833000' :
         continue
 
       if curr_id is None or prev_id is None :
