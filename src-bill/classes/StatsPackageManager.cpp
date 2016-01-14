@@ -237,6 +237,7 @@ StatsPackage * StatsPackageManager::updateStatsPackage(CallInfo *callInfo, int s
 
     stats.used_seconds += callInfo->call->package_time;
     stats.used_credit += callInfo->call->package_credit;
+    stats.min_call_id = stats.min_call_id == 0 ? callInfo->call->id : stats.min_call_id;
     stats.max_call_id = callInfo->call->id;
 
     return &stats;
