@@ -546,6 +546,10 @@ void RadiusAuthProcessor::processLineWithoutNumber() {
     }
 
     if (lineWithoutNumber) {
+        if (origTrunk->orig_redirect_number && request->redirectNumber.size() > 0) {
+            return;
+        }
+
         response->srcNumber = server->calling_station_id_for_line_without_number;
         if (trace != nullptr) {
             *trace << "INFO|LINE WITH NUMBER|SET RESPONSE.CALLING = " << response->srcNumber << "\n";
