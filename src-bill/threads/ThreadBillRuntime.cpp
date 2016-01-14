@@ -15,5 +15,7 @@ void ThreadBillRuntime::run() {
     }
 
     Billing billing;
-    billing.calc();
+    // Флаг для дифференциации логирования
+    bool realtimePurpose = true;
+    billing.calc(realtimePurpose);
 }
