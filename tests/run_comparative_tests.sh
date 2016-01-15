@@ -83,5 +83,5 @@ git reset --hard ${CURRENT_HASH}
 NOW=$(date +"%Y-%m-%d")
 git tag -a $NOW -m "Tested $NOW" tested
 
-git push --tags origin tested:tested
+git push --tags --force origin tested:tested
 
