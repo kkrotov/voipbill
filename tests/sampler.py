@@ -132,6 +132,11 @@ conn = psycopg2.connect(database='nispd_test', user='postgres')
 cur = conn.cursor()
 
 
+nowTime = datetime.datetime.now()
+nowTimeStr = datetime.datetime.strftime(nowTime, '%Y-%m-%d %H:%M:%S')
+nowTimeDbPartition = datetime.datetime.strftime(nowTime, '%Y%m')
+
+
 # Вытаскиваем актуальный список DID'ов тестового клиента
 
 # Ключ - регион. Значение - список DID'ов этого региона
@@ -139,8 +144,10 @@ regionDids = {}
 
 cur.execute('''
   SET search_path = billing, pg_catalog;
-  SELECT server_id, did FROM billing.service_number WHERE client_account_id = %s ORDER BY server_id;
-''' % TEST_CLIENT_ID)
+  SELECT server_id, did FROM billing.service_number WHERE client_account_id = %(clientId)s
+  AND activation_dt <= '%(nowTime)s' AND '%(nowTime)s' < expire_dt
+  ORDER BY server_id;
+''' % {'clientId': TEST_CLIENT_ID, 'nowTime': nowTimeStr})
 
 rows = cur.fetchall()
 for region_id, did in rows:
@@ -148,6 +155,24 @@ for region_id, did in rows:
     regionDids[region_id] = []
 
   regionDids[region_id].append(did)
+
+
+# Определяем, какие номера из списка - наши, и определяем их регион
+
+ourDialNumbers = {}
+
+cur.execute('''
+  SET search_path = billing, pg_catalog;
+  SELECT server_id, did FROM billing.service_number WHERE did IN (%(numbers)s)
+  ORDER BY server_id;
+''' % {'numbers': ','.join(["'%s'" % num for num in DIAL_NUMBERS]), 'nowTime': nowTimeStr})
+
+rows = cur.fetchall()
+for region_id, did in rows:
+  ourDialNumbers[did] = region_id
+
+print ourDialNumbers
+
 
 # Вытаскиваем актуальный список префиксов для определения местных транков
 
@@ -166,10 +191,6 @@ for region_id, prefixes in rows:
 
 # Навешиваем триггеры для нотификаций завершения синхронизации
 # "центр->регион" до генерации тестовых звонков и "регион->центр" - после
-
-nowTime = datetime.datetime.now()
-nowTimeStr = datetime.datetime.strftime(nowTime, '%Y-%m-%d %H:%M:%S')
-nowTimeDbPartition = datetime.datetime.strftime(nowTime, '%Y%m')
 
 cur.execute('''
   SET search_path = calls_raw, pg_catalog;
@@ -209,7 +230,7 @@ cur.execute('''
     AFTER DELETE ON queue
     FOR EACH ROW
     EXECUTE PROCEDURE notify_queue_delete();
-''' % {'dbPartTime': nowTimeDbPartition)
+''' % {'dbPartTime': nowTimeDbPartition})
 
 conn.commit()
 
@@ -291,6 +312,15 @@ def isLocalFor(number, region) :
       return True
   return False
 
+def determineAlienTrunk(number, region) :
+  if number not in ourDialNumbers :
+    return localTrunk[region] if isLocalFor(number, region) else mgmnTrunk[region]
+  else :
+    # TODO: Процедура неправильная, нужны местные локальные транки с указанным регионом,
+    # (выбирать их по trunk.code??? - стрёмно), поэтому пока не используем.
+    ourTrunkRegion = ourDialNumbers[number]
+    return myTrunk[ourTrunkRegion]
+
 
 print 'Вставляем тестовые звонки в регионы:'
 print regionsList
@@ -342,8 +372,17 @@ for (regConn, region_id) in regConnections :
         if B == did and not B.startswith('7800') :
           continue
 
+        # Входящие иностранные на 800-е пропускаем
+        if not A.startswith('7') and B.startswith('7800') :
+          continue
+
         # Исходящие звонки с 800-х вообще не должны делаться, для них используются "короткие" номера.
         if A.startswith('7800') :
+          continue
+
+        if number in ourDialNumbers :
+          # Не генерим звонки между нашими абонентами,
+          # т.к. определение нашего транка - либо нетривиально, либо требует решения.
           continue
 
         '''
@@ -377,12 +416,12 @@ for (regConn, region_id) in regConnections :
 
         if B == did :
           # Входящий звонок
-          srcTrunk = localTrunk[region_id] if isLocalFor(A, region_id) else mgmnTrunk[region_id]
+          srcTrunk = determineAlienTrunk(A, region_id)
           dstTrunk = myTrunk[region_id]
         else :
           # Исходящий звонок
           srcTrunk = myTrunk[region_id]
-          dstTrunk = localTrunk[region_id] if isLocalFor(B, region_id) else mgmnTrunk[region_id]
+          dstTrunk = determineAlienTrunk(B, region_id)
 
         statement = '''
           SELECT insert_cdr(%(callId)d::bigint, '85.94.32.233'::inet, '%(A)s', '%(B)s',
@@ -392,7 +431,8 @@ for (regConn, region_id) in regConnections :
           '%(srcTrunk)s', '%(dstTrunk)s',
           3::smallint, 3::smallint,
           '')
-          ''' % {'A': A, 'B': B, 'callId': callId, 'srcTrunk': srcTrunk, 'dstTrunk': dstTrunk}
+          ''' % {'A': A, 'B': B, 'callId': callId, 'srcTrunk': srcTrunk, 'dstTrunk': dstTrunk,
+                 'nowTime': nowTimeStr}
 
         # print statement
 
