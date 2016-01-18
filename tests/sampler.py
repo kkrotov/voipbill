@@ -265,7 +265,22 @@ if rows[0][0] > 0 :
 
   onsync.unlisten('queuedeleted')
 
-conn.close()
+# conn.close()
+
+
+# Создаём таблицы для хранения тестовых данных
+cur.execute('''
+  CREATE SCHEMA IF NOT EXISTS tests;
+  CREATE TABLE IF NOT EXISTS tests.voiprouting_tests (
+    sampler_id BIGINT NOT NULL, -- ID прогона тестов
+    region_id INT NOT NULL,
+    src_number TEXT NOT NULL,
+    dst_number TEXT NOT NULL,
+    route_case TEXT, -- RouteCase, если есть
+    debug TEXT       -- Полный ответ демона
+  )
+''')
+conn.commit()
 
 
 # Пустая queue ещё не значит, что демон биллинга готов к вставке звонков.
@@ -384,6 +399,37 @@ for (regConn, region_id) in regConnections :
           # Не генерим звонки между нашими абонентами,
           # т.к. определение нашего транка - либо нетривиально, либо требует решения.
           continue
+
+        if A == did :
+          # Для всех исходящих генерим тестирование маршрутизации
+          # Результаты пишем (append'ом) в формате "Регион А-номер Б-номер RouteCase"
+          # Полный лог ответа демона биллинга тоже пишем, чтобы можно было сравнить на месте
+          # fail с предыдущим позитивным ответом.
+          # Результаты сравниваются и выводится позитивная информация для тех кейсов,
+          # для которых остутствуют или отличаются результаты в новой версии,
+          # наряду с негативными ответами демона биллинга.
+
+          routeReply = ''
+          route_case = ''
+
+          try :
+            requestUrl = 'http://localhost:80%(region_id)s/test/auth?trunk_name=%(myTrunk)s&src_number=%(A)s&dst_number=%(B)s&src_noa=3&dst_noa=3' % {
+              'A': A, 'B': B, 'region_id': region_id, 'myTrunk': myTrunk[region_id]
+            }
+            routeReply = urllib2.urlopen(requestUrl).read()
+            route_case = routeReply.split('\n')[-2]
+          except:
+            routeReply = sys.exc_info()[0]
+
+          cur.execute('''INSERT INTO tests.voiprouting_tests
+            (sampler_id, region_id, src_number, dst_number, route_case, debug) VALUES
+            (%(sampler_id)d, %(region_id)d, '%(src_number)s', '%(dst_number)s', '%(route_case)s', '%(debug)s')''',
+            {
+              'sampler_id': CALLID_START, 'region_id': region_id,
+              'src_number': A, 'dst_number': B, 'route_case': route_case,
+              'debug': routeReply
+            })
+          conn.commit()
 
         '''
         При необходимости добавить проверку маршрутизации и выбор актуального маршрута самим биллингом,
