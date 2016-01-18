@@ -9,10 +9,61 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-
 class TestComparativeResults(unittest2.TestCase):
+  def test_voiprouting_comparer(self):
 
-  def test_comparer(self):
+    # Выбираем обсчитанные звонки для двух итераций и сравниваем их между собой
+
+    # Для получения сравниваемых диапазонов id,
+    # берём две записи: с самым большим id и с самым маленьким id.
+    # Делим каждую из них на миллион, формируем два сравниваемых диапазона.
+    # Сравнение делаем по соответствующим записям.
+
+    conn = psycopg2.connect(database='nispd_test', user='postgres')
+    cur = conn.cursor()
+
+    cur.execute('''
+      SET search_path = tests, pg_catalog;
+
+      SELECT curr.region_id, curr.src_number, curr.dst_number,
+             curr.route_case, curr.debug,
+             prev.route_case, prev.debug
+      FROM      voiprouting_tests curr
+
+      LEFT JOIN voiprouting_tests prev
+
+      ON     (prev.src_number = curr.src_number
+        AND prev.dst_number = curr.dst_number
+        AND prev.region_id = curr.region_id
+        
+        AND prev.sampler_id < (SELECT sampler_id / 1000000 FROM voiprouting_tests ORDER BY sampler_id DESC LIMIT 1) * 1000000)
+              
+      WHERE
+        curr.sampler_id >=    (SELECT sampler_id / 1000000 FROM voiprouting_tests ORDER BY sampler_id DESC LIMIT 1) * 1000000
+
+      ORDER BY curr.region_id, curr.src_number, curr.dst_number;
+    ''')
+
+    rows = cur.fetchall()
+
+    recordsOk = True
+    hasRecords = False
+
+    for region, src_number, dst_number, curr_rc, curr_full, prev_rc, prev_full in rows :
+      hasRecords = True
+      if prev_rc != curr_rc :
+        recordsOk = False
+        print region, src_number, dst_number, curr_rc, curr_full, prev_rc, prev_full
+
+    if not hasRecords :
+      errorlog += 'ERROR: VoIP Routing test not happened at all.\n'
+
+    conn.close()
+
+    self.assertTrue(recordsOk and hasRecords)
+
+
+  def test_billing_comparer(self):
 
     # Выбираем обсчитанные звонки для двух итераций и сравниваем их между собой
 
