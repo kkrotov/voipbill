@@ -265,8 +265,6 @@ if rows[0][0] > 0 :
 
   onsync.unlisten('queuedeleted')
 
-# conn.close()
-
 
 # Создаём таблицы для хранения тестовых данных
 cur.execute('''
@@ -348,9 +346,9 @@ callId = CALLID_START
 # Вставляем тестовые звонки
 
 for (regConn, region_id) in regConnections :
-  cur = regConn.cursor()
+  curReg = regConn.cursor()
 
-  cur.execute('''
+  curReg.execute('''
     DROP SEQUENCE calls_cdr.cdr_id_seq;
     CREATE SEQUENCE calls_cdr.cdr_id_seq
       INCREMENT 1
@@ -423,7 +421,7 @@ for (regConn, region_id) in regConnections :
 
           cur.execute('''INSERT INTO tests.voiprouting_tests
             (sampler_id, region_id, src_number, dst_number, route_case, debug) VALUES
-            (%(sampler_id)d, %(region_id)d, '%(src_number)s', '%(dst_number)s', '%(route_case)s', '%(debug)s')''',
+            (%(sampler_id)s, %(region_id)s, %(src_number)s, %(dst_number)s, %(route_case)s, %(debug)s)''',
             {
               'sampler_id': CALLID_START, 'region_id': region_id,
               'src_number': A, 'dst_number': B, 'route_case': route_case,
@@ -482,13 +480,14 @@ for (regConn, region_id) in regConnections :
 
         # print statement
 
-        cur.execute(statement)
+        curReg.execute(statement)
 
         callId += 1
 
   regConn.commit()
   regConn.close()
 
+conn.close()
 
 print 'Ждём, когда в центральном сервере появятся все обсчитанные звонки. Или таймаута'
 
