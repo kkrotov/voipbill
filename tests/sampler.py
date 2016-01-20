@@ -294,6 +294,16 @@ cur.execute('''
 conn.commit()
 
 
+# Убираем ограничения, так как "звоним" на огромные суммы
+cur.execute('''
+  SET search_path = billing, pg_catalog;
+  UPDATE billing.clients SET voip_limit_month = 0, voip_limit_day = 0, credit = 100000000
+  WHERE id = %s''',
+  TEST_CLIENT_ID
+)
+conn.commit()
+
+
 # Пустая queue ещё не значит, что демон биллинга готов к вставке звонков.
 # Что весьма печально. TODO: это надо исправить, после исправления sleep выпилить.
 time.sleep(120)
