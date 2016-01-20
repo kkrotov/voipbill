@@ -298,9 +298,7 @@ conn.commit()
 cur.execute('''
   SET search_path = billing, pg_catalog;
   UPDATE billing.clients SET voip_limit_month = 0, voip_limit_day = 0, credit = 100000000
-  WHERE id = %s''',
-  TEST_CLIENT_ID
-)
+  WHERE id = %(clientId)d''' % {'clientId': TEST_CLIENT_ID})
 conn.commit()
 
 
