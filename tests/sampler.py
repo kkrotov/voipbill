@@ -174,6 +174,19 @@ for region_id, did in rows:
 print ourDialNumbers
 
 
+# Вытаскиваем список номеров, используемых для исходящих звонков для линий без номера
+
+outboundDidForNoNum = {}
+
+cur.execute('''
+  SET search_path = public, pg_catalog;
+  SELECT id, calling_station_id_for_line_without_number FROM public.server''')
+
+rows = cur.fetchall()
+for region_id, number in rows:
+  outboundDidForNoNum[region_id] = number
+
+
 # Вытаскиваем актуальный список префиксов для определения местных транков
 
 localPrefix = {
@@ -399,6 +412,10 @@ for (regConn, region_id) in regConnections :
           continue
 
         if A == did :
+          # Заменяем короткий номер:
+          if len(A) == 4 :
+            A = outboundDidForNoNum[region_id] + '*' + A
+
           # Для всех исходящих генерим тестирование маршрутизации
           # Результаты пишем (append'ом) в формате "Регион А-номер Б-номер RouteCase"
           # Полный лог ответа демона биллинга тоже пишем, чтобы можно было сравнить на месте

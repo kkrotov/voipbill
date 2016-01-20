@@ -52,11 +52,16 @@ class TestComparativeResults(unittest2.TestCase):
     for region, src_number, dst_number, curr_rc, curr_full, prev_rc, prev_full in rows :
       hasRecords = True
       if prev_rc != curr_rc :
+        # Баги того, что маршрутизация поменялась.
         recordsOk = False
         print region, src_number, dst_number, curr_rc, curr_full, prev_rc, prev_full
 
+      if prev_rc == 'RESULT|RELEASE REASON|NO_ROUTE_TO_DESTINATION' :
+        # Добавляем ошибки маршрутизации
+        print region, src_number, dst_number, curr_rc, curr_full, prev_rc, prev_full
+
     if not hasRecords :
-      errorlog += 'ERROR: VoIP Routing test not happened at all.\n'
+      print 'ERROR: VoIP Routing test not happened at all.\n'
 
     conn.close()
 
