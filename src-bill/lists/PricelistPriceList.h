@@ -19,7 +19,7 @@ protected:
         strcpy(item->prefix, row.get(1));
         item->price = row.get_d(2);
         item->date_from = row.get_ll(3);
-        item->date_to = row.get_ll(4);
+        item->date_to = row.get_ll(4) + 86399;
     }
 
     struct key_pricelist_id {
