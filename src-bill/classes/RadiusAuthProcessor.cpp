@@ -770,8 +770,11 @@ string RadiusAuthProcessor::analyzeCall(Call &call) {
     } else if (call.number_service_id != 0 && call.orig) {
         
         // Блокировка МГМН если превышен лимит кредита
-        if (!call.isLocal()  && client->isConsumedCreditLimit(spentBalanceSum)) {
-            return "low_balance";
+        if (client->isConsumedCreditLimit(spentBalanceSum)) {
+            // Если звонок не местный или прочий платный
+            if (!call.isLocal() || abs(call.cost) > 0.000001) {
+                return "low_balance";
+            }
         }
 
         // Блокировка МГМН если превышен дневной лимит
