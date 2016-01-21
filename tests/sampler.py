@@ -132,6 +132,11 @@ conn = psycopg2.connect(database='nispd_test', user='postgres')
 cur = conn.cursor()
 
 
+nowTime = datetime.datetime.now()
+nowTimeStr = datetime.datetime.strftime(nowTime, '%Y-%m-%d %H:%M:%S')
+nowTimeDbPartition = datetime.datetime.strftime(nowTime, '%Y%m')
+
+
 # Вытаскиваем актуальный список DID'ов тестового клиента
 
 # Ключ - регион. Значение - список DID'ов этого региона
@@ -139,8 +144,10 @@ regionDids = {}
 
 cur.execute('''
   SET search_path = billing, pg_catalog;
-  SELECT server_id, did FROM billing.service_number WHERE client_account_id = %s ORDER BY server_id;
-''' % TEST_CLIENT_ID)
+  SELECT server_id, did FROM billing.service_number WHERE client_account_id = %(clientId)s
+  AND activation_dt <= '%(nowTime)s' AND '%(nowTime)s' < expire_dt
+  ORDER BY server_id;
+''' % {'clientId': TEST_CLIENT_ID, 'nowTime': nowTimeStr})
 
 rows = cur.fetchall()
 for region_id, did in rows:
@@ -148,6 +155,37 @@ for region_id, did in rows:
     regionDids[region_id] = []
 
   regionDids[region_id].append(did)
+
+
+# Определяем, какие номера из списка - наши, и определяем их регион
+
+ourDialNumbers = {}
+
+cur.execute('''
+  SET search_path = billing, pg_catalog;
+  SELECT server_id, did FROM billing.service_number WHERE did IN (%(numbers)s)
+  ORDER BY server_id;
+''' % {'numbers': ','.join(["'%s'" % num for num in DIAL_NUMBERS]), 'nowTime': nowTimeStr})
+
+rows = cur.fetchall()
+for region_id, did in rows:
+  ourDialNumbers[did] = region_id
+
+print ourDialNumbers
+
+
+# Вытаскиваем список номеров, используемых для исходящих звонков для линий без номера
+
+outboundDidForNoNum = {}
+
+cur.execute('''
+  SET search_path = public, pg_catalog;
+  SELECT id, calling_station_id_for_line_without_number FROM public.server''')
+
+rows = cur.fetchall()
+for region_id, number in rows:
+  outboundDidForNoNum[region_id] = number
+
 
 # Вытаскиваем актуальный список префиксов для определения местных транков
 
@@ -166,10 +204,6 @@ for region_id, prefixes in rows:
 
 # Навешиваем триггеры для нотификаций завершения синхронизации
 # "центр->регион" до генерации тестовых звонков и "регион->центр" - после
-
-nowTime = datetime.datetime.now()
-nowTimeStr = datetime.datetime.strftime(nowTime, '%Y-%m-%d %H:%M:%S')
-nowTimeDbPartition = datetime.datetime.strftime(nowTime, '%Y%m')
 
 cur.execute('''
   SET search_path = calls_raw, pg_catalog;
@@ -209,7 +243,7 @@ cur.execute('''
     AFTER DELETE ON queue
     FOR EACH ROW
     EXECUTE PROCEDURE notify_queue_delete();
-''' % {'dbPartTime': nowTimeDbPartition)
+''' % {'dbPartTime': nowTimeDbPartition})
 
 conn.commit()
 
@@ -244,7 +278,28 @@ if rows[0][0] > 0 :
 
   onsync.unlisten('queuedeleted')
 
-conn.close()
+
+# Создаём таблицы для хранения тестовых данных
+cur.execute('''
+  CREATE SCHEMA IF NOT EXISTS tests;
+  CREATE TABLE IF NOT EXISTS tests.voiprouting_tests (
+    sampler_id BIGINT NOT NULL, -- ID прогона тестов
+    region_id INT NOT NULL,
+    src_number TEXT NOT NULL,
+    dst_number TEXT NOT NULL,
+    route_case TEXT, -- RouteCase, если есть
+    debug TEXT       -- Полный ответ демона
+  )
+''')
+conn.commit()
+
+
+# Убираем ограничения, так как "звоним" на огромные суммы
+cur.execute('''
+  SET search_path = billing, pg_catalog;
+  UPDATE billing.clients SET voip_limit_month = 0, voip_limit_day = 0, credit = 100000000
+  WHERE id = %(clientId)d''' % {'clientId': TEST_CLIENT_ID})
+conn.commit()
 
 
 # Пустая queue ещё не значит, что демон биллинга готов к вставке звонков.
@@ -291,6 +346,15 @@ def isLocalFor(number, region) :
       return True
   return False
 
+def determineAlienTrunk(number, region) :
+  if number not in ourDialNumbers :
+    return localTrunk[region] if isLocalFor(number, region) else mgmnTrunk[region]
+  else :
+    # TODO: Процедура неправильная, нужны местные локальные транки с указанным регионом,
+    # (выбирать их по trunk.code??? - стрёмно), поэтому пока не используем.
+    ourTrunkRegion = ourDialNumbers[number]
+    return myTrunk[ourTrunkRegion]
+
 
 print 'Вставляем тестовые звонки в регионы:'
 print regionsList
@@ -303,9 +367,9 @@ callId = CALLID_START
 # Вставляем тестовые звонки
 
 for (regConn, region_id) in regConnections :
-  cur = regConn.cursor()
+  curReg = regConn.cursor()
 
-  cur.execute('''
+  curReg.execute('''
     DROP SEQUENCE calls_cdr.cdr_id_seq;
     CREATE SEQUENCE calls_cdr.cdr_id_seq
       INCREMENT 1
@@ -342,9 +406,53 @@ for (regConn, region_id) in regConnections :
         if B == did and not B.startswith('7800') :
           continue
 
+        # Входящие иностранные на 800-е пропускаем
+        if not A.startswith('7') and B.startswith('7800') :
+          continue
+
         # Исходящие звонки с 800-х вообще не должны делаться, для них используются "короткие" номера.
         if A.startswith('7800') :
           continue
+
+        if number in ourDialNumbers :
+          # Не генерим звонки между нашими абонентами,
+          # т.к. определение нашего транка - либо нетривиально, либо требует решения.
+          continue
+
+        if A == did :
+          # Заменяем короткий номер:
+          if len(A) == 4 :
+            A = outboundDidForNoNum[region_id] + '*' + A
+
+          # Для всех исходящих генерим тестирование маршрутизации
+          # Результаты пишем (append'ом) в формате "Регион А-номер Б-номер RouteCase"
+          # Полный лог ответа демона биллинга тоже пишем, чтобы можно было сравнить на месте
+          # fail с предыдущим позитивным ответом.
+          # Результаты сравниваются и выводится позитивная информация для тех кейсов,
+          # для которых остутствуют или отличаются результаты в новой версии,
+          # наряду с негативными ответами демона биллинга.
+
+          routeReply = ''
+          route_case = ''
+
+          try :
+            requestUrl = 'http://localhost:80%(region_id)s/test/auth?trunk_name=%(myTrunk)s&src_number=%(A)s&dst_number=%(B)s&src_noa=3&dst_noa=3' % {
+              'A': A, 'B': B, 'region_id': region_id, 'myTrunk': myTrunk[region_id]
+            }
+            routeReply = urllib2.urlopen(requestUrl).read()
+            route_case = routeReply.split('\n')[-2]
+          except:
+            routeReply = sys.exc_info()[0]
+
+          cur.execute('''INSERT INTO tests.voiprouting_tests
+            (sampler_id, region_id, src_number, dst_number, route_case, debug) VALUES
+            (%(sampler_id)s, %(region_id)s, %(src_number)s, %(dst_number)s, %(route_case)s, %(debug)s)''',
+            {
+              'sampler_id': CALLID_START, 'region_id': region_id,
+              'src_number': A, 'dst_number': B, 'route_case': route_case,
+              'debug': routeReply
+            })
+          conn.commit()
 
         '''
         При необходимости добавить проверку маршрутизации и выбор актуального маршрута самим биллингом,
@@ -377,12 +485,12 @@ for (regConn, region_id) in regConnections :
 
         if B == did :
           # Входящий звонок
-          srcTrunk = localTrunk[region_id] if isLocalFor(A, region_id) else mgmnTrunk[region_id]
+          srcTrunk = determineAlienTrunk(A, region_id)
           dstTrunk = myTrunk[region_id]
         else :
           # Исходящий звонок
           srcTrunk = myTrunk[region_id]
-          dstTrunk = localTrunk[region_id] if isLocalFor(B, region_id) else mgmnTrunk[region_id]
+          dstTrunk = determineAlienTrunk(B, region_id)
 
         statement = '''
           SELECT insert_cdr(%(callId)d::bigint, '85.94.32.233'::inet, '%(A)s', '%(B)s',
@@ -392,17 +500,19 @@ for (regConn, region_id) in regConnections :
           '%(srcTrunk)s', '%(dstTrunk)s',
           3::smallint, 3::smallint,
           '')
-          ''' % {'A': A, 'B': B, 'callId': callId, 'srcTrunk': srcTrunk, 'dstTrunk': dstTrunk}
+          ''' % {'A': A, 'B': B, 'callId': callId, 'srcTrunk': srcTrunk, 'dstTrunk': dstTrunk,
+                 'nowTime': nowTimeStr}
 
         # print statement
 
-        cur.execute(statement)
+        curReg.execute(statement)
 
         callId += 1
 
   regConn.commit()
   regConn.close()
 
+conn.close()
 
 print 'Ждём, когда в центральном сервере появятся все обсчитанные звонки. Или таймаута'
 
