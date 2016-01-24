@@ -452,7 +452,6 @@ void BillingCall::setupTrunk() {
     }
 
     call->trunk_id = callInfo->trunk->id;
-    call->operator_id = callInfo->trunk->code;
     call->our = callInfo->trunk->our_trunk || callInfo->trunk->auth_by_number;
 }
 

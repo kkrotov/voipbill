@@ -12,7 +12,6 @@ struct ServiceTrunk {
     bool term_enabled;
     double orig_min_payment;
     double term_min_payment;
-    int operator_id;
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -25,7 +24,6 @@ struct ServiceTrunk {
         trace << "term_enabled: " << term_enabled << ", ";
         trace << "orig_min_payment: " << orig_min_payment << ", ";
         trace << "term_min_payment: " << term_min_payment << ", ";
-        trace << "operator_id: " << operator_id << ", ";
         trace << ")";
     }
 };

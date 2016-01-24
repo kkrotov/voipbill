@@ -91,8 +91,8 @@ bool ThreadSyncCalls::copyCallsPart(string month) {
 
     BDb::copy("calls_raw.calls_raw_" + month,
         "",
-        "       id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_stats_id, package_time, package_credit, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, geo_mob, operator_id, server_id",
-        "select id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_stats_id, package_time, package_credit, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, geo_mob, operator_id, " + app().conf.str_instance_id + " " \
+        "       id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_stats_id, package_time, package_credit, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, geo_mob, server_id",
+        "select id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_stats_id, package_time, package_credit, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, geo_mob, " + app().conf.str_instance_id + " " \
         "   from calls_raw.calls_raw_" + month +
         "   where id>" + lexical_cast<string>(central_id) +
         "   order by id limit 100000",

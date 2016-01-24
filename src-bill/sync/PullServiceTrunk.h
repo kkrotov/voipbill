@@ -21,6 +21,5 @@ public:
         fields.push_back("term_enabled");
         fields.push_back("orig_min_payment");
         fields.push_back("term_min_payment");
-        fields.push_back("operator_id");
     }
 };
