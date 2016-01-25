@@ -43,7 +43,6 @@ struct Call {
     int geo_id;
     bool geo_mob;
     int geo_operator_id;
-    int operator_id;
 
     long long int cdr_call_id;
 
@@ -81,7 +80,6 @@ struct Call {
         trace << "geo_id: " << geo_id << ", ";
         trace << "geo_mob: " << (geo_mob ? "true" : "false") << ", ";
         trace << "geo_operator_id: " << geo_operator_id << ", ";
-        trace << "operator_id: " << operator_id << ", ";
         trace << "is_service_number: " << (is_service_number ? "true" : "false") << ", ";
         trace << ")";
     }
@@ -122,7 +120,6 @@ struct Call {
         geo_id = 0;
         geo_mob = false;
         geo_operator_id = 0;
-        operator_id = 0;
 
         cdr_call_id = cdr->call_id;
 

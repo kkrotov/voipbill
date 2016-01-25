@@ -10,7 +10,7 @@ protected:
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
         return "    select trunk_id, id, client_account_id, " \
-            "               orig_enabled, term_enabled, orig_min_payment, term_min_payment, operator_id, " \
+            "               orig_enabled, term_enabled, orig_min_payment, term_min_payment, " \
             "               extract(epoch from activation_dt), extract(epoch from expire_dt) " \
             "       from billing.service_trunk " \
             "       where server_id='" + server_id + "' " \
@@ -25,9 +25,8 @@ protected:
         item->term_enabled = row.get_b(4);
         item->orig_min_payment = row.get_d(5);
         item->term_min_payment = row.get_d(6);
-        item->operator_id = row.get_i(7);
-        item->activation_dt = row.get_ll(8);
-        item->expire_dt = row.get_ll(9);
+        item->activation_dt = row.get_ll(7);
+        item->expire_dt = row.get_ll(8);
     }
 
 
