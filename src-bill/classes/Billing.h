@@ -11,6 +11,6 @@ public:
     void setBillingData(DataBillingContainer *billingData);
 
     void calcCurrentCalls();
-    void calc();
+    void calc(bool realtimePurpose = false);
 };
 
