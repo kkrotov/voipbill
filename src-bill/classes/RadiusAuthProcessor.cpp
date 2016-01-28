@@ -192,7 +192,7 @@ void RadiusAuthProcessor::process() {
           logRequest->params["rate_buy"] = buyRate;
           logRequest->params["gross_margin"] = call.rate - buyRate;
           if (call.rate > 0.000001) {
-              logRequest->params["gross_margin_percent"] = call.rate - buyRate / call.rate * 100.0;
+              logRequest->params["gross_margin_percent"] = (call.rate - buyRate) / call.rate * 100.0;
           }
         }
 
