@@ -183,8 +183,19 @@ void RadiusAuthProcessor::process() {
                 return;
             }
         }
+       
+        double buyRate = 0.0;
 
-        processOutcome(outcomeId);
+        if (processOutcome(outcomeId, & buyRate)) {
+
+          // Логируем себестоимость минуты звонка
+          logRequest->params["rate_buy"] = buyRate;
+          logRequest->params["gross_margin"] = call.rate - buyRate;
+          if (call.rate > 0.000001) {
+              logRequest->params["gross_margin_percent"] = call.rate - buyRate / call.rate * 100.0;
+          }
+        }
+
         return;
 
     } catch (Exception &e) {
@@ -248,7 +259,8 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
     return 0;
 }
 
-void RadiusAuthProcessor::processOutcome(int outcomeId) {
+// Возвращает true, если в pBuyRate возвращается себестоимость одной минуты звонка на транк.
+bool RadiusAuthProcessor::processOutcome(int outcomeId, double* pBuyRate) {
     auto outcome = repository.getOutcome(outcomeId);
     if (outcome == nullptr) {
         throw Exception("Outcome #" + lexical_cast<string>(outcomeId) + " not found", "RadiusAuthProcessor::processOutcome");
@@ -261,35 +273,36 @@ void RadiusAuthProcessor::processOutcome(int outcomeId) {
 
     if (outcome->isAuto()) {
 
-        processAutoOutcome();
-        return;
+        return processAutoOutcome(pBuyRate);
 
     } else if (outcome->isRouteCase()) {
 
         processRouteCaseOutcome(outcome);
-        return;
+        return false;
 
     } else if (outcome->isReleaseReason()) {
 
         processReleaseReasonOutcome(outcome);
-        return;
+        return false;
 
     } else if (outcome->isAirp()) {
 
         processAirpOutcome(outcome);
-        return;
+        return false;
 
     } else if (outcome->isAccept()) {
 
         response->setAccept();
-        return;
+        return false;
 
     }
 
     throw Exception("Unexpected type of outcome #" + lexical_cast<string>(outcome->id), "RadiusAuthProcessor::processOutcome");
 }
 
-void RadiusAuthProcessor::processAutoOutcome() {
+// Возвращает true, если есть хотя бы один транк,
+// а в pBuyRate возвращается себестоимость одной минуты звонка на этот транк.
+bool RadiusAuthProcessor::processAutoOutcome(double* pBuyRate) {
 
     ServiceTrunk * origServiceTrunk = nullptr;
     Pricelist * origPricelist = nullptr;
@@ -301,7 +314,7 @@ void RadiusAuthProcessor::processAutoOutcome() {
     getAvailableTermServiceTrunk(termServiceTrunks);
 
 
-    processAutoRouteResponse(termServiceTrunks);
+    return processAutoRouteResponse(termServiceTrunks, pBuyRate);
 }
 
 void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk * origServiceTrunk, Pricelist * origPricelist, PricelistPrice * origPrice) {
@@ -398,12 +411,14 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
     sort(termServiceTrunks.begin(), termServiceTrunks.end(), service_trunk_order());
 }
 
-void RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders) {
+bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate) {
+
+    bool hasRateForATrunk = false;
 
     if (termOrders.size() == 0) {
         Log::warning("Auto Route not contains operators");
         response->setReleaseReason("NO_ROUTE_TO_DESTINATION");
-        return;
+        return hasRateForATrunk;
     }
 
     if (trace != nullptr) {
@@ -411,6 +426,13 @@ void RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
     }
 
     for (ServiceTrunkOrder &trunkOrder : termOrders) {
+        if (!hasRateForATrunk) {
+            hasRateForATrunk = true;
+            if (pBuyRate) {
+                * pBuyRate = trunkOrder.price->price;
+            }
+        }
+
         if (trace != nullptr) {
             *trace << "INFO||PRICE: " << trunkOrder.price->price;
             *trace << ", TRUNK: " << trunkOrder.trunk->name << " (" << trunkOrder.trunk->id << ")";
@@ -438,6 +460,8 @@ void RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
     }
 
     response->setRouteCase("rc_auto" + routeCase);
+
+    return hasRateForATrunk;
 }
 
 void RadiusAuthProcessor::processRouteCaseOutcome(Outcome * outcome) {
