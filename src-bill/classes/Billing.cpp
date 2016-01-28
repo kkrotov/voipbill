@@ -80,6 +80,9 @@ void logFinishedCall(const Call& call, Client* account, Repository& repository) 
 
     pLogMessage logCall(new LogMessage());
     logCall->type = "call";
+
+    logCall->message = lexical_cast<string>(call.id);
+
     logCall->params["orig"] = call.orig ? "true" : "false";
     logCall->params["src"] = call.src_number;
     logCall->params["dst"] = call.dst_number;
@@ -134,6 +137,26 @@ void logFinishedCall(const Call& call, Client* account, Repository& repository) 
     }    
 
     Log::info(logCall);
+
+}
+
+void logFinishedCall(const Call& origCall, const Call& termCall, Client* origAccount, Client* termAccount, Trunk* origTrunk, Trunk* termTrunk, Repository& repository) {
+
+    // TODO: адекватное логирование звонков
+
+    // interconnect_cost ??? vat ??? как влияют на стоимость и себестоимость?
+
+    // Исходящий - если origCall.our && (!termCall.our || termCall.our && termTrunk && termTrunk->route_table_id)
+    // Входящий  - если termCall.our && (!origCall.our || origCall.our && origTrunk && origTrunk->route_table_id)
+    // Сразу два звонка - если origCall.our && termCall.our && origTrunk && origTrunk->route_table_id && termTrunk && termTrunk->route_table_id
+    // Исходящий стоимость: origCall.cost, себестоимость: termCall.cost
+    // Входящий стоимость: termCall.cost, себестоимость: origCall.cost ; знак имеет значение
+    // Сразу два звонка:
+    //  Исходящий стоимость: origCall.cost, себестоимость: 0
+    //  Входящий стоимость: termCall.cost, себестоимость: 0
+
+    logFinishedCall(origCall, origAccount, repository);
+    logFinishedCall(termCall, termAccount, repository);
 }
 
 
@@ -187,8 +210,8 @@ void Billing::calc(bool realtimePurpose) {
 
         if (realtimePurpose) {
             // Логируем завершённый звонок
-            logFinishedCall(origCall, origCallInfo.account, repository);
-            logFinishedCall(termCall, termCallInfo.account, repository);
+            logFinishedCall(origCall, termCall, origCallInfo.account, termCallInfo.account,
+                            origCallInfo.trunk, termCallInfo.trunk, repository);
         }
     }
 
