@@ -115,7 +115,7 @@ DIAL_NUMBERS = [num for num in [line.split()[-1] for line in DIAL_NUMBERS.split(
 REGION_TRUNKS = '''99	mcn_msk_ast16_99	MGTS_Loc	BEE_Loc
 98	mcn_spb_ast6_98	smg_RTK_Loc	smg_Beeline_Loc
 97	mcn_krd_ast6_97	smg_RTK_Loc	smg_Beeline_Loc
-96	mcn_smr_ast6_96	RTK_Loc		MTT
+96	mcn_smr_ast6_96	smg_RTK_Loc		MTT
 95	mcn_ekb_ast6_95	smg_RTK_Loc	smg_Beeline_Loc
 94	mcn_nsk_ast6_94	smg_RTK_Loc	smg_Beeline_Loc
 93	mcn_kzn_ast6_93	smg_Tattelecom_Loc	smg_Beeline_Loc
