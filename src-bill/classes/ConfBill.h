@@ -7,6 +7,7 @@ class ConfBill : public Conf {
 public:
     string db_main;
     string db_calls;
+    double db_bandwidth_limit_mbits;
 
     uint16_t web_port;
 

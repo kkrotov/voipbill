@@ -4,6 +4,7 @@
 #include <errno.h>
 #include "Log.h"
 #include "../common.h"
+#include "Timer.h"
 
 BDb::BDb() {
     this->conn = 0;
@@ -169,7 +170,7 @@ BDbResult BDb::query(const string &squery) {
     return query(squery.c_str());
 }
 
-void BDb::copy(string dst_table, string src_table, string columns, string query, BDb *db_from, BDb *db_to) {
+void BDb::copy(string dst_table, string src_table, string columns, string query, BDb *db_from, BDb *db_to, double bandwidth_limit_mbits) {
 
     string query_from("COPY ");
     if (query != "") {
@@ -215,8 +216,20 @@ void BDb::copy(string dst_table, string src_table, string columns, string query,
 
     char* pBuffer = 0;
     int bytesRead = 0;
+
+    int max_bandwidth = 0;
+    if (bandwidth_limit_mbits > 0.0001) {
+        max_bandwidth = (int)(bandwidth_limit_mbits * 1024 * 1024 / 8);
+    }
+
+    Timer bandwidthTimer;
+    bandwidthTimer.start();
+    int loop_bytes = 0;
+
+
     while ((bytesRead = PQgetCopyData(db_from->getConn(), &pBuffer, 0)) > -1) {
-        if (pBuffer == NULL) continue;
+        if (pBuffer == nullptr) continue;
+
         if (PQputCopyData(db_to->getConn(), pBuffer, bytesRead) != 1) {
             PQfreemem(pBuffer);
             db_from->disconnect();
@@ -224,6 +237,26 @@ void BDb::copy(string dst_table, string src_table, string columns, string query,
             throw DbException("error", "BDb::copy::transfer");
         }
         PQfreemem(pBuffer);
+
+
+        loop_bytes += bytesRead;
+
+        if (bandwidthTimer.tloop() >= 0.99999) {
+            bandwidthTimer.stop();
+            bandwidthTimer.start();
+            loop_bytes = 0;
+        }
+
+        if (max_bandwidth > 0 && loop_bytes > max_bandwidth) {
+            int64_t sleep_time = (int)((1.0 - bandwidthTimer.tloop()) * 1000000000);
+            struct timespec tw = {0,sleep_time};
+            struct timespec tr;
+            nanosleep(&tw, &tr);
+
+            bandwidthTimer.stop();
+            bandwidthTimer.start();
+            loop_bytes = 0;
+        }
     }
 
     res = PQgetResult(db_from->getConn());
@@ -236,7 +269,7 @@ void BDb::copy(string dst_table, string src_table, string columns, string query,
     }
     PQclear(res);
 
-    if (PQputCopyEnd(db_to->getConn(), NULL) != 1) {
+    if (PQputCopyEnd(db_to->getConn(), nullptr) != 1) {
         DbException e(db_to->getConn(), "BDb::copy::to::end");
         db_to->disconnect();
         throw e;
