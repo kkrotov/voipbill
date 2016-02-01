@@ -6,8 +6,7 @@
 
 BasePull::BasePull() {
     pull_count_full = 0;
-    pull_count_updated = 0;
-    pull_count_deleted = 0;
+    pull_count_partial = 0;
     pull_count_errors = 0;
 }
 
@@ -59,7 +58,7 @@ void BasePull::pullFull() {
     string del = "delete from " + dst_table;
     manager->db_calls.exec(del);
 
-    BDb::copy(dst_table, src_table, getQueryFields(), "", &manager->db_main, &manager->db_calls);
+    BDb::copy(dst_table, src_table, getQueryFields(), "", &manager->db_main, &manager->db_calls, manager->bandwidth_limit_mbits);
 
     trans.commit();
 
@@ -67,9 +66,6 @@ void BasePull::pullFull() {
 }
 
 void BasePull::pullPartial() {
-
-
-    size_t originalCount = ids_to_pull.size();
 
     string query_fields = getQueryFields();
 
@@ -80,48 +76,19 @@ void BasePull::pullPartial() {
 
     string del = "delete from " + dst_table + " where \"" + key + "\" in (" + getFilterIds() + ")";
 
-
-    BDbResult res = manager->db_main.query(sel);
-    if (res.size() > 0) {
-
-        string ins = "insert into " + dst_table + "(" + query_fields + ") values ";
-
-        while (res.next()) {
-
-            if (res.position() > 0) ins.append(",");
-            ins.append("(");
-
-            for (size_t col = 0; col < fields.size(); col++) {
-                if (col > 0) ins.append(",");
-                if (res.is_null(col)) {
-                    ins.append("NULL");
-                } else {
-                    ins.append("'").append(res.get(col)).append("'");
-                }
-            }
-
-            ins.append(")");
-
-            auto it = ids_to_pull.find(res.get_s(0));
-            if (it != ids_to_pull.end()) {
-                ids_to_pull.erase(it);
-            }
-        }
-
-        {
-            BDbTransaction trans(&manager->db_calls);
-            manager->db_calls.exec(del);
-            manager->db_calls.exec(ins);
-            trans.commit();
-        }
-
-        pull_count_updated += res.size();
-        pull_count_deleted += originalCount - res.size();
-    } else {
+    {
+        BDbTransaction trans(&manager->db_calls);
         manager->db_calls.exec(del);
-
-        pull_count_deleted += originalCount;
+        BDb::copy(dst_table, src_table, getQueryFields(), sel, &manager->db_main, &manager->db_calls, manager->bandwidth_limit_mbits);
+        trans.commit();
     }
+
+    auto it = ids_to_pull.find(key);
+    if (it != ids_to_pull.end()) {
+        ids_to_pull.erase(it);
+    }
+
+    pull_count_partial += 1;
 
 }
 

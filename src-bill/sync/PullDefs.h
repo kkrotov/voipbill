@@ -9,6 +9,8 @@ public:
         src_table = "billing.defs";
         dst_table = "billing.defs";
 
+        key = "pricelist_id";
+
         fields.push_back("ndef");
         fields.push_back("pricelist_id");
         fields.push_back("date_from");

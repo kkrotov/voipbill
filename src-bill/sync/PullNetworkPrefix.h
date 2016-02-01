@@ -9,6 +9,8 @@ public:
         src_table = "billing.network_prefix";
         dst_table = "billing.network_prefix";
 
+        key = "network_config_id";
+
         fields.push_back("prefix");
         fields.push_back("network_config_id");
         fields.push_back("date_from");
