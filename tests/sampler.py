@@ -441,8 +441,8 @@ for (regConn, region_id) in regConnections :
             }
             routeReply = urllib2.urlopen(requestUrl).read()
             route_case = routeReply.split('\n')[-2]
-          except:
-            routeReply = sys.exc_info()[0]
+          except Exception as err :
+            routeReply = err.reason
 
           cur.execute('''INSERT INTO tests.voiprouting_tests
             (sampler_id, region_id, src_number, dst_number, route_case, debug) VALUES
