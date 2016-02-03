@@ -6,6 +6,7 @@ ManagerPull::ManagerPull() {
     db_main.setCS(app().conf.db_main);
     db_calls.setCS(app().conf.db_calls);
     errors_count = 0;
+    bandwidth_limit_mbits = app().conf.db_bandwidth_limit_mbits;
 }
 
 void ManagerPull::add(BasePull * pull) {

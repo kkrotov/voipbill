@@ -11,6 +11,7 @@ web_port = 80%(region_id)s
 [db]
 main =  host=127.0.0.1 dbname=nispd_test user=bill_daemon_remote password=qRPCcAvrS4qWvGAhgzrXWuGJ2nwYEf8C
 calls = host=127.0.0.1 dbname=nispd%(region_id)s_test user=bill_daemon_local password=gwvIg7OPTfoJE5vxWVKpmvAxBPMNP7t1
+bandwidth_limit_mbits = 100
 
 [geo]
 instance_id = %(region_id)s

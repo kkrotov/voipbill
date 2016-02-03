@@ -16,8 +16,7 @@ public:
     Timer timer;
     string event;
     int pull_count_full;
-    int pull_count_updated;
-    int pull_count_deleted;
+    int pull_count_partial;
     int pull_count_errors;
 
     virtual void init() = 0;
