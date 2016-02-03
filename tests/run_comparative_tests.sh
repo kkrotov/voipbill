@@ -58,7 +58,7 @@ echo 'Migrating database structures and data...'
 . "$DIR/migrate_db.sh"
 
 echo 'Migrating daemons configs...'
-. "$DIR/migrate_configs.sh"
+python "$DIR/migrate_configs.py"
 
 echo 'Starting new app version...'
 . "$DIR/run.sh"
