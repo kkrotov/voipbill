@@ -11,7 +11,7 @@ regionsList = imp.load_source('regions-list', os.path.join(__location__, 'region
 for region_id in regionsList :
   config = configparser.ConfigParser()
   config.read('app_bill%s.conf' % region_id)
-  config['db']['bandwidth_limit_mbits'] = 100
+  config['db']['bandwidth_limit_mbits'] = '100'
 
   with open('app_bill%s.conf' % region_id, 'w') as configfile :
     config.write(configfile)

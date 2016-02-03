@@ -450,7 +450,7 @@ for (regConn, region_id) in regConnections :
             {
               'sampler_id': CALLID_START, 'region_id': region_id,
               'src_number': A, 'dst_number': B, 'route_case': route_case,
-              'debug': routeReply
+              'debug': str(routeReply)
             })
           conn.commit()
 
