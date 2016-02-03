@@ -59,6 +59,7 @@ struct Call {
         trace << "orig: " << (orig ? "true" : "false") << ", ";
         trace << "our: " << (our ? "true" : "false") << ", ";
         trace << "account_id: " << account_id << ", ";
+        trace << "trunk_id: " << trunk_id << ", ";
         trace << "trunk_service_id: " << trunk_service_id << ", ";
         trace << "number_service_id: " << number_service_id << ", ";
         trace << "src_number: " << src_number << ", ";
