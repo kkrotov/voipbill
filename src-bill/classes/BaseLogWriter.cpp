@@ -21,8 +21,9 @@ void BaseLogWriter::massPublish(list<pLogMessage> messages) {
                 publishStarted = (int) beforePublish();
             }
 
-            doPublish(message);
-
+            if (publishStarted) {
+                doPublish(message);
+            }
         }
 
     }
