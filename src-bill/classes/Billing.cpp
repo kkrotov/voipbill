@@ -154,9 +154,15 @@ void logFinishedCall(const Call& origCall, const Call& termCall, Client* origAcc
     logCall->params["term_rate"] = termCall.rate;
     logCall->params["term_cost"] = termCall.cost;
 
-    if (-origCall.cost > 0.000001 && termCall.cost > 0.000001) {
-        logCall->params["gross_margin"] = -origCall.cost - termCall.cost;
-        logCall->params["gross_margin_percent"] = (-origCall.cost - termCall.cost) / -origCall.rate * 100.0;
+    if (abs(origCall.cost) > 0.000001 || abs(termCall.cost) > 0.000001) {
+        auto grossMargin = -origCall.cost - termCall.cost;
+        if (grossMargin > 0.000001) {
+            logCall->params["gross_margin"] = grossMargin;
+            logCall->params["gross_margin_percent"] = grossMargin / -origCall.rate * 100.0;
+        } else {
+            logCall->params["gross_margin_negative"] = grossMargin;
+            logCall->params["gross_margin_negative_percent"] = grossMargin / -origCall.rate * 100.0;
+        }
     }
 
     logCall->params["orig_billed_time"] = origCall.billed_time;
