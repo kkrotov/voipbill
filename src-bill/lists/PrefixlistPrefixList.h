@@ -43,7 +43,7 @@ protected:
             begin = p.first;
             end = p.second;
         }
-        {
+        if (prefix && prefix[0]) {
             auto p = equal_range(begin, end, prefix, key_prefix());
             begin = p.first;
             end = p.second;

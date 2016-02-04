@@ -28,6 +28,10 @@ protected:
     };
 
     GeoPrefix * _find(char * prefix) {
+        if (!prefix || !prefix[0]) {
+            return nullptr;
+        }
+
         auto begin = this->data.begin();
         auto end = this->data.end();
         {

@@ -28,13 +28,14 @@ protected:
             }
         }
 
+        item->sub_type = STAT_PREFIXLIST_SUBTYPE_ALL;
         char * subType = row.get(3);
-        if (strcmp(subType, "fixed") == 0) {
-            item->sub_type = STAT_PREFIXLIST_SUBTYPE_FIXED;
-        } else if (strcmp(subType, "mobile") == 0) {
-            item->sub_type = STAT_PREFIXLIST_SUBTYPE_MOBILE;
-        } else {
-            item->sub_type = STAT_PREFIXLIST_SUBTYPE_ALL;
+        if (subType && subType[0]) {
+            if (strcmp(subType, "fixed") == 0) {
+                item->sub_type = STAT_PREFIXLIST_SUBTYPE_FIXED;
+            } else if (strcmp(subType, "mobile") == 0) {
+                item->sub_type = STAT_PREFIXLIST_SUBTYPE_MOBILE;
+            }
         }
 
         item->country_id = row.get_i(4);
