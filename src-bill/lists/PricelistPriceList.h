@@ -57,11 +57,13 @@ protected:
             begin = p.first;
             end = p.second;
         }
-        {
+
+        if (prefix && prefix[0]) {
             auto p = equal_range(begin, end, prefix, key_prefix());
             begin = p.first;
             end = p.second;
         }
+
         {
             auto p = equal_range(begin, end, timestamp, key_timestamp());
             begin = p.first;

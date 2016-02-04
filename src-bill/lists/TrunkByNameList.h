@@ -33,12 +33,21 @@ protected:
 
     struct key_trunk_name {
         bool operator() (const Trunk & left, const char * trunk_name) {
+            if (!trunk_name || !left.trunk_name) {
+                return false;
+            }
             return strcmp(left.trunk_name, trunk_name) < 0;
         }
         bool operator() (const char * trunk_name, const Trunk & right) {
+            if (!trunk_name || !right.trunk_name) {
+                return false;
+            }
             return strcmp(trunk_name, right.trunk_name) < 0;
         }
         bool operator() (const Trunk & left, const Trunk & right) {
+            if (!right.trunk_name || !left.trunk_name) {
+                return false;
+            }
             return strcmp(left.trunk_name, right.trunk_name) < 0;
         }
     };
