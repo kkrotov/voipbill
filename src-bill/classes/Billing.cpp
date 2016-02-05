@@ -160,8 +160,8 @@ void logFinishedCall(const Call& origCall, const Call& termCall, Client* origAcc
             logCall->params["gross_margin"] = grossMargin;
             logCall->params["gross_margin_percent"] = grossMargin / -origCall.rate * 100.0;
         } else {
-            logCall->params["gross_margin_negative"] = grossMargin;
-            logCall->params["gross_margin_negative_percent"] = grossMargin / -origCall.rate * 100.0;
+            logCall->params["gross_margin_negative"] = -grossMargin;
+            logCall->params["gross_margin_negative_percent"] = grossMargin / origCall.rate * 100.0;
         }
     }
 
