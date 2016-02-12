@@ -443,6 +443,8 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
         }
     }
 
+# if 0
+
     string routeCase;
     set<int> trunkIds;
 
@@ -460,6 +462,33 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
     }
 
     response->setRouteCase("rc_auto" + routeCase);
+
+# else
+
+    string routeCase;
+    set<int> trunkIds;
+
+    for (ServiceTrunkOrder &trunkOrder : termOrders) {
+        if (trunkIds.find(trunkOrder.trunk->id) != trunkIds.end()) {
+            continue;
+        }
+        trunkIds.insert(trunkOrder.trunk->id);
+
+        if (routeCase.length()) {
+            routeCase += ",";
+        }
+
+        routeCase += trunkOrder.trunk->trunk_name;
+
+        // TODO: выпилить или увеличить это ограничение
+        if (trunkIds.size() == 3) {
+            break;
+        }
+    }
+
+    response->setRouteCase(routeCase);
+
+# endif
 
     return hasRateForATrunk;
 }
