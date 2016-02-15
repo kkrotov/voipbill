@@ -1,6 +1,9 @@
 #!/bin/python
 # -*- coding: utf-8 -*-
 
+'''
+Пример реализации миграции конфиг-файла, добавляюшей новый параметр:
+
 import os
 import imp
 import configparser
@@ -15,4 +18,5 @@ for region_id in regionsList :
 
   with open('app_bill%s.conf' % region_id, 'w') as configfile :
     config.write(configfile)
+'''
 
