@@ -74,14 +74,14 @@ python "$DIR/comparative_test.py"
 [[ $? -ne 0 ]] && exit
 
 # В случае успешного прохождения тестов, делаем коммит в tested - ветку, пригодную для деплоя.
-CURRENT_HASH=`git rev-parse HEAD`
+# CURRENT_HASH=`git rev-parse HEAD`
 
-git checkout tested
+# git checkout tested
 
-git reset --hard ${CURRENT_HASH}
+# git reset --hard ${CURRENT_HASH}
 
-NOW=$(date +"%Y-%m-%d")
-git tag -a $NOW -m "Tested $NOW" tested
+# NOW=$(date +"%Y-%m-%d")
+# git tag -a $NOW -m "Tested $NOW" tested
 
-git push --tags --force origin tested:tested
+# git push --tags --force origin tested:tested
 
