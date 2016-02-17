@@ -7,6 +7,9 @@
 
 struct service_trunk_order {
     bool operator() (const ServiceTrunkOrder & left, const ServiceTrunkOrder & right) {
+
+        // TODO: if (strcmp(left.pricelist.currency_id, right.pricelist.currency_id) == 0) ...
+
         return left.price->price < right.price->price;
     }
 };
@@ -94,6 +97,14 @@ void RadiusAuthProcessor::process() {
         logRequest->params["pricelist_prefix"] = lexical_cast<string>(call.prefix);
         logRequest->params["geo_id"] = call.geo_id;
         logRequest->params["rate"] = call.rate;
+
+        if (callInfo.pricelist && callInfo.pricelist->currency_id[0]) {
+            logRequest->params["rate_currency"] = callInfo.pricelist->currency_id;
+            if (trace != nullptr) {
+                *trace << "INFO|SELL PRICELIST CURRENCY: " << callInfo.pricelist->currency_id << "\n";
+            }
+        }
+
         logRequest->params["cost"] = call.cost;
 
         if (callInfo.account != nullptr) {
@@ -185,15 +196,27 @@ void RadiusAuthProcessor::process() {
         }
        
         double buyRate = 0.0;
+        char currency_id[4] = {0};
 
-        if (processOutcome(outcomeId, & buyRate)) {
+        if (processOutcome(outcomeId, & buyRate, currency_id)) {
 
-          // Логируем себестоимость минуты звонка
-          logRequest->params["rate_buy"] = buyRate;
-          logRequest->params["gross_margin"] = call.rate - buyRate;
-          if (call.rate > 0.000001) {
-              logRequest->params["gross_margin_percent"] = (call.rate - buyRate) / call.rate * 100.0;
-          }
+            // Логируем себестоимость минуты звонка
+            logRequest->params["rate_buy"] = buyRate;
+
+            if (currency_id[0]) {
+                logRequest->params["rate_buy_currency"] = currency_id;
+                if (trace != nullptr) {
+                    *trace << "INFO|BUY PRICELIST CURRENCY: " << currency_id << "\n";
+                }
+            }
+
+            if (callInfo.pricelist && currency_id[0] && callInfo.pricelist->currency_id[0]
+                && strcmp(currency_id, callInfo.pricelist->currency_id) == 0) {
+                logRequest->params["gross_margin"] = call.rate - buyRate;
+                if (call.rate > 0.000001) {
+                    logRequest->params["gross_margin_percent"] = (call.rate - buyRate) / call.rate * 100.0;
+                }
+            }
         }
 
         return;
@@ -260,7 +283,7 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
 }
 
 // Возвращает true, если в pBuyRate возвращается себестоимость одной минуты звонка на транк.
-bool RadiusAuthProcessor::processOutcome(int outcomeId, double* pBuyRate) {
+bool RadiusAuthProcessor::processOutcome(int outcomeId, double* pBuyRate, char* pCurrencyId) {
     auto outcome = repository.getOutcome(outcomeId);
     if (outcome == nullptr) {
         throw Exception("Outcome #" + lexical_cast<string>(outcomeId) + " not found", "RadiusAuthProcessor::processOutcome");
@@ -273,7 +296,7 @@ bool RadiusAuthProcessor::processOutcome(int outcomeId, double* pBuyRate) {
 
     if (outcome->isAuto()) {
 
-        return processAutoOutcome(pBuyRate);
+        return processAutoOutcome(pBuyRate, pCurrencyId);
 
     } else if (outcome->isRouteCase()) {
 
@@ -302,7 +325,7 @@ bool RadiusAuthProcessor::processOutcome(int outcomeId, double* pBuyRate) {
 
 // Возвращает true, если есть хотя бы один транк,
 // а в pBuyRate возвращается себестоимость одной минуты звонка на этот транк.
-bool RadiusAuthProcessor::processAutoOutcome(double* pBuyRate) {
+bool RadiusAuthProcessor::processAutoOutcome(double* pBuyRate, char* pCurrencyId) {
 
     ServiceTrunk * origServiceTrunk = nullptr;
     Pricelist * origPricelist = nullptr;
@@ -314,7 +337,7 @@ bool RadiusAuthProcessor::processAutoOutcome(double* pBuyRate) {
     getAvailableTermServiceTrunk(termServiceTrunks);
 
 
-    return processAutoRouteResponse(termServiceTrunks, pBuyRate);
+    return processAutoRouteResponse(termServiceTrunks, pBuyRate, pCurrencyId);
 }
 
 void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk * origServiceTrunk, Pricelist * origPricelist, PricelistPrice * origPrice) {
@@ -325,6 +348,9 @@ void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk * origServic
         Pricelist * pricelist;
         PricelistPrice * price;
         if (checkServiceTrunkAvailability(serviceTrunk, SERVICE_TRUNK_SETTINGS_ORIGINATION, pricelist, price)) {
+
+            // TODO: if (strcmp(pricelist.currency_id, origPriceList.currency_id) == 0) ...
+
             if (origServiceTrunk == nullptr || price->price < origPrice->price) {
                 origServiceTrunk = serviceTrunk;
                 origPricelist = pricelist;
@@ -380,6 +406,9 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
             Pricelist * pricelist;
             PricelistPrice * price;
             if (checkServiceTrunkAvailability(serviceTrunk, SERVICE_TRUNK_SETTINGS_TERMINATION, pricelist, price)) {
+
+                // TODO: pricelist.currency_id => в валюту server->min_price_for_autorouting ...
+
                 if (
                     server->min_price_for_autorouting > 0
                     && price->price > server->min_price_for_autorouting
@@ -411,7 +440,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
     sort(termServiceTrunks.begin(), termServiceTrunks.end(), service_trunk_order());
 }
 
-bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate) {
+bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate, char* pCurrencyId) {
 
     bool hasRateForATrunk = false;
 
@@ -431,6 +460,10 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
             if (pBuyRate) {
                 * pBuyRate = trunkOrder.price->price;
             }
+
+            if (pCurrencyId) {
+                strncpy(trunkOrder.pricelist->currency_id, pCurrencyId, 4);
+            }
         }
 
         if (trace != nullptr) {
@@ -438,6 +471,7 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
             *trace << ", TRUNK: " << trunkOrder.trunk->name << " (" << trunkOrder.trunk->id << ")";
             *trace << ", SERVICE TRUNK " << trunkOrder.serviceTrunk->id;
             *trace << ", PRICELIST: " << trunkOrder.pricelist->id;
+            *trace << ", PRICELIST CURRENCY: " << trunkOrder.pricelist->currency_id;
             *trace << ", PREFIX: " << trunkOrder.price->prefix;
             *trace << "\n";
         }

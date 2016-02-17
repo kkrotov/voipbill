@@ -13,6 +13,7 @@ struct Pricelist {
     double initiate_mgmn_cost;
     double initiate_zona_cost;
     bool price_include_vat;
+    char currency_id[4];
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -26,6 +27,7 @@ struct Pricelist {
         trace << "initiate_mgmn_cost " << initiate_mgmn_cost << ", ";
         trace << "initiate_zona_cost: " << initiate_zona_cost << ", ";
         trace << "price_include_vat: " << price_include_vat << ", ";
+        trace << "currency_id: " << currency_id << ", ";
         trace << ")";
     }
 };

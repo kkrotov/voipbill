@@ -50,21 +50,26 @@ echo 'Stopping tested app version...'
 
 echo 'Switching back to the new source code version...'
 . "$DIR/switch_repo_back.sh"
+[[ $? -ne 0 ]] && exit
 
 echo "Переключились обратно на новую (тестируемую) версию:"
 git log --name-status HEAD^..HEAD
 
 echo 'Migrating database structures and data...'
-. "$DIR/migrate_db.sh"
+python "$DIR/migrate_db.py"
+[[ $? -ne 0 ]] && exit
 
 echo 'Migrating daemons configs...'
 python "$DIR/migrate_configs.py"
+[[ $? -ne 0 ]] && exit
 
 echo 'Starting new app version...'
 . "$DIR/run.sh"
+[[ $? -ne 0 ]] && exit
 
 echo 'Генерируем тестовые примеры для новой (тестируемой) версии и ждём завершения синхронизации...'
 nice -19 python "$DIR/sampler.py"
+[[ $? -ne 0 ]] && exit
 
 echo 'Stopping new app version...'
 . "$DIR/stop.sh"

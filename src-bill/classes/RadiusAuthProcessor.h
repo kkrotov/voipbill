@@ -41,15 +41,15 @@ private:
 
     bool filterByNumber(const int numberId, string strNumber);
 
-    bool processOutcome(int outcomeId, double* pBuyRate = 0);
+    bool processOutcome(int outcomeId, double* pBuyRate = 0, char* pCurrencyId = 0);
 
-    bool processAutoOutcome(double* pBuyRate = 0);
+    bool processAutoOutcome(double* pBuyRate = 0, char* pCurrencyId = 0);
     void processRouteCaseOutcome(Outcome * outcome);
     void processReleaseReasonOutcome(Outcome * outcome);
     void processAirpOutcome(Outcome * outcome);
     void getAvailableOrigServiceTrunk(ServiceTrunk * origServiceTrunk, Pricelist * origPricelist, PricelistPrice * origPrice);
     void getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks);
-    bool processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate = 0);
+    bool processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate = 0, char* pCurrencyId = 0);
     string analyzeCall(Call &call);
     void fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double vat_rate);
 
