@@ -2,7 +2,7 @@
 
 echo 'Compiling app_bill...'
 
-scl enable devtoolset-2 bash << \EOF
+scl enable devtoolset-3 bash << \EOF
 
 mkdir -p libs/boost
 
@@ -17,7 +17,7 @@ ln -sfT /usr/pgsql-9.4/include/ /usr/include/postgresql
 popd
 
 cmake .
-make
+make -j4
 
 EOF
 
