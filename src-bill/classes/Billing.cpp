@@ -77,7 +77,10 @@ void fetchGlobalCounters(int accountId, double vat_rate, Repository& repository,
 }
 
 
-void logFinishedCall(const Call& origCall, const Call& termCall, Client* origAccount, Client* termAccount, Trunk* origTrunk, Trunk* termTrunk, Repository& repository) {
+void logFinishedCall(const Call& origCall, const Call& termCall, const CallInfo& origInfo, const CallInfo& termInfo, Trunk* origTrunk, Trunk* termTrunk, Repository& repository) {
+
+    Client* origAccount = origInfo.account;
+    Client* termAccount = termInfo.account;
 
     // interconnect_cost ??? vat ??? как влияют на стоимость и себестоимость?
 
@@ -153,15 +156,34 @@ void logFinishedCall(const Call& origCall, const Call& termCall, Client* origAcc
 
     logCall->params["term_rate"] = termCall.rate;
     logCall->params["term_cost"] = termCall.cost;
+ 
+
+    if (origInfo.pricelist && origInfo.pricelist->currency_id[0]) {
+        logCall->params["orig_currency"] = origInfo.pricelist->currency_id;
+    }
+
+    if (termInfo.pricelist && termInfo.pricelist->currency_id[0]) {
+        logCall->params["term_currency"] = termInfo.pricelist->currency_id;
+    }
 
     if (abs(origCall.cost) > 0.000001 || abs(termCall.cost) > 0.000001) {
-        auto grossMargin = -origCall.cost - termCall.cost;
-        if (grossMargin > 0.000001) {
-            logCall->params["gross_margin"] = grossMargin;
-            logCall->params["gross_margin_percent"] = grossMargin / -origCall.cost * 100.0;
-        } else {
-            logCall->params["gross_margin_negative"] = -grossMargin;
-            logCall->params["gross_margin_negative_percent"] = grossMargin / origCall.cost * 100.0;
+        // Вычисляем маржу только, если валюты известны и совпадают.
+        if (origInfo.pricelist && termInfo.pricelist
+            && origInfo.pricelist->currency_id[0] && termInfo.pricelist->currency_id[0]
+            && strncmp(origInfo.pricelist->currency_id, termInfo.pricelist->currency_id, 4) == 0) {
+
+            auto grossMargin = -origCall.cost - termCall.cost;
+            if (grossMargin > 0.000001) {
+                logCall->params["gross_margin"] = grossMargin;
+                if (abs(origCall.cost) > 0.000001) {
+                    logCall->params["gross_margin_percent"] = grossMargin / -origCall.cost * 100.0;
+                }
+            } else {
+                logCall->params["gross_margin_negative"] = -grossMargin;
+                if (abs(origCall.cost) > 0.000001) {
+                    logCall->params["gross_margin_negative_percent"] = grossMargin / origCall.cost * 100.0;
+                }
+            }
         }
     }
 
@@ -299,7 +321,7 @@ void Billing::calc(bool realtimePurpose) {
 
         if (realtimePurpose) {
             // Логируем завершённый звонок
-            logFinishedCall(origCall, termCall, origCallInfo.account, termCallInfo.account,
+            logFinishedCall(origCall, termCall, origCallInfo, termCallInfo,
                             origCallInfo.trunk, termCallInfo.trunk, repository);
         }
     }
