@@ -126,6 +126,11 @@ REGION_TRUNKS = '''99	mcn_msk_ast16_99	MGTS_Loc	BEE_Loc
 
 REGION_TRUNKS = [line.split() for line in REGION_TRUNKS.split('\n')]
 
+# Загружаем список регионов
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+regionsList = imp.load_source('regions-list', os.path.join(__location__, 'regions-list')).REGIONS_LIST.split()
+
+
 # Подписываемся на вставки звонков в центральную БД
 
 conn = psycopg2.connect(database='nispd_test', user='postgres')
@@ -260,8 +265,8 @@ conn.commit()
 
 cur.execute('''
   SET search_path = event, pg_catalog;
-  SELECT count(server_id) FROM queue;
-''')
+  SELECT count(server_id) FROM queue WHERE server_id IN (%(regions)s);
+''' % {'regions': ','.join(regionsList)})
 rows = cur.fetchall()
 if rows[0][0] > 0 :
   print 'Ждём, когда все регионы заполнят свои базы, забрав данные из центральной'
@@ -276,8 +281,8 @@ if rows[0][0] > 0 :
       sys.stdout.write('.')
       cur.execute('''
         SET search_path = event, pg_catalog;
-        SELECT count(server_id) FROM queue;
-      ''')
+        SELECT count(server_id) FROM queue WHERE server_id IN (%(regions)s);
+      ''' % {'regions': ','.join(regionsList)})
       rows = cur.fetchall()
       print rows[0][0]
       if rows[0][0] == 0 :
@@ -309,9 +314,6 @@ time.sleep(120)
 # Подписка при синхронизации calls_raw из региона в центр
 pubsub = pgpubsub.connect(user='postgres', database='nispd_test')
 pubsub.listen('rawcallsreceived')
-
-__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-regionsList = imp.load_source('regions-list', os.path.join(__location__, 'regions-list')).REGIONS_LIST.split()
 
 # Наши транки
 myTrunk = {
