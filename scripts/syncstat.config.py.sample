@@ -1,0 +1,16 @@
+config = {
+  'stat' : {    
+    'host': 'stat.mcn.ru', 
+    'user': 'v_billing_sync', 
+    'password': '123456'
+    'db':'nispd'
+  },    
+        
+  'bill': {     
+    'host': 'eridanus.mcn.ru', 
+    'user': 'stat', 
+    'password': '123456', 
+    'db': 'nispd'
+  }
+}
+
