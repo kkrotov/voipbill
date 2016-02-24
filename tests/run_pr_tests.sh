@@ -11,6 +11,7 @@ git log --name-status HEAD^..HEAD
 
 echo 'Сначала компилируем новую версию приложения, чтобы не запускать тесты при ошибках...'
 . "$DIR/compile.sh"
+[[ $? -ne 0 ]] && exit
 
 # echo 'Creating databases...'
 # . "$DIR/create_schema.sh"
