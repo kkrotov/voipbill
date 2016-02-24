@@ -462,7 +462,7 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
             }
 
             if (pCurrencyId) {
-                strncpy(trunkOrder.pricelist->currency_id, pCurrencyId, 4);
+                strncpy(pCurrencyId, trunkOrder.pricelist->currency_id, 4);
             }
         }
 
