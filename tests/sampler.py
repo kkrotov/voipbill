@@ -275,8 +275,14 @@ if rows[0][0] > 0 :
 
   for e in onsync.events(select_timeout=5*60, yield_timeouts=True):
     if e is None:
-      print 'ERROR: Синхронизация из центра в регионы неудачна'
-      break
+      print 'ERROR: Синхронизация из центра в регионы неудачна:'
+      cur.execute('''
+        SET search_path = event, pg_catalog;
+        SELECT * FROM queue WHERE server_id IN (%(regions)s);
+      ''' % {'regions': ','.join(regionsList)})
+      rows = cur.fetchall()
+      print rows
+      sys.exit(1)
     else:
       sys.stdout.write('.')
       cur.execute('''
