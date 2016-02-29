@@ -52,6 +52,7 @@ private:
     shared_ptr<TariffChangeLogList> tariffChangeLog;
     shared_ptr<StatDestinationPrefixlistsList> statDestinationPrefixlists;
     shared_ptr<StatPrefixlistList> statPrefixlist;
+    shared_ptr<CurrencyRateList> currencyRate;
 public:
     shared_ptr<ActiveCounter> activeCounter;
 
@@ -227,6 +228,15 @@ public:
 
     void getAllStatPrefixlistIdsByStatDestinationId(vector<int> &resultPrefixlistIds, int destination_id) {
         statDestinationPrefixlists->findAll(resultPrefixlistIds, destination_id, trace);
+    }
+
+    double getCurrencyRate(const char* currency_id) const {
+        const CurrencyRate* rate = currencyRate->find(currency_id);
+        if (rate) {
+            return rate->rate;
+        } else {
+            return 0.0;
+        }
     }
 
     bool matchNumber(int number_id, long long int numberPrefix) {

@@ -127,6 +127,7 @@ set(BILL_SOURCES
     src-bill/data/DataContainer.cpp
     src-bill/data/DataBillingContainer.cpp
     src-bill/data/DataCurrentCallsContainer.cpp
+    src-bill/data/CurrencyRateData.cpp
     src-bill/lists/ActiveCounter.cpp
     src-bill/lists/AirpList.cpp
     src-bill/lists/ClientList.cpp
@@ -171,6 +172,7 @@ set(BILL_SOURCES
     src-bill/lists/TrunkPriorityList.cpp
     src-bill/lists/TrunkRuleList.cpp
     src-bill/lists/TrunkTrunkRuleList.cpp
+    src-bill/lists/CurrencyRateList.cpp
     src-bill/models/Airp.cpp
     src-bill/models/Call.cpp
     src-bill/models/CallInfo.cpp
@@ -216,6 +218,7 @@ set(BILL_SOURCES
     src-bill/models/TrunkPriority.cpp
     src-bill/models/TrunkRule.cpp
     src-bill/models/TrunkTrunkRule.cpp
+    src-bill/models/CurrencyRate.cpp
     src-bill/sync/BasePull.cpp
     src-bill/sync/ManagerPull.cpp
     src-bill/sync/PullAirp.cpp

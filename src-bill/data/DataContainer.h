@@ -43,6 +43,7 @@
 #include "StatDestinationPrefixlistsData.h"
 #include "StatPrefixlistData.h"
 #include "ActiveCounterData.h"
+#include "CurrencyRateData.h"
 
 class DataContainer {
 public:
@@ -87,6 +88,7 @@ public:
     StatDestinationPrefixlistsData statDestinationPrefixlists;
     StatPrefixlistData statPrefixlist;
     ActiveCounterData activeCounter;
+    CurrencyRateData currencyRate;
 
     static DataContainer * instance();
 
