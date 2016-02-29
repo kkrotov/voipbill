@@ -63,6 +63,12 @@ echo 'Migrating daemons configs...'
 python "$DIR/migrate_configs.py"
 [[ $? -ne 0 ]] && exit
 
+echo 'Генерируем тестовые затравочные данные для новых таблиц...'
+# Скрипт работает с тем же списком миграций, что и migrate_db.py, но ищет файлы с именем миграции
+# и суффиксом _seed. Выполняет "миграции" для всех таких файлов.
+python "$DIR/migrate_db.py" _seed
+[[ $? -ne 0 ]] && exit
+
 echo 'Starting new app version...'
 . "$DIR/run.sh"
 [[ $? -ne 0 ]] && exit

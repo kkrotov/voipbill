@@ -31,9 +31,23 @@ def centralDb() :
 def regionalDb(reg) :
   return psycopg2.connect(database='nispd%s_test' % reg, user='postgres')
 
+
+suffix = sys.argv[1] if len(sys.argv) > 1 else ''
+
 for migration_name in migrations :
-  migration_file = migration_name + '.py'
-  migrate = imp.load_source(migration_file, os.path.join(__location__, '../install/migrations/' + migration_file)).migrate
-  print 'Migrating ' + migration_name + '...'
+  migration_file = migration_name + suffix + '.py'
+  migrate = None
+
+  if suffix == '' :
+    migrate = imp.load_source(migration_file, os.path.join(__location__, '../install/migrations/' + migration_file)).migrate
+    print 'Migrating ' + migration_name + '...'
+  else :
+    # Специальная обработка seed-данных для тестирования миграций
+    try :
+      migrate = imp.load_source(migration_file, os.path.join(__location__, 'seed_data/' + migration_file)).migrate
+    except IOError :
+      continue
+    print 'Applying seed data for testing ' + migration_name + ' migration...'
+
   migrate(centralDb, regionalDb, regionsList)
 
