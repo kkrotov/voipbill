@@ -238,6 +238,7 @@ set(BILL_SOURCES
     src-bill/sync/PullRouteTable.cpp
     src-bill/sync/PullRouteTableRoute.cpp
     src-bill/sync/PullRoutingReportData.cpp
+    src-bill/sync/PullCurrencyRate.cpp
     src-bill/sync/PullServer.cpp
     src-bill/sync/PullServiceNumber.cpp
     src-bill/sync/PullServicePackage.cpp

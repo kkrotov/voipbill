@@ -19,6 +19,7 @@
 #include "../sync/PullTariffLog.h"
 #include "../sync/PullStatPrefixlist.h"
 #include "../sync/PullStatDestinationPrefixlists.h"
+#include "../sync/PullCurrencyRate.h"
 
 #include "../sync/PullServer.h"
 #include "../sync/PullAirp.h"
@@ -70,6 +71,7 @@ ThreadSync::ThreadSync() {
     manager->add(new PullLogTariff());
     manager->add(new PullStatPrefixlist());
     manager->add(new PullStatDestinationPrefixlists());
+    manager->add(new PullCurrencyRate());
 
     manager->add(new PullServer());
     manager->add(new PullAirp());
