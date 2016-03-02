@@ -112,6 +112,12 @@ class Sync(Daemon):
                 if n == 100:
                     need = True
 
+            n = self.do_sync_currency_rate(100)
+            if n > 0:
+                print '+', n, 'currency_rate'
+                if n == 100:
+                    need = True
+
 
     def do_sync_clients(self, partsize):
         cur_stat = self.db_stat.cursor()
@@ -500,6 +506,40 @@ class Sync(Daemon):
         
         return len(tofix)
         
+    def do_sync_currency_rate(self, partsize):
+        cur_stat = self.db_stat.cursor()
+        cur_stat.execute("""        select z.rnd, z.tid, c.currency, c.date, c.rate
+                                from z_sync_postgres z
+                                left join currency_rate c on z.tid=c.id
+                                where z.tbase='"""+tbase+"""' and z.tname='currency_rate'
+                                limit """+str(partsize))
+        todel = []
+        toins = []
+        tofix = []
+        for r in cur_stat.fetchall():
+            tofix.append( (r[1],r[0]) )
+            if r[2] == None:
+                todel.append( (r[1],) )
+            else:
+                toins.append( (r[1],r[2],r[3],r[4]) )
+
+        if len(tofix) == 0:
+            return 0
+
+        cur = self.db.cursor();
+        cur.execute('BEGIN')
+
+        if len(toins) > 0:
+            cur.executemany("INSERT INTO billing.currency_rate(id, currency, date, rate)VALUES(%s,%s,%s,%s)", toins)
+        if len(todel) > 0:
+            cur.executemany("delete from billing.currency_rate where id=%s", todel)
+
+        cur.execute('COMMIT')
+        
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='currency_rate' and tid=%s and rnd=%s", tofix)
+        
+        return len(tofix)
+
     def is_need_sync(self):
         cur = self.db_stat.cursor()
         cur.execute(" select tbase from z_sync_postgres where tbase='"+tbase+"' limit 1")
