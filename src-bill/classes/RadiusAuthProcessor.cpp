@@ -5,13 +5,32 @@
 #include "RadiusAuthProcessor.h"
 #include "BillingCall.h"
 
-struct service_trunk_order {
-    bool operator() (const ServiceTrunkOrder & left, const ServiceTrunkOrder & right) {
-
-        // TODO: if (strcmp(left.pricelist.currency_id, right.pricelist.currency_id) == 0) ...
-
-        return left.price->price < right.price->price;
+bool priceLessThan(double priceLeft, const Pricelist &pricelistLeft,
+                   double priceRight, const Pricelist &pricelistRight, const Repository& repository) {
+    if (0 == strncmp(pricelistLeft.currency_id, pricelistRight.currency_id, 4)) {
+        return priceLeft < priceRight;
+    } else {
+        double leftRoubles = repository.priceToRoubles(priceLeft, pricelistLeft);
+        double rightRoubles = repository.priceToRoubles(priceRight, pricelistRight);
+        return leftRoubles < rightRoubles;
     }
+}
+
+class service_trunk_order {
+public:
+
+    service_trunk_order(const Repository& repository) : repository(repository) {}
+
+    bool operator() (const ServiceTrunkOrder & left, const ServiceTrunkOrder & right) {
+        if (left.price && left.pricelist && right.price && right.pricelist) {
+            return priceLessThan(left.price->price, *left.pricelist, right.price->price, *right.pricelist, this->repository);
+        }
+
+        return false;
+    }
+
+private:
+    const Repository& repository;
 };
 
 void RadiusAuthProcessor::init() {
@@ -345,13 +364,14 @@ void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk * origServic
     repository.getAllServiceTrunk(serviceTrunks, origTrunk->id);
 
     for (auto serviceTrunk : serviceTrunks) {
-        Pricelist * pricelist;
-        PricelistPrice * price;
+        Pricelist * pricelist = 0;
+        PricelistPrice * price = 0;
         if (checkServiceTrunkAvailability(serviceTrunk, SERVICE_TRUNK_SETTINGS_ORIGINATION, pricelist, price)) {
 
-            // TODO: if (strcmp(pricelist.currency_id, origPriceList.currency_id) == 0) ...
+            if (origServiceTrunk == nullptr ||
+                price && pricelist && origPrice && origPricelist &&
+                priceLessThan(price->price, *pricelist, origPrice->price, *origPricelist, this->repository)) {
 
-            if (origServiceTrunk == nullptr || price->price < origPrice->price) {
                 origServiceTrunk = serviceTrunk;
                 origPricelist = pricelist;
                 origPrice = price;
@@ -403,15 +423,14 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
 
 
         for (auto serviceTrunk : serviceTrunks) {
-            Pricelist * pricelist;
-            PricelistPrice * price;
+            Pricelist * pricelist = 0;
+            PricelistPrice * price = 0;
             if (checkServiceTrunkAvailability(serviceTrunk, SERVICE_TRUNK_SETTINGS_TERMINATION, pricelist, price)) {
-
-                // TODO: pricelist.currency_id => в валюту server->min_price_for_autorouting ...
 
                 if (
                     server->min_price_for_autorouting > 0
-                    && price->price > server->min_price_for_autorouting
+                    && price && pricelist
+                    && this->repository.priceToRoubles(price->price, *pricelist) > server->min_price_for_autorouting
                     && account != nullptr
                     && !account->anti_fraud_disabled)
                 {
@@ -437,7 +456,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
         }
     }
 
-    sort(termServiceTrunks.begin(), termServiceTrunks.end(), service_trunk_order());
+    sort(termServiceTrunks.begin(), termServiceTrunks.end(), service_trunk_order(this->repository));
 }
 
 bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate, char* pCurrencyId) {

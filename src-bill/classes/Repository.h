@@ -230,14 +230,32 @@ public:
         statDestinationPrefixlists->findAll(resultPrefixlistIds, destination_id, trace);
     }
 
-    double getCurrencyRate(const char* currency_id) const {
-        const CurrencyRate* rate = currencyRate->find(currency_id);
+    bool getCurrencyRate(const char* currency_id, double* o_currencyRate) const {
+        if (!currency_id || !o_currencyRate) {
+            throw Exception("Invalid arguments passed into getCurrencyRate()");
+        }
+
+        const CurrencyRate* rate = this->currencyRate->find(currency_id);
         if (rate) {
-            return rate->rate;
+            * o_currencyRate = rate->rate;
+            return true;
         } else {
-            return 0.0;
+            // "Безопасный" курс - 1:1
+            * o_currencyRate = 1.0;
+            return false;
         }
     }
+
+    double priceToRoubles(double price, const Pricelist &pricelist) const {
+        double currencyRate = 1.0;
+        if (this->getCurrencyRate(pricelist.currency_id, & currencyRate)
+            && currencyRate > 0.00000001) {
+            return price * currencyRate;
+        } else {
+            return price;
+        }
+    }
+
 
     bool matchNumber(int number_id, long long int numberPrefix) {
         char tmpNumber[20];
