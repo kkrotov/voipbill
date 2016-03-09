@@ -5,34 +5,6 @@
 #include "RadiusAuthProcessor.h"
 #include "BillingCall.h"
 
-bool priceLessThan(double priceLeft, const Pricelist &pricelistLeft,
-                   double priceRight, const Pricelist &pricelistRight, const Repository& repository) {
-    if (0 == strncmp(pricelistLeft.currency_id, pricelistRight.currency_id, 4)) {
-        return priceLeft < priceRight;
-    } else {
-        double leftRoubles = repository.priceToRoubles(priceLeft, pricelistLeft);
-        double rightRoubles = repository.priceToRoubles(priceRight, pricelistRight);
-        return leftRoubles < rightRoubles;
-    }
-}
-
-class service_trunk_order {
-public:
-
-    service_trunk_order(const Repository& repository) : repository(repository) {}
-
-    bool operator() (const ServiceTrunkOrder & left, const ServiceTrunkOrder & right) {
-        if (left.price && left.pricelist && right.price && right.pricelist) {
-            return priceLessThan(left.price->price, *left.pricelist, right.price->price, *right.pricelist, this->repository);
-        }
-
-        return false;
-    }
-
-private:
-    const Repository& repository;
-};
-
 void RadiusAuthProcessor::init() {
     if (!repository.prepare() || !repository.billingData->ready()) {
         throw Exception("Billing not ready.", "RadiusAuthProcessor::init");
@@ -360,23 +332,18 @@ bool RadiusAuthProcessor::processAutoOutcome(double* pBuyRate, char* pCurrencyId
 }
 
 void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk * origServiceTrunk, Pricelist * origPricelist, PricelistPrice * origPrice) {
-    vector<ServiceTrunk *> serviceTrunks;
-    repository.getAllServiceTrunk(serviceTrunks, origTrunk->id);
 
-    for (auto serviceTrunk : serviceTrunks) {
-        Pricelist * pricelist = 0;
-        PricelistPrice * price = 0;
-        if (checkServiceTrunkAvailability(serviceTrunk, SERVICE_TRUNK_SETTINGS_ORIGINATION, pricelist, price)) {
+    vector<ServiceTrunkOrder> trunkSettingsOrderList;
 
-            if (origServiceTrunk == nullptr ||
-                price && pricelist && origPrice && origPricelist &&
-                priceLessThan(price->price, *pricelist, origPrice->price, *origPricelist, this->repository)) {
+    repository.getTrunkSettingsOrderList(trunkSettingsOrderList, origTrunk, atoll(aNumber.c_str()), atoll(bNumber.c_str()), SERVICE_TRUNK_SETTINGS_ORIGINATION);
 
-                origServiceTrunk = serviceTrunk;
-                origPricelist = pricelist;
-                origPrice = price;
-            }
-        }
+    repository.orderOrigTrunkSettingsOrderList(trunkSettingsOrderList);
+
+    if (trunkSettingsOrderList.size() > 0) {
+        auto order = trunkSettingsOrderList.at(0);
+        origServiceTrunk = order.serviceTrunk;
+        origPricelist = order.pricelist;
+        origPrice = order.price;
     }
 }
 
@@ -421,42 +388,34 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
             continue;
         }
 
+        vector<ServiceTrunkOrder> trunkSettingsOrderList;
 
-        for (auto serviceTrunk : serviceTrunks) {
-            Pricelist * pricelist = 0;
-            PricelistPrice * price = 0;
-            if (checkServiceTrunkAvailability(serviceTrunk, SERVICE_TRUNK_SETTINGS_TERMINATION, pricelist, price)) {
+        repository.getTrunkSettingsOrderList(trunkSettingsOrderList, termTrunk, atoll(aNumber.c_str()), atoll(bNumber.c_str()), SERVICE_TRUNK_SETTINGS_TERMINATION);
 
-                if (
-                    server->min_price_for_autorouting > 0
-                    && price && pricelist
-                    && this->repository.priceToRoubles(price->price, *pricelist) > server->min_price_for_autorouting
-                    && account != nullptr
-                    && !account->anti_fraud_disabled)
-                {
-                    if (trace != nullptr) {
-                        *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE ANTI FRAUD: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << serviceTrunk->id << "\n";
-                    }
-                } else {
-                    ServiceTrunkOrder termOrder;
-                    termOrder.trunk = termTrunk;
-                    termOrder.serviceTrunk = serviceTrunk;
-                    termOrder.pricelist = pricelist;
-                    termOrder.price = price;
-                    termServiceTrunks.push_back(termOrder);
-                    if (trace != nullptr) {
-                        *trace << "INFO|TERM SERVICE TRUNK ACCEPT|" << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << serviceTrunk->id << "\n";
-                    }
+        repository.orderTermTrunkSettingsOrderList(trunkSettingsOrderList);
+
+        for (auto termOrder : trunkSettingsOrderList) {
+            if (
+                server->min_price_for_autorouting > 0
+                && termOrder.price && termOrder.pricelist
+                && this->repository.priceToRoubles(termOrder.price->price, *termOrder.pricelist) > server->min_price_for_autorouting
+                && termOrder.price->price > server->min_price_for_autorouting
+                && account != nullptr
+                && !account->anti_fraud_disabled)
+            {
+                if (trace != nullptr) {
+                    *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE ANTI FRAUD: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << termOrder.serviceTrunk->id << "\n";
                 }
             } else {
+                termServiceTrunks.push_back(termOrder);
                 if (trace != nullptr) {
-                    *trace << "INFO|TERM SERVICE TRUNK DECLINE|" << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << serviceTrunk->id << "\n";
+                    *trace << "INFO|TERM SERVICE TRUNK ACCEPT|" << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << termOrder.serviceTrunk->id << "\n";
                 }
             }
         }
     }
 
-    sort(termServiceTrunks.begin(), termServiceTrunks.end(), service_trunk_order(this->repository));
+    repository.orderTermTrunkSettingsOrderList(termServiceTrunks);
 }
 
 bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate, char* pCurrencyId) {
@@ -496,28 +455,6 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
         }
     }
 
-# if 0
-
-    string routeCase;
-    set<int> trunkIds;
-
-    for (ServiceTrunkOrder &trunkOrder : termOrders) {
-        if (trunkIds.find(trunkOrder.trunk->id) != trunkIds.end()) {
-            continue;
-        }
-        trunkIds.insert(trunkOrder.trunk->id);
-
-        routeCase += "_" + lexical_cast<string>(trunkOrder.trunk->id);
-
-        if (trunkIds.size() == 3) {
-            break;
-        }
-    }
-
-    response->setRouteCase("rc_auto" + routeCase);
-
-# else
-
     string routeCase;
     set<int> trunkIds;
 
@@ -540,8 +477,6 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
     }
 
     response->setRouteCase(routeCase);
-
-# endif
 
     return hasRateForATrunk;
 }
@@ -761,84 +696,6 @@ bool RadiusAuthProcessor::matchPrefixlist(const int prefixlistId, string strNumb
     auto prefix = repository.getPrefixlistPrefix(prefixlist->id, strNumber.c_str());
     return prefix != nullptr;
 }
-
-bool RadiusAuthProcessor::checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int type, Pricelist * &pricelist, PricelistPrice * &price) {
-
-    vector<ServiceTrunkSettings *> serviceTrunkSettings;
-    repository.getAllServiceTrunkSettings(serviceTrunkSettings, serviceTrunk->id, type);
-
-    if (serviceTrunkSettings.size() == 0) {
-        if (trace != nullptr) {
-            *trace << "DEBUG|SERVICE TRUNK DECLINE|TRUNK SETTINGS NOT FOUND, SEVICE_TRUNK_ID: " << serviceTrunk->id << "\n";
-        }
-        return false;
-    }
-
-    for (auto trunkSettings : serviceTrunkSettings) {
-
-        if (trunkSettings->src_number_id > 0 && !repository.matchNumber(trunkSettings->src_number_id, atoll(aNumber.c_str()))) {
-            if (trace != nullptr) {
-                *trace << "DEBUG|SERVICE TRUNK DECLINE|BY SRC NUMBER MATCHING, SEVICE_TRUNK_ID: " << serviceTrunk->id << "\n";
-            }
-            continue;
-        }
-
-        if (trunkSettings->dst_number_id > 0 && !repository.matchNumber(trunkSettings->dst_number_id, atoll(bNumber.c_str()))) {
-            if (trace != nullptr) {
-                *trace << "DEBUG|SERVICE TRUNK DECLINE|BY DST NUMBER MATCHING, SEVICE_TRUNK_ID: " << serviceTrunk->id << "\n";
-            }
-            continue;
-        }
-
-        pricelist = repository.getPricelist(trunkSettings->pricelist_id);
-        if (pricelist == nullptr) {
-            if (trace != nullptr) {
-                *trace << "DEBUG|SERVICE TRUNK DECLINE|PRICELIST NOT FOUND BY ID: " << trunkSettings->pricelist_id << ", SEVICE_TRUNK_ID: " << serviceTrunk->id << "\n";
-            }
-            continue;
-        }
-
-        if (pricelist->local) {
-
-            auto networkPrefix = repository.getNetworkPrefix(pricelist->local_network_config_id, atoll(bNumber.c_str()));
-            if (networkPrefix == nullptr) {
-                if (trace != nullptr) {
-                    *trace << "DEBUG|SERVICE TRUNK DECLINE|NETWORK PREFIX NOT FOUND BY local_network_config_id: " << pricelist->local_network_config_id << ", PRICELIST_ID: " << pricelist->id << ", SEVICE_TRUNK_ID: " << serviceTrunk->id << "\n";
-                }
-                continue;
-            }
-
-            price = repository.getPrice(trunkSettings->pricelist_id, networkPrefix->network_type_id);
-            if (price == nullptr) {
-                if (trace != nullptr) {
-                    *trace << "DEBUG|SERVICE TRUNK DECLINE|PRICE NOT FOUND: PRICELIST_ID: " << pricelist->id  << ", PREFIX: " << networkPrefix->network_type_id << ", SEVICE_TRUNK_ID: " << serviceTrunk->id << "\n";
-                }
-                continue;
-            }
-
-
-        } else {
-
-            price = repository.getPrice(trunkSettings->pricelist_id, atoll(bNumber.c_str()));
-            if (price == nullptr) {
-                if (trace != nullptr) {
-                    *trace << "DEBUG|SERVICE TRUNK DECLINE|PRICE NOT FOUND: PRICELIST_ID: " << pricelist->id  << ", PREFIX: " << atoll(bNumber.c_str()) << ", SEVICE_TRUNK_ID: " << serviceTrunk->id << "\n";
-                }
-                continue;
-            }
-
-        }
-
-        if (trace != nullptr) {
-            *trace << "DEBUG|SERVICE TRUNK ACCEPT|SEVICE_TRUNK_ID: " << serviceTrunk->id << "\n";
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
 
 string RadiusAuthProcessor::analyzeCall(Call &call) {
 

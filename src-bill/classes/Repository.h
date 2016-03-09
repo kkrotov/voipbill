@@ -121,8 +121,8 @@ public:
         serviceTrunk->findAll(resultTrunks, trunk_id, currentTime, trace);
     }
 
-    void getAllServiceTrunkSettings(vector<ServiceTrunkSettings *> &resultTrunkSettings, int trunk_id, int type) {
-        serviceTrunkSettings->findAll(resultTrunkSettings, trunk_id, type, trace);
+    void getAllServiceTrunkSettings(vector<ServiceTrunkSettings *> &resultTrunkSettings, int trunk_id, int destinationType) {
+        serviceTrunkSettings->findAll(resultTrunkSettings, trunk_id, destinationType, trace);
     }
 
     void getAllServiceNumberPackage(vector<ServicePackage *> &resultPackages, int service_number_id) {
@@ -256,6 +256,17 @@ public:
         }
     }
 
+    bool priceLessThan(double priceLeft, const Pricelist &pricelistLeft,
+                       double priceRight, const Pricelist &pricelistRight) const {
+        if (0 == strncmp(pricelistLeft.currency_id, pricelistRight.currency_id, 4)) {
+            return priceLeft < priceRight;
+        } else {
+            double leftRoubles = this->priceToRoubles(priceLeft, pricelistLeft);
+            double rightRoubles = this->priceToRoubles(priceRight, pricelistRight);
+            return leftRoubles < rightRoubles;
+        }
+    }
+
 
     bool matchNumber(int number_id, long long int numberPrefix) {
         char tmpNumber[20];
@@ -297,5 +308,162 @@ public:
         return 0;
     }
 
+    bool trunkOrderLessThan(const ServiceTrunkOrder & left, const ServiceTrunkOrder & right) const {
+        if (left.price && left.pricelist && right.price && right.pricelist) {
+            return priceLessThan(left.price->price, *left.pricelist, right.price->price, *right.pricelist);
+        }
 
+        if (left.price && left.pricelist && (!right.price || !right.pricelist)) {
+            // Известная цена всегда строго меньше любой неизвестной цены.
+            return true;
+        }
+
+        if ((!left.price || !left.pricelist) && right.price && right.pricelist) {
+            // Неизвестная цена никогда не меньше любой известной цены.
+            return false;
+        }
+
+        // Если у обоих нет ценника, неважно, что вернуть - мы всё равно не сможем гарантировать стабильность сортировки
+        return false;
+    }
+
+    struct trunk_settings_order_desc_price {
+        bool operator() (const ServiceTrunkOrder & left, const ServiceTrunkOrder & right) {
+            return this->repository.trunkOrderLessThan(right, left);
+        }
+
+        trunk_settings_order_desc_price(const Repository& repository) : repository(repository) {}
+
+    private:
+        const Repository& repository;
+    };
+
+    struct trunk_settings_order_asc_price {
+        bool operator() (const ServiceTrunkOrder & left, const ServiceTrunkOrder & right) {
+            return this->repository.trunkOrderLessThan(left, right);
+        }
+
+        trunk_settings_order_asc_price(const Repository& repository) : repository(repository) {}
+
+    private:
+        const Repository& repository;
+    };
+
+    void orderOrigTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList) const {
+        sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
+    }
+
+    void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList) const {
+        sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
+    }
+
+    bool checkTrunkSettingsConditions(ServiceTrunkSettings * &trunkSettings, long long int srcNumber, long long int dstNumber, Pricelist * &pricelist, PricelistPrice * &price) {
+
+        if (trunkSettings->src_number_id > 0 && !matchNumber(trunkSettings->src_number_id, srcNumber)) {
+            if (trace != nullptr) {
+                *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY SRC NUMBER MATCHING, TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+            }
+            return false;
+        }
+
+        if (trunkSettings->dst_number_id > 0 && !matchNumber(trunkSettings->dst_number_id, dstNumber)) {
+            if (trace != nullptr) {
+                *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY DST NUMBER MATCHING, TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+            }
+            return false;
+        }
+
+        pricelist = getPricelist(trunkSettings->pricelist_id);
+        if (pricelist == nullptr) {
+            if (trace != nullptr) {
+                *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICELIST NOT FOUND BY ID: " << trunkSettings->pricelist_id << ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+            }
+            return false;
+        }
+
+        if (pricelist->local) {
+
+            auto networkPrefix = getNetworkPrefix(pricelist->local_network_config_id, dstNumber);
+            if (networkPrefix == nullptr) {
+                if (trace != nullptr) {
+                    *trace << "DEBUG|TRUNK SETTINGS DECLINE|NETWORK PREFIX NOT FOUND BY local_network_config_id: " << pricelist->local_network_config_id << ", PRICELIST_ID: " << pricelist->id << ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << " / " << "\n";
+                }
+                return false;
+            }
+
+            price = getPrice(trunkSettings->pricelist_id, networkPrefix->network_type_id);
+            if (price == nullptr) {
+                if (trace != nullptr) {
+                    *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICE NOT FOUND: PRICELIST_ID: " << pricelist->id  << ", PREFIX: " << networkPrefix->network_type_id << ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+                }
+                return false;
+            }
+
+
+        } else {
+
+            price = getPrice(trunkSettings->pricelist_id, dstNumber);
+            if (price == nullptr) {
+                if (trace != nullptr) {
+                    *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICE NOT FOUND: PRICELIST_ID: " << pricelist->id  << ", PREFIX: " << dstNumber << ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+                }
+                return false;
+            }
+
+        }
+
+        if (trace != nullptr) {
+            *trace << "DEBUG|TRUNK SETTINGS ACCEPT|TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+        }
+
+        return true;
+    }
+
+    void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk * trunk, long long int srcNumber, long long int dstNumber, int destinationType) {
+        vector<ServiceTrunk *> serviceTrunks;
+        getAllServiceTrunk(serviceTrunks, trunk->id);
+
+        if (serviceTrunks.size() == 0) {
+            if (trace != nullptr) {
+                *trace << "DEBUG|SERVICE TRUNK DECLINE|CAUSE SERVICE TRUNK NOT FOUND BY TRUNK " << trunk->name << " (" << trunk->id << ")" << "\n";
+            }
+            return;
+        }
+
+        for (auto serviceTrunk : serviceTrunks) {
+            vector<ServiceTrunkSettings *> trunkSettingsList;
+            getAllServiceTrunkSettings(trunkSettingsList, serviceTrunk->id, destinationType);
+
+            for (auto trunkSettings : trunkSettingsList) {
+                Pricelist *pricelist;
+                PricelistPrice *price;
+                if (checkTrunkSettingsConditions(trunkSettings, srcNumber, dstNumber, pricelist, price)) {
+                    auto account = getAccount(serviceTrunk->client_account_id);
+                    if (account == nullptr) {
+                        if (trace != nullptr) {
+                            *trace << "DEBUG|TRUNK SETTINGS SKIP|ACCOUNT NOT FOUND BY ID " << serviceTrunk->client_account_id << "\n";
+                        }
+                        continue;
+                    }
+                    ServiceTrunkOrder order;
+                    order.trunk = trunk;
+                    order.serviceTrunk = serviceTrunk;
+                    order.pricelist = pricelist;
+                    order.price = price;
+                    resultTrunkSettingsTrunkOrderList.push_back(order);
+                }
+            }
+
+        }
+
+        if (resultTrunkSettingsTrunkOrderList.size() > 0) {
+            if (trace != nullptr) {
+                *trace << "FOUND|TRUNK SETTING ORDER LIST|" << "\n";
+            }
+        } else {
+            if (trace != nullptr) {
+                *trace << "NOT FOUND|TRUNK SETTING ORDER LIST|" << "\n";
+            }
+        }
+    }
 };

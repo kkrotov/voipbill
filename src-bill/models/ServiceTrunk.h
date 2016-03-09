@@ -1,6 +1,9 @@
 #pragma once
 
 #include "../common.h"
+#include "Trunk.h"
+#include "Pricelist.h"
+#include "PricelistPrice.h"
 
 struct ServiceTrunk {
     int id;
@@ -27,3 +30,11 @@ struct ServiceTrunk {
         trace << ")";
     }
 };
+
+struct ServiceTrunkOrder {
+    Trunk * trunk;
+    ServiceTrunk * serviceTrunk;
+    Pricelist * pricelist;
+    PricelistPrice * price;
+};
+

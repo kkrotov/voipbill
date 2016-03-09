@@ -27,7 +27,6 @@ protected:
     void processGeo();
     void processDestinations();
     int getDest(int geo_id);
-    bool checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int type, Pricelist * &pricelist, PricelistPrice * &price);
     void processLineWithoutNumber(Call *call, Cdr *cdr);
     long long int getNumber();
     long long int getRemoteNumber();
@@ -37,7 +36,8 @@ protected:
     bool isUsage7800();
 
     void setupTrunk();
-    void setupEffectiveServiceTrunkPricelistPrice();
+    void setupEffectiveOrigTrunkSettings();
+    void setupEffectiveTermTrunkSettings();
     void setupServiceTrunk();
     void setupServiceNumber();
     void setupServiceTrunkForNumber();

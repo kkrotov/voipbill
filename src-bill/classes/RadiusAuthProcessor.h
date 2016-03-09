@@ -7,13 +7,6 @@
 
 using namespace std;
 
-struct ServiceTrunkOrder {
-    Trunk * trunk;
-    ServiceTrunk * serviceTrunk;
-    Pricelist * pricelist;
-    PricelistPrice * price;
-};
-
 class RadiusAuthProcessor {
 public:
 
@@ -61,6 +54,5 @@ private:
     bool autoTrunkFilterDstNumber(Trunk * termTrunk);
     bool matchTrunkGroup(const int trunkGroupId, const int trunkId);
     bool matchPrefixlist(const int prefixlistId, string strNumber);
-    bool checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int type, Pricelist * &pricelist, PricelistPrice * &price);
 };
 
