@@ -466,7 +466,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
         }
     }
 
-    repository.orderTermTrunkSettingsOrderList(termServiceTrunks);
+    repository.orderTermTrunkSettingsOrderList(termServiceTrunks, time(nullptr));
 }
 
 bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate, Pricelist** pFirstBuyPricelist) {
