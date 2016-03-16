@@ -399,7 +399,6 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
                 server->min_price_for_autorouting > 0
                 && termOrder.price && termOrder.pricelist
                 && this->repository.priceToRoubles(termOrder.price->price, *termOrder.pricelist) > server->min_price_for_autorouting
-                && termOrder.price->price > server->min_price_for_autorouting
                 && account != nullptr
                 && !account->anti_fraud_disabled)
             {
