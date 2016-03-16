@@ -378,16 +378,6 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
             continue;
         }
 
-        vector<ServiceTrunk *> serviceTrunks;
-        repository.getAllServiceTrunk(serviceTrunks, termTrunk->id);
-
-        if (serviceTrunks.size() == 0) {
-            if (trace != nullptr) {
-                *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE SERVICE TRUNK NOT FOUND, " << termTrunk->name << " (" << termTrunk->id << ")" << "\n";
-            }
-            continue;
-        }
-
         vector<ServiceTrunkOrder> trunkSettingsOrderList;
 
         repository.getTrunkSettingsOrderList(trunkSettingsOrderList, termTrunk, atoll(aNumber.c_str()), atoll(bNumber.c_str()), SERVICE_TRUNK_SETTINGS_TERMINATION);
