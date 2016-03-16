@@ -53,7 +53,11 @@ void BillingCall::calcByTrunk() {
         *trace << "INFO|TARIFFICATION BY TRUNK" << "\n";
     }
 
-    setupEffectiveServiceTrunkPricelistPrice();
+    if (call->orig) {
+        setupEffectiveOrigTrunkSettings();
+    } else {
+        setupEffectiveTermTrunkSettings();
+    }
 
     setupServiceTrunk();
 
@@ -168,76 +172,6 @@ void BillingCall::calcTermByNumber() {
 
         call->cost = - call->cost;
     }
-}
-
-
-bool BillingCall::checkServiceTrunkAvailability(ServiceTrunk *serviceTrunk, int type, Pricelist * &pricelist, PricelistPrice * &price) {
-
-    vector<ServiceTrunkSettings *> serviceTrunkSettings;
-    repository->getAllServiceTrunkSettings(serviceTrunkSettings, serviceTrunk->id, type);
-    for (auto trunkSettings : serviceTrunkSettings) {
-
-        if (trunkSettings->src_number_id > 0 && !repository->matchNumber(trunkSettings->src_number_id, call->src_number)) {
-            if (trace != nullptr) {
-                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE SRC_NUMBER NOT MATCHED" << "\n";
-            }
-            continue;
-        }
-
-        if (trunkSettings->dst_number_id > 0 && !repository->matchNumber(trunkSettings->dst_number_id, call->dst_number)) {
-            if (trace != nullptr) {
-                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE DST_NUMBER NOT MATCHED" << "\n";
-            }
-            continue;
-        }
-
-        pricelist = repository->getPricelist(trunkSettings->pricelist_id);
-        if (pricelist == nullptr) {
-            if (trace != nullptr) {
-                *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST NOT FOUND" << "\n";
-            }
-            continue;
-        }
-
-        if (pricelist->local) {
-
-            auto networkPrefix = repository->getNetworkPrefix(pricelist->local_network_config_id, call->dst_number);
-            if (networkPrefix == nullptr) {
-                if (trace != nullptr) {
-                    *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE NETWORK PREFIX NOT FOUND" << "\n";
-                }
-                continue;
-            }
-
-            price = repository->getPrice(trunkSettings->pricelist_id, networkPrefix->network_type_id);
-            if (price == nullptr) {
-                if (trace != nullptr) {
-                    *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
-                }
-                continue;
-            }
-
-
-        } else {
-
-            price = repository->getPrice(trunkSettings->pricelist_id, call->dst_number);
-            if (price == nullptr) {
-                if (trace != nullptr) {
-                    *trace << "INFO|SERVICE TRUNK SETTINGS SKIPPED|CAUSE PRICELIST PRICE NOT FOUND" << "\n";
-                }
-                continue;
-            }
-
-        }
-
-        if (trace != nullptr) {
-            *trace << "INFO|SERVICE TRUNK SETTINGS MATCHED" << "\n";
-        }
-
-        return true;
-    }
-
-    return false;
 }
 
 void BillingCall::numberPreprocessing() {
@@ -455,20 +389,33 @@ void BillingCall::setupTrunk() {
     call->our = callInfo->trunk->our_trunk || callInfo->trunk->auth_by_number;
 }
 
-void BillingCall::setupEffectiveServiceTrunkPricelistPrice() {
-    vector<ServiceTrunk *> serviceTrunks;
-    repository->getAllServiceTrunk(serviceTrunks, callInfo->trunk->id);
+void BillingCall::setupEffectiveOrigTrunkSettings() {
+    vector<ServiceTrunkOrder> trunkSettingsOrderList;
 
-    for (auto serviceTrunk : serviceTrunks) {
-        Pricelist * pricelist;
-        PricelistPrice * price;
-        if (checkServiceTrunkAvailability(serviceTrunk, call->orig ? SERVICE_TRUNK_SETTINGS_ORIGINATION : SERVICE_TRUNK_SETTINGS_TERMINATION, pricelist, price)) {
-            if (callInfo->serviceTrunk == nullptr || price->price < callInfo->price->price) {
-                callInfo->serviceTrunk = serviceTrunk;
-                callInfo->pricelist = pricelist;
-                callInfo->price = price;
-            }
-        }
+    repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number, SERVICE_TRUNK_SETTINGS_ORIGINATION);
+
+    repository->orderOrigTrunkSettingsOrderList(trunkSettingsOrderList);
+
+    if (trunkSettingsOrderList.size() > 0) {
+        auto order = trunkSettingsOrderList.at(0);
+        callInfo->serviceTrunk = order.serviceTrunk;
+        callInfo->pricelist = order.pricelist;
+        callInfo->price = order.price;
+    }
+}
+
+void BillingCall::setupEffectiveTermTrunkSettings() {
+    vector<ServiceTrunkOrder> trunkSettingsOrderList;
+
+    repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number, SERVICE_TRUNK_SETTINGS_TERMINATION);
+
+    repository->orderTermTrunkSettingsOrderList(trunkSettingsOrderList);
+
+    if (trunkSettingsOrderList.size() > 0) {
+        auto order = trunkSettingsOrderList.at(0);
+        callInfo->serviceTrunk = order.serviceTrunk;
+        callInfo->pricelist = order.pricelist;
+        callInfo->price = order.price;
     }
 }
 

@@ -151,13 +151,6 @@ void logFinishedCall(const Call& origCall, const Call& termCall, const CallInfo&
 
     logCall->params["geo_id"] = origCall.geo_id;
 
-    logCall->params["orig_rate"] = origCall.rate;
-    logCall->params["orig_cost"] = -origCall.cost;
-
-    logCall->params["term_rate"] = termCall.rate;
-    logCall->params["term_cost"] = termCall.cost;
- 
-
     if (origInfo.pricelist && origInfo.pricelist->currency_id[0]) {
         logCall->params["orig_currency"] = origInfo.pricelist->currency_id;
     }
@@ -166,24 +159,36 @@ void logFinishedCall(const Call& origCall, const Call& termCall, const CallInfo&
         logCall->params["term_currency"] = termInfo.pricelist->currency_id;
     }
 
-    if (abs(origCall.cost) > 0.000001 || abs(termCall.cost) > 0.000001) {
-        // Вычисляем маржу только, если валюты известны и совпадают.
-        if (origInfo.pricelist && termInfo.pricelist
-            && origInfo.pricelist->currency_id[0] && termInfo.pricelist->currency_id[0]
-            && strncmp(origInfo.pricelist->currency_id, termInfo.pricelist->currency_id, 4) == 0) {
+    logCall->params["orig_rate"] = origCall.rate;
+    logCall->params["orig_cost"] = -origCall.cost;
 
-            auto grossMargin = -origCall.cost - termCall.cost;
-            if (grossMargin > 0.000001) {
-                logCall->params["gross_margin"] = grossMargin;
-                if (abs(origCall.cost) > 0.000001) {
-                    logCall->params["gross_margin_percent"] = grossMargin / -origCall.cost * 100.0;
-                }
-            } else {
-                logCall->params["gross_margin_negative"] = -grossMargin;
-                if (abs(origCall.cost) > 0.000001) {
-                    logCall->params["gross_margin_negative_percent"] = grossMargin / origCall.cost * 100.0;
-                }
-            }
+    logCall->params["term_rate"] = termCall.rate;
+    logCall->params["term_cost"] = termCall.cost;
+
+    double origCostRub = 0;
+    if (origInfo.pricelist) {
+        origCostRub = repository.priceToRoubles(-origCall.cost, *origInfo.pricelist);
+        logCall->params["orig_rate_rub"] = origCostRub;
+        logCall->params["orig_cost_rub"] = repository.priceToRoubles(-origCall.cost, *origInfo.pricelist);
+    }
+
+    double termCostRub = 0;
+    if (termInfo.pricelist) {
+        termCostRub = repository.priceToRoubles(termCall.cost, *termInfo.pricelist);
+        logCall->params["term_rate_rub"] = termCostRub;
+        logCall->params["term_cost_rub"] = repository.priceToRoubles(termCall.cost, *termInfo.pricelist);
+    }
+
+    if (abs(origCostRub) > 0.000001 && abs(termCostRub) > 0.000001) {
+
+        double grossMarginRub = origCostRub - termCostRub;
+
+        if (grossMarginRub > 0.000001) {
+            logCall->params["gross_margin"] = grossMarginRub;
+            logCall->params["gross_margin_percent"] = grossMarginRub / origCostRub * 100.0;
+        } else {
+            logCall->params["gross_margin_negative"] = -grossMarginRub;
+            logCall->params["gross_margin_negative_percent"] = -grossMarginRub / origCostRub * 100.0;
         }
     }
 

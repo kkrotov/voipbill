@@ -45,6 +45,7 @@ void DataContainer::loadAll(BDb * db) {
     tariffChangeLog.load(db);
     statDestinationPrefixlists.load(db);
     statPrefixlist.load(db);
+    currencyRate.load(db);
 
     activeCounter.load(serviceNumber.get(), serviceTrunk.get());
 }

@@ -184,6 +184,10 @@ bool Repository::prepare(time_t currentTime) {
         return false;
     }
 
+    if ((currencyRate = data->currencyRate.get()) == nullptr) {
+        return false;
+    }
+
     return true;
 }
 

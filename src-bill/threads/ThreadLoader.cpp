@@ -192,6 +192,9 @@ void ThreadLoader::run() {
 
                 repository.data->server.load(&db_calls);
 
+            } else if (event == "currency_rate") {
+
+                repository.data->currencyRate.load(&db_calls);
             }
 
             db_calls.exec("DELETE from event.queue WHERE event='" + event + "' and version = '" + lexical_cast<string>(version) + "'");
