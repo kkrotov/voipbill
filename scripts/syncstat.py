@@ -7,7 +7,7 @@ import psycopg2
 
 from Daemon import Daemon
 
-from syncstat.config.py import config
+from syncstat_config import config
 
 tbase = 'nispd'
 pid_file = '/var/run/syncstat.pid'
