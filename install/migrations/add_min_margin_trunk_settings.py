@@ -31,7 +31,7 @@ def migrate(centralDb, regionalDb, regionsList) :
       ALTER TABLE billing.service_trunk_settings ADD COLUMN minimum_margin_type SMALLINT DEFAULT 0;
       ALTER TABLE billing.service_trunk_settings ADD COLUMN minimum_margin NUMERIC(10,5) DEFAULT 0;
       
-      REPLACE RULE service_trunk_settings_rl_duplicate AS
+      CREATE OR REPLACE RULE service_trunk_settings_rl_duplicate AS
         ON INSERT TO billing.service_trunk_settings
         WHERE (EXISTS (SELECT x.id FROM billing.service_trunk_settings x WHERE x.id = new.id))
         DO INSTEAD

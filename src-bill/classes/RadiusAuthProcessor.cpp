@@ -340,21 +340,21 @@ bool RadiusAuthProcessor::processAutoOutcome(double* pBuyRate, Pricelist** pFirs
         * pFirstBuyPricelist = nullptr;
     }
 
-    // FIXME: Зачем здесь эти четыре строчки???
-    ServiceTrunk * origServiceTrunk = nullptr;
-    Pricelist * origPricelist = nullptr;
-    PricelistPrice * origPrice = nullptr;
-    getAvailableOrigServiceTrunk(origServiceTrunk, origPricelist, origPrice);
+    ServiceTrunk* origServiceTrunk = nullptr;
+    Pricelist* origPricelist = nullptr;
+    PricelistPrice* origPrice = nullptr;
+    ServiceTrunkSettings* origSettings = nullptr;
+    getAvailableOrigServiceTrunk(& origServiceTrunk, & origPricelist, & origPrice, & origSettings);
 
 
     vector<ServiceTrunkOrder> termServiceTrunks;
-    getAvailableTermServiceTrunk(termServiceTrunks);
+    getAvailableTermServiceTrunk(termServiceTrunks, origPricelist, origPrice, origSettings);
 
 
     return processAutoRouteResponse(termServiceTrunks, pBuyRate, pFirstBuyPricelist);
 }
 
-void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk * origServiceTrunk, Pricelist * origPricelist, PricelistPrice * origPrice) {
+void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk** origServiceTrunk, Pricelist** origPricelist, PricelistPrice** origPrice, ServiceTrunkSettings** origSettings) {
 
     vector<ServiceTrunkOrder> trunkSettingsOrderList;
 
@@ -364,14 +364,14 @@ void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk * origServic
 
     if (trunkSettingsOrderList.size() > 0) {
         auto order = trunkSettingsOrderList.at(0);
-        // BUGBUG: Эта строчка не делает ничего!
-        origServiceTrunk = order.serviceTrunk;
-        origPricelist = order.pricelist;
-        origPrice = order.price;
+        * origServiceTrunk = order.serviceTrunk;
+        * origPricelist = order.pricelist;
+        * origPrice = order.price;
+        * origSettings = order.trunkSettings;
     }
 }
 
-void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks) {
+void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks, Pricelist* origPricelist, PricelistPrice* origPrice, ServiceTrunkSettings* origSettings) {
     vector<Trunk *> termTrunks;
     repository.getAllAutoRoutingTrunks(termTrunks);
 
@@ -420,6 +420,43 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
                     *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE ANTI FRAUD: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << termOrder.serviceTrunk->id << "\n";
                 }
             } else {
+                if (origSettings && origSettings->minimum_margin_type != SERVICE_TRUNK_SETTINGS_MIN_MARGIN_ABSENT
+                    && termOrder.price && termOrder.pricelist && abs(termOrder.price->price) > 0.000001
+                    && origPrice && origPricelist && abs(origPrice->price) > 0.000001) {
+ 
+                    if (origSettings->minimum_margin_type == SERVICE_TRUNK_SETTINGS_MIN_MARGIN_PERCENT
+                        || origSettings->minimum_margin_type == SERVICE_TRUNK_SETTINGS_MIN_MARGIN_VALUE) {
+
+                        double origRub = this->repository.priceToRoubles(origPrice->price, *origPricelist);
+                        double termRub = this->repository.priceToRoubles(termOrder.price->price, *termOrder.pricelist);
+
+                        if (origRub > 0.000001 && termRub > 0.000001) {
+
+                            double profit = origRub - termRub;
+
+                            // Под маржой в процентах здесь понимается НАЦЕНКА
+                            // Под маржой в абс. единицах - ПРИБЫЛЬ
+                            double trunkMargin = origSettings->minimum_margin_type == SERVICE_TRUNK_SETTINGS_MIN_MARGIN_VALUE
+                                ? profit
+                                : profit / termRub;
+
+                            if (trunkMargin < origSettings->minimum_margin) {
+                                if (trace != nullptr) {
+                                    *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE MIN MARGIN: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << termOrder.serviceTrunk->id
+                                      << ", MIN MARGIN: " << origSettings->minimum_margin << ", TRUNK MARGIN: " << trunkMargin << "\n";
+                                }
+
+                                continue;
+                            }
+                        }
+                    } else {
+                        if (trace != nullptr) {
+                            *trace << "DEBUG|TERM SERVICE TRUNK ACCEPT|UNEXPECTED MIN MARGIN TYPE: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "
+                                << termOrder.serviceTrunk->id << ", STRANGE MIN MARGIN TYPE: " << origSettings->minimum_margin_type << "\n";
+                        }
+                    }
+                }
+
                 termServiceTrunks.push_back(termOrder);
                 if (trace != nullptr) {
                     *trace << "INFO|TERM SERVICE TRUNK ACCEPT|" << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << termOrder.serviceTrunk->id << "\n";

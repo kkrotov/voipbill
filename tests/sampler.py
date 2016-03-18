@@ -9,6 +9,7 @@ import os
 import sys
 import imp
 import urllib2
+import httplib
 
 print 'Запущен скрипт генератора тестовых звонков'
 print '  Алгоритм работы:'
@@ -449,6 +450,8 @@ for (regConn, region_id) in regConnections :
             }
             routeReply = urllib2.urlopen(requestUrl).read()
             route_case = routeReply.split('\n')[-2]
+          except httplib.BadStatusLine :
+            routeReply = 'FATAL: PROCESS CRASHED'
           except Exception as err :
             routeReply = err.reason
 

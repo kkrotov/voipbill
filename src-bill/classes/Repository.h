@@ -448,6 +448,7 @@ public:
                     ServiceTrunkOrder order;
                     order.trunk = trunk;
                     order.serviceTrunk = serviceTrunk;
+                    order.trunkSettings = trunkSettings;
                     order.pricelist = pricelist;
                     order.price = price;
                     resultTrunkSettingsTrunkOrderList.push_back(order);
