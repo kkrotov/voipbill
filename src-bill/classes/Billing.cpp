@@ -120,6 +120,14 @@ void logFinishedCall(const Call& origCall, const Call& termCall, const CallInfo&
 
     logCall->params["orig_trunk_id"] = origCall.trunk_id;
     logCall->params["term_trunk_id"] = termCall.trunk_id;
+    
+    if (origInfo.trunk && origInfo.trunk->trunk_name[0]) {
+        logCall->params["orig_trunk_name"] = origInfo.trunk->trunk_name;
+    }
+
+    if (termInfo.trunk && termInfo.trunk->trunk_name[0]) {
+        logCall->params["term_trunk_name"] = termInfo.trunk->trunk_name;
+    }
 
     logCall->params["orig_account_id"] = origCall.account_id;
     logCall->params["term_account_id"] = termCall.account_id;
@@ -159,36 +167,46 @@ void logFinishedCall(const Call& origCall, const Call& termCall, const CallInfo&
         logCall->params["term_currency"] = termInfo.pricelist->currency_id;
     }
 
+    // Стоимость минуты оригинации в валюте прайслиста
     logCall->params["orig_rate"] = origCall.rate;
+    // Стоимость оригинации всего звонка в валюте прайслиста
     logCall->params["orig_cost"] = -origCall.cost;
 
+    // Стоимость минуты терминации в валюте прайслиста
     logCall->params["term_rate"] = termCall.rate;
+    // Стоимость терминации всего звонка в валюте прайслиста
     logCall->params["term_cost"] = termCall.cost;
 
+    // Стоимость оригинации всего звонка в рублях
     double origCostRub = 0;
     if (origInfo.pricelist) {
         origCostRub = repository.priceToRoubles(-origCall.cost, *origInfo.pricelist);
-        logCall->params["orig_rate_rub"] = origCostRub;
-        logCall->params["orig_cost_rub"] = repository.priceToRoubles(-origCall.cost, *origInfo.pricelist);
+        logCall->params["orig_cost_rub"] = origCostRub;
+        logCall->params["orig_rate_rub"] = repository.priceToRoubles(origCall.rate, *origInfo.pricelist);
     }
 
+    // Стоимость терминации всего звонка в рублях
     double termCostRub = 0;
     if (termInfo.pricelist) {
         termCostRub = repository.priceToRoubles(termCall.cost, *termInfo.pricelist);
-        logCall->params["term_rate_rub"] = termCostRub;
-        logCall->params["term_cost_rub"] = repository.priceToRoubles(termCall.cost, *termInfo.pricelist);
+        logCall->params["term_cost_rub"] = termCostRub;
+        logCall->params["term_rate_rub"] = repository.priceToRoubles(termCall.rate, *termInfo.pricelist);
     }
 
+    // Маржу считаем только, если стоимость ненулевая, иначе получим бессмысленное значение.
     if (abs(origCostRub) > 0.000001 && abs(termCostRub) > 0.000001) {
 
-        double grossMarginRub = origCostRub - termCostRub;
+        double profitRub = origCostRub - termCostRub;
 
-        if (grossMarginRub > 0.000001) {
-            logCall->params["gross_margin"] = grossMarginRub;
-            logCall->params["gross_margin_percent"] = grossMarginRub / origCostRub * 100.0;
+        logCall->params["profit"] = profitRub;
+        logCall->params["profit_markup"] = profitRub / termCostRub * 100.0;
+
+        if (profitRub > -0.000001) {
+            logCall->params["profit_positive"] = profitRub;
+            logCall->params["profit_markup_positive"] = profitRub / termCostRub * 100.0;
         } else {
-            logCall->params["gross_margin_negative"] = -grossMarginRub;
-            logCall->params["gross_margin_negative_percent"] = -grossMarginRub / origCostRub * 100.0;
+            logCall->params["profit_negative"] = -profitRub;
+            logCall->params["profit_markup_negative"] = -profitRub / termCostRub * 100.0;
         }
     }
 
