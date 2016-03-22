@@ -2,6 +2,7 @@
 
 #include "../common.h"
 #include "Trunk.h"
+#include "ServiceTrunkSettings.h"
 #include "Pricelist.h"
 #include "PricelistPrice.h"
 
@@ -34,6 +35,7 @@ struct ServiceTrunk {
 struct ServiceTrunkOrder {
     Trunk * trunk;
     ServiceTrunk * serviceTrunk;
+    ServiceTrunkSettings * trunkSettings;
     Pricelist * pricelist;
     PricelistPrice * price;
 };

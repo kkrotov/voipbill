@@ -20,5 +20,7 @@ public:
         fields.push_back("pricelist_id");
         fields.push_back("minimum_minutes");
         fields.push_back("minimum_cost");
+        fields.push_back("minimum_margin_type");
+        fields.push_back("minimum_margin");
     }
 };

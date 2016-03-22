@@ -298,7 +298,7 @@ class Sync(Daemon):
 
     def do_sync_usage_trunk_settings(self, partsize):
         cur_stat = self.db_stat.cursor()
-        cur_stat.execute("""    select z.rnd, z.tid, c.usage_id, c.type, c.order, c.src_number_id, c.dst_number_id, c.pricelist_id, c.minimum_minutes, c.minimum_cost
+        cur_stat.execute("""    select z.rnd, z.tid, c.usage_id, c.type, c.order, c.src_number_id, c.dst_number_id, c.pricelist_id, c.minimum_minutes, c.minimum_cost, c.minimum_margin, c.minimum_margin_type
                                 from z_sync_postgres z
                                 left join usage_trunk_settings c on z.tid=c.id
                                 where z.tbase='"""+tbase+"""' and z.tname='usage_trunk_settings'
@@ -311,7 +311,7 @@ class Sync(Daemon):
             if r[2] == None:
                 todel.append( (r[1],) )
             else:
-                toins.append( (r[1],r[2],fix_date(r[3]),fix_date(r[4]),r[5],r[6],r[7],r[8],r[9]) )
+                toins.append( (r[1],r[2],fix_date(r[3]),fix_date(r[4]),r[5],r[6],r[7],r[8],r[9],r[10],r[11]) )
 
         if len(tofix) == 0:
             return 0
@@ -320,7 +320,7 @@ class Sync(Daemon):
         cur.execute('BEGIN')
 
         if len(toins) > 0:
-            cur.executemany("INSERT INTO billing.service_trunk_settings(id, trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id, minimum_minutes, minimum_cost)VALUES(%s,%s,'%s','%s',%s,%s,%s,%s,%s)", toins)
+            cur.executemany("INSERT INTO billing.service_trunk_settings(id, trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id, minimum_minutes, minimum_cost, minimum_margin, minimum_margin_type)VALUES(%s,%s,'%s','%s',%s,%s,%s,%s,%s,%s,%s)", toins)
         if len(todel) > 0:
             cur.executemany("delete from billing.service_trunk_settings where id=%s", todel)
 

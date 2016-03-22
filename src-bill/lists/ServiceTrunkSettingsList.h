@@ -7,7 +7,8 @@ class ServiceTrunkSettingsList : public ObjList<ServiceTrunkSettings> {
 protected:
 
     string sql(BDb * db) {
-        return "    select id, trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id, minimum_minutes, minimum_cost " \
+        return "    select id, trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id, minimum_minutes, minimum_cost, " \
+            "              minimum_margin_type, minimum_margin "
             "       from billing.service_trunk_settings " \
             "       order by trunk_id asc, \"type\" asc, \"order\" asc ";
     }
@@ -22,6 +23,8 @@ protected:
         item->pricelist_id = row.get_i(6);
         item->minimum_minutes = row.get_i(7);
         item->minimum_cost = row.get_i(8);
+        item->minimum_margin_type = row.get_i(9);
+        item->minimum_margin = row.get_d(10);
     }
 
     struct key_trunk_id {

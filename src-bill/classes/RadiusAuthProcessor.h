@@ -40,8 +40,8 @@ private:
     void processRouteCaseOutcome(Outcome * outcome);
     void processReleaseReasonOutcome(Outcome * outcome);
     void processAirpOutcome(Outcome * outcome);
-    void getAvailableOrigServiceTrunk(ServiceTrunk * origServiceTrunk, Pricelist * origPricelist, PricelistPrice * origPrice);
-    void getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks);
+    void getAvailableOrigServiceTrunk(ServiceTrunk** origServiceTrunk, Pricelist** origPricelist, PricelistPrice** origPrice, ServiceTrunkSettings** origSettings);
+    void getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks, Pricelist* origPricelist, PricelistPrice* origPrice, ServiceTrunkSettings* origSettings);
     bool processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate = 0, Pricelist** pFirstBuyPricelist = 0);
     string analyzeCall(Call &call);
     void fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double vat_rate);
