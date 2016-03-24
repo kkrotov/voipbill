@@ -15,6 +15,7 @@ struct Trunk {
     int route_table_id;
     bool our_trunk;
     bool auth_by_number;
+    bool orig_redirect_number_7800;
     bool orig_redirect_number;
     bool term_redirect_number;
 
@@ -31,6 +32,7 @@ struct Trunk {
         trace << "route_table_id: " << route_table_id << ", ";
         trace << "our_trunk: " << our_trunk << ", ";
         trace << "auth_by_number: " << auth_by_number << ", ";
+        trace << "orig_redirect_number_7800: " << orig_redirect_number_7800 << ", ";
         trace << "orig_redirect_number: " << orig_redirect_number << ", ";
         trace << "term_redirect_number: " << term_redirect_number << ", ";
         trace << ")";

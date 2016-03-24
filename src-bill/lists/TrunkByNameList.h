@@ -9,7 +9,7 @@ protected:
 
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
-        return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, default_priority, auto_routing, route_table_id, our_trunk, auth_by_number, orig_redirect_number, term_redirect_number " \
+        return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, default_priority, auto_routing, route_table_id, our_trunk, auth_by_number, orig_redirect_number_7800, orig_redirect_number, term_redirect_number " \
             "   from auth.trunk " \
             "   where server_id = " + server_id +
             "   order by trunk_name asc ";
@@ -27,8 +27,9 @@ protected:
         item->route_table_id = row.get_i(8);
         item->our_trunk = row.get_b(9);
         item->auth_by_number = row.get_b(10);
-        item->orig_redirect_number = row.get_b(11);
-        item->term_redirect_number = row.get_b(12);
+        item->orig_redirect_number_7800 = row.get_b(11);
+        item->orig_redirect_number = row.get_b(12);
+        item->term_redirect_number = row.get_b(13);
     }
 
     struct key_trunk_name {
