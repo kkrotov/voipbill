@@ -233,7 +233,18 @@ void BillingCall::processRedirectNumber() {
                 *trace << "INFO|PROCESS REDIRECT NUMBER|SET SRC_NUMBER = " << call->src_number << "\n";
             }
         }
+    } else if (callInfo->trunk->orig_redirect_number_7800) {
+        long long int redirect_number =  atoll(cdr->redirect_number);
+
+        if (redirect_number > 0) {
+            call->dst_number = redirect_number;
+
+            if (trace != nullptr) {
+                *trace << "INFO|PROCESS REDIRECT NUMBER 7800|SET DST_NUMBER = " << call->dst_number << "\n";
+            }
+        }
     }
+
 }
 
 void BillingCall::processGeo() {
