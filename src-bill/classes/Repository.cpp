@@ -144,6 +144,10 @@ bool Repository::prepare(time_t currentTime) {
         return false;
     }
 
+    if ((serviceNumberByTechNumber = data->serviceNumberByTechNumber.get()) == nullptr) {
+        return false;
+    }
+
     if ((serviceNumberPackage = data->serviceNumberPackage.get()) == nullptr) {
         return false;
     }

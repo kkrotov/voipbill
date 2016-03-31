@@ -32,6 +32,7 @@
 #include "MobPrefixData.h"
 #include "GeoPrefixData.h"
 #include "ServiceNumberData.h"
+#include "ServiceNumberByTechNumberData.h"
 #include "ServiceNumberPackageData.h"
 #include "ServiceTrunkData.h"
 #include "ServiceTrunkPackageData.h"
@@ -77,6 +78,7 @@ public:
     MobPrefixData mobPrefix;
     GeoPrefixData geoPrefix;
     ServiceNumberData serviceNumber;
+    ServiceNumberByTechNumberData serviceNumberByTechNumber;
     ServiceNumberPackageData serviceNumberPackage;
     ServiceTrunkData serviceTrunk;
     ServiceTrunkPackageData serviceTrunkPackage;

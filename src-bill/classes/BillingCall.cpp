@@ -234,13 +234,17 @@ void BillingCall::processRedirectNumber() {
             }
         }
     } else if (callInfo->trunk->orig_redirect_number_7800) {
-        long long int redirect_number =  atoll(cdr->redirect_number);
+        ServiceNumber* serviceNumber = repository->getServiceNumberByTechnicalNumber(getRemoteNumber());
+        if (serviceNumber) {
 
-        if (redirect_number > 0) {
-            call->dst_number = redirect_number;
+            long long int replacement_number = atoll(serviceNumber->did);
 
-            if (trace != nullptr) {
-                *trace << "INFO|PROCESS REDIRECT NUMBER 7800|SET DST_NUMBER = " << call->dst_number << "\n";
+            if (replacement_number > 0) {
+                call->dst_number = replacement_number;
+
+                if (trace != nullptr) {
+                    *trace << "INFO|PROCESS REPLACEMENT NUMBER 7800|SET DST_NUMBER = " << call->dst_number << "\n";
+                }
             }
         }
     }

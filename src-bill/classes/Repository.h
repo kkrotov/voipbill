@@ -43,6 +43,7 @@ private:
     shared_ptr<MobPrefixList> mobPrefix;
     shared_ptr<GeoPrefixList> geoPrefix;
     shared_ptr<ServiceNumberList> serviceNumber;
+    shared_ptr<ServiceNumberByTechNumberList> serviceNumberByTechNumber;
     shared_ptr<ServiceNumberPackageList> serviceNumberPackage;
     shared_ptr<ServiceTrunkList> serviceTrunk;
     shared_ptr<ServiceTrunkPackageList> serviceTrunkPackage;
@@ -111,6 +112,10 @@ public:
 
     ServiceNumber * getServiceNumber(const char * numberPrefix) {
         return getServiceNumber(atoll(numberPrefix));
+    }
+
+    ServiceNumber * getServiceNumberByTechnicalNumber(long long int technicalNumber) {
+        return serviceNumberByTechNumber->find(technicalNumber, currentTime, trace);
     }
 
     ServiceTrunk * getServiceTrunk(int trunk_id) {
