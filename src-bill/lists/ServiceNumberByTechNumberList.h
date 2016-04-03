@@ -4,7 +4,7 @@
 #include "../models/ServiceNumber.h"
 #include "../classes/AppBill.h"
 
-class ServiceNumberList : public ObjList<ServiceNumber> {
+class ServiceNumberByTechNumberList : public ObjList<ServiceNumber> {
 protected:
 
     string sql(BDb * db) {
@@ -12,7 +12,8 @@ protected:
         return "    select did, id, client_account_id, lines_count, extract(epoch from activation_dt), extract(epoch from expire_dt), tech_number, tech_number_operator_id " \
             "       from billing.service_number " \
             "       where server_id='" + server_id + "' " \
-            "       order by did asc, activation_dt asc ";
+            "       and tech_number is not null " \
+            "       order by tech_number asc, activation_dt asc ";
         //  and expire_dt > now()
     }
 
@@ -27,23 +28,6 @@ protected:
         item->tech_number_operator_id = row.get_i(7);
     }
 
-    struct key {
-        char * did;
-        time_t timestamp;
-        bool operator() (const ServiceNumber & left, int right) {
-            return strcmp(left.did, did) < 0 || left.activation_dt > timestamp || left.expire_dt < timestamp;
-        }
-    };
-
-    struct key_did {
-        bool operator() (const ServiceNumber & left, const char * did) {
-            return strcmp(left.did, did) < 0;
-        }
-        bool operator() (const char * did, const ServiceNumber & right) {
-            return strcmp(did, right.did) < 0;
-        }
-    };
-
     struct key_activation_dt {
         bool operator() (const ServiceNumber & left, time_t activation_dt) {
             return left.activation_dt < activation_dt;
@@ -53,17 +37,32 @@ protected:
         }
     };
 
+    struct key_tech_number {
+        bool operator() (const ServiceNumber & left, const char * tech_number) {
+            if (left.tech_number[0]) {
+                return strcmp(left.tech_number, tech_number) < 0;
+            } else {
+                return true;
+            }
+        }
+        bool operator() (const char * tech_number, const ServiceNumber & right) {
+            if (right.tech_number[0]) {
+                return strcmp(tech_number, right.tech_number) < 0;
+            } else {
+                return true;
+            }
+        }
+    };
+
 public:
-
-    ServiceNumber * find(long long int numberPrefix, time_t timestamp, stringstream *trace = nullptr) {
-
-        char did[20];
-        sprintf(did, "%lld", numberPrefix);
+    ServiceNumber * find(long long int technicalNumber, time_t timestamp, stringstream *trace = nullptr) {
+        char tech_number[20];
+        sprintf(tech_number, "%lld", technicalNumber);
 
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
-            auto p = equal_range(begin, end, &did[0], key_did());
+            auto p = equal_range(begin, end, &tech_number[0], key_tech_number());
             begin = p.first;
             end = p.second;
         }
@@ -85,12 +84,12 @@ public:
         if (trace != nullptr) {
 
             if (result != nullptr) {
-                *trace << "FOUND|SERVICE NUMBER|BY DID'" << numberPrefix << "', TIME '" << string_time(timestamp) << "'" << "\n";
+                *trace << "FOUND|SERVICE NUMBER|BY TECHNICAL NUMBER '" << technicalNumber << "', TIME '" << string_time(timestamp) << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
                 *trace << "\n";
             } else {
-                *trace << "NOT FOUND|SERVICE NUMBER|BY DID'" << numberPrefix << "', TIME '" << string_time(timestamp) << "'" << "\n";
+                *trace << "NOT FOUND|SERVICE NUMBER|BY TECHNICAL NUMBER '" << technicalNumber << "', TIME '" << string_time(timestamp) << "'" << "\n";
             }
         }
 

@@ -18,5 +18,7 @@ public:
         fields.push_back("activation_dt");
         fields.push_back("expire_dt");
         fields.push_back("lines_count");
+        fields.push_back("tech_number");
+        fields.push_back("tech_number_operator_id");
     }
 };

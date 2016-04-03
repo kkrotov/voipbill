@@ -195,10 +195,11 @@ class Sync(Daemon):
 
     def do_sync_usage_voip(self, partsize):
         cur_stat = self.db_stat.cursor()
-        cur_stat.execute("""        select z.rnd, z.tid, cc.id, c.activation_dt, c.expire_dt, c.E164, c.no_of_lines, c.region
+        cur_stat.execute("""        select z.rnd, z.tid, cc.id, c.activation_dt, c.expire_dt, c.E164, c.no_of_lines, c.region, vn.number_tech, vn.operator_account_id
                                 from z_sync_postgres z
                                 left join usage_voip c on z.tid=c.id
                                 left join clients cc on c.client=cc.client
+                                left join voip_numbers vn on vn.number = c.E164
                                 where z.tbase='"""+tbase+"""' and z.tname='usage_voip'
                                 limit """+str(partsize))
         todel = []
@@ -209,7 +210,7 @@ class Sync(Daemon):
             if r[2] == None:
                 todel.append( (r[1],) )
             else:
-                toins.append( (r[1],r[2],fix_date(r[3]),fix_date(r[4]),r[5],r[6],r[7]) )
+                toins.append( (r[1],r[2],fix_date(r[3]),fix_date(r[4]),r[5],r[6],r[7],r[8],r[9]) )
 
         if len(tofix) == 0:
             return 0
@@ -218,7 +219,7 @@ class Sync(Daemon):
         cur.execute('BEGIN')
 
         if len(toins) > 0:
-            cur.executemany("INSERT INTO billing.service_number(id, client_account_id, activation_dt, expire_dt, did, lines_count, server_id)VALUES(%s,%s,%s,%s,%s,%s,%s)", toins)
+            cur.executemany("INSERT INTO billing.service_number(id, client_account_id, activation_dt, expire_dt, did, lines_count, server_id, tech_number, tech_number_operator_id)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)", toins)
         if len(todel) > 0:
             cur.executemany("delete from billing.service_number where id=%s", todel)
 
