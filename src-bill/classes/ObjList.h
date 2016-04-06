@@ -31,9 +31,11 @@ protected:
     std::vector<T> data;
     virtual string sql(BDb *db = 0) = 0;
     virtual void parse_item(BDbResult &row, T * item) = 0;
+    BDb *db_saved;
 public:
 
     virtual void load(BDb * db) {
+        this->db_saved = db;
         BDbResult res = db->query(sql(db));
 
         loadtime = time(NULL);
@@ -56,5 +58,10 @@ public:
 
     virtual size_t size() {
         return this->data.size();
+    }
+    
+    virtual void reload()
+    {
+        this->load(this->db_saved);
     }
 };
