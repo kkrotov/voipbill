@@ -55,8 +55,7 @@ protected:
     };
 
 public:
-
-    ServiceNumber * __find(long long int technicalNumber, time_t timestamp, stringstream *trace = nullptr) {
+    ServiceNumber * find(long long int technicalNumber, time_t timestamp, stringstream *trace = nullptr) {
         char tech_number[20];
         sprintf(tech_number, "%lld", technicalNumber);
 
@@ -81,15 +80,19 @@ public:
                 }
             }
         }
-        return result;
-    }
 
-    ServiceNumber * find(long long int technicalNumber, time_t timestamp, stringstream *trace = nullptr) {
-	ServiceNumber * number = this->__find(technicalNumber, timestamp, trace);
-	if (number == nullptr) {
-	    this->reload();
-	    return this->__find(technicalNumber, timestamp, trace);
-	}
-	return number;
+        if (trace != nullptr) {
+
+            if (result != nullptr) {
+                *trace << "FOUND|SERVICE NUMBER|BY TECHNICAL NUMBER '" << technicalNumber << "', TIME '" << string_time(timestamp) << "'" << "\n";
+                *trace << "||";
+                result->dump(*trace);
+                *trace << "\n";
+            } else {
+                *trace << "NOT FOUND|SERVICE NUMBER|BY TECHNICAL NUMBER '" << technicalNumber << "', TIME '" << string_time(timestamp) << "'" << "\n";
+            }
+        }
+
+        return result;
     }
 };
