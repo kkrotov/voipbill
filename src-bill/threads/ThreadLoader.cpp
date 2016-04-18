@@ -153,6 +153,7 @@ void ThreadLoader::run() {
 
                 repository.data->serviceNumber.load(&db_calls);
                 repository.data->activeCounter.load(repository.data->serviceNumber.get(), repository.data->serviceTrunk.get());
+                repository.data->serviceNumberByTechNumber.load(&db_calls);
 
             } else if (event == "service_trunk") {
 
