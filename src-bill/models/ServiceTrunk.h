@@ -42,7 +42,6 @@ struct ServiceTrunkOrder {
     Pricelist * pricelist;
     PricelistPrice * price;
     Client * account;
-    ServiceTrunkSettings * trunkSettings;
     StatsTrunkSettings * statsTrunkSettings;
 
     void dump(stringstream &trace) {
