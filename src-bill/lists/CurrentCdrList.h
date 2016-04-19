@@ -17,17 +17,17 @@ protected:
             "       dst_route, " \
             "       src_noa, " \
             "       dst_noa, " \
-            "       call_id " \
+            "       call_id, " \
+            "       insert_time, " \
+            "       now() at time zone 'utc' " \
             "	from calls_cdr.start " \
             "   order by call_id ";
     }
 
     inline void parse_item(BDbResult &row, Cdr * item) {
-        time_t now = time(nullptr);
 
         item->id = 0;
         item->connect_time = parseDateTime(row.get(0));
-        item->session_time = (int)(now - item->connect_time);
         strcpy((char*) &item->src_number, row.get(1));
         strcpy((char*) &item->dst_number, row.get(2));
         strcpy((char*) &item->dst_replace, row.get(3));
@@ -37,5 +37,18 @@ protected:
         item->src_noa = row.get_i(7);
         item->dst_noa = row.get_i(8);
         item->call_id = row.get_ll(9);
+
+        time_t insert_time = row.get_ll(10);
+        time_t db_now = row.get_ll(11);
+
+        // Старый код, дававший расхождения с фактической продолжительностью:
+        // time_t now = time(nullptr);
+        // item->session_time = (int)(now - item->connect_time);
+
+        // Вычисления полностью в БД, запас в две секунды.
+        item->session_time = (int)(db_now - insert_time);
+        if (item->session_time > 1) {
+            item->session_time -= 2;
+        }
     }
 };
