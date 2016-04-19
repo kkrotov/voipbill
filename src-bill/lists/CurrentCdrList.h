@@ -38,8 +38,8 @@ protected:
         item->dst_noa = row.get_i(8);
         item->call_id = row.get_ll(9);
 
-        time_t insert_time = row.get_ll(10);
-        time_t db_now = row.get_ll(11);
+        time_t insert_time = parseDateTime(row.get(10));
+        time_t db_now = parseDateTime(row.get(11));
 
         // Старый код, дававший расхождения с фактической продолжительностью:
         // time_t now = time(nullptr);
