@@ -21,6 +21,8 @@ struct Cdr {
 
     long long int call_id;
 
+    int disconnect_cause;
+
     Cdr() {
         id = 0;
         connect_time = 0;
@@ -34,6 +36,7 @@ struct Cdr {
         src_noa = 0;
         dst_noa = 0;
         call_id = 0;
+        disconnect_cause = 0;
     }
 
     void dump(stringstream &trace) {
@@ -50,6 +53,7 @@ struct Cdr {
         trace << "src_noa: " << src_noa << ", ";
         trace << "dst_noa: " << dst_noa << ", ";
         trace << "call_id: " << call_id << ", ";
+        trace << "disconnect_cause: " << disconnect_cause << ", ";
         trace << ")";
     }
 };

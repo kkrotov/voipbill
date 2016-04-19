@@ -40,7 +40,8 @@ bool CdrManager::loadPart(BDb * db_calls) {
             "       dst_route, " \
             "       src_noa, " \
             "       dst_noa, " \
-            "       call_id" \
+            "       call_id, " \
+            "       disconnect_cause" \
             "	from calls_cdr.cdr " \
             "	where " \
             "       id > '" + lexical_cast<string>(getLastId()) + "' " \
@@ -67,6 +68,7 @@ bool CdrManager::loadPart(BDb * db_calls) {
             cdr.src_noa = res.get_i(9);
             cdr.dst_noa = res.get_i(10);
             cdr.call_id = res.get_ll(11);
+            cdr.disconnect_cause = res.get_i(12);
 
             queue.push_back(cdr);
 
