@@ -77,7 +77,7 @@ void fetchGlobalCounters(int accountId, double vat_rate, Repository& repository,
 }
 
 
-void logFinishedCall(const Call& origCall, const Call& termCall, const CallInfo& origInfo, const CallInfo& termInfo, Trunk* origTrunk, Trunk* termTrunk, Repository& repository) {
+void logFinishedCall(const Cdr& cdr, const Call& origCall, const Call& termCall, const CallInfo& origInfo, const CallInfo& termInfo, Trunk* origTrunk, Trunk* termTrunk, Repository& repository) {
 
     Client* origAccount = origInfo.account;
     Client* termAccount = termInfo.account;
@@ -117,6 +117,8 @@ void logFinishedCall(const Call& origCall, const Call& termCall, const CallInfo&
 
     logCall->params["orig_our"] = origCall.our ? "client" : "operator";
     logCall->params["term_our"] = termCall.our ? "client" : "operator";
+
+    logCall->params["disconnect_cause"] = cdr.disconnect_cause;
 
     logCall->params["orig_trunk_id"] = origCall.trunk_id;
     logCall->params["term_trunk_id"] = termCall.trunk_id;
@@ -344,7 +346,7 @@ void Billing::calc(bool realtimePurpose) {
 
         if (realtimePurpose) {
             // Логируем завершённый звонок
-            logFinishedCall(origCall, termCall, origCallInfo, termCallInfo,
+            logFinishedCall(*cdr, origCall, termCall, origCallInfo, termCallInfo,
                             origCallInfo.trunk, termCallInfo.trunk, repository);
         }
     }
