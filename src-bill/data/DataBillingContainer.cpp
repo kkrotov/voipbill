@@ -265,17 +265,17 @@ void DataBillingContainer::statsAccountGetClients(vector<StatsAccount> &destClie
     statsAccount.getClients(destClients);
 }
 
-int DataBillingContainer::statsAccountGetSumMonth(int account_id, double vat_rate) {
+double DataBillingContainer::statsAccountGetSumMonth(int account_id, double vat_rate) {
     lock_guard<Spinlock> guard(lock);
     return statsAccount.getSumMonth(account_id, vat_rate);
 }
 
-int DataBillingContainer::statsAccountGetSumDay(int account_id, double vat_rate) {
+double DataBillingContainer::statsAccountGetSumDay(int account_id, double vat_rate) {
     lock_guard<Spinlock> guard(lock);
     return statsAccount.getSumDay(account_id, vat_rate);
 }
 
-int DataBillingContainer::statsAccountGetSumBalance(int account_id, double vat_rate) {
+double DataBillingContainer::statsAccountGetSumBalance(int account_id, double vat_rate) {
     lock_guard<Spinlock> guard(lock);
     return statsAccount.getSumBalance(account_id, vat_rate);
 }

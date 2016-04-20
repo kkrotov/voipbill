@@ -72,9 +72,9 @@ public:
     size_t getCallsStoredCounter();
 
     void statsAccountGetClients(vector<StatsAccount> &destClients);
-    int statsAccountGetSumMonth(int account_id, double vat_rate);
-    int statsAccountGetSumDay(int account_id, double vat_rate);
-    int statsAccountGetSumBalance(int account_id, double vat_rate);
+    double statsAccountGetSumMonth(int account_id, double vat_rate);
+    double statsAccountGetSumDay(int account_id, double vat_rate);
+    double statsAccountGetSumBalance(int account_id, double vat_rate);
     StatsFreemin * statsFreeminGetCurrent(CallInfo * callInfo);
     StatsPackage * statsPackageGetCurrent(CallInfo * callInfo, ServicePackage * servicePackage, TariffPackage * tariffPackage);
     void statsAccountGetChanges(map<int, StatsAccount> &changes, bool &needClear);
