@@ -12,6 +12,16 @@ struct ServiceNumber {
     char tech_number[20];
     int tech_number_operator_id;
 
+    // Получить номер для использования в чёрном списке.
+    const char* asBlacklistNumber() {
+        return tech_number[0] ? tech_number : did;
+    }
+
+    bool is7800() {
+        // Если номер начинается с 7800 и он не 4-значный:
+        return 0 == strncmp("7800", did, 4) && did[4];
+    }
+
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
