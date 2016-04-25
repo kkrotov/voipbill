@@ -53,10 +53,27 @@ void ThreadBlacklistCalc::run() {
             map<int, ServiceNumber> &numbers = repository.activeCounter->clientNumbers[lock.client_id];
             for (auto number : numbers) {
                 if (lock.disabled_local) {
-                    wanted_blacklist_local.insert(number.second.did);
+
+                    if (! number.second.is7800()) {
+                        // Обычные номера не требуют специальной обработки -
+                        // разрешаем только местные звонки:
+                        wanted_blacklist_local.insert(number.second.did);
+                    } else {
+                        // Чтобы входящие на 7800 не продолжали разорять
+                        // товарищей с нулевым балансом, они блокируются при
+                        // нулевом балансе / превышении суточного лимита.
+                        // Исходящие местные с таких номеров не делаются.
+                        // TODO: не в России для платных входящих это негодно,
+                        // необходимо обобщить понятие платных входящих,
+                        // включить авторизацию для всех входящих,
+                        // маршрутизировать
+                        wanted_blacklist_global
+                          .insert(number.second.asBlacklistNumber());
+                    }
                 }
+
                 if (lock.disabled_global) {
-                    wanted_blacklist_global.insert(number.second.did);
+                    wanted_blacklist_global.insert(number.second.asBlacklistNumber());
                 }
             }
         }
@@ -84,7 +101,7 @@ void ThreadBlacklistCalc::run() {
 
         map<int, ServiceNumber> &numbers = repository.activeCounter->clientNumbers[client->id];
         for (auto number : numbers) {
-            wanted_blacklist_anti_fraud_disable.insert(number.second.did);
+            wanted_blacklist_anti_fraud_disable.insert(number.second.asBlacklistNumber());
         }
     }
 
