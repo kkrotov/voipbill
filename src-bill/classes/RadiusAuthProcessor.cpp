@@ -3,6 +3,7 @@
 #include "../common.h"
 #include "Log.h"
 #include "RadiusAuthProcessor.h"
+#include "RadiusAuthServer.h"
 #include "BillingCall.h"
 
 void RadiusAuthProcessor::init() {
@@ -35,7 +36,7 @@ void RadiusAuthProcessor::setTrace(stringstream *trace) {
     repository.trace = trace;
 }
 
-void RadiusAuthProcessor::process() {
+void RadiusAuthProcessor::process(std::map <int, std::pair <RejectReason, time_t> > *o_pAccountIdsBlockedBefore) {
 
     try {
         init();
@@ -71,7 +72,7 @@ void RadiusAuthProcessor::process() {
             *trace << "\n";
         }
 
-        string billResponse = analyzeCall(call);
+        string billResponse = analyzeCall(call, o_pAccountIdsBlockedBefore);
         if (trace != nullptr) {
             *trace << "INFO|BILL RESPONSE|" << billResponse << "\n";
         }
@@ -755,7 +756,7 @@ bool RadiusAuthProcessor::matchPrefixlist(const int prefixlistId, string strNumb
     return prefix != nullptr;
 }
 
-string RadiusAuthProcessor::analyzeCall(Call &call) {
+string RadiusAuthProcessor::analyzeCall(Call &call, std::map <int, std::pair <RejectReason, time_t> >  *o_pAccountIdsBlockedBefore) {
 
     if (call.account_id == 0) {
         return "reject";
@@ -764,6 +765,13 @@ string RadiusAuthProcessor::analyzeCall(Call &call) {
     auto client = repository.getAccount(call.account_id);
     if (client == nullptr) {
         return "reject";
+    }
+
+    if (o_pAccountIdsBlockedBefore->count(call.account_id) > 0) { 
+
+        // какой-то из параллельных звонков уже сделал баланс отрицательным
+        std::pair <RejectReason, time_t> block = (*o_pAccountIdsBlockedBefore)[call.account_id];
+        return block.first == REASON_NO_BALANCE ? "low_balance" : "voip_disabled";
     }
 
     double vat_rate = repository.getVatRate(client);
@@ -784,14 +792,16 @@ string RadiusAuthProcessor::analyzeCall(Call &call) {
 
     if (call.trunk_service_id != 0) {
 
-        if (client->isConsumedCreditLimit(spentBalanceSum)) {
+        if (isLowBalance (&Client::isConsumedCreditLimit, REASON_NO_BALANCE, client, spentBalanceSum, call, o_pAccountIdsBlockedBefore)) {
+
+            // не можем говорить ни секунды
             return "low_balance";
         }
 
     } else if (call.number_service_id != 0 && call.orig) {
         
         // Блокировка МГМН если превышен лимит кредита
-        if (client->isConsumedCreditLimit(spentBalanceSum)) {
+        if (isLowBalance (&Client::isConsumedCreditLimit, REASON_NO_BALANCE, client, spentBalanceSum, call, o_pAccountIdsBlockedBefore)) {
             // Если звонок не местный или прочий платный
             if (!call.isLocal() || abs(call.cost) > 0.000001) {
                 return "low_balance";
@@ -799,7 +809,7 @@ string RadiusAuthProcessor::analyzeCall(Call &call) {
         }
 
         // Блокировка МГМН если превышен дневной лимит
-        if (!call.isLocal() && client->isConsumedDailyLimit(spentDaySum)) {
+        if (!call.isLocal() && isLowBalance(&Client::isConsumedDailyLimit, REASON_DAILY_LIMIT, client, spentDaySum, call, o_pAccountIdsBlockedBefore)) {
             return "voip_disabled";
         }
 
@@ -817,6 +827,23 @@ string RadiusAuthProcessor::analyzeCall(Call &call) {
     return "accept";
 }
 
+bool RadiusAuthProcessor::isLowBalance (bool (Client::*checkLimit)(double), RejectReason reason, Client *client, double spentBalanceSum, Call &call, std::map <int, std::pair <RejectReason, time_t> > *o_pAccountIdsBlockedBefore)
+{
+    if ((client->*checkLimit)(spentBalanceSum)) {
+           
+        if ((client->*checkLimit)(spentBalanceSum - call.cost)) {
+
+            // не можем говорить ни секунды
+            return true;
+
+        } else {
+
+            // можем говорить меньше минуты, блокируем попытки параллельных звонков
+            (*o_pAccountIdsBlockedBefore)[call.account_id] = std::make_pair(reason, time(0) + 60);
+        }
+    }
+    return false;
+}
 
 void RadiusAuthProcessor::fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double vat_rate) {
 

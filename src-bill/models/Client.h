@@ -40,11 +40,11 @@ struct Client {
     }
 
     bool isConsumedCreditLimit(double value) {
-        return hasCreditLimit() && (balance + credit + value < 0);
+        return hasCreditLimit() && (balance + credit + value < 0.00001);
     }
 
     bool isConsumedDailyLimit(double value) {
-        return hasDailyLimit() && (limit_d + value < 0);
+        return hasDailyLimit() && (limit_d + value < 0.00001);
     }
 
     double getPriceWithVat(double price, double vat_rate) {

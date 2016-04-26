@@ -32,6 +32,7 @@ void AppBill::runApp() {
 
     registerAllThreads();
 
+    // Модуль веб интерфейса
     ThreadWeb web;
 
     std::thread web_thread(std::ref(web));
@@ -86,21 +87,29 @@ void AppBill::registerAllThreads() {
 void AppBill::runAppInSingleMode()
 {
     std::vector<std::string> standardThreads {
+            // Логирование
             "log",
+            // Блок синхронизации 
             "sync",
+            // Блок считывания данных в оперативную память
             "loader",
             "account_balance_recalc",
             "remote_loader",
+            // Контроль текущих звонков
             "current_calls",
             "fetch_cdr",
+            // Расчет себестоимости звонка, Расчет цены MCN для звонка
             "runtime",
+            // Обновление центральной БД (копирование данных из региональной БД в центральную) 
             "save",
             "sync_calls",
             "sync_counters",
             "sync_locks",
             "client_lock",
+            // Блокировка клиента
             "blacklist_fetch",
             "blacklist_calc",
+            // Сброс звонка при недостаточном балансе
             "limitcontrol",
             "update_active_clients",
             "checkstarttable",
