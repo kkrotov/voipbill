@@ -1,23 +1,42 @@
 #pragma once
 
 #include <string>
+#include <map>
 
 #include "Repository.h"
-#include "RadiusAuthServer.h"
+//#include "RadiusAuthServer.h"
+
+enum RejectReason {
+    REASON_NO_BALANCE,
+    REASON_DAILY_LIMIT,
+};
 
 using namespace std;
 
 class RadiusAuthProcessor {
 public:
 
-    RadiusAuthProcessor(RadiusAuthRequest * request, RadiusAuthResponse * response, pLogMessage &logRequest);
+    RadiusAuthProcessor(struct RadiusAuthRequest * request, struct RadiusAuthResponse * response, pLogMessage &logRequest);
     void setTrace(stringstream *trace);
-    void process();
+    void process() { 
+        static std::map<int, std::pair<RejectReason, time_t> > accountIdsBlockedBefore;
+        time_t time_now = time(0);
+        for (auto it = accountIdsBlockedBefore.begin(); it!=accountIdsBlockedBefore.end(); it++) {
+
+            std::pair<RejectReason, time_t> block = it->second;
+            if (block.second <= time_now) {
+                // время блокировки истекло, удаляем из списка
+                accountIdsBlockedBefore.erase(it);
+            }
+        }
+        process(&accountIdsBlockedBefore);
+    }
+    void process(std::map <int, std::pair <RejectReason, time_t> > *);
 
 private:
     stringstream *trace;
-    RadiusAuthRequest * request;
-    RadiusAuthResponse * response;
+    struct RadiusAuthRequest * request;
+    struct RadiusAuthResponse * response;
     pLogMessage logRequest;
 
     string aNumber;
@@ -43,7 +62,8 @@ private:
     void getAvailableOrigServiceTrunk(ServiceTrunk** origServiceTrunk, Pricelist** origPricelist, PricelistPrice** origPrice, ServiceTrunkSettings** origSettings);
     void getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks, Pricelist* origPricelist, PricelistPrice* origPrice, ServiceTrunkSettings* origSettings);
     bool processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate = 0, Pricelist** pFirstBuyPricelist = 0);
-    string analyzeCall(Call &call);
+    string analyzeCall(Call &call, std::map <int, std::pair <RejectReason, time_t> > *);
+    bool isLowBalance (bool (Client::*lpCheckLimit)(double), RejectReason reason, Client *client, double spentBalanceSum, Call &call, std::map<int, std::pair <RejectReason, time_t> > *);
     void fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double vat_rate);
 
     void processRedirectNumber();

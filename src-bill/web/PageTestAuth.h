@@ -7,6 +7,7 @@
 #include "../classes/BillingCall.h"
 #include <string>
 #include "../classes/RadiusAuthProcessor.h"
+#include "../classes/RadiusAuthServer.h"
 
 using namespace std;
 

@@ -97,9 +97,19 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
 }
 
 void RadiusAuthServer::processRequest(RadiusAuthRequest &request, RadiusAuthResponse &response, pLogMessage &logRequest) {
-    RadiusAuthProcessor processor(&request, &response, logRequest);
-    processor.process();
 
+    RadiusAuthProcessor processor(&request, &response, logRequest);
+    time_t time_now = time(0);
+    for (auto it = accountIdsBlockedBefore.begin(); it != accountIdsBlockedBefore.end(); it++) {
+
+        // причина и время блокирования
+        std::pair<RejectReason, time_t> block = it->second;
+        if (block.second <= time_now) {
+            // время блокировки истекло, удаляем из списка 
+            accountIdsBlockedBefore.erase(it);
+        }
+    }
+    processor.process (&accountIdsBlockedBefore);
 }
 
 void RadiusAuthServer::sendResponse(RadiusServerStack &p_stack, RadiusAuthResponse &response, pLogMessage &logRequest)
