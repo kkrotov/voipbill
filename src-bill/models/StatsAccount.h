@@ -4,11 +4,16 @@
 
 struct StatsAccount {
     int account_id;
+    // начисления по звонкам с момента последнего выставления счетов 
+    // sum(calls_raw.calls_raw.cost) where connect_time>billing.clients.amount_date
     double sum;
+    // -"- за текущий день
     double sum_day;
-    double sum_month;
+    double sum_month; // удалить
+    // текущий день
     time_t amount_day;
-    time_t amount_month;
+    time_t amount_month; // удалить
+    // дата последнего выставления счетов
     time_t amount_date;
 
     double sumDay(double vat_rate, bool filter_by_date = true) {
