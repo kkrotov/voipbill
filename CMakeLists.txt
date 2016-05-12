@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 project(voip)
 
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -pthread")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ldl -static-libstdc++ -static-libgcc")
 
 include_directories(/usr/pgsql-9.4/include libs/jsoncpp-master/include)
 link_directories(/usr/pgsql-9.4/lib)
@@ -35,6 +36,7 @@ set(BILL_SOURCES
     src-bill/classes/daemon/DaemonApp.cpp
     src-bill/classes/daemon/DaemonWorker.cpp
     src-bill/classes/daemon/DaemonMonitor.cpp
+    src-bill/classes/daemon/DeathHandler.cpp
     src-bill/classes/App.cpp
     src-bill/classes/AppBill.cpp
     src-bill/classes/BaseLogWriter.cpp
