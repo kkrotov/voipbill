@@ -124,10 +124,9 @@ protected:
             free(Messages);
         }
 
-        Log::error(message);
-
-        Log::info("[DAEMON] Stopped");
-
+        Log::error("[WORKER] " + message);
+        Log::info("[WORKER] Stopped");
+        app().logger.processLogQueue();
 
         app().stop();    // остановим все рабочие потоки и корректно закроем всё что надо
 

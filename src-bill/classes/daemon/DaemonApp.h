@@ -16,7 +16,6 @@ namespace po = boost::program_options;
 #include "DaemonMonitor.h"
 #include "DaemonWorker.h"
 #include "../LogWriterGraylog.h"
-#include "DeathHandler.h"
 
 class DaemonApp {
 
@@ -161,7 +160,6 @@ protected:
         if (!app().conf.log_graylog_host.empty())
             app().logger.addLogWriter(pLogWriter(new LogWriterGraylog(app().conf.log_graylog_host, app().conf.log_graylog_port, app().conf.log_graylog_source, app().conf.str_instance_id)));
 
-        Debug::DeathHandler dh;
         bool result = app().run();
 
         removePidFile();
@@ -211,7 +209,6 @@ protected:
             setsid();   // создаём новый сеанс, чтобы не зависеть от родителя
             chdir("/"); // переходим в корень диска, если мы этого не сделаем, то могут быть проблемы. к примеру с размантированием дисков
 
-            Debug::DeathHandler dh;
             DaemonMonitor monitor;
 
             savePidFile();
