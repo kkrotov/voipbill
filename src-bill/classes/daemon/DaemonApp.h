@@ -221,6 +221,7 @@ protected:
 
         }
         // если это родитель
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         cout << "Success: Daemon is started" << endl;
         return true; // завершим процес, т.к. основную свою задачу (запуск демона) мы выполнили
     }

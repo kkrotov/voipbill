@@ -43,6 +43,8 @@ public:
             for (;;) {  // цикл ожижания сообщений
                 int signo;
                 sigwait(&sigset, &signo);   // ждем указанных сообщений
+                string message = string_fmt("Got signal %d", signo);
+        	logInfo(message);
 
                 if (signo == SIGUSR1) {     // если то сообщение обновления конфига, обновим конфиг
                     status = false;     // ReloadConfig();
