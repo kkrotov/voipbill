@@ -316,6 +316,25 @@ void Billing::calc(bool realtimePurpose) {
             break;
         }
 
+        // Не обсчитываем и не пишем в статистику звонки
+        // с пустой длительностью и нетипичным Release Reason'ом:
+        if (cdr->session_time < 1) {
+            bool unusualDisconnectCause = std::set<int>{
+                    CAUSE_NORMAL_CLEARING,   // 16
+                    CAUSE_BUSY,              // 17
+                    CAUSE_NO_REPONDING,      // 18
+                    CAUSE_NO_ANSWER,         // 19
+                    CAUSE_NORMAL_UNSPECIFIED // 31
+                }
+                .count(cdr->disconnect_cause) == 0;
+
+            if (unusualDisconnectCause) {
+                repository.billingData->removeFirstCdr();
+                continue;
+            }
+        }
+
+
         if (!repository.prepare(cdr->connect_time)) {
             break;
         }

@@ -2,6 +2,22 @@
 
 #include "../common.h"
 
+
+// Коды причин завершения звонка Q.850/Q.931 https://ru.wikipedia.org/wiki/Q.931
+// Cisco-специфичные http://www.cisco.com/c/en/us/td/docs/voice_ip_comm/cucm/service/8_5_1/cdrdef/cdradmin/cdrcodes.html
+enum CauseCode {
+    // Normal call clearing
+    CAUSE_NORMAL_CLEARING = 16,
+    // User busy
+    CAUSE_BUSY = 17,
+    // No user responding
+    CAUSE_NO_REPONDING = 18,
+    // T.301 expired: – User Alerted, No answer from user
+    CAUSE_NO_ANSWER = 19,
+    // Normal, unspecified
+    CAUSE_NORMAL_UNSPECIFIED = 31
+};
+
 struct Cdr {
     long long int id;
 
