@@ -160,7 +160,7 @@ void StatsTrunkSettingsManager::prepareSaveQuery(stringstream &query) {
     }
 
     if (i == 0) {
-        query.clear();
+        query.str(std::string());
     }
 }
 
