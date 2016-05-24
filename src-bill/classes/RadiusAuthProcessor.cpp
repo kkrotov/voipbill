@@ -831,7 +831,7 @@ bool RadiusAuthProcessor::isLowBalance (bool (Client::*checkLimit)(double), Reje
 {
     if ((client->*checkLimit)(spentBalanceSum)) {
            
-        if ((client->*checkLimit)(spentBalanceSum + call.cost)) {
+        if ((client->*checkLimit)(spentBalanceSum - call.cost)) {
 
             // не можем говорить ни секунды
             return true;
