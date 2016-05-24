@@ -802,8 +802,8 @@ string RadiusAuthProcessor::analyzeCall(Call &call, std::map <int, std::pair <Re
         
         // Блокировка МГМН если превышен лимит кредита
         if (isLowBalance (&Client::isConsumedCreditLimit, REASON_NO_BALANCE, client, spentBalanceSum, call, o_pAccountIdsBlockedBefore)) {
-            // Если звонок не местный и платный
-            if (!call.isLocal() && abs(call.cost) > 0.000001) {
+            // Если звонок платный
+            if (abs(call.cost) > 0.000001) {
                 return "low_balance";
             }
         }
