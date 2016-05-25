@@ -182,9 +182,16 @@ public:
                 html << "BlackListGlobal: <b>" << blacklist_global->blacklist.size() << "</b><br/>\n";
                 for (auto phone : blacklist_global->blacklist) {
                     html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                    html << "<b>" << phone << "</b>";
-                    if ((usage = repository.getServiceNumber(phone.c_str())) != 0)
+                    if ((usage = repository.getServiceNumber(phone.c_str())) != 0) {
+                        html << "<b>" << phone << "</b>";
                         html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
+                    } else if ((usage = repository.getServiceNumberByTechnicalNumber(atoll(phone.c_str()))) != 0) {
+                        html << "<b>" << usage->did << " (" << phone << ")" << "</b>";
+                        html << " / " << "<a href='/client?id=" << usage->client_account_id << "'>" << usage->client_account_id << "</a>";
+                    } else {
+                        html << "<b>" << phone << "</b>";
+                    }
+
                     html << "<br/>\n";
                 }
                 html << "</td>\n";
