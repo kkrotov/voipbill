@@ -11,5 +11,8 @@ public:
 
         fields.push_back("prefixlist_id");
         fields.push_back("prefix");
+
+        datatype.push_back("prefixlist_id integer");
+        datatype.push_back("prefix character varying(20)");
     }
 };

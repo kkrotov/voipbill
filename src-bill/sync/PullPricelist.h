@@ -22,5 +22,17 @@ public:
         fields.push_back("initiate_zona_cost");
         fields.push_back("price_include_vat");
         fields.push_back("currency_id");
+
+        datatype.push_back("id smallint");
+        datatype.push_back("region smallint");
+        datatype.push_back("tariffication_by_minutes boolean");
+        datatype.push_back("tariffication_full_first_minute boolean");
+        datatype.push_back("orig boolean");
+        datatype.push_back("local boolean");
+        datatype.push_back("local_network_config_id integer");
+        datatype.push_back("initiate_mgmn_cost numeric(8,2)");
+        datatype.push_back("initiate_zona_cost numeric(8,2)");
+        datatype.push_back("price_include_vat boolean");
+        datatype.push_back("currency_id character(3)");
     }
 };
