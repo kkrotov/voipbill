@@ -15,5 +15,10 @@ public:
         fields.push_back("country");
         fields.push_back("region");
         fields.push_back("city");
+
+        datatype.push_back("id integer");
+        datatype.push_back("country integer");
+        datatype.push_back("region integer");
+        datatype.push_back("city integer");
     }
 };
