@@ -13,5 +13,10 @@ public:
         fields.push_back("outgoing");
         fields.push_back("order");
         fields.push_back("prefixlist_id");
+
+        datatype.push_back("trunk_id integer");
+        datatype.push_back("outgoing boolean");
+        datatype.push_back("\"order\" smallint");
+        datatype.push_back("prefixlist_id integer");
     }
 };

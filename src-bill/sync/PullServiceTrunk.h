@@ -21,5 +21,16 @@ public:
         fields.push_back("term_enabled");
         fields.push_back("orig_min_payment");
         fields.push_back("term_min_payment");
+
+        datatype.push_back("id integer");
+        datatype.push_back("server_id integer");
+        datatype.push_back("client_account_id integer");
+        datatype.push_back("trunk_id integer");
+        datatype.push_back("activation_dt timestamp");
+        datatype.push_back("expire_dt timestamp");
+        datatype.push_back("orig_enabled boolean");
+        datatype.push_back("term_enabled boolean");
+        datatype.push_back("orig_min_payment double precision");
+        datatype.push_back("term_min_payment double precision");
     }
 };

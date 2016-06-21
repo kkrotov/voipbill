@@ -15,5 +15,10 @@ public:
         fields.push_back("server_id");
         fields.push_back("name");
         fields.push_back("prefixlist_ids");
+
+        datatype.push_back("id integer");
+        datatype.push_back("server_id integer");
+        datatype.push_back("name character varying(50)");
+        datatype.push_back("prefixlist_ids integer[]");
     }
 };
