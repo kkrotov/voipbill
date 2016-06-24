@@ -14,7 +14,7 @@ do
   echo "Daemon ${region_id} runned with pid $!"
 
   # Каждому процессу даём поработать две минуты, иначе текущие версии демона падают в разных местах
-  sleep 120s
+  sleep 200s
 
 done
 
