@@ -277,9 +277,9 @@ void logFinishedCall(const Cdr& cdr, const Call& origCall, const Call& termCall,
 	logCall->params["term_balance_current"] = sumBalance2;
 	logCall->params["term_balance_global"] = globalBalanceSum;
 	logCall->params["term_balance_realtime"] = termAccount->balance + spentBalanceSum;
-	if (termAccount->hasCreditLimit()) {
-	    logCall->params["term_credit_limit"] = termAccount->credit;
-	    logCall->params["term_credit_available"] = termAccount->balance + termAccount->credit + spentBalanceSum;
+	if (termAccount->hasTermCreditLimit()) {
+	    logCall->params["term_credit_limit"] = termAccount->credit_term;
+	    logCall->params["term_credit_available"] = termAccount->balance + termAccount->credit_term + spentBalanceSum;
 	}
 
 	logCall->params["term_daily_local"] = sumDay;
@@ -315,6 +315,25 @@ void Billing::calc(bool realtimePurpose) {
         if (cdr == nullptr) {
             break;
         }
+
+        // Не обсчитываем и не пишем в статистику звонки
+        // с пустой длительностью и нетипичным Release Reason'ом:
+        if (cdr->session_time < 1) {
+            bool unusualDisconnectCause = std::set<int>{
+                    CAUSE_NORMAL_CLEARING,   // 16
+                    CAUSE_BUSY,              // 17
+                    CAUSE_NO_REPONDING,      // 18
+                    CAUSE_NO_ANSWER,         // 19
+                    CAUSE_NORMAL_UNSPECIFIED // 31
+                }
+                .count(cdr->disconnect_cause) == 0;
+
+            if (unusualDisconnectCause) {
+                repository.billingData->removeFirstCdr();
+                continue;
+            }
+        }
+
 
         if (!repository.prepare(cdr->connect_time)) {
             break;

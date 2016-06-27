@@ -12,7 +12,7 @@ protected:
         return "    select id, service_trunk_id, tariff_package_id, periodical, extract(epoch from activation_dt), extract(epoch from expire_dt) " \
             "       from billing.service_package " \
             "       where service_trunk_id > 0 " \
-            "       order by service_trunk_id asc, activation_dt asc ";
+            "       order by service_trunk_id asc, activation_dt asc, id ";
     }
 
     inline void parse_item(BDbResult &row, ServicePackage * item) {

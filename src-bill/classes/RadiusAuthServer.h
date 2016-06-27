@@ -1,9 +1,11 @@
 #pragma once
 
+#include <map> 
 #include "../common.h"
 #include "../../libs/ace-radius/RadiusServerStack.h"
 #include "../classes/Log.h"
 #include "../classes/Timer.h"
+#include "RadiusAuthProcessor.h"
 
 struct RadiusAuthRequest {
     string trunkName;
@@ -62,6 +64,8 @@ struct RadiusAuthResponse {
 };
 
 class RadiusAuthServer {
+
+    std::map<int, std::pair<RejectReason, time_t> > accountIdsBlockedBefore;
 public:
     size_t request_count = 0;
     size_t response_count = 0;

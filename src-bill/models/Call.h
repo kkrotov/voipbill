@@ -45,6 +45,7 @@ struct Call {
     int geo_operator_id;
 
     long long int cdr_call_id;
+    int disconnect_cause;
 
     bool is_service_number;
 
@@ -82,6 +83,7 @@ struct Call {
         trace << "geo_mob: " << (geo_mob ? "true" : "false") << ", ";
         trace << "geo_operator_id: " << geo_operator_id << ", ";
         trace << "is_service_number: " << (is_service_number ? "true" : "false") << ", ";
+        trace << "disconnect_cause: " << disconnect_cause;
         trace << ")";
     }
 
@@ -123,6 +125,7 @@ struct Call {
         geo_operator_id = 0;
 
         cdr_call_id = cdr->call_id;
+        disconnect_cause = cdr->disconnect_cause;
 
         is_service_number = false;
     }

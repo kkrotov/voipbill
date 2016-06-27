@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -17,6 +18,7 @@ namespace po = boost::program_options;
 #include "../LogWriterGraylog.h"
 
 class DaemonApp {
+
     int argc;
     char** argv;
     std::string config_file;
@@ -177,15 +179,35 @@ protected:
 
         } else if (!pid) {  // если это потомок
 
+            cout << "Starting daemon..." << endl;
+
+            // закрываем дескрипторы ввода/вывода/ошибок, так как нам они больше не понадобятся
+            close(STDIN_FILENO);
+            if (open("/dev/null",O_RDONLY) == -1) {
+
+                std::cout << "Failed to reopen stdin while daemonising" << std::endl;
+                exit(1);
+            }
+            std::string log_filename = app().conf.log_file_filename;
+            if (!log_filename.empty()) {
+            
+                // перенаправляем stdout и stderr в лог
+                int logfile_fileno = open(log_filename.c_str(),O_RDWR|O_CREAT|O_APPEND,S_IRUSR|S_IWUSR|S_IRGRP);
+                if (logfile_fileno>0) {
+
+                    dup2(logfile_fileno,STDOUT_FILENO);
+                    dup2(logfile_fileno,STDERR_FILENO);
+                    close(logfile_fileno);
+                }
+
+            } else {
+
+                close(STDOUT_FILENO);
+                close(STDERR_FILENO);
+            }
             umask(0);   // разрешаем выставлять все биты прав на создаваемые файлы, иначе у нас могут быть проблемы с правами доступа
             setsid();   // создаём новый сеанс, чтобы не зависеть от родителя
             chdir("/"); // переходим в корень диска, если мы этого не сделаем, то могут быть проблемы. к примеру с размантированием дисков
-
-            // закрываем дискрипторы ввода/вывода/ошибок, так как нам они больше не понадобятся
-            close(STDIN_FILENO);
-            close(STDOUT_FILENO);
-            close(STDERR_FILENO);
-
 
             DaemonMonitor monitor;
 
@@ -197,10 +219,11 @@ protected:
 
             return status;
 
-        } else {  // если это родитель
-            return true; // завершим процес, т.к. основную свою задачу (запуск демона) мы выполнили
         }
-
+        // если это родитель
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        cout << "Success: Daemon is started" << endl;
+        return true; // завершим процес, т.к. основную свою задачу (запуск демона) мы выполнили
     }
 
     bool stop() {

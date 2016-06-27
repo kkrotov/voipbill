@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 project(voip)
 
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
 
-include_directories(/usr/include/postgresql libs/jsoncpp-master/include)
+include_directories(/usr/pgsql-9.4/include libs/jsoncpp-master/include)
 link_directories(/usr/pgsql-9.4/lib)
 
 set(BOOST_SOURCES
