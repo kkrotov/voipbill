@@ -274,7 +274,7 @@ if rows[0][0] > 0 :
   onsync = pgpubsub.connect(user='postgres', database='nispd_test')
   onsync.listen('queuedeleted')
 
-  for e in onsync.events(select_timeout=5*60, yield_timeouts=True):
+  for e in onsync.events(select_timeout=10*60, yield_timeouts=True):
     if e is None:
       print 'ERROR: Синхронизация из центра в регионы неудачна:'
       cur.execute('''
