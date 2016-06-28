@@ -20,6 +20,8 @@ do
   /usr/pgsql-9.4/bin/dropdb -U postgres --if-exists nispd${region_id}_test || exit 1
   echo "Создаём пустую региональную БД $region_id без схемы"
   /usr/pgsql-9.4/bin/createdb -U postgres nispd${region_id}_test
+  echo "Удаляем тип dblink_pkey_results"
+  /usr/pgsql-9.4/bin/psql -U postgres nispd${region_id}_test -c "drop type dblink_pkey_results"
   echo "Импортируем схему региональной БД $region_id..."
   /usr/pgsql-9.4/bin/psql -U postgres nispd${region_id}_test < nispd99.sql
 done
