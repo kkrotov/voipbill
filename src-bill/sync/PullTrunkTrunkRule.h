@@ -12,5 +12,9 @@ public:
         fields.push_back("trunk_id");
         fields.push_back("order");
         fields.push_back("trunk_group_id");
+
+        datatype.push_back("trunk_id integer");
+        datatype.push_back("\"order\" smallint");
+        datatype.push_back("trunk_group_id integer");
     }
 };

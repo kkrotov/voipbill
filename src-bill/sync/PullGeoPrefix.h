@@ -12,5 +12,9 @@ public:
         fields.push_back("prefix");
         fields.push_back("geo_id");
         fields.push_back("operator_id");
+
+        datatype.push_back("prefix character varying(11)");
+        datatype.push_back("geo_id integer");
+        datatype.push_back("operator_id integer");
     }
 };

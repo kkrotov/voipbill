@@ -170,6 +170,27 @@ BDbResult BDb::query(const string &squery) {
     return query(squery.c_str());
 }
 
+void BDb::copy_dblink(string dst_table, string fields, string columns, string query, BDb *db_from, BDb *db_to) {
+
+    if (!db_to->connect()) {
+        throw Exception("Database error");
+    }
+    string query_copy = "INSERT INTO "+dst_table+"("+fields+")"+
+                        " SELECT tab_temp.* FROM dblink('"+db_from->getCS()+"','"+query+"')"+
+                        " AS tab_temp ("+columns+")";
+
+    PGresult *res = PQexec(db_to->getConn(), query_copy.c_str());
+    ExecStatusType statusType = PQresultStatus(res);
+    if (statusType == PGRES_FATAL_ERROR || statusType == PGRES_BAD_RESPONSE) {
+
+        DbException e(db_to->getConn(), "BDb::copy_dblink");
+        PQclear(res);
+        db_to->disconnect();
+        throw e;
+    }
+    PQclear(res);
+}
+
 void BDb::copy(string dst_table, string src_table, string columns, string query, BDb *db_from, BDb *db_to, double bandwidth_limit_mbits) {
 
     string query_from("COPY ");

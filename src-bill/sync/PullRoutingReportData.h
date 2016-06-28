@@ -11,5 +11,8 @@ public:
 
         fields.push_back("prefix");
         fields.push_back("routes");
+
+        datatype.push_back("prefix character varying(20)");
+        datatype.push_back("routes integer[]");
     }
 };

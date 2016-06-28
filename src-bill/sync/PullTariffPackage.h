@@ -15,5 +15,10 @@ public:
         fields.push_back("destination_id");
         fields.push_back("prepaid_minutes");
         fields.push_back("pricelist_id");
+
+        datatype.push_back("id integer");
+        datatype.push_back("destination_id integer");
+        datatype.push_back("prepaid_minutes integer");
+        datatype.push_back("pricelist_id integer");
     }
 };

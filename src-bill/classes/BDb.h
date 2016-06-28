@@ -21,6 +21,7 @@ public:
     ~BDb();
 
     void setCS(const string &connstr);
+    string getCS() {return this->connstr;};
 
     PGconn * getConn();
     bool connect();
@@ -38,6 +39,7 @@ public:
     BDbResult query(const string &squery);
 
     static void copy(string table_to, string table_from, string columns, string query, BDb *db_from, BDb *db_to, double bandwidth_limit_mbits = 0.0);
+    static void copy_dblink(string dst_table, string fields, string columns, string query, BDb *db_from, BDb *db_to);
 
     bool ping();
     static bool test(const string &connstr);

@@ -33,6 +33,7 @@ protected:
     string dst_table;
     string key;
     vector<string> fields;
+    vector<string> datatype;
 
     set<string> ids_to_pull;
     bool need_pull;

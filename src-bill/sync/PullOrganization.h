@@ -16,5 +16,11 @@ public:
         fields.push_back("actual_from");
         fields.push_back("actual_to");
         fields.push_back("tax_rate");
+
+        datatype.push_back("id integer");
+        datatype.push_back("organization_id integer");
+        datatype.push_back("actual_from date");
+        datatype.push_back("actual_to date");
+        datatype.push_back("tax_rate double precision");
     }
 };
