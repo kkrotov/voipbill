@@ -18,5 +18,13 @@ public:
         fields.push_back("noa");
         fields.push_back("length");
         fields.push_back("prefix");
+
+        datatype.push_back("id integer");
+        datatype.push_back("trunk_id integer");
+        datatype.push_back("\"order\" integer");
+        datatype.push_back("src boolean");
+        datatype.push_back("noa smallint");
+        datatype.push_back("length smallint");
+        datatype.push_back("prefix character varying(10)");
     }
 };

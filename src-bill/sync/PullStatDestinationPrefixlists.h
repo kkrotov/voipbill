@@ -14,5 +14,9 @@ public:
         fields.push_back("id");
         fields.push_back("destination_id");
         fields.push_back("prefixlist_id");
+
+        datatype.push_back("id integer");
+        datatype.push_back("destination_id integer");
+        datatype.push_back("prefixlist_id integer");
     }
 };

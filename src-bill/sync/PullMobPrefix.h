@@ -11,5 +11,8 @@ public:
 
         fields.push_back("prefix");
         fields.push_back("mob");
+
+        datatype.push_back("prefix character varying(11)");
+        datatype.push_back("mob boolean");
     }
 };

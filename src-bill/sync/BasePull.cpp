@@ -58,7 +58,15 @@ void BasePull::pullFull() {
     string del = "delete from " + dst_table;
     manager->db_calls.exec(del);
 
-    BDb::copy(dst_table, src_table, getQueryFields(), "", &manager->db_main, &manager->db_calls, manager->bandwidth_limit_mbits);
+    if (datatype.size()>0)
+    {
+        string query_fields = getQueryFields();
+        string field_types = join(datatype, ",");
+        string sel = "select " + query_fields + " from " + src_table;
+        BDb::copy_dblink(dst_table, query_fields, field_types, sel, &manager->db_main, &manager->db_calls);
+    }
+    else
+        BDb::copy(dst_table, src_table, getQueryFields(), "", &manager->db_main, &manager->db_calls, manager->bandwidth_limit_mbits);
 
     trans.commit();
 
@@ -69,19 +77,24 @@ void BasePull::pullPartial() {
 
     string query_fields = getQueryFields();
 
-    string sel =
-            "   select " + query_fields +
-            "   from " + src_table +
-            "   where \"" + key + "\" in (" + getFilterIds() + ")";
-
+    string sel = "select " + query_fields + " from " + src_table; 
     string del = "delete from " + dst_table + " where \"" + key + "\" in (" + getFilterIds() + ")";
 
-    {
-        BDbTransaction trans(&manager->db_calls);
-        manager->db_calls.exec(del);
-        BDb::copy(dst_table, src_table, getQueryFields(), sel, &manager->db_main, &manager->db_calls, manager->bandwidth_limit_mbits);
-        trans.commit();
+    BDbTransaction trans(&manager->db_calls);
+    manager->db_calls.exec(del);
+
+    if (datatype.size()>0) {
+
+        sel += " where \"" + key + "\" in (" + join(ids_to_pull, ",") + ")";
+        string field_types = join(datatype, ",");
+        BDb::copy_dblink(dst_table, query_fields, field_types, sel,  &manager->db_main, &manager->db_calls);
     }
+    else {
+
+        sel += " where \"" + key + "\" in (" + getFilterIds() + ")";
+        BDb::copy(dst_table, src_table, query_fields, sel, &manager->db_main, &manager->db_calls, manager->bandwidth_limit_mbits);
+    }
+    trans.commit();
 
     auto it = ids_to_pull.find(key);
     if (it != ids_to_pull.end()) {
@@ -99,4 +112,3 @@ string BasePull::getQueryFields() {
 string BasePull::getFilterIds() {
     return "'" + join(ids_to_pull, "','") + "'";
 }
-

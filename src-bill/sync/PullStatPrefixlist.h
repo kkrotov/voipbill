@@ -20,5 +20,15 @@ public:
         fields.push_back("city_id");
         fields.push_back("exclude_operators");
         fields.push_back("operators");
+
+        datatype.push_back("id integer");
+        datatype.push_back("type_id smallint");
+        datatype.push_back("prefixes text");
+        datatype.push_back("sub_type character varying(10)");
+        datatype.push_back("country_id integer");
+        datatype.push_back("region_id integer");
+        datatype.push_back("city_id integer");
+        datatype.push_back("exclude_operators boolean");
+        datatype.push_back("operators text");
     }
 };

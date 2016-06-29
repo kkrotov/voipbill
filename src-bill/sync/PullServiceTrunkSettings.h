@@ -22,5 +22,17 @@ public:
         fields.push_back("minimum_cost");
         fields.push_back("minimum_margin_type");
         fields.push_back("minimum_margin");
+
+        datatype.push_back("id integer");
+        datatype.push_back("trunk_id integer");
+        datatype.push_back("type smallint");
+        datatype.push_back("\"order\" smallint");
+        datatype.push_back("src_number_id integer");
+        datatype.push_back("dst_number_id integer");
+        datatype.push_back("pricelist_id integer");
+        datatype.push_back("minimum_minutes integer");
+        datatype.push_back("minimum_cost integer");
+        datatype.push_back("minimum_margin_type smallint");
+        datatype.push_back("minimum_margin numeric(10,5)");
     }
 };

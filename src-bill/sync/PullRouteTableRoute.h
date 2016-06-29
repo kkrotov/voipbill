@@ -15,5 +15,12 @@ public:
         fields.push_back("b_number_id");
         fields.push_back("outcome_id");
         fields.push_back("outcome_route_table_id");
+
+        datatype.push_back("route_table_id integer");
+        datatype.push_back("\"order\" smallint");
+        datatype.push_back("a_number_id integer");
+        datatype.push_back("b_number_id integer");
+        datatype.push_back("outcome_id integer");
+        datatype.push_back("outcome_route_table_id integer");
     }
 };

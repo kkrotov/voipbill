@@ -11,5 +11,8 @@ public:
 
         fields.push_back("trunk_group_id");
         fields.push_back("trunk_id");
+
+        datatype.push_back("trunk_group_id integer");
+        datatype.push_back("trunk_id integer");
     }
 };
