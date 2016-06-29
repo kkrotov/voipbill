@@ -7,8 +7,11 @@ DIR=`dirname "${THIS}"`
 . "$DIR/regions-list"
 
 # Быстрый вариант восстановления схемы и основных данных центральной БД:
-echo "Дампим центральную БД без схем calls_raw и calls_aggr..."
-/usr/pgsql-9.4/bin/pg_dump -Fc -N calls_raw -N calls_aggr -O -h eridanus.mcn.ru -U pgsqltest nispd > nispd_full.sql
+echo "Дампим центральную БД без схем calls_raw, calls_aggr, nnp ..."
+/usr/pgsql-9.4/bin/pg_dump -Fc -N calls_raw -N calls_aggr -N nnp -O -h eridanus.mcn.ru -U pgsqltest nispd > nispd_full.sql
+
+echo "Удаляем тип dblink_pkey_results"
+/usr/pgsql-9.4/bin/psql -U postgres nispd_test -c "drop type dblink_pkey_results"
 
 echo "Импортируем центральную БД без схем calls_raw и calls_aggr..."
 /usr/pgsql-9.4/bin/pg_restore -U postgres -d nispd_test -Fc nispd_full.sql
@@ -19,7 +22,6 @@ echo "Дампим схемы calls_raw и calls_aggr центральной Б�
 
 echo "Импортируем схемы calls_raw и calls_aggr в центральную БД без данных..."
 /usr/pgsql-9.4/bin/psql -U postgres nispd_test < nispd_calls_schema.sql
-
 
 for region_id in `echo $REGIONS_LIST`
 do
