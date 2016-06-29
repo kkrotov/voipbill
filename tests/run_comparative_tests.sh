@@ -84,6 +84,7 @@ echo 'Running tests analyzis...'
 python "$DIR/comparative_test.py"
 [[ $? -ne 0 ]] && exit
 
+exit 0
 # В случае успешного прохождения тестов, делаем коммит в tested - ветку, пригодную для деплоя.
 # CURRENT_HASH=`git rev-parse HEAD`
 
