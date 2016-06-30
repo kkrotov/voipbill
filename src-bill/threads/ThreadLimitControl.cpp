@@ -103,11 +103,6 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
         logRequest->params["credit_available"] = client->balance + client->credit + sumBalance + sumBalance2 + globalBalanceSum;
     }
 
-    if (client->hasTermCreditLimit()) {
-        logRequest->params["term_credit_limit"] = client->credit_term;
-        logRequest->params["term_credit_available"] = client->balance + client->credit_term + sumBalance + sumBalance2 + globalBalanceSum;
-    }
-
     logRequest->params["daily_local"] = sumDay;
     logRequest->params["daily_current"] = sumDay2;
     logRequest->params["daily_global"] = globalDaySum;
@@ -127,10 +122,6 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
 
     if (client->isConsumedCreditLimit(spentBalanceSum)) {
         logRequest->params["block_credit_flag"] = "true";
-    }
-
-    if (client->isConsumedTermCreditLimit(spentBalanceSum)) {
-        logRequest->params["block_term_credit_flag"] = "true";
     }
 
     if (client->isConsumedDailyLimit(spentDaySum)) {
@@ -160,17 +151,6 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
 
         }
 
-        if (client->isConsumedTermCreditLimit(spentBalanceSum)) {
-            logRequest->params["kill_reason"] = "term_credit_limit";
-
-            logRequest->message =
-                    "KILL: trunk #" + lexical_cast<string>(call.trunk_service_id) + ": Term Credit limit: " + string_fmt("%.2f", client->balance + client->credit_term + sumBalance + sumBalance2 + globalBalanceSum) + " = " +
-                    string_fmt("%.2f", client->balance) + " (balance) + " + string_fmt("%d", client->credit_term) + " (credit_term) + " + string_fmt("%.2f", sumBalance) + " (local) + " + string_fmt("%.2f", sumBalance2) + " (current) + " + string_fmt("%.2f", globalBalanceSum) + " (global) <br/>\n";
-
-            return true;
-
-        }
-
     } else if (call.number_service_id != 0 && call.orig) {
 
         // Блокировка МГМН
@@ -189,17 +169,6 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
             logRequest->message =
                     "KILL: number " + lexical_cast<string>(call.src_number) + " -> " + lexical_cast<string>(call.dst_number) + " : Credit limit: " + string_fmt("%.2f", client->balance + client->credit + sumBalance + sumBalance2 + globalBalanceSum) + " = " +
                     string_fmt("%.2f", client->balance) + " (balance) + " + string_fmt("%d", client->credit) + " (credit) + " + string_fmt("%.2f", sumBalance) + " (local) + " + string_fmt("%.2f", sumBalance2) + " (current) + " + string_fmt("%.2f", globalBalanceSum) + " (global) <br/>\n";
-
-            return true;
-        }
-
-        // Блокировка МГМН если превышен лимит кредита НА ВХОДЯЩИЕ ЗВОНКИ
-        if (!call.isLocal()  && client->isConsumedTermCreditLimit(spentBalanceSum)) {
-            logRequest->params["kill_reason"] = "term_credit_limit";
-
-            logRequest->message =
-                    "KILL: number " + lexical_cast<string>(call.src_number) + " -> " + lexical_cast<string>(call.dst_number) + " : Credit limit: " + string_fmt("%.2f", client->balance + client->credit_term + sumBalance + sumBalance2 + globalBalanceSum) + " = " +
-                    string_fmt("%.2f", client->balance) + " (balance) + " + string_fmt("%d", client->credit_term) + " (credit_term) + " + string_fmt("%.2f", sumBalance) + " (local) + " + string_fmt("%.2f", sumBalance2) + " (current) + " + string_fmt("%.2f", globalBalanceSum) + " (global) <br/>\n";
 
             return true;
         }

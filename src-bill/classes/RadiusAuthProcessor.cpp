@@ -124,11 +124,6 @@ void RadiusAuthProcessor::process(std::map <int, std::pair <RejectReason, time_t
                 logRequest->params["credit_available"] = callInfo.account->balance + callInfo.account->credit + spentBalanceSum;
             }
 
-            if (callInfo.account->hasTermCreditLimit()) {
-                logRequest->params["term_credit_limit"] = callInfo.account->credit_term;
-                logRequest->params["term_credit_available"] = callInfo.account->balance + callInfo.account->credit_term + spentBalanceSum;
-            }
-
             logRequest->params["daily_local"] = sumDay;
             logRequest->params["daily_current"] = sumDay2;
             logRequest->params["daily_global"] = globalDaySum;
@@ -148,10 +143,6 @@ void RadiusAuthProcessor::process(std::map <int, std::pair <RejectReason, time_t
 
             if (callInfo.account->isConsumedCreditLimit(spentBalanceSum)) {
                 logRequest->params["block_credit_flag"] = "true";
-            }
-
-            if (callInfo.account->isConsumedTermCreditLimit(spentBalanceSum)) {
-                logRequest->params["block_term_credit_flag"] = "true";
             }
 
             if (callInfo.account->isConsumedDailyLimit(spentDaySum)) {
