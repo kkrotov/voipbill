@@ -65,6 +65,7 @@ public:
                     ("config-file,c", po::value<string>(), "path to config file")
                     ("pid-file,p", po::value<string>(), "path to pid file")
                     ("test,t", "run tests")
+                    ("gccver,v", "gcc compiler version")
                     ;
 
             po::variables_map vm;
@@ -74,6 +75,11 @@ public:
 
             if (vm.count("help")) {
                 cout << desc << "\n";
+                return false;
+            }
+
+            if (vm.count("gccver")) {
+                cout << "GCC Version: " << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__ << "\n";
                 return false;
             }
 
