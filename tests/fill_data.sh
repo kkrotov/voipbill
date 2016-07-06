@@ -13,6 +13,9 @@ echo "Дампим центральную БД без схем calls_raw и call
 echo "Удаляем тип dblink_pkey_results"
 /usr/pgsql-9.4/bin/psql -U postgres nispd_test -c "drop type dblink_pkey_results"
 
+echo "Удаляем тип dblink_pkey_results"
+/usr/pgsql-9.4/bin/psql -U postgres nispd_test -c "drop type dblink_pkey_results"
+
 echo "Импортируем центральную БД без схем calls_raw и calls_aggr..."
 /usr/pgsql-9.4/bin/pg_restore -U postgres -d nispd_test -Fc nispd_full.sql
 
