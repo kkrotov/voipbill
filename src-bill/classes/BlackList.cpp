@@ -141,6 +141,11 @@ void BlackList::log_info(const string &phone, pLogMessage &logRequest) {
         logRequest->params["credit_available"] = client->balance + client->credit + spentBalanceSum;
     }
 
+    if (client->hasTermCreditLimit()) {
+        logRequest->params["term_credit_limit"] = client->credit_term;
+        logRequest->params["term_credit_available"] = client->balance + client->credit_term + spentBalanceSum;
+    }
+
     logRequest->params["daily_local"] = sumDay;
     logRequest->params["daily_current"] = sumDay2;
     logRequest->params["daily_global"] = globalDaySum;
@@ -160,6 +165,10 @@ void BlackList::log_info(const string &phone, pLogMessage &logRequest) {
 
     if (client->isConsumedCreditLimit(spentBalanceSum)) {
         logRequest->params["block_credit_flag"] = "true";
+    }
+
+    if (client->isConsumedTermCreditLimit(spentBalanceSum)) {
+        logRequest->params["block_term_credit_flag"] = "true";
     }
 
     if (client->isConsumedDailyLimit(spentDaySum)) {
