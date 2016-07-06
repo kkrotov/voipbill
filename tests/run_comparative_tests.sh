@@ -73,6 +73,9 @@ echo 'Starting new app version...'
 . "$DIR/run.sh" 30
 [[ $? -ne 0 ]] && exit
 
+echo 'Wait 6min. Пока у демонов нитка Loader встанет в статус реади.'
+sleep 360s
+
 echo 'Генерируем тестовые примеры для новой (тестируемой) версии и ждём завершения синхронизации...'
 nice -19 python "$DIR/sampler.py"
 [[ $? -ne 0 ]] && exit
