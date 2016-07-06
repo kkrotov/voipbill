@@ -117,8 +117,13 @@ public:
         html << "-----<br/>\n";
 
         if (client->hasCreditLimit()) {
-            html << "Balance available: <b>" << string_fmt("%.2f", client->balance + client->credit + sum_balance + sum_balance2 + sum_balance_global) << "</b> = ";
+            html << "Orig Balance available: <b>" << string_fmt("%.2f", client->balance + client->credit + sum_balance + sum_balance2 + sum_balance_global) << "</b> = ";
             html << string_fmt("%.2f", client->balance) << " (balance) + " << string_fmt("%d", client->credit) << " (credit) + " << string_fmt("%.2f", sum_balance) << " (local) + " << string_fmt("%.2f", sum_balance2) << " (current) + " << string_fmt("%.2f", sum_balance_global) << " (global) <br/>\n";
+        }
+
+        if (client->hasTermCreditLimit()) {
+            html << "Term Balance available: <b>" << string_fmt("%.2f", client->balance + client->credit_term + sum_balance + sum_balance2 + sum_balance_global) << "</b> = ";
+            html << string_fmt("%.2f", client->balance) << " (balance) + " << string_fmt("%d", client->credit_term) << " (credit_term) + " << string_fmt("%.2f", sum_balance) << " (local) + " << string_fmt("%.2f", sum_balance2) << " (current) + " << string_fmt("%.2f", sum_balance_global) << " (global) <br/>\n";
         }
 
         if (client->hasDailyLimit()) {
