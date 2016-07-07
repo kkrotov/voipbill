@@ -34,6 +34,7 @@ public:
     void process(std::map <int, std::pair <RejectReason, time_t> > *);
 
 private:
+    bool billingNotReady;
     stringstream *trace;
     struct RadiusAuthRequest * request;
     struct RadiusAuthResponse * response;

@@ -8,9 +8,11 @@
 
 void RadiusAuthProcessor::init() {
     if (!repository.prepare() || !repository.billingData->ready()) {
+        billingNotReady = true;
         throw Exception("Billing not ready.", "RadiusAuthProcessor::init");
     }
 
+    billingNotReady = false;
     server = repository.getServer();
 
     origTrunk = repository.getTrunkByName(request->trunkName.c_str());
@@ -239,7 +241,7 @@ void RadiusAuthProcessor::process(std::map <int, std::pair <RejectReason, time_t
         Log::error("RadiusAuthProcessor: ERROR");
     }
 
-    if (origTrunk == nullptr) {
+    if ((origTrunk == nullptr) && !billingNotReady) {
         response->setReleaseReason("NO_ROUTE_TO_DESTINATION");
         return;
     }
