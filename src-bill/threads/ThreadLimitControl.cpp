@@ -153,7 +153,7 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
             logRequest->params["kill_reason"] = "credit_limit";
 
             logRequest->message =
-                    "KILL: trunk #" + lexical_cast<string>(call.trunk_service_id) + ": Credit limit: " + string_fmt("%.2f", client->balance + client->credit + sumBalance + sumBalance2 + globalBalanceSum) + " = " +
+                    "KILL: trunk #" + lexical_cast<string>(call.trunk_service_id) + ": Client Id: " + lexical_cast<string>(client->id) + ", Credit limit: " + string_fmt("%.2f", client->balance + client->credit + sumBalance + sumBalance2 + globalBalanceSum) + " = " +
                     string_fmt("%.2f", client->balance) + " (balance) + " + string_fmt("%d", client->credit) + " (credit) + " + string_fmt("%.2f", sumBalance) + " (local) + " + string_fmt("%.2f", sumBalance2) + " (current) + " + string_fmt("%.2f", globalBalanceSum) + " (global) <br/>\n";
 
             return true;
@@ -164,7 +164,7 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
             logRequest->params["kill_reason"] = "term_credit_limit";
 
             logRequest->message =
-                    "KILL: trunk #" + lexical_cast<string>(call.trunk_service_id) + ": Term Credit limit: " + string_fmt("%.2f", client->balance + client->credit_term + sumBalance + sumBalance2 + globalBalanceSum) + " = " +
+                    "KILL: trunk #" + lexical_cast<string>(call.trunk_service_id) + ": Client Id: " + lexical_cast<string>(client->id) + ", Term Credit limit: " + string_fmt("%.2f", client->balance + client->credit_term + sumBalance + sumBalance2 + globalBalanceSum) + " = " +
                     string_fmt("%.2f", client->balance) + " (balance) + " + string_fmt("%d", client->credit_term) + " (credit_term) + " + string_fmt("%.2f", sumBalance) + " (local) + " + string_fmt("%.2f", sumBalance2) + " (current) + " + string_fmt("%.2f", globalBalanceSum) + " (global) <br/>\n";
 
             return true;
