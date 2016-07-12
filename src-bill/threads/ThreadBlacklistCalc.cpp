@@ -78,6 +78,19 @@ void ThreadBlacklistCalc::run() {
             }
         }
 
+        if (lock.disabled_local) {
+
+            map<int, ServiceTrunk> &trunks = repository.activeCounter->clientTrunks[lock.client_id];
+            for (auto pairTrunk : trunks) {
+                auto trunk = repository.getTrunk(pairTrunk.second.trunk_id);
+                if (trunk != nullptr && !trunk->auth_by_number) {
+                    // если авторизация заблокированного клиента производится не по номеру, а по транку,
+                    // то блокируем такой транк
+                    wanted_blacklist_trunk.insert(trunk->trunk_name);
+                }
+            }
+        }
+
         if (lock.disabled_global) {
             map<int, ServiceTrunk> &trunks = repository.activeCounter->clientTrunks[lock.client_id];
             for (auto pairTrunk : trunks) {
