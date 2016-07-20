@@ -24,7 +24,6 @@ public:
         fields.push_back("timezone_offset");
         fields.push_back("is_blocked");
         fields.push_back("anti_fraud_disabled");
-        fields.push_back("credit_term");
 
         datatype.push_back("id integer");
         datatype.push_back("voip_limit_month integer");
@@ -39,6 +38,5 @@ public:
         datatype.push_back("timezone_offset smallint");
         datatype.push_back("is_blocked boolean");
         datatype.push_back("anti_fraud_disabled boolean");
-        datatype.push_back("credit_term integer");
     }
 };

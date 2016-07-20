@@ -9,7 +9,7 @@ def migrate(centralDb, regionalDb, regionsList) :
   for (regConn, region_id) in regConnections :
     curReg = regConn.cursor()
     curReg.execute('''
-	ALTER TABLE billing.clients ADD COLUMN credit_term integer NOT NULL DEFAULT -1;
+	ALTER TABLE billing.clients DROP COLUMN credit_term;
     ''')
     regConn.commit()
     regConn.close()
@@ -20,7 +20,7 @@ def migrate(centralDb, regionalDb, regionsList) :
   # Мигрируем центральную БД
   cur = conn.cursor()
   cur.execute('''
-	ALTER TABLE billing.clients ADD COLUMN credit_term integer NOT NULL DEFAULT -1;
+	ALTER TABLE billing.clients DROP COLUMN credit_term;
 
   ''')
   conn.commit()
