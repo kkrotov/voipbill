@@ -277,9 +277,9 @@ void logFinishedCall(const Cdr& cdr, const Call& origCall, const Call& termCall,
 	logCall->params["term_balance_current"] = sumBalance2;
 	logCall->params["term_balance_global"] = globalBalanceSum;
 	logCall->params["term_balance_realtime"] = termAccount->balance + spentBalanceSum;
-	if (termAccount->hasTermCreditLimit()) {
-	    logCall->params["term_credit_limit"] = termAccount->credit_term;
-	    logCall->params["term_credit_available"] = termAccount->balance + termAccount->credit_term + spentBalanceSum;
+	if (termAccount->hasCreditLimit()) {
+	    logCall->params["term_credit_limit"] = termAccount->credit;
+	    logCall->params["term_credit_available"] = termAccount->balance + termAccount->credit + spentBalanceSum;
 	}
 
 	logCall->params["term_daily_local"] = sumDay;
