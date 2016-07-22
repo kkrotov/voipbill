@@ -1,4 +1,3 @@
-CMakeLists.txt
 /libs/boost
 /.idea
 *~
@@ -18,3 +17,13 @@ CMakeLists.txt
 /app_bill/.dep.inc
 /app_bill/nbproject/private
 /app_bill/nbproject/*.mk
+
+app_bill*
+auth*
+
+
+/CMakeFiles/*
+CMakeCache.txt
+*.cmake
+Makefile
+

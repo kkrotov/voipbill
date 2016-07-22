@@ -424,6 +424,11 @@ public:
         return true;
     }
 
+    /*****************************************************************************************************************
+     *   Вычисляем список возможных прайс листов для тарификации конкретной пары АБ номеров на транке.
+     *
+     */
+
     void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk * trunk, long long int srcNumber, long long int dstNumber, int destinationType) {
         vector<ServiceTrunk *> serviceTrunks;
         getAllServiceTrunk(serviceTrunks, trunk->id);

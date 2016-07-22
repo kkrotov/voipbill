@@ -12,13 +12,13 @@ struct Call {
     long long int peer_id;
     long long int cdr_id;
     time_t connect_time;
-    bool orig;
+    bool orig;                      // Плечо вызова.
     bool our;
 
-    int trunk_id;
-    int account_id;
-    int trunk_service_id;
-    int number_service_id;
+    int trunk_id;                   // Транк плеча вызова. таблица auth.trunk
+    int account_id;                 // Лицевой счет плеча вызова
+    int trunk_service_id;           // Услуга "Транк" для плеча вызова. таблица billing.service_trunk
+    int number_service_id;          // Услуга "Номер" для плеча вызова. таблица billing.service_number
 
     long long int src_number;
     long long int dst_number;
@@ -39,7 +39,7 @@ struct Call {
     long long int prefix;
 
     int destination_id;
-    bool mob;
+    bool mob;                       // Флаг "Звонок на мобильный"
     int geo_id;
     bool geo_mob;
     int geo_operator_id;
