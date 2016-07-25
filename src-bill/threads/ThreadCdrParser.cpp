@@ -54,11 +54,10 @@ void ThreadCdrParser::processFile(const string &fileName) {
     fetchFile(fileContent);
 
     std::list<CallData> calls;
-    parseFile(calls, fileContent);
+    if (parseFile(calls, fileContent))
+        saveCalls(calls);
 
-    saveCalls(calls);
-
-    saveCdrFile(calls);
+    saveCdrFile();
 }
 
 void ThreadCdrParser::fetchFile(string &fileContent) {
@@ -67,21 +66,24 @@ void ThreadCdrParser::fetchFile(string &fileContent) {
     ftpClient.fetch("/" + cdrFile.file_name, fileContent);
 }
 
-void ThreadCdrParser::parseFile(std::list<CallData> &calls, const string &fileContent) {
+bool ThreadCdrParser::parseFile(std::list<CallData> &calls, const string &fileContent) {
     logParser("parsing file " + cdrFile.file_name);
 
     if (!parser.Parse(calls, fileContent)) {
-        throw Exception((boost::format("Can not parse file %1%") % cdrFile.file_name).str(), "ThreadCdrParser::run");
+        Log::error((boost::format("Can not parse file %1%") % cdrFile.file_name).str());
+        return false;
     }
 
     if (parser.GetErrorCallsCount() > 0) {
         Log::error((boost::format("File %1% has %2% errors. ID %3%") % cdrFile.file_name %
                     (calls.size() - parser.GetErrorCallsCount()) % parser.GetErrorIDs()).str());
+        return false;
     }
 
     cdrFile.total_count = calls.size();
     cdrFile.error_count = parser.GetErrorCallsCount();
     cdrFile.error_ids = parser.GetErrorIDs();
+    return true;
 }
 
 void ThreadCdrParser::saveCalls(const std::list<CallData> &calls) {
@@ -99,7 +101,7 @@ void ThreadCdrParser::saveCalls(const std::list<CallData> &calls) {
 
 void ThreadCdrParser::saveCall(const CallData &call) {
     std::string query = (boost::format(
-            "select public.insert_cdr('%1%','%2%','%3%','%4%','%5%','%6%','%7%','%8%','%9%','%10%','%11%','%12%','%13%','%14%','%15%')")
+            "select public.insert_cdr('%1%','%2%','%3%','%4%','%5%','%6%','%7%','%8%','%9%','%10%','%11%','%12%','%13%','%14%','%15%','%16%','%17%')")
                        % call.call_id % app().conf.cdr_nasip
                        % call.src_number % call.dst_number
                        % call.redirect_number % call.session_time
@@ -107,7 +109,8 @@ void ThreadCdrParser::saveCall(const CallData &call) {
                        % call.disconnect_time % call.disconnect_cause
                        % call.src_route % call.dst_route
                        % call.src_noa % call.dst_noa
-                       % call.dst_replace).str();
+                       % call.dst_replace
+                       % call.call_finished % call.releasing_party).str();
     db_calls.query(query);
 
     cdrFile.insert_count++;
@@ -118,7 +121,7 @@ bool ThreadCdrParser::isCallExists(const string &hash) {
     return (res.next() && res.get_s(0).size() > 0);
 }
 
-void ThreadCdrParser::saveCdrFile(const std::list<CallData> &calls) {
+void ThreadCdrParser::saveCdrFile() {
     logParser("saving cdr file " + cdrFile.file_name);
 
     std::string query = (boost::format(

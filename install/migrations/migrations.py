@@ -2,6 +2,6 @@
 # -*- coding: utf-8 -*-
 
 migrations_order = [
- 'add_credit_term'
+'cdr_new_fields'
 ]
 

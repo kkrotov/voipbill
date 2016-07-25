@@ -21,12 +21,15 @@ struct CallData
     int disconnect_cause;
     std::string setup_time_raw;
     std::string hash;
+    std::string call_finished;
+    std::string releasing_party;
 
     CallData() {
         session_time = 0;
         src_noa = 0;
         dst_noa = 0;
     }
+    bool IsFinished() { return call_finished.compare("Yes")==0; };
 };
 
 class CdrParser {

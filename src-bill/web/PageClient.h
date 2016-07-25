@@ -138,7 +138,7 @@ public:
 
         html << "-----<br/>\n";
 
-        html << "Last account date: <b>" << string_time(client->amount_date) << "</b><br/>\n";
+        html << "Last account date: <b>" << (client->amount_date>0? string_time(client->amount_date):"<none>") << "</b><br/>\n";
 
         html << "-----<br/>\n";
 
