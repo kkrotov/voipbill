@@ -31,9 +31,9 @@ public:
 
         string server_id = app().conf.str_instance_id;
 
-//        src_sql_where = " ( not deleted and date_to > ( now() - '2 month'::interval ) and pricelist_id in (select id from voip.pricelist where region = " + server_id +" ) ) ";
+        src_sql_where = " ( not deleted and date_to > ( now() - ''2 month''::interval ) and pricelist_id in (select id from voip.pricelist where region = " + server_id +" ) ) ";
 
-        src_sql_where = " ( pricelist_id in (select id from voip.pricelist where region = " + server_id +" ) ) ";
+//        src_sql_where = " ( pricelist_id in (select id from voip.pricelist where region = " + server_id +" ) ) ";
 
     }
 };
