@@ -1,8 +1,11 @@
 #pragma once
 
 #include "BasePull.h"
+#include "../classes/AppBill.h"
+
 
 class PullDefs: public BasePull {
+
 public:
     void init() {
         event = "defs";
@@ -24,5 +27,13 @@ public:
         datatype.push_back("deleted boolean");
         datatype.push_back("date_to date");
         datatype.push_back("price numeric(8,4)");
+
+
+        string server_id = app().conf.str_instance_id;
+
+//        src_sql_where = " ( not deleted and date_to > ( now() - '2 month'::interval ) and pricelist_id in (select id from voip.pricelist where region = " + server_id +" ) ) ";
+
+        src_sql_where = " ( pricelist_id in (select id from voip.pricelist where region = " + server_id +" ) ) ";
+
     }
 };

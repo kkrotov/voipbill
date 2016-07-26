@@ -32,6 +32,8 @@ protected:
     string src_table;
     string dst_table;
     string key;
+    string src_sql_where = "";
+    
     vector<string> fields;
     vector<string> datatype;
 
