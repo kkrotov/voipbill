@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BasePull.h"
+#include "../classes/AppBill.h"
 
 class PullPricelist : public BasePull {
 public:
@@ -34,5 +35,11 @@ public:
         datatype.push_back("initiate_zona_cost numeric(8,2)");
         datatype.push_back("price_include_vat boolean");
         datatype.push_back("currency_id character(3)");
+
+        string server_id = app().conf.str_instance_id;
+
+        src_sql_where = " region  = " + server_id +" ";
+
+
     }
 };
