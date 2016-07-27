@@ -47,11 +47,11 @@ public:
 private:
     void processFile(const string &fileName);
     void fetchFile(string &fileContent);
-    void parseFile(std::list<CallData> &calls, const string &fileContent);
+    bool parseFile(std::list<CallData> &calls, const string &fileContent);
     void saveCalls(const std::list<CallData> &calls);
     void saveCall(const CallData &call);
     bool isCallExists(const string &hash);
-    void saveCdrFile(const std::list<CallData> &calls);
+    void saveCdrFile();
     string getFileNameForParse();
     bool isFileProcessed(const std::string &Filename);
     void logParser(const std::string &message);

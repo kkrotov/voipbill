@@ -125,35 +125,36 @@ bool CdrParser::ParseCall(const std::string &RawCallData, CallData &Call) {
     unsigned int dummy_noa;
 
     try {
-        if (GetValue("CallFinished", RawCallData).compare("Yes") != 0) {
-            return false;
-        }
+        Call.call_finished = GetValue("CallFinished", RawCallData);
+        bool call_is_finished = Call.IsFinished();
 
         Call.call_id = GetValue("CallReference", RawCallData);
 
         ParseNumber("IncomingCallingAddress", RawCallData, Call.src_number, Call.src_noa, true);
 
-        ParseNumber("IncomingCalledAddress", RawCallData, Call.dst_number, Call.dst_noa);
+        ParseNumber("IncomingCalledAddress", RawCallData, Call.dst_number, Call.dst_noa, !call_is_finished);
 
         ParseNumber("IncomingRedirectingAddress", RawCallData, Call.redirect_number, dummy_noa, true);
 
         ParseNumber("OutgoingCalledAddress", RawCallData, Call.dst_replace, dummy_noa, true);
 
-        Call.setup_time = ParseDateTime("StartTimeStamp", RawCallData);
+        Call.setup_time = ParseDateTime("StartTimeStamp", RawCallData, !call_is_finished);
 
         Call.connect_time = ParseDateTime("AnswerTimeStamp", RawCallData, true);
 
-        Call.disconnect_time = ParseDateTime("ReleaseTimeStamp", RawCallData);
+        Call.disconnect_time = ParseDateTime("ReleaseTimeStamp", RawCallData, !call_is_finished);
 
         Call.session_time = ParseSessionTime("CallDuration", RawCallData);
 
-        Call.src_route = GetValue("IncomingRouteId", RawCallData);
+        Call.src_route = GetValue("IncomingRouteId", RawCallData, !call_is_finished);
 
         Call.dst_route = GetValue("OutgoingRouteId", RawCallData, true);
 
         Call.disconnect_cause = ParseDisconnectCause("CauseIndicator", RawCallData);
 
-        Call.setup_time_raw = GetValue("StartTimeStamp", RawCallData);
+        Call.setup_time_raw = GetValue("StartTimeStamp", RawCallData, !call_is_finished);
+
+        Call.releasing_party = GetValue("ReleasingParty", RawCallData, true);
 
         CalculateHash(Call);
 
@@ -173,14 +174,14 @@ bool CdrParser::ParseCall(const std::string &RawCallData, CallData &Call) {
 
 std::string CdrParser::GetValue(const std::string &Name, const std::string &Data, bool CanBeEmpty) {
     std::string value;
-    std::string searchstring = (boost::format("%1%>(.+)</%1%") % Name).str();
+    std::string searchstring = (boost::format("%1%>(.*)</%1%") % Name).str();
     std::regex re(searchstring);
     std::smatch match;
     if (std::regex_search(Data, match, re) && (match.size() >= 2)) {
         value = (string)match[1];
     } else {
         if (!CanBeEmpty) {
-            throw Exception("Call field " + Name + " not found");
+            Log::error("Call parsing error: Call field " + Name + " not found\n" + Data);
         }
     }
     return value;

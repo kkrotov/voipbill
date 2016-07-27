@@ -45,6 +45,7 @@ bool CdrManager::loadPart(BDb * db_calls) {
             "	from calls_cdr.cdr " \
             "	where " \
             "       id > '" + lexical_cast<string>(getLastId()) + "' " \
+            "       and (call_finished='' or call_finished='Yes') " \
             "	order by id " \
             "	limit " + lexical_cast<string>(CDRS_PARTITION_SIZE);
 
