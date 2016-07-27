@@ -15,6 +15,24 @@ def migrate(centralDb, regionalDb, regionsList) :
 	ALTER TABLE calls_cdr.cdr ADD COLUMN releasing_party character varying;
     ''')
     curReg.execute('''
+        DROP FUNCTION insert_cdr(
+            p_call_id bigint,
+            nas_ip inet,
+            src_number character varying,
+            dst_number character varying,
+            redirect_number character varying,
+            session_time bigint,
+            setup_time character varying,
+            connect_time character varying,
+            disconnect_time character varying,
+            disconnect_cause smallint,
+            src_route character varying,
+            dst_route character varying,
+            src_noa smallint,
+            dst_noa smallint,
+            dst_replace character varying);
+    ''')
+    curReg.execute('''
 	CREATE OR REPLACE FUNCTION insert_cdr(
 	    p_call_id bigint,
 	    nas_ip inet,
