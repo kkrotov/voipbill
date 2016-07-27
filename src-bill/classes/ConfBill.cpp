@@ -12,6 +12,16 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     db_calls = pt.get<string>("db.calls");
     db_bandwidth_limit_mbits = pt.get<double>("db.bandwidth_limit_mbits");
 
+    string threads = pt.get<string>("main.run_threads", "");
+    if (threads.length()>0) {
+
+        std::stringstream ss(threads);
+        string tmp;
+
+        while (ss >> tmp) {
+            active_threads.push_back(tmp);
+        }
+    }
     instance_id = pt.get<uint16_t>("geo.instance_id");
     str_instance_id = boost::lexical_cast<string>(instance_id);
 

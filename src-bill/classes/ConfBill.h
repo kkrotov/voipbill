@@ -10,6 +10,7 @@ public:
     double db_bandwidth_limit_mbits;
 
     uint16_t web_port;
+    vector<string> active_threads;
 
     uint16_t instance_id;
     string str_instance_id;

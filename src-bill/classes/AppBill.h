@@ -12,6 +12,7 @@ public:
 protected:
     void runApp();
     void runAppInSingleMode();
+    void runActiveThreads();
 
     void registerAllThreads();    
     template<class T> void registerThread();
