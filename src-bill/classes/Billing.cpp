@@ -296,6 +296,29 @@ void logFinishedCall(const Cdr& cdr, const Call& origCall, const Call& termCall,
 }
 
 
+void logUnfinishedCall(const Cdr& cdr) {
+
+    pLogMessage logCall(new LogMessage());
+
+    logCall->type = "call";
+    logCall->params["src_number"] = cdr.src_number;
+    logCall->params["dst_number"] = cdr.dst_number;
+    logCall->params["dst_replace"] = cdr.dst_replace;
+    logCall->params["redirect_number"] = cdr.redirect_number;
+
+    logCall->params["src_route"] = cdr.src_route;
+    logCall->params["dst_route"] = cdr.dst_route;
+
+    logCall->params["src_noa"] = cdr.src_noa;
+    logCall->params["dst_noa"] = cdr.dst_noa;
+
+    logCall->params["disconnect_cause"] = cdr.disconnect_cause;
+    logCall->params["call_finished"] = cdr.call_finished;
+
+    Log::info(logCall);
+}
+
+
 void Billing::calc(bool realtimePurpose) {
 
     if (!repository.billingData->ready()) {
@@ -314,6 +337,12 @@ void Billing::calc(bool realtimePurpose) {
         Cdr *cdr = repository.billingData->getFirstCdr();
         if (cdr == nullptr) {
             break;
+        }
+
+        if (!cdr->isCallFinished()) {
+
+            logUnfinishedCall (*cdr);
+            continue;
         }
 
         // Не обсчитываем и не пишем в статистику звонки

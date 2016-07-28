@@ -41,11 +41,12 @@ bool CdrManager::loadPart(BDb * db_calls) {
             "       src_noa, " \
             "       dst_noa, " \
             "       call_id, " \
-            "       disconnect_cause" \
+            "       disconnect_cause, " \
+            "       call_finished, " \
+            "       releasing_party " \
             "	from calls_cdr.cdr " \
             "	where " \
             "       id > '" + lexical_cast<string>(getLastId()) + "' " \
-            "       and (call_finished='' or call_finished='Yes') " \
             "	order by id " \
             "	limit " + lexical_cast<string>(CDRS_PARTITION_SIZE);
 
@@ -70,6 +71,8 @@ bool CdrManager::loadPart(BDb * db_calls) {
             cdr.dst_noa = res.get_i(10);
             cdr.call_id = res.get_ll(11);
             cdr.disconnect_cause = res.get_i(12);
+            strncpy((char*) &cdr.call_finished, res.get(13), sizeof(cdr.call_finished));
+            strncpy((char*) &cdr.releasing_party, res.get(14), sizeof(cdr.releasing_party));
 
             queue.push_back(cdr);
 

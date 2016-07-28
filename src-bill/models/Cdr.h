@@ -39,6 +39,9 @@ struct Cdr {
 
     int disconnect_cause;
 
+    char call_finished[16];
+    char releasing_party[32];
+
     Cdr() {
         id = 0;
         connect_time = 0;
@@ -71,5 +74,10 @@ struct Cdr {
         trace << "call_id: " << call_id << ", ";
         trace << "disconnect_cause: " << disconnect_cause << ", ";
         trace << ")";
+    }
+
+    bool isCallFinished() {
+
+        return (call_finished[0]=='\0') || (strcasecmp (call_finished, "Yes")==0);
     }
 };
