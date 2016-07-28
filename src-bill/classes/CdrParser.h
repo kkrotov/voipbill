@@ -2,6 +2,7 @@
 
 #include <string>
 #include <list>
+#include <boost/algorithm/string.hpp>
 
 struct CallData
 {
@@ -23,13 +24,14 @@ struct CallData
     std::string hash;
     std::string call_finished;
     std::string releasing_party;
+    std::string release_timestamp;
 
     CallData() {
         session_time = 0;
         src_noa = 0;
         dst_noa = 0;
     }
-    bool IsFinished() { return call_finished.compare("Yes")==0; };
+    bool IsFinished() { return boost::iequals(call_finished, "YES"); };
 };
 
 class CdrParser {

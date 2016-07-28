@@ -62,8 +62,9 @@ bool CdrParser::Parse(std::list<CallData> &Calls, const std::string &RawData) {
 std::string CdrParser::ParseDateTime(const std::string &Name, const std::string &Data,  bool CanBeEmpty)
 {
     std::string value = GetValue(Name, Data, CanBeEmpty);
-    if (CanBeEmpty && (value.size() == 0))
+    if (value.size() == 0)
         return "";
+
     std::string result = (boost::format("%1%-%2%-%3% %4%:%5%:%6%.%7%+00") % value.substr(0, 4) % value.substr(4, 2) %
             value.substr(6, 2) % value.substr(8, 2) % value.substr(10, 2) % value.substr(12, 2) % value.substr(15, 6)).str();
     return result;
@@ -155,6 +156,8 @@ bool CdrParser::ParseCall(const std::string &RawCallData, CallData &Call) {
         Call.setup_time_raw = GetValue("StartTimeStamp", RawCallData, !call_is_finished);
 
         Call.releasing_party = GetValue("ReleasingParty", RawCallData, true);
+
+        Call.release_timestamp = ParseDateTime("ReleaseTimeStamp", RawCallData, true);
 
         CalculateHash(Call);
 
