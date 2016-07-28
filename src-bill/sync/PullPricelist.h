@@ -38,7 +38,7 @@ public:
 
         string server_id = app().conf.str_instance_id;
 
-        src_sql_where = " region  = " + server_id +" ";
+        src_sql_where = " ( region  = " + server_id +" or is_global ) ";
 
 
     }
