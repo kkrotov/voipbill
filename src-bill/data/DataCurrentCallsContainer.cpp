@@ -61,3 +61,13 @@ shared_ptr<StatsPackageManager> DataCurrentCallsContainer::getStatsPackage() {
     return statsPackage;
 }
 
+void DataCurrentCallsContainer::setStatsTrunkSettings(shared_ptr<StatsTrunkSettingsManager> &newStatsTrunkSettings) {
+    lock_guard<Spinlock> guard(lock);
+    statsTrunkSettings = newStatsTrunkSettings;
+}
+
+shared_ptr<StatsTrunkSettingsManager> DataCurrentCallsContainer::getStatsTrunkSettings() {
+    lock_guard<Spinlock> guard(lock);
+    return statsTrunkSettings;
+}
+

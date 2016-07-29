@@ -409,7 +409,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
 
         repository.getTrunkSettingsOrderList(trunkSettingsOrderList, termTrunk, atoll(aNumber.c_str()), atoll(bNumber.c_str()), SERVICE_TRUNK_SETTINGS_TERMINATION);
 
-        repository.orderTermTrunkSettingsOrderList(trunkSettingsOrderList);
+        repository.orderTermTrunkSettingsOrderList(trunkSettingsOrderList, time(nullptr));
 
         for (auto termOrder : trunkSettingsOrderList) {
             if (
@@ -420,7 +420,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
                 && !account->anti_fraud_disabled)
             {
                 if (trace != nullptr) {
-                    *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE ANTI FRAUD: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << termOrder.serviceTrunk->id << "\n";
+                    *trace << "INFO|TERM TRUNK SETTINGS DECLINE|CAUSE ANTI FRAUD: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << termOrder.serviceTrunk->id << "TRUNK SETTINGS ID: "  << termOrder.trunkSettings->id << " / " << termOrder.trunkSettings->order << "\n";
                 }
             } else {
                 if (origSettings && origSettings->minimum_margin_type != SERVICE_TRUNK_SETTINGS_MIN_MARGIN_ABSENT
@@ -462,13 +462,13 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
 
                 termServiceTrunks.push_back(termOrder);
                 if (trace != nullptr) {
-                    *trace << "INFO|TERM SERVICE TRUNK ACCEPT|" << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << termOrder.serviceTrunk->id << "\n";
+                    *trace << "INFO|TERM TRUNK SETTINGS ACCEPT|" << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << termOrder.serviceTrunk->id << "TRUNK SETTINGS ID: "  << termOrder.trunkSettings->id << " / " << termOrder.trunkSettings->order << "\n";
                 }
             }
         }
     }
 
-    repository.orderTermTrunkSettingsOrderList(termServiceTrunks);
+    repository.orderTermTrunkSettingsOrderList(termServiceTrunks, time(nullptr));
 }
 
 bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate, Pricelist** pFirstBuyPricelist) {

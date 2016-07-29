@@ -35,6 +35,8 @@ struct Call {
     int package_time;
     double package_credit;
 
+    int trunk_settings_stats_id;
+
     int pricelist_id;
     long long int prefix;
 
@@ -75,6 +77,7 @@ struct Call {
         trace << "service_package_stats_id: " << service_package_stats_id << ", ";
         trace << "package_time: " << package_time << ", ";
         trace << "package_credit: " << package_credit << ", ";
+        trace << "trunk_settings_stats_id: " << trunk_settings_stats_id << ", ";
         trace << "pricelist_id: " << pricelist_id << ", ";
         trace << "prefix: " << prefix << ", ";
         trace << "destination_id: " << destination_id << ", ";
@@ -114,6 +117,8 @@ struct Call {
         service_package_stats_id = 0;
         package_time = 0;
         package_credit = 0.0;
+
+        trunk_settings_stats_id = 0;
 
         pricelist_id = 0;
         prefix = 0;
