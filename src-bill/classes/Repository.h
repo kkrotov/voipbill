@@ -294,7 +294,7 @@ public:
     }
 
     bool matchPrefixlist(int prefixlist_id, char * prefix) {
-        auto prefixlist = getPricelist(prefixlist_id);
+        auto prefixlist = getPrefixlist(prefixlist_id);
         if (prefixlist == nullptr) {
             return false;
         }
@@ -358,9 +358,7 @@ public:
         sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
     }
 
-    void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList) const {
-        sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
-    }
+    void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, time_t connect_time) const;
 
     bool checkTrunkSettingsConditions(ServiceTrunkSettings * &trunkSettings, long long int srcNumber, long long int dstNumber, Pricelist * &pricelist, PricelistPrice * &price) {
 
@@ -457,8 +455,10 @@ public:
                     }
                     ServiceTrunkOrder order;
                     order.trunk = trunk;
+                    order.account = account;
                     order.serviceTrunk = serviceTrunk;
                     order.trunkSettings = trunkSettings;
+                    order.statsTrunkSettings = nullptr;
                     order.pricelist = pricelist;
                     order.price = price;
                     resultTrunkSettingsTrunkOrderList.push_back(order);
@@ -470,6 +470,14 @@ public:
         if (resultTrunkSettingsTrunkOrderList.size() > 0) {
             if (trace != nullptr) {
                 *trace << "FOUND|TRUNK SETTING ORDER LIST|" << "\n";
+            }
+
+            for (auto order : resultTrunkSettingsTrunkOrderList) {
+                if (trace != nullptr) {
+                    *trace << "||";
+                    order.dump(*trace);
+                    *trace << "\n";
+                }
             }
         } else {
             if (trace != nullptr) {

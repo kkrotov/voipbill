@@ -15,6 +15,7 @@
 #include "Pricelist.h"
 #include "PricelistPrice.h"
 #include "Geo.h"
+#include "ServiceTrunkSettings.h"
 
 struct DT {
     time_t day;
@@ -29,6 +30,7 @@ struct CallInfo {
     ServiceTrunk * serviceTrunk;
     ServicePackage *servicePackagePrepaid;
     ServicePackage * servicePackagePricelist;
+    ServiceTrunkSettings * trunkSettings;
     TariffChangeLog * logTariff;
     Tariff * mainTariff;
     Tariff * tariff;

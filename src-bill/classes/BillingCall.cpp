@@ -567,7 +567,9 @@ void BillingCall::setupEffectiveOrigTrunkSettings() {
 
     if (trunkSettingsOrderList.size() > 0) {
         auto order = trunkSettingsOrderList.at(0);
+        callInfo->account = order.account;
         callInfo->serviceTrunk = order.serviceTrunk;
+        callInfo->trunkSettings = order.trunkSettings;
         callInfo->pricelist = order.pricelist;
         callInfo->price = order.price;
 
@@ -587,15 +589,18 @@ void BillingCall::setupEffectiveTermTrunkSettings() {
     repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number, SERVICE_TRUNK_SETTINGS_TERMINATION);
     // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
 
-    repository->orderTermTrunkSettingsOrderList(trunkSettingsOrderList);
     // отсортировали по цене
+    repository->orderTermTrunkSettingsOrderList(trunkSettingsOrderList, call->connect_time);
 
     if (trunkSettingsOrderList.size() > 0) {
         auto order = trunkSettingsOrderList.at(0);
+        callInfo->account = order.account;
         callInfo->serviceTrunk = order.serviceTrunk;
+        callInfo->trunkSettings = order.trunkSettings;
         callInfo->pricelist = order.pricelist;
         callInfo->price = order.price;
         // сохраняем в структуре callInfo самый дешевый прайслист и цену для этой пары АБ.
+        call->trunk_settings_stats_id = order.statsTrunkSettings->id;
     }
 }
 

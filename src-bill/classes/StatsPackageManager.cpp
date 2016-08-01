@@ -147,6 +147,11 @@ void StatsPackageManager::prepareSaveQuery(stringstream &query) {
     int i = 0;
     for (auto it : realtimeStatsPackageParts[0]) {
         StatsPackage &stats = it.second;
+
+        if (stats.min_call_id == 0 || stats.max_call_id == 0) {
+            continue;
+        }
+
         if (i > 0) query << ",\n";
         query << "(";
         query << "'" << stats.id << "',";
@@ -159,6 +164,10 @@ void StatsPackageManager::prepareSaveQuery(stringstream &query) {
         query << "'" << stats.min_call_id << "',";
         query << "'" << stats.max_call_id << "')";
         i++;
+    }
+
+    if (i == 0) {
+        query.clear();
     }
 }
 
@@ -218,8 +227,8 @@ StatsPackage * StatsPackageManager::createStatsPackage(CallInfo * callInfo, Serv
     stats.used_seconds = 0;
     stats.used_credit = 0;
     stats.paid_seconds = paid_seconds;
-    stats.min_call_id = callInfo->call->id;
-    stats.max_call_id = callInfo->call->id;
+    stats.min_call_id = 0;
+    stats.max_call_id = 0;
 
     statsByPackageId[stats.package_id].push_front(stats.id);
 

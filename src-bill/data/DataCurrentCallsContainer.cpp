@@ -5,6 +5,7 @@ DataCurrentCallsContainer::DataCurrentCallsContainer() {
     statsAccount = shared_ptr<StatsAccountManager>(new StatsAccountManager());
     statsFreemin = shared_ptr<StatsFreeminManager>(new StatsFreeminManager());
     statsPackage = shared_ptr<StatsPackageManager>(new StatsPackageManager());
+    statsTrunkSettings = shared_ptr<StatsTrunkSettingsManager>(new StatsTrunkSettingsManager());
 }
 
 DataCurrentCallsContainer * DataCurrentCallsContainer::instance() {
@@ -59,5 +60,15 @@ void DataCurrentCallsContainer::setStatsPackage(shared_ptr<StatsPackageManager> 
 shared_ptr<StatsPackageManager> DataCurrentCallsContainer::getStatsPackage() {
     lock_guard<Spinlock> guard(lock);
     return statsPackage;
+}
+
+void DataCurrentCallsContainer::setStatsTrunkSettings(shared_ptr<StatsTrunkSettingsManager> &newStatsTrunkSettings) {
+    lock_guard<Spinlock> guard(lock);
+    statsTrunkSettings = newStatsTrunkSettings;
+}
+
+shared_ptr<StatsTrunkSettingsManager> DataCurrentCallsContainer::getStatsTrunkSettings() {
+    lock_guard<Spinlock> guard(lock);
+    return statsTrunkSettings;
 }
 
