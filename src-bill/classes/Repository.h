@@ -369,13 +369,23 @@ public:
             if (order.trunkSettings->minimum_minutes > 0) {
                 if (order.statsTrunkSettings->used_seconds < order.trunkSettings->minimum_minutes * 60) {
                     trunkSettingsOrderFreeList.push_back(order);
+                    if (trace != nullptr) {
+                        *trace << "DEBUG|TRUNK SETTINGS ORDER LIST|TRUNK_SETTINGS_ID: " << order.trunkSettings->id
+                               << " / used_seconds  = " << order.statsTrunkSettings->used_seconds
+                               << " / minimum_minutes * 60 = " << order.trunkSettings->minimum_minutes * 60 << "\n";
+                    }
                 }
                 continue;
             }
 
             if (order.trunkSettings->minimum_cost > 0) {
-                if (order.statsTrunkSettings->used_credit <= order.trunkSettings->minimum_cost * 60) {
+                if (order.statsTrunkSettings->used_credit <= order.trunkSettings->minimum_cost) {
                     trunkSettingsOrderFreeList.push_back(order);
+                    if (trace != nullptr) {
+                        *trace << "DEBUG|TRUNK SETTINGS ORDER LIST|TRUNK_SETTINGS_ID: " << order.trunkSettings->id
+                        << " / used_credit = " << order.statsTrunkSettings->used_credit
+                        << " / minimum_cost = " << order.trunkSettings->minimum_cost << "\n";
+                    }
                 }
                 continue;
             }

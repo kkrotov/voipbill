@@ -512,6 +512,18 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
             *trace << ", PRICELIST: " << trunkOrder.pricelist->id;
             *trace << ", PRICELIST CURRENCY: " << trunkOrder.pricelist->currency_id;
             *trace << ", PREFIX: " << trunkOrder.price->prefix;
+            if(trunkOrder.trunkSettings != nullptr && trunkOrder.statsTrunkSettings != nullptr ) {
+                    if(trunkOrder.trunkSettings->minimum_cost>0) {
+                        *trace << ", MINIMUM_COST: " << trunkOrder.trunkSettings->minimum_cost;
+                        *trace << ", USED_CREDIT: " << trunkOrder.statsTrunkSettings->used_credit;
+                    }
+                    if(trunkOrder.trunkSettings->minimum_minutes>0) {
+                        *trace << ", MINIMUM_MINUTES: " << trunkOrder.trunkSettings->minimum_minutes
+                               << " ( " << trunkOrder.trunkSettings->minimum_minutes * 60 << " seconds )";
+                        *trace << ", USED_SECONDS: " << trunkOrder.statsTrunkSettings->used_seconds;
+                    }
+            }
+
             *trace << "\n";
         }
     }
