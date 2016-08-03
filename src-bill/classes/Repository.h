@@ -358,52 +358,7 @@ public:
         sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
     }
 
-    void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, time_t connect_time) const {
-
-        vector<ServiceTrunkOrder> trunkSettingsOrderFreeList;
-        vector<ServiceTrunkOrder> trunkSettingsOrderPayList;
-
-        for (auto order : trunkSettingsOrderList) {
-            order.statsTrunkSettings = billingData->statsTrunkSettingsGetCurrent(connect_time, order.account, order.trunkSettings);
-
-            if (order.trunkSettings->minimum_minutes > 0) {
-                if (order.statsTrunkSettings->used_seconds < order.trunkSettings->minimum_minutes * 60) {
-                    trunkSettingsOrderFreeList.push_back(order);
-                    if (trace != nullptr) {
-                        *trace << "DEBUG|TRUNK SETTINGS ORDER LIST|TRUNK_SETTINGS_ID: " << order.trunkSettings->id
-                               << " / used_seconds  = " << order.statsTrunkSettings->used_seconds
-                               << " / minimum_minutes * 60 = " << order.trunkSettings->minimum_minutes * 60 << "\n";
-                    }
-                }
-                continue;
-            }
-
-            if (order.trunkSettings->minimum_cost > 0) {
-                if (order.statsTrunkSettings->used_credit <= order.trunkSettings->minimum_cost) {
-                    trunkSettingsOrderFreeList.push_back(order);
-                    if (trace != nullptr) {
-                        *trace << "DEBUG|TRUNK SETTINGS ORDER LIST|TRUNK_SETTINGS_ID: " << order.trunkSettings->id
-                        << " / used_credit = " << order.statsTrunkSettings->used_credit
-                        << " / minimum_cost = " << order.trunkSettings->minimum_cost << "\n";
-                    }
-                }
-                continue;
-            }
-
-            trunkSettingsOrderPayList.push_back(order);
-        }
-
-        sort(trunkSettingsOrderFreeList.begin(), trunkSettingsOrderFreeList.end(), trunk_settings_order_desc_price(*this));
-        sort(trunkSettingsOrderPayList.begin(), trunkSettingsOrderPayList.end(), trunk_settings_order_asc_price(*this));
-
-        trunkSettingsOrderList.clear();
-        for (auto order : trunkSettingsOrderFreeList) {
-            trunkSettingsOrderList.push_back(order);
-        }
-        for (auto order : trunkSettingsOrderPayList) {
-            trunkSettingsOrderList.push_back(order);
-        }
-    }
+    void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, time_t connect_time) const;
 
     bool checkTrunkSettingsConditions(ServiceTrunkSettings * &trunkSettings, long long int srcNumber, long long int dstNumber, Pricelist * &pricelist, PricelistPrice * &price) {
 
