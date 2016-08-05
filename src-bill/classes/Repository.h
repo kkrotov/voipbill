@@ -294,7 +294,7 @@ public:
     }
 
     bool matchPrefixlist(int prefixlist_id, char * prefix) {
-        auto prefixlist = getPricelist(prefixlist_id);
+        auto prefixlist = getPrefixlist(prefixlist_id);
         if (prefixlist == nullptr) {
             return false;
         }
