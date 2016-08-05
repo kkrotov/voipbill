@@ -13,6 +13,7 @@
 #include "../classes/StatsAccountManager.h"
 #include "../classes/StatsFreeminManager.h"
 #include "../classes/StatsPackageManager.h"
+#include "../classes/StatsTrunkSettingsManager.h"
 
 #include "DataContainer.h"
 
@@ -31,10 +32,11 @@ private:
     CdrManager          cdrs;
     CallsManager        calls;
 public:
-    StatsAccountManager statsAccount;
-    StatsFreeminManager statsFreemin;
-    StatsPackageManager statsPackage;
-    ClientLockData      clientLock;
+    StatsAccountManager         statsAccount;
+    StatsFreeminManager         statsFreemin;
+    StatsPackageManager         statsPackage;
+    StatsTrunkSettingsManager   statsTrunkSettings;
+    ClientLockData              clientLock;
 
     long long int lastSyncCentralCallId = -1;
 
@@ -77,12 +79,15 @@ public:
     double statsAccountGetSumBalance(int account_id, double vat_rate);
     StatsFreemin * statsFreeminGetCurrent(CallInfo * callInfo);
     StatsPackage * statsPackageGetCurrent(CallInfo * callInfo, ServicePackage * servicePackage, TariffPackage * tariffPackage);
+    StatsTrunkSettings * statsTrunkSettingsGetCurrent(time_t connect_time, Client * account, ServiceTrunkSettings * trunkSettings);
     void statsAccountGetChanges(map<int, StatsAccount> &changes, bool &needClear);
     void statsAccountAddChanges(map<int, StatsAccount> &changes, bool needClear);
     void statsFreeminGetChanges(map<int, StatsFreemin> &changes);
     void statsFreeminAddChanges(map<int, StatsFreemin> &changes);
     void statsPackageGetChanges(map<int, StatsPackage> &changes);
     void statsPackageAddChanges(map<int, StatsPackage> &changes);
+    void statsTrunkSettingsGetChanges(map<int, StatsTrunkSettings> &changes);
+    void statsTrunkSettingsAddChanges(map<int, StatsTrunkSettings> &changes);
 
 private:
     void loadLastCallIdAndCdrIdAndTime(BDb * db_calls);

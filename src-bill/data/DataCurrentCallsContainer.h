@@ -4,6 +4,7 @@
 #include "../classes/StatsAccountManager.h"
 #include "../classes/StatsFreeminManager.h"
 #include "../classes/StatsPackageManager.h"
+#include "../classes/StatsTrunkSettingsManager.h"
 #include "../common.h"
 #include "../models/Cdr.h"
 #include "../models/Call.h"
@@ -35,10 +36,14 @@ public:
     void setStatsPackage(shared_ptr<StatsPackageManager> &newStatsPackage);
     shared_ptr<StatsPackageManager> getStatsPackage();
 
+    void setStatsTrunkSettings(shared_ptr<StatsTrunkSettingsManager> &newStatsTrunkSettings);
+    shared_ptr<StatsTrunkSettingsManager> getStatsTrunkSettings();
+
 private:
     Spinlock lock;
     shared_ptr<vector<Call>> callsWaitSaving;
     shared_ptr<StatsAccountManager> statsAccount;
     shared_ptr<StatsFreeminManager> statsFreemin;
     shared_ptr<StatsPackageManager> statsPackage;
+    shared_ptr<StatsTrunkSettingsManager> statsTrunkSettings;
 };
