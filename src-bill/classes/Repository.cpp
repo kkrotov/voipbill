@@ -229,7 +229,7 @@ void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trun
             trunkSettingsOrderPayList.push_back(order);
         }
 
-        sort(trunkSettingsOrderFreeList.begin(), trunkSettingsOrderFreeList.end(), trunk_settings_order_desc_price(*this));
+        sort(trunkSettingsOrderFreeList.begin(), trunkSettingsOrderFreeList.end(), trunk_settings_order_asc_price(*this));
         sort(trunkSettingsOrderPayList.begin(), trunkSettingsOrderPayList.end(), trunk_settings_order_asc_price(*this));
 
         trunkSettingsOrderList.clear();
