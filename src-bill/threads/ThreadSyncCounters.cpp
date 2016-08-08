@@ -11,9 +11,13 @@ ThreadSyncCounters::ThreadSyncCounters() {
     last_sync_account_count = 0;
     last_sync_freemin_count = 0;
     last_sync_package_count = 0;
+    last_sync_trunk_settings_count = 0;
+
     total_sync_account_count = 0;
     total_sync_freemin_count = 0;
     total_sync_package_count = 0;
+    total_sync_trunk_settings_count = 0;
+
 }
 
 bool ThreadSyncCounters::ready() {
@@ -35,6 +39,9 @@ void ThreadSyncCounters::run() {
 
     last_sync_package_count = repository.billingData->statsPackage.sync(&db_main, &db_calls);
     total_sync_package_count += last_sync_package_count;
+
+    last_sync_trunk_settings_count = repository.billingData->statsTrunkSettings.sync(&db_main, &db_calls);
+    total_sync_trunk_settings_count += last_sync_trunk_settings_count;
 }
 
 void ThreadSyncCounters::htmlfull(stringstream &html) {
@@ -43,9 +50,12 @@ void ThreadSyncCounters::htmlfull(stringstream &html) {
     html << "Last sync account count: " << last_sync_account_count << "<br/>\n";
     html << "Last sync freemin count: " << last_sync_freemin_count << "<br/>\n";
     html << "Last sync package count: " << last_sync_package_count << "<br/>\n";
+    html << "Last sync tunk stettings count: " << last_sync_trunk_settings_count << "<br/>\n";
+
     html << "Total sync account count: " << total_sync_account_count << "<br/>\n";
     html << "Total sync freemin count: " << total_sync_freemin_count << "<br/>\n";
     html << "Total sync package count: " << total_sync_package_count << "<br/>\n";
+    html << "Total sync tunk stettings count: " << total_sync_trunk_settings_count << "<br/>\n";
 }
 
 bool ThreadSyncCounters::hasFullHtml() {
