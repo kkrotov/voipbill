@@ -148,10 +148,6 @@ void StatsPackageManager::prepareSaveQuery(stringstream &query) {
     for (auto it : realtimeStatsPackageParts[0]) {
         StatsPackage &stats = it.second;
 
-        if (stats.min_call_id == 0 || stats.max_call_id == 0) {
-            continue;
-        }
-
         if (i > 0) query << ",\n";
         query << "(";
         query << "'" << stats.id << "',";

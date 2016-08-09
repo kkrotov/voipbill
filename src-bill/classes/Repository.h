@@ -66,6 +66,41 @@ public:
         currentTime = time(nullptr);
     }
 
+    Trunk *getServiceTrunk(int trunk_settings_id, ServiceTrunkSettings &trunkSettings)
+    {
+        if (serviceTrunkSettings == nullptr)
+            return nullptr;
+
+        int settings_trunk_id = 0;
+        for (int i=0; i<serviceTrunkSettings->size(); i++) {
+
+            ServiceTrunkSettings *settings = serviceTrunkSettings->get(i);
+            if (settings->id == trunk_settings_id) {
+
+                trunkSettings = *settings;
+                settings_trunk_id = settings->trunk_id;
+                break;
+            }
+        }
+        if (settings_trunk_id==0)
+            return nullptr;
+
+        int trunk_id = 0;
+        for (int i=0; i<serviceTrunk->size(); i++) {
+
+            ServiceTrunk *st = serviceTrunk->get(i);
+            if (st->id == settings_trunk_id) {
+
+                trunk_id = st->trunk_id;
+                break;
+            }
+        }
+        if (trunk_id == 0)
+            return nullptr;
+
+        return this->getTrunk(trunk_id);
+    }
+
     bool prepare(time_t currentTime = 0);
 
     InstanceSettings * getInstanceSettings() {

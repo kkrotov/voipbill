@@ -143,10 +143,6 @@ void StatsFreeminManager::prepareSaveQuery(stringstream &query) {
     for (auto it : realtimeStatsFreeminParts[0]) {
         StatsFreemin &stats = it.second;
 
-        if (stats.min_call_id == 0 || stats.max_call_id == 0) {
-            continue;
-        }
-
         if (i > 0) query << ",\n";
         query << "(";
         query << "'" << stats.id << "',";
