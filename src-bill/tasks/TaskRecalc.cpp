@@ -135,6 +135,15 @@ void TaskRecalc::run() {
         repository.billingData->statsPackage.sync(db_main, &db_calls);
         trans.commit();
     }
+
+    setStatus("17. sync trunk settings");
+    {
+        BDbTransaction trans(db_main);
+        db_main->exec("DELETE FROM billing.stats_trunk_settings WHERE server_id = " + app().conf.str_instance_id + " and max_call_id > " + lexical_cast<string>(oldStoredLastId));
+        repository.billingData->statsTrunkSettings.sync(db_main, &db_calls);
+        trans.commit();
+    }
+
 }
 
 void TaskRecalc::html(stringstream &html) {

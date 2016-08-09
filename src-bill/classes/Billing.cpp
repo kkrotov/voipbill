@@ -342,12 +342,13 @@ void Billing::calc(bool realtimePurpose) {
         if (cdr == nullptr) {
             break;
         }
-
+/*
         if (!cdr->isCallFinished()) {
 
             logUnfinishedCall (*cdr);
             continue;
         }
+*/
 
         // Не обсчитываем и не пишем в статистику звонки
         // с пустой длительностью и нетипичным Release Reason'ом:

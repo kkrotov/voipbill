@@ -142,10 +142,6 @@ void StatsTrunkSettingsManager::prepareSaveQuery(stringstream &query) {
     for (auto it : realtimeStatsTrunkSettingsParts[0]) {
         StatsTrunkSettings &stats = it.second;
 
-        if (stats.min_call_id == 0 || stats.max_call_id == 0) {
-            continue;
-        }
-
         if (i > 0) query << ",\n";
         query << "(";
         query << "'" << stats.id << "',";
