@@ -11,7 +11,7 @@ class ThreadClientLock : public Thread {
 
     void run();
 
-    bool needLockLocal(int client_account_id);
+    bool needLockLocal(int client_account_id,bool &need_lock_finance,bool &need_lock_overran);
     bool needLockGlobal(int client_account_id);
 
 

@@ -68,6 +68,12 @@ public:
         if (clientLock.disabled_global)
             html << "Blocked GLOBAL<br/>\n";
 
+        if (clientLock.is_finance_block)
+            html << "Blocked FINANCE<br/>\n";
+
+        if (clientLock.is_overran)
+            html << "Blocked OVERRAN<br/>\n";
+
         html << "-----<br/>\n";
 
 
