@@ -50,7 +50,10 @@ private:
     bool parseFile(std::list<CallData> &calls, const string &fileContent);
     void saveCalls(const std::list<CallData> &calls);
     void saveCall(const CallData &call);
+    void saveUnfinishedCall(const CallData &call);
+    void logUnfinishedCall(CallData &call);
     bool isCallExists(const string &hash);
+    bool isCallExists(const string &hash, string dst_route);
     void saveCdrFile();
     string getFileNameForParse();
     bool isFileProcessed(const std::string &Filename);

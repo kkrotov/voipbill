@@ -92,12 +92,58 @@ void ThreadCdrParser::saveCalls(const std::list<CallData> &calls) {
     for (auto call : calls) {
         cdrFile.progress++;
 
+        if (!call.IsFinished()) {
+            if (!isCallExists(call.hash, call.dst_route)) {
+                saveUnfinishedCall(call);
+                logUnfinishedCall(call);
+            }
+            continue;
+        }
+
         if (!isCallExists(call.hash)) {
             saveCall(call);
         }
 
     }
 }
+
+void ThreadCdrParser::saveUnfinishedCall(const CallData &call) {
+
+    try {
+
+        std::string query = (boost::format("select public.insert_cdr_unfinished('%1%','%2%','%3%','%4%','%5%','%6%')")
+                             % call.call_id % call.setup_time % call.dst_route % call.releasing_party % call.release_timestamp % call.disconnect_cause).str();
+        db_calls.query(query);
+    }
+    catch (Exception &e) {
+
+        std::string message = "Error adding new unfinished call "+call.call_id+": "+e.message;
+        Log::error(message);
+    }
+}
+
+void ThreadCdrParser::logUnfinishedCall(CallData &call) {
+
+    pLogMessage logCall(new LogMessage());
+
+    logCall->type = "call";
+    logCall->params["src_number"] = call.src_number;
+    logCall->params["dst_number"] = call.dst_number;
+    logCall->params["dst_replace"] = call.dst_replace;
+    logCall->params["redirect_number"] = call.redirect_number;
+
+    logCall->params["src_route"] = call.src_route;
+    logCall->params["dst_route"] = call.dst_route;
+
+    logCall->params["src_noa"] = call.src_noa;
+    logCall->params["dst_noa"] = call.dst_noa;
+
+    logCall->params["disconnect_cause"] = call.disconnect_cause;
+    logCall->params["call_finished"] = call.call_finished;
+
+    Log::info(logCall);
+}
+
 
 void ThreadCdrParser::saveCall(const CallData &call) {
     std::string query = (boost::format(
@@ -118,6 +164,11 @@ void ThreadCdrParser::saveCall(const CallData &call) {
 
 bool ThreadCdrParser::isCallExists(const string &hash) {
     BDbResult res = db_calls.query("select hash from calls_cdr.cdr where hash='" + hash + "' limit 1");
+    return (res.next() && res.get_s(0).size() > 0);
+}
+
+bool ThreadCdrParser::isCallExists(const string &hash, string dst_route) {
+    BDbResult res = db_calls.query("select hash from calls_cdr.cdr_unfinished where hash='" + hash + "' and dst_route='"+dst_route+"' limit 1");
     return (res.next() && res.get_s(0).size() > 0);
 }
 
