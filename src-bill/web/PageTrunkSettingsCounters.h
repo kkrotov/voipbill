@@ -17,7 +17,7 @@ public:
         auto statsTrunkSettings = &repository.billingData->statsTrunkSettings;
 
 
-        html << "<table><tr><th>id</th><th>trunk_settings_id</th><th>trunk name</th><th>activation<br>expire</th><th>pricelist_id</th><th>minimum_minutes</th><th>minimum_cost</th><th>used mins</th><th>used credit</th></tr>";
+        html << "<table><tr><th>id</th><th>trunk_settings_id</th><th>trunk_name</th><th>activation<br>expire</th><th>pricelist_id</th><th>minimum_minutes</th><th>minimum_cost</th><th>used_mins</th><th>used_credit</th></tr>";
         for (auto it : statsTrunkSettings->statsByTrunkSettingsId) {
             int trunkSettingsId = it.first;
             list<int> &statIds = it.second;
@@ -43,7 +43,12 @@ public:
                         minimum_cost = trunkSettings.minimum_cost;
                         pricelist_id = trunkSettings.pricelist_id;
                     }
+                    else
+                        trunk_name = "[Unknown]";
                 }
+                if (stats.expire_dt<time(0))
+                    continue;
+
                 html << "<tr>";
                 html << "<td>" << stats.id << "</td>";
                 html << "<td>" << stats.trunk_settings_id << "</td>";
