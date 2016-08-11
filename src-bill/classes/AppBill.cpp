@@ -37,7 +37,10 @@ void AppBill::runApp() {
 
     std::thread web_thread(std::ref(web));
 
-    runAppInSingleMode();
+    if (conf.active_threads.size()==0)
+        runAppInSingleMode();
+    else
+        runActiveThreads();
 
     threads.joinAll();
 
@@ -119,6 +122,22 @@ void AppBill::runAppInSingleMode()
     };
 
     for (auto thread: standardThreads) {
+
         threads.run(newThreadObject(thread));
+    }
+}
+
+void AppBill::runActiveThreads()
+{
+    for (auto thread_name: conf.active_threads) {
+
+        Thread *t = newThreadObject(thread_name);
+        if (t == nullptr) {
+
+            cout << "ERROR: Unable to run thread " + thread_name + "\n";
+            continue;
+        }
+        cout << "Running thread " + thread_name + "...\n";
+        threads.run(t);
     }
 }

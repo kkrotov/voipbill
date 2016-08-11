@@ -63,6 +63,9 @@ void BasePull::pullFull() {
         string query_fields = getQueryFields();
         string field_types = join(datatype, ",");
         string sel = "select " + query_fields + " from " + src_table;
+
+        if(src_sql_where != "") sel += string(" where ") + src_sql_where;
+
         BDb::copy_dblink(dst_table, query_fields, field_types, sel, &manager->db_main, &manager->db_calls);
     }
     else
@@ -77,7 +80,7 @@ void BasePull::pullPartial() {
 
     string query_fields = getQueryFields();
 
-    string sel = "select " + query_fields + " from " + src_table; 
+    string sel = "select " + query_fields + " from " + src_table;
     string del = "delete from " + dst_table + " where \"" + key + "\" in (" + getFilterIds() + ")";
 
     BDbTransaction trans(&manager->db_calls);
@@ -85,13 +88,19 @@ void BasePull::pullPartial() {
 
     if (datatype.size()>0) {
 
-        sel += " where \"" + key + "\" in (" + join(ids_to_pull, ",") + ")";
+        sel += " where \"" + key + "\" in (" + join(ids_to_pull, ",") + ") ";
+        
+        if(src_sql_where != "") sel += string(" and ") + src_sql_where;
+        
         string field_types = join(datatype, ",");
         BDb::copy_dblink(dst_table, query_fields, field_types, sel,  &manager->db_main, &manager->db_calls);
     }
     else {
 
-        sel += " where \"" + key + "\" in (" + getFilterIds() + ")";
+        sel += " where \"" + key + "\" in (" + getFilterIds() + ") ";
+
+        if(src_sql_where != "") sel += string(" and ") + src_sql_where;
+
         BDb::copy(dst_table, src_table, query_fields, sel, &manager->db_main, &manager->db_calls, manager->bandwidth_limit_mbits);
     }
     trans.commit();

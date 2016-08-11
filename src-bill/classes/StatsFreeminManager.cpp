@@ -42,7 +42,7 @@ void StatsFreeminManager::load(BDb * db, time_t lastStoredCallTime) {
     }
 
     loaded = true;
-}\
+}
 
 void StatsFreeminManager::recalc(BDb * db, long long int storedLastId) {
     string strStoredLastId = lexical_cast<string>(storedLastId);
@@ -142,6 +142,7 @@ void StatsFreeminManager::prepareSaveQuery(stringstream &query) {
     int i = 0;
     for (auto it : realtimeStatsFreeminParts[0]) {
         StatsFreemin &stats = it.second;
+
         if (i > 0) query << ",\n";
         query << "(";
         query << "'" << stats.id << "',";
@@ -152,6 +153,10 @@ void StatsFreeminManager::prepareSaveQuery(stringstream &query) {
         query << "'" << stats.min_call_id << "',";
         query << "'" << stats.max_call_id << "')";
         i++;
+    }
+
+    if (i == 0) {
+        query.clear();
     }
 }
 
@@ -182,8 +187,8 @@ StatsFreemin * StatsFreeminManager::createStatsFreemin(CallInfo * callInfo) {
     stats.month_dt = callInfo->dt.month;
     stats.used_seconds = 0;
     stats.used_credit = 0;
-    stats.min_call_id = callInfo->call->id;
-    stats.max_call_id = callInfo->call->id;
+    stats.min_call_id = 0;
+    stats.max_call_id = 0;
 
 
     freeminsByServiceId[stats.service_number_id].push_front(stats.id);

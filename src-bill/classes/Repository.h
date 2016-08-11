@@ -66,6 +66,52 @@ public:
         currentTime = time(nullptr);
     }
 
+    Trunk *getServiceTrunk(int trunk_settings_id, ServiceTrunkSettings &trunkSettings)
+    {
+        if (serviceTrunkSettings == nullptr)
+            return nullptr;
+
+        int settings_trunk_id = 0;
+        for (int i=0; i<serviceTrunkSettings->size(); i++) {
+
+            ServiceTrunkSettings *settings = serviceTrunkSettings->get(i);
+            if (settings->id == trunk_settings_id) {
+
+                trunkSettings = *settings;
+                settings_trunk_id = settings->trunk_id;
+                break;
+            }
+        }
+        if (settings_trunk_id==0)
+            return nullptr;
+
+        int trunk_id = 0;
+        for (int i=0; i<serviceTrunk->size(); i++) {
+
+            ServiceTrunk *st = serviceTrunk->get(i);
+            if (st->id == settings_trunk_id) {
+
+                trunk_id = st->trunk_id;
+                break;
+            }
+        }
+        if (trunk_id == 0)
+            return nullptr;
+
+        //return this->getTrunk(trunk_id);
+        Trunk *result = nullptr;
+        for (int i=0; i<trunk->size(); i++) {
+
+            Trunk *t = trunk->get(i);
+            if (t->id == trunk_id) {
+
+                result = t;
+                break;
+            }
+        }
+        return result;
+    }
+
     bool prepare(time_t currentTime = 0);
 
     InstanceSettings * getInstanceSettings() {
@@ -294,7 +340,7 @@ public:
     }
 
     bool matchPrefixlist(int prefixlist_id, char * prefix) {
-        auto prefixlist = getPricelist(prefixlist_id);
+        auto prefixlist = getPrefixlist(prefixlist_id);
         if (prefixlist == nullptr) {
             return false;
         }
@@ -358,9 +404,7 @@ public:
         sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
     }
 
-    void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList) const {
-        sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
-    }
+    void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, time_t connect_time) const;
 
     bool checkTrunkSettingsConditions(ServiceTrunkSettings * &trunkSettings, long long int srcNumber, long long int dstNumber, Pricelist * &pricelist, PricelistPrice * &price) {
 
@@ -424,6 +468,11 @@ public:
         return true;
     }
 
+    /*****************************************************************************************************************
+     *   Вычисляем список возможных прайс листов для тарификации конкретной пары АБ номеров на транке.
+     *
+     */
+
     void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk * trunk, long long int srcNumber, long long int dstNumber, int destinationType) {
         vector<ServiceTrunk *> serviceTrunks;
         getAllServiceTrunk(serviceTrunks, trunk->id);
@@ -452,8 +501,10 @@ public:
                     }
                     ServiceTrunkOrder order;
                     order.trunk = trunk;
+                    order.account = account;
                     order.serviceTrunk = serviceTrunk;
                     order.trunkSettings = trunkSettings;
+                    order.statsTrunkSettings = nullptr;
                     order.pricelist = pricelist;
                     order.price = price;
                     resultTrunkSettingsTrunkOrderList.push_back(order);
@@ -465,6 +516,14 @@ public:
         if (resultTrunkSettingsTrunkOrderList.size() > 0) {
             if (trace != nullptr) {
                 *trace << "FOUND|TRUNK SETTING ORDER LIST|" << "\n";
+            }
+
+            for (auto order : resultTrunkSettingsTrunkOrderList) {
+                if (trace != nullptr) {
+                    *trace << "||";
+                    order.dump(*trace);
+                    *trace << "\n";
+                }
             }
         } else {
             if (trace != nullptr) {

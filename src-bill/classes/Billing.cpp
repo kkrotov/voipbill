@@ -23,6 +23,7 @@ void Billing::calcCurrentCalls() {
     shared_ptr<StatsAccountManager> statsAccount(new StatsAccountManager());
     shared_ptr<StatsFreeminManager> statsFreemin(new StatsFreeminManager());
     shared_ptr<StatsPackageManager> statsPackage(new StatsPackageManager());
+    shared_ptr<StatsTrunkSettingsManager> statsTrunkSettings(new StatsTrunkSettingsManager());
 
     for (size_t i = 0; i < currentCdrs->size(); i++) {
         auto cdr = currentCdrs->get(i);
@@ -46,11 +47,13 @@ void Billing::calcCurrentCalls() {
         statsAccount.get()->add(&origCallInfo);
         statsFreemin.get()->add(&origCallInfo);
         statsPackage.get()->add(&origCallInfo);
+        statsTrunkSettings.get()->add(&origCallInfo);
         callsWaitSaving->push_back(origCall);
 
         statsAccount.get()->add(&termCallInfo);
         statsFreemin.get()->add(&termCallInfo);
         statsPackage.get()->add(&termCallInfo);
+        statsTrunkSettings.get()->add(&termCallInfo);
         callsWaitSaving->push_back(termCall);
     }
 
@@ -58,6 +61,7 @@ void Billing::calcCurrentCalls() {
     repository.currentCalls->setStatsAccount(statsAccount);
     repository.currentCalls->setStatsFreemin(statsFreemin);
     repository.currentCalls->setStatsPackage(statsPackage);
+    repository.currentCalls->setStatsTrunkSettings(statsTrunkSettings);
 }
 
 void fetchGlobalCounters(int accountId, double vat_rate, Repository& repository, double* globalBalanceSum, double* globalDaySum) {
