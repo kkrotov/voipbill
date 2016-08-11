@@ -39,14 +39,19 @@ void ThreadClientLock::run() {
 
     for (int client_account_id : repository.activeCounter->activeClients) {
 
-        bool need_lock_local = needLockLocal(client_account_id);
+        bool need_lock_overran = false;
+        bool need_lock_finance = false;
+
+        bool need_lock_local = needLockLocal(client_account_id,need_lock_finance,need_lock_overran);
         bool need_lock_global = needLockGlobal(client_account_id);
 
-        if (need_lock_local || need_lock_global) {
+        if (need_lock_local || need_lock_global || need_lock_overran || need_lock_finance ) {
             ClientLockObj &client_lock = client_locks[client_account_id];
             client_lock.client_id = client_account_id;
             client_lock.disabled_local = need_lock_local;
             client_lock.disabled_global = need_lock_global;
+            client_lock.is_overran = need_lock_overran;
+            client_lock.is_finance_block = need_lock_finance;
         }
     }
 
@@ -56,7 +61,9 @@ void ThreadClientLock::run() {
 }
 
 
-bool ThreadClientLock::needLockLocal(int client_account_id) {
+bool ThreadClientLock::needLockLocal(int client_account_id,bool &need_lock_finance,bool &need_lock_overran) {
+
+    bool result = false;
 
     auto client = repository.getAccount(client_account_id);
     if (client != nullptr) {
@@ -73,16 +80,18 @@ bool ThreadClientLock::needLockLocal(int client_account_id) {
         double spentDaySum = sumDay + (globalCounter ? globalCounter->sumDay(vat_rate) : 0.0);
 
         if (client->isConsumedCreditLimit(spentBalanceSum)) {
-            return true;
+            need_lock_finance = true;
+            result = true;
         }
 
         if (client->isConsumedDailyLimit(spentDaySum)) {
-            return true;
+            need_lock_overran = true;
+            result = true;
         }
 
     }
 
-    return false;
+    return result;
 }
 
 bool ThreadClientLock::needLockGlobal(int client_account_id) {

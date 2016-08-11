@@ -44,15 +44,17 @@ void ThreadSyncLocks::save_client_locks() {
         ClientLockObj value = clientLock->get(account_id);
 
         if (sync_count == 0) {
-            q.append("INSERT INTO billing.clients_locks(client_id,region_id,voip_auto_disabled,voip_auto_disabled_local)VALUES");
+            q.append("INSERT INTO billing.clients_locks(client_id,region_id,voip_auto_disabled,voip_auto_disabled_local,is_finance_block,is_overran)VALUES");
         } else {
             q.append(",");
         }
-        q.append(string_fmt("(%d,'%d',%s,%s)",
+        q.append(string_fmt("(%d,'%d',%s,%s,%s,%s)",
                             account_id,
                             app().conf.instance_id,
                             (value.disabled_global ? "true" : "false"),
-                            (value.disabled_local ? "true" : "false")));
+                            (value.disabled_local ? "true" : "false"),
+                            (value.is_finance_block ? "true" : "false"),
+                            (value.is_overran ? "true" : "false")));
         sync_count += 1;
     }
 

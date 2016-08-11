@@ -26,6 +26,10 @@ public:
         html << "<th nowrap>Client</th>\n";
         html << "<th nowrap>Block MGMN</th>\n";
         html << "<th nowrap>Block Global</th>\n";
+
+        html << "<th nowrap>Block is_finance_block</th>\n";
+        html << "<th nowrap>Block is_overran</th>\n";
+
         html << "<th nowrap>Balance available</th>\n";
         html << "<th nowrap>Daily available</th>\n";
         html << "<th nowrap>Block MGMN Flag</th>\n";
@@ -66,6 +70,9 @@ public:
             html << "<td nowrap><a href='/client?id=" << client_id << "'>" << client_id << "</a></td>\n";
             html << "<td nowrap>" << (lock.disabled_local ? "BLOCK MGMN" : "-")  << "</td>\n";
             html << "<td nowrap>" << (lock.disabled_global ? "BLOCK GLOBAL" : "-") << "</td>\n";
+
+            html << "<td nowrap>" << (lock.is_finance_block ? "BLOCK FINANCE" : "-")  << "</td>\n";
+            html << "<td nowrap>" << (lock.is_overran ? "BLOCK OVERRAN" : "-") << "</td>\n";
 
             if (client != nullptr && client->hasCreditLimit()) {
                 html << "<td nowrap>" << string_fmt("%.2f", client->balance + client->credit + sum_balance + sum_balance_global) << "</td>\n";

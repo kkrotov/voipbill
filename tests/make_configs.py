@@ -7,6 +7,7 @@ import imp
 configTemplate = """
 [main]
 web_port = 80%(region_id)s
+run_threads = log sync loader account_balance_recalc remote_loader current_calls fetch_cdr runtime save sync_calls sync_counters sync_locks client_lock update_active_clients checkstarttable tasks radius_auth_server
 
 [db]
 main =  host=127.0.0.1 dbname=nispd_test user=bill_daemon_remote password=qRPCcAvrS4qWvGAhgzrXWuGJ2nwYEf8C
