@@ -672,19 +672,33 @@ void RadiusAuthProcessor::processLineWithoutNumber() {
 }
 
 bool RadiusAuthProcessor::autoTrunkFilterSrcTrunk(Trunk * termTrunk) {
-    vector<int> resultTrunkGroupIds;
-    repository.getAllTrunkTrunkRulesTrunkGroupIds(resultTrunkGroupIds, termTrunk->id);
+    vector<TrunkTrunkRule> resultTrunkGroupRules;
+    repository.getAllTrunkGroupRules(resultTrunkGroupRules, termTrunk->id);
 
     if (termTrunk->source_trunk_rule_default_allowed) {
-        for (int trunkGroupId : resultTrunkGroupIds) {
-            if (matchTrunkGroup(trunkGroupId, origTrunk->id)) {
+        for (int i=0; i< resultTrunkGroupRules.size(); i++) {
+
+	    int num_a = resultTrunkGroupRules[i].number_id_filter_a; bool f_a = true;
+	    int num_b = resultTrunkGroupRules[i].number_id_filter_b; bool f_b = true;
+	    
+	    if (num_a>0) f_a = filterByNumber(resultTrunkGroupRules[i].number_id_filter_a, aNumber);
+	    if (num_b>0) f_b = filterByNumber(resultTrunkGroupRules[i].number_id_filter_b, bNumber);
+
+            if (f_a && f_b && matchTrunkGroup(resultTrunkGroupRules[i].trunk_group_id, origTrunk->id)) {
                 return false;
             }
         }
         return true;
     } else {
-        for (int trunkGroupId : resultTrunkGroupIds) {
-            if (matchTrunkGroup(trunkGroupId, origTrunk->id)) {
+        for (int i=0; i< resultTrunkGroupRules.size(); i++) {
+
+	    int num_a = resultTrunkGroupRules[i].number_id_filter_a; bool f_a = true;
+	    int num_b = resultTrunkGroupRules[i].number_id_filter_b; bool f_b = true;
+	    
+	    if (num_a>0) f_a = filterByNumber(resultTrunkGroupRules[i].number_id_filter_a, aNumber);
+	    if (num_b>0) f_b = filterByNumber(resultTrunkGroupRules[i].number_id_filter_b, bNumber);
+
+            if (f_a && f_b &&  matchTrunkGroup(resultTrunkGroupRules[i].trunk_group_id, origTrunk->id)) {
                 return true;
             }
         }
