@@ -92,11 +92,10 @@ void ThreadCdrParser::saveCalls(const std::list<CallData> &calls) {
     for (auto call : calls) {
         cdrFile.progress++;
 
-        if (!call.IsFinished()) {
-            if (!isCallExists(call.hash, call.dst_route)) {
-                saveUnfinishedCall(call);
-                logUnfinishedCall(call);
-            }
+        if (!call.IsFinished() && !isUnfinishedCallExists(call.hash, call.dst_route)) {
+
+            saveUnfinishedCall(call);
+            logUnfinishedCall(call);
             continue;
         }
 
@@ -139,9 +138,10 @@ void ThreadCdrParser::logUnfinishedCall(CallData &call) {
     logCall->params["dst_noa"] = call.dst_noa;
 
     logCall->params["disconnect_cause"] = call.disconnect_cause;
-    logCall->params["call_finished"] = call.call_finished;
+    logCall->params["call_finished"] = "No";
 
     Log::info(logCall);
+    Log::info("Call "+call.call_id+" is UNFINISHED");
 }
 
 
@@ -167,7 +167,7 @@ bool ThreadCdrParser::isCallExists(const string &hash) {
     return (res.next() && res.get_s(0).size() > 0);
 }
 
-bool ThreadCdrParser::isCallExists(const string &hash, string dst_route) {
+bool ThreadCdrParser::isUnfinishedCallExists(const string &hash, string dst_route) {
     BDbResult res = db_calls.query("select hash from calls_cdr.cdr_unfinished where hash='" + hash + "' and dst_route='"+dst_route+"' limit 1");
     return (res.next() && res.get_s(0).size() > 0);
 }

@@ -26,8 +26,9 @@ public:
 
     void clear();
 
-    void prepareSaveQueries(map<time_t, stringstream> &queryPerMonth);
+    void prepareSaveQueries(map<time_t, stringstream> &queryPerMonth, vector<string> &querytime);
     void executeSaveQueries(BDb * dbCalls, map<time_t, stringstream> &queryPerMonth);
+    void createIfNotExists (BDb * dbCalls, string qtime);
 
 private:
     bool ready();

@@ -146,7 +146,7 @@ void CallsManager::calls_insert_row(Call * call, stringstream &q) {
     q << ")\n";
 }
 
-void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth) {
+void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth, vector<string> &querytime) {
 
     if (realtimeCallsParts[0].size() == 0) {
         return;
@@ -164,6 +164,10 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth) 
             struct tm timeinfo;
             gmtime_r(&dt_month, &timeinfo);
             strftime(buff, 20, "%Y%m", &timeinfo);
+
+            char query_timestamp[32];
+            strftime(query_timestamp, 32, "%Y-%m-%d", &timeinfo);
+            querytime.push_back(query_timestamp);
 
             stringstream &q = queryPerMonth[dt_month];
             q << "INSERT INTO calls_raw.calls_raw_" + string(buff) + "(" \
@@ -184,6 +188,11 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth) 
         }
 
     }
+}
+
+void CallsManager::createIfNotExists (BDb * dbCalls, string qtime)
+{
+    dbCalls->exec("select create_calls_raw('"+qtime+"'::timestamp without time zone)");
 }
 
 void CallsManager::executeSaveQueries(BDb * dbCalls, map<time_t, stringstream> &queryPerMonth) {

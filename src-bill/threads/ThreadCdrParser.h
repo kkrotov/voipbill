@@ -53,7 +53,7 @@ private:
     void saveUnfinishedCall(const CallData &call);
     void logUnfinishedCall(CallData &call);
     bool isCallExists(const string &hash);
-    bool isCallExists(const string &hash, string dst_route);
+    bool isUnfinishedCallExists(const string &hash, string dst_route);
     void saveCdrFile();
     string getFileNameForParse();
     bool isFileProcessed(const std::string &Filename);
