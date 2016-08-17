@@ -269,6 +269,10 @@ public:
         trunkTrunkRule->findTrunkGroupIds(resultTrunkGroupIds, trunk_id, trace);
     }
 
+    void getAllTrunkGroupRules(vector<TrunkTrunkRule> &resultTrunkGroupRules, int trunk_id) {
+        trunkTrunkRule->findTrunkGroupRules(resultTrunkGroupRules, trunk_id, trace);
+    }
+
     void getAllAutoRoutingTrunks(vector<Trunk *> &resultTrunks) {
         trunk->findAllAutorouting(resultTrunks, trace);
     }
