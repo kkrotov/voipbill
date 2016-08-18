@@ -353,8 +353,8 @@ bool RadiusAuthProcessor::processAutoOutcome(double* pBuyRate, Pricelist** pFirs
     vector<ServiceTrunkOrder> termServiceTrunks;
     getAvailableTermServiceTrunk(termServiceTrunks, origPricelist, origPrice, origSettings);
 
-
-    return processAutoRouteResponse(termServiceTrunks, pBuyRate, pFirstBuyPricelist);
+    double origRub = this->repository.priceToRoubles(origPrice->price, *origPricelist);
+    return processAutoRouteResponse(termServiceTrunks, pBuyRate, pFirstBuyPricelist, origRub);
 }
 
 void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk** origServiceTrunk, Pricelist** origPricelist, PricelistPrice** origPrice, ServiceTrunkSettings** origSettings) {
@@ -471,7 +471,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
     repository.orderTermTrunkSettingsOrderList(termServiceTrunks, time(nullptr));
 }
 
-bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate, Pricelist** pFirstBuyPricelist) {
+bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate, Pricelist** pFirstBuyPricelist, double origRub) {
 
     if (pBuyRate) {
         * pBuyRate = 0;
@@ -506,6 +506,8 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
         }
 
         if (trace != nullptr) {
+            *trace << "INFO|| TERM PRICE: " << trunkOrder.price->price;
+            *trace << ", ORIG PRICE: " << origRub;
             *trace << "INFO||PRICE: " << trunkOrder.price->price;
             *trace << ", TRUNK: " << trunkOrder.trunk->name << " (" << trunkOrder.trunk->id << ")";
             *trace << ", SERVICE TRUNK " << trunkOrder.serviceTrunk->id;
@@ -522,6 +524,10 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
                                << " ( " << trunkOrder.trunkSettings->minimum_minutes * 60 << " seconds )";
                         *trace << ", USED_SECONDS: " << trunkOrder.statsTrunkSettings->used_seconds;
                     }
+                if (trunkOrder.trunkSettings->minimum_margin_type!=SERVICE_TRUNK_SETTINGS_MIN_MARGIN_ABSENT) {
+
+                    *trace << ", MINIMUM_MARGIN_TYPE:" << trunkOrder.trunkSettings->minimum_margin_type << ", MINIMUM_MARGIN:" << trunkOrder.trunkSettings->minimum_margin;
+                }
             }
 
             *trace << "\n";
