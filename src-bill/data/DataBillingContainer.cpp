@@ -125,7 +125,10 @@ void DataBillingContainer::save(BDb * dbCalls) {
 
     {
         lock_guard<Spinlock> guard(lock);
-        calls.prepareSaveQueries(callsQueryPerMonth);
+        vector<string> queryTime;
+        calls.prepareSaveQueries(callsQueryPerMonth, queryTime);
+        for (string qtime : queryTime)
+            calls.createIfNotExists(dbCalls, qtime);
     }
     {
         lock_guard<Spinlock> guard(lock);
