@@ -134,7 +134,7 @@ BDbResult BDb::query(const char * squery) {
 
     int attemps_count = connected() ? 2 : 1;
 
-    string errors;
+    string errors="BDb::query("+string(squery)+"): ";
 
     while (attemps_count-- > 0) {
         try {
