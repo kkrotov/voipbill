@@ -62,7 +62,7 @@ private:
     void processAirpOutcome(Outcome * outcome);
     void getAvailableOrigServiceTrunk(ServiceTrunk** origServiceTrunk, Pricelist** origPricelist, PricelistPrice** origPrice, ServiceTrunkSettings** origSettings);
     void getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks, Pricelist* origPricelist, PricelistPrice* origPrice, ServiceTrunkSettings* origSettings);
-    bool processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate = 0, Pricelist** pFirstBuyPricelist = 0);
+    bool processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate = 0, Pricelist** pFirstBuyPricelist = 0, double origRub=0);
     string analyzeCall(Call &call, std::map <int, std::pair <RejectReason, time_t> > *);
     bool isLowBalance (bool (Client::*lpCheckLimit)(double), RejectReason reason, Client *client, double spentBalanceSum, Call &call, std::map<int, std::pair <RejectReason, time_t> > *);
     void fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double vat_rate);
