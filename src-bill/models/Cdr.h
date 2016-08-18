@@ -75,9 +75,4 @@ struct Cdr {
         trace << "disconnect_cause: " << disconnect_cause << ", ";
         trace << ")";
     }
-
-    bool isCallFinished() {
-
-        return (call_finished[0]=='\0') || (strcasecmp (call_finished, "Yes")==0);
-    }
 };
