@@ -199,10 +199,11 @@ void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trun
 
         vector<ServiceTrunkOrder> trunkSettingsOrderFreeList;
         vector<ServiceTrunkOrder> trunkSettingsOrderPayList;
+        vector<ServiceTrunkOrder> trunkSettingsAccepted(trunkSettingsOrderList);
 
         for (auto order : trunkSettingsOrderList) {
             order.statsTrunkSettings = billingData->statsTrunkSettingsGetCurrent(connect_time, order.account, order.trunkSettings);
-            
+
             if (order.trunkSettings->minimum_minutes > 0) {
                 if (order.statsTrunkSettings->used_seconds < order.trunkSettings->minimum_minutes * 60) {
                     trunkSettingsOrderFreeList.push_back(order);
@@ -233,11 +234,20 @@ void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trun
         sort(trunkSettingsOrderPayList.begin(), trunkSettingsOrderPayList.end(), trunk_settings_order_asc_price(*this));
 
         trunkSettingsOrderList.clear();
+
         for (auto order : trunkSettingsOrderFreeList) {
-            trunkSettingsOrderList.push_back(order);
+            for (auto accepted_order : trunkSettingsAccepted)
+              if(accepted_order.trunkSettings->id == order.trunkSettings->id) {
+                  trunkSettingsOrderList.push_back(order);
+                  break;
+              }
         }
+
         for (auto order : trunkSettingsOrderPayList) {
-            trunkSettingsOrderList.push_back(order);
+            for (auto accepted_order : trunkSettingsAccepted)
+              if(accepted_order.trunkSettings->id == order.trunkSettings->id) {
+                  trunkSettingsOrderList.push_back(order);
+                  break;
+              }
         }
 }
-
