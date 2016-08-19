@@ -192,7 +192,7 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth, 
 
 void CallsManager::createIfNotExists (BDb * dbCalls, string qtime)
 {
-    dbCalls->exec("select create_calls_raw('"+qtime+"'::timestamp without time zone)");
+    dbCalls->query("select create_calls_raw('"+qtime+"'::timestamp without time zone)");
 }
 
 void CallsManager::executeSaveQueries(BDb * dbCalls, map<time_t, stringstream> &queryPerMonth) {
