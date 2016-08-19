@@ -126,8 +126,8 @@ void ThreadCdrParser::logUnfinishedCall(CallData &call) {
     pLogMessage logCall(new LogMessage());
 
     logCall->type = "call";
-    logCall->params["src_number"] = call.src_number;
-    logCall->params["dst_number"] = call.dst_number;
+    logCall->params["src"] = call.src_number;
+    logCall->params["dst"] = call.dst_number;
     logCall->params["dst_replace"] = call.dst_replace;
     logCall->params["redirect_number"] = call.redirect_number;
 
