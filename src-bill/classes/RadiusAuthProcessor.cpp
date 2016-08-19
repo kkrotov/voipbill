@@ -353,7 +353,7 @@ bool RadiusAuthProcessor::processAutoOutcome(double* pBuyRate, Pricelist** pFirs
     vector<ServiceTrunkOrder> termServiceTrunks;
     getAvailableTermServiceTrunk(termServiceTrunks, origPricelist, origPrice, origSettings);
 
-    double origRub = this->repository.priceToRoubles(origPrice->price, *origPricelist);
+    double origRub = (origPrice!= nullptr)? this->repository.priceToRoubles(origPrice->price, *origPricelist):0;
     return processAutoRouteResponse(termServiceTrunks, pBuyRate, pFirstBuyPricelist, origRub);
 }
 
