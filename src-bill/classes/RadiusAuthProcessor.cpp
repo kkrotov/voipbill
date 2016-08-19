@@ -17,7 +17,8 @@ void RadiusAuthProcessor::init() {
 
     origTrunk = repository.getTrunkByName(request->trunkName.c_str());
     if (origTrunk == nullptr) {
-        throw Exception("Udp request validation: trunk not found: " + request->trunkName, "RadiusAuthProcessor::process");
+        throw Exception("Udp request validation: trunk not found: " + request->trunkName,
+                        "RadiusAuthProcessor::process");
     }
 
     aNumber = request->srcNumber;
@@ -25,7 +26,8 @@ void RadiusAuthProcessor::init() {
 
 }
 
-RadiusAuthProcessor::RadiusAuthProcessor(RadiusAuthRequest * request, RadiusAuthResponse *response, pLogMessage &logRequest) {
+RadiusAuthProcessor::RadiusAuthProcessor(RadiusAuthRequest *request, RadiusAuthResponse *response,
+                                         pLogMessage &logRequest) {
     this->request = request;
     this->response = response;
     this->logRequest = logRequest;
@@ -38,7 +40,7 @@ void RadiusAuthProcessor::setTrace(stringstream *trace) {
     repository.trace = trace;
 }
 
-void RadiusAuthProcessor::process(std::map <int, std::pair <RejectReason, time_t> > *o_pAccountIdsBlockedBefore) {
+void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> > *o_pAccountIdsBlockedBefore) {
 
     try {
         init();
@@ -123,7 +125,8 @@ void RadiusAuthProcessor::process(std::map <int, std::pair <RejectReason, time_t
             logRequest->params["balance_realtime"] = callInfo.account->balance + spentBalanceSum;
             if (callInfo.account->hasCreditLimit()) {
                 logRequest->params["credit_limit"] = callInfo.account->credit;
-                logRequest->params["credit_available"] = callInfo.account->balance + callInfo.account->credit + spentBalanceSum;
+                logRequest->params["credit_available"] =
+                        callInfo.account->balance + callInfo.account->credit + spentBalanceSum;
             }
 
             logRequest->params["daily_local"] = sumDay;
@@ -186,11 +189,11 @@ void RadiusAuthProcessor::process(std::map <int, std::pair <RejectReason, time_t
                 return;
             }
         }
-       
-        double buyRate = 0.0;
-        Pricelist* firstBuyPricelist = 0;
 
-        if (processOutcome(outcomeId, & buyRate, & firstBuyPricelist)) {
+        double buyRate = 0.0;
+        Pricelist *firstBuyPricelist = 0;
+
+        if (processOutcome(outcomeId, &buyRate, &firstBuyPricelist)) {
 
             // Логируем себестоимость минуты звонка
             logRequest->params["rate_buy"] = buyRate;
@@ -202,7 +205,7 @@ void RadiusAuthProcessor::process(std::map <int, std::pair <RejectReason, time_t
                 }
 
                 if (callInfo.pricelist && callInfo.pricelist->currency_id[0]) {
-                
+
                     double buyPriceRub = repository.priceToRoubles(buyRate, *firstBuyPricelist);
                     double sellPriceRub = repository.priceToRoubles(call.rate, *callInfo.pricelist);
 
@@ -245,7 +248,8 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
 
     auto routeTable = repository.getRouteTable(routeTableId);
     if (routeTable == nullptr) {
-        throw Exception("Route table #" + lexical_cast<string>(routeTableId) + " not found", "RadiusAuthProcessor::processRouteTable");
+        throw Exception("Route table #" + lexical_cast<string>(routeTableId) + " not found",
+                        "RadiusAuthProcessor::processRouteTable");
     }
 
 
@@ -257,7 +261,7 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
     vector<RouteTableRoute *> routes;
     repository.getAllRouteTableRoutes(routes, routeTable->id);
 
-    for (RouteTableRoute * route : routes) {
+    for (RouteTableRoute *route : routes) {
 
         if (route->a_number_id && !filterByNumber(route->a_number_id, aNumber)) {
             continue;
@@ -283,18 +287,19 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
 }
 
 // Возвращает true, если в pBuyRate возвращается себестоимость одной минуты звонка на транк.
-bool RadiusAuthProcessor::processOutcome(int outcomeId, double* pBuyRate, Pricelist** pFirstBuyPricelist) {
+bool RadiusAuthProcessor::processOutcome(int outcomeId, double *pBuyRate, Pricelist **pFirstBuyPricelist) {
     if (pBuyRate) {
-        * pBuyRate = 0;
+        *pBuyRate = 0;
     }
 
     if (pFirstBuyPricelist) {
-        * pFirstBuyPricelist = nullptr;
+        *pFirstBuyPricelist = nullptr;
     }
 
     auto outcome = repository.getOutcome(outcomeId);
     if (outcome == nullptr) {
-        throw Exception("Outcome #" + lexical_cast<string>(outcomeId) + " not found", "RadiusAuthProcessor::processOutcome");
+        throw Exception("Outcome #" + lexical_cast<string>(outcomeId) + " not found",
+                        "RadiusAuthProcessor::processOutcome");
     }
 
     if (trace != nullptr) {
@@ -328,26 +333,27 @@ bool RadiusAuthProcessor::processOutcome(int outcomeId, double* pBuyRate, Pricel
 
     }
 
-    throw Exception("Unexpected type of outcome #" + lexical_cast<string>(outcome->id), "RadiusAuthProcessor::processOutcome");
+    throw Exception("Unexpected type of outcome #" + lexical_cast<string>(outcome->id),
+                    "RadiusAuthProcessor::processOutcome");
 }
 
 // Возвращает true, если есть хотя бы один транк,
 // а в pBuyRate возвращается себестоимость одной минуты звонка на этот транк.
-bool RadiusAuthProcessor::processAutoOutcome(double* pBuyRate, Pricelist** pFirstBuyPricelist) {
+bool RadiusAuthProcessor::processAutoOutcome(double *pBuyRate, Pricelist **pFirstBuyPricelist) {
 
     if (pBuyRate) {
-        * pBuyRate = 0;
+        *pBuyRate = 0;
     }
 
     if (pFirstBuyPricelist) {
-        * pFirstBuyPricelist = nullptr;
+        *pFirstBuyPricelist = nullptr;
     }
 
-    ServiceTrunk* origServiceTrunk = nullptr;
-    Pricelist* origPricelist = nullptr;
-    PricelistPrice* origPrice = nullptr;
-    ServiceTrunkSettings* origSettings = nullptr;
-    getAvailableOrigServiceTrunk(& origServiceTrunk, & origPricelist, & origPrice, & origSettings);
+    ServiceTrunk *origServiceTrunk = nullptr;
+    Pricelist *origPricelist = nullptr;
+    PricelistPrice *origPrice = nullptr;
+    ServiceTrunkSettings *origSettings = nullptr;
+    getAvailableOrigServiceTrunk(&origServiceTrunk, &origPricelist, &origPrice, &origSettings);
 
 
     vector<ServiceTrunkOrder> termServiceTrunks;
@@ -357,76 +363,89 @@ bool RadiusAuthProcessor::processAutoOutcome(double* pBuyRate, Pricelist** pFirs
     return processAutoRouteResponse(termServiceTrunks, pBuyRate, pFirstBuyPricelist, origRub);
 }
 
-void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk** origServiceTrunk, Pricelist** origPricelist, PricelistPrice** origPrice, ServiceTrunkSettings** origSettings) {
+void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk **origServiceTrunk, Pricelist **origPricelist,
+                                                       PricelistPrice **origPrice,
+                                                       ServiceTrunkSettings **origSettings) {
 
     vector<ServiceTrunkOrder> trunkSettingsOrderList;
 
-    repository.getTrunkSettingsOrderList(trunkSettingsOrderList, origTrunk, atoll(aNumber.c_str()), atoll(bNumber.c_str()), SERVICE_TRUNK_SETTINGS_ORIGINATION);
+    repository.getTrunkSettingsOrderList(trunkSettingsOrderList, origTrunk, atoll(aNumber.c_str()),
+                                         atoll(bNumber.c_str()), SERVICE_TRUNK_SETTINGS_ORIGINATION);
 
     repository.orderOrigTrunkSettingsOrderList(trunkSettingsOrderList);
 
     if (trunkSettingsOrderList.size() > 0) {
         auto order = trunkSettingsOrderList.at(0);
-        * origServiceTrunk = order.serviceTrunk;
-        * origPricelist = order.pricelist;
-        * origPrice = order.price;
-        * origSettings = order.trunkSettings;
+        *origServiceTrunk = order.serviceTrunk;
+        *origPricelist = order.pricelist;
+        *origPrice = order.price;
+        *origSettings = order.trunkSettings;
     }
 }
 
-void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks, Pricelist* origPricelist, PricelistPrice* origPrice, ServiceTrunkSettings* origSettings) {
+void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks,
+                                                       Pricelist *origPricelist, PricelistPrice *origPrice,
+                                                       ServiceTrunkSettings *origSettings) {
     vector<Trunk *> termTrunks;
     repository.getAllAutoRoutingTrunks(termTrunks);
 
     for (auto termTrunk : termTrunks) {
         if (!autoTrunkFilterSrcTrunk(termTrunk)) {
             if (trace != nullptr) {
-                *trace << "INFO|TERM SERVICE TRUNK DECLINE|BY TRUNK FILTER, " << termTrunk->name << " (" << termTrunk->id << ")" << "\n";
+                *trace << "INFO|TERM SERVICE TRUNK DECLINE|BY TRUNK FILTER, " << termTrunk->name << " (" <<
+                termTrunk->id << ")" << "\n";
             }
             continue;
         }
         if (!autoTrunkFilterSrcNumber(termTrunk)) {
             if (trace != nullptr) {
-                *trace << "INFO|TERM SERVICE TRUNK DECLINE|BY SRC NUMBER FILTER, " << termTrunk->name << " (" << termTrunk->id << ")" << "\n";
+                *trace << "INFO|TERM SERVICE TRUNK DECLINE|BY SRC NUMBER FILTER, " << termTrunk->name << " (" <<
+                termTrunk->id << ")" << "\n";
             }
             continue;
         }
         if (!autoTrunkFilterDstNumber(termTrunk)) {
             if (trace != nullptr) {
-                *trace << "INFO|TERM SERVICE TRUNK DECLINE|BY DST NUMBER FILTER, " << termTrunk->name << " (" << termTrunk->id << ")" << "\n";
+                *trace << "INFO|TERM SERVICE TRUNK DECLINE|BY DST NUMBER FILTER, " << termTrunk->name << " (" <<
+                termTrunk->id << ")" << "\n";
             }
             continue;
         }
 
         if (origTrunk->orig_redirect_number && request->redirectNumber.size() > 0 && !termTrunk->term_redirect_number) {
             if (trace != nullptr) {
-                *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE NOT SUPPORT REDIRECTING NUMBER, " << termTrunk->name << " (" << termTrunk->id << ")" << "\n";
+                *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE NOT SUPPORT REDIRECTING NUMBER, " << termTrunk->name <<
+                " (" << termTrunk->id << ")" << "\n";
             }
             continue;
         }
 
         vector<ServiceTrunkOrder> trunkSettingsOrderList;
 
-        repository.getTrunkSettingsOrderList(trunkSettingsOrderList, termTrunk, atoll(aNumber.c_str()), atoll(bNumber.c_str()), SERVICE_TRUNK_SETTINGS_TERMINATION);
+        repository.getTrunkSettingsOrderList(trunkSettingsOrderList, termTrunk, atoll(aNumber.c_str()),
+                                             atoll(bNumber.c_str()), SERVICE_TRUNK_SETTINGS_TERMINATION);
 
         repository.orderTermTrunkSettingsOrderList(trunkSettingsOrderList, time(nullptr));
 
         for (auto termOrder : trunkSettingsOrderList) {
             if (
-                server->min_price_for_autorouting > 0
-                && termOrder.price && termOrder.pricelist
-                && this->repository.priceToRoubles(termOrder.price->price, *termOrder.pricelist) > server->min_price_for_autorouting
-                && account != nullptr
-                && !account->anti_fraud_disabled)
-            {
+                    server->min_price_for_autorouting > 0
+                    && termOrder.price && termOrder.pricelist
+                    && this->repository.priceToRoubles(termOrder.price->price, *termOrder.pricelist) >
+                       server->min_price_for_autorouting
+                    && account != nullptr
+                    && !account->anti_fraud_disabled) {
                 if (trace != nullptr) {
-                    *trace << "INFO|TERM TRUNK SETTINGS DECLINE|CAUSE ANTI FRAUD: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << termOrder.serviceTrunk->id << "TRUNK SETTINGS ID: "  << termOrder.trunkSettings->id << " / " << termOrder.trunkSettings->order << "\n";
+                    *trace << "INFO|TERM TRUNK SETTINGS DECLINE|CAUSE ANTI FRAUD: " << termTrunk->name << " (" <<
+                    termTrunk->id << ")" << ", SERVICE TRUNK ID: " << termOrder.serviceTrunk->id <<
+                    "TRUNK SETTINGS ID: " << termOrder.trunkSettings->id << " / " << termOrder.trunkSettings->order <<
+                    "\n";
                 }
             } else {
                 if (origSettings && origSettings->minimum_margin_type != SERVICE_TRUNK_SETTINGS_MIN_MARGIN_ABSENT
                     && termOrder.price && termOrder.pricelist && abs(termOrder.price->price) > 0.000001
                     && origPrice && origPricelist && abs(origPrice->price) > 0.000001) {
- 
+
                     if (origSettings->minimum_margin_type == SERVICE_TRUNK_SETTINGS_MIN_MARGIN_PERCENT
                         || origSettings->minimum_margin_type == SERVICE_TRUNK_SETTINGS_MIN_MARGIN_VALUE) {
 
@@ -439,14 +458,17 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
 
                             // Под маржой в процентах здесь понимается НАЦЕНКА
                             // Под маржой в абс. единицах - ПРИБЫЛЬ
-                            double trunkMargin = origSettings->minimum_margin_type == SERVICE_TRUNK_SETTINGS_MIN_MARGIN_VALUE
-                                ? profit
-                                : profit / termRub;
+                            double trunkMargin =
+                                    origSettings->minimum_margin_type == SERVICE_TRUNK_SETTINGS_MIN_MARGIN_VALUE
+                                    ? profit
+                                    : profit / termRub;
 
                             if (trunkMargin < origSettings->minimum_margin) {
                                 if (trace != nullptr) {
-                                    *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE MIN MARGIN: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << termOrder.serviceTrunk->id
-                                      << ", MIN MARGIN: " << origSettings->minimum_margin << ", TRUNK MARGIN: " << trunkMargin << "\n";
+                                    *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE MIN MARGIN: " << termTrunk->name <<
+                                    " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: " << termOrder.serviceTrunk->id
+                                    << ", MIN MARGIN: " << origSettings->minimum_margin << ", TRUNK MARGIN: " <<
+                                    trunkMargin << "\n";
                                 }
 
                                 continue;
@@ -454,15 +476,19 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
                         }
                     } else {
                         if (trace != nullptr) {
-                            *trace << "DEBUG|TERM SERVICE TRUNK ACCEPT|UNEXPECTED MIN MARGIN TYPE: " << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "
-                                << termOrder.serviceTrunk->id << ", STRANGE MIN MARGIN TYPE: " << origSettings->minimum_margin_type << "\n";
+                            *trace << "DEBUG|TERM SERVICE TRUNK ACCEPT|UNEXPECTED MIN MARGIN TYPE: " <<
+                            termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "
+                            << termOrder.serviceTrunk->id << ", STRANGE MIN MARGIN TYPE: " <<
+                            origSettings->minimum_margin_type << "\n";
                         }
                     }
                 }
 
                 termServiceTrunks.push_back(termOrder);
                 if (trace != nullptr) {
-                    *trace << "INFO|TERM TRUNK SETTINGS ACCEPT|" << termTrunk->name << " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: "  << termOrder.serviceTrunk->id << "TRUNK SETTINGS ID: "  << termOrder.trunkSettings->id << " / " << termOrder.trunkSettings->order << "\n";
+                    *trace << "INFO|TERM TRUNK SETTINGS ACCEPT|" << termTrunk->name << " (" << termTrunk->id << ")" <<
+                    ", SERVICE TRUNK ID: " << termOrder.serviceTrunk->id << "TRUNK SETTINGS ID: " <<
+                    termOrder.trunkSettings->id << " / " << termOrder.trunkSettings->order << "\n";
                 }
             }
         }
@@ -471,14 +497,15 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
     repository.orderTermTrunkSettingsOrderList(termServiceTrunks, time(nullptr));
 }
 
-bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double* pBuyRate, Pricelist** pFirstBuyPricelist, double origRub) {
+bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double *pBuyRate,
+                                                   Pricelist **pFirstBuyPricelist, double origRub) {
 
     if (pBuyRate) {
-        * pBuyRate = 0;
+        *pBuyRate = 0;
     }
 
     if (pFirstBuyPricelist) {
-        * pFirstBuyPricelist = nullptr;
+        *pFirstBuyPricelist = nullptr;
     }
 
     bool hasRateForATrunk = false;
@@ -497,11 +524,11 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
         if (!hasRateForATrunk) {
             hasRateForATrunk = true;
             if (pBuyRate) {
-                * pBuyRate = trunkOrder.price->price;
+                *pBuyRate = trunkOrder.price->price;
             }
 
             if (pFirstBuyPricelist) {
-                * pFirstBuyPricelist = trunkOrder.pricelist;
+                *pFirstBuyPricelist = trunkOrder.pricelist;
             }
         }
 
@@ -514,19 +541,20 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
             *trace << ", PRICELIST: " << trunkOrder.pricelist->id;
             *trace << ", PRICELIST CURRENCY: " << trunkOrder.pricelist->currency_id;
             *trace << ", PREFIX: " << trunkOrder.price->prefix;
-            if(trunkOrder.trunkSettings != nullptr && trunkOrder.statsTrunkSettings != nullptr ) {
-                    if(trunkOrder.trunkSettings->minimum_cost>0) {
-                        *trace << ", MINIMUM_COST: " << trunkOrder.trunkSettings->minimum_cost;
-                        *trace << ", USED_CREDIT: " << trunkOrder.statsTrunkSettings->used_credit;
-                    }
-                    if(trunkOrder.trunkSettings->minimum_minutes>0) {
-                        *trace << ", MINIMUM_MINUTES: " << trunkOrder.trunkSettings->minimum_minutes
-                               << " ( " << trunkOrder.trunkSettings->minimum_minutes * 60 << " seconds )";
-                        *trace << ", USED_SECONDS: " << trunkOrder.statsTrunkSettings->used_seconds;
-                    }
-                if (trunkOrder.trunkSettings->minimum_margin_type!=SERVICE_TRUNK_SETTINGS_MIN_MARGIN_ABSENT) {
+            if (trunkOrder.trunkSettings != nullptr && trunkOrder.statsTrunkSettings != nullptr) {
+                if (trunkOrder.trunkSettings->minimum_cost > 0) {
+                    *trace << ", MINIMUM_COST: " << trunkOrder.trunkSettings->minimum_cost;
+                    *trace << ", USED_CREDIT: " << trunkOrder.statsTrunkSettings->used_credit;
+                }
+                if (trunkOrder.trunkSettings->minimum_minutes > 0) {
+                    *trace << ", MINIMUM_MINUTES: " << trunkOrder.trunkSettings->minimum_minutes
+                    << " ( " << trunkOrder.trunkSettings->minimum_minutes * 60 << " seconds )";
+                    *trace << ", USED_SECONDS: " << trunkOrder.statsTrunkSettings->used_seconds;
+                }
+                if (trunkOrder.trunkSettings->minimum_margin_type != SERVICE_TRUNK_SETTINGS_MIN_MARGIN_ABSENT) {
 
-                    *trace << ", MINIMUM_MARGIN_TYPE:" << trunkOrder.trunkSettings->minimum_margin_type << ", MINIMUM_MARGIN:" << trunkOrder.trunkSettings->minimum_margin;
+                    *trace << ", MINIMUM_MARGIN_TYPE:" << trunkOrder.trunkSettings->minimum_margin_type <<
+                    ", MINIMUM_MARGIN:" << trunkOrder.trunkSettings->minimum_margin;
                 }
             }
 
@@ -560,10 +588,11 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
     return hasRateForATrunk;
 }
 
-void RadiusAuthProcessor::processRouteCaseOutcome(Outcome * outcome) {
+void RadiusAuthProcessor::processRouteCaseOutcome(Outcome *outcome) {
     auto routeCase = repository.getRouteCase(outcome->route_case_id);
     if (routeCase == nullptr) {
-        throw Exception("Route case #" + lexical_cast<string>(outcome->route_case_id) + " not found", "RadiusAuthProcessor::processRouteCaseOutcome");
+        throw Exception("Route case #" + lexical_cast<string>(outcome->route_case_id) + " not found",
+                        "RadiusAuthProcessor::processRouteCaseOutcome");
     }
 
     response->setRouteCase(routeCase->name);
@@ -576,19 +605,21 @@ void RadiusAuthProcessor::processRouteCaseOutcome(Outcome * outcome) {
     }
 }
 
-void RadiusAuthProcessor::processReleaseReasonOutcome(Outcome * outcome) {
+void RadiusAuthProcessor::processReleaseReasonOutcome(Outcome *outcome) {
     auto releaseReason = repository.getReleaseReason(outcome->release_reason_id);
     if (releaseReason == nullptr) {
-        throw Exception("Release reason #" + lexical_cast<string>(outcome->release_reason_id) + " not found", "RadiusAuthProcessor::processReleaseReasonOutcome");
+        throw Exception("Release reason #" + lexical_cast<string>(outcome->release_reason_id) + " not found",
+                        "RadiusAuthProcessor::processReleaseReasonOutcome");
     }
 
     response->setReleaseReason(releaseReason->name);
 }
 
-void RadiusAuthProcessor::processAirpOutcome(Outcome * outcome) {
+void RadiusAuthProcessor::processAirpOutcome(Outcome *outcome) {
     auto airp = repository.getAirp(outcome->airp_id);
     if (airp == nullptr) {
-        throw Exception("Airp #" + lexical_cast<string>(outcome->airp_id) + " not found", "RadiusAuthProcessor::processAirpOutcome");
+        throw Exception("Airp #" + lexical_cast<string>(outcome->airp_id) + " not found",
+                        "RadiusAuthProcessor::processAirpOutcome");
     }
 
     response->setAirp(airp->name);
@@ -604,7 +635,8 @@ void RadiusAuthProcessor::processAirpOutcome(Outcome * outcome) {
 bool RadiusAuthProcessor::filterByNumber(const int numberId, string strNumber) {
     auto number = repository.getNumber(numberId);
     if (number == nullptr) {
-        throw Exception("Number #" + lexical_cast<string>(numberId) + " not found", "RadiusAuthProcessor::filterByNumber");
+        throw Exception("Number #" + lexical_cast<string>(numberId) + " not found",
+                        "RadiusAuthProcessor::filterByNumber");
     }
 
     auto prefixlistIds = number->getPrefixlistIds();
@@ -612,27 +644,32 @@ bool RadiusAuthProcessor::filterByNumber(const int numberId, string strNumber) {
 
         auto prefixlist = repository.getPrefixlist(*it);
         if (prefixlist == nullptr) {
-            throw Exception("Prefixlist #" + lexical_cast<string>(*it) + " not found", "RadiusAuthProcessor::filterByNumber");
+            throw Exception("Prefixlist #" + lexical_cast<string>(*it) + " not found",
+                            "RadiusAuthProcessor::filterByNumber");
         }
 
         auto prefix = repository.getPrefixlistPrefix(prefixlist->id, strNumber.c_str());
         if (prefix) {
             if (trace != nullptr) {
-                *trace << "DEBUG|PREFIXLIST MATCHED|" << strNumber  << " in "<< prefixlist->name << " (" << prefixlist->id << ")" << "\n";
+                *trace << "DEBUG|PREFIXLIST MATCHED|" << strNumber << " in " << prefixlist->name << " (" <<
+                prefixlist->id << ")" << "\n";
             }
             if (trace != nullptr) {
-                *trace << "INFO|NUMBER MATCHED|" << strNumber  << " in "<< number->name << " (" << numberId << ")" << "\n";
+                *trace << "INFO|NUMBER MATCHED|" << strNumber << " in " << number->name << " (" << numberId << ")" <<
+                "\n";
             }
             return true;
         }
 
         if (trace != nullptr) {
-            *trace << "DEBUG|PREFIXLIST NOT MATCHED|" << strNumber  << " not in "<< prefixlist->name << " (" << prefixlist->id << ")" << "\n";
+            *trace << "DEBUG|PREFIXLIST NOT MATCHED|" << strNumber << " not in " << prefixlist->name << " (" <<
+            prefixlist->id << ")" << "\n";
         }
     }
 
     if (trace != nullptr) {
-        *trace << "INFO|NUMBER NOT MATCHED|" << strNumber  << " not in "<< number->name << " (" << numberId << ")" << "\n";
+        *trace << "INFO|NUMBER NOT MATCHED|" << strNumber << " not in " << number->name << " (" << numberId << ")" <<
+        "\n";
     }
 
     return false;
@@ -651,7 +688,7 @@ void RadiusAuthProcessor::processLineWithoutNumber() {
     if (!origTrunk->our_trunk
         || !origTrunk->auth_by_number
         || !server->calling_station_id_for_line_without_number[0] != 0
-    ) {
+            ) {
         return;
     }
 
@@ -677,18 +714,20 @@ void RadiusAuthProcessor::processLineWithoutNumber() {
     }
 }
 
-bool RadiusAuthProcessor::autoTrunkFilterSrcTrunk(Trunk * termTrunk) {
+bool RadiusAuthProcessor::autoTrunkFilterSrcTrunk(Trunk *termTrunk) {
     vector<TrunkTrunkRule> resultTrunkGroupRules;
     repository.getAllTrunkGroupRules(resultTrunkGroupRules, termTrunk->id);
 
     if (termTrunk->source_trunk_rule_default_allowed) {
-        for (int i=0; i< resultTrunkGroupRules.size(); i++) {
+        for (int i = 0; i < resultTrunkGroupRules.size(); i++) {
 
-	    int num_a = resultTrunkGroupRules[i].number_id_filter_a; bool f_a = true;
-	    int num_b = resultTrunkGroupRules[i].number_id_filter_b; bool f_b = true;
-	    
-	    if (num_a>0) f_a = filterByNumber(resultTrunkGroupRules[i].number_id_filter_a, aNumber);
-	    if (num_b>0) f_b = filterByNumber(resultTrunkGroupRules[i].number_id_filter_b, bNumber);
+            int num_a = resultTrunkGroupRules[i].number_id_filter_a;
+            bool f_a = true;
+            int num_b = resultTrunkGroupRules[i].number_id_filter_b;
+            bool f_b = true;
+
+            if (num_a > 0) f_a = filterByNumber(resultTrunkGroupRules[i].number_id_filter_a, aNumber);
+            if (num_b > 0) f_b = filterByNumber(resultTrunkGroupRules[i].number_id_filter_b, bNumber);
 
             if (f_a && f_b && matchTrunkGroup(resultTrunkGroupRules[i].trunk_group_id, origTrunk->id)) {
                 return false;
@@ -696,15 +735,17 @@ bool RadiusAuthProcessor::autoTrunkFilterSrcTrunk(Trunk * termTrunk) {
         }
         return true;
     } else {
-        for (int i=0; i< resultTrunkGroupRules.size(); i++) {
+        for (int i = 0; i < resultTrunkGroupRules.size(); i++) {
 
-	    int num_a = resultTrunkGroupRules[i].number_id_filter_a; bool f_a = true;
-	    int num_b = resultTrunkGroupRules[i].number_id_filter_b; bool f_b = true;
-	    
-	    if (num_a>0) f_a = filterByNumber(resultTrunkGroupRules[i].number_id_filter_a, aNumber);
-	    if (num_b>0) f_b = filterByNumber(resultTrunkGroupRules[i].number_id_filter_b, bNumber);
+            int num_a = resultTrunkGroupRules[i].number_id_filter_a;
+            bool f_a = true;
+            int num_b = resultTrunkGroupRules[i].number_id_filter_b;
+            bool f_b = true;
 
-            if (f_a && f_b &&  matchTrunkGroup(resultTrunkGroupRules[i].trunk_group_id, origTrunk->id)) {
+            if (num_a > 0) f_a = filterByNumber(resultTrunkGroupRules[i].number_id_filter_a, aNumber);
+            if (num_b > 0) f_b = filterByNumber(resultTrunkGroupRules[i].number_id_filter_b, bNumber);
+
+            if (f_a && f_b && matchTrunkGroup(resultTrunkGroupRules[i].trunk_group_id, origTrunk->id)) {
                 return true;
             }
         }
@@ -712,18 +753,18 @@ bool RadiusAuthProcessor::autoTrunkFilterSrcTrunk(Trunk * termTrunk) {
     }
 }
 
-bool RadiusAuthProcessor::autoTrunkFilterSrcNumber(Trunk * termTrunk) {
+bool RadiusAuthProcessor::autoTrunkFilterSrcNumber(Trunk *termTrunk) {
     vector<TrunkRule *> rules;
     repository.getAllTrunkRules(rules, termTrunk->id, false);
     if (termTrunk->source_rule_default_allowed) {
-        for (TrunkRule * rule : rules) {
+        for (TrunkRule *rule : rules) {
             if (matchPrefixlist(rule->prefixlist_id, aNumber)) {
                 return false;
             }
         }
         return true;
     } else {
-        for (TrunkRule * rule : rules) {
+        for (TrunkRule *rule : rules) {
             if (matchPrefixlist(rule->prefixlist_id, aNumber)) {
                 return true;
             }
@@ -732,18 +773,18 @@ bool RadiusAuthProcessor::autoTrunkFilterSrcNumber(Trunk * termTrunk) {
     }
 }
 
-bool RadiusAuthProcessor::autoTrunkFilterDstNumber(Trunk * termTrunk) {
+bool RadiusAuthProcessor::autoTrunkFilterDstNumber(Trunk *termTrunk) {
     vector<TrunkRule *> rules;
     repository.getAllTrunkRules(rules, termTrunk->id, true);
     if (termTrunk->destination_rule_default_allowed) {
-        for (TrunkRule * rule : rules) {
+        for (TrunkRule *rule : rules) {
             if (matchPrefixlist(rule->prefixlist_id, bNumber)) {
                 return false;
             }
         }
         return true;
     } else {
-        for (TrunkRule * rule : rules) {
+        for (TrunkRule *rule : rules) {
             if (matchPrefixlist(rule->prefixlist_id, bNumber)) {
                 return true;
             }
@@ -756,7 +797,8 @@ bool RadiusAuthProcessor::matchTrunkGroup(const int trunkGroupId, const int matc
 
     auto trunkGroup = repository.getTrunkGroup(trunkGroupId);
     if (trunkGroup == nullptr) {
-        throw Exception("TrunkGroup #" + lexical_cast<string>(trunkGroupId) + " not found", "RadiusAuthProcessor::matchTrunkGroup");
+        throw Exception("TrunkGroup #" + lexical_cast<string>(trunkGroupId) + " not found",
+                        "RadiusAuthProcessor::matchTrunkGroup");
     }
 
     vector<int> trunkIds;
@@ -764,7 +806,8 @@ bool RadiusAuthProcessor::matchTrunkGroup(const int trunkGroupId, const int matc
     for (int trunkId : trunkIds) {
         if (trunkId == matchTrunkId) {
             if (trace != nullptr) {
-                *trace << "DEBUG|TRUNK GROUP MATCHED|" << trunkGroup->name << "(" << trunkGroup->id << "): " << matchTrunkId << " in ";
+                *trace << "DEBUG|TRUNK GROUP MATCHED|" << trunkGroup->name << "(" << trunkGroup->id << "): " <<
+                matchTrunkId << " in ";
                 for (int tmpId : trunkIds) *trace << tmpId << ",";
                 *trace << "\n";
             }
@@ -773,7 +816,8 @@ bool RadiusAuthProcessor::matchTrunkGroup(const int trunkGroupId, const int matc
     }
 
     if (trace != nullptr) {
-        *trace << "DEBUG|TRUNK GROUP NOT MATCHED|" << trunkGroup->name << "(" << trunkGroup->id << "): " << matchTrunkId << " not in ";
+        *trace << "DEBUG|TRUNK GROUP NOT MATCHED|" << trunkGroup->name << "(" << trunkGroup->id << "): " <<
+        matchTrunkId << " not in ";
         for (int tmpId : trunkIds) *trace << tmpId << ",";
         *trace << "\n";
     }
@@ -783,14 +827,16 @@ bool RadiusAuthProcessor::matchTrunkGroup(const int trunkGroupId, const int matc
 bool RadiusAuthProcessor::matchPrefixlist(const int prefixlistId, string strNumber) {
     auto prefixlist = repository.getPrefixlist(prefixlistId);
     if (prefixlist == nullptr) {
-        throw Exception("Prefixlist #" + lexical_cast<string>(prefixlistId) + " not found", "RadiusAuthProcessor::matchPrefixlist");
+        throw Exception("Prefixlist #" + lexical_cast<string>(prefixlistId) + " not found",
+                        "RadiusAuthProcessor::matchPrefixlist");
     }
 
     auto prefix = repository.getPrefixlistPrefix(prefixlist->id, strNumber.c_str());
     return prefix != nullptr;
 }
 
-string RadiusAuthProcessor::analyzeCall(Call &call, std::map <int, std::pair <RejectReason, time_t> >  *o_pAccountIdsBlockedBefore) {
+string RadiusAuthProcessor::analyzeCall(Call &call,
+                                        std::map<int, std::pair<RejectReason, time_t> > *o_pAccountIdsBlockedBefore) {
 
     if (call.account_id == 0) {
         return "reject";
@@ -801,10 +847,10 @@ string RadiusAuthProcessor::analyzeCall(Call &call, std::map <int, std::pair <Re
         return "reject";
     }
 
-    if (o_pAccountIdsBlockedBefore->count(call.account_id) > 0) { 
+    if (o_pAccountIdsBlockedBefore->count(call.account_id) > 0) {
 
         // какой-то из параллельных звонков уже сделал баланс отрицательным
-        std::pair <RejectReason, time_t> block = (*o_pAccountIdsBlockedBefore)[call.account_id];
+        std::pair<RejectReason, time_t> block = (*o_pAccountIdsBlockedBefore)[call.account_id];
         return block.first == REASON_NO_BALANCE ? "low_balance" : "voip_disabled";
     }
 
@@ -826,16 +872,18 @@ string RadiusAuthProcessor::analyzeCall(Call &call, std::map <int, std::pair <Re
 
     if (call.trunk_service_id != 0) {
 
-        if (isLowBalance (&Client::isConsumedCreditLimit, REASON_NO_BALANCE, client, spentBalanceSum, call, o_pAccountIdsBlockedBefore)) {
+        if (isLowBalance(&Client::isConsumedCreditLimit, REASON_NO_BALANCE, client, spentBalanceSum, call,
+                         o_pAccountIdsBlockedBefore)) {
 
             // не можем говорить ни секунды
             return "low_balance";
         }
 
     } else if (call.number_service_id != 0 && call.orig) {
-        
+
         // Блокировка МГМН если превышен лимит кредита
-        if (isLowBalance (&Client::isConsumedCreditLimit, REASON_NO_BALANCE, client, spentBalanceSum, call, o_pAccountIdsBlockedBefore)) {
+        if (isLowBalance(&Client::isConsumedCreditLimit, REASON_NO_BALANCE, client, spentBalanceSum, call,
+                         o_pAccountIdsBlockedBefore)) {
             // Если звонок платный
             if (abs(call.cost) > 0.000001) {
                 return "low_balance";
@@ -843,7 +891,9 @@ string RadiusAuthProcessor::analyzeCall(Call &call, std::map <int, std::pair <Re
         }
 
         // Блокировка МГМН если превышен дневной лимит
-        if (!call.isLocal() && isLowBalance(&Client::isConsumedDailyLimit, REASON_DAILY_LIMIT, client, spentDaySum, call, o_pAccountIdsBlockedBefore)) {
+        if (!call.isLocal() &&
+            isLowBalance(&Client::isConsumedDailyLimit, REASON_DAILY_LIMIT, client, spentDaySum, call,
+                         o_pAccountIdsBlockedBefore)) {
             return "voip_disabled";
         }
 
@@ -861,10 +911,11 @@ string RadiusAuthProcessor::analyzeCall(Call &call, std::map <int, std::pair <Re
     return "accept";
 }
 
-bool RadiusAuthProcessor::isLowBalance (bool (Client::*checkLimit)(double), RejectReason reason, Client *client, double spentBalanceSum, Call &call, std::map <int, std::pair <RejectReason, time_t> > *o_pAccountIdsBlockedBefore)
-{
+bool RadiusAuthProcessor::isLowBalance(bool (Client::*checkLimit)(double), RejectReason reason, Client *client,
+                                       double spentBalanceSum, Call &call,
+                                       std::map<int, std::pair<RejectReason, time_t> > *o_pAccountIdsBlockedBefore) {
     if ((client->*checkLimit)(spentBalanceSum)) {
-           
+
         if ((client->*checkLimit)(spentBalanceSum - call.cost)) {
 
             // не можем говорить ни секунды
@@ -879,9 +930,10 @@ bool RadiusAuthProcessor::isLowBalance (bool (Client::*checkLimit)(double), Reje
     return false;
 }
 
-void RadiusAuthProcessor::fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double vat_rate) {
+void RadiusAuthProcessor::fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum,
+                                              double vat_rate) {
 
-    GlobalCounters * globalCounter = nullptr;
+    GlobalCounters *globalCounter = nullptr;
     if (repository.data->globalCounters.ready()) {
         globalCounter = repository.data->globalCounters.get()->find(accountId);
     }

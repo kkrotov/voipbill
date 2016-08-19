@@ -132,7 +132,8 @@ class Sync(Daemon):
                                     case c.price_include_vat when true then 't' else 'f' end,
                                     case c.is_blocked when true then 't' else 'f' end,
                                     c.timezone_offset,
-                                    case c.anti_fraud_disabled when true then 't' else 'f' end
+                                    case c.anti_fraud_disabled when true then 't' else 'f' end,
+                                    c.account_version
                                 from z_sync_postgres z left join clients c on z.tid=c.id
                                 left join client_contract cc on cc.id=c.contract_id
                                 where z.tbase='"""+tbase+"' and z.tname='clients' limit "+str(partsize))
@@ -144,7 +145,7 @@ class Sync(Daemon):
             if r[2] == None:
                 todel.append( (r[1],) )
             else:
-                toins.append( (r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11],r[12],r[13]) )
+                toins.append( (r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11],r[12],r[13],r[14]) )
 
         if len(tofix) == 0:
             return 0
@@ -152,7 +153,7 @@ class Sync(Daemon):
         cur = self.db.cursor();
         cur.execute('BEGIN')
         if len(toins) > 0:
-            cur.executemany("INSERT INTO billing.clients(id, voip_limit_month, voip_limit_day, voip_disabled, balance, credit,amount_date,last_payed_month,organization_id,price_include_vat,is_blocked,timezone_offset,anti_fraud_disabled)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", toins)
+            cur.executemany("INSERT INTO billing.clients(id, voip_limit_month, voip_limit_day, voip_disabled, balance, credit,amount_date,last_payed_month,organization_id,price_include_vat,is_blocked,timezone_offset,anti_fraud_disabled,account_version)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", toins)
         if len(todel) > 0:
             cur.executemany("delete from billing.clients where id=%s", todel)
 
