@@ -506,8 +506,6 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
         }
 
         if (trace != nullptr) {
-            *trace << "INFO|| TERM PRICE: " << trunkOrder.price->price;
-            *trace << ", ORIG PRICE: " << origRub << "\n";
             *trace << "INFO||PRICE: " << trunkOrder.price->price;
             *trace << ", TRUNK: " << trunkOrder.trunk->name << " (" << trunkOrder.trunk->id << ")";
             *trace << ", SERVICE TRUNK " << trunkOrder.serviceTrunk->id;
@@ -529,7 +527,8 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
                     *trace << ", MINIMUM_MARGIN_TYPE:" << trunkOrder.trunkSettings->minimum_margin_type << ", MINIMUM_MARGIN:" << trunkOrder.trunkSettings->minimum_margin;
                 }
             }
-
+            *trace << ", TERM PRICE: " << trunkOrder.price->price;
+            *trace << ", ORIG PRICE: " << origRub;
             *trace << "\n";
         }
     }
