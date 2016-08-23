@@ -321,7 +321,7 @@ void Billing::calc(bool realtimePurpose) {
         if (cdr == nullptr) {
             break;
         }
-
+/*
         // Не обсчитываем и не пишем в статистику звонки
         // с пустой длительностью и нетипичным Release Reason'ом:
         if (cdr->session_time < 1) {
@@ -339,7 +339,7 @@ void Billing::calc(bool realtimePurpose) {
                 continue;
             }
         }
-
+*/
 
         if (!repository.prepare(cdr->connect_time)) {
             break;
