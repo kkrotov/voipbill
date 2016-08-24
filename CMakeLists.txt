@@ -312,7 +312,7 @@ set(BILL_SOURCES
     src-bill/web/PageTestCalcGui.cpp
     src-bill/web/PageTestAuth.cpp
     src-bill/main.cpp
-)
+    src-bill/web/PageCdrUnfinished.cpp src-bill/web/PageCdrUnfinished.h )
 
 add_definitions(-DHAVE_SYS_IOCTL_H -DHAVE_SOCKLEN_T)
 file(GLOB_RECURSE ACE_RADIUS_SOURCES "libs/ace-radius/*.cpp")

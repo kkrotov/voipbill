@@ -21,6 +21,7 @@
 #include "PageTestAuth.h"
 #include "http/request.hpp"
 #include "http/reply.hpp"
+#include "PageCdrUnfinished.h"
 
 class HttpHandler {
 private:
@@ -44,6 +45,7 @@ private:
         handlers.push_back(shared_ptr<BasePage>(new PageTestCalc));
         handlers.push_back(shared_ptr<BasePage>(new PageTestCalcGui));
         handlers.push_back(shared_ptr<BasePage>(new PageTestAuth));
+        handlers.push_back(shared_ptr<BasePage>(new PageCdrUnfinished));
     }
 
 public:
