@@ -60,23 +60,26 @@ public:
                 "select "+
                     cdr_unfinished+".call_id, "+                    // 0
                     cdr_unfinished+".setup_time, "+                 // 1
-                    cdr_unfinished+".dst_route, "+                  // 2
-                    cdr_unfinished+".releasing_party, "+            // 3
-                    cdr_unfinished+".release_timestamp, "+          // 4
-                    cdr_unfinished+".disconnect_cause, "+           // 5
+                    cdr_unfinished+".src_number, "+                 // 2
+                    cdr_unfinished+".dst_number, "+                 // 3
+                    cdr_unfinished+".src_route, "+                  // 4
+                    cdr_unfinished+".dst_route, "+                  // 5
+                    cdr_unfinished+".releasing_party, "+            // 6
+                    cdr_unfinished+".release_timestamp, "+          // 7
+                    cdr_unfinished+".disconnect_cause, "+           // 8
 //                    calls_cdr+".nas_ip, "+
-                    calls_cdr+".src_number, "+                      // 6
-                    calls_cdr+".dst_number, "+                      // 7
-                    calls_cdr+".redirect_number, "+                 // 8
-                    calls_cdr+".connect_time, "+                    // 9
-                    calls_cdr+".disconnect_time, "+                 // 10
-                    calls_cdr+".session_time, "+                    // 11
-                    calls_cdr+".disconnect_cause, "+                // 12
-                    calls_cdr+".src_route, "+                       // 13
-                    calls_cdr+".dst_route, "+                       // 14
-                    calls_cdr+".src_noa, "+                         // 15
-                    calls_cdr+".dst_noa, "+                         // 16
-                    calls_cdr+".dst_replace "                       // 17
+                    calls_cdr+".src_number, "+                      // 9
+                    calls_cdr+".dst_number, "+                      // 10
+                    calls_cdr+".redirect_number, "+                 // 11
+                    calls_cdr+".connect_time, "+                    // 12
+                    calls_cdr+".disconnect_time, "+                 // 13
+                    calls_cdr+".session_time, "+                    // 14
+                    calls_cdr+".disconnect_cause, "+                // 15
+                    calls_cdr+".src_route, "+                       // 16
+                    calls_cdr+".dst_route, "+                       // 17
+                    calls_cdr+".src_noa, "+                         // 18
+                    calls_cdr+".dst_noa, "+                         // 19
+                    calls_cdr+".dst_replace "                       // 20
                 "from "+cdr_unfinished+" left join "+calls_cdr+" using(hash) "
                 "where "+cdr_unfinished+".setup_time>='"+sql_time(timeFrom)+"' and "+cdr_unfinished+".setup_time<='"+sql_time(timeTo)+"' "
                 "order by "+cdr_unfinished+".call_id desc, "+cdr_unfinished+".setup_time desc";
@@ -94,31 +97,37 @@ public:
 
                 long long int call_id = res.get_ll(0);
                 time_t setup_time = parseDateTime(res.get(1));
+                char src_number_unfinished[33];
+                strcpy((char *) &src_number_unfinished, res.get(2));
+                char dst_number_unfinished[33];
+                strcpy((char *) &dst_number_unfinished, res.get(3));
+                char src_route_unfinished[33];
+                strcpy((char *) &src_route_unfinished, res.get(4));
                 char dst_route_unfinished[33];
-                strcpy((char *) &dst_route_unfinished, res.get(2));
+                strcpy((char *) &dst_route_unfinished, res.get(5));
                 char releasing_party_unfinished[32];
-                strncpy((char*) &releasing_party_unfinished, res.get(3), sizeof(releasing_party_unfinished));
-                time_t releasing_time = parseDateTime(res.get(4));
-                int disconnect_cause_unfinished = res.get_i(5);
+                strncpy((char*) &releasing_party_unfinished, res.get(6), sizeof(releasing_party_unfinished));
+                time_t releasing_time = parseDateTime(res.get(7));
+                int disconnect_cause_unfinished = res.get_i(8);
 
                 char src_number[33];
-                strcpy((char *) &src_number, res.get(6));
+                strcpy((char *) &src_number, res.get(9));
                 char dst_number[33];
-                strcpy((char *) &dst_number, res.get(7));
+                strcpy((char *) &dst_number, res.get(10));
                 char redirect_number[33];
-                strcpy((char *) &redirect_number, res.get(8));
-                time_t connect_time = parseDateTime(res.get(9));
-                time_t disconnect_time = parseDateTime(res.get(10));
-                time_t session_time = res.get_i(11);
-                int disconnect_cause_finished = res.get_i(12);
+                strcpy((char *) &redirect_number, res.get(11));
+                time_t connect_time = parseDateTime(res.get(12));
+                time_t disconnect_time = parseDateTime(res.get(13));
+                time_t session_time = res.get_i(14);
+                int disconnect_cause_finished = res.get_i(15);
                 char src_route[33];
-                strcpy((char *) &src_route, res.get(13));
+                strcpy((char *) &src_route, res.get(16));
                 char dst_route_finished[33];
-                strcpy((char *) &dst_route_finished, res.get(14));
-                int src_noa = res.get_i(15);
-                int dst_noa = res.get_i(16);
+                strcpy((char *) &dst_route_finished, res.get(17));
+                int src_noa = res.get_i(18);
+                int dst_noa = res.get_i(19);
                 char dst_replace[33];
-                strcpy((char*)&dst_replace, res.get(17));
+                strcpy((char*)&dst_replace, res.get(20));
 
                 if (call_id != current_call_id) {
 
@@ -145,6 +154,9 @@ public:
                 Cdr cdr;
                 cdr.call_id = call_id;
                 cdr.connect_time = setup_time;
+                strcpy((char *) &cdr.src_number, src_number_unfinished);
+                strcpy((char *) &cdr.dst_number, dst_number_unfinished);
+                strcpy((char *) &cdr.src_route, src_route_unfinished);
                 strcpy((char *) &cdr.dst_route, dst_route_unfinished);
                 strncpy((char *) &cdr.releasing_party, releasing_party_unfinished, sizeof(cdr.releasing_party));
                 cdr.disconnect_cause = disconnect_cause_unfinished;
@@ -189,7 +201,7 @@ public:
 //        string time_to = period_date(timeTo);
         html <<   "<head>\n"
 //             <<   "    <meta charset=\"UTF-8\">\n"
-             <<   "    <title>Title</title>\n"
+             <<   "    <title>CDR Unfinished</title>\n"
              <<   "    <link rel=\"stylesheet\" href=\"//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css\">\n"
              <<   "    <link rel=\"stylesheet\" href=\"/resources/demos/style.css\">\n"
              <<   "    <script src=\"https://code.jquery.com/jquery-1.12.4.js\"></script>\n"
@@ -206,8 +218,6 @@ public:
              <<   "<script>\n"
              <<   "    $( function() {\n"
              <<   "        $( \"#date_from\" ).datepicker({ dateFormat: \"yy-mm-dd\" });\n"
-             <<   "        $( \"#date_from\" ).datepicker();\n"
-//             <<   "        $( \"#date_to\" ).datepicker();\n"
              <<   "    } );\n"
              <<   "</script>\n"
              <<   "</body>\n";
@@ -238,15 +248,23 @@ public:
         html << ".bad { color: #ff0000; }\n";
         html << "</style>\n";
 
-        html << "<table><tr><th>call_id</th><th>connect_time</th><th>session_time</th><th>src_number</th><th>dst_number</th>"
-                "<th>src_route</th><th>dst_route</th><th>releasing_party</th>"
-                "<th>redirect_number</th><th>disconnect_cause</th><th>src_noa</th><th>dst_noa</th><th>dst_replace</th></tr>";
+        html << "<table><tr><th>call_id</th><th>connect_time</th><th>session_time</th><th>disconnect_cause</th>"
+                "<th>src_number</th><th>dst_number</th><th>src_route</th><th>dst_route</th><th>releasing_party</th>"
+                "<th>redirect_number</th><th>src_noa</th><th>dst_noa</th><th>dst_replace</th></tr>";
 
         long long int current_call_id = 0;
         for (size_t i = 0; i < unfinishedCdrs.size(); i++) {
 
             Cdr cdr = unfinishedCdrs.at(i);
-            string row_class = cdr.disconnect_cause==16? string("finished"):string("unfinished");
+            bool normalDisconnectCause = std::set<int>{
+                    CAUSE_NORMAL_CLEARING,   // 16
+                    CAUSE_BUSY,              // 17
+                    CAUSE_NO_REPONDING,      // 18
+                    CAUSE_NO_ANSWER          // 19
+            }
+            .count(cdr.disconnect_cause) > 0;
+            string row_class = normalDisconnectCause? string("finished"):string("unfinished");
+
             html << "<tr>";
             if (cdr.call_id != current_call_id) {
 
@@ -258,13 +276,13 @@ public:
 
             html << "<td class=" << row_class << ">" << (cdr.connect_time>0? string_time(cdr.connect_time):string(" ")) << "</td>";
             html << "<td class=" << row_class << ">" << cdr.session_time << "</td>";
+            html << "<td class=" << (normalDisconnectCause? "good":"bad") << ">" << cdr.disconnect_cause << "</td>";
             html << "<td class=" << row_class << ">" << cdr.src_number << "</td>";
             html << "<td class=" << row_class << ">" << cdr.dst_number << "</td>";
             html << "<td class=" << row_class << ">" << cdr.src_route << "</td>";
             html << "<td class=" << row_class << ">" << cdr.dst_route << "</td>";
             html << "<td class=" << row_class << ">" << cdr.releasing_party << "</td>";
             html << "<td class=" << row_class << ">" << cdr.redirect_number << "</td>";
-            html << "<td class=" << (cdr.disconnect_cause==16? "good":"bad") << ">" << cdr.disconnect_cause << "</td>";
             if (cdr.src_noa != 0)
                 html << "<td class=" << row_class << ">" << cdr.src_noa << "</td>";
             else
