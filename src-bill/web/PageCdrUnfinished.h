@@ -49,7 +49,7 @@ public:
         return timegm(&uri_tm);
     }
 
-    bool getCdrUnfinished(BDb * db_calls, time_t timeFrom, time_t timeTo, vector<Cdr> &cdrUnfinished) {
+    bool getCdrUnfinished(BDb * db_calls, time_t timeFrom, time_t timeTo, string src_number, string dst_number, string limit, vector<Cdr> &cdrUnfinished) {
 
         if (timeFrom > timeTo)
             return false;
@@ -67,7 +67,6 @@ public:
                     cdr_unfinished+".releasing_party, "+            // 6
                     cdr_unfinished+".release_timestamp, "+          // 7
                     cdr_unfinished+".disconnect_cause, "+           // 8
-//                    calls_cdr+".nas_ip, "+
                     calls_cdr+".src_number, "+                      // 9
                     calls_cdr+".dst_number, "+                      // 10
                     calls_cdr+".redirect_number, "+                 // 11
@@ -82,7 +81,8 @@ public:
                     calls_cdr+".dst_replace "                       // 20
                 "from "+cdr_unfinished+" left join "+calls_cdr+" using(hash) "
                 "where "+cdr_unfinished+".setup_time>='"+sql_time(timeFrom)+"' and "+cdr_unfinished+".setup_time<='"+sql_time(timeTo)+"' "
-                "order by "+cdr_unfinished+".call_id desc, "+cdr_unfinished+".setup_time desc";
+                        " and "+cdr_unfinished+".src_number like '"+src_number+"'"+" and "+cdr_unfinished+".dst_number like '"+dst_number+"' "+
+                "order by "+cdr_unfinished+".call_id desc, "+cdr_unfinished+".setup_time desc limit "+limit;
 
         try {
 
@@ -146,6 +146,7 @@ public:
                         cdr.src_noa = src_noa;
                         cdr.dst_noa = dst_noa;
                         strcpy((char *) &cdr.dst_replace, dst_replace);
+                        strncpy((char *) &cdr.releasing_party, releasing_party_unfinished, sizeof(cdr.releasing_party));
 
                         cdrUnfinished.push_back(cdr);
                     }
@@ -160,7 +161,7 @@ public:
                 strcpy((char *) &cdr.dst_route, dst_route_unfinished);
                 strncpy((char *) &cdr.releasing_party, releasing_party_unfinished, sizeof(cdr.releasing_party));
                 cdr.disconnect_cause = disconnect_cause_unfinished;
-                cdr.session_time = releasing_time - setup_time;
+                cdr.session_time = releasing_time>0? releasing_time - setup_time:0;
 
                 cdrUnfinished.push_back(cdr);
             }
@@ -184,20 +185,39 @@ public:
 
         time_t timeFrom = uri_time(parameters["date_from"].c_str());
         time_t timeTo = timeFrom+3600*24; //uri_time(parameters["date_to"].c_str());
+        string src_number = parameters["src_number"];
+        string dst_number = parameters["dst_number"];
+        string limit = parameters["limit"];
+
+//        bool bShowAll = parameters["show_all"].compare("on")==0;
 //        string src_number_pattern = parameters["src_number"];
 //        string dst_number_pattern = parameters["dst_number"];
         string action = parameters["do_search"];
-        render_time_from_to(html, timeFrom, timeTo);
+        render_filter(html, timeFrom, timeTo, src_number, dst_number, limit);
 
-        if (timeFrom < timeTo && action.compare("Search")==0)
-            render_cdr_table (timeFrom, timeTo, html, parameters);
+        if (timeFrom < timeTo && action.compare("Search")==0) {
+
+            BDb db_calls(app().conf.db_calls);
+            vector<Cdr> unfinishedCdrs;
+            if (getCdrUnfinished(&db_calls, timeFrom, timeTo, src_number, dst_number, limit, unfinishedCdrs))
+                render_cdr_table (timeFrom, timeTo, html, unfinishedCdrs);
+        }
 
         html <<   "</html>";
     }
 
-    void render_time_from_to(std::stringstream &html, time_t &timeFrom, time_t &timeTo) {
+    void render_filter(std::stringstream &html, time_t &timeFrom, time_t &timeTo, string &src_number, string &dst_number, string &limit) {
 
         string time_from = from_date(timeFrom);
+        if (src_number.size()==0)
+            src_number = string("%");
+
+        if (dst_number.size()==0)
+            dst_number = string("%");
+
+        if (limit.size()==0)
+            limit = string("100");
+
 //        string time_to = period_date(timeTo);
         html <<   "<head>\n"
 //             <<   "    <meta charset=\"UTF-8\">\n"
@@ -209,10 +229,12 @@ public:
              <<   "</head>\n"
              <<   "<body>\n"
              <<   "<form action=\"\" method=\"GET\">\n"
-//             <<   "    <label for=\"src_number\">src_number:</label> <input type=\"text\" name=\"src_number\" id=\"src_number\" value=\"\">\n"
-//             <<   "    <label for=\"dst_number\">dst_number:</label> <input type=\"text\" name=\"dst_number\" id=\"dst_number\" value=\"\">\n"
+             <<   "    <label for=\"src_number\">src_number:</label> <input type=\"text\" name=\"src_number\" id=\"src_number\" value=\""+src_number+"\">\n"
+             <<   "    <label for=\"dst_number\">dst_number:</label> <input type=\"text\" name=\"dst_number\" id=\"dst_number\" value=\""+dst_number+"\">\n"
+             <<   "    <label for=\"limit\">limit:</label> <input type=\"text\" name=\"limit\" id=\"limit\" value=\""+limit+"\">\n"
              <<   "    <label for=\"date_from\">date_from:</label> <input type=\"text\" name=\"date_from\" id=\"date_from\" value=\"" << time_from << "\">\n"
 //             <<   "    <label for=\"date_to\">date_to: <input type=\"text\" name=\"date_to\" id=\"date_to\" value=\"" << time_to << "\">\n"
+//             <<   "<input type=\"checkbox\" checked=\"checked\" name=\"show_all\" id=\"show_all\"/><label for=\"show_all\">show all</label>"
              <<   "    <input type=\"submit\" value=\"Search\" name=\"do_search\">\n"
              <<   "</form>\n"
              <<   "<script>\n"
@@ -223,12 +245,7 @@ public:
              <<   "</body>\n";
     }
 
-    void render_cdr_table (time_t timeFrom, time_t timeTo, std::stringstream &html, map<string, string> &parameters) {
-
-        BDb db_calls(app().conf.db_calls);
-        vector<Cdr> unfinishedCdrs;
-        if (!getCdrUnfinished(&db_calls, timeFrom, timeTo, unfinishedCdrs))
-            return;
+    void render_cdr_table (time_t timeFrom, time_t timeTo, std::stringstream &html, vector<Cdr> unfinishedCdrs) {
 
         html << "<table width=100% border=0 cellspacing=0>\n";
         html << "<tr>\n";
