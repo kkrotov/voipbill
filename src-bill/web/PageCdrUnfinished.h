@@ -78,8 +78,9 @@ public:
                     calls_cdr+".dst_route, "+                       // 17
                     calls_cdr+".src_noa, "+                         // 18
                     calls_cdr+".dst_noa, "+                         // 19
-                    calls_cdr+".dst_replace "                       // 20
-                "from "+cdr_unfinished+" left join "+calls_cdr+" using(hash) "
+                    calls_cdr+".dst_replace, "+                     // 20
+                    calls_cdr+".call_id "                           // 21
+                "from "+cdr_unfinished+" full outer join "+calls_cdr+" using(hash) "
                 "where "+cdr_unfinished+".setup_time>='"+sql_time(timeFrom)+"' and "+cdr_unfinished+".setup_time<='"+sql_time(timeTo)+"' "
                         " and "+cdr_unfinished+".src_number like '"+src_number+"'"+" and "+cdr_unfinished+".dst_number like '"+dst_number+"' "+
                 "order by "+cdr_unfinished+".call_id desc, "+cdr_unfinished+".setup_time desc limit "+limit;
@@ -95,7 +96,8 @@ public:
             long long int current_call_id = 0;
             while (res.next()) {
 
-                long long int call_id = res.get_ll(0);
+                // cdr_unfinished
+                long long int call_id_unfinished = res.get_ll(0);
                 time_t setup_time = parseDateTime(res.get(1));
                 char src_number_unfinished[33];
                 strcpy((char *) &src_number_unfinished, res.get(2));
@@ -110,6 +112,7 @@ public:
                 time_t releasing_time = parseDateTime(res.get(7));
                 int disconnect_cause_unfinished = res.get_i(8);
 
+                // calls_cdr
                 char src_number[33];
                 strcpy((char *) &src_number, res.get(9));
                 char dst_number[33];
@@ -128,8 +131,30 @@ public:
                 int dst_noa = res.get_i(19);
                 char dst_replace[33];
                 strcpy((char*)&dst_replace, res.get(20));
+                long long int call_id = res.get_ll(21);
 
-                if (call_id != current_call_id) {
+                if (call_id_unfinished == 0) {
+
+                    Cdr cdr;
+                    cdr.call_id = call_id;
+                    strcpy((char *) &cdr.dst_route, dst_route_finished);
+                    cdr.disconnect_cause = disconnect_cause_finished;
+                    strcpy((char *) &cdr.src_number, src_number);
+                    strcpy((char *) &cdr.dst_number, dst_number);
+                    strcpy((char *) &cdr.redirect_number, redirect_number);
+                    cdr.connect_time = connect_time;
+                    cdr.session_time = session_time;
+                    strcpy((char *) &cdr.src_route, src_route);
+                    cdr.src_noa = src_noa;
+                    cdr.dst_noa = dst_noa;
+                    strcpy((char *) &cdr.dst_replace, dst_replace);
+                    strncpy((char *) &cdr.releasing_party, releasing_party_unfinished, sizeof(cdr.releasing_party));
+
+                    cdrUnfinished.push_back(cdr);
+                    current_call_id = call_id;
+                    continue;
+                }
+                if (call_id!= current_call_id) {
 
                     if (src_number[0] != '\0') {
 
@@ -153,7 +178,7 @@ public:
                     current_call_id = call_id;
                 }
                 Cdr cdr;
-                cdr.call_id = call_id;
+                cdr.call_id = call_id_unfinished;
                 cdr.connect_time = setup_time;
                 strcpy((char *) &cdr.src_number, src_number_unfinished);
                 strcpy((char *) &cdr.dst_number, dst_number_unfinished);
