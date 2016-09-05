@@ -291,8 +291,9 @@ public:
         html << "</style>\n";
 
         html << "<table><tr><th>call_id</th><th>setup_time</th><th>connect_time</th><th>PDD</th><th>session_time</th><th>disconnect_cause</th>"
-                "<th>src_number</th><th>dst_number</th><th>src_route</th><th>dst_route</th><th>releasing_party</th>"
-                "<th>redirect_number</th><th>src_noa</th><th>dst_noa</th><th>dst_replace</th></tr>";
+                "<th>src_number</th><th>dst_number</th><th>src_route</th><th>dst_route</th>"  //"<th>releasing_party</th>"
+                "<th>redirect_number</th>" //"<th>src_noa</th><th>dst_noa</th>"
+                "<th>dst_replace</th></tr>";
 
         long long int current_call_id = 0;
         for (size_t i = 0; i < unfinishedCdrs.size(); i++) {
@@ -329,9 +330,9 @@ public:
             html << "<td class=" << row_class << ">" << cdr.dst_number << "</td>";
             html << "<td class=" << row_class << ">" << cdr.src_route << "</td>";
             html << "<td class=" << row_class << ">" << cdr.dst_route << "</td>";
-            html << "<td class=" << row_class << ">" << cdr.releasing_party << "</td>";
+            //html << "<td class=" << row_class << ">" << cdr.releasing_party << "</td>";
             html << "<td class=" << row_class << ">" << cdr.redirect_number << "</td>";
-            if (cdr.src_noa != 0)
+            /*if (cdr.src_noa != 0)
                 html << "<td class=" << row_class << ">" << cdr.src_noa << "</td>";
             else
                 html << "<td> </td>";
@@ -339,7 +340,7 @@ public:
             if (cdr.dst_noa != 0)
                 html << "<td class=" << row_class << ">" << cdr.dst_noa << "</td>";
             else
-                html << "<td> </td>";
+                html << "<td> </td>";*/
 
             html << "<td class=" << row_class << ">" << cdr.dst_replace << "</td>";
             html << "</tr>";
