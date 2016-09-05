@@ -307,6 +307,102 @@ public:
             }
             html << "</tr>\n";
         }
+        {
+            auto dl = &repository.data->nnpDestination;
+            html << "<tr><th>NNP Destination</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->nnpNumberRangePrefix;
+            html << "<tr><th>NNP Number Range Prefix</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->nnpPackage;
+            html << "<tr><th>NNP Package</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->nnpPackagePrice;
+            html << "<tr><th>NNP Package Price</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->nnpPrefix;
+            html << "<tr><th>NNP Prefix</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->nnpRegion;
+            html << "<tr><th>NNP Region</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->nnpNumberRange;
+            html << "<tr><th>NNP NumberRange</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->nnpOperator;
+            html << "<tr><th>NNP Operator</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->nnpPackageMinute;
+            html << "<tr><th>NNP Package Minute</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->nnpPackagePricelist;
+            html << "<tr><th>NNP Package Pricelist</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->nnpPrefixDestination;
+            html << "<tr><th>NNP Prefix Destination</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+            html << "</tr>\n";
+        }
+        {
+            auto dl = &repository.data->nnpAccountTariffLight;
+            html << "<tr><th>NNP Account Tariff Light</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+                 dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+            html << "</tr>\n";
+        }
 
         html << "</table>\n";
 

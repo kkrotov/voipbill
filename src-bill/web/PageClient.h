@@ -60,6 +60,7 @@ public:
 
 
         html << "Client Id: <b>" << client->id << "</b><br/>\n";
+        html << "Account version: <b>" << client->account_version << "</b><br/>\n";
         html << "-----<br/>\n";
 
         if (clientLock.disabled_local)

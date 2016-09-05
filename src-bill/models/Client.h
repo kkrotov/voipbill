@@ -15,6 +15,7 @@ struct Client {
     short timezone_offset;
     bool is_blocked;
     bool anti_fraud_disabled;
+    int account_version;
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -29,6 +30,7 @@ struct Client {
         trace << "timezone_offset: " << timezone_offset << ", ";
         trace << "is_blocked: " << is_blocked << ", ";
         trace << "anti_fraud_disabled: " << anti_fraud_disabled << ", ";
+        trace << "account_version: " << account_version << ", ";
         trace << ")";
     }
 

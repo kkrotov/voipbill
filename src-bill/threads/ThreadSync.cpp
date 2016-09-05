@@ -40,6 +40,19 @@
 #include "../sync/PullTrunkRule.h"
 #include "../sync/PullTrunkTrunkRule.h"
 
+#include "../sync/nnp/NNPAccountTariffLightPull.h"
+#include "../sync/nnp/NNPNumberRangePrefixPull.h"
+#include "../sync/nnp/NNPOperatorPull.h"
+#include "../sync/nnp/NNPPackagePricelistPull.h"
+#include "../sync/nnp/NNPPackagePull.h"
+#include "../sync/nnp/NNPPrefixPull.h"
+#include "../sync/nnp/NNPDestinationPull.h"
+#include "../sync/nnp/NNPNumberRangePull.h"
+#include "../sync/nnp/NNPPackageMinutePull.h"
+#include "../sync/nnp/NNPPackagePricePull.h"
+#include "../sync/nnp/NNPPrefixDestinatioPull.h"
+#include "../sync/nnp/NNPRegionPull.h"
+
 void ThreadSync::run() {
 
     manager->pull();
@@ -91,4 +104,17 @@ ThreadSync::ThreadSync() {
     manager->add(new PullTrunkPriority());
     manager->add(new PullTrunkRule());
     manager->add(new PullTrunkTrunkRule());
+
+    manager->add(new NNPAccountTariffLightPull());
+    manager->add(new NNPNumberRangePrefixPull());
+    manager->add(new NNPOperatorPull());
+    manager->add(new NNPPackagePricelistPull());
+    manager->add(new NNPPackagePull());
+    manager->add(new NNPPrefixPull());
+    manager->add(new NNPDestinationPull());
+    manager->add(new NNPNumberRangePull());
+    manager->add(new NNPPackageMinutePull());
+    manager->add(new NNPPackagePricePull());
+    manager->add(new NNPPrefixDestinatioPull());
+    manager->add(new NNPRegionPull());
 }

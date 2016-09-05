@@ -47,6 +47,18 @@ void DataContainer::loadAll(BDb * db) {
     statDestinationPrefixlists.load(db);
     statPrefixlist.load(db);
     currencyRate.load(db);
-
     activeCounter.load(serviceNumber.get(), serviceTrunk.get());
+    nnpDestination.load(db);
+    nnpNumberRangePrefix.load(db);
+    nnpPackage.load(db);
+    nnpPackagePrice.load(db);
+    nnpPrefix.load(db);
+    nnpRegion.load(db);
+    nnpNumberRange.load(db);
+    nnpOperator.load(db);
+    nnpPackageMinute.load(db);
+    nnpPackagePricelist.load(db);
+    nnpPrefixDestination.load(db);
+    nnpAccountTariffLight.load(db);
+
 }

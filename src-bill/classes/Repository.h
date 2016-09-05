@@ -54,6 +54,20 @@ private:
     shared_ptr<StatDestinationPrefixlistsList> statDestinationPrefixlists;
     shared_ptr<StatPrefixlistList> statPrefixlist;
     shared_ptr<CurrencyRateList> currencyRate;
+
+    shared_ptr<NNPRegionList> nnpRegion;
+    shared_ptr<NNPDestinationList>  nnpDestination;
+    shared_ptr<NNPOperatorList> nnpOperator;
+    shared_ptr<NNPPrefixList> nnpPrefix;
+    shared_ptr<NNPNumberRangeList> nnpNumberRange;
+    shared_ptr<NNPNumberRangePrefixList> nnpNumberRangePrefix;
+    shared_ptr<NNPPrefixDestinationList> nnpPrefixDestination;
+    shared_ptr<NNPPackageList> nnpPackage;
+    shared_ptr<NNPPackageMinuteList> nnpPackageMinute;
+    shared_ptr<NNPPackagePriceList> nnpPackagePrice;
+    shared_ptr<NNPPackagePricelistList> nnpPackagePricelist;
+    shared_ptr<NNPAccountTariffLightList> nnpAccountTariffLight;
+
 public:
     shared_ptr<ActiveCounter> activeCounter;
 

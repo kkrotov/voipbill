@@ -192,6 +192,55 @@ bool Repository::prepare(time_t currentTime) {
         return false;
     }
 
+
+    if ((nnpDestination = data->nnpDestination.get()) == nullptr) {
+        return false;
+    }
+
+    if ((nnpNumberRangePrefix = data->nnpNumberRangePrefix.get()) == nullptr) {
+        return false;
+    }
+
+    if ((nnpPackage = data->nnpPackage.get()) == nullptr) {
+        return false;
+    }
+
+    if ((nnpPackagePrice = data->nnpPackagePrice.get()) == nullptr) {
+        return false;
+    }
+
+    if ((nnpPrefix = data->nnpPrefix.get()) == nullptr) {
+        return false;
+    }
+
+    if ((nnpRegion = data->nnpRegion.get()) == nullptr) {
+        return false;
+    }
+
+    if ((nnpNumberRange = data->nnpNumberRange.get()) == nullptr) {
+        return false;
+    }
+
+    if ((nnpOperator = data->nnpOperator.get()) == nullptr) {
+        return false;
+    }
+
+    if ((nnpPackageMinute = data->nnpPackageMinute.get()) == nullptr) {
+        return false;
+    }
+
+    if ((nnpPackagePricelist = data->nnpPackagePricelist.get()) == nullptr) {
+        return false;
+    }
+
+    if ((nnpPrefixDestination = data->nnpPrefixDestination.get()) == nullptr) {
+        return false;
+    }
+
+    if ((nnpAccountTariffLight = data->nnpAccountTariffLight.get()) == nullptr) {
+        return false;
+    }
+
     return true;
 }
 

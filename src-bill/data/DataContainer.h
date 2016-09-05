@@ -46,6 +46,20 @@
 #include "ActiveCounterData.h"
 #include "CurrencyRateData.h"
 
+#include "nnp/NNPDestinationData.h"
+#include "nnp/NNPNumberRangePrefixData.h"
+#include "nnp/NNPPackageData.h"
+#include "nnp/NNPPackagePriceData.h"
+#include "nnp/NNPPrefixData.h"
+#include "nnp/NNPRegionData.h"
+#include "nnp/NNPNumberRangeData.h"
+#include "nnp/NNPOperatorData.h"
+#include "nnp/NNPPackageMinuteData.h"
+#include "nnp/NNPPackagePricelistData.h"
+#include "nnp/NNPPrefixDestinationData.h"
+#include "nnp/NNPAccountTariffLightData.h"
+
+
 class DataContainer {
 public:
     ServerData server;
@@ -91,6 +105,19 @@ public:
     StatPrefixlistData statPrefixlist;
     ActiveCounterData activeCounter;
     CurrencyRateData currencyRate;
+
+    NNPDestinationData nnpDestination;
+    NNPNumberRangePrefixData nnpNumberRangePrefix;
+    NNPPackageData nnpPackage;
+    NNPPackagePriceData nnpPackagePrice;
+    NNPPrefixData nnpPrefix;
+    NNPRegionData nnpRegion;
+    NNPNumberRangeData nnpNumberRange;
+    NNPOperatorData nnpOperator;
+    NNPPackageMinuteData nnpPackageMinute;
+    NNPPackagePricelistData nnpPackagePricelist;
+    NNPPrefixDestinationData nnpPrefixDestination;
+    NNPAccountTariffLightData nnpAccountTariffLight;
 
     static DataContainer * instance();
 
