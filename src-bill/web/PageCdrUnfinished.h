@@ -6,6 +6,7 @@
 
 class PageCdrUnfinished : public BasePage {
     Spinlock lock;
+    Repository repository;
 
 public:
     string time_suffix(time_t time) {
@@ -76,18 +77,19 @@ public:
                     "coalesce("+cdr_unfinished+".src_number, "+calls_cdr+".src_number), "+      // 2
                     "coalesce("+cdr_unfinished+".dst_number, "+calls_cdr+".dst_number), "+      // 3
                     "coalesce("+cdr_unfinished+".src_route, "+calls_cdr+".src_route), "+        // 4
-                    "coalesce("+cdr_unfinished+".dst_route, "+calls_cdr+".dst_route), "+        // 5
-                    cdr_unfinished+".releasing_party, "+            // 6
-                    cdr_unfinished+".release_timestamp, "+          // 7
-                    cdr_unfinished+".disconnect_cause, "+           // 8
-                    calls_cdr+".redirect_number, "+                 // 9
-                    calls_cdr+".connect_time, "+                    // 10
-                    calls_cdr+".disconnect_time, "+                 // 11
-                    calls_cdr+".session_time, "+                    // 12
-                    calls_cdr+".src_noa, "+                         // 13
-                    calls_cdr+".dst_noa, "+                         // 14
-                    calls_cdr+".dst_replace, "+                     // 15
-                    calls_cdr+".disconnect_cause "+                 // 16
+                    cdr_unfinished+".dst_route, "+                  // 5
+                    calls_cdr+".dst_route, "+                       // 6
+                    "coalesce("+cdr_unfinished+".releasing_party, "+calls_cdr+".releasing_party), "+        // 7
+                    cdr_unfinished+".release_timestamp, "+          // 8
+                    cdr_unfinished+".disconnect_cause, "+           // 9
+                    calls_cdr+".redirect_number, "+                 // 10
+                    calls_cdr+".connect_time, "+                    // 11
+                    calls_cdr+".disconnect_time, "+                 // 12
+                    calls_cdr+".session_time, "+                    // 13
+                    calls_cdr+".src_noa, "+                         // 14
+                    calls_cdr+".dst_noa, "+                         // 15
+                    calls_cdr+".dst_replace, "+                     // 16
+                    calls_cdr+".disconnect_cause "+                 // 17
                 "from "+cdr_unfinished+ sql_join+calls_cdr+" using(hash) ";
 
         string cdr_time = "coalesce("+cdr_unfinished+".setup_time, "+calls_cdr+".setup_time)";
@@ -97,7 +99,7 @@ public:
         if (src_number.size()>0)
             where += " and "+cdr_src+" like '%"+src_number+"%'";
 
-        if (dst_number.size()==0)
+        if (dst_number.size()>0)
             where += " and "+cdr_dst+" like '%"+dst_number+"%'";
 
         if (show_unfinished_only)
@@ -124,23 +126,25 @@ public:
                 strcpy((char *) &dst_number, res.get(3));
                 char src_route[33];
                 strcpy((char *) &src_route, res.get(4));
+                char dst_route_unfinished[33];
+                strcpy((char *) &dst_route_unfinished, res.get(5));
                 char dst_route[33];
-                strcpy((char *) &dst_route, res.get(5));
+                strcpy((char *) &dst_route, res.get(6));
                 char releasing_party_unfinished[32];
-                strncpy((char*) &releasing_party_unfinished, res.get(6), sizeof(releasing_party_unfinished));
-                time_t releasing_time = parseDateTime(res.get(7));
-                int disconnect_cause_unfinished = res.get_i(8);
+                strncpy((char*) &releasing_party_unfinished, res.get(7), sizeof(releasing_party_unfinished));
+                time_t releasing_time = parseDateTime(res.get(8));
+                int disconnect_cause_unfinished = res.get_i(9);
 
                 char redirect_number[33];
-                strcpy((char *) &redirect_number, res.get(9));
-                time_t connect_time = parseDateTime(res.get(10));
-                time_t disconnect_time = parseDateTime(res.get(11));
-                time_t session_time = res.get_i(12);
-                int src_noa = res.get_i(13);
-                int dst_noa = res.get_i(14);
+                strcpy((char *) &redirect_number, res.get(10));
+                time_t connect_time = parseDateTime(res.get(11));
+                time_t disconnect_time = parseDateTime(res.get(12));
+                time_t session_time = res.get_i(13);
+                int src_noa = res.get_i(14);
+                int dst_noa = res.get_i(15);
                 char dst_replace[33];
-                strcpy((char*)&dst_replace, res.get(15));
-                int disconnect_cause_finished = res.get_i(16);
+                strcpy((char*)&dst_replace, res.get(16));
+                int disconnect_cause_finished = res.get_i(17);
 
                 if (call_id != current_call_id) {
 
@@ -164,7 +168,6 @@ public:
 
                         cdrUnfinished.push_back(cdr);
                     }
-                    current_call_id = call_id;
                 }
                 if (disconnect_cause_unfinished>0 && !show_finished_only) {
 
@@ -174,13 +177,14 @@ public:
                     strcpy((char *) &cdr.src_number, src_number);
                     strcpy((char *) &cdr.dst_number, dst_number);
                     strcpy((char *) &cdr.src_route, src_route);
-                    strcpy((char *) &cdr.dst_route, dst_route);
+                    strcpy((char *) &cdr.dst_route, dst_route_unfinished);
                     strncpy((char *) &cdr.releasing_party, releasing_party_unfinished, sizeof(cdr.releasing_party));
                     cdr.disconnect_cause = disconnect_cause_unfinished;
                     cdr.session_time = releasing_time>0? releasing_time - setup_time:0;
 
                     cdrUnfinished.push_back(cdr);
                 }
+                current_call_id = call_id;
             }
         }
         catch (DbException &e) {
@@ -197,11 +201,23 @@ public:
 
     void render(std::stringstream &html, map<string, string> &parameters) {
 
+        if (!ready())
+            return;
+
         html << "<!DOCTYPE html>\n" << "<html lang=\"en\">\n";
         renderHeader(html);
 
         time_t timeFrom = uri_time(parameters["date_from"].c_str());
-        time_t timeTo = timeFrom+3600*24; //uri_time(parameters["date_to"].c_str());
+        int hour_from = atoi(parameters["hour_from"].c_str());
+        if (hour_from<24)
+            timeFrom += hour_from*3600;
+
+        time_t timeTo;
+        if (hour_from<24)
+            timeTo = timeFrom + 3600;
+        else
+            timeTo = timeFrom + 24*3600; //uri_time(parameters["date_to"].c_str());
+        
         string src_number = parameters["src_number"];
         string dst_number = parameters["dst_number"];
         string tab_show = parameters["show"];
@@ -211,7 +227,7 @@ public:
 //        string src_number_pattern = parameters["src_number"];
 //        string dst_number_pattern = parameters["dst_number"];
         string action = parameters["do_search"];
-        render_filter(html, timeFrom, timeTo, src_number, dst_number, limit, tab_show);
+        render_filter(html, timeFrom, hour_from, timeTo, src_number, dst_number, limit, tab_show);
 
         if (timeFrom < timeTo && action.compare("Search")==0) {
 
@@ -224,7 +240,7 @@ public:
         html <<   "</html>";
     }
 
-    void render_filter(std::stringstream &html, time_t &timeFrom, time_t &timeTo, string &src_number, string &dst_number, string &limit, string tab_show) {
+    void render_filter(std::stringstream &html, time_t &timeFrom, int hour_from, time_t &timeTo, string &src_number, string &dst_number, string &limit, string tab_show) {
 
         string time_from = from_date(timeFrom);
 
@@ -240,7 +256,39 @@ public:
         if (checked_unfin.size()==0 && checked_fin.size()==0 && checked_all.size()==0)
             checked_all = "checked";
 
+        vector<string> hour_checked(25);
+        if (hour_from<=hour_checked.size() && hour_from>0)
+            hour_checked[hour_from] = " selected";
+
 //        string time_to = period_date(timeTo);
+        string dropdown_list = "<select name=\"hour_from\">"
+                " <option value=\"0\"" +  hour_checked[0] + ">0:00 - 1:00</option>\n"+
+                " <option value=\"1\"" +  hour_checked[1] +">1:00 - 2:00</option>\n"+
+                " <option value=\"2\"" +  hour_checked[2] + ">2:00 - 3:00</option>\n"
+                " <option value=\"3\"" +  hour_checked[3] + ">3:00 - 4:00</option>\n"
+                " <option value=\"4\"" +  hour_checked[4] + ">4:00 - 5:00</option>\n"
+                " <option value=\"5\"" +  hour_checked[5] + ">5:00 - 6:00</option>\n"
+                " <option value=\"6\"" +  hour_checked[6] + ">6:00 - 7:00</option>\n"
+                " <option value=\"7\"" +  hour_checked[7] + ">7:00 - 8:00</option>\n"
+                " <option value=\"8\"" +  hour_checked[8] + ">8:00 - 9:00</option>\n"
+                " <option value=\"9\"" +  hour_checked[9] + ">9:00 - 10:00</option>\n"
+                " <option value=\"10\""+  hour_checked[10] + ">10:00 - 11:00</option>\n"
+                " <option value=\"11\"" +  hour_checked[11] + ">11:00 - 12:00</option>\n"
+                " <option value=\"12\"" +  hour_checked[12] + ">12:00 - 13:00</option>\n"
+                " <option value=\"13\"" +  hour_checked[13] + ">13:00 - 14:00</option>\n"
+                " <option value=\"14\"" +  hour_checked[14] + ">14:00 - 15:00</option>\n"
+                " <option value=\"15\"" +  hour_checked[15] + ">15:00 - 16:00</option>\n"
+                " <option value=\"16\"" +  hour_checked[16] + ">16:00 - 17:00</option>\n"
+                " <option value=\"17\"" +  hour_checked[17] + ">17:00 - 18:00</option>\n"
+                " <option value=\"18\"" +  hour_checked[18] + ">18:00 - 19:00</option>\n"
+                " <option value=\"19\"" +  hour_checked[19] + ">19:00 - 20:00</option>\n"
+                " <option value=\"20\"" +  hour_checked[20] + ">20:00 - 21:00</option>\n"
+                " <option value=\"21\"" +  hour_checked[21] + ">21:00 - 22:00</option>\n"
+                " <option value=\"22\"" +  hour_checked[22] + ">22:00 - 23:00</option>\n"
+                " <option value=\"23\"" +  hour_checked[23] + ">23:00 - 24:00</option>\n"
+                " <option value=\"24\"" +  hour_checked[24] + ">0:00 - 24:00</option>\n"
+                "</select>\n";
+
         html <<   "<head>\n"
 //             <<   "    <meta charset=\"UTF-8\">\n"
              <<   "    <title>CDR Log</title>\n"
@@ -254,6 +302,7 @@ public:
              <<   "    <label for=\"src_number\">src_number:</label> <input type=\"text\" name=\"src_number\" id=\"src_number\" value=\""+src_number+"\">\n"
              <<   "    <label for=\"dst_number\">dst_number:</label> <input type=\"text\" name=\"dst_number\" id=\"dst_number\" value=\""+dst_number+"\">\n"
              <<   "    <label for=\"date_from\">date_from:</label> <input type=\"text\" name=\"date_from\" id=\"date_from\" value=\"" << time_from << "\">\n"
+             <<   dropdown_list
              <<   "    <label for=\"limit\">limit:</label> <input type=\"text\" name=\"limit\" id=\"limit\" value=\""+limit+"\">\n"
              <<   "    <input type=\"radio\" name=\"show\" value=\"all\" "+checked_all+"> show all\n"
              <<   "    <input type=\"radio\" name=\"show\" value=\"fin\" "+checked_fin+"> finished\n"
@@ -291,7 +340,7 @@ public:
         html << "</style>\n";
 
         html << "<table><tr><th>call_id</th><th>setup_time</th><th>connect_time</th><th>PDD</th><th>session_time</th><th>disconnect_cause</th>"
-                "<th>src_number</th><th>dst_number</th><th>src_route</th><th>dst_route</th>"  //"<th>releasing_party</th>"
+                "<th>src_number</th><th>dst_number</th><th>src_route</th><th>Our</th><th>dst_route</th><th>Our</th><th>releasing_party</th>"
                 "<th>redirect_number</th>" //"<th>src_noa</th><th>dst_noa</th>"
                 "<th>dst_replace</th></tr>";
 
@@ -307,6 +356,15 @@ public:
             }
             .count(cdr.disconnect_cause) > 0;
             string row_class = normalDisconnectCause? string("finished"):string("unfinished");
+            Trunk *src_trunk = repository.getTrunkByName(cdr.src_route);
+            string src_trunk_type = "?";
+            if (src_trunk!= nullptr)
+                src_trunk_type = (src_trunk!= nullptr && src_trunk->our_trunk)? "+":"";
+
+            Trunk *dst_trunk = repository.getTrunkByName(cdr.dst_route);
+            string dst_trunk_type = "?";
+            if (dst_trunk!= nullptr)
+                dst_trunk_type = (dst_trunk!= nullptr && dst_trunk->our_trunk)? "+":"";
 
             html << "<tr>";
             if (cdr.call_id != current_call_id) {
@@ -329,8 +387,10 @@ public:
             html << "<td class=" << row_class << ">" << cdr.src_number << "</td>";
             html << "<td class=" << row_class << ">" << cdr.dst_number << "</td>";
             html << "<td class=" << row_class << ">" << cdr.src_route << "</td>";
+            html << "<td class=" << row_class << ">" << src_trunk_type << "</td>";
             html << "<td class=" << row_class << ">" << cdr.dst_route << "</td>";
-            //html << "<td class=" << row_class << ">" << cdr.releasing_party << "</td>";
+            html << "<td class=" << row_class << ">" << dst_trunk_type << "</td>";
+            html << "<td class=" << row_class << ">" << cdr.releasing_party << "</td>";
             html << "<td class=" << row_class << ">" << cdr.redirect_number << "</td>";
             /*if (cdr.src_noa != 0)
                 html << "<td class=" << row_class << ">" << cdr.src_noa << "</td>";
@@ -347,5 +407,16 @@ public:
 
         }
         html << "</table>";
+    }
+
+    bool ready() {
+
+        if (!repository.billingData->ready()) {
+            return false;
+        }
+        if (!repository.prepare()) {
+            return false;
+        }
+        return true;
     }
 };
