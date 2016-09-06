@@ -152,13 +152,15 @@ void ThreadLoader::run() {
             } else if (event == "service_number") {
 
                 repository.data->serviceNumber.load(&db_calls);
-                repository.data->activeCounter.load(repository.data->serviceNumber.get(), repository.data->serviceTrunk.get());
+                repository.data->activeCounter.load(repository.data->serviceNumber.get(),
+                                                    repository.data->serviceTrunk.get());
                 repository.data->serviceNumberByTechNumber.load(&db_calls);
 
             } else if (event == "service_trunk") {
 
                 repository.data->serviceTrunk.load(&db_calls);
-                repository.data->activeCounter.load(repository.data->serviceNumber.get(), repository.data->serviceTrunk.get());
+                repository.data->activeCounter.load(repository.data->serviceNumber.get(),
+                                                    repository.data->serviceTrunk.get());
 
             } else if (event == "service_trunk_settings") {
 
@@ -198,7 +200,68 @@ void ThreadLoader::run() {
                 repository.data->currencyRate.load(&db_calls);
             }
 
-            db_calls.exec("DELETE from event.queue WHERE event='" + event + "' and version = '" + lexical_cast<string>(version) + "'");
+            else if (event == "nnp_account_tariff_light") {
+
+                repository.data->nnpAccountTariffLight.load(&db_calls);
+            }
+
+            else if (event == "nnp_destination") {
+
+                repository.data->nnpDestination.load(&db_calls);
+            }
+
+            else if (event == "nnp_number_range_prefix") {
+
+                repository.data->nnpNumberRangePrefix.load(&db_calls);
+            }
+
+            else if (event == "nnp_number_range") {
+
+                repository.data->nnpNumberRange.load(&db_calls);
+            }
+
+            else if (event == "nnp_operator") {
+
+                repository.data->nnpOperator.load(&db_calls);
+            }
+
+            else if (event == "nnp_package_minute") {
+
+                repository.data->nnpPackageMinute.load(&db_calls);
+            }
+
+            else if (event == "nnp_package_pricelist") {
+
+                repository.data->nnpPackagePricelist.load(&db_calls);
+            }
+
+            else if (event == "nnp_package_price") {
+
+                repository.data->nnpPackagePrice.load(&db_calls);
+            }
+
+            else if (event == "nnp_package") {
+
+                repository.data->nnpPackage.load(&db_calls);
+            }
+
+            else if (event == "nnp_prefix_destination") {
+
+                repository.data->nnpPrefixDestination.load(&db_calls);
+            }
+
+            else if (event == "nnp_prefix") {
+
+                repository.data->nnpPrefix.load(&db_calls);
+            }
+
+            else if (event == "nnp_region") {
+
+                repository.data->nnpRegion.load(&db_calls);
+            }
+
+            db_calls.exec("DELETE from event.queue WHERE event='" + event + "' and version = '" +
+                          lexical_cast<string>(version) + "'");
 
         }
     } catch (Exception &e) {
