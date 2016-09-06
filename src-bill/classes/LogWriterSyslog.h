@@ -10,6 +10,7 @@ protected:
     bool beforePublish();
     void doPublish(pLogMessage message);
     void afterPublish();
+    string logWriterName();
 };
 
 

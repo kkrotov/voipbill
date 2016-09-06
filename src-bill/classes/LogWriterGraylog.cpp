@@ -58,3 +58,7 @@ void LogWriterGraylog::massPublish(list<pLogMessage> messages) {
     socket.close();
 }
 
+string LogWriterGraylog::logWriterName() {
+
+    return string("LogWriterGraylog");
+}

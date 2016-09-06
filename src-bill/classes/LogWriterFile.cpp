@@ -23,3 +23,8 @@ void LogWriterFile::afterPublish() {
     fclose(file);
 
 }
+
+string LogWriterFile::logWriterName() {
+
+    return string("LogWriterFile");
+}
