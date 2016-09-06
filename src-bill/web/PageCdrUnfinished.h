@@ -6,6 +6,7 @@
 
 class PageCdrUnfinished : public BasePage {
     Spinlock lock;
+    Repository repository;
 
 public:
     string time_suffix(time_t time) {
@@ -77,7 +78,7 @@ public:
                     "coalesce("+cdr_unfinished+".dst_number, "+calls_cdr+".dst_number), "+      // 3
                     "coalesce("+cdr_unfinished+".src_route, "+calls_cdr+".src_route), "+        // 4
                     "coalesce("+cdr_unfinished+".dst_route, "+calls_cdr+".dst_route), "+        // 5
-                    cdr_unfinished+".releasing_party, "+            // 6
+                    "coalesce("+cdr_unfinished+".releasing_party, "+calls_cdr+".releasing_party), "+        // 6
                     cdr_unfinished+".release_timestamp, "+          // 7
                     cdr_unfinished+".disconnect_cause, "+           // 8
                     calls_cdr+".redirect_number, "+                 // 9
@@ -97,7 +98,7 @@ public:
         if (src_number.size()>0)
             where += " and "+cdr_src+" like '%"+src_number+"%'";
 
-        if (dst_number.size()==0)
+        if (dst_number.size()>0)
             where += " and "+cdr_dst+" like '%"+dst_number+"%'";
 
         if (show_unfinished_only)
@@ -164,7 +165,6 @@ public:
 
                         cdrUnfinished.push_back(cdr);
                     }
-                    current_call_id = call_id;
                 }
                 if (disconnect_cause_unfinished>0 && !show_finished_only) {
 
@@ -181,6 +181,7 @@ public:
 
                     cdrUnfinished.push_back(cdr);
                 }
+                current_call_id = call_id;
             }
         }
         catch (DbException &e) {
@@ -196,6 +197,9 @@ public:
     }
 
     void render(std::stringstream &html, map<string, string> &parameters) {
+
+        if (!ready())
+            return;
 
         html << "<!DOCTYPE html>\n" << "<html lang=\"en\">\n";
         renderHeader(html);
@@ -291,7 +295,7 @@ public:
         html << "</style>\n";
 
         html << "<table><tr><th>call_id</th><th>setup_time</th><th>connect_time</th><th>PDD</th><th>session_time</th><th>disconnect_cause</th>"
-                "<th>src_number</th><th>dst_number</th><th>src_route</th><th>dst_route</th>"  //"<th>releasing_party</th>"
+                "<th>src_number</th><th>dst_number</th><th>src_route</th><th>Our</th><th>dst_route</th><th>Our</th><th>releasing_party</th>"
                 "<th>redirect_number</th>" //"<th>src_noa</th><th>dst_noa</th>"
                 "<th>dst_replace</th></tr>";
 
@@ -307,6 +311,15 @@ public:
             }
             .count(cdr.disconnect_cause) > 0;
             string row_class = normalDisconnectCause? string("finished"):string("unfinished");
+            Trunk *src_trunk = repository.getTrunkByName(cdr.src_route);
+            string src_trunk_type = "?";
+            if (src_trunk!= nullptr)
+                src_trunk_type = (src_trunk!= nullptr && src_trunk->our_trunk)? "+":"";
+
+            Trunk *dst_trunk = repository.getTrunkByName(cdr.dst_route);
+            string dst_trunk_type = "?";
+            if (dst_trunk!= nullptr)
+                dst_trunk_type = (dst_trunk!= nullptr && dst_trunk->our_trunk)? "+":"";
 
             html << "<tr>";
             if (cdr.call_id != current_call_id) {
@@ -329,8 +342,10 @@ public:
             html << "<td class=" << row_class << ">" << cdr.src_number << "</td>";
             html << "<td class=" << row_class << ">" << cdr.dst_number << "</td>";
             html << "<td class=" << row_class << ">" << cdr.src_route << "</td>";
+            html << "<td class=" << row_class << ">" << src_trunk_type << "</td>";
             html << "<td class=" << row_class << ">" << cdr.dst_route << "</td>";
-            //html << "<td class=" << row_class << ">" << cdr.releasing_party << "</td>";
+            html << "<td class=" << row_class << ">" << dst_trunk_type << "</td>";
+            html << "<td class=" << row_class << ">" << cdr.releasing_party << "</td>";
             html << "<td class=" << row_class << ">" << cdr.redirect_number << "</td>";
             /*if (cdr.src_noa != 0)
                 html << "<td class=" << row_class << ">" << cdr.src_noa << "</td>";
@@ -347,5 +362,16 @@ public:
 
         }
         html << "</table>";
+    }
+
+    bool ready() {
+
+        if (!repository.billingData->ready()) {
+            return false;
+        }
+        if (!repository.prepare()) {
+            return false;
+        }
+        return true;
     }
 };
