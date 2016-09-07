@@ -25,7 +25,7 @@ public:
         return string(buff);
     }
 
-    string from_date (time_t time) {
+    string str_date (time_t time) {
 
         char buff[128];
         struct tm * timeinfo = gmtime(&time);
@@ -33,21 +33,29 @@ public:
         return string(buff);
     }
 
-    time_t uri_time (const char*uriTime) {
+    string str_time (time_t time) {
 
-        if (uriTime == nullptr)
-            return time(NULL);
+        char buff[128];
+        struct tm * timeinfo = gmtime(&time);
+        strftime(buff, sizeof(buff), "%H:%M:%S", timeinfo);
+        return string(buff);
+    }
 
-        // from=20160828085734&to=20160829085734
-        // date_from=2016-08-29&date_to=2016-09-01&do_search=Go
+    time_t uri_data_time (string uriDate, string uriTime) {
+
         struct tm uri_tm = {0};
-//       if (sscanf(uriTime, "%4d%2d%2d%2d%2d%2d", &uri_tm.tm_year, &uri_tm.tm_mon, &uri_tm.tm_mday, &uri_tm.tm_hour, &uri_tm.tm_min, &uri_tm.tm_sec) <= 0)
-        if (sscanf(uriTime, "%d-%d-%d", &uri_tm.tm_year, &uri_tm.tm_mon, &uri_tm.tm_mday) <= 0)
+        strptime(uriTime.c_str(), "%H:%M:%S", &uri_tm);
+
+        struct tm uri_dt = {0};
+        if (sscanf(uriDate.c_str(), "%d-%d-%d", &uri_dt.tm_year, &uri_dt.tm_mon, &uri_dt.tm_mday) <= 0)
             return time(NULL);
 
-        uri_tm.tm_year -= 1900;
-        uri_tm.tm_mon -= 1;
-        return timegm(&uri_tm);
+        uri_dt.tm_year -= 1900;
+        uri_dt.tm_mon -= 1;
+        uri_dt.tm_hour = uri_tm.tm_hour;
+        uri_dt.tm_min = uri_tm.tm_min;
+        uri_dt.tm_sec = uri_tm.tm_sec;
+        return timegm(&uri_dt);
     }
 
     bool getCdrUnfinished(BDb * db_calls, time_t timeFrom, time_t timeTo, string src_number, string dst_number, string limit, string showFinished, vector<Cdr> &cdrUnfinished) {
@@ -207,42 +215,40 @@ public:
         html << "<!DOCTYPE html>\n" << "<html lang=\"en\">\n";
         renderHeader(html);
 
-        time_t timeFrom = uri_time(parameters["date_from"].c_str());
-        int hour_from = atoi(parameters["hour_from"].c_str());
-        if (hour_from<24)
-            timeFrom += hour_from*3600;
+        string dateFrom = parameters["date_from"];
+        string timeFrom = parameters["time_from"];
+        string timeTo = parameters["time_to"];
 
-        time_t timeTo;
-        if (hour_from<24)
-            timeTo = timeFrom + 3600;
-        else
-            timeTo = timeFrom + 24*3600; //uri_time(parameters["date_to"].c_str());
+        time_t time_from = uri_data_time(dateFrom, timeFrom);
+        if (timeFrom.size()==0)
+            time_from -= 3600;
+
+        time_t time_to = uri_data_time(dateFrom, timeTo); //uri_time(parameters["date_to"].c_str());
         
         string src_number = parameters["src_number"];
         string dst_number = parameters["dst_number"];
         string tab_show = parameters["show"];
         string limit = parameters["limit"];
 
-//        bool bShowAll = parameters["show_all"].compare("on")==0;
-//        string src_number_pattern = parameters["src_number"];
-//        string dst_number_pattern = parameters["dst_number"];
         string action = parameters["do_search"];
-        render_filter(html, timeFrom, hour_from, timeTo, src_number, dst_number, limit, tab_show);
+        render_filter(html, time_from, time_to, src_number, dst_number, limit, tab_show);
 
         if (timeFrom < timeTo && action.compare("Search")==0) {
 
             BDb db_calls(app().conf.db_calls);
             vector<Cdr> cdrs;
-            if (getCdrUnfinished(&db_calls, timeFrom, timeTo, src_number, dst_number, limit, tab_show, cdrs))
-                render_cdr_table (timeFrom, timeTo, html, cdrs);
+            if (getCdrUnfinished(&db_calls, time_from, time_to, src_number, dst_number, limit, tab_show, cdrs))
+                render_cdr_table (time_from, time_to, html, cdrs);
         }
 
         html <<   "</html>";
     }
 
-    void render_filter(std::stringstream &html, time_t &timeFrom, int hour_from, time_t &timeTo, string &src_number, string &dst_number, string &limit, string tab_show) {
+    void render_filter(std::stringstream &html, time_t &timeFrom, time_t &timeTo, string &src_number, string &dst_number, string &limit, string tab_show) {
 
-        string time_from = from_date(timeFrom);
+        string date_from = str_date(timeFrom);
+        string time_from = str_time(timeFrom);
+        string time_to = str_time(timeTo);
 
         if (limit.size()==0)
             limit = string("100");
@@ -256,38 +262,7 @@ public:
         if (checked_unfin.size()==0 && checked_fin.size()==0 && checked_all.size()==0)
             checked_all = "checked";
 
-        vector<string> hour_checked(25);
-        if (hour_from<=hour_checked.size() && hour_from>0)
-            hour_checked[hour_from] = " selected";
-
 //        string time_to = period_date(timeTo);
-        string dropdown_list = "<select name=\"hour_from\">"
-                " <option value=\"0\"" +  hour_checked[0] + ">0:00 - 1:00</option>\n"+
-                " <option value=\"1\"" +  hour_checked[1] +">1:00 - 2:00</option>\n"+
-                " <option value=\"2\"" +  hour_checked[2] + ">2:00 - 3:00</option>\n"
-                " <option value=\"3\"" +  hour_checked[3] + ">3:00 - 4:00</option>\n"
-                " <option value=\"4\"" +  hour_checked[4] + ">4:00 - 5:00</option>\n"
-                " <option value=\"5\"" +  hour_checked[5] + ">5:00 - 6:00</option>\n"
-                " <option value=\"6\"" +  hour_checked[6] + ">6:00 - 7:00</option>\n"
-                " <option value=\"7\"" +  hour_checked[7] + ">7:00 - 8:00</option>\n"
-                " <option value=\"8\"" +  hour_checked[8] + ">8:00 - 9:00</option>\n"
-                " <option value=\"9\"" +  hour_checked[9] + ">9:00 - 10:00</option>\n"
-                " <option value=\"10\""+  hour_checked[10] + ">10:00 - 11:00</option>\n"
-                " <option value=\"11\"" +  hour_checked[11] + ">11:00 - 12:00</option>\n"
-                " <option value=\"12\"" +  hour_checked[12] + ">12:00 - 13:00</option>\n"
-                " <option value=\"13\"" +  hour_checked[13] + ">13:00 - 14:00</option>\n"
-                " <option value=\"14\"" +  hour_checked[14] + ">14:00 - 15:00</option>\n"
-                " <option value=\"15\"" +  hour_checked[15] + ">15:00 - 16:00</option>\n"
-                " <option value=\"16\"" +  hour_checked[16] + ">16:00 - 17:00</option>\n"
-                " <option value=\"17\"" +  hour_checked[17] + ">17:00 - 18:00</option>\n"
-                " <option value=\"18\"" +  hour_checked[18] + ">18:00 - 19:00</option>\n"
-                " <option value=\"19\"" +  hour_checked[19] + ">19:00 - 20:00</option>\n"
-                " <option value=\"20\"" +  hour_checked[20] + ">20:00 - 21:00</option>\n"
-                " <option value=\"21\"" +  hour_checked[21] + ">21:00 - 22:00</option>\n"
-                " <option value=\"22\"" +  hour_checked[22] + ">22:00 - 23:00</option>\n"
-                " <option value=\"23\"" +  hour_checked[23] + ">23:00 - 24:00</option>\n"
-                " <option value=\"24\"" +  hour_checked[24] + ">0:00 - 24:00</option>\n"
-                "</select>\n";
 
         html <<   "<head>\n"
 //             <<   "    <meta charset=\"UTF-8\">\n"
@@ -301,15 +276,15 @@ public:
              <<   "<form action=\"\" method=\"GET\">\n"
              <<   "    <label for=\"src_number\">src_number:</label> <input type=\"text\" name=\"src_number\" id=\"src_number\" value=\""+src_number+"\">\n"
              <<   "    <label for=\"dst_number\">dst_number:</label> <input type=\"text\" name=\"dst_number\" id=\"dst_number\" value=\""+dst_number+"\">\n"
-             <<   "    <label for=\"date_from\">date_from:</label> <input type=\"text\" name=\"date_from\" id=\"date_from\" value=\"" << time_from << "\">\n"
-             <<   dropdown_list
-             <<   "    <label for=\"limit\">limit:</label> <input type=\"text\" name=\"limit\" id=\"limit\" value=\""+limit+"\">\n"
+             <<   "    <label for=\"date_from\">date_from:</label> <input type=\"text\" name=\"date_from\" id=\"date_from\" value=\"" << date_from << "\">\n"
+             <<   "    <label for=\"time_from\">time_from:</label> <input type=\"text\" name=\"time_from\" id=\"time_from\" value=\"" << time_from << "\">\n"
+             <<   "    <label for=\"time_to\">time_to:</label> <input type=\"text\" name=\"time_to\" id=\"time_to\" value=\"" << time_to << "\">\n"
+             <<   "<br>"
+             <<   "    <input type=\"submit\" value=\"Search\" name=\"do_search\">\n"
              <<   "    <input type=\"radio\" name=\"show\" value=\"all\" "+checked_all+"> show all\n"
              <<   "    <input type=\"radio\" name=\"show\" value=\"fin\" "+checked_fin+"> finished\n"
              <<   "    <input type=\"radio\" name=\"show\" value=\"unfin\" "+checked_unfin+"> unfinished\n"
-//             <<   "    <label for=\"date_to\">date_to: <input type=\"text\" name=\"date_to\" id=\"date_to\" value=\"" << time_to << "\">\n"
-//             <<   "<input type=\"checkbox\" checked=\"checked\" name=\"show_all\" id=\"show_all\"/><label for=\"show_all\">show all</label>"
-             <<   "    <input type=\"submit\" value=\"Search\" name=\"do_search\">\n"
+             <<   "    <label for=\"limit\">limit:</label> <input type=\"text\" name=\"limit\" id=\"limit\" value=\""+limit+"\">\n"
              <<   "</form>\n"
              <<   "<script>\n"
              <<   "    $( function() {\n"
