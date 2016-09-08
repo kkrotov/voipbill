@@ -78,7 +78,7 @@ void ThreadBlacklistCalc::run() {
             }
         }
 
-        if (lock.disabled_local) {
+        if (lock.is_finance_block) {
 
             map<int, ServiceTrunk> &trunks = repository.activeCounter->clientTrunks[lock.client_id];
             for (auto pairTrunk : trunks) {
