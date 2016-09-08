@@ -58,19 +58,21 @@ void ThreadSyncLocks::save_client_locks() {
         sync_count += 1;
     }
 
-    if (sync_count > 0) {
+    if ((sync_count > 0) || needTotalSync) {
         try {
             if (needTotalSync) {
                 BDbTransaction trans(&db_main);
 
                 db_main.exec("DELETE FROM billing.clients_locks WHERE region_id=" + app().conf.str_instance_id);
-                db_main.exec(q);
+                if (q.size()>0)
+                    db_main.exec(q);
 
                 trans.commit();
 
                 clientLock->needTotalSync = false;
             } else {
-                db_main.exec(q);
+                if (q.size()>0)
+                    db_main.exec(q);
             }
 
             clientLock->fixChanges(marker);
