@@ -16,7 +16,7 @@ protected:
         item->id = row.get_i(0);
         item->nnp_tariff_id = row.get_i(1);
         item->nnp_destination_id = row.get_i(2);
-        item->price = row.get_i(3);
+        item->price = row.get_d(3);
     }
 
     struct key_id {

@@ -9,7 +9,7 @@ protected:
 
     string sql(BDb * db) {
         return "select id, \"number\", account_client_id, " \
-            "   tariff_id, extract(epoch from activate_from), extract(epoch from deactivate_from) " \
+            "   tariff_id, extract(epoch from activate_from), extract(epoch from deactivate_from), coefficient " \
             "   from nnp.account_tariff_light ";
     }
 
@@ -20,6 +20,8 @@ protected:
         item->nnp_tariff_id = row.get_i(3);
         item->activate_from = row.get_i(4);
         item->deactivate_from = row.get_i(5);
+        item->coefficient = row.get_d(6);
+
     }
 
     struct key_id {

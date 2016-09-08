@@ -7,6 +7,7 @@ struct NNPAccountTariffLight {
     long long int number;
     int account_client_id;
     int nnp_tariff_id;
+    double coefficient;
     time_t activate_from,deactivate_from;
 
     void dump(stringstream &trace) {
@@ -17,6 +18,7 @@ struct NNPAccountTariffLight {
         trace << "nnp_tariff_id: " << nnp_tariff_id << ", ";
         trace << "activate_from: " << string_time(activate_from) << ", ";
         trace << "deactivate_from: " << string_time(deactivate_from) << ", ";
+        trace << "coefficient: " << coefficient << ", ";
         trace << ")";
     }
 };

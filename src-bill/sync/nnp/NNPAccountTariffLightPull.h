@@ -18,12 +18,15 @@ public:
         fields.push_back("tariff_id");
         fields.push_back("activate_from");
         fields.push_back("deactivate_from");
+        fields.push_back("coefficient");
+
 
         datatype.push_back("id integer");
         datatype.push_back("\"number\" bigint");
         datatype.push_back("account_client_id integer");
         datatype.push_back("tariff_id integer");
-        datatype.push_back("activate_from date");
-        datatype.push_back("deactivate_from date");
+        datatype.push_back("activate_from timestamp");
+        datatype.push_back("deactivate_from timestamp");
+        datatype.push_back("coefficient real");
     }
 };
