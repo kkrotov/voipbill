@@ -112,18 +112,7 @@ public:
         if (trunk_id == 0)
             return nullptr;
 
-        //return this->getTrunk(trunk_id);
-        Trunk *result = nullptr;
-        for (int i=0; i<trunk->size(); i++) {
-
-            Trunk *t = trunk->get(i);
-            if (t->id == trunk_id) {
-
-                result = t;
-                break;
-            }
-        }
-        return result;
+        return this->getTrunk(trunk_id);
     }
 
     bool prepare(time_t currentTime = 0);
