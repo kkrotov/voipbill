@@ -18,14 +18,17 @@ void ThreadSyncCalls::run() {
     if (!lock.owns_lock()) {
         return;
     }
-
     repository.billingData->prepareSyncCallsCentral(&db_main);
 
     string local_prev_sync_month;
     string local_curr_sync_month;
     string local_next_sync_month;
     try {
-        BDbResult res = db_calls.query("select date_trunc('month', connect_time) - interval '1 month', date_trunc('month', connect_time), date_trunc('month', connect_time) + interval '1 month' from calls_raw.calls_raw where id>" + lexical_cast<string>(repository.billingData->lastSyncCentralCallId) + " order by id limit 1");
+        BDbResult res = db_calls.query("select date_trunc('month', connect_time) - interval '1 month', "
+                                               "date_trunc('month', connect_time), date_trunc('month', connect_time) + interval '1 month' "
+                                               "from calls_raw.calls_raw "
+                                               "where id>" + lexical_cast<string>(repository.billingData->lastSyncCentralCallId) +
+                                       " order by id limit 1");
         if (!res.next()) {
             // nothing to sync
             return;
@@ -41,6 +44,12 @@ void ThreadSyncCalls::run() {
         throw e;
     }
 
+    syncCallsRaw(local_prev_sync_month,local_curr_sync_month,local_next_sync_month);
+    syncCallsCdr(local_curr_sync_month);
+}
+
+bool ThreadSyncCalls::syncCallsRaw(string local_prev_sync_month,string local_curr_sync_month,string local_next_sync_month) {
+
     try {
 
         while (copyCallsPart(local_prev_sync_month)) { }
@@ -53,6 +62,7 @@ void ThreadSyncCalls::run() {
         e.addTrace("ThreadSyncCalls::run::copy(main_last_id:" + lexical_cast<string>(repository.billingData->lastSyncCentralCallId) + ")");
         throw e;
     }
+    return true;
 }
 
 bool ThreadSyncCalls::copyCallsPart(string month) {
@@ -99,6 +109,47 @@ bool ThreadSyncCalls::copyCallsPart(string month) {
         &db_calls, &db_main);
 
     return true;
+}
+
+bool ThreadSyncCalls::syncCallsCdr(string month) {
+
+    string field_names = "server_id,id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,"
+            "dst_route,src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party";
+    string field_types ="server_id integer,"
+                        "  id bigint,"
+                        "  call_id bigint,"
+                        "  nas_ip inet,"
+                        "  src_number character varying(32),"
+                        "  dst_number character varying(32),"
+                        "  redirect_number character varying(32),"
+                        "  setup_time timestamp without time zone,"
+                        "  connect_time timestamp without time zone,"
+                        "  disconnect_time timestamp without time zone,"
+                        "  session_time bigint,"
+                        "  disconnect_cause smallint,"
+                        "  src_route character varying(32),"
+                        "  dst_route character varying(32),"
+                        "  src_noa smallint,"
+                        "  dst_noa smallint,"
+                        "  hash uuid,"
+                        "  dst_replace character varying(32),"
+                        "  call_finished character varying,"
+                        "  releasing_party character varying";
+    string select = "select "+ app().conf.str_instance_id +",id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,"
+                            "dst_route,src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party "
+                    "from calls_cdr.cdr_"+month+" where id>"+ lexical_cast<string>(repository.billingData->lastSyncCentralCdrId);
+
+    try {
+
+        BDb::copy_dblink("calls_cdr.cdr_"+month, field_names, field_types, select, &db_calls, &db_main);
+        return true;
+    }
+    catch (Exception e) {
+
+        std::string message = "Error syncronizing cdr tables: "+e.message;
+        Log::error(message);
+        return false;
+    }
 }
 
 void ThreadSyncCalls::htmlfull(stringstream &html) {
