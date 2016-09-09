@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS  billing.stats_nnp_package_minute;
 
 CREATE TABLE billing.stats_nnp_package_minute
 (
+  id integer NOT NULL,
   server_id smallint NOT NULL,
   nnp_account_tariff_light_id integer NOT NULL,
   nnp_package_minute_id  integer NOT NULL,
@@ -12,7 +13,7 @@ CREATE TABLE billing.stats_nnp_package_minute
   used_credit double precision NOT NULL,
   min_call_id bigint NOT NULL,
   max_call_id bigint NOT NULL,
-  CONSTRAINT stats_nnp_package_minute_pkey PRIMARY KEY (server_id,nnp_account_tariff_light_id,nnp_package_minute_id)
+  CONSTRAINT stats_nnp_package_minute_pkey PRIMARY KEY (id)
 )
 WITH (
   OIDS=FALSE
@@ -42,20 +43,20 @@ CREATE OR REPLACE RULE stats_nnp_package_minute_rl AS
     ON INSERT TO billing.stats_nnp_package_minute
    WHERE (EXISTS ( SELECT x.server_id,x.nnp_account_tariff_light_id,x.nnp_package_minute_id
            FROM billing.stats_nnp_package_minute x
-          WHERE x.nnp_account_tariff_light_id = new.nnp_account_tariff_light_id AND x.nnp_package_minute_id=new.nnp_package_minute_id AND x.server_id = new.server_id)) DO INSTEAD  
+          WHERE x.id = new.id  AND x.server_id = new.server_id)) DO INSTEAD  
           
           UPDATE billing.stats_nnp_package_minute
           
-          SET   activate_from = new.activate_from , 
+          SET   
+                nnp_account_tariff_light_id = new.nnp_account_tariff_light_id,
+                nnp_package_minute_id = new.nnp_package_minute_id,
+                activate_from = new.activate_from , 
                 deactivate_from = new.deactivate_from, 
                 used_seconds = new.used_seconds, 
                 paid_seconds = new.paid_seconds, 
                 used_credit = new.used_credit, 
                 min_call_id = new.min_call_id, 
                 max_call_id = new.max_call_id
-  WHERE stats_nnp_package_minute.nnp_account_tariff_light_id = new.nnp_account_tariff_light_id AND stats_nnp_package_minute.nnp_package_minute_id = new.nnp_package_minute_id
-        AND stats_nnp_package_minute.server_id = new.server_id ;
+  WHERE stats_nnp_package_minute.id = new.id AND stats_nnp_package_minute.server_id = new.server_id ;
 
-ALTER TABLE nnp.account_tariff_light ALTER COLUMN activate_from TYPE timestamp without time zone;
-ALTER TABLE nnp.account_tariff_light ALTER COLUMN deactivate_from TYPE timestamp without time zone;
 

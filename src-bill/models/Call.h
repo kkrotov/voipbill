@@ -37,6 +37,9 @@ struct Call {
 
     int trunk_settings_stats_id;
 
+    int  account_version;              // Номер версии расчета примененного к звонку, 4 - обычная, 5 - nnp-пакеты
+    int  stats_nnp_package_minute_id;  // номер счетчика минут на nnp-пакете применнноного к этому звонку.
+
     int pricelist_id;
     long long int prefix;
 

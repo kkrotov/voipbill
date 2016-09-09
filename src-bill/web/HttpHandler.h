@@ -9,6 +9,7 @@
 #include "PageFmins.h"
 #include "PagePackage.h"
 #include "PageTrunkSettingsCounters.h"
+#include "PageNNPPackageMinuteCounters.h"
 #include "PageLocks.h"
 #include "PageBlacklist.h"
 #include "PageSync.h"
@@ -34,6 +35,7 @@ private:
         handlers.push_back(shared_ptr<BasePage>(new PageFmins));
         handlers.push_back(shared_ptr<BasePage>(new PagePackage));
         handlers.push_back(shared_ptr<BasePage>(new PageTrunkSettingsCounters));
+        handlers.push_back(shared_ptr<BasePage>(new PageNNPPackageMinuteCounters));
         handlers.push_back(shared_ptr<BasePage>(new PageLocks));
         handlers.push_back(shared_ptr<BasePage>(new PageBlacklist));
         handlers.push_back(shared_ptr<BasePage>(new PageSync));
