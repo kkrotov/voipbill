@@ -11,6 +11,7 @@ protected:
     string graylogSource;
     string serverId;
     void massPublish(list<pLogMessage> messages);
+    string logWriterName();
 };
 
 

@@ -9,3 +9,8 @@ void LogWriterScreen::doPublish(pLogMessage message) {
     printf("%s\n", msg.c_str());
 
 }
+
+string LogWriterScreen::logWriterName() {
+
+    return string("LogWriterScreen");
+}

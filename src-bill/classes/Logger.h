@@ -30,4 +30,5 @@ private:
     time_t getPeriod();
     void addMessageToHistory();
     void processGroupingMessages();
+    void publishMessages(list<pLogMessage> &messages);
 };
