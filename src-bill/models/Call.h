@@ -7,6 +7,9 @@
 #define CALL_ORIG               true
 #define CALL_TERM               false
 
+#define CALL_ACCOUNT_VERSION_4  4
+#define CALL_ACCOUNT_VERSION_5  5
+
 struct Call {
     long long int id;
     long long int peer_id;
@@ -37,8 +40,8 @@ struct Call {
 
     int trunk_settings_stats_id;
 
-    int  account_version;              // Номер версии расчета примененного к звонку, 4 - обычная, 5 - nnp-пакеты
-    int  stats_nnp_package_minute_id;  // номер счетчика минут на nnp-пакете применнноного к этому звонку.
+    int account_version_orig, account_version_term;                          // Номер версии расчета примененного к звонку, 4 - обычная, 5 - nnp-пакеты. Для терминационного и оригинационного плеча.
+    int stats_nnp_package_minute_orig_id, stats_nnp_package_minute_term_id;  // номер счетчика минут на nnp-пакете применнноного к этому звонку. Для терминационного и оригинационного плеча.
 
     int pricelist_id;
     long long int prefix;
@@ -93,7 +96,7 @@ struct Call {
         trace << ")";
     }
 
-    Call(Cdr * cdr, bool orig) {
+    Call(Cdr *cdr, bool orig) {
         this->orig = orig;
         our = false;
 
@@ -134,6 +137,11 @@ struct Call {
 
         cdr_call_id = cdr->call_id;
         disconnect_cause = cdr->disconnect_cause;
+
+        account_version_orig = 4;
+        account_version_term = 4;
+        stats_nnp_package_minute_orig_id = 0;
+        stats_nnp_package_minute_term_id = 0;
 
         is_service_number = false;
     }

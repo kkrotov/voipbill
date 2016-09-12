@@ -25,10 +25,6 @@ DB_DUMP_REGIONAL_SCHEMA=$DIR/SQL/nispd99.schema.sql
 
 ####################################################################################################################################################
 
-    /usr/pgsql-9.4/bin/psql -U postgres -h $HOST_DB_TEST_MAIN -d $NAME_DB_TEST_MAIN < $DB_DUMP_DATA_MAIN_WO_CALLS 
-
-exit
-
 
 main_db_test_create_and_load() {
 

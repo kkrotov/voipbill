@@ -71,13 +71,13 @@ void StatsNNPPackageMinuteManager::recalc(BDb *db, long long int storedLastId) {
                      "        used_seconds = coalesce(s.used_seconds, 0),                   " \
                      "        used_credit = coalesce(s.used_credit, 0)                      " \
                      "    from (                                                            " \
-                     "        select  stats_nnp_package_minute_id as id,                    " \
+                     "        select  stats_nnp_package_minute_orig_id as id,               " \
                      "                sum(billed_time) as used_seconds,                     " \
                      "                sum(cost) as used_credit,                             " \
                      "                max(id) as min_call_id, max(id) as max_call_id        " \
                      "        from calls_raw.calls_raw                                      " \
                      "        where id >= " + strMinCallId + "                              " \
-                     "        group by stats_nnp_package_minute_id                          " \
+                     "        group by stats_nnp_package_minute_orig_id                     " \
                      "    ) s                                                               " \
                      "    where p.max_call_id >= " + strStoredLastId + " and p.id = s.id    ");
 
@@ -117,11 +117,11 @@ StatsNNPPackageMinute *StatsNNPPackageMinuteManager::getCurrent(time_t connect_t
 
 void StatsNNPPackageMinuteManager::add(CallInfo *callInfo) {
 
-    if (callInfo->call->stats_nnp_package_minute_id == 0) {
+    if (callInfo->call->stats_nnp_package_minute_orig_id == 0 ) {
         return;
     }
 
-    StatsNNPPackageMinute *stats = updateStatsNNPPackageMinute(callInfo, callInfo->call->stats_nnp_package_minute_id);
+    StatsNNPPackageMinute *stats = updateStatsNNPPackageMinute(callInfo, callInfo->call->stats_nnp_package_minute_orig_id);
     if (stats != nullptr) {
         size_t parts = realtimeStatsNNPPackageMinuteParts.size();
         map<int, StatsNNPPackageMinute> &realtimeStatsNNPPackageMinute = realtimeStatsNNPPackageMinuteParts.at(

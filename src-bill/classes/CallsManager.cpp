@@ -4,8 +4,7 @@ CallsManager::CallsManager() {
     clear();
 }
 
-void CallsManager::clear()
-{
+void CallsManager::clear() {
     realtimeLastId = -1;
     realtimeLastTime = 0;
     storedLastId = -1;
@@ -25,7 +24,7 @@ bool CallsManager::ready() {
 
 void CallsManager::add(Call &call) {
     size_t parts = realtimeCallsParts.size();
-    vector<Call>&realtimeCalls = realtimeCallsParts.at(parts - 1);
+    vector<Call> &realtimeCalls = realtimeCallsParts.at(parts - 1);
 
     realtimeCalls.push_back(call);
 
@@ -57,7 +56,7 @@ size_t CallsManager::getQueueSize() {
 }
 
 
-void CallsManager::calls_insert_row(Call * call, stringstream &q) {
+void CallsManager::calls_insert_row(Call *call, stringstream &q) {
 
     q << "(";
     q << "'" << call->id << "',";
@@ -142,7 +141,33 @@ void CallsManager::calls_insert_row(Call * call, stringstream &q) {
     }
     q << (call->mob ? "true" : "false") << ",";
     q << (call->geo_mob ? "true" : "false") << ",";
+
+    if (call->account_version_orig != 0) {
+        q << "'" << call->account_version_orig << "',";
+    } else {
+        q << "NULL,";
+    }
+
+    if (call->account_version_term != 0) {
+        q << "'" << call->account_version_term << "',";
+    } else {
+        q << "NULL,";
+    }
+
+    if (call->stats_nnp_package_minute_orig_id != 0) {
+        q << "'" << call->stats_nnp_package_minute_orig_id << "',";
+    } else {
+        q << "NULL,";
+    }
+
+    if (call->stats_nnp_package_minute_term_id != 0) {
+        q << "'" << call->stats_nnp_package_minute_term_id << "',";
+    } else {
+        q << "NULL,";
+    }
+
     q << call->disconnect_cause;
+
     q << ")\n";
 }
 
@@ -157,7 +182,7 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth, 
         struct tm ttt;
         gmtime_r(&call.connect_time, &ttt);
         time_t dt_day = call.connect_time - ttt.tm_hour * 3600 - ttt.tm_min * 60 - ttt.tm_sec;
-        time_t dt_month = dt_day - (ttt.tm_mday - 1)*86400;
+        time_t dt_month = dt_day - (ttt.tm_mday - 1) * 86400;
 
         if (queryPerMonth.find(dt_month) == queryPerMonth.end()) {
             char buff[20];
@@ -174,7 +199,8 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth, 
                     "id,orig,our,peer_id,cdr_id,connect_time,trunk_id,account_id,trunk_service_id,number_service_id," \
                     "src_number,dst_number,billed_time,rate,cost,tax_cost,interconnect_rate,interconnect_cost," \
                     "service_package_id,service_package_stats_id,package_time,package_credit,trunk_settings_stats_id," \
-                    "destination_id,pricelist_id,prefix,geo_id,geo_operator_id,mob,geo_mob,disconnect_cause" \
+                    "destination_id,pricelist_id,prefix,geo_id,geo_operator_id,mob,geo_mob," \
+                     "account_version_orig,account_version_term,stats_nnp_package_minute_orig_id,stats_nnp_package_minute_term_id,disconnect_cause " \
                  ")VALUES\n";
 
             calls_insert_row(&call, q);
@@ -190,12 +216,11 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth, 
     }
 }
 
-void CallsManager::createIfNotExists (BDb * dbCalls, string qtime)
-{
-    dbCalls->query("select create_calls_raw('"+qtime+"'::timestamp without time zone)");
+void CallsManager::createIfNotExists(BDb *dbCalls, string qtime) {
+    dbCalls->query("select create_calls_raw('" + qtime + "'::timestamp without time zone)");
 }
 
-void CallsManager::executeSaveQueries(BDb * dbCalls, map<time_t, stringstream> &queryPerMonth) {
+void CallsManager::executeSaveQueries(BDb *dbCalls, map<time_t, stringstream> &queryPerMonth) {
 
     for (auto &it : queryPerMonth) {
         dbCalls->exec(it.second.str());
