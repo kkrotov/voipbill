@@ -167,6 +167,7 @@ void DataBillingContainer::prepareSyncCallsCentral(BDb * db_main) {
 
         loadSyncCentralCallIdAndTime(db_main);
         loadSyncCentralCdrIdAndTime(db_main);
+        loadSyncCentralCdrUnfinishedIdAndTime(db_main);
     }
     catch (Exception &e) {
 
@@ -208,13 +209,28 @@ void DataBillingContainer::loadSyncCentralCdrIdAndTime(BDb * db_main) {
     auto res = db_main->query("select id, setup_time from calls_cdr.cdr where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
     if (res.next()) {
 
-        lastSyncCentralCdrTime = res.get_ll(0);
+        lastSyncCentralCdrId = res.get_ll(0);
         lastSyncCentralCdrTime = parseDateTime(res.get(1));
     }
     else {
 
+        lastSyncCentralCdrId = 0;
         lastSyncCentralCdrTime = 0;
-        lastSyncCentralCdrTime = 0;
+    }
+}
+
+void DataBillingContainer::loadSyncCentralCdrUnfinishedIdAndTime(BDb * db_main) {
+
+    auto res = db_main->query("select id, setup_time from calls_cdr.cdr_unfinished where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
+    if (res.next()) {
+
+        lastSyncCentralCdrUnfinishedId = res.get_ll(0);
+        //lastSyncCentralCdrTime = parseDateTime(res.get(1));
+    }
+    else {
+
+        lastSyncCentralCdrUnfinishedId = 0;
+        //lastSyncCentralCdrTime = 0;
     }
 }
 

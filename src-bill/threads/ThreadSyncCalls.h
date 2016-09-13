@@ -18,8 +18,11 @@ class ThreadSyncCalls : public Thread {
 
     void run();
 
-    bool syncCallsRaw(string local_prev_sync_month,string local_curr_sync_month,string local_next_sync_month);
-    bool syncCallsCdr(string month);
+    bool getCurrentMonths (string relname, string fieldname, long long int id, string &local_prev_sync_month, string &local_curr_sync_month, string &local_next_sync_month);
+    bool getCurrentMonths (string &local_prev_sync_month, string &local_curr_sync_month, string &local_next_sync_month);
+    bool syncCallsRaw();
+    bool syncCallsCdr();
+    bool syncCallsCdrUnfinished();
     bool copyCallsPart(string month);
     void htmlfull(stringstream &html);
 
