@@ -1,15 +1,7 @@
-#!/bin/python
-# -*- coding: utf-8 -*-
+-- Function: calls_cdr.tr_partitioning()
 
-def migrate(centralDb, regionalDb, regionsList) :
+-- DROP FUNCTION calls_cdr.tr_partitioning();
 
-  regConnections = [(regionalDb(reg), int(reg)) for reg in regionsList]
-
-  # Мигрируем региональные БД
-  for (regConn, region_id) in regConnections :
-    curReg = regConn.cursor()
-
-    curReg.execute('''
 CREATE OR REPLACE FUNCTION calls_cdr.tr_partitioning()
   RETURNS trigger AS
 $BODY$
@@ -70,13 +62,6 @@ end;
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-    ''')
-
-    curReg.execute('''
 ALTER FUNCTION calls_cdr.tr_partitioning()
   OWNER TO postgres;
-    ''')
-
-    regConn.commit()
-    regConn.close()
 

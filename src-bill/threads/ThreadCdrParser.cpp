@@ -98,11 +98,7 @@ void ThreadCdrParser::saveCalls(const std::list<CallData> &calls) {
             logUnfinishedCall(call);
             continue;
         }
-
-        if (!isCallExists(call.hash)) {
-            saveCall(call);
-        }
-
+        saveCall(call);
     }
 }
 
