@@ -1,8 +1,8 @@
--- Function: calls_cdr.tr_partitioning_cdr_unfinished()
+-- Function: calls_cdr.tr_partitioning()
 
--- DROP FUNCTION calls_cdr.tr_partitioning_cdr_unfinished();
+-- DROP FUNCTION calls_cdr.tr_partitioning();
 
-CREATE OR REPLACE FUNCTION calls_cdr.tr_partitioning_cdr_unfinished()
+CREATE OR REPLACE FUNCTION calls_cdr.tr_partitioning()
   RETURNS trigger AS
 $BODY$
 declare
@@ -62,6 +62,6 @@ end;
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION calls_cdr.tr_partitioning_cdr_unfinished()
+ALTER FUNCTION calls_cdr.tr_partitioning()
   OWNER TO postgres;
 
