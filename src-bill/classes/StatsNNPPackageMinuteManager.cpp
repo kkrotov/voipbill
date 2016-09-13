@@ -117,11 +117,11 @@ StatsNNPPackageMinute *StatsNNPPackageMinuteManager::getCurrent(time_t connect_t
 
 void StatsNNPPackageMinuteManager::add(CallInfo *callInfo) {
 
-    if (callInfo->call->stats_nnp_package_minute_orig_id == 0 ) {
+    if (callInfo->call->stats_nnp_package_minute_id == 0 ) {
         return;
     }
 
-    StatsNNPPackageMinute *stats = updateStatsNNPPackageMinute(callInfo, callInfo->call->stats_nnp_package_minute_orig_id);
+    StatsNNPPackageMinute *stats = updateStatsNNPPackageMinute(callInfo, callInfo->call->stats_nnp_package_minute_id);
     if (stats != nullptr) {
         size_t parts = realtimeStatsNNPPackageMinuteParts.size();
         map<int, StatsNNPPackageMinute> &realtimeStatsNNPPackageMinute = realtimeStatsNNPPackageMinuteParts.at(

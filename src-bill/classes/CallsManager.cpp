@@ -142,26 +142,14 @@ void CallsManager::calls_insert_row(Call *call, stringstream &q) {
     q << (call->mob ? "true" : "false") << ",";
     q << (call->geo_mob ? "true" : "false") << ",";
 
-    if (call->account_version_orig != 0) {
-        q << "'" << call->account_version_orig << "',";
+    if (call->account_version != 0) {
+        q << "'" << call->account_version << "',";
     } else {
         q << "NULL,";
     }
 
-    if (call->account_version_term != 0) {
-        q << "'" << call->account_version_term << "',";
-    } else {
-        q << "NULL,";
-    }
-
-    if (call->stats_nnp_package_minute_orig_id != 0) {
-        q << "'" << call->stats_nnp_package_minute_orig_id << "',";
-    } else {
-        q << "NULL,";
-    }
-
-    if (call->stats_nnp_package_minute_term_id != 0) {
-        q << "'" << call->stats_nnp_package_minute_term_id << "',";
+    if (call->stats_nnp_package_minute_id != 0) {
+        q << "'" << call->stats_nnp_package_minute_id << "',";
     } else {
         q << "NULL,";
     }
@@ -200,7 +188,7 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth, 
                     "src_number,dst_number,billed_time,rate,cost,tax_cost,interconnect_rate,interconnect_cost," \
                     "service_package_id,service_package_stats_id,package_time,package_credit,trunk_settings_stats_id," \
                     "destination_id,pricelist_id,prefix,geo_id,geo_operator_id,mob,geo_mob," \
-                     "account_version_orig,account_version_term,stats_nnp_package_minute_orig_id,stats_nnp_package_minute_term_id,disconnect_cause " \
+                     "account_version,stats_nnp_package_minute_id,disconnect_cause " \
                  ")VALUES\n";
 
             calls_insert_row(&call, q);

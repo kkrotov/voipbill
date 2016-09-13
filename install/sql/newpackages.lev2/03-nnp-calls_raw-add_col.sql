@@ -1,5 +1,8 @@
 ALTER TABLE calls_raw.calls_raw
- ADD COLUMN account_version_orig integer,
- ADD COLUMN account_version_term integer,
- ADD COLUMN stats_nnp_package_minute_orig_id integer,
- ADD COLUMN stats_nnp_package_minute_term_id integer
+ DROP COLUMN account_version_orig,
+  DROP COLUMN account_version_term,
+   DROP COLUMN stats_nnp_package_minute_orig_id,
+    DROP COLUMN stats_nnp_package_minute_term_id,
+     ADD COLUMN account_version integer,
+      ADD COLUMN stats_nnp_package_minute_id integer
+      

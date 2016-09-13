@@ -4,16 +4,16 @@
 
 struct NNPAccountTariffLight {
     int id;
-    long long int number;
+    int service_number_id;
     int account_client_id;
     int nnp_tariff_id;
     double coefficient;
-    time_t activate_from,deactivate_from;
+    time_t activate_from, deactivate_from;
 
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
-        trace << "number: " << number << ", ";
+        trace << "service_number_id: " << service_number_id << ", ";
         trace << "account_client_id: " << account_client_id << ", ";
         trace << "nnp_tariff_id: " << nnp_tariff_id << ", ";
         trace << "activate_from: " << string_time(activate_from) << ", ";

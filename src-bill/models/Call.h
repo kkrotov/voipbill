@@ -40,8 +40,8 @@ struct Call {
 
     int trunk_settings_stats_id;
 
-    int account_version_orig, account_version_term;                          // Номер версии расчета примененного к звонку, 4 - обычная, 5 - nnp-пакеты. Для терминационного и оригинационного плеча.
-    int stats_nnp_package_minute_orig_id, stats_nnp_package_minute_term_id;  // номер счетчика минут на nnp-пакете применнноного к этому звонку. Для терминационного и оригинационного плеча.
+    int account_version;              // Номер версии расчета примененного к звонку, 4 - обычная, 5 - nnp-пакеты.
+    int stats_nnp_package_minute_id;  // номер счетчика минут на nnp-пакете применнноного к этому звонку.
 
     int pricelist_id;
     long long int prefix;
@@ -138,10 +138,9 @@ struct Call {
         cdr_call_id = cdr->call_id;
         disconnect_cause = cdr->disconnect_cause;
 
-        account_version_orig = 4;
-        account_version_term = 4;
-        stats_nnp_package_minute_orig_id = 0;
-        stats_nnp_package_minute_term_id = 0;
+        account_version = 4;
+        stats_nnp_package_minute_id = 0;
+
 
         is_service_number = false;
     }

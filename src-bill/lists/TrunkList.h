@@ -12,7 +12,7 @@ protected:
         return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, source_trunk_rule_default_allowed, default_priority, auto_routing, route_table_id, our_trunk, auth_by_number, orig_redirect_number_7800, orig_redirect_number, term_redirect_number " \
             "   from auth.trunk " \
             "   where server_id = " + server_id +
-               "   order by trunk_name asc ";
+               "   order by id asc ";
     }
 
     inline void parse_item(BDbResult &row, Trunk *item) {
@@ -45,18 +45,16 @@ protected:
 
 public:
     Trunk *find(int id, stringstream *trace = nullptr) {
+
         auto begin = this->data.begin();
         auto end = this->data.end();
-
-        Trunk *result = nullptr;
-
-        for (auto it = begin; it != end; ++it) {
-            Trunk *trunk = &*it;
-            if (trunk->id == id) {
-                result = trunk;
-                break;
-            }
+        {
+            auto p = equal_range(begin, end, id, key_id());
+            begin = p.first;
+            end = p.second;
         }
+
+        Trunk * result = begin <  end ? &*begin : nullptr;
 
         if (trace != nullptr) {
             if (result != nullptr) {
