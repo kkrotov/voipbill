@@ -93,6 +93,7 @@ public:
     void statsNNPPackaeMinuteGetChanges(map<int, StatsNNPPackageMinute> &changes);
     void statsNNPPackaeMinuteAddChanges(map<int, StatsNNPPackageMinute> &changes);
 
+    int statsNNPPackaeMinuteGetUsedSeconds(int nnp_account_tariff_light_id, int nnp_package_minute_id);
 private:
     void loadLastCallIdAndCdrIdAndTime(BDb * db_calls);
     void loadSyncCentralCallIdAndTime(BDb * db_main);
@@ -101,4 +102,6 @@ private:
 
     friend class PageFmins;
     friend class PagePackage;
+
+
 };

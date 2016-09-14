@@ -381,3 +381,8 @@ void DataBillingContainer::statsNNPPackaeMinuteAddChanges(map<int, StatsNNPPacka
     statsNNPPackageMinute.addChanges(changes);
 }
 
+int DataBillingContainer::statsNNPPackaeMinuteGetUsedSeconds(int nnp_account_tariff_light_id,
+                                                             int nnp_package_minute_id) {
+    lock_guard<Spinlock> guard(lock);
+    return statsNNPPackageMinute.getUsedSeconds(nnp_account_tariff_light_id, nnp_package_minute_id);
+}

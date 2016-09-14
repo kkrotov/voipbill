@@ -47,4 +47,6 @@ private:
 
     StatsNNPPackageMinute * createStatsNNPPackageMinute(time_t connect_time, Client * account, StatsNNPPackageMinute * nnpPackageMinute);
     StatsNNPPackageMinute * updateStatsNNPPackageMinute(CallInfo *callInfo, int statNNPPackageMinuteId);
+
+    int getUsedSeconds(int nnp_account_tariff_light_id, int nnp_package_minute_id);
 };

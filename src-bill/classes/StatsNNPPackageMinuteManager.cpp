@@ -29,7 +29,7 @@ void StatsNNPPackageMinuteManager::load(BDb *db, time_t lastSaveCallTime) {
             "   order by id asc, activate_from asc "
     );
     while (res.next()) {
-        StatsNNPPackageMinute &stats = statsNNPPackageMinute[res.get_i(0)]; // ключ у нас два поля!
+        StatsNNPPackageMinute &stats = statsNNPPackageMinute[res.get_i(0)];
         stats.id = res.get_i(0);
         stats.nnp_account_tariff_light_id = res.get_i(1);
         stats.nnp_package_minute_id = res.get_i(2);
@@ -117,7 +117,7 @@ StatsNNPPackageMinute *StatsNNPPackageMinuteManager::getCurrent(time_t connect_t
 
 void StatsNNPPackageMinuteManager::add(CallInfo *callInfo) {
 
-    if (callInfo->call->stats_nnp_package_minute_id == 0 ) {
+    if (callInfo->call->stats_nnp_package_minute_id == 0) {
         return;
     }
 
@@ -187,7 +187,7 @@ void StatsNNPPackageMinuteManager::removePartitionAfterSave() {
 }
 
 StatsNNPPackageMinute *StatsNNPPackageMinuteManager::createStatsNNPPackageMinute(time_t connect_time, Client *account,
-                                                                              StatsNNPPackageMinute *nnpPackageMinute) {
+                                                                                 StatsNNPPackageMinute *nnpPackageMinute) {
 
     time_t activate_dt;
     time_t deactivate_dt;
@@ -217,7 +217,8 @@ StatsNNPPackageMinute *StatsNNPPackageMinuteManager::createStatsNNPPackageMinute
     return &stats;
 }
 
-StatsNNPPackageMinute *StatsNNPPackageMinuteManager::updateStatsNNPPackageMinute(CallInfo *callInfo, int statNNPPackageMinuteId) {
+StatsNNPPackageMinute *StatsNNPPackageMinuteManager::updateStatsNNPPackageMinute(CallInfo *callInfo,
+                                                                                 int statNNPPackageMinuteId) {
 
     auto itStatsNNPPackageMinute = statsNNPPackageMinute.find(statNNPPackageMinuteId);
     if (itStatsNNPPackageMinute == statsNNPPackageMinute.end()) {
@@ -250,7 +251,8 @@ void StatsNNPPackageMinuteManager::addChanges(map<int, StatsNNPPackageMinute> &c
 size_t StatsNNPPackageMinuteManager::sync(BDb *db_main, BDb *db_calls) {
 
     BDbResult resMax = db_main->query(
-            "SELECT max(max_call_id) FROM billing.stats_nnp_package_minute WHERE server_id='" + app().conf.str_instance_id +
+            "SELECT max(max_call_id) FROM billing.stats_nnp_package_minute WHERE server_id='" +
+            app().conf.str_instance_id +
             "'");
     long long int central_max_call_id = resMax.next() ? resMax.get_ll(0) : 0;
 
@@ -294,3 +296,13 @@ size_t StatsNNPPackageMinuteManager::sync(BDb *db_main, BDb *db_calls) {
     return res.size();
 }
 
+int StatsNNPPackageMinuteManager::getUsedSeconds(int nnp_account_tariff_light_id, int nnp_package_minute_id) {
+
+    for (auto it = statsNNPPackageMinute.begin(); it != statsNNPPackageMinute.end(); it++) {
+        if (it->second.nnp_account_tariff_light_id == nnp_account_tariff_light_id &&
+            it->second.nnp_package_minute_id == nnp_package_minute_id)
+            return it->second.used_seconds;
+    }
+    return 0;
+
+}

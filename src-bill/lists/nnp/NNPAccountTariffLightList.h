@@ -35,27 +35,9 @@ protected:
     };
 
 public:
-    NNPAccountTariffLight *find(int id, stringstream *trace = nullptr) {
-        auto begin = this->data.begin();
-        auto end = this->data.end();
-        {
-            auto p = equal_range(begin, end, id, key_id());
-            begin = p.first;
-            end = p.second;
-        }
-        NNPAccountTariffLight *result = begin < end ? &*begin : nullptr;
+    NNPAccountTariffLight *find(int id, stringstream *trace = nullptr);
 
-        if (trace != nullptr) {
-            if (result != nullptr) {
-                *trace << "FOUND|NNPAccountTariffLight|BY ID '" << id << "'" << "\n";
-                *trace << "||";
-                result->dump(*trace);
-                *trace << "\n";
-            } else {
-                *trace << "NOT FOUND|NNPAccountTariffLight|BY ID '" << id << "'" << "\n";
-            }
-        }
+    void findAllActiveByClientID(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight, int client_id,
+                                 stringstream *trace = nullptr);
 
-        return result;
-    }
 };

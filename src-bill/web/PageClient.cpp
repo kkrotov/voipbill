@@ -212,6 +212,74 @@ void PageClient::render_client_balance_indicators(std::stringstream &html, Clien
 
 }
 
+void PageClient::render_client_packeges_info(std::stringstream &html, Client *client) {
+    if (client == nullptr) {
+        html << "Passed a null pointer - Client *client ";
+        return;
+    }
+
+    if (!repository.data->nnpAccountTariffLight.ready() ||
+        !repository.data->serviceNumber.ready() ||
+        !repository.data->nnpPackageMinute.ready() ||
+        !repository.data->nnpDestination.ready())
+        return;
+
+    int client_id = client->id;
+
+    html << "---- active packages with minutes ----<br/>\n";
+    vector<NNPAccountTariffLight> nnpAccountTariffLight;
+    vector<ServiceNumber> serviceNumber;
+
+    repository.getServiceNumberByClientID(serviceNumber, client_id);
+    repository.getActiveNNPAccountTariffLight(nnpAccountTariffLight, client_id);
+
+    for (auto it = serviceNumber.begin(); it != serviceNumber.end(); it++) {
+        html << "did:<b>" << it->did << "</b>, lines_count:" << it->lines_count << "<br/>";
+        for (auto it2 = nnpAccountTariffLight.begin(); it2 != nnpAccountTariffLight.end(); it2++) {
+            if (it2->service_number_id == it->id) {
+                vector<NNPPackageMinute> nnpPackageMinute;
+                repository.getNNPPackageMinuteByTariff(nnpPackageMinute, it2->nnp_tariff_id);
+
+                if (nnpPackageMinute.size() > 0) {
+                    html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                    html << "nnp_tariff_id=" << it2->nnp_tariff_id << ",";
+                    html << "package_minute_id=" << it2->id << ",";
+                    html << "coefficient=" << string_fmt("%.4f", it2->coefficient) << ",";
+                    html << "[" << string_time(it2->activate_from) << "," << string_time(it2->deactivate_from) <<
+                    "]<br/>";
+
+                    for (auto it3 = nnpPackageMinute.begin(); it3 != nnpPackageMinute.end(); it3++) {
+
+                        NNPDestination *nnpDestination = repository.getNNPDestination(it3->nnp_destination_id);
+                        int used_seconds = repository.billingData->statsNNPPackaeMinuteGetUsedSeconds(
+                                it2->nnp_tariff_id, it3->id);
+
+                        html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                        html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                        html << "nnp_destination_id=" << it3->nnp_destination_id << " (<b>";
+                        html << nnpDestination->name << "</b>),";
+                        html << "minutes in package=" << it3->minute << " ";
+                        html << "(effective minutes=" << string_fmt("%.2f", it3->minute * it2->coefficient) << ") ";
+                        html << "used minutes=" << string_fmt("%.2f", (double) used_seconds / 60.0) << ",";
+                        html << "left minutes=<b>" <<
+                        string_fmt("%.2f", it3->minute * it2->coefficient - (double) used_seconds / 60.0) <<
+                        "</b>";
+                        html << "<br/>";
+                    }
+
+                }
+
+
+            }
+
+        }
+    }
+
+    html << "-----<br/>\n";
+
+    return;
+}
+
 void PageClient::render(std::stringstream &html, map<string, string> &parameters) {
     renderHeader(html);
 
@@ -235,6 +303,10 @@ void PageClient::render(std::stringstream &html, map<string, string> &parameters
     html << "-----<br/>\n";
 
     render_client_balance_indicators(html, client);
+
+    if (client->account_version == CALL_ACCOUNT_VERSION_5)
+        render_client_packeges_info(html, client);
+
     render_client_locks(html, client);
     render_client_current_calls(html, client);
 

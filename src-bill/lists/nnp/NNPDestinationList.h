@@ -15,7 +15,7 @@ protected:
 
     inline void parse_item(BDbResult &row, NNPDestination *item) {
         item->id = row.get_i(0);
-        item->name = row.get_i(1);
+        item->name = row.get_s(1);
     }
 
     struct key_id {
