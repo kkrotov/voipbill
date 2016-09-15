@@ -367,7 +367,7 @@ set(BILL_SOURCES
 
     src-bill/models/StatsNNPPackageMinute.cpp
     src-bill/classes/StatsNNPPackageMinuteManager.cpp
-
+    src-bill/classes/nnp/NNPResolver.cpp
 
     src-bill/main.cpp
 

@@ -259,7 +259,7 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
                         html << "nnp_destination_id=" << it3->nnp_destination_id << " (<b>";
                         html << nnpDestination->name << "</b>),";
                         html << "minutes in package=" << it3->minute << " ";
-                        html << "(effective minutes=" << string_fmt("%.2f", it3->minute * it2->coefficient) << ") ";
+                        html << "(effective minutes=" << string_fmt("%.2f", it3->minute * it2->coefficient) << "), ";
                         html << "used minutes=" << string_fmt("%.2f", (double) used_seconds / 60.0) << ",";
                         html << "left minutes=<b>" <<
                         string_fmt("%.2f", it3->minute * it2->coefficient - (double) used_seconds / 60.0) <<
