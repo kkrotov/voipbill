@@ -170,6 +170,13 @@ BDbResult BDb::query(const string &squery) {
     return query(squery.c_str());
 }
 
+bool BDb::rel_exists (string rel) {
+
+    string check = "SELECT to_regclass('" + rel + "')";
+    auto res = query(check.c_str());
+    return res.next() && res.get_s(0).size()>0;
+}
+
 void BDb::copy_dblink(string dst_table, string fields, string columns, string query, BDb *db_from, BDb *db_to) {
 
     if (!db_to->connect()) {
