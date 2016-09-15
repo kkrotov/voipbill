@@ -3,13 +3,10 @@
 
 ThreadSyncCdrs::ThreadSyncCdrs() {
     id = idName();
-    name = "Sync Calls to central db";
+    name = "Sync Cdrs to central db";
 
     db_main.setCS(app().conf.db_main);
     db_calls.setCS(app().conf.db_calls);
-
-    last_central_id = 0;
-    last_local_id = 0;
 }
 
 void ThreadSyncCdrs::run() {
@@ -20,7 +17,7 @@ void ThreadSyncCdrs::run() {
     }
     repository.billingData->prepareSyncCallsCentral(&db_main);
 
-    syncCallsRaw();
+    //syncCallsRaw();
     syncCallsCdr();
     syncCallsCdrUnfinished();
 }
@@ -40,6 +37,7 @@ bool ThreadSyncCdrs::getCurrentMonths (string &local_prev_sync_month, string &lo
         local_next_sync_month = res.get_s(2);
     }
     catch (Exception &e) {
+
         e.addTrace("ThreadSyncCdrs::run::get_local_sync_month");
         throw e;
     }
@@ -72,7 +70,7 @@ bool ThreadSyncCdrs::getCurrentMonths (string relname, string fieldname, long lo
     return true;
 }
 
-bool ThreadSyncCdrs::syncCallsRaw() {
+/*bool ThreadSyncCdrs::syncCallsRaw() {
 
     string local_prev_sync_month;
     string local_curr_sync_month;
@@ -134,15 +132,6 @@ bool ThreadSyncCdrs::copyCallsPart(string month) {
     }
 
 
-    /*BDb::copy("calls_raw.calls_raw_" + month,
-        "",
-        "       id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, geo_mob, server_id, disconnect_cause",
-        "select id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, geo_mob, " + app().conf.str_instance_id + ", disconnect_cause  " \
-        "   from calls_raw.calls_raw_" + month +
-        "   where id>" + lexical_cast<string>(central_id) +
-        "   order by id limit 100000",
-        &db_calls, &db_main);*/
-
     try {
 
         string field_names ="server_id,id,orig,peer_id,cdr_id,connect_time,trunk_id,account_id,trunk_service_id,number_service_id,src_number,dst_number,billed_time,rate,"
@@ -201,7 +190,7 @@ bool ThreadSyncCdrs::copyCallsPart(string month) {
         return false;
     }
 }
-
+*/
 bool ThreadSyncCdrs::syncCallsCdr() {
 
     string local_prev_sync_month;
@@ -286,7 +275,7 @@ bool ThreadSyncCdrs::syncCallsCdrUnfinished() {
         return false;
     }
 }
-
+/*
 void ThreadSyncCdrs::htmlfull(stringstream &html) {
     this->html(html);
 
@@ -307,5 +296,4 @@ void ThreadSyncCdrs::htmlfull(stringstream &html) {
 bool ThreadSyncCdrs::hasFullHtml() {
     return true;
 }
-
-
+*/

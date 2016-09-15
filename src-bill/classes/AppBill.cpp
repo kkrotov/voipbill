@@ -22,6 +22,7 @@
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
 #include "../threads/ThreadCdrParser.h"
+#include "../threads/ThreadSyncCdrs.h"
 
 AppBill & app() {
     static AppBill appVar;
@@ -74,6 +75,7 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadBillRuntime>();
     registerThread<ThreadSave>();
     registerThread<ThreadSyncCalls>();
+    registerThread<ThreadSyncCdrs>();
     registerThread<ThreadSyncCounters>();
     registerThread<ThreadSyncLocks>();
     registerThread<ThreadClientLock>();
@@ -110,6 +112,8 @@ void AppBill::runAppInSingleMode()
             "save",
             // Передача данных по локальным вызовам calls_raw.calls_raw на центральный сервер
             "sync_calls",
+            // Синхронизация таблиц локальных вызовов calls_cdr.cdr и calls_cdr.cdr_unfinished на центральный сервер
+            "sync_cdrs",
             // Обновление счётчиков по клиентским счетам, использованных бесплатных минут и пакетов на центральной БД
             "sync_counters",
             // обновление таблицы клиентских блокировок billing.clients_locks на центральном сервере
