@@ -4,7 +4,7 @@
 #include "../classes/BDb.h"
 #include "../classes/Repository.h"
 
-class ThreadSyncCalls : public Thread {
+class ThreadSyncCdrs : public Thread {
     BDb db_main;   
     BDb db_calls;
     string last_central_month;
@@ -17,12 +17,17 @@ class ThreadSyncCalls : public Thread {
     Repository repository;
 
     void run();
-    
+
+    bool getCurrentMonths (string relname, string fieldname, long long int id, string &local_prev_sync_month, string &local_curr_sync_month, string &local_next_sync_month);
+    bool getCurrentMonths (string &local_prev_sync_month, string &local_curr_sync_month, string &local_next_sync_month);
+    bool syncCallsRaw();
+    bool syncCallsCdr();
+    bool syncCallsCdrUnfinished();
     bool copyCallsPart(string month);
     void htmlfull(stringstream &html);
 
 public:
-    ThreadSyncCalls();
+    ThreadSyncCdrs();
     static const char* idName() { return "sync_calls"; }
     bool hasFullHtml() override;
 };
