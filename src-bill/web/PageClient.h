@@ -35,25 +35,28 @@ public:
 
         double vat_rate = repository.getVatRate(client);
 
-        double sum_month, sum_day, sum_balance;
-        double sum_month2, sum_day2, sum_balance2;
+        double sum_month, sum_day, sum_mn_day, sum_balance;
+        double sum_month2, sum_day2, sum_mn_day2, sum_balance2;
         ClientLockObj clientLock = repository.billingData->clientLock.get()->get(client_id);
         sum_month = repository.billingData->statsAccountGetSumMonth(client_id, vat_rate);
         sum_day = repository.billingData->statsAccountGetSumDay(client_id, vat_rate);
+        sum_mn_day = repository.billingData->statsAccountGetSumMNDay(client_id, vat_rate);
         sum_balance = repository.billingData->statsAccountGetSumBalance(client_id, vat_rate);
 
 
         auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
         sum_balance2 = statsAccount2->getSumBalance(client_id, vat_rate);
         sum_day2 = statsAccount2->getSumDay(client_id, vat_rate);
+        sum_mn_day2 = statsAccount2->getSumMNDay(client_id, vat_rate);
         sum_month2 = statsAccount2->getSumMonth(client_id, vat_rate);
 
-        double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
+        double sum_month_global = 0, sum_day_global = 0, sum_mn_day_global = 0, sum_balance_global = 0;
         if (repository.data->globalCounters.ready()) {
             auto globalCounter = repository.data->globalCounters.get()->find(client_id);
             if (globalCounter) {
                 sum_balance_global += globalCounter->sumBalance(vat_rate);
                 sum_day_global += globalCounter->sumDay(vat_rate);
+                sum_mn_day_global += globalCounter->sumMNDay(vat_rate);
                 sum_month_global += globalCounter->sumMonth(vat_rate);
             }
         }
@@ -74,6 +77,9 @@ public:
 
         if (clientLock.is_overran)
             html << "Blocked OVERRAN<br/>\n";
+
+        if (clientLock.is_mn_overran)
+            html << "Blocked MN OVERRAN<br/>\n";
 
         html << "-----<br/>\n";
 
@@ -133,6 +139,11 @@ public:
             html << string_fmt("%d", client->limit_d) << " (limit_d) + " << string_fmt("%.2f", sum_day) << " (local) + " << string_fmt("%.2f", sum_day2) << " (current) + " << string_fmt("%.2f", sum_day_global) << " (global) <br/>\n";
         }
 
+        if (client->hasDailyMNLimit()) {
+            html << "Daily MN available: <b>" << string_fmt("%.2f", client->limit_d_mn + sum_mn_day + sum_mn_day2 + sum_mn_day_global) << "</b> = ";
+            html << string_fmt("%d", client->limit_d_mn) << " (limit_d_mn) + " << string_fmt("%.2f", sum_mn_day) << " (local_mn) + " << string_fmt("%.2f", sum_mn_day2) << " (current_mn) + " << string_fmt("%.2f", sum_mn_day_global) << " (global_mn) <br/>\n";
+        }
+
         html << "-----<br/>\n";
 
         if (client->is_blocked) {
@@ -151,6 +162,9 @@ public:
 
         html << "Sum from account: <b>" << string_fmt("%.2f", sum_balance + sum_balance2 + sum_balance_global) << "</b> = " << string_fmt("%.2f", sum_balance) << " (local) + " << string_fmt("%.2f", sum_balance2) << " (current) + " << string_fmt("%.2f", sum_balance_global) << " (global) <br/>\n";
         html << "Sum Day: <b>" << string_fmt("%.2f", sum_day + sum_day2 + sum_day_global) << "</b> = " << string_fmt("%.2f", sum_day) << " (local) + " << string_fmt("%.2f", sum_day2) << " (current) + " << string_fmt("%.2f", sum_day_global) << " (global) <br/>\n";
+        html << "Sum MN Day: <b>" << string_fmt("%.2f", sum_mn_day + sum_mn_day2 + sum_mn_day_global) << "</b> = " <<
+        string_fmt("%.2f", sum_mn_day) << " (local) + " << string_fmt("%.2f", sum_mn_day2) << " (current) + " <<
+        string_fmt("%.2f", sum_mn_day_global) << " (global) <br/>\n";
         html << "Sum Month: <b>" << string_fmt("%.2f", sum_month + sum_month2 + sum_month_global) << "</b> = " << string_fmt("%.2f", sum_month) << " (local) + " << string_fmt("%.2f", sum_month2) << " (current) + " << string_fmt("%.2f", sum_month_global) << " (global) <br/>\n";
 
         html << "-----<br/>\n";
