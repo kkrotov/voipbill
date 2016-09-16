@@ -18,6 +18,7 @@ using boost::algorithm::is_any_of;
 #include <queue>
 #include <deque>
 #include <set>
+#include <stack>
 using namespace std;
 
 #include <boost/lexical_cast.hpp>
@@ -38,6 +39,9 @@ time_t get_tday_end(time_t timestamp, short timezone_offset = 0);
 
 time_t get_tmonth(time_t timestamp, short timezone_offset = 0);
 time_t get_tmonth_end(time_t timestamp, short timezone_offset = 0);
+
+
+bool removeHtmlTags (string str);
 
 
 char const * build_date();

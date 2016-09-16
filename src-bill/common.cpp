@@ -155,3 +155,52 @@ time_t get_tmonth_end(time_t timestamp, short timezone_offset) {
 
     return timegm(&timeinfo) - 1 - 3600 * timezone_offset;
 }
+
+/**
+ * Removes html tags from the string.
+ * Returns false if string was NOT modified.
+ * Returns true if string was modified.
+ *
+ * @param str - string to remove tags from.
+ *
+ * @return false - string was NOT modified, true - string was modified.
+ */
+bool removeHtmlTags (string &str) {
+
+    bool modified = false;
+    stack<unsigned int> openIndex;
+
+    if (!str.size())
+        return false;
+
+    for (int i = 0; i < str.size(); i++) {
+
+        if (str.at(i) == '<') {
+            openIndex.push (i);
+            continue;
+        }
+        else if (str.at(i) == '>') {
+            if ( openIndex.size() ) {
+                for (int j = openIndex.top(); j <= i; j++)
+                    str.at(j) = '\0';
+                openIndex.pop();
+                modified = true;
+            }
+            continue;
+        }
+    }
+
+    if (!modified)
+        return false;
+
+    int dst = 0;
+    for (int src = 0; src < str.size(); src++) {
+        if (str.at(src)) {
+            str.at(dst) = str.at(src);
+            dst++;
+        }
+    }
+    str.erase (dst, std::string::npos);
+
+    return true;
+}
