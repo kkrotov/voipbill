@@ -12,6 +12,7 @@ class BaseLogWriter {
 public:
     BaseLogWriter(LogLevel minLevel, LogLevel maxLevel);
     virtual void massPublish(list<pLogMessage> messages);
+    virtual string logWriterName() { return ""; };
 protected:
     LogLevel minLevel;
     LogLevel maxLevel;

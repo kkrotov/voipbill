@@ -14,7 +14,8 @@ void StatsAccountManager::load(BDb * db) {
     realtimeStatsAccountParts.push_back(map<int, StatsAccount>());
 
     BDbResult res = db->query(
-            "   select account_id, extract(epoch from amount_month), sum_month, extract(epoch from amount_day), sum_day, extract(epoch from amount_date), sum " \
+            "   select account_id, extract(epoch from amount_month), sum_month, extract(epoch from amount_day), sum_day," \
+            "   sum_mn_day,extract(epoch from amount_date), sum " \
             "   from billing.stats_account"
     );
 
@@ -25,8 +26,9 @@ void StatsAccountManager::load(BDb * db) {
         stats.sum_month = res.get_d(2);
         stats.amount_day = res.get_ll(3);
         stats.sum_day = res.get_d(4);
-        stats.amount_date = res.get_ll(5);
-        stats.sum = res.get_d(6);
+        stats.sum_mn_day = res.get_d(5);
+        stats.amount_date = res.get_ll(6);
+        stats.sum = res.get_d(7);
     }
 
     loaded = true;
@@ -45,13 +47,14 @@ void StatsAccountManager::recalc(BDb * db) {
     db->exec("DELETE FROM billing.stats_account");
 
     db->exec(
-            "   INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum)"
+            "   INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, sum_mn_day, amount_date, sum)"
             "   select " \
             "       c.id, " \
             "       '" + sMonth + "', " \
             "       COALESCE(m.m_sum, 0), " \
             "       '" + sDay + "', " \
             "       COALESCE(d.d_sum, 0), " \
+            "       COALESCE(d.d_mn_sum, 0), " \
             "       c.amount_date, " \
             "       COALESCE(a.a_sum, 0) " \
             "   from billing.clients c  " \
@@ -64,7 +67,7 @@ void StatsAccountManager::recalc(BDb * db) {
             "       ) as m " \
             "   on c.id = m.account_id " \
             "   left join " \
-            "       (   select account_id, sum(cost) d_sum from calls_raw.calls_raw c " \
+            "       (   select account_id, sum(cost) d_sum, sum(CASE WHEN destination_id=2 then cost ELSE 0 END) d_mn_sum from calls_raw.calls_raw c " \
             "           where " \
             "           c.connect_time >= '" + sDay + "'::date and " \
             "           c.connect_time < '" + sDay + "'::date + '1 day'::interval " \
@@ -150,7 +153,8 @@ void StatsAccountManager::prepareSaveQuery(stringstream &query) {
         return;
     }
 
-    query << "INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum) VALUES\n";
+    query <<
+    "INSERT INTO billing.stats_account(account_id, amount_month, sum_month, amount_day, sum_day, sum_mn_day, amount_date, sum) VALUES\n";
     int i = 0;
     for (auto it : realtimeStatsAccountParts[0]) {
         StatsAccount &stats = it.second;
@@ -161,6 +165,7 @@ void StatsAccountManager::prepareSaveQuery(stringstream &query) {
         query << "'" << stats.sum_month << "',";
         query << "'" << string_date(stats.amount_day, 2) << "',";
         query << "'" << stats.sum_day << "',";
+        query << "'" << stats.sum_mn_day << "',";
         query << "'" << string_time(stats.amount_date, 3) << "',";
         query << "'" << stats.sum << "')";
         i++;
@@ -212,9 +217,11 @@ void StatsAccountManager::add(CallInfo *callInfo) {
 
     if (abs(callInfo->dtUtc.day - stats.amount_day) < 43200) {
         stats.sum_day += call->cost;
+        if (call->isInternational()) stats.sum_mn_day += call->cost; // Учитываем в отдельном счетчике mn-траффик
     } else if (callInfo->dtUtc.day > stats.amount_day) {
         stats.amount_day = callInfo->dtUtc.day;
         stats.sum_day = call->cost;
+        if (call->isInternational()) stats.sum_mn_day = call->cost; // Учитываем в отдельном счетчике mn-траффик
     }
 
     if (call->connect_time >= callInfo->account->amount_date) {
@@ -242,6 +249,15 @@ double StatsAccountManager::getSumDay(int account_id, double vat_rate) {
     auto it1 = statsAccount.find(account_id);
     if (it1 != statsAccount.end()) {
         return it1->second.sumDay(vat_rate);
+    } else {
+        return 0;
+    }
+}
+
+double StatsAccountManager::getSumMNDay(int account_id, double vat_rate) {
+    auto it1 = statsAccount.find(account_id);
+    if (it1 != statsAccount.end()) {
+        return it1->second.sumMNDay(vat_rate);
     } else {
         return 0;
     }
@@ -288,7 +304,8 @@ size_t StatsAccountManager::sync(BDb * db_main, DataBillingContainer * billingDa
     billingData->statsAccountGetChanges(changes, needClear);
 
     stringstream query;
-    query << "INSERT INTO billing.stats_account(server_id, account_id, amount_month, sum_month, amount_day, sum_day, amount_date, sum) VALUES\n";
+    query <<
+    "INSERT INTO billing.stats_account(server_id, account_id, amount_month, sum_month, amount_day, sum_day,sum_mn_day, amount_date, sum) VALUES\n";
     int i = 0;
 
     for (auto it: changes) {
@@ -301,6 +318,7 @@ size_t StatsAccountManager::sync(BDb * db_main, DataBillingContainer * billingDa
         query << "'" << stats.sum_month << "',";
         query << "'" << string_date(stats.amount_day, 8) << "',";
         query << "'" << stats.sum_day << "',";
+        query << "'" << stats.sum_mn_day << "',";
         query << "'" << string_time(stats.amount_date, 4) << "',";
         query << "'" << stats.sum << "')";
         i++;

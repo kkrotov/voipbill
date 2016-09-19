@@ -1,4 +1,6 @@
 #include <map>
+#include <iostream>
+#include <sstream>
 
 #include "Logger.h"
 
@@ -61,13 +63,51 @@ void Logger::processLogQueue() {
             queue.pop();
         }
     }
+    publishMessages(messages);
+}
 
+void Logger::publishMessages(list<pLogMessage> &messages)
+{
+    std::stringstream errorstream;
+    list<pLogWriter> good_writers;
     for (auto it = writers.begin(); it != writers.end(); ++it) {
+
         try {
             (*it)->massPublish(messages);
-        } catch (...) {}
-    }
+            good_writers.push_back(*it);
+        }
+        catch (std::exception& e) {
 
+            errorstream << (*it)->logWriterName() << " ERROR processing log queue: " << e.what();
+        }
+        catch (...) {
+
+            errorstream << (*it)->logWriterName() << ": ERROR processing log queue";
+        }
+    }
+    if (!errorstream.str().empty()) {
+
+        pLogMessage error(new LogMessage);
+        error->level = LogLevel::ERROR;
+        error->time = time(NULL);
+        error->timeInGroup = error->time;
+        error->count = 1;
+        error->countInGroup = 0;
+        error->message = errorstream.str();
+
+        list<pLogMessage> messages;
+        messages.push_back(error);
+        for (auto it = good_writers.begin(); it != good_writers.end(); ++it) {
+
+            try {
+                (*it)->massPublish(messages);
+            }
+            catch (...) {
+
+                std::cerr << (*it)->logWriterName() << ": ERROR processing log queue";
+            }
+        }
+    }
 }
 
 void Logger::processGroupingMessages() {

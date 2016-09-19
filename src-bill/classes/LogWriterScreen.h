@@ -8,6 +8,7 @@ public:
     LogWriterScreen(LogLevel minLevel = LogLevel::DEBUG, LogLevel maxLevel = LogLevel::ERROR);
 protected:
     void doPublish(pLogMessage message);
+    string logWriterName();
 };
 
 

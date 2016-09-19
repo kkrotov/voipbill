@@ -22,6 +22,7 @@ struct Cdr {
     long long int id;
 
     time_t connect_time;
+    time_t setup_time;
     int session_time;
 
     char src_number[33];
@@ -45,6 +46,7 @@ struct Cdr {
     Cdr() {
         id = 0;
         connect_time = 0;
+        setup_time = 0;
         session_time = 0;
         src_number[0] = 0;
         dst_number[0] = 0;

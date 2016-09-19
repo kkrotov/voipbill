@@ -81,17 +81,20 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
 
     double sumBalance = repository.billingData->statsAccountGetSumBalance(call.account_id, vat_rate);
     double sumDay = repository.billingData->statsAccountGetSumDay(call.account_id, vat_rate);
+    double sumMNDay = repository.billingData->statsAccountGetSumMNDay(call.account_id, vat_rate);
 
     auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
     double sumBalance2 = statsAccount2->getSumBalance(call.account_id, vat_rate);
     double sumDay2 = statsAccount2->getSumDay(call.account_id, vat_rate);
+    double sumMNDay2 = statsAccount2->getSumMNDay(call.account_id, vat_rate);
 
-    double globalBalanceSum, globalDaySum;
-    fetchGlobalCounters(call.account_id, globalBalanceSum, globalDaySum, vat_rate);
+    double globalBalanceSum, globalDaySum, globalDayMNSum;
+    fetchGlobalCounters(call.account_id, globalBalanceSum, globalDaySum, globalDayMNSum, vat_rate);
 
-    double spentBalanceSum, spentDaySum;
+    double spentBalanceSum, spentDaySum, spentDayMNSum;
     spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
     spentDaySum = sumDay + sumDay2 + globalDaySum;
+    spentDayMNSum = sumMNDay + sumMNDay2 + globalDayMNSum;
 
     logRequest->params["balance_stat"] = client->balance;
     logRequest->params["balance_local"] = sumBalance;
@@ -107,11 +110,18 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
     logRequest->params["daily_current"] = sumDay2;
     logRequest->params["daily_global"] = globalDaySum;
     logRequest->params["daily_total"] = spentDaySum;
+    logRequest->params["daily_mn_local"] = sumMNDay;
+    logRequest->params["daily_mn_current"] = sumMNDay2;
+    logRequest->params["daily_mn_global"] = globalDayMNSum;
+    logRequest->params["daily_mn_total"] = spentDayMNSum;
     if (client->hasDailyLimit()) {
         logRequest->params["daily_limit"] = client->limit_d;
         logRequest->params["daily_available"] = client->limit_d + spentDaySum;
     }
-
+    if (client->hasDailyMNLimit()) {
+        logRequest->params["daily_mn_limit"] = client->limit_d_mn;
+        logRequest->params["daily_mn_available"] = client->limit_d_mn + spentDayMNSum;
+    }
     if (client->is_blocked) {
         logRequest->params["block_full_flag"] = "true";
     }
@@ -173,6 +183,16 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
             return true;
         }
 
+        // Блокировка МН
+        if (call.isInternational() && client->isConsumedDailyMNLimit(spentDayMNSum)) {
+            logRequest->params["kill_reason"] = "mn_block";
+
+            logRequest->message =
+                    "KILL: number " + lexical_cast<string>(call.src_number) + " -> " +
+                    lexical_cast<string>(call.dst_number) + " : Block MN overrun<br/>\n";
+            return true;
+        }
+
         // Блокировка МГМН если превышен дневной лимит
         if (!call.isLocal() && client->isConsumedDailyLimit(spentDaySum)) {
             logRequest->params["kill_reason"] = "daily_limit";
@@ -190,7 +210,8 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
 
 }
 
-void ThreadLimitControl::fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum, double vat_rate) {
+void ThreadLimitControl::fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum,
+                                             double &globalDayMNSum, double vat_rate) {
 
     GlobalCounters * globalCounter = nullptr;
     if (repository.data->globalCounters.ready()) {
@@ -200,9 +221,11 @@ void ThreadLimitControl::fetchGlobalCounters(int accountId, double &globalBalanc
     if (globalCounter != nullptr) {
         globalBalanceSum = globalCounter->sumBalance(vat_rate);
         globalDaySum = globalCounter->sumDay(vat_rate);
+        globalDayMNSum = globalCounter->sumMNDay(vat_rate);
     } else {
         globalBalanceSum = 0.0;
         globalDaySum = 0.0;
+        globalDayMNSum = 0.0;
     }
 }
 
