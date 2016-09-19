@@ -67,7 +67,7 @@ void StatsAccountManager::recalc(BDb * db) {
             "       ) as m " \
             "   on c.id = m.account_id " \
             "   left join " \
-            "       (   select account_id, sum(cost) d_sum, sum(CASE WHEN id_destination=2 then cost ELSE 0 END) d_mn_sum from calls_raw.calls_raw c " \
+            "       (   select account_id, sum(cost) d_sum, sum(CASE WHEN destination_id=2 then cost ELSE 0 END) d_mn_sum from calls_raw.calls_raw c " \
             "           where " \
             "           c.connect_time >= '" + sDay + "'::date and " \
             "           c.connect_time < '" + sDay + "'::date + '1 day'::interval " \
