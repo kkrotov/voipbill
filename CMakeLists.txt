@@ -312,6 +312,7 @@ set(BILL_SOURCES
     src-bill/web/PageTestCalc.cpp
     src-bill/web/PageTestCalcGui.cpp
     src-bill/web/PageTestAuth.cpp
+    src-bill/web/PageCdrUnfinished.cpp src-bill/web/PageCdrUnfinished.h 
 
     src-bill/models/nnp/NNPRegion.cpp
     src-bill/lists/nnp/NNPRegionList.cpp

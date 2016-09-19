@@ -98,11 +98,7 @@ void ThreadCdrParser::saveCalls(const std::list<CallData> &calls) {
             logUnfinishedCall(call);
             continue;
         }
-
-        if (!isCallExists(call.hash)) {
-            saveCall(call);
-        }
-
+        saveCall(call);
     }
 }
 
@@ -110,8 +106,9 @@ void ThreadCdrParser::saveUnfinishedCall(const CallData &call) {
 
     try {
 
-        std::string query = (boost::format("select public.insert_cdr_unfinished('%1%','%2%','%3%','%4%','%5%','%6%')")
-                             % call.call_id % call.setup_time % call.dst_route % call.releasing_party % call.release_timestamp % call.disconnect_cause).str();
+        std::string query = (boost::format("select public.insert_cdr_unfinished('%1%','%2%','%3%','%4%','%5%','%6%','%7%','%8%','%9%')")
+                             % call.call_id % call.setup_time %call.src_number %call.dst_number %call.src_route % call.dst_route
+                             % call.releasing_party % call.release_timestamp % call.disconnect_cause).str();
         db_calls.query(query);
     }
     catch (Exception &e) {

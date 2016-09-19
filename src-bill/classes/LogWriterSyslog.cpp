@@ -25,3 +25,7 @@ void LogWriterSyslog::afterPublish() {
 
 }
 
+string LogWriterSyslog::logWriterName() {
+
+    return string("LogWriterSyslog");
+}

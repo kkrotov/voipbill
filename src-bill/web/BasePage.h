@@ -33,6 +33,7 @@ public:
         html << " <a href='/locks'>Locks</a> | ";
         html << " <a href='/blacklist'>Blacklist</a> | ";
         html << " <a href='/sync'>Sync</a> | ";
+        html << " <a href='/cdrunfinished'>CDR Log</a> | ";
         html << " <a href='/log'>Log</a> | ";
         html << " <a href='/config'>Config</a> | ";
         html << string_time(time(NULL)) << " ";

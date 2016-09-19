@@ -32,6 +32,8 @@ public:
 
     double getSumMonth(int account_id, double vat_rate);
     double getSumDay(int account_id, double vat_rate);
+
+    double getSumMNDay(int account_id, double vat_rate);
     double getSumBalance(int account_id, double vat_rate);
 
     void getClients(vector<StatsAccount> &destClients) {
@@ -53,4 +55,6 @@ private:
     size_t size();
     friend class DataBillingContainer;
     friend class Billing;
+
+
 };
