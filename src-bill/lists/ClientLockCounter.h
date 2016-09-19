@@ -32,12 +32,14 @@ public:
         for (auto pair : client_locks) {
             ClientLockObj &cc = counter[pair.first];
             if (cc.client_id == 0 || cc.disabled_local != pair.second.disabled_local || cc.disabled_global != pair.second.disabled_global ||
-        	cc.is_finance_block != pair.second.is_finance_block || cc.is_overran != pair.second.is_overran ) {
+        	cc.is_finance_block != pair.second.is_finance_block || cc.is_overran != pair.second.is_overran
+        	|| cc.is_mn_overran != pair.second.is_mn_overran ) {
                 cc.client_id = pair.first;
                 cc.disabled_local = pair.second.disabled_local;
                 cc.disabled_global = pair.second.disabled_global;
                 cc.is_finance_block = pair.second.is_finance_block;
                 cc.is_overran = pair.second.is_overran;
+                cc.is_mn_overran = pair.second.is_mn_overran;
 
                 marker++;
                 changes[pair.first] = marker;

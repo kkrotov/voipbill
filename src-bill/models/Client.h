@@ -6,6 +6,7 @@
 struct Client {
     int id;
     int limit_d;
+    int limit_d_mn;
     int credit;
     double balance;
     bool disabled;
@@ -21,6 +22,7 @@ struct Client {
         trace << "(";
         trace << "id: " << id << ", ";
         trace << "limit_d: " << limit_d << ", ";
+        trace << "limit_d_mn: " << limit_d_mn << ", ";
         trace << "credit: " << credit << ", ";
         trace << "balance: " << balance << ", ";
         trace << "disabled: " << disabled << ", ";
@@ -42,6 +44,10 @@ struct Client {
         return limit_d != 0;
     }
 
+    bool hasDailyMNLimit() {
+        return limit_d_mn != 0;
+    }
+
     bool isConsumedCreditLimit(double value) {
         return hasCreditLimit() && (balance + credit + value < 0.00001);
     }
@@ -49,6 +55,11 @@ struct Client {
     bool isConsumedDailyLimit(double value) {
         return hasDailyLimit() && (limit_d + value < 0.00001);
     }
+
+    bool isConsumedDailyMNLimit(double value) {
+        return hasDailyMNLimit() && (limit_d_mn + value < 0.00001);
+    }
+
 
     double getPriceWithVat(double price, double vat_rate) {
         if (price_include_vat) {
