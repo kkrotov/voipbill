@@ -133,6 +133,19 @@ bool ThreadSyncCalls::copyCallsPart(string month, unsigned long limit) {
 
     try {
 
+#if 1
+        BDb::copy("calls_raw.calls_raw_" + suffix,
+                "",
+                "       id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, geo_mob, server_id, disconnect_cause",
+                "select id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, geo_mob, " + app().conf.str_instance_id + ", disconnect_cause  " \
+                "   from calls_raw.calls_raw_" + suffix +
+                "   where id>" + lexical_cast<string>(central_id) +
+                "   order by id limit 100000",
+                &db_calls, &db_main);
+#else
+        // использование dblink для копирования данных в центральную БД
+        // требует сетевую доступность источника данных (БД на региональном сервере) со стороны центральной базы.
+        // записи в app_bill.conf типа "calls = host=localhost" не прокатывают
         string field_names ="server_id,id,orig,peer_id,cdr_id,connect_time,trunk_id,account_id,trunk_service_id,number_service_id,src_number,dst_number,billed_time,rate,"
                 "cost,tax_cost,interconnect_rate,interconnect_cost,service_package_id,service_package_stats_id,package_time,package_credit,destination_id,pricelist_id,prefix,"
                 "geo_id,geo_operator_id,mob,operator_id,geo_mob,our,trunk_settings_stats_id,disconnect_cause,account_version,stats_nnp_package_minute_id";
@@ -179,6 +192,7 @@ bool ThreadSyncCalls::copyCallsPart(string month, unsigned long limit) {
                 "from " + relname + " where id>" + lexical_cast<string>(central_id) + " order by id limit " + lexical_cast<string>(limit);
 
         BDb::copy_dblink("calls_raw.calls_raw", field_names, field_types, select, &db_calls, &db_main);
+#endif
     }
     catch (Exception e) {
 
