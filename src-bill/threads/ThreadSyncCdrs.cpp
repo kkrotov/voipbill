@@ -17,9 +17,8 @@ void ThreadSyncCdrs::run() {
     }
     repository.billingData->prepareSyncCallsCentral(&db_main);
 
-    //syncCallsRaw();
-    syncCallsCdr();
-    syncCallsCdrUnfinished();
+    while (syncCallsCdr());
+    while (syncCallsCdrUnfinished());
 }
 
 bool ThreadSyncCdrs::getCurrentMonths (string &local_prev_sync_month, string &local_curr_sync_month, string &local_next_sync_month) {
@@ -38,7 +37,7 @@ bool ThreadSyncCdrs::getCurrentMonths (string &local_prev_sync_month, string &lo
     }
     catch (Exception &e) {
 
-        e.addTrace("ThreadSyncCdrs::run::get_local_sync_month");
+        e.addTrace("ThreadSyncCdrs::getCurrentMonths");
         throw e;
     }
     return true;
@@ -64,7 +63,7 @@ bool ThreadSyncCdrs::getCurrentMonths (string relname, string fieldname, long lo
         local_next_sync_month += res.get_s(2).substr(5, 2);
     }
     catch (Exception &e) {
-        e.addTrace("ThreadSyncCdrs::run::get_local_sync_month");
+        e.addTrace("ThreadSyncCdrs::getCurrentMonths");
         throw e;
     }
     return true;
@@ -196,8 +195,39 @@ bool ThreadSyncCdrs::syncCallsCdr() {
     string local_prev_sync_month;
     string local_curr_sync_month;
     string local_next_sync_month;
-    if (!getCurrentMonths ("calls_cdr.cdr", "setup_time", repository.billingData->lastSyncCentralCdrId, local_prev_sync_month, local_curr_sync_month, local_next_sync_month))
+    if (!getCurrentMonths("calls_cdr.cdr", "setup_time", repository.billingData->lastSyncCentralCdrId,
+                          local_prev_sync_month, local_curr_sync_month, local_next_sync_month))
         return false;
+
+    return copyCallsCdr(local_curr_sync_month, 100000);
+}
+
+bool ThreadSyncCdrs::copyCallsCdr(string month, int limit) {
+
+    long long int central_id=repository.billingData->lastSyncCentralCdrId,
+            local_id=0;
+    auto res = db_calls.query("select id from calls_cdr.cdr_" + month + " order by id desc limit 1");
+    if (res.next())
+        local_id = res.get_ll(0);
+
+    if (local_id <= central_id)
+        return false;
+
+    BDb::copy("calls_cdr.cdr_" + month,
+              "",
+              "server_id,id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,dst_route,"
+                      "src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party",
+              "select "+app().conf.str_instance_id +",id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,dst_route,"
+                       "src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party "
+              "from calls_cdr.cdr_" + month +
+              "  where id>" + lexical_cast<string>(central_id) +
+              "  order by id limit "+lexical_cast<string>(limit),
+              &db_calls, &db_main);
+
+    return true;
+}
+
+bool ThreadSyncCdrs::copyDblinkCallsCdr(string month) {
 
     try {
 
@@ -225,7 +255,7 @@ bool ThreadSyncCdrs::syncCallsCdr() {
                 "  releasing_party character varying";
         string select = "select "+ app().conf.str_instance_id +",id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,"
                 "dst_route,src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party "
-                "from calls_cdr.cdr_"+local_curr_sync_month+" where id>"+ lexical_cast<string>(repository.billingData->lastSyncCentralCdrId)+" order by id limit 100000";
+                "from calls_cdr.cdr_"+month+" where id>"+ lexical_cast<string>(repository.billingData->lastSyncCentralCdrId)+" order by id limit 100000";
 
         BDb::copy_dblink("calls_cdr.cdr", field_names, field_types, select, &db_calls, &db_main);
         return true;
@@ -243,9 +273,36 @@ bool ThreadSyncCdrs::syncCallsCdrUnfinished() {
     string local_prev_sync_month;
     string local_curr_sync_month;
     string local_next_sync_month;
-    if (!getCurrentMonths ("calls_cdr.cdr_unfinished", "setup_time", repository.billingData->lastSyncCentralCdrUnfinishedId, local_prev_sync_month, local_curr_sync_month, local_next_sync_month) &&
-            !getCurrentMonths (local_prev_sync_month, local_curr_sync_month, local_next_sync_month))
+    if (!getCurrentMonths("calls_cdr.cdr_unfinished", "setup_time",repository.billingData->lastSyncCentralCdrUnfinishedId, local_prev_sync_month, local_curr_sync_month, local_next_sync_month) &&
+        !getCurrentMonths(local_prev_sync_month, local_curr_sync_month, local_next_sync_month))
         return false;
+
+    return copyCallsCdrUnfinished(local_curr_sync_month, 100000);
+}
+
+bool ThreadSyncCdrs::copyCallsCdrUnfinished(string month, int limit) {
+
+    long long int central_id=repository.billingData->lastSyncCentralCdrUnfinishedId,local_id=0;
+    auto res = db_calls.query("select id from calls_cdr.cdr_unfinished_"+month+" where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
+    if (res.next())
+        local_id = res.get_ll(0);
+
+    if (local_id <= central_id)
+        return false;
+
+    BDb::copy("calls_cdr.cdr_unfinished_" + month,
+              "",
+              "server_id,id,call_id,setup_time,hash,dst_route,releasing_party,release_timestamp,disconnect_cause,src_number,dst_number,src_route",
+              "select "+ app().conf.str_instance_id +",id,call_id,setup_time,hash,dst_route,releasing_party,release_timestamp,disconnect_cause,src_number,dst_number,src_route "
+              "from calls_cdr.cdr_unfinished_" + month +
+              "  where id>" + lexical_cast<string>(central_id) +
+              "  order by id limit "+lexical_cast<string>(limit),
+              &db_calls, &db_main);
+
+    return true;
+}
+
+bool ThreadSyncCdrs::copyDblinkCallsCdrUnfinished(string local_curr_sync_month) {
 
     try {
 
