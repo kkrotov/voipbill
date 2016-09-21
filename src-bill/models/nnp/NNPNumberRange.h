@@ -8,6 +8,8 @@ struct NNPNumberRange {
     int ndc;
     long long int number_from;
     long long int number_to;
+    long long int full_number_from;
+    long long int full_number_to;
     bool is_mob;
     bool is_active;
     int nnp_operator_id;
@@ -23,6 +25,8 @@ struct NNPNumberRange {
         trace << "ndc: " << ndc << ", ";
         trace << "number_from: " << number_from << ", ";
         trace << "number_to: " << number_to << ", ";
+            trace << "full_number_from: " << full_number_from << ", ";
+            trace << "full_number_to: " << full_number_to << ", ";
         trace << "is_mob: " << is_mob << ", ";
         trace << "is_active: " << is_active << ", ";
         trace << "nnp_operator_id: " << nnp_operator_id << ", ";

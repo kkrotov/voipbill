@@ -54,6 +54,12 @@ bool NNPResolver::matchNumberNNPDestination(long long int numberPrefix, int nnp_
     if (nnpDestination == nullptr)
         throw CalcException("NNPDestination NOT FOUND");
 
+
+
+    //string number_from = itoa (nnpDestination->);
+
+
+
     return false;
 }
 
@@ -64,6 +70,10 @@ bool NNPResolver::matchNumberNNPDestination(long long int numberPrefix, int nnp_
  */
 
 bool NNPResolver::isExistNumberPrefixInNNPNumberRange(long long int numberPrefix, NNPNumberRange *nnpNumberRange) {
+
+    NNPNumberRange
+
+//    --itoa()
 
     return false;
 }

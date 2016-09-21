@@ -9,7 +9,8 @@ protected:
 
     string sql(BDb *db) {
         return "select id, country_code, ndc, number_from, number_to, is_mob, " \
-            "   is_active, operator_id, region_id, extract(epoch from insert_time), extract(epoch from update_time), city_id " \
+            "   is_active, operator_id, region_id, extract(epoch from insert_time), extract(epoch from update_time), city_id, " \
+            "   full_number_from, full_number_to " \
             "   from nnp.number_range " \
             "   order by id ";
     }
@@ -27,6 +28,9 @@ protected:
         item->insert_time = row.get_i(9);
         item->update_time = row.get_i(10);
         item->nnp_city_id = row.get_i(11);
+        item->full_number_from = row.get_i(12);
+        item->full_number_to = row.get_i(13);
+
     }
 
     struct key_id {
