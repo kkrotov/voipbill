@@ -78,6 +78,8 @@ public:
 
     void statsAccountGetClients(vector<StatsAccount> &destClients);
     double statsAccountGetSumMonth(int account_id, double vat_rate);
+
+    double statsAccountGetSumMNDay(int account_id, double vat_rate);
     double statsAccountGetSumDay(int account_id, double vat_rate);
     double statsAccountGetSumBalance(int account_id, double vat_rate);
     StatsFreemin * statsFreeminGetCurrent(CallInfo * callInfo);
@@ -102,4 +104,5 @@ private:
 
     friend class PageFmins;
     friend class PagePackage;
+
 };

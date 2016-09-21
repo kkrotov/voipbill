@@ -328,6 +328,11 @@ double DataBillingContainer::statsAccountGetSumDay(int account_id, double vat_ra
     return statsAccount.getSumDay(account_id, vat_rate);
 }
 
+double DataBillingContainer::statsAccountGetSumMNDay(int account_id, double vat_rate) {
+    lock_guard<Spinlock> guard(lock);
+    return statsAccount.getSumMNDay(account_id, vat_rate);
+}
+
 double DataBillingContainer::statsAccountGetSumBalance(int account_id, double vat_rate) {
     lock_guard<Spinlock> guard(lock);
     return statsAccount.getSumBalance(account_id, vat_rate);

@@ -7,15 +7,15 @@
 class TrunkList : public ObjList<Trunk> {
 protected:
 
-    string sql(BDb * db) {
+    string sql(BDb *db) {
         string server_id = app().conf.str_instance_id;
         return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, source_trunk_rule_default_allowed, default_priority, auto_routing, route_table_id, our_trunk, auth_by_number, orig_redirect_number_7800, orig_redirect_number, term_redirect_number " \
             "   from auth.trunk " \
             "   where server_id = " + server_id +
-            "   order by trunk_name asc ";
+               "   order by trunk_name asc ";
     }
 
-    inline void parse_item(BDbResult &row, Trunk * item) {
+    inline void parse_item(BDbResult &row, Trunk *item) {
         item->id = row.get_i(0);
         row.fill_cs(1, item->name, sizeof(item->name));
         row.fill_cs(2, item->trunk_name, sizeof(item->trunk_name));
@@ -34,24 +34,29 @@ protected:
     }
 
     struct key_id {
-        bool operator() (const Trunk & left, int id) {
+        bool operator()(const Trunk &left, int id) {
             return left.id < id;
         }
-        bool operator() (int id, const Trunk & right) {
+
+        bool operator()(int id, const Trunk &right) {
             return id < right.id;
         }
     };
 
 public:
-    Trunk * find(int id, stringstream *trace = nullptr) {
+    Trunk *find(int id, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
-        {
-            auto p = equal_range(begin, end, id, key_id());
-            begin = p.first;
-            end = p.second;
+
+        Trunk *result = nullptr;
+
+        for (auto it = begin; it != end; ++it) {
+            Trunk *trunk = &*it;
+            if (trunk->id == id) {
+                result = trunk;
+                break;
+            }
         }
-        Trunk * result = begin <  end ? &*begin : nullptr;
 
         if (trace != nullptr) {
             if (result != nullptr) {
@@ -72,7 +77,7 @@ public:
         auto end = this->data.end();
 
         for (auto it = begin; it != end; ++it) {
-            Trunk * trunk = &*it;
+            Trunk *trunk = &*it;
 
             if (trunk->auto_routing) {
                 if (resultTrunks.size() == 0) {

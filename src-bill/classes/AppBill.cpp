@@ -94,13 +94,13 @@ void AppBill::runAppInSingleMode()
     std::vector<std::string> standardThreads {
             // Логирование
             "log",
-            // Блок синхронизации 
+            // Перемещение данных из таблиц центрального сервера на региональные
             "sync",
             // Блок считывания данных в оперативную память
             "loader",
             // синхронизация данных по балансу таблиц billing.clients и billing.stats_accounts
             "account_balance_recalc",
-            // синхронизация таблиц billing.stats_account на центральном и региональных сервера
+            // синхронизация таблиц billing.stats_account на центральном и региональных серверах
             "remote_loader",
             // Контроль текущих звонков
             "current_calls",
@@ -108,7 +108,7 @@ void AppBill::runAppInSingleMode()
             "fetch_cdr",
             // Расчет себестоимости звонка, Расчет цены MCN для звонка
             "runtime",
-            // Обновление центральной БД (копирование данных из региональной БД в центральную) 
+            // Обновление центральной БД (копирование данных из региональной БД в центральную)
             "save",
             // Передача данных по локальным вызовам calls_raw.calls_raw на центральный сервер
             "sync_calls",
@@ -120,7 +120,7 @@ void AppBill::runAppInSingleMode()
             "sync_locks",
             // Извлечение чёрных списков из openca
             "client_lock",
-            // Блокировка клиента
+            // Извлечение чёрных списков из openca
             "blacklist_fetch",
             // модификация чёрных списков в репозитории и в openca
             "blacklist_calc",
