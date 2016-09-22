@@ -138,8 +138,7 @@ void ThreadCdrParser::logUnfinishedCall(CallData &call) {
     logCall->params["disconnect_cause"] = call.disconnect_cause;
     logCall->params["call_finished"] = "No";
 
-    Log::info(logCall);
-    Log::info("Call "+call.call_id+" is UNFINISHED");
+    Log::info(logCall); // Call "+call.call_id+" is UNFINISHED
 }
 
 

@@ -297,8 +297,7 @@ void logFinishedCall(const Cdr& cdr, const Call& origCall, const Call& termCall,
 	}
     }    
 
-    Log::info(logCall);
-    Log::info("Call "+to_string(origCall.id)+" is FINISHED");
+    Log::info(logCall); // Call "+to_string(origCall.id)+" is FINISHED
 }
 
 
