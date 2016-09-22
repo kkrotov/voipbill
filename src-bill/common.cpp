@@ -165,7 +165,7 @@ time_t get_tmonth_end(time_t timestamp, short timezone_offset) {
  *
  * @return false - string was NOT modified, true - string was modified.
  */
-bool removeHtmlTags (string &str) {
+bool removeHtmlTags (string & str) {
 
     bool modified = false;
     stack<unsigned int> openIndex;
@@ -175,7 +175,11 @@ bool removeHtmlTags (string &str) {
 
     for (int i = 0; i < str.size(); i++) {
 
-        if (str.at(i) == '<') {
+        if (str.at(i) == '<' && i+1 < str.size() &&
+           ( ( str.at(i+1) >= 'a' && str.at(i+1) <= 'z' ) || 
+             ( str.at(i+1) >= 'A' && str.at(i+1) <= 'Z' ) ||
+               str.at(i+1) == '!'                         ||
+               str.at(i+1) == '/' ) ) {
             openIndex.push (i);
             continue;
         }

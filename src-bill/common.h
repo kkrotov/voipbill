@@ -41,7 +41,7 @@ time_t get_tmonth(time_t timestamp, short timezone_offset = 0);
 time_t get_tmonth_end(time_t timestamp, short timezone_offset = 0);
 
 
-bool removeHtmlTags (string str);
+bool removeHtmlTags (string & str);
 
 
 char const * build_date();
