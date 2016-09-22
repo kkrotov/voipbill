@@ -29,6 +29,7 @@ public:
         html << "<th nowrap>Month Sum</th>\n";
         html << "<th nowrap>Day</th>\n";
         html << "<th nowrap>Day Sum</th>\n";
+        html << "<th nowrap>Day MN Sum</th>\n";
         html << "<th nowrap>Date</th>\n";
         html << "<th nowrap>Sum</th>\n";
         html << "<th nowrap>Balance available</th>\n";
@@ -77,6 +78,7 @@ public:
             html << "<td nowrap>" << sum_month_raw << "</td>\n";
             html << "<td nowrap>" << string_date(cc.amount_day, 13) << "</td>\n";
             html << "<td nowrap>" << sum_day_raw << "</td>\n";
+            html << "<td nowrap" <<  ( fabs(sum_day_raw) < fabs(sum_mn_day_raw) ? "  style=\"color:Red\" " : " ") << ">" << sum_mn_day_raw << "</td>\n";
             html << "<td nowrap>" << (cc.amount_date>0? string_time(cc.amount_date):"<none>") << "</td>\n";
             html << "<td nowrap>" << sum_balance << "</td>\n";
 
