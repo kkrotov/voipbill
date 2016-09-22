@@ -24,6 +24,7 @@ void Billing::calcCurrentCalls() {
     shared_ptr<StatsFreeminManager> statsFreemin(new StatsFreeminManager());
     shared_ptr<StatsPackageManager> statsPackage(new StatsPackageManager());
     shared_ptr<StatsTrunkSettingsManager> statsTrunkSettings(new StatsTrunkSettingsManager());
+    shared_ptr<StatsNNPPackageMinuteManager> statsNNPPackageMinute(new StatsNNPPackageMinuteManager());
 
     for (size_t i = 0; i < currentCdrs->size(); i++) {
         auto cdr = currentCdrs->get(i);
@@ -48,12 +49,15 @@ void Billing::calcCurrentCalls() {
         statsFreemin.get()->add(&origCallInfo);
         statsPackage.get()->add(&origCallInfo);
         statsTrunkSettings.get()->add(&origCallInfo);
+        statsNNPPackageMinute.get()->add(&origCallInfo);
+
         callsWaitSaving->push_back(origCall);
 
         statsAccount.get()->add(&termCallInfo);
         statsFreemin.get()->add(&termCallInfo);
         statsPackage.get()->add(&termCallInfo);
         statsTrunkSettings.get()->add(&termCallInfo);
+        statsNNPPackageMinute.get()->add(&termCallInfo);
         callsWaitSaving->push_back(termCall);
     }
 
@@ -62,6 +66,7 @@ void Billing::calcCurrentCalls() {
     repository.currentCalls->setStatsFreemin(statsFreemin);
     repository.currentCalls->setStatsPackage(statsPackage);
     repository.currentCalls->setStatsTrunkSettings(statsTrunkSettings);
+    repository.currentCalls->setStatsNNPPackageMinute(statsNNPPackageMinute);
 }
 
 void fetchGlobalCounters(int accountId, double vat_rate, Repository& repository, double* globalBalanceSum, double* globalDaySum) {

@@ -538,4 +538,21 @@ public:
             }
         }
     }
+
+    void getActiveNNPAccountTariffLight(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight, int client_id) {
+        nnpAccountTariffLight->findAllActiveByClientID(resultNNPAccountTariffLight, client_id, trace);
+    }
+
+    void getServiceNumberByClientID(vector<ServiceNumber> &resultServiceNumber, int client_id) {
+        serviceNumber->findAllByClientID(resultServiceNumber, client_id, trace);
+    }
+
+    void getNNPPackageMinuteByTariff(vector<NNPPackageMinute> &resultNNPPackageMinute, int nnp_tariff_id) {
+        nnpPackageMinute->findAllByTariffID(resultNNPPackageMinute, nnp_tariff_id, trace);
+    }
+
+    NNPDestination *getNNPDestination(int id) {
+        return nnpDestination->find(id, trace);
+    }
+
 };

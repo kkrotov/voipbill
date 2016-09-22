@@ -9,7 +9,7 @@ protected:
 
     string sql(BDb *db) {
         return "select id,tariff_id,pricelist_id " \
-            "   from nnp.package_pricelist ";
+            "   from nnp.package_pricelist order by id";
     }
 
     inline void parse_item(BDbResult &row, NNPPackagePricelist *item) {

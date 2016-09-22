@@ -42,7 +42,7 @@ main_db_test_create_and_load() {
     /usr/pgsql-9.4/bin/psql -h $HOST_DB_TEST_MAIN -U postgres $NAME_DB_TEST_MAIN < $DB_DUMP_SCHEMA_MAIN || exit 1
 
     echo "]]] 5. Загружаем тестовые данные в базу из [$DB_DUMP_DATA_MAIN_WO_CALLS]"
-    /usr/pgsql-9.4/bin/pg_restore -U postgres -h $HOST_DB_TEST_MAIN -d $NAME_DB_TEST_MAIN -Fc $DB_DUMP_DATA_MAIN_WO_CALLS 
+    /usr/pgsql-9.4/bin/psql -U postgres -h $HOST_DB_TEST_MAIN -d $NAME_DB_TEST_MAIN < $DB_DUMP_DATA_MAIN_WO_CALLS 
 
     echo "]]] 6. Загружаем схему calls из [$DB_DUMP_SCHEMA_MAIN_CALLS]"
     /usr/pgsql-9.4/bin/psql -U postgres -h $HOST_DB_TEST_MAIN  $NAME_DB_TEST_MAIN < $DB_DUMP_SCHEMA_MAIN_CALLS

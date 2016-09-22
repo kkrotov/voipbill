@@ -76,5 +76,7 @@ protected:
 
     bool matchTariffPackageDestination(TariffPackage * tariff);
 
+    bool matchNumberNNPDestination(long long int numberPrefix, int nnp_destination_id);
+
 };
 

@@ -33,6 +33,7 @@ public:
         html << "<th nowrap>Sum</th>\n";
         html << "<th nowrap>Balance available</th>\n";
         html << "<th nowrap>Daily available</th>\n";
+        html << "<th nowrap>Daily MN available</th>\n";
         html << "<th nowrap>Block MGMN Flag</th>\n";
         html << "<th nowrap>Block Global Flag</th>\n";
         html << "</tr>\n";
@@ -51,21 +52,22 @@ public:
 
             double sum_month_raw = cc.sumMonth(vat_rate, false);
             double sum_day_raw = cc.sumDay(vat_rate, false);
+            double sum_mn_day_raw = cc.sumMNDay(vat_rate, false);
             double sum_month = cc.sumMonth(vat_rate);
             double sum_day = cc.sumDay(vat_rate);
+            double sum_mn_day = cc.sumMNDay(vat_rate);
             double sum_balance = cc.sumBalance(vat_rate);
 
+            if (abs(sum_month) <= 0.0001 && abs(sum_day) <= 0.0001 && abs(sum_mn_day) <= 0.0001 && abs(sum_balance) <= 0.0001) continue;
 
 
-            if (abs(sum_month) <= 0.0001 && abs(sum_day) <= 0.0001 && abs(sum_balance) <= 0.0001) continue;
-
-
-            double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
+            double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0, sum_mn_day_global = 0;
             if (repository.data->globalCounters.ready()) {
                 auto globalCounter = repository.data->globalCounters.get()->find(client_id);
                 if (globalCounter) {
                     sum_balance_global += globalCounter->sumBalance(vat_rate);
                     sum_day_global += globalCounter->sumDay(vat_rate);
+                    sum_mn_day_global += globalCounter->sumMNDay(vat_rate);
                 }
             }
 
@@ -86,6 +88,12 @@ public:
 
             if (client != nullptr && client->hasDailyLimit()) {
                 html << "<td nowrap>" << string_fmt("%.2f", client->limit_d + sum_day + sum_day_global) << "</td>\n";
+            } else {
+                html << "<td nowrap>-</td>\n";
+            }
+
+            if (client != nullptr && client->hasDailyMNLimit()) {
+                html << "<td nowrap>" << string_fmt("%.2f", client->limit_d_mn + sum_mn_day + sum_mn_day_global) << "</td>\n";
             } else {
                 html << "<td nowrap>-</td>\n";
             }

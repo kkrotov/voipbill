@@ -9,7 +9,7 @@ protected:
 
     string sql(BDb *db) {
         return "select prefix_id,number_range_id, extract(epoch from insert_time) " \
-            "   from nnp.number_range_prefix ";
+            "   from nnp.number_range_prefix  order by prefix_id";
     }
 
     inline void parse_item(BDbResult &row, NNPNumberRangePrefix *item) {
