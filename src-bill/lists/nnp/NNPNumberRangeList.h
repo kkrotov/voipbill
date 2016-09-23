@@ -11,7 +11,7 @@ protected:
         return "select id, country_code, ndc, number_from, number_to, is_mob, " \
             "   is_active, operator_id, region_id, extract(epoch from insert_time), extract(epoch from update_time), city_id, " \
             "   full_number_from, full_number_to " \
-            "   from nnp.number_range " \
+            "   from nnp.number_range" \
             "   order by full_number_from, full_number_to";
     }
 
@@ -30,18 +30,7 @@ protected:
         item->nnp_city_id = row.get_i(11);
         item->full_number_from = row.get_ll(12);
         item->full_number_to = row.get_ll(13);
-
     }
-
-    struct key_id {
-        bool operator()(const NNPNumberRange &left, int id) {
-            return left.id < id;
-        }
-
-        bool operator()(int id, const NNPNumberRange &right) {
-            return id < right.id;
-        }
-    };
 
     struct key_full_number_from;
 

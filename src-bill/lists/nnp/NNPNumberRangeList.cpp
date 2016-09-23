@@ -12,7 +12,7 @@ struct NNPNumberRangeList::key_full_number_from {
 
 
 NNPNumberRange *NNPNumberRangeList::getNNPNumberRange(long long int num, stringstream *trace) {
-    if (num > 0) {
+    if (num > 0 && this->data.size() > 0) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {

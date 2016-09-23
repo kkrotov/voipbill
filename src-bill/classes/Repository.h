@@ -573,5 +573,10 @@ public:
         return nnpNumberRange->getNNPNumberRange(num, trace);
     }
 
+    bool getNNPPrefixsByNumberRange(vector<NNPNumberRangePrefix *> &nnpNumberRangePrefixList,
+                                    int nnpNumberRangeId, stringstream *trace = nullptr) {
+        return nnpNumberRangePrefix->getNNPPrefixsByNumberRange(nnpNumberRangePrefixList,
+                                                                nnpNumberRangeId, trace);
+    }
 
 };

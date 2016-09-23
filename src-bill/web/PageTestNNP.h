@@ -29,7 +29,9 @@ public:
             sNum = parameters["num"];
         //html << cmd;
 
-        if (std::atoll(sNum.c_str()) > 0)
+        long long int num = std::atoll(sNum.c_str());
+
+        if (num > 0)
 
             try {
 
@@ -41,7 +43,22 @@ public:
                 NNPResolver nnp = NNPResolver(&repository);
                 nnp.setTrace(&html);
 
-                test(std::atoll(sNum.c_str()), html);
+                html << "Тестируем вхождение в диапазон номера " << num << "<br>\n";
+
+                NNPNumberRange *nnpNumberRange = repository.getNNPNumberRange(num, &html);
+
+                if (nnpNumberRange != nullptr) {
+                    html << "Нашли: " << nnpNumberRange->id << " [" << nnpNumberRange->full_number_to << ":" <<
+                    nnpNumberRange->full_number_to << "]<br>\n";
+
+                    html << "Получаем список префиксов<br>\n";
+
+                    vector<NNPNumberRangePrefix *> nnpNumberRangePrefixList;
+                    repository.getNNPPrefixsByNumberRange(nnpNumberRangePrefixList, nnpNumberRange->id, &html);
+
+
+                } else "Не нашли.<br>\n";
+
 
             } catch (CalcException &e) {
                 html << "ERROR|NNP RESOLVER STOPPED|CAUSE " << e.message << "\n";
@@ -49,20 +66,6 @@ public:
 
     }
 
-    void test(long long int num, std::stringstream &html) {
-        vector<int> nnpMatchNumberRangeIds;
-
-        html << "Тестируем вхождение в диапазоны номера " << num << "<br>\n";
-
-        NNPNumberRange *nnpNumberRange = repository.getNNPNumberRange(num, &html);
-
-        if (nnpNumberRange != nullptr) {
-            html << "Нашли: " << nnpNumberRange->id << " [" << nnpNumberRange->full_number_to << ":" <<
-            nnpNumberRange->full_number_to << "]<br>\n";
-        } else "Не нашли.<br>\n";
-
-
-    }
 
 };
 
