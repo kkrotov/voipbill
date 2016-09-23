@@ -71,9 +71,18 @@ bool NNPResolver::matchNumberNNPDestination(long long int numberPrefix, int nnp_
 
 bool NNPResolver::isExistNumberPrefixInNNPNumberRange(long long int numberPrefix, NNPNumberRange *nnpNumberRange) {
 
-    NNPNumberRange
+//    NNPNumberRange
 
 //    --itoa()
 
     return false;
+}
+
+bool NNPResolver::nnpMatchNumberRange(vector<int> &nnpMatchNumberRangeIds, long long int num) {
+
+//    NNPNumberRangeData nnpNumberRangeList = repository->data->nnpNumberRange;
+
+    nnpMatchNumberRangeIds.push_back(5);
+    nnpMatchNumberRangeIds.push_back(6);
+    return true;
 }

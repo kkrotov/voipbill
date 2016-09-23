@@ -22,4 +22,6 @@ public:
     void findAllNumberRange(vector<int>&nnp_number_rangeIds,long long int numberPrefix);
 
     bool isExistNumberPrefixInNNPNumberRange(long long int numberPrefix, NNPNumberRange *nnpNumberRange);
+
+    bool nnpMatchNumberRange(vector<int> &nnpMatchNumberRangeIds, long long int num);
 };
