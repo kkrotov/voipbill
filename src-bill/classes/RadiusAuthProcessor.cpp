@@ -908,13 +908,13 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
         }
 
         // Блокировка МН если превышен дневной лимит на МН звонки
- /*       if (call.isInternational() &&
+        if (call.isInternational() &&
             isLowBalance(&Client::isConsumedDailyMNLimit, REASON_DAILY_LIMIT, client, spentDayMNSum, call,
                          o_pAccountIdsBlockedBefore)) {
             return "voip_disabled";
         }
 
- */
+
         // Глобальная блокировка
         if (client->is_blocked) {
             return "voip_disabled";
