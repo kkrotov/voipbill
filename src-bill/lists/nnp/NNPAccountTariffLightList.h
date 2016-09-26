@@ -10,7 +10,8 @@ protected:
     string sql(BDb *db) {
         return "select id, account_tariff_id, account_client_id, " \
             "   tariff_id, extract(epoch from activate_from), extract(epoch from deactivate_from), coefficient " \
-            "   from nnp.account_tariff_light order by id";
+            "   from nnp.account_tariff_light order by id asc";
+
     }
 
     inline void parse_item(BDbResult &row, NNPAccountTariffLight *item) {
