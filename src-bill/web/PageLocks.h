@@ -29,9 +29,11 @@ public:
 
         html << "<th nowrap>Block is_finance_block</th>\n";
         html << "<th nowrap>Block is_overran</th>\n";
+        html << "<th nowrap>Block is_mn_overran</th>\n";
 
         html << "<th nowrap>Balance available</th>\n";
         html << "<th nowrap>Daily available</th>\n";
+        html << "<th nowrap>Daily MN available</th>\n";
         html << "<th nowrap>Block MGMN Flag</th>\n";
         html << "<th nowrap>Block Global Flag</th>\n";
         html << "</tr>\n";
@@ -54,26 +56,29 @@ public:
 
             double sum_month = repository.billingData->statsAccountGetSumMonth(client_id, vat_rate);
             double sum_day = repository.billingData->statsAccountGetSumDay(client_id, vat_rate);
+            double sum_mn_day = repository.billingData->statsAccountGetSumMNDay(client_id, vat_rate);
             double sum_balance = repository.billingData->statsAccountGetSumBalance(client_id, vat_rate);
 
 
-            double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0;
+            double sum_month_global = 0, sum_day_global = 0, sum_balance_global = 0, sum_mn_day_global = 0;
             if (repository.data->globalCounters.ready()) {
                 auto globalCounter = repository.data->globalCounters.get()->find(client_id);
                 if (globalCounter) {
                     sum_balance_global += globalCounter->sumBalance(vat_rate);
                     sum_day_global += globalCounter->sumDay(vat_rate);
+                    sum_mn_day_global += globalCounter->sumMNDay(vat_rate);
                 }
             }
 
             html << "<tr>\n";
             html << "<td nowrap><a href='/client?id=" << client_id << "'>" << client_id << "</a></td>\n";
             html << "<td nowrap>" << (lock.disabled_local ? "BLOCK MGMN" : "-")  << "</td>\n";
+
             html << "<td nowrap>" << (lock.disabled_global ? "BLOCK GLOBAL" : "-") << "</td>\n";
 
             html << "<td nowrap>" << (lock.is_finance_block ? "BLOCK FINANCE" : "-")  << "</td>\n";
             html << "<td nowrap>" << (lock.is_overran ? "BLOCK OVERRAN" : "-") << "</td>\n";
-
+            html << "<td nowrap>" << (lock.is_mn_overran ? "BLOCK MN OVERRAN" : "-") << "</td>\n";
             if (client != nullptr && client->hasCreditLimit()) {
                 html << "<td nowrap>" << string_fmt("%.2f", client->balance + client->credit + sum_balance + sum_balance_global) << "</td>\n";
             } else {
@@ -85,6 +90,14 @@ public:
             } else {
                 html << "<td nowrap>-</td>\n";
             }
+
+            if (client != nullptr && client->hasDailyMNLimit()) {
+                html << "<td nowrap>" << string_fmt("%.2f", client->limit_d_mn + sum_mn_day + sum_mn_day_global) <<
+                "</td>\n";
+            } else {
+                html << "<td nowrap>-</td>\n";
+            }
+
 
             if (client != nullptr && client->disabled) {
                 html << "<td nowrap>" << "TRUE" << "</td>\n";

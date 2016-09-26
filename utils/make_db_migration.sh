@@ -3,8 +3,6 @@
 THIS=`readlink -f "${BASH_SOURCE[0]}"`
 DIR=`dirname "${THIS}"`
 
-exit
-
 # Здесь живёт $REGIONS_LIST
 . "$DIR/regions-list"
 
@@ -19,8 +17,8 @@ HOST="reg${region_id}.mcntelecom.ru"
 DBNAME="nispd${region_id}"
 USER=doleynik_rw
 
-    echo "Делаем правку : HOST $HOST : USER $USER : DBNAME $DBNAME : SQL: $SQL"
-    /usr/pgsql-9.4/bin/psql -h $HOST -U $USER $DBNAME -c "$SQL" || exit 1
+    echo "Делаем правку : HOST $HOST : USER $USER : DBNAME $DBNAME"
+    /usr/pgsql-9.4/bin/psql -h $HOST -U $USER $DBNAME < reg_11.sql
 
 done
 

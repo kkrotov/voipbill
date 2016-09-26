@@ -31,11 +31,11 @@ echo "]]] 1. Дампим текущую схему московской рег�
 /usr/pgsql-9.4/bin/pg_dump -c -s --disable-trigger -O -h $HOST_DB_REGIONAL -U $DB_USER $NAME_DB_REGIONAL > $DIR/SQL/$NAME_DB_REGIONAL.schema.sql
 
 echo "]]] 2. Дампим данные ЦЕНТРАЛЬНОЙ БД без схем  calls_raw,calls_aggr. сервер [$HOST_DB_MAIN],база [$NAME_DB_MAIN]"
-/usr/pgsql-9.4/bin/pg_dump -a -Fc -N calls_raw -N calls_aggr --disable-triggers -O -h $HOST_DB_MAIN -U $DB_USER $NAME_DB_MAIN > $DIR/SQL/$NAME_DB_MAIN.data_wo_calls_data.sql
+/usr/pgsql-9.4/bin/pg_dump -a -N calls_raw -N calls_aggr --disable-triggers -O -h $HOST_DB_MAIN -U $DB_USER $NAME_DB_MAIN > $DIR/SQL/$NAME_DB_MAIN.data_wo_calls_data.sql
 
 # Центральная база
 echo "]]] 3. Дампим cхему центральной БД. сервер [$HOST_DB_MAIN],база [$NAME_DB_MAIN]"
-/usr/pgsql-9.4/bin/pg_dump -c --disable-triggers -s -O -h $HOST_DB_MAIN -U $DB_USER $NAME_DB_MAIN > $DIR/SQL/$NAME_DB_MAIN.schema.sql
+/usr/pgsql-9.4/bin/pg_dump -c -s -O -h $HOST_DB_MAIN -U $DB_USER $NAME_DB_MAIN > $DIR/SQL/$NAME_DB_MAIN.schema.sql
 
 # Схему с calls'ами докатываем.
 echo "]]] 4. Дампим схемы calls_raw и calls_aggr центральной БД без данных. сервер [$HOST_DB_MAIN],база [$NAME_DB_MAIN]"

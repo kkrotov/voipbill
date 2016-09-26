@@ -106,17 +106,21 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
 
             double sumBalance = repository.billingData->statsAccountGetSumBalance(callInfo.account->id, vat_rate);
             double sumDay = repository.billingData->statsAccountGetSumDay(callInfo.account->id, vat_rate);
+            double sumMNDay = repository.billingData->statsAccountGetSumMNDay(callInfo.account->id, vat_rate);
 
             auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
             double sumBalance2 = statsAccount2->getSumBalance(callInfo.account->id, vat_rate) + call.cost;
             double sumDay2 = statsAccount2->getSumDay(callInfo.account->id, vat_rate) + call.cost;
+            double sumMNDay2 = statsAccount2->getSumMNDay(callInfo.account->id, vat_rate) + call.cost;
 
-            double globalBalanceSum, globalDaySum;
-            fetchGlobalCounters(callInfo.account->id, globalBalanceSum, globalDaySum, vat_rate);
+            double globalBalanceSum, globalDaySum, globalDayMNSum;
+            fetchGlobalCounters(callInfo.account->id, globalBalanceSum, globalDaySum, globalDayMNSum, vat_rate);
 
-            double spentBalanceSum, spentDaySum;
+            double spentBalanceSum, spentDaySum, spentDayMNSum;
             spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
             spentDaySum = sumDay + sumDay2 + globalDaySum;
+            spentDayMNSum = sumMNDay + sumMNDay2 + globalDayMNSum;
+
 
             logRequest->params["balance_stat"] = callInfo.account->balance;
             logRequest->params["balance_local"] = sumBalance;
@@ -136,6 +140,10 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
             if (callInfo.account->hasDailyLimit()) {
                 logRequest->params["daily_limit"] = callInfo.account->limit_d;
                 logRequest->params["daily_available"] = callInfo.account->limit_d + spentDaySum;
+            }
+            if (callInfo.account->hasDailyMNLimit()) {
+                logRequest->params["daily_mn_limit"] = callInfo.account->limit_d_mn;
+                logRequest->params["daily_mn_available"] = callInfo.account->limit_d_mn + spentDayMNSum;
             }
 
             if (callInfo.account->is_blocked) {
@@ -857,17 +865,20 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
 
     double sumBalance = repository.billingData->statsAccountGetSumBalance(call.account_id, vat_rate);
     double sumDay = repository.billingData->statsAccountGetSumDay(call.account_id, vat_rate);
+    double sumMNDay = repository.billingData->statsAccountGetSumMNDay(call.account_id, vat_rate);
 
     auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
     double sumBalance2 = statsAccount2->getSumBalance(call.account_id, vat_rate) + call.cost;
     double sumDay2 = statsAccount2->getSumDay(call.account_id, vat_rate) + call.cost;
+    double sumMNDay2 = statsAccount2->getSumMNDay(call.account_id, vat_rate) + call.cost;
 
-    double globalBalanceSum, globalDaySum;
-    fetchGlobalCounters(call.account_id, globalBalanceSum, globalDaySum, vat_rate);
+    double globalBalanceSum, globalDaySum, globalDayMNSum;
+    fetchGlobalCounters(call.account_id, globalBalanceSum, globalDaySum, globalDayMNSum, vat_rate);
 
-    double spentBalanceSum, spentDaySum;
+    double spentBalanceSum, spentDaySum, spentDayMNSum;
     spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
     spentDaySum = sumDay + sumDay2 + globalDaySum;
+    spentDayMNSum = sumMNDay + sumMNDay2 + globalDayMNSum;
 
     if (call.trunk_service_id != 0) {
 
@@ -892,6 +903,13 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
         // Блокировка МГМН если превышен дневной лимит
         if (!call.isLocal() &&
             isLowBalance(&Client::isConsumedDailyLimit, REASON_DAILY_LIMIT, client, spentDaySum, call,
+                         o_pAccountIdsBlockedBefore)) {
+            return "voip_disabled";
+        }
+
+        // Блокировка МН если превышен дневной лимит на МН звонки
+        if (call.isInternational() &&
+            isLowBalance(&Client::isConsumedDailyMNLimit, REASON_DAILY_LIMIT, client, spentDayMNSum, call,
                          o_pAccountIdsBlockedBefore)) {
             return "voip_disabled";
         }
@@ -930,7 +948,7 @@ bool RadiusAuthProcessor::isLowBalance(bool (Client::*checkLimit)(double), Rejec
 }
 
 void RadiusAuthProcessor::fetchGlobalCounters(int accountId, double &globalBalanceSum, double &globalDaySum,
-                                              double vat_rate) {
+                                              double &globalDayMNSum, double vat_rate) {
 
     GlobalCounters *globalCounter = nullptr;
     if (repository.data->globalCounters.ready()) {
@@ -940,8 +958,10 @@ void RadiusAuthProcessor::fetchGlobalCounters(int accountId, double &globalBalan
     if (globalCounter != nullptr) {
         globalBalanceSum = globalCounter->sumBalance(vat_rate);
         globalDaySum = globalCounter->sumDay(vat_rate);
+        globalDayMNSum = globalCounter->sumMNDay(vat_rate);
     } else {
         globalBalanceSum = 0.0;
         globalDaySum = 0.0;
+        globalDayMNSum = 0.0;
     }
 }

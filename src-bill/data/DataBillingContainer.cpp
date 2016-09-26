@@ -17,12 +17,14 @@ void DataBillingContainer::loadAll(BDb * db, bool recalc) {
         statsFreemin.recalc(db, getCallsStoredLastId());
         statsPackage.recalc(db, getCallsStoredLastId());
         statsTrunkSettings.recalc(db, getCallsStoredLastId());
+        statsNNPPackageMinute.recalc(db, getCallsStoredLastId());
     }
 
     statsAccount.load(db);
     statsFreemin.load(db, getCallsStoredLastTime());
     statsPackage.load(db, getCallsStoredLastTime());
     statsTrunkSettings.load(db, getCallsStoredLastTime());
+    statsNNPPackageMinute.load(db, getCallsStoredLastTime());
 
     clientLock.load(db);
 }
@@ -79,6 +81,10 @@ bool DataBillingContainer::ready() {
         return false;
     }
 
+    if (!statsNNPPackageMinute.ready()) {
+        return false;
+    }
+
     if (!clientLock.ready()) {
         return false;
     }
@@ -93,6 +99,7 @@ void DataBillingContainer::addCall(CallInfo * callInfo) {
     statsFreemin.add(callInfo);
     statsPackage.add(callInfo);
     statsTrunkSettings.add(callInfo);
+    statsNNPPackageMinute.add(callInfo);
 
     calls.add(*callInfo->call);
 
@@ -122,6 +129,7 @@ void DataBillingContainer::save(BDb * dbCalls) {
     stringstream statFreeminQuery;
     stringstream statPackageQuery;
     stringstream statTrunkSettingsQuery;
+    stringstream statNNPPackageMinuteQuery;
 
     {
         lock_guard<Spinlock> guard(lock);
@@ -146,12 +154,17 @@ void DataBillingContainer::save(BDb * dbCalls) {
         lock_guard<Spinlock> guard(lock);
         statsTrunkSettings.prepareSaveQuery(statTrunkSettingsQuery);
     }
+    {
+        lock_guard<Spinlock> guard(lock);
+        statsNNPPackageMinute.prepareSaveQuery(statNNPPackageMinuteQuery);
+    }
 
     calls.executeSaveQueries(dbCalls, callsQueryPerMonth);
     statsAccount.executeSaveQuery(dbCalls, statAccountQuery);
     statsFreemin.executeSaveQuery(dbCalls, statFreeminQuery);
     statsPackage.executeSaveQuery(dbCalls, statPackageQuery);
     statsTrunkSettings.executeSaveQuery(dbCalls, statTrunkSettingsQuery);
+    statsNNPPackageMinute.executeSaveQuery(dbCalls, statNNPPackageMinuteQuery);
 
     trans.commit();
 
@@ -205,6 +218,7 @@ void DataBillingContainer::createNewPartition() {
     statsFreemin.createNewPartition();
     statsPackage.createNewPartition();
     statsTrunkSettings.createNewPartition();
+    statsNNPPackageMinute.createNewPartition();
 }
 
 void DataBillingContainer::removePartitionAfterSave() {
@@ -213,6 +227,8 @@ void DataBillingContainer::removePartitionAfterSave() {
     statsFreemin.removePartitionAfterSave();
     statsPackage.removePartitionAfterSave();
     statsTrunkSettings.removePartitionAfterSave();
+    statsNNPPackageMinute.removePartitionAfterSave();
+
 }
 
 bool DataBillingContainer::cdrsLoadPart(BDb * db_calls) {
@@ -293,6 +309,11 @@ double DataBillingContainer::statsAccountGetSumDay(int account_id, double vat_ra
     return statsAccount.getSumDay(account_id, vat_rate);
 }
 
+double DataBillingContainer::statsAccountGetSumMNDay(int account_id, double vat_rate) {
+    lock_guard<Spinlock> guard(lock);
+    return statsAccount.getSumMNDay(account_id, vat_rate);
+}
+
 double DataBillingContainer::statsAccountGetSumBalance(int account_id, double vat_rate) {
     lock_guard<Spinlock> guard(lock);
     return statsAccount.getSumBalance(account_id, vat_rate);
@@ -354,3 +375,19 @@ void DataBillingContainer::statsTrunkSettingsAddChanges(map<int, StatsTrunkSetti
     statsTrunkSettings.addChanges(changes);
 }
 
+
+void DataBillingContainer::statsNNPPackaeMinuteGetChanges(map<int, StatsNNPPackageMinute> &changes){
+    lock_guard<Spinlock> guard(lock);
+    statsNNPPackageMinute.getChanges(changes);
+}
+
+void DataBillingContainer::statsNNPPackaeMinuteAddChanges(map<int, StatsNNPPackageMinute> &changes){
+    lock_guard<Spinlock> guard(lock);
+    statsNNPPackageMinute.addChanges(changes);
+}
+
+int DataBillingContainer::statsNNPPackaeMinuteGetUsedSeconds(int nnp_account_tariff_light_id,
+                                                             int nnp_package_minute_id) {
+    lock_guard<Spinlock> guard(lock);
+    return statsNNPPackageMinute.getUsedSeconds(nnp_account_tariff_light_id, nnp_package_minute_id);
+}

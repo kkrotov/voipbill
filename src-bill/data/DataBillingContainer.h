@@ -14,6 +14,7 @@
 #include "../classes/StatsFreeminManager.h"
 #include "../classes/StatsPackageManager.h"
 #include "../classes/StatsTrunkSettingsManager.h"
+#include "../classes/StatsNNPPackageMinuteManager.h"
 
 #include "DataContainer.h"
 
@@ -36,6 +37,7 @@ public:
     StatsFreeminManager         statsFreemin;
     StatsPackageManager         statsPackage;
     StatsTrunkSettingsManager   statsTrunkSettings;
+    StatsNNPPackageMinuteManager       statsNNPPackageMinute;
     ClientLockData              clientLock;
 
     long long int lastSyncCentralCallId = -1;
@@ -75,6 +77,8 @@ public:
 
     void statsAccountGetClients(vector<StatsAccount> &destClients);
     double statsAccountGetSumMonth(int account_id, double vat_rate);
+
+    double statsAccountGetSumMNDay(int account_id, double vat_rate);
     double statsAccountGetSumDay(int account_id, double vat_rate);
     double statsAccountGetSumBalance(int account_id, double vat_rate);
     StatsFreemin * statsFreeminGetCurrent(CallInfo * callInfo);
@@ -88,7 +92,10 @@ public:
     void statsPackageAddChanges(map<int, StatsPackage> &changes);
     void statsTrunkSettingsGetChanges(map<int, StatsTrunkSettings> &changes);
     void statsTrunkSettingsAddChanges(map<int, StatsTrunkSettings> &changes);
+    void statsNNPPackaeMinuteGetChanges(map<int, StatsNNPPackageMinute> &changes);
+    void statsNNPPackaeMinuteAddChanges(map<int, StatsNNPPackageMinute> &changes);
 
+    int statsNNPPackaeMinuteGetUsedSeconds(int nnp_account_tariff_light_id, int nnp_package_minute_id);
 private:
     void loadLastCallIdAndCdrIdAndTime(BDb * db_calls);
     void loadSyncCentralCallIdAndTime(BDb * db_main);
@@ -97,4 +104,5 @@ private:
 
     friend class PageFmins;
     friend class PagePackage;
+
 };

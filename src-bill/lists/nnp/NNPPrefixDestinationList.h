@@ -9,7 +9,7 @@ protected:
 
     string sql(BDb *db) {
         return "select prefix_id,destination_id, is_addition, extract(epoch from insert_time) " \
-            "   from nnp.prefix_destination ";
+            "   from nnp.prefix_destination order by prefix_id";
     }
 
     inline void parse_item(BDbResult &row, NNPPrefixDestination *item) {

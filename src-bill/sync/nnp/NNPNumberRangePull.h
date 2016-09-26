@@ -29,6 +29,8 @@ public:
         fields.push_back("update_time");
         fields.push_back("update_user_id");
         fields.push_back("city_id");
+            fields.push_back("full_number_from");
+            fields.push_back("full_number_to");
 
         datatype.push_back("id integer");
         datatype.push_back("country_code integer");
@@ -46,5 +48,8 @@ public:
         datatype.push_back("update_time timestamp(0)");
         datatype.push_back("update_user_id integer");
         datatype.push_back("city_id integer");
+            datatype.push_back("full_number_from bigint");
+            datatype.push_back("full_number_to bigint");
+
     }
 };

@@ -45,6 +45,7 @@ protected:
 
 public:
     Trunk *find(int id, stringstream *trace = nullptr) {
+
         auto begin = this->data.begin();
         auto end = this->data.end();
         {

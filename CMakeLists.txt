@@ -303,6 +303,7 @@ set(BILL_SOURCES
     src-bill/web/PageFmins.cpp
     src-bill/web/PagePackage.cpp
     src-bill/web/PageTrunkSettingsCounters.cpp
+    src-bill/web/PageNNPPackageMinuteCounters.cpp
     src-bill/web/PageHome.cpp
     src-bill/web/PageLocks.cpp
     src-bill/web/PageLog.cpp
@@ -339,33 +340,39 @@ set(BILL_SOURCES
     src-bill/models/nnp/NNPAccountTariffLight.cpp
     src-bill/lists/nnp/NNPAccountTariffLightList.cpp
 
+    src-bill/data/nnp/NNPDestinationData.cpp
+    src-bill/data/nnp/NNPNumberRangeData.cpp
+    src-bill/data/nnp/NNPNumberRangePrefixData.cpp
+    src-bill/data/nnp/NNPOperatorData.cpp
+    src-bill/data/nnp/NNPPackageData.cpp
+    src-bill/data/nnp/NNPPackageMinuteData.cpp
+    src-bill/data/nnp/NNPPackagePriceData.cpp
+    src-bill/data/nnp/NNPPackagePricelistData.cpp
+    src-bill/data/nnp/NNPPrefixDestinationData.cpp
+    src-bill/data/nnp/NNPPrefixData.cpp
+    src-bill/data/nnp/NNPRegionData.cpp
 
+    src-bill/sync/nnp/NNPDestinationPull.cpp 
+    src-bill/sync/nnp/NNPNumberRangePull.cpp 
+    src-bill/sync/nnp/NNPNumberRangePrefixPull.cpp 
+    src-bill/sync/nnp/NNPOperatorPull.cpp 
+    src-bill/sync/nnp/NNPPackagePull.cpp 
+    src-bill/sync/nnp/NNPPackageMinutePull.cpp 
+    src-bill/sync/nnp/NNPPackagePricePull.cpp 
+    src-bill/sync/nnp/NNPPackagePricelistPull.cpp 
+    src-bill/sync/nnp/NNPPrefixPull.cpp 
+    src-bill/sync/nnp/NNPPrefixDestinatioPull.cpp 
+    src-bill/sync/nnp/NNPRegionPull.cpp 
+    src-bill/data/nnp/NNPAccountTariffLightData.cpp 
+    src-bill/sync/nnp/NNPAccountTariffLightPull.cpp 
+
+    src-bill/models/StatsNNPPackageMinute.cpp
+    src-bill/classes/StatsNNPPackageMinuteManager.cpp
+    src-bill/classes/nnp/NNPResolver.cpp
 
     src-bill/main.cpp
-    src-bill/data/nnp/NNPDestinationData.cpp
-    src-bill/data/nnp/NNPDestinationData.h
-    src-bill/data/nnp/NNPNumberRangeData.cpp
-    src-bill/data/nnp/NNPNumberRangeData.h
-    src-bill/data/nnp/NNPNumberRangePrefixData.cpp
-    src-bill/data/nnp/NNPNumberRangePrefixData.h
-    src-bill/data/nnp/NNPOperatorData.cpp
-    src-bill/data/nnp/NNPOperatorData.h
-    src-bill/data/nnp/NNPPackageData.cpp
-    src-bill/data/nnp/NNPPackageData.h
-    src-bill/data/nnp/NNPPackageMinuteData.cpp
-    src-bill/data/nnp/NNPPackageMinuteData.h
-    src-bill/data/nnp/NNPPackagePriceData.cpp
-    src-bill/data/nnp/NNPPackagePriceData.h
-    src-bill/data/nnp/NNPPackagePricelistData.cpp
-    src-bill/data/nnp/NNPPackagePricelistData.h
-    src-bill/data/nnp/NNPPrefixDestinationData.cpp
-    src-bill/data/nnp/NNPPrefixDestinationData.h
-    src-bill/data/nnp/NNPPrefixData.cpp
-    src-bill/data/nnp/NNPPrefixData.h
-    src-bill/data/nnp/NNPRegionData.cpp
-    src-bill/data/nnp/NNPRegionData.h
 
-        src-bill/sync/nnp/NNPDestinationPull.cpp src-bill/sync/nnp/NNPDestinationPull.h src-bill/sync/nnp/NNPNumberRangePull.cpp src-bill/sync/nnp/NNPNumberRangePull.h src-bill/sync/nnp/NNPNumberRangePrefixPull.cpp src-bill/sync/nnp/NNPNumberRangePrefixPull.h src-bill/sync/nnp/NNPOperatorPull.cpp src-bill/sync/nnp/NNPOperatorPull.h src-bill/sync/nnp/NNPPackagePull.cpp src-bill/sync/nnp/NNPPackagePull.h src-bill/sync/nnp/NNPPackageMinutePull.cpp src-bill/sync/nnp/NNPPackageMinutePull.h src-bill/sync/nnp/NNPPackagePricePull.cpp src-bill/sync/nnp/NNPPackagePricePull.h src-bill/sync/nnp/NNPPackagePricelistPull.cpp src-bill/sync/nnp/NNPPackagePricelistPull.h src-bill/sync/nnp/NNPPrefixPull.cpp src-bill/sync/nnp/NNPPrefixPull.h src-bill/sync/nnp/NNPPrefixDestinatioPull.cpp src-bill/sync/nnp/NNPPrefixDestinatioPull.h src-bill/sync/nnp/NNPRegionPull.cpp src-bill/sync/nnp/NNPRegionPull.h src-bill/data/nnp/NNPAccountTariffLightData.cpp src-bill/data/nnp/NNPAccountTariffLightData.h src-bill/sync/nnp/NNPAccountTariffLightPull.cpp src-bill/sync/nnp/NNPAccountTariffLightPull.h)
+)
 
 add_definitions(-DHAVE_SYS_IOCTL_H -DHAVE_SOCKLEN_T)
 file(GLOB_RECURSE ACE_RADIUS_SOURCES "libs/ace-radius/*.cpp")

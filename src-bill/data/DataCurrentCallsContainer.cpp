@@ -6,6 +6,7 @@ DataCurrentCallsContainer::DataCurrentCallsContainer() {
     statsFreemin = shared_ptr<StatsFreeminManager>(new StatsFreeminManager());
     statsPackage = shared_ptr<StatsPackageManager>(new StatsPackageManager());
     statsTrunkSettings = shared_ptr<StatsTrunkSettingsManager>(new StatsTrunkSettingsManager());
+    statsNNPPackageMinute = shared_ptr<StatsNNPPackageMinuteManager>(new StatsNNPPackageMinuteManager());
 }
 
 DataCurrentCallsContainer * DataCurrentCallsContainer::instance() {
@@ -71,4 +72,17 @@ shared_ptr<StatsTrunkSettingsManager> DataCurrentCallsContainer::getStatsTrunkSe
     lock_guard<Spinlock> guard(lock);
     return statsTrunkSettings;
 }
+
+
+void DataCurrentCallsContainer::setStatsNNPPackageMinute(shared_ptr<StatsNNPPackageMinuteManager> &newStatsNNPPackageMinute) {
+    lock_guard<Spinlock> guard(lock);
+    statsNNPPackageMinute = newStatsNNPPackageMinute;
+}
+
+shared_ptr<StatsNNPPackageMinuteManager> DataCurrentCallsContainer::getStatsNNPPackageMinute() {
+    lock_guard<Spinlock> guard(lock);
+    return statsNNPPackageMinute;
+}
+
+
 
