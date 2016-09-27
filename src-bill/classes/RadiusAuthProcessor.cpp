@@ -914,6 +914,7 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
             return "voip_disabled";
         }
 
+
         // Глобальная блокировка
         if (client->is_blocked) {
             return "voip_disabled";
