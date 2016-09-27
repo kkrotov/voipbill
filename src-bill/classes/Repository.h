@@ -565,7 +565,7 @@ public:
         nnpPackageMinute->findAllByTariffID(resultNNPPackageMinute, nnp_tariff_id, trace);
     }
 
-    NNPDestination *getNNPDestination(int id) {
+    NNPDestination *getNNPDestination(int id, stringstream *trace = nullptr) {
         return nnpDestination->find(id, trace);
     }
 
@@ -573,10 +573,39 @@ public:
         return nnpNumberRange->getNNPNumberRange(num, trace);
     }
 
-    bool getNNPPrefixsByNumberRange(vector<NNPNumberRangePrefix *> &nnpNumberRangePrefixList,
+    bool getNNPPrefixsByNumberRange(vector<int> &nnpPrefixIds,
                                     int nnpNumberRangeId, stringstream *trace = nullptr) {
-        return nnpNumberRangePrefix->getNNPPrefixsByNumberRange(nnpNumberRangePrefixList,
+        return nnpNumberRangePrefix->getNNPPrefixsByNumberRange(nnpPrefixIds,
                                                                 nnpNumberRangeId, trace);
+    }
+
+    bool getNNPDestinationsByPrefix(set<int> &nnpDestinationIds,
+                                    vector<int> &nnpNumberRangePrefixList,
+                                    stringstream *trace = nullptr) {
+        return nnpPrefixDestination->getNNPDestinationsByPrefix(nnpDestinationIds, nnpNumberRangePrefixList, trace);
+    }
+
+    bool getNNPDestinationByNum(set<int> &nnpDestinationIds, long long int num, stringstream *trace = nullptr) {
+
+        bool fResult = false;
+
+        NNPNumberRange *nnpNumberRange = getNNPNumberRange(num, trace);
+
+        if (nnpNumberRange != nullptr) {
+            vector<int> nnpPrefixIds;
+            getNNPPrefixsByNumberRange(nnpPrefixIds, nnpNumberRange->id, trace);
+            fResult = getNNPDestinationsByPrefix(nnpDestinationIds, nnpPrefixIds, trace);
+        }
+
+        for (auto it = nnpDestinationIds.begin(); it != nnpDestinationIds.end(); it++)
+            NNPDestination *nnpDestination = getNNPDestination(*it, trace);
+
+        if (trace != nullptr && !fResult) {
+            *trace << "NOT FOUND|NNPDestination|BY num '" << num << "'" << "\n";
+
+        }
+
+        return fResult;
     }
 
 };

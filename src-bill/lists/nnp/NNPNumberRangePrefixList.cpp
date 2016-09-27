@@ -12,7 +12,7 @@ struct NNPNumberRangePrefixList::key_nnp_number_range {
     }
 };
 
-bool NNPNumberRangePrefixList::getNNPPrefixsByNumberRange(vector<NNPNumberRangePrefix *> &nnpNumberRangePrefixList,
+bool NNPNumberRangePrefixList::getNNPPrefixsByNumberRange(vector<int> &nnpPrefixIds,
                                                           int nnpNumberRangeId, stringstream *trace) {
     if (nnpNumberRangeId < 1 || this->data.size() == 0) return false;
     {
@@ -22,7 +22,7 @@ bool NNPNumberRangePrefixList::getNNPPrefixsByNumberRange(vector<NNPNumberRangeP
 
         if (p.first != p.second) {
             for (auto it = p.first; it != p.second; it++) {
-                nnpNumberRangePrefixList.push_back(it.base());
+                nnpPrefixIds.push_back(it.base()->nnp_prefix_id);
                 if (trace != nullptr) {
                     *trace << "FOUND|NNPPrefix|BY NNPNumberRange '" << nnpNumberRangeId << "'" << "\n";
                     *trace << "||";

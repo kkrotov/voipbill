@@ -2,6 +2,8 @@
 
 #include "../../classes/ObjList.h"
 #include "../../models/nnp/NNPPrefixDestination.h"
+#include "../../models/nnp/NNPDestination.h"
+#include "../../models/nnp/NNPNumberRangePrefix.h"
 #include "../../classes/AppBill.h"
 
 class NNPPrefixDestinationList : public ObjList<NNPPrefixDestination> {
@@ -15,10 +17,15 @@ protected:
     inline void parse_item(BDbResult &row, NNPPrefixDestination *item) {
         item->nnp_prefix_id = row.get_i(0);
         item->nnp_destination_id = row.get_i(1);
-        item->is_addition = row.get_i(2);
+        item->is_addition = row.get_b(2);
         item->insert_time = row.get_i(3);
     }
 
+    struct key_prefix_id_range;
+
 public:
+
+    bool getNNPDestinationsByPrefix(set<int> &nnpDestinationIds,
+                                    vector<int> &nnpNumberRangePrefixIds, stringstream *trace);
 
 };

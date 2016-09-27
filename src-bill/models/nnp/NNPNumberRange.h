@@ -4,7 +4,6 @@
 
 struct NNPNumberRange {
     int id;
-    int country_code;
     int ndc;
     long long int number_from;
     long long int number_to;
@@ -17,11 +16,12 @@ struct NNPNumberRange {
     time_t insert_time;
     time_t update_time;
     int nnp_city_id;
+    int country_prefix;
 
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
-        trace << "country_code: " << country_code << ", ";
+            trace << "country_prefix: " << country_prefix << ", ";
         trace << "ndc: " << ndc << ", ";
         trace << "number_from: " << number_from << ", ";
         trace << "number_to: " << number_to << ", ";

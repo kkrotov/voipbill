@@ -25,44 +25,32 @@ public:
         if (parameters.find("cmd") != parameters.end())
             cmd = parameters["cmd"];
 
-        if (parameters.find("num") != parameters.end())
-            sNum = parameters["num"];
-        //html << cmd;
 
-        long long int num = std::atoll(sNum.c_str());
+        if (cmd == "getDestinationByNum") {
 
-        if (num > 0)
+            if (parameters.find("num") != parameters.end()) {
+                sNum = parameters["num"];
 
-            try {
+                long long int num = std::atoll(sNum.c_str());
 
-                if (!repository.prepare()) {
-                    html << "ERROR|BILLING NOT READY";
-                    return;
-                }
+                if (num > 0)
 
-                NNPResolver nnp = NNPResolver(&repository);
-                nnp.setTrace(&html);
+                    try {
 
-                html << "Тестируем вхождение в диапазон номера " << num << "<br>\n";
+                        if (!repository.prepare()) {
+                            html << "ERROR|BILLING NOT READY";
+                            return;
+                        }
 
-                NNPNumberRange *nnpNumberRange = repository.getNNPNumberRange(num, &html);
+                        set<int> nnpDestinationIds;
+                        repository.getNNPDestinationByNum(nnpDestinationIds, num, &html);
 
-                if (nnpNumberRange != nullptr) {
-                    html << "Нашли: " << nnpNumberRange->id << " [" << nnpNumberRange->full_number_to << ":" <<
-                    nnpNumberRange->full_number_to << "]<br>\n";
-
-                    html << "Получаем список префиксов<br>\n";
-
-                    vector<NNPNumberRangePrefix *> nnpNumberRangePrefixList;
-                    repository.getNNPPrefixsByNumberRange(nnpNumberRangePrefixList, nnpNumberRange->id, &html);
-
-
-                } else "Не нашли.<br>\n";
-
-
-            } catch (CalcException &e) {
-                html << "ERROR|NNP RESOLVER STOPPED|CAUSE " << e.message << "\n";
+                    }
+                    catch (CalcException &e) {
+                        html << "ERROR|NNP RESOLVER STOPPED|CAUSE " << e.message << "\n";
+                    }
             }
+        }
 
     }
 

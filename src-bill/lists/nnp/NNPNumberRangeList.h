@@ -5,10 +5,11 @@
 #include "../../classes/AppBill.h"
 
 class NNPNumberRangeList : public ObjList<NNPNumberRange> {
+
 protected:
 
     string sql(BDb *db) {
-        return "select id, country_code, ndc, number_from, number_to, is_mob, " \
+        return "select id, country_prefix, ndc, number_from, number_to, is_mob, " \
             "   is_active, operator_id, region_id, extract(epoch from insert_time), extract(epoch from update_time), city_id, " \
             "   full_number_from, full_number_to " \
             "   from nnp.number_range" \
@@ -17,7 +18,7 @@ protected:
 
     inline void parse_item(BDbResult &row, NNPNumberRange *item) {
         item->id = row.get_i(0);
-        item->country_code = row.get_i(1);
+        item->country_prefix = row.get_i(1);
         item->ndc = row.get_i(2);
         item->number_from = row.get_ll(3);
         item->number_to = row.get_ll(4);

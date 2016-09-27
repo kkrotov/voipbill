@@ -23,6 +23,5 @@ protected:
 
 public:
 
-    bool getNNPPrefixsByNumberRange(vector<NNPNumberRangePrefix *> &nnpNumberRangePrefixList,
-                                    int nnpNumberRangeId, stringstream *trace);
+    bool getNNPPrefixsByNumberRange(vector<int> &nnpPrefixIds, int nnpNumberRangeId, stringstream *trace);
 };
