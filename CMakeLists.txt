@@ -283,6 +283,7 @@ set(BILL_SOURCES
     src-bill/threads/ThreadUpdateActiveClients.cpp
     src-bill/threads/ThreadTasks.cpp
     src-bill/threads/ThreadSyncCalls.cpp
+    src-bill/threads/ThreadSyncCdrs.cpp
     src-bill/threads/ThreadSyncCounters.cpp
     src-bill/threads/ThreadSyncLocks.cpp
     src-bill/threads/ThreadWeb.cpp

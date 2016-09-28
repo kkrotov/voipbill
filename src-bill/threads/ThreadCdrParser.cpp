@@ -90,15 +90,18 @@ void ThreadCdrParser::saveCalls(const std::list<CallData> &calls) {
     logParser("saving calls " + cdrFile.file_name);
 
     for (auto call : calls) {
+
         cdrFile.progress++;
+        if (call.IsFinished()) {
 
-        if (!call.IsFinished() && !isUnfinishedCallExists(call.hash, call.dst_route)) {
-
-            saveUnfinishedCall(call);
-            logUnfinishedCall(call);
+            saveCall(call);
             continue;
         }
-        saveCall(call);
+        if (!isUnfinishedCallExists(call.hash, call.dst_route)) {
+
+            saveUnfinishedCall(call);
+            logCall(call);
+        }
     }
 }
 
@@ -118,7 +121,7 @@ void ThreadCdrParser::saveUnfinishedCall(const CallData &call) {
     }
 }
 
-void ThreadCdrParser::logUnfinishedCall(CallData &call) {
+void ThreadCdrParser::logCall(CallData &call) {
 
     pLogMessage logCall(new LogMessage());
 
@@ -136,10 +139,10 @@ void ThreadCdrParser::logUnfinishedCall(CallData &call) {
     logCall->params["dst_noa"] = call.dst_noa;
 
     logCall->params["disconnect_cause"] = call.disconnect_cause;
-    logCall->params["call_finished"] = "No";
+    logCall->params["call_finished"] = call.call_finished;
 
-    Log::info(logCall);
-    Log::info("Call "+call.call_id+" is UNFINISHED");
+    time_t log_time = parseDateTime(call.setup_time.c_str());
+    Log::info(logCall, log_time); // Call "+call.call_id+" is UNFINISHED
 }
 
 
