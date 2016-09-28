@@ -112,7 +112,7 @@ void logFinishedCall(const Cdr& cdr, const Call& origCall, const Call& termCall,
     logCall->type = "call";
     logCall->params["call_finished"] = "Yes";
 
-    logCall->message = lexical_cast<string>(origCall.cdr_id);
+    logCall->message = "Call "+to_string(origCall.id)+" is FINISHED"; //lexical_cast<string>(origCall.cdr_id);
 
     logCall->params["orig_id"] = origCall.id;
     logCall->params["term_id"] = termCall.id;
@@ -297,8 +297,7 @@ void logFinishedCall(const Cdr& cdr, const Call& origCall, const Call& termCall,
 	}
     }    
 
-    Log::info(logCall);
-    Log::info("Call "+to_string(origCall.id)+" is FINISHED");
+    Log::info(logCall); // Call "+to_string(origCall.id)+" is FINISHED
 }
 
 

@@ -140,7 +140,7 @@ bool ThreadSyncCalls::copyCallsPart(string month, unsigned long limit) {
                 "select id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, geo_mob, " + app().conf.str_instance_id + ", disconnect_cause, account_version, stats_nnp_package_minute_id  " \
                 "   from calls_raw.calls_raw_" + suffix +
                 "   where id>" + lexical_cast<string>(central_id) +
-                "   order by id limit 100000",
+                "   order by id limit " + lexical_cast<string>(limit),
                 &db_calls, &db_main);
 #else
         // использование dblink для копирования данных в центральную БД
@@ -206,12 +206,12 @@ bool ThreadSyncCalls::copyCallsPart(string month, unsigned long limit) {
 void ThreadSyncCalls::htmlfull(stringstream &html) {
     this->html(html);
 
-    html << "Local Table: <b>calls_raw.calls_raw_" << last_local_month << "</b><br/>\n";
+    html << "Local Call Table: <b>calls_raw.calls_raw_" << last_local_month << "</b><br/>\n";
     html << "Local Call Id: <b>" << lexical_cast<string>(last_local_id) << "</b><br/>\n";
     html << "Local Call Time: <b>" << last_local_time << "</b><br/>\n";
     html << "<br/>\n";
 
-    html << "Central Table: <b>calls_raw.calls_raw_" << last_central_month << "</b><br/>\n";
+    html << "Central Call Table: <b>calls_raw.calls_raw_" << last_central_month << "</b><br/>\n";
     html << "Central Call Id: <b>" << lexical_cast<string>(last_central_id) << "</b><br/>\n";
     html << "Central Call Time: <b>" << last_central_time << "</b><br/>\n";
     html << "<br/>\n";

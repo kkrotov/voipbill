@@ -39,8 +39,11 @@ public:
     ClientLockData              clientLock;
 
     long long int lastSyncCentralCallId = -1;
+    long long int lastSyncCentralCdrId = 0;
+    long long int lastSyncCentralCdrUnfinishedId = 0;
 
     time_t lastSyncCentralCallTime = 0;
+    time_t lastSyncCentralCdrTime = 0;
 
     static DataBillingContainer * instance();
 
@@ -94,6 +97,8 @@ public:
 private:
     void loadLastCallIdAndCdrIdAndTime(BDb * db_calls);
     void loadSyncCentralCallIdAndTime(BDb * db_main);
+    void loadSyncCentralCdrIdAndTime(BDb * db_main);
+    void loadSyncCentralCdrUnfinishedIdAndTime(BDb * db_main);
     void createNewPartition();
     void removePartitionAfterSave();
 

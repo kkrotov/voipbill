@@ -164,8 +164,13 @@ void DataBillingContainer::save(BDb * dbCalls) {
 
 void DataBillingContainer::prepareSyncCallsCentral(BDb * db_main) {
     try {
+
         loadSyncCentralCallIdAndTime(db_main);
-    } catch (Exception &e) {
+        loadSyncCentralCdrIdAndTime(db_main);
+        loadSyncCentralCdrUnfinishedIdAndTime(db_main);
+    }
+    catch (Exception &e) {
+
         e.addTrace("DataBillingContainer::prepareSyncCallsCentral");
         throw e;
     }
@@ -196,6 +201,36 @@ void DataBillingContainer::loadSyncCentralCallIdAndTime(BDb * db_main) {
     } else {
         lastSyncCentralCallId   = 0;
         lastSyncCentralCallTime = 0;
+    }
+}
+
+void DataBillingContainer::loadSyncCentralCdrIdAndTime(BDb * db_main) {
+
+    auto res = db_main->query("select id, setup_time from calls_cdr.cdr where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
+    if (res.next()) {
+
+        lastSyncCentralCdrId = res.get_ll(0);
+        lastSyncCentralCdrTime = parseDateTime(res.get(1));
+    }
+    else {
+
+        lastSyncCentralCdrId = 0;
+        lastSyncCentralCdrTime = 0;
+    }
+}
+
+void DataBillingContainer::loadSyncCentralCdrUnfinishedIdAndTime(BDb * db_main) {
+
+    auto res = db_main->query("select id, setup_time from calls_cdr.cdr_unfinished where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
+    if (res.next()) {
+
+        lastSyncCentralCdrUnfinishedId = res.get_ll(0);
+        //lastSyncCentralCdrTime = parseDateTime(res.get(1));
+    }
+    else {
+
+        lastSyncCentralCdrUnfinishedId = 0;
+        //lastSyncCentralCdrTime = 0;
     }
 }
 

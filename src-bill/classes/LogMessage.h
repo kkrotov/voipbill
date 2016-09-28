@@ -13,7 +13,7 @@ struct LogMessage {
     LogLevel level;
     std::string message;
     std::string type;
-    time_t time;
+    time_t log_time;
     time_t timeInGroup;
     int count;
     int countInGroup;
