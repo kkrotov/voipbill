@@ -672,6 +672,7 @@ void BillingCall::setupAccount() {
     callInfo->make_dt(); // учитываем часовой пояс регионального сервера
 
     call->account_id = callInfo->account->id;
+    call->account_version = callInfo->account->account_version;
 }
 
 /********************************************************************************************************************

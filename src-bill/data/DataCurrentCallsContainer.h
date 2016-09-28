@@ -5,6 +5,7 @@
 #include "../classes/StatsFreeminManager.h"
 #include "../classes/StatsPackageManager.h"
 #include "../classes/StatsTrunkSettingsManager.h"
+#include "../classes/StatsNNPPackageMinuteManager.h"
 #include "../common.h"
 #include "../models/Cdr.h"
 #include "../models/Call.h"
@@ -39,6 +40,9 @@ public:
     void setStatsTrunkSettings(shared_ptr<StatsTrunkSettingsManager> &newStatsTrunkSettings);
     shared_ptr<StatsTrunkSettingsManager> getStatsTrunkSettings();
 
+    void setStatsNNPPackageMinute(shared_ptr<StatsNNPPackageMinuteManager> &newStatsNNPPackageMinute);
+    shared_ptr<StatsNNPPackageMinuteManager> getStatsNNPPackageMinute();
+
 private:
     Spinlock lock;
     shared_ptr<vector<Call>> callsWaitSaving;
@@ -46,4 +50,5 @@ private:
     shared_ptr<StatsFreeminManager> statsFreemin;
     shared_ptr<StatsPackageManager> statsPackage;
     shared_ptr<StatsTrunkSettingsManager> statsTrunkSettings;
+    shared_ptr<StatsNNPPackageMinuteManager> statsNNPPackageMinute;
 };
