@@ -283,6 +283,7 @@ set(BILL_SOURCES
     src-bill/threads/ThreadUpdateActiveClients.cpp
     src-bill/threads/ThreadTasks.cpp
     src-bill/threads/ThreadSyncCalls.cpp
+    src-bill/threads/ThreadSyncCdrs.cpp
     src-bill/threads/ThreadSyncCounters.cpp
     src-bill/threads/ThreadSyncLocks.cpp
     src-bill/threads/ThreadWeb.cpp
@@ -378,9 +379,9 @@ target_link_libraries (app_bill_elf rt pthread pq curl crypto)
 add_executable(app_bill src-bill/main.cpp)
 target_link_libraries(app_bill app_bill_elf)
 
-add_executable(auth-client src-auth-client/client.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
+#add_executable(auth-client src-auth-client/client.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
 
-add_executable(auth-server src-auth-client/server.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
+#add_executable(auth-server src-auth-client/server.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
 
 add_executable(tests/unit/utest ${UNIT_TESTS_SOURCE})
 target_link_libraries (tests/unit/utest app_bill_elf)

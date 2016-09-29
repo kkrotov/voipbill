@@ -13,7 +13,7 @@ bool LogWriterFile::beforePublish() {
 
 void LogWriterFile::doPublish(pLogMessage message) {
 
-    string msg = stime(message->time) + slevel(message->level) + scount(message->count) + message->message;
+    string msg = stime(message->log_time) + slevel(message->level) + scount(message->count) + message->message;
     fprintf(file, "%s\n", msg.c_str());
 
 }

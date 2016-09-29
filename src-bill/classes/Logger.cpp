@@ -15,8 +15,11 @@ void Logger::logMessage(pLogMessage message) {
     lock_guard<std::mutex> lock(mutex);
 
     if (grouping_interval == 0) {
-        message->time = time(NULL);
-        message->timeInGroup = message->time;
+
+        if (message->log_time==0)
+            message->log_time = time(NULL);
+
+        message->timeInGroup = message->log_time;
         message->count = 1;
         message->countInGroup = 0;
         queue.push(message);
@@ -27,7 +30,10 @@ void Logger::logMessage(pLogMessage message) {
 
     pLogMessage history_message = history[message->message];
     if (history_message.get() == 0) {
-        message->time = time(NULL);
+
+        if (message->log_time==0)
+            message->log_time = time(NULL);
+
         message->timeInGroup = getPeriod();
         message->count = 1;
         message->countInGroup = 0;
@@ -89,8 +95,10 @@ void Logger::publishMessages(list<pLogMessage> &messages)
 
         pLogMessage error(new LogMessage);
         error->level = LogLevel::ERROR;
-        error->time = time(NULL);
-        error->timeInGroup = error->time;
+        if (error->log_time==0)
+            error->log_time = time(NULL);
+
+        error->timeInGroup = error->log_time;
         error->count = 1;
         error->countInGroup = 0;
         error->message = errorstream.str();
@@ -120,7 +128,7 @@ void Logger::processGroupingMessages() {
             pLogMessage message = it->second;
 
             if (message->countInGroup > 0) {
-                message->time = message->timeInGroup;
+                message->log_time = message->timeInGroup;
                 message->count = message->countInGroup;
                 message->timeInGroup = period;
                 message->countInGroup = 0;

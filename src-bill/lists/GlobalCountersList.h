@@ -15,7 +15,7 @@ protected:
            "          sum(case when amount_day = '" + sDay + "' then sum_mn_day else 0 end), " \
            "          sum(case when amount_month = '" + sMonth + "' then sum_month else 0 end) " \
            "   from billing.stats_account " \
-           "     where server_id<>" + server_id + " and (sum<>0 or sum_day<>0 or sum_month<>0) " \
+           "     where server_id<>" + server_id + " and (sum<>0 or sum_day<>0 or sum_mn_day<>0 or sum_month<>0) " \
            "     group by account_id " \
            "     order by account_id asc ";
     }

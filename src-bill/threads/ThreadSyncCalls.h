@@ -17,9 +17,11 @@ class ThreadSyncCalls : public Thread {
     Repository repository;
 
     void run();
-    
-    bool copyCallsPart(string month);
+    bool getCurrentMonths(string &local_prev_sync_month, string &local_curr_sync_month, string &local_next_sync_month);
+    bool copyCallsPart(string month, unsigned long limit);
     void htmlfull(stringstream &html);
+    bool getLocalId (string month, long long &id, string &time);
+    void getCentalId (string month, long long &id, string &time);
 
 public:
     ThreadSyncCalls();

@@ -11,6 +11,8 @@
 using namespace std;
 
 class PageTestNNP : public BasePage {
+    Repository repository;
+
 public:
     bool canHandle(std::string &path) {
         return path == "/test/nnpcalc";
@@ -18,35 +20,41 @@ public:
 
     void render(std::stringstream &html, map<string, string> &parameters) {
 
-        string cmd;
+        string cmd, sNum;
 
-        if (parameters.find("cmd") != parameters.end()) {
+        if (parameters.find("cmd") != parameters.end())
             cmd = parameters["cmd"];
-            //html << cmd;
-        } else
 
-            html << "not found";
 
-        try {
+        if (cmd == "getDestinationByNum") {
 
-            Repository repository;
-            if (!repository.prepare()) {
-                html << "ERROR|BILLING NOT READY";
-                return;
+            if (parameters.find("num") != parameters.end()) {
+                sNum = parameters["num"];
+
+                long long int num = std::atoll(sNum.c_str());
+
+                if (num > 0)
+
+                    try {
+
+                        if (!repository.prepare()) {
+                            html << "ERROR|BILLING NOT READY";
+                            return;
+                        }
+
+                        set<int> nnpDestinationIds;
+                        repository.getNNPDestinationByNum(nnpDestinationIds, num, &html);
+
+                    }
+                    catch (CalcException &e) {
+                        html << "ERROR|NNP RESOLVER STOPPED|CAUSE " << e.message << "\n";
+                    }
             }
-
-            NNPResolver nnp = NNPResolver(&repository);
-            nnp.setTrace(&html);
-
-            bool res = nnp.matchNumberNNPDestination(79263747216, 3);
-
-            html << "Номер 79263747216 - " << res << "\n";
-
-        } catch (CalcException &e) {
-            html << "ERROR|NNP RESOLVER STOPPED|CAUSE " << e.message << "\n";
         }
 
     }
+
+
 };
 
 

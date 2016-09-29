@@ -2,6 +2,7 @@
 
 #include "../../classes/ObjList.h"
 #include "../../models/nnp/NNPDestination.h"
+#include "../../models/nnp/NNPNumberRangePrefix.h"
 #include "../../classes/AppBill.h"
 
 class NNPDestinationList : public ObjList<NNPDestination> {
@@ -52,4 +53,5 @@ public:
 
         return result;
     }
+
 };
