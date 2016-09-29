@@ -4,6 +4,7 @@
 ThreadSyncCdrs::ThreadSyncCdrs() {
     id = idName();
     name = "Sync Cdrs to central db";
+    threadSleepSeconds = app().conf.cdr_parcer_interval;
 
     db_main.setCS(app().conf.db_main);
     db_calls.setCS(app().conf.db_calls);
