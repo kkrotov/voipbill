@@ -238,12 +238,12 @@ void DataBillingContainer::loadSyncCentralCdrUnfinishedIdAndTime(BDb * db_main) 
     if (res.next()) {
 
         lastSyncCentralCdrUnfinishedId = res.get_ll(0);
-        //lastSyncCentralCdrTime = parseDateTime(res.get(1));
+        lastSyncCentralCdrUnfinishedTime = parseDateTime(res.get(1));
     }
     else {
 
         lastSyncCentralCdrUnfinishedId = 0;
-        //lastSyncCentralCdrTime = 0;
+        lastSyncCentralCdrUnfinishedTime = 0;
     }
 }
 

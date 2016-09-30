@@ -46,6 +46,7 @@ public:
 
     time_t lastSyncCentralCallTime = 0;
     time_t lastSyncCentralCdrTime = 0;
+    time_t lastSyncCentralCdrUnfinishedTime = 0;
 
     static DataBillingContainer * instance();
 

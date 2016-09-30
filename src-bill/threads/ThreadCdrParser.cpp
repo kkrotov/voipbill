@@ -125,7 +125,7 @@ void ThreadCdrParser::logCall(CallData &call) {
 
     pLogMessage logCall(new LogMessage());
 
-    logCall->type = "call";
+    logCall->type = "cdr";
     logCall->params["call_id"] = call.call_id;
     logCall->params["src"] = call.src_number;
     logCall->params["dst"] = call.dst_number;
