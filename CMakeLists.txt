@@ -365,10 +365,13 @@ set(BILL_SOURCES
     src-bill/data/nnp/NNPRegionData.cpp
     src-bill/data/nnp/NNPRegionData.h
 
-        src-bill/sync/nnp/NNPDestinationPull.cpp src-bill/sync/nnp/NNPDestinationPull.h src-bill/sync/nnp/NNPNumberRangePull.cpp src-bill/sync/nnp/NNPNumberRangePull.h src-bill/sync/nnp/NNPNumberRangePrefixPull.cpp src-bill/sync/nnp/NNPNumberRangePrefixPull.h src-bill/sync/nnp/NNPOperatorPull.cpp src-bill/sync/nnp/NNPOperatorPull.h src-bill/sync/nnp/NNPPackagePull.cpp src-bill/sync/nnp/NNPPackagePull.h src-bill/sync/nnp/NNPPackageMinutePull.cpp src-bill/sync/nnp/NNPPackageMinutePull.h src-bill/sync/nnp/NNPPackagePricePull.cpp src-bill/sync/nnp/NNPPackagePricePull.h src-bill/sync/nnp/NNPPackagePricelistPull.cpp src-bill/sync/nnp/NNPPackagePricelistPull.h src-bill/sync/nnp/NNPPrefixPull.cpp src-bill/sync/nnp/NNPPrefixPull.h src-bill/sync/nnp/NNPPrefixDestinatioPull.cpp src-bill/sync/nnp/NNPPrefixDestinatioPull.h src-bill/sync/nnp/NNPRegionPull.cpp src-bill/sync/nnp/NNPRegionPull.h src-bill/data/nnp/NNPAccountTariffLightData.cpp src-bill/data/nnp/NNPAccountTariffLightData.h src-bill/sync/nnp/NNPAccountTariffLightPull.cpp src-bill/sync/nnp/NNPAccountTariffLightPull.h)
+        src-bill/sync/nnp/NNPDestinationPull.cpp src-bill/sync/nnp/NNPDestinationPull.h src-bill/sync/nnp/NNPNumberRangePull.cpp src-bill/sync/nnp/NNPNumberRangePull.h src-bill/sync/nnp/NNPNumberRangePrefixPull.cpp src-bill/sync/nnp/NNPNumberRangePrefixPull.h src-bill/sync/nnp/NNPOperatorPull.cpp src-bill/sync/nnp/NNPOperatorPull.h src-bill/sync/nnp/NNPPackagePull.cpp src-bill/sync/nnp/NNPPackagePull.h src-bill/sync/nnp/NNPPackageMinutePull.cpp src-bill/sync/nnp/NNPPackageMinutePull.h src-bill/sync/nnp/NNPPackagePricePull.cpp src-bill/sync/nnp/NNPPackagePricePull.h src-bill/sync/nnp/NNPPackagePricelistPull.cpp src-bill/sync/nnp/NNPPackagePricelistPull.h src-bill/sync/nnp/NNPPrefixPull.cpp src-bill/sync/nnp/NNPPrefixPull.h src-bill/sync/nnp/NNPPrefixDestinatioPull.cpp src-bill/sync/nnp/NNPPrefixDestinatioPull.h src-bill/sync/nnp/NNPRegionPull.cpp src-bill/sync/nnp/NNPRegionPull.h src-bill/data/nnp/NNPAccountTariffLightData.cpp src-bill/data/nnp/NNPAccountTariffLightData.h src-bill/sync/nnp/NNPAccountTariffLightPull.cpp src-bill/sync/nnp/NNPAccountTariffLightPull.h src-bill/classes/StatsNNPPackageMinuteManager.cpp src-bill/classes/nnp/NNPResolver.cpp)
 
 set (UNIT_TESTS_SOURCE
-        tests/unit/main.cpp tests/unit/BaseTest.cpp tests/unit/RemoveHtmlTagsTest.cpp)
+        tests/unit/main.cpp
+        tests/unit/BaseTest.cpp
+        tests/unit/RemoveHtmlTagsTest.cpp
+        tests/unit/NNPNumberRangeFindTest.cpp)
 
 add_definitions(-DHAVE_SYS_IOCTL_H -DHAVE_SOCKLEN_T)
 file(GLOB_RECURSE ACE_RADIUS_SOURCES "libs/ace-radius/*.cpp")

@@ -6,6 +6,7 @@ using namespace std;
 
 #include "BaseTest.h"
 #include "RemoveHtmlTagsTest.h"
+#include "NNPNumberRangeFindTest.h"
 
 bool startTests ();
 bool testThis       (BaseTest* test);
@@ -30,10 +31,11 @@ BOOST_AUTO_TEST_CASE(first_test) {
  * @return Если хоть один тест не был пройден false, если все прошли удачно true
  */
 bool startTests () {
-    const unsigned int TEST_NUM = 1;
+    const unsigned int TEST_NUM = 2;
 
     BaseTest* TESTS[TEST_NUM] = {
-            static_cast<BaseTest*>(new RemoveHtmlTagsTest ())
+            static_cast<BaseTest*>(new RemoveHtmlTagsTest    ()),
+            static_cast<BaseTest*>(new NNPNumberRangeFindTest())
     };
 
     printf ("\n");
@@ -43,6 +45,10 @@ bool startTests () {
         printf ("---\nTesting:%s", test->getTestName());
             failed = testThis(test);
 
+    }
+
+    for (auto test : TESTS) {
+        delete test;
     }
     return !failed;
 }
@@ -86,10 +92,11 @@ bool testThis  (BaseTest* test) {
         checkTime.tv_nsec += currentStop.tv_nsec - currentStart.tv_nsec;
     }
     if (!failedCurrent)
-        printf (" :: SUCCESS (set:%lfs)(check:%lfs)\n", (double)setTime.  tv_sec + (double)setTime.  tv_nsec / 1000000000.0,
+        printf ("\nSUCCESS (set:%lfs)(check:%lfs)\n", test->getTestName(),
+                                                        (double)setTime.  tv_sec + (double)setTime.  tv_nsec / 1000000000.0,
                                                         (double)checkTime.tv_sec + (double)checkTime.tv_nsec / 1000000000.0);
     else
-        printf ("\n%s :: FAILED\n", test->getTestName());
+        printf ("%s :: FAILED\n", test->getTestName());
 
     return !failedCurrent;
 }

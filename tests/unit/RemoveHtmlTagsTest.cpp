@@ -31,9 +31,9 @@ bool RemoveHtmlTagsTest :: setResult   (unsigned int index) {
     }
 
     string strToTest[this->maxIndex + 1] = {"",
-                                            "Te<  < > >sted",
-                                            "Te< >>s< >ted",
-                                            "Te<<< >>sted"};
+                                            "Te<s  <s > >sted",
+                                            "Te<s >>s<s >ted",
+                                            "Te<<s<s >>sted"};
 
     this->resultReturn = removeHtmlTags (strToTest[index]);
     this->resultStr    = strToTest[index];
