@@ -10,6 +10,11 @@
 
 using namespace std;
 
+/**
+ * Класс тестирования функции getNNPDestinationsByRange.
+ * Тестирование проводится через url запросы к запущенному биллеру.
+ *
+ */
 class NNPNumberRangeFindTest : public BaseTest {
 
     NNPNumberRangeFindTest (NNPNumberRangeFindTest&);

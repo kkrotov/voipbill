@@ -1,5 +1,17 @@
 #include "NNPNumberRangeFindTest.h"
 
+/**
+ * Callback функция Curl.
+ * Обрабатывает данные полученные из url запроса.
+ * С помощью регулярных выражений находит range, prefix и destination.
+ * Вызывает setCurlResults.
+ *
+ * @param contents_temp - Данные полученные из url запроса
+ * @param size
+ * @param nmemb
+ * @param test - Объект NNPNumberRangeFindTest
+ * @return size * nmemb
+ */
 static size_t WriteCallback(void *contents_temp, size_t size, size_t nmemb, void *test)
 {
     size_t realsize = size * nmemb;
@@ -38,6 +50,10 @@ static size_t WriteCallback(void *contents_temp, size_t size, size_t nmemb, void
     return realsize;
 }
 
+/**
+ * Инициализирует curl и BDb.
+ *
+ */
 NNPNumberRangeFindTest :: NNPNumberRangeFindTest ()
         : db ("host=127.0.0.1 dbname=nispd99_test user=markgrin password=") {
     db.connect();
@@ -46,6 +62,12 @@ NNPNumberRangeFindTest :: NNPNumberRangeFindTest ()
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 }
 
+/**
+ * Записывет результат полученный из url запроса.
+ * @param index индекс результата
+ * @return true если запись произведена успешно, false - если неуспешно
+ *
+ */
 bool NNPNumberRangeFindTest :: setResult   (unsigned int index) {
     srand (index);
     CURLcode res;
@@ -78,6 +100,12 @@ bool NNPNumberRangeFindTest :: setResult   (unsigned int index) {
     return true;
 }
 
+/**
+ * Проверяет результат.
+ *
+ * @param index - Индекс результата
+ * @return true - проверка пройдена, false - проверка не пройдена
+ */
 bool NNPNumberRangeFindTest :: checkResult (unsigned int index) {
 
     srand(index);
@@ -110,14 +138,30 @@ bool NNPNumberRangeFindTest :: checkResult (unsigned int index) {
     return true;
 }
 
+/**
+ * Возвращает максимальный индекс результата.
+ * @return Максимальный индекс результата.
+ *
+ */
 unsigned int NNPNumberRangeFindTest :: getMaxIndex () const {
     return this->maxIndex;
 }
+
+/**
+ * Возвращает название теста.
+ * @return название теста.
+ *
+ */
 const char*  NNPNumberRangeFindTest :: getTestName () const {
     static const char* name = "NNP Number range find test";
     return name;
 }
 
+/**
+ * Функция, которую должен вызвать curl callback,
+ *  чтобы сохранить результаты из url - запроса
+ *
+ */
 void NNPNumberRangeFindTest :: setCurlResult (const char* range, vector<string>* prefix, vector<string>* destination) {
 
     if (!range || !prefix || !destination) {
@@ -133,11 +177,23 @@ void NNPNumberRangeFindTest :: setCurlResult (const char* range, vector<string>*
     }
 }
 
+/**
+ * Деструктор. Отключается от БД и выключает curl
+ *
+ */
 NNPNumberRangeFindTest :: ~NNPNumberRangeFindTest() {
     db.disconnect();
     curl_easy_cleanup(curl);
 }
 
+/**
+ * Проверяет правильность resultRange по данному номеру.
+ *
+ * @param fullNumber - номер для проверки
+ * @return true  - resultRange и данные из БД совпадают,
+ *         false - не совпадают.
+ *
+ */
 bool NNPNumberRangeFindTest :: checkRange (string & fullNumber) {
 
     char query[256];
@@ -162,6 +218,13 @@ bool NNPNumberRangeFindTest :: checkRange (string & fullNumber) {
     return false;
 }
 
+/**
+ * Проверяет правильность resultPrefix по resultRange.
+ *
+ * @return true  - resultPrefix и данные из БД совпадают,
+ *         false - не совпадают.
+ *
+ */
 bool NNPNumberRangeFindTest :: checkPrefix      () {
 
     char query[256];
@@ -199,6 +262,14 @@ bool NNPNumberRangeFindTest :: checkPrefix      () {
     }
     return true;
 }
+
+/**
+ * Проверяет правильность resultDestination по resultPrefix.
+ *
+ * @return true  - resultDestination и данные из БД совпадают,
+ *         false - не совпадают.
+ *
+ */
 bool NNPNumberRangeFindTest :: checkDestination () {
 
     vector<string> dests;
@@ -237,6 +308,11 @@ bool NNPNumberRangeFindTest :: checkDestination () {
     return true;
 }
 
+/**
+ * Выбирает какие destination из БД подходят к resultPrefix.
+ *
+ * @param dests - vector строк для записи результата
+ */
 void NNPNumberRangeFindTest :: getDestinations  (vector<string> & dests) {
 
     char query[256];
