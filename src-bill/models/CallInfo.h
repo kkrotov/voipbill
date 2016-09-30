@@ -15,6 +15,8 @@
 #include "Pricelist.h"
 #include "PricelistPrice.h"
 #include "Geo.h"
+#include "nnp/NNPNumberRange.h"
+
 #include "ServiceTrunkSettings.h"
 
 struct DT {
@@ -38,6 +40,7 @@ struct CallInfo {
     Pricelist * pricelist;
     PricelistPrice * price;
     Geo * geo;
+    NNPNumberRange *nnpNumberRange;
 
     DT dt;
     DT dtUtc;
@@ -56,6 +59,7 @@ struct CallInfo {
         pricelist = nullptr;
         price = nullptr;
         geo = nullptr;
+        nnpNumberRange = nullptr;
     }
 
     void make_dt() {

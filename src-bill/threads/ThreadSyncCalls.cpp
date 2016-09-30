@@ -1,5 +1,4 @@
 #include "ThreadSyncCalls.h"
-#include "../classes/AppBill.h"
 
 ThreadSyncCalls::ThreadSyncCalls() {
     id = idName();
@@ -12,12 +11,15 @@ ThreadSyncCalls::ThreadSyncCalls() {
     last_local_id = 0;
 }
 
-bool ThreadSyncCalls::getCurrentMonths(string &local_prev_sync_month, string &local_curr_sync_month, string &local_next_sync_month) {
+bool ThreadSyncCalls::getCurrentMonths(string &local_prev_sync_month, string &local_curr_sync_month,
+                                       string &local_next_sync_month) {
 
     try {
 
-        BDbResult res = db_calls.query("select date_trunc('month', connect_time) - interval '1 month', date_trunc('month', connect_time), date_trunc('month', connect_time) + interval '1 month' "
-                                       "from calls_raw.calls_raw where id>" + lexical_cast<string>(repository.billingData->lastSyncCentralCallId) + " order by id limit 1");
+        BDbResult res = db_calls.query(
+                "select date_trunc('month', connect_time) - interval '1 month', date_trunc('month', connect_time), date_trunc('month', connect_time) + interval '1 month' "
+                        "from calls_raw.calls_raw where id>" +
+                lexical_cast<string>(repository.billingData->lastSyncCentralCallId) + " order by id limit 1");
         if (!res.next()) {
             // nothing to sync
             return false;
@@ -46,28 +48,30 @@ void ThreadSyncCalls::run() {
     string local_prev_sync_month;
     string local_curr_sync_month;
     string local_next_sync_month;
-    if (!getCurrentMonths (local_prev_sync_month, local_curr_sync_month, local_next_sync_month))
+    if (!getCurrentMonths(local_prev_sync_month, local_curr_sync_month, local_next_sync_month))
         return;
 
     try {
 
-        while (copyCallsPart(local_prev_sync_month,100000)) { }
+        while (copyCallsPart(local_prev_sync_month, 100000)) { }
 
-        while (copyCallsPart(local_curr_sync_month,100000)) { }
+        while (copyCallsPart(local_curr_sync_month, 100000)) { }
 
-        while (copyCallsPart(local_next_sync_month,100000)) { }
+        while (copyCallsPart(local_next_sync_month, 100000)) { }
 
     }
     catch (Exception &e) {
 
-        e.addTrace("ThreadSyncCalls::run::copy(main_last_id:" + lexical_cast<string>(repository.billingData->lastSyncCentralCallId) + ")");
+        e.addTrace("ThreadSyncCalls::run::copy(main_last_id:" +
+                   lexical_cast<string>(repository.billingData->lastSyncCentralCallId) + ")");
         throw e;
     }
 }
 
-bool ThreadSyncCalls::getLocalId (string month, long long &local_id, string &local_time) {
+bool ThreadSyncCalls::getLocalId(string month, long long &local_id, string &local_time) {
 
-    auto res1 = db_calls.query("select id, connect_time from calls_raw.calls_raw_" + month + " order by id desc limit 1");
+    auto res1 = db_calls.query(
+            "select id, connect_time from calls_raw.calls_raw_" + month + " order by id desc limit 1");
     if (res1.next()) {
 
         local_id = res1.get_ll(0);
@@ -80,7 +84,7 @@ bool ThreadSyncCalls::getLocalId (string month, long long &local_id, string &loc
     }
 }
 
-void ThreadSyncCalls::getCentalId (string month, long long int &central_id, string &central_time) {
+void ThreadSyncCalls::getCentalId(string month, long long int &central_id, string &central_time) {
 
     auto res2 = db_main.query("select id, connect_time from calls_raw.calls_raw_" + month + " where server_id = " +
                               app().conf.str_instance_id + " order by id desc limit 1");
@@ -98,26 +102,28 @@ void ThreadSyncCalls::getCentalId (string month, long long int &central_id, stri
 
 bool ThreadSyncCalls::copyCallsPart(string month, unsigned long limit) {
 
-    string suffix = month.substr(0, 4)+month.substr(5, 2);
+    string suffix = month.substr(0, 4) + month.substr(5, 2);
     string relname = "calls_raw.calls_raw_" + suffix;
     if (!db_main.rel_exists(relname)) {
 
-        string create_partition = "select calls_raw.create_calls_raw_partition('"+month+"'::timestamp without time zone)";
+        string create_partition =
+                "select calls_raw.create_calls_raw_partition('" + month + "'::timestamp without time zone)";
         db_main.query(create_partition);
     }
     if (!db_calls.rel_exists(relname)) {
 
-        string create_partition = "select calls_raw.create_calls_raw_partition('"+month+"'::timestamp without time zone)";
+        string create_partition =
+                "select calls_raw.create_calls_raw_partition('" + month + "'::timestamp without time zone)";
         db_calls.query(create_partition);
     }
 
     long long int central_id, local_id;
     string central_time, local_time;
 
-    if (!getLocalId (suffix, local_id, local_time))
+    if (!getLocalId(suffix, local_id, local_time))
         return false;
 
-    getCentalId (suffix, central_id, central_time);
+    getCentalId(suffix, central_id, central_time);
 
     last_central_month = suffix;
     last_central_id = central_id;
@@ -135,13 +141,24 @@ bool ThreadSyncCalls::copyCallsPart(string month, unsigned long limit) {
 
 #if 1
         BDb::copy("calls_raw.calls_raw_" + suffix,
-                "",
-                "       id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, geo_mob, server_id, disconnect_cause, account_version, stats_nnp_package_minute_id",
-                "select id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id, service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix, geo_id, geo_operator_id, mob, geo_mob, " + app().conf.str_instance_id + ", disconnect_cause, account_version, stats_nnp_package_minute_id  " \
-                "   from calls_raw.calls_raw_" + suffix +
-                "   where id>" + lexical_cast<string>(central_id) +
-                "   order by id limit " + lexical_cast<string>(limit),
-                &db_calls, &db_main);
+                  "",
+                  " id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, "\
+                " src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id,"\
+                " service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix,"\
+                " nnp_operator_id, nnp_region_id, nnp_city_id, nnp_country_prefix, nnp_ndc, nnp_is_mob, trunk_group_id,"\
+                " geo_id, geo_operator_id, mob, geo_mob, server_id, disconnect_cause, account_version, stats_nnp_package_minute_id",
+
+                  " select id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id,"\
+                " src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id,"\
+                " service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix,"\
+                " nnp_operator_id, nnp_region_id, nnp_city_id, nnp_country_prefix, nnp_ndc, nnp_is_mob, trunk_group_id,"\
+                " geo_id, geo_operator_id, mob, geo_mob, " + app().conf.str_instance_id +
+                  ", disconnect_cause, account_version, stats_nnp_package_minute_id  " \
+
+                          "   from calls_raw.calls_raw_" + suffix +
+                  "   where id>" + lexical_cast<string>(central_id) +
+                  "   order by id limit " + lexical_cast<string>(limit),
+                  &db_calls, &db_main);
 #else
         // использование dblink для копирования данных в центральную БД
         // требует сетевую доступность источника данных (БД на региональном сервере) со стороны центральной базы.
@@ -196,7 +213,7 @@ bool ThreadSyncCalls::copyCallsPart(string month, unsigned long limit) {
     }
     catch (Exception e) {
 
-        std::string message = "Error syncronizing cdr tables: "+e.message;
+        std::string message = "Error syncronizing cdr tables: " + e.message;
         Log::error(message);
         return false;
     }
