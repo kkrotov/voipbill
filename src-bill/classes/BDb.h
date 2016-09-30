@@ -42,6 +42,7 @@ public:
     static void copy_dblink(string dst_table, string fields, string columns, string query, BDb *db_from, BDb *db_to);
 
     bool ping();
+    bool rel_exists (string rel);
     static bool test(const string &connstr);
 };
 

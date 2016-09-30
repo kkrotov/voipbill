@@ -17,12 +17,14 @@ void DataBillingContainer::loadAll(BDb * db, bool recalc) {
         statsFreemin.recalc(db, getCallsStoredLastId());
         statsPackage.recalc(db, getCallsStoredLastId());
         statsTrunkSettings.recalc(db, getCallsStoredLastId());
+        statsNNPPackageMinute.recalc(db, getCallsStoredLastId());
     }
 
     statsAccount.load(db);
     statsFreemin.load(db, getCallsStoredLastTime());
     statsPackage.load(db, getCallsStoredLastTime());
     statsTrunkSettings.load(db, getCallsStoredLastTime());
+    statsNNPPackageMinute.load(db, getCallsStoredLastTime());
 
     clientLock.load(db);
 }
@@ -79,6 +81,10 @@ bool DataBillingContainer::ready() {
         return false;
     }
 
+    if (!statsNNPPackageMinute.ready()) {
+        return false;
+    }
+
     if (!clientLock.ready()) {
         return false;
     }
@@ -93,6 +99,7 @@ void DataBillingContainer::addCall(CallInfo * callInfo) {
     statsFreemin.add(callInfo);
     statsPackage.add(callInfo);
     statsTrunkSettings.add(callInfo);
+    statsNNPPackageMinute.add(callInfo);
 
     calls.add(*callInfo->call);
 
@@ -122,6 +129,7 @@ void DataBillingContainer::save(BDb * dbCalls) {
     stringstream statFreeminQuery;
     stringstream statPackageQuery;
     stringstream statTrunkSettingsQuery;
+    stringstream statNNPPackageMinuteQuery;
 
     {
         lock_guard<Spinlock> guard(lock);
@@ -146,12 +154,17 @@ void DataBillingContainer::save(BDb * dbCalls) {
         lock_guard<Spinlock> guard(lock);
         statsTrunkSettings.prepareSaveQuery(statTrunkSettingsQuery);
     }
+    {
+        lock_guard<Spinlock> guard(lock);
+        statsNNPPackageMinute.prepareSaveQuery(statNNPPackageMinuteQuery);
+    }
 
     calls.executeSaveQueries(dbCalls, callsQueryPerMonth);
     statsAccount.executeSaveQuery(dbCalls, statAccountQuery);
     statsFreemin.executeSaveQuery(dbCalls, statFreeminQuery);
     statsPackage.executeSaveQuery(dbCalls, statPackageQuery);
     statsTrunkSettings.executeSaveQuery(dbCalls, statTrunkSettingsQuery);
+    statsNNPPackageMinute.executeSaveQuery(dbCalls, statNNPPackageMinuteQuery);
 
     trans.commit();
 
@@ -164,8 +177,13 @@ void DataBillingContainer::save(BDb * dbCalls) {
 
 void DataBillingContainer::prepareSyncCallsCentral(BDb * db_main) {
     try {
+
         loadSyncCentralCallIdAndTime(db_main);
-    } catch (Exception &e) {
+        loadSyncCentralCdrIdAndTime(db_main);
+        loadSyncCentralCdrUnfinishedIdAndTime(db_main);
+    }
+    catch (Exception &e) {
+
         e.addTrace("DataBillingContainer::prepareSyncCallsCentral");
         throw e;
     }
@@ -199,12 +217,43 @@ void DataBillingContainer::loadSyncCentralCallIdAndTime(BDb * db_main) {
     }
 }
 
+void DataBillingContainer::loadSyncCentralCdrIdAndTime(BDb * db_main) {
+
+    auto res = db_main->query("select id, setup_time from calls_cdr.cdr where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
+    if (res.next()) {
+
+        lastSyncCentralCdrId = res.get_ll(0);
+        lastSyncCentralCdrTime = parseDateTime(res.get(1));
+    }
+    else {
+
+        lastSyncCentralCdrId = 0;
+        lastSyncCentralCdrTime = 0;
+    }
+}
+
+void DataBillingContainer::loadSyncCentralCdrUnfinishedIdAndTime(BDb * db_main) {
+
+    auto res = db_main->query("select id, setup_time from calls_cdr.cdr_unfinished where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
+    if (res.next()) {
+
+        lastSyncCentralCdrUnfinishedId = res.get_ll(0);
+        //lastSyncCentralCdrTime = parseDateTime(res.get(1));
+    }
+    else {
+
+        lastSyncCentralCdrUnfinishedId = 0;
+        //lastSyncCentralCdrTime = 0;
+    }
+}
+
 void DataBillingContainer::createNewPartition() {
     calls.createNewPartition();
     statsAccount.createNewPartition();
     statsFreemin.createNewPartition();
     statsPackage.createNewPartition();
     statsTrunkSettings.createNewPartition();
+    statsNNPPackageMinute.createNewPartition();
 }
 
 void DataBillingContainer::removePartitionAfterSave() {
@@ -213,6 +262,8 @@ void DataBillingContainer::removePartitionAfterSave() {
     statsFreemin.removePartitionAfterSave();
     statsPackage.removePartitionAfterSave();
     statsTrunkSettings.removePartitionAfterSave();
+    statsNNPPackageMinute.removePartitionAfterSave();
+
 }
 
 bool DataBillingContainer::cdrsLoadPart(BDb * db_calls) {
@@ -359,3 +410,19 @@ void DataBillingContainer::statsTrunkSettingsAddChanges(map<int, StatsTrunkSetti
     statsTrunkSettings.addChanges(changes);
 }
 
+
+void DataBillingContainer::statsNNPPackaeMinuteGetChanges(map<int, StatsNNPPackageMinute> &changes){
+    lock_guard<Spinlock> guard(lock);
+    statsNNPPackageMinute.getChanges(changes);
+}
+
+void DataBillingContainer::statsNNPPackaeMinuteAddChanges(map<int, StatsNNPPackageMinute> &changes){
+    lock_guard<Spinlock> guard(lock);
+    statsNNPPackageMinute.addChanges(changes);
+}
+
+int DataBillingContainer::statsNNPPackaeMinuteGetUsedSeconds(int nnp_account_tariff_light_id,
+                                                             int nnp_package_minute_id) {
+    lock_guard<Spinlock> guard(lock);
+    return statsNNPPackageMinute.getUsedSeconds(nnp_account_tariff_light_id, nnp_package_minute_id);
+}

@@ -8,7 +8,7 @@ DIR=`dirname "${THIS}"`
 
 # Быстрый вариант восстановления схемы и основных данных центральной БД:
 echo "Дампим центральную БД без схем calls_raw, calls_aggr ..."
-/usr/pgsql-9.4/bin/pg_dump -Fc -N calls_raw -N calls_aggr -O -h eridanus.mcn.ru -U pgsqltest nispd > nispd_full.sql
+/usr/pgsql-9.4/bin/pg_dump -Fc -N calls_raw -N calls_aggr -N calls_cdr -O -h eridanus.mcn.ru -U pgsqltest nispd > nispd_full.sql
 
 echo "Удаляем тип dblink_pkey_results"
 /usr/pgsql-9.4/bin/psql -U postgres nispd_test -c "drop type dblink_pkey_results"
@@ -21,7 +21,7 @@ echo "Импортируем центральную БД без схем calls_r
 
 # Схему с calls'ами докатываем.
 echo "Дампим схемы calls_raw и calls_aggr центральной БД без данных..."
-/usr/pgsql-9.4/bin/pg_dump -s -O -n calls_raw -n calls_aggr -h eridanus.mcn.ru -U pgsqltest nispd > nispd_calls_schema.sql
+/usr/pgsql-9.4/bin/pg_dump -s -O -n calls_raw -n calls_aggr -n calls_cdr -h eridanus.mcn.ru -U pgsqltest nispd > nispd_calls_schema.sql
 
 echo "Импортируем схемы calls_raw и calls_aggr в центральную БД без данных..."
 /usr/pgsql-9.4/bin/psql -U postgres nispd_test < nispd_calls_schema.sql

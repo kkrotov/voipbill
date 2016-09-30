@@ -2,33 +2,35 @@
 
 #include "../../classes/ObjList.h"
 #include "../../models/nnp/NNPDestination.h"
+#include "../../models/nnp/NNPNumberRangePrefix.h"
 #include "../../classes/AppBill.h"
 
 class NNPDestinationList : public ObjList<NNPDestination> {
 protected:
 
-    string sql(BDb * db) {
+    string sql(BDb *db) {
         return "select id, name " \
             "   from nnp.destination " \
-            "   order by name ";
+            "   order by id ";
     }
 
-    inline void parse_item(BDbResult &row, NNPDestination * item) {
+    inline void parse_item(BDbResult &row, NNPDestination *item) {
         item->id = row.get_i(0);
-        item->name = row.get_i(1);
+        item->name = row.get_s(1);
     }
 
     struct key_id {
-        bool operator() (const NNPDestination & left, int id) {
+        bool operator()(const NNPDestination &left, int id) {
             return left.id < id;
         }
-        bool operator() (int id, const NNPDestination & right) {
+
+        bool operator()(int id, const NNPDestination &right) {
             return id < right.id;
         }
     };
 
 public:
-    NNPDestination * find(int id, stringstream *trace = nullptr) {
+    NNPDestination *find(int id, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -36,7 +38,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        NNPDestination * result = begin < end ? &*begin : nullptr;
+        NNPDestination *result = begin < end ? &*begin : nullptr;
 
         if (trace != nullptr) {
             if (result != nullptr) {
@@ -51,4 +53,5 @@ public:
 
         return result;
     }
+
 };

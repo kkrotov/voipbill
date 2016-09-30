@@ -316,7 +316,7 @@ conn.commit()
 
 # Пустая queue ещё не значит, что демон биллинга готов к вставке звонков.
 # Что весьма печально. TODO: это надо исправить, после исправления sleep выпилить.
-time.sleep(120)
+time.sleep(40)
 
 # Подписка при синхронизации calls_raw из региона в центр
 pubsub = pgpubsub.connect(user='postgres', database='nispd_test')

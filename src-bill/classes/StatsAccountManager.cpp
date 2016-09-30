@@ -222,6 +222,8 @@ void StatsAccountManager::add(CallInfo *callInfo) {
         stats.amount_day = callInfo->dtUtc.day;
         stats.sum_day = call->cost;
         if (call->isInternational()) stats.sum_mn_day = call->cost; // Учитываем в отдельном счетчике mn-траффик
+            else stats.sum_mn_day = 0;  // Не забываем обнулять счетчик для первого звонка в день, если он
+                                        // не международный
     }
 
     if (call->connect_time >= callInfo->account->amount_date) {

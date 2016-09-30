@@ -56,7 +56,7 @@ private:
     shared_ptr<CurrencyRateList> currencyRate;
 
     shared_ptr<NNPRegionList> nnpRegion;
-    shared_ptr<NNPDestinationList>  nnpDestination;
+    shared_ptr<NNPDestinationList> nnpDestination;
     shared_ptr<NNPOperatorList> nnpOperator;
     shared_ptr<NNPPrefixList> nnpPrefix;
     shared_ptr<NNPNumberRangeList> nnpNumberRange;
@@ -80,13 +80,12 @@ public:
         currentTime = time(nullptr);
     }
 
-    Trunk *getServiceTrunk(int trunk_settings_id, ServiceTrunkSettings &trunkSettings)
-    {
+    Trunk *getServiceTrunk(int trunk_settings_id, ServiceTrunkSettings &trunkSettings) {
         if (serviceTrunkSettings == nullptr)
             return nullptr;
 
         int settings_trunk_id = 0;
-        for (int i=0; i<serviceTrunkSettings->size(); i++) {
+        for (int i = 0; i < serviceTrunkSettings->size(); i++) {
 
             ServiceTrunkSettings *settings = serviceTrunkSettings->get(i);
             if (settings->id == trunk_settings_id) {
@@ -96,11 +95,11 @@ public:
                 break;
             }
         }
-        if (settings_trunk_id==0)
+        if (settings_trunk_id == 0)
             return nullptr;
 
         int trunk_id = 0;
-        for (int i=0; i<serviceTrunk->size(); i++) {
+        for (int i = 0; i < serviceTrunk->size(); i++) {
 
             ServiceTrunk *st = serviceTrunk->get(i);
             if (st->id == settings_trunk_id) {
@@ -117,24 +116,24 @@ public:
 
     bool prepare(time_t currentTime = 0);
 
-    InstanceSettings * getInstanceSettings() {
+    InstanceSettings *getInstanceSettings() {
         return instanceSettings;
     }
 
-    Server * getServer() {
+    Server *getServer() {
         return server;
     }
 
-    Client * getAccount(int account_id) {
+    Client *getAccount(int account_id) {
         return client->find(account_id, trace);
     }
 
-    Trunk * getTrunk(int trunk_id) {
+    Trunk *getTrunk(int trunk_id) {
         return trunk->find(trunk_id, trace);
     }
 
-    Trunk * getTrunkByName(const char *trunk_name) {
-        Trunk * trunk = trunkByName->find(trunk_name, trace);
+    Trunk *getTrunkByName(const char *trunk_name) {
+        Trunk *trunk = trunkByName->find(trunk_name, trace);
         if (trunk != nullptr) {
             return trunk;
         }
@@ -147,7 +146,7 @@ public:
         return nullptr;
     }
 
-    TrunkGroup * getTrunkGroup(int trunk_group_id) {
+    TrunkGroup *getTrunkGroup(int trunk_group_id) {
         return trunkGroup->find(trunk_group_id, trace);
     }
 
@@ -155,19 +154,19 @@ public:
         trunkGroupItem->findTrunkIds(resultTrunkIds, trunk_group_id, trace);
     }
 
-    ServiceNumber * getServiceNumber(long long int numberPrefix) {
+    ServiceNumber *getServiceNumber(long long int numberPrefix) {
         return serviceNumber->find(numberPrefix, currentTime, trace);
     }
 
-    ServiceNumber * getServiceNumber(const char * numberPrefix) {
+    ServiceNumber *getServiceNumber(const char *numberPrefix) {
         return getServiceNumber(atoll(numberPrefix));
     }
 
-    ServiceNumber * getServiceNumberByTechnicalNumber(long long int technicalNumber) {
+    ServiceNumber *getServiceNumberByTechnicalNumber(long long int technicalNumber) {
         return serviceNumberByTechNumber->find(technicalNumber, currentTime, trace);
     }
 
-    ServiceTrunk * getServiceTrunk(int trunk_id) {
+    ServiceTrunk *getServiceTrunk(int trunk_id) {
         return serviceTrunk->find(trunk_id, currentTime, trace);
     }
 
@@ -175,7 +174,8 @@ public:
         serviceTrunk->findAll(resultTrunks, trunk_id, currentTime, trace);
     }
 
-    void getAllServiceTrunkSettings(vector<ServiceTrunkSettings *> &resultTrunkSettings, int trunk_id, int destinationType) {
+    void getAllServiceTrunkSettings(vector<ServiceTrunkSettings *> &resultTrunkSettings, int trunk_id,
+                                    int destinationType) {
         serviceTrunkSettings->findAll(resultTrunkSettings, trunk_id, destinationType, trace);
     }
 
@@ -187,48 +187,48 @@ public:
         serviceTrunkPackage->findAll(resultPackages, service_trunk_id, currentTime, trace);
     }
 
-    Pricelist * getPricelist(int pricelist_id) {
+    Pricelist *getPricelist(int pricelist_id) {
         return pricelist->find(pricelist_id, trace);
     }
 
-    PricelistPrice * getPrice(int pricelist_id, long long int numberPrefix) {
+    PricelistPrice *getPrice(int pricelist_id, long long int numberPrefix) {
         return pricelistPrice->find(pricelist_id, numberPrefix, currentTime, trace);
     }
 
-    NetworkPrefix * getNetworkPrefix(int network_config_id, long long int numberPrefix) {
+    NetworkPrefix *getNetworkPrefix(int network_config_id, long long int numberPrefix) {
         return networkPrefix->find(network_config_id, numberPrefix, currentTime, trace);
     }
 
-    TariffChangeLog * getTariffLog(int usage_id) {
+    TariffChangeLog *getTariffLog(int usage_id) {
         return tariffChangeLog->find(usage_id, currentTime, trace);
     }
 
-    Tariff * getTariff(int tariff_id) {
+    Tariff *getTariff(int tariff_id) {
         return tariff->find(tariff_id, trace);
     }
 
-    TariffPackage * getTariffPackage(int tariff_id) {
+    TariffPackage *getTariffPackage(int tariff_id) {
         return tariffPackage->find(tariff_id, trace);
     }
 
-    MobPrefix * getMobPrefix(long long int prefix) {
+    MobPrefix *getMobPrefix(long long int prefix) {
         return mobPrefix->find(prefix, trace);
     }
 
-    GeoPrefix * getGeoPrefix(long long int prefix) {
+    GeoPrefix *getGeoPrefix(long long int prefix) {
         return geoPrefix->find(prefix, trace);
     }
 
-    Geo * getGeo(int geo_id) {
+    Geo *getGeo(int geo_id) {
         return geo->find(geo_id, trace);
     }
 
-    TrunkNumberPreprocessing * getTrunkNumberPreprocessing(int trunk_id, int order) {
+    TrunkNumberPreprocessing *getTrunkNumberPreprocessing(int trunk_id, int order) {
         return trunkNumberPreprocessing->find(trunk_id, order, trace);
     }
 
 
-    RouteTable * getRouteTable(int id) {
+    RouteTable *getRouteTable(int id) {
         return routeTable->find(id, trace);
     }
 
@@ -236,31 +236,31 @@ public:
         routeTableRoute->findAll(resultRoutes, route_table_id, trace);
     }
 
-    Outcome * getOutcome(int id) {
+    Outcome *getOutcome(int id) {
         return outcome->find(id, trace);
     }
 
-    RouteCase * getRouteCase(int id) {
+    RouteCase *getRouteCase(int id) {
         return routeCase->find(id, trace);
     }
 
-    ReleaseReason * getReleaseReason(int id) {
+    ReleaseReason *getReleaseReason(int id) {
         return releaseReason->find(id, trace);
     }
 
-    Airp * getAirp(int id) {
+    Airp *getAirp(int id) {
         return airp->find(id, trace);
     }
 
-    Number * getNumber(int id) {
+    Number *getNumber(int id) {
         return number->find(id, trace);
     }
 
-    Prefixlist * getPrefixlist(int id) {
+    Prefixlist *getPrefixlist(int id) {
         return prefixlist->find(id, trace);
     }
 
-    PrefixlistPrefix * getPrefixlistPrefix(int prefixlist_id, const char * prefix) {
+    PrefixlistPrefix *getPrefixlistPrefix(int prefixlist_id, const char *prefix) {
         return prefixlistPrefix->find(prefixlist_id, prefix, trace);
     }
 
@@ -280,7 +280,7 @@ public:
         trunk->findAllAutorouting(resultTrunks, trace);
     }
 
-    StatPrefixlist * getStatPrefixlist(int stat_prefixlist_id) {
+    StatPrefixlist *getStatPrefixlist(int stat_prefixlist_id) {
         return statPrefixlist->find(stat_prefixlist_id, trace);
     }
 
@@ -288,25 +288,25 @@ public:
         statDestinationPrefixlists->findAll(resultPrefixlistIds, destination_id, trace);
     }
 
-    bool getCurrencyRate(const char* currency_id, double* o_currencyRate) const {
+    bool getCurrencyRate(const char *currency_id, double *o_currencyRate) const {
         if (!currency_id || !o_currencyRate) {
             throw Exception("Invalid arguments passed into getCurrencyRate()");
         }
 
-        const CurrencyRate* rate = this->currencyRate->find(currency_id);
+        const CurrencyRate *rate = this->currencyRate->find(currency_id);
         if (rate) {
-            * o_currencyRate = rate->rate;
+            *o_currencyRate = rate->rate;
             return true;
         } else {
             // "Безопасный" курс - 1:1
-            * o_currencyRate = 1.0;
+            *o_currencyRate = 1.0;
             return false;
         }
     }
 
     double priceToRoubles(double price, const Pricelist &pricelist) const {
         double currencyRate = 1.0;
-        if (this->getCurrencyRate(pricelist.currency_id, & currencyRate)
+        if (this->getCurrencyRate(pricelist.currency_id, &currencyRate)
             && currencyRate > 0.00000001) {
             return price * currencyRate;
         } else {
@@ -346,7 +346,7 @@ public:
 
     }
 
-    bool matchPrefixlist(int prefixlist_id, char * prefix) {
+    bool matchPrefixlist(int prefixlist_id, char *prefix) {
         auto prefixlist = getPrefixlist(prefixlist_id);
         if (prefixlist == nullptr) {
             return false;
@@ -356,7 +356,7 @@ public:
         return prefixlistPrefix != nullptr;
     }
 
-    double getVatRate(Client * client) {
+    double getVatRate(Client *client) {
         if (client != nullptr && !client->price_include_vat) {
             auto org = organization->find(client->organization_id, time(nullptr));
             if (org != nullptr) {
@@ -366,7 +366,7 @@ public:
         return 0;
     }
 
-    bool trunkOrderLessThan(const ServiceTrunkOrder & left, const ServiceTrunkOrder & right) const {
+    bool trunkOrderLessThan(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) const {
         if (left.price && left.pricelist && right.price && right.pricelist) {
             return priceLessThan(left.price->price, *left.pricelist, right.price->price, *right.pricelist);
         }
@@ -386,25 +386,25 @@ public:
     }
 
     struct trunk_settings_order_desc_price {
-        bool operator() (const ServiceTrunkOrder & left, const ServiceTrunkOrder & right) {
+        bool operator()(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) {
             return this->repository.trunkOrderLessThan(right, left);
         }
 
-        trunk_settings_order_desc_price(const Repository& repository) : repository(repository) {}
+        trunk_settings_order_desc_price(const Repository &repository) : repository(repository) { }
 
     private:
-        const Repository& repository;
+        const Repository &repository;
     };
 
     struct trunk_settings_order_asc_price {
-        bool operator() (const ServiceTrunkOrder & left, const ServiceTrunkOrder & right) {
+        bool operator()(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) {
             return this->repository.trunkOrderLessThan(left, right);
         }
 
-        trunk_settings_order_asc_price(const Repository& repository) : repository(repository) {}
+        trunk_settings_order_asc_price(const Repository &repository) : repository(repository) { }
 
     private:
-        const Repository& repository;
+        const Repository &repository;
     };
 
     void orderOrigTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList) const {
@@ -413,18 +413,21 @@ public:
 
     void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, time_t connect_time) const;
 
-    bool checkTrunkSettingsConditions(ServiceTrunkSettings * &trunkSettings, long long int srcNumber, long long int dstNumber, Pricelist * &pricelist, PricelistPrice * &price) {
+    bool checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
+                                      long long int dstNumber, Pricelist *&pricelist, PricelistPrice *&price) {
 
         if (trunkSettings->src_number_id > 0 && !matchNumber(trunkSettings->src_number_id, srcNumber)) {
             if (trace != nullptr) {
-                *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY SRC NUMBER MATCHING, TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+                *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY SRC NUMBER MATCHING, TRUNK_SETTINGS_ID: " <<
+                trunkSettings->id << " / " << trunkSettings->order << "\n";
             }
             return false;
         }
 
         if (trunkSettings->dst_number_id > 0 && !matchNumber(trunkSettings->dst_number_id, dstNumber)) {
             if (trace != nullptr) {
-                *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY DST NUMBER MATCHING, TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+                *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY DST NUMBER MATCHING, TRUNK_SETTINGS_ID: " <<
+                trunkSettings->id << " / " << trunkSettings->order << "\n";
             }
             return false;
         }
@@ -432,7 +435,8 @@ public:
         pricelist = getPricelist(trunkSettings->pricelist_id);
         if (pricelist == nullptr) {
             if (trace != nullptr) {
-                *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICELIST NOT FOUND BY ID: " << trunkSettings->pricelist_id << ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+                *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICELIST NOT FOUND BY ID: " << trunkSettings->pricelist_id <<
+                ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
             }
             return false;
         }
@@ -442,7 +446,9 @@ public:
             auto networkPrefix = getNetworkPrefix(pricelist->local_network_config_id, dstNumber);
             if (networkPrefix == nullptr) {
                 if (trace != nullptr) {
-                    *trace << "DEBUG|TRUNK SETTINGS DECLINE|NETWORK PREFIX NOT FOUND BY local_network_config_id: " << pricelist->local_network_config_id << ", PRICELIST_ID: " << pricelist->id << ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << " / " << "\n";
+                    *trace << "DEBUG|TRUNK SETTINGS DECLINE|NETWORK PREFIX NOT FOUND BY local_network_config_id: " <<
+                    pricelist->local_network_config_id << ", PRICELIST_ID: " << pricelist->id <<
+                    ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << " / " << "\n";
                 }
                 return false;
             }
@@ -450,7 +456,9 @@ public:
             price = getPrice(trunkSettings->pricelist_id, networkPrefix->network_type_id);
             if (price == nullptr) {
                 if (trace != nullptr) {
-                    *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICE NOT FOUND: PRICELIST_ID: " << pricelist->id  << ", PREFIX: " << networkPrefix->network_type_id << ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+                    *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICE NOT FOUND: PRICELIST_ID: " << pricelist->id <<
+                    ", PREFIX: " << networkPrefix->network_type_id << ", TRUNK_SETTINGS_ID: " << trunkSettings->id <<
+                    " / " << trunkSettings->order << "\n";
                 }
                 return false;
             }
@@ -461,7 +469,9 @@ public:
             price = getPrice(trunkSettings->pricelist_id, dstNumber);
             if (price == nullptr) {
                 if (trace != nullptr) {
-                    *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICE NOT FOUND: PRICELIST_ID: " << pricelist->id  << ", PREFIX: " << dstNumber << ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+                    *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICE NOT FOUND: PRICELIST_ID: " << pricelist->id <<
+                    ", PREFIX: " << dstNumber << ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " <<
+                    trunkSettings->order << "\n";
                 }
                 return false;
             }
@@ -469,7 +479,8 @@ public:
         }
 
         if (trace != nullptr) {
-            *trace << "DEBUG|TRUNK SETTINGS ACCEPT|TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+            *trace << "DEBUG|TRUNK SETTINGS ACCEPT|TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " <<
+            trunkSettings->order << "\n";
         }
 
         return true;
@@ -480,13 +491,15 @@ public:
      *
      */
 
-    void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk * trunk, long long int srcNumber, long long int dstNumber, int destinationType) {
+    void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
+                                   long long int srcNumber, long long int dstNumber, int destinationType) {
         vector<ServiceTrunk *> serviceTrunks;
         getAllServiceTrunk(serviceTrunks, trunk->id);
 
         if (serviceTrunks.size() == 0) {
             if (trace != nullptr) {
-                *trace << "DEBUG|SERVICE TRUNK DECLINE|CAUSE SERVICE TRUNK NOT FOUND BY TRUNK " << trunk->name << " (" << trunk->id << ")" << "\n";
+                *trace << "DEBUG|SERVICE TRUNK DECLINE|CAUSE SERVICE TRUNK NOT FOUND BY TRUNK " << trunk->name <<
+                " (" << trunk->id << ")" << "\n";
             }
             return;
         }
@@ -502,7 +515,8 @@ public:
                     auto account = getAccount(serviceTrunk->client_account_id);
                     if (account == nullptr) {
                         if (trace != nullptr) {
-                            *trace << "DEBUG|TRUNK SETTINGS SKIP|ACCOUNT NOT FOUND BY ID " << serviceTrunk->client_account_id << "\n";
+                            *trace << "DEBUG|TRUNK SETTINGS SKIP|ACCOUNT NOT FOUND BY ID " <<
+                            serviceTrunk->client_account_id << "\n";
                         }
                         continue;
                     }
@@ -538,4 +552,60 @@ public:
             }
         }
     }
+
+    void getActiveNNPAccountTariffLight(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight, int client_id) {
+        nnpAccountTariffLight->findAllActiveByClientID(resultNNPAccountTariffLight, client_id, trace);
+    }
+
+    void getServiceNumberByClientID(vector<ServiceNumber> &resultServiceNumber, int client_id) {
+        serviceNumber->findAllByClientID(resultServiceNumber, client_id, trace);
+    }
+
+    void getNNPPackageMinuteByTariff(vector<NNPPackageMinute> &resultNNPPackageMinute, int nnp_tariff_id) {
+        nnpPackageMinute->findAllByTariffID(resultNNPPackageMinute, nnp_tariff_id, trace);
+    }
+
+    NNPDestination *getNNPDestination(int id, stringstream *trace = nullptr) {
+        return nnpDestination->find(id, trace);
+    }
+
+    NNPNumberRange *getNNPNumberRange(long long int num, stringstream *trace = nullptr) {
+        return nnpNumberRange->getNNPNumberRange(num, trace);
+    }
+
+    bool getNNPPrefixsByNumberRange(vector<int> &nnpPrefixIds,
+                                    int nnpNumberRangeId, stringstream *trace = nullptr) {
+        return nnpNumberRangePrefix->getNNPPrefixsByNumberRange(nnpPrefixIds,
+                                                                nnpNumberRangeId, trace);
+    }
+
+    bool getNNPDestinationsByPrefix(set<int> &nnpDestinationIds,
+                                    vector<int> &nnpNumberRangePrefixList,
+                                    stringstream *trace = nullptr) {
+        return nnpPrefixDestination->getNNPDestinationsByPrefix(nnpDestinationIds, nnpNumberRangePrefixList, trace);
+    }
+
+    bool getNNPDestinationByNum(set<int> &nnpDestinationIds, long long int num, stringstream *trace = nullptr) {
+
+        bool fResult = false;
+
+        NNPNumberRange *nnpNumberRange = getNNPNumberRange(num, trace);
+
+        if (nnpNumberRange != nullptr) {
+            vector<int> nnpPrefixIds;
+            getNNPPrefixsByNumberRange(nnpPrefixIds, nnpNumberRange->id, trace);
+            fResult = getNNPDestinationsByPrefix(nnpDestinationIds, nnpPrefixIds, trace);
+        }
+
+        for (auto it = nnpDestinationIds.begin(); it != nnpDestinationIds.end(); it++)
+            NNPDestination *nnpDestination = getNNPDestination(*it, trace);
+
+        if (trace != nullptr && !fResult) {
+            *trace << "NOT FOUND|NNPDestination|BY num '" << num << "'" << "\n";
+
+        }
+
+        return fResult;
+    }
+
 };

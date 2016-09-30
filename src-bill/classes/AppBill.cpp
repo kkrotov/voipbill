@@ -22,6 +22,7 @@
 #include "../threads/ThreadCheckStartTable.h"
 #include "../threads/ThreadTasks.h"
 #include "../threads/ThreadCdrParser.h"
+#include "../threads/ThreadSyncCdrs.h"
 
 AppBill & app() {
     static AppBill appVar;
@@ -74,6 +75,7 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadBillRuntime>();
     registerThread<ThreadSave>();
     registerThread<ThreadSyncCalls>();
+    registerThread<ThreadSyncCdrs>();
     registerThread<ThreadSyncCounters>();
     registerThread<ThreadSyncLocks>();
     registerThread<ThreadClientLock>();
@@ -92,32 +94,47 @@ void AppBill::runAppInSingleMode()
     std::vector<std::string> standardThreads {
             // Логирование
             "log",
-            // Блок синхронизации 
+            // Перемещение данных из таблиц центрального сервера на региональные
             "sync",
             // Блок считывания данных в оперативную память
             "loader",
+            // синхронизация данных по балансу таблиц billing.clients и billing.stats_accounts
             "account_balance_recalc",
+            // синхронизация таблиц billing.stats_account на центральном и региональных серверах
             "remote_loader",
             // Контроль текущих звонков
             "current_calls",
+            // Загрузка вновь полеченных cdr из таблицы calls_cdr.cdr
             "fetch_cdr",
             // Расчет себестоимости звонка, Расчет цены MCN для звонка
             "runtime",
-            // Обновление центральной БД (копирование данных из региональной БД в центральную) 
+            // Обновление центральной БД (копирование данных из региональной БД в центральную)
             "save",
+            // Передача данных по локальным вызовам calls_raw.calls_raw на центральный сервер
             "sync_calls",
+            // Синхронизация таблиц локальных вызовов calls_cdr.cdr и calls_cdr.cdr_unfinished на центральный сервер
+            "sync_cdrs",
+            // Обновление счётчиков по клиентским счетам, использованных бесплатных минут и пакетов на центральной БД
             "sync_counters",
+            // обновление таблицы клиентских блокировок billing.clients_locks на центральном сервере
             "sync_locks",
+            // Извлечение чёрных списков из openca
             "client_lock",
-            // Блокировка клиента
+            // Извлечение чёрных списков из openca
             "blacklist_fetch",
+            // модификация чёрных списков в репозитории и в openca
             "blacklist_calc",
             // Сброс звонка при недостаточном балансе
             "limitcontrol",
+            // ведение списка активных номеров (billing.service_number) и транков (billing.service_trunk)
             "update_active_clients",
+            // извлечение новых записей из таблицы calls_cdr.start
             "checkstarttable",
+            // отслеживание команды запуска процедуры пересчёта начислений за текущий или предыдущий месяцы
             "tasks",
+            // извлечение xml файлов с записями cdr, их разбор и занесение в таблицу calls_cdr.cdr
             "cdr_parser",
+            // сервер обработки запросов по протоколу radius
             "radius_auth_server",
     };
 

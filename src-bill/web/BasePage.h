@@ -28,8 +28,9 @@ public:
         html << " <a href='/data-billing'>Data billing</a> | ";
         html << " <a href='/counters'>Counters</a> | ";
         html << " <a href='/fmins'>Free minutes</a> | ";
-        html << " <a href='/packages'>Packages</a> | ";
-        html << " <a href='/trunk-settings-counters'>Trunk settings counters</a> | ";
+        html << " <a href='/packages'>Old Packages</a> | ";
+        html << " <a href='/nnp-package-minute-counters'>NNP Packages</a> | ";
+        html << " <a href='/trunk-settings-counters'>Minimalki</a> | ";
         html << " <a href='/locks'>Locks</a> | ";
         html << " <a href='/blacklist'>Blacklist</a> | ";
         html << " <a href='/sync'>Sync</a> | ";

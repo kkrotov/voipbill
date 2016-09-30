@@ -10,10 +10,10 @@ THIS=`readlink -f "${BASH_SOURCE[0]}"`
 DIR=`dirname "${THIS}"`
 
 HOST_DB_TEST_MAIN=127.0.0.1
-NAME_DB_TEST_MAIN=nispd
+NAME_DB_TEST_MAIN=nispd_test
 
 HOST_DB_TEST_REGIONAL=127.0.0.1
-NAME_DB_TEST_REGIONAL=nispd99
+NAME_DB_TEST_REGIONAL=nispd99_test
 
 DB_USER=pgsqltest
 
@@ -29,6 +29,6 @@ DB_USER=pgsqltest
     for region_id in `echo $REGIONS_LIST`
     do
        echo "      * Удаляем nispd${region_id}_test  на сервере [$HOST_DB_TEST_REGIONAL]"
-       /usr/pgsql-9.4/bin/dropdb -h $HOST_DB_TEST_REGIONAL -U postgres --if-exists nispd${region_id} || exit 1
+       /usr/pgsql-9.4/bin/dropdb -h $HOST_DB_TEST_REGIONAL -U postgres --if-exists nispd${region_id}_test || exit 1
     done
 

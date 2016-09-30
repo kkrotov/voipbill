@@ -39,7 +39,7 @@ void LogWriterGraylog::massPublish(list<pLogMessage> messages) {
 
             message->params["source"] = graylogSource;
             message->params["server"] = serverId;
-            message->params["timestamp"] = boost::lexical_cast<string>(message->time);
+            message->params["timestamp"] = boost::lexical_cast<string>(message->log_time);
             message->params["message"] = scount(message->count) + message->message;
             message->params["level"] = getSyslogLevel(message->level);
             if (!message->type.empty()) {

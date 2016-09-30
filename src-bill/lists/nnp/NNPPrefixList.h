@@ -10,7 +10,7 @@ protected:
     string sql(BDb *db) {
         return "select id, name " \
             "   from nnp.prefix " \
-            "   order by name ";
+            "   order by id ";
     }
 
     inline void parse_item(BDbResult &row, NNPPrefix *item) {

@@ -13,11 +13,13 @@ class ThreadSyncCounters : public Thread {
     size_t last_sync_freemin_count;
     size_t last_sync_package_count;
     size_t last_sync_trunk_settings_count;
+    size_t last_sync_nnp_package_minute_count;
 
     size_t total_sync_account_count;
     size_t total_sync_freemin_count;
     size_t total_sync_package_count;
     size_t total_sync_trunk_settings_count;
+    size_t total_sync_nnp_package_minute_count;
 
     bool ready();
 
