@@ -40,9 +40,6 @@ struct Call {
 
     int trunk_settings_stats_id;
 
-    int account_version;              // Номер версии расчета примененного к звонку, 4 - обычная, 5 - nnp-пакеты.
-    int stats_nnp_package_minute_id;  // номер счетчика минут на nnp-пакете применнноного к этому звонку.
-
     int pricelist_id;
     long long int prefix;
 
@@ -56,6 +53,17 @@ struct Call {
     int disconnect_cause;
 
     bool is_service_number;
+
+    int account_version;              // Номер версии расчета примененного к звонку, 4 - обычная, 5 - nnp-пакеты.
+    int stats_nnp_package_minute_id;  // номер счетчика минут на nnp-пакете применнноного к этому звонку.
+
+    int nnp_operator_id;
+    int nnp_region_id;
+    int nnp_city_id;
+    int nnp_country_prefix;
+    int nnp_ndc;
+    bool nnp_is_mob;
+    int trunk_group_id;
 
 
     void dump(stringstream &trace) {
@@ -93,6 +101,13 @@ struct Call {
         trace << "geo_operator_id: " << geo_operator_id << ", ";
         trace << "is_service_number: " << (is_service_number ? "true" : "false") << ", ";
         trace << "disconnect_cause: " << disconnect_cause;
+        trace << "nnp_operator_id: " << nnp_operator_id << ", ";
+        trace << "nnp_region_id: " << nnp_region_id << ", ";
+        trace << "nnp_city_id: " << nnp_city_id << ", ";
+        trace << "nnp_country_prefix: " << nnp_country_prefix << ", ";
+        trace << "nnp_ndc: " << nnp_ndc << ", ";
+        trace << "nnp_is_mob: " << (nnp_is_mob ? "true" : "false") << ", ";
+        trace << "trunk_group_id: " << trunk_group_id << ", ";
         trace << ")";
     }
 
@@ -141,8 +156,16 @@ struct Call {
         account_version = 4;
         stats_nnp_package_minute_id = 0;
 
-
         is_service_number = false;
+
+        nnp_operator_id = 0;
+        nnp_region_id = 0;
+        nnp_city_id = 0;
+        nnp_country_prefix = 0;
+        nnp_ndc = 0;
+        nnp_is_mob = false;
+        trunk_group_id = 0;
+
     }
 
     bool isLocal() {
