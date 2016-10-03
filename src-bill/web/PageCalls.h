@@ -10,21 +10,47 @@ public:
     }
 
     void render(std::stringstream &html, map<string, string> &parameters) {
+
         renderHeader(html);
 
+        bool show_incoming = true, show_outgoing = true;
+        string trunk_name = parameters["trunkname"];
+        string destination = parameters["dest"];
+        if (destination.compare("in")) {
+            show_incoming = false;
+        }
+        if (destination.compare("out")) {
+            show_outgoing = false;
+        }
         Repository repository;
-
         shared_ptr<CurrentCdrList> cdrList = repository.currentCalls->currentCdr.get();
         if (cdrList == nullptr) {
+
             return;
         }
-
         html << "<table width=100% border=0 cellspacing=0>\n";
         html << "<tr>\n";
-        html << "<td>Current calls: <b>" << cdrList->size() << "</b>" << "</td>\n";
-        html << "<td>Call per second: <b>" << repository.currentCalls->callPerSecond << "</b>" << "</td>\n";
-        html << "<td>Max call per second: <b>" << repository.currentCalls->maxCallPerSecond << "</b>" << "</td>\n";
-        html << "</td>\n";
+        if (trunk_name.size()>0) {
+
+            string active_trunk = "Active trunk";
+            if (show_incoming && !show_outgoing)
+                active_trunk = "Incoming trunk";
+
+            if (show_outgoing && !show_incoming)
+                active_trunk = "Outgoing trunk";
+
+            html << "<td>" << active_trunk << ": <b>" << trunk_name << "</b>" << "</td>\n";
+            html << "<td>Destination: <b>";
+
+            html << "</b>" << "</td>\n";
+        }
+        else {
+
+            html << "<td>Current calls: <b>" << cdrList->size() << "</b>" << "</td>\n";
+            html << "<td>Call per second: <b>" << repository.currentCalls->callPerSecond << "</b>" << "</td>\n";
+            html << "<td>Max call per second: <b>" << repository.currentCalls->maxCallPerSecond << "</b>" << "</td>\n";
+            html << "</td>\n";
+        }
         html << "</tr>\n";
         html << "</table>\n";
 
@@ -79,12 +105,23 @@ public:
         Call *callTerm = nullptr;
 
         for (size_t i = 0; i < cdrList->size(); i++) {
-            Cdr *cdr = cdrList->get(i);
+
+            Cdr * cdr = cdrList->get(i);
             if (fullMode) {
                 callOrig = &calls->at(i * 2);
                 callTerm = &calls->at(i * 2 + 1);
             }
+            if (trunk_name.size()>0) {
 
+                if (trunk_name.compare(cdr->src_route)!=0 && trunk_name.compare(cdr->dst_route)!=0)
+                    continue;
+
+                if (trunk_name.compare(cdr->src_route)!=0 && show_incoming)
+                    continue;
+
+                if (trunk_name.compare(cdr->dst_route)!=0 && show_outgoing)
+                    continue;
+            }
             html << "<tr class='tr_orig'>\n";
             html << "<td nowrap rowspan=2 style='text-align: left'>" << string_time(cdr->connect_time) << "</td>\n";
             html << "<td nowrap rowspan=2>" << cdr->session_time << "</td>\n";
@@ -174,7 +211,5 @@ public:
             html << "</tr>\n";
         }
         html << "</table>\n";
-
-
-    }
+   }
 };
