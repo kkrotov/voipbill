@@ -18,6 +18,7 @@ struct Trunk {
     bool orig_redirect_number_7800;
     bool orig_redirect_number;
     bool term_redirect_number;
+    int capacity;
 
     void dump(stringstream &trace) {
         trace << "(";

@@ -84,14 +84,18 @@ public:
 
 class PageTrunks : public BasePage {
 
+    Repository repository;
+
 public:
     bool canHandle(std::string &path) {
         return path == "/trunks";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
 
-        Repository repository;
+        if (!ready())
+            return;
+
+        renderHeader(html);
 
         shared_ptr<CurrentCdrList> cdrList = repository.currentCalls->currentCdr.get();
         if (cdrList == nullptr) {
@@ -120,6 +124,7 @@ public:
         html << "<table width=100% border=0 cellspacing=0>\n";
         html << "<tr>"
                 "<th nowrap>trunk_name</th>"
+                "<th nowrap>capacity</th>"
                 "<th nowrap>incoming count</th>";
         if (fullMode)
             html << "<th nowrap>incoming cost</th>";
@@ -132,6 +137,7 @@ public:
         if (fullMode)
             html << "<th nowrap>total cost</th>";
 
+        html << "<th nowrap>load</th>";
         html << "</tr>";;
 
         for (size_t i = 0; i < activeTrunks.count(); i++) {
@@ -139,6 +145,11 @@ public:
             TrunkIoParams trunkParam = activeTrunks.at(i);
             html << "<tr class='tr_orig'>\n";
             html << "<td nowrap><a class=orig href='/calls?trunkname=" << trunkParam.trunk_name << "'>" << trunkParam.trunk_name << "</a></td>\n";
+
+            Trunk *trunk = repository.getTrunkByName(trunkParam.trunk_name.c_str());
+            int capacity = trunk!= nullptr? trunk->capacity:0;
+            html << "<td nowrap>" << capacity << "</td>\n";
+
             if (trunkParam.num_of_incoming>0)
                 html << "<td nowrap><a class=orig href='/calls?trunkname=" << trunkParam.trunk_name << "&dest=in'>" << trunkParam.num_of_incoming << "</a></td>\n";
             else
@@ -159,8 +170,19 @@ public:
             if (fullMode)
                 html << "<td nowrap>" << trunkParam.incoming_cost+trunkParam.outgoing_cost << "</td>\n";
 
+            string load = capacity>0? (trunkParam.num_of_incoming+trunkParam.num_of_outgoing)*100/capacity+"%":" ";
+            html << "<td nowrap>" <<  load << "</td>\n";
+
             html << "</tr>\n";
         }
         html << "</table>\n";
+    }
+
+    bool ready() {
+
+        if (!repository.billingData->ready())
+            return false;
+
+        return repository.prepare();
     }
 };
