@@ -170,8 +170,11 @@ public:
             if (fullMode)
                 html << "<td nowrap>" << trunkParam.incoming_cost+trunkParam.outgoing_cost << "</td>\n";
 
-            string load = capacity>0? (trunkParam.num_of_incoming+trunkParam.num_of_outgoing)*100/capacity+"%":" ";
-            html << "<td nowrap>" <<  load << "</td>\n";
+            int load = 0;
+            if (capacity>0)
+                load = ((trunkParam.num_of_incoming+trunkParam.num_of_outgoing)*100/capacity);
+
+            html << "<td nowrap>" <<  load << "%</td>\n";
 
             html << "</tr>\n";
         }
