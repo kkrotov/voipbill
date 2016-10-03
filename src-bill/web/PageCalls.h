@@ -63,7 +63,7 @@ public:
         }
         html << "<th nowrap>src_route</th>\n";
         html << "<th nowrap rowspan=2>call_id</th>\n";
-        html << "<th nowrap>src / redirect</th>\n";
+        html << "<th nowrap>src/redirect</th>\n";
         html << "<th nowrap>noa</th>\n";
         html << "</tr>\n";
         html << "<tr>\n";
