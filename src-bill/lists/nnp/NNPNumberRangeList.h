@@ -12,7 +12,9 @@ protected:
         return "select id, country_prefix, ndc, number_from, number_to, is_mob, " \
             "   is_active, operator_id, region_id, extract(epoch from insert_time), extract(epoch from update_time), city_id, " \
             "   full_number_from, full_number_to " \
-            "   from nnp.number_range" \
+            "   from nnp.number_range  " \
+            "   where is_active and ( full_number_from <= full_number_to ) and  ( full_number_from >= 0 ) and " \
+            "   length(full_number_from::varchar) = length(full_number_to::varchar) " \
             "   order by full_number_from, full_number_to";
     }
 
