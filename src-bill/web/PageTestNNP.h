@@ -21,36 +21,57 @@ public:
     void render(std::stringstream &html, map<string, string> &parameters) {
 
         string cmd, sNum;
+        try {
 
-        if (parameters.find("cmd") != parameters.end())
-            cmd = parameters["cmd"];
+            if (parameters.find("cmd") != parameters.end())
+                cmd = parameters["cmd"];
 
 
-        if (cmd == "getDestinationByNum") {
+            if (cmd == "getDestinationByNum") {
 
-            if (parameters.find("num") != parameters.end()) {
-                sNum = parameters["num"];
+                if (parameters.find("num") != parameters.end()) {
+                    sNum = parameters["num"];
 
-                long long int num = std::atoll(sNum.c_str());
+                    long long int num = std::atoll(sNum.c_str());
 
-                if (num > 0)
+                    if (num > 0)
 
-                    try {
 
-                        if (!repository.prepare()) {
-                            html << "ERROR|BILLING NOT READY";
-                            return;
-                        }
-
-                        set<int> nnpDestinationIds;
-                        repository.getNNPDestinationByNum(nnpDestinationIds, num, &html);
-
+                    if (!repository.prepare()) {
+                        html << "ERROR|BILLING NOT READY";
+                        return;
                     }
-                    catch (CalcException &e) {
-                        html << "ERROR|NNP RESOLVER STOPPED|CAUSE " << e.message << "\n";
+
+                    set<int> nnpDestinationIds;
+                    repository.getNNPDestinationByNum(nnpDestinationIds, num, &html);
+
+                }
+            }
+            if (cmd == "getNumberRangeByNum") {
+
+                if (parameters.find("num") != parameters.end()) {
+                    sNum = parameters["num"];
+
+                    long long int num = std::atoll(sNum.c_str());
+
+                    if (num > 0)
+
+
+                    if (!repository.prepare()) {
+                        html << "ERROR|BILLING NOT READY";
+                        return;
                     }
+
+                    set<int> nnpDestinationIds;
+                    NNPNumberRange *nnpNumberRange = repository.getNNPNumberRange(num, &html);
+
+                }
             }
         }
+        catch (CalcException &e) {
+            html << "ERROR|NNP RESOLVER STOPPED|CAUSE " << e.message << "\n";
+        }
+
 
     }
 

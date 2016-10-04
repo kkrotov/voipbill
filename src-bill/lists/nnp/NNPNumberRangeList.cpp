@@ -6,35 +6,41 @@ struct NNPNumberRangeList::key_full_number_from {
     }
 
     bool operator()(long long int num, const NNPNumberRange &right) {
-        return num < right.full_number_from;
+        return num <= right.full_number_to;
     }
 };
 
-
 NNPNumberRange *NNPNumberRangeList::getNNPNumberRange(long long int num, stringstream *trace) {
     if (num > 0 && this->data.size() > 0) {
-        auto begin = this->data.begin();
-        auto end = this->data.end();
+
+        auto begin_orig = this->data.begin();
+        auto end_orig = this->data.end();
+
+        auto begin = begin_orig;
+        auto end = end_orig;
         {
-            auto p = lower_bound(begin, end, num, key_full_number_from());
-            if (p != begin) {
-                p--;
-                do {
-                    bool isMatch = p->full_number_from <= num && num <= p->full_number_to && p->is_active;
-                    if (isMatch) {
-                        NNPNumberRange *result = p.base();
-                        if (trace != nullptr && result != nullptr) {
+            int i = 0;
+            do {
+                auto p = equal_range(begin, end, num, key_full_number_from());
+                begin = p.first;
+                end = p.second;
+
+                if ((begin != begin_orig) && (begin != end_orig)) {
+
+                    auto item = begin - 1;
+
+                    if (item->full_number_from <= num && num <= item->full_number_to) {
+                        if (trace != nullptr) {
                             *trace << "FOUND|NNPNumberRange|BY NUM '" << num << "'" << "\n";
                             *trace << "||";
-                            result->dump(*trace);
+                            item->dump(*trace);
                             *trace << "\n";
                         }
-                        return p.base();
+                        return &*item;
                     }
-                    p++;
-                    if (p == end) break;
-                } while (p->full_number_to < num);
-            }
+                }
+                i++;
+            } while (begin != end && i < 5);
         }
     }
     if (trace != nullptr) {
@@ -43,4 +49,3 @@ NNPNumberRange *NNPNumberRangeList::getNNPNumberRange(long long int num, strings
     }
     return nullptr;
 }
-
