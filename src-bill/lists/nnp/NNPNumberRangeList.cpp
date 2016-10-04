@@ -18,10 +18,8 @@ NNPNumberRange *NNPNumberRangeList::getNNPNumberRange(long long int num, strings
 
         auto begin = begin_orig;
         auto end = end_orig;
-
         {
             int i = 0;
-
             do {
                 auto p = equal_range(begin, end, num, key_full_number_from());
                 begin = p.first;
@@ -32,19 +30,17 @@ NNPNumberRange *NNPNumberRangeList::getNNPNumberRange(long long int num, strings
                     auto item = begin - 1;
 
                     if (item->full_number_from <= num && num <= item->full_number_to) {
-
-                        *trace << "FOUND|NNPNumberRange|BY NUM '" << num << "'" << "\n";
-                        *trace << "||";
-                        item->dump(*trace);
-                        *trace << "\n";
+                        if (trace != nullptr) {
+                            *trace << "FOUND|NNPNumberRange|BY NUM '" << num << "'" << "\n";
+                            *trace << "||";
+                            item->dump(*trace);
+                            *trace << "\n";
+                        }
                         return &*item;
                     }
                 }
-
                 i++;
             } while (begin != end && i < 5);
-
-
         }
     }
     if (trace != nullptr) {
