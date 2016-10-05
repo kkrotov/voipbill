@@ -86,7 +86,7 @@ public:
 
         if (sort_column==0)
             std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
-                return b.trunk_name < a.trunk_name;
+                return b.trunk_name > a.trunk_name;
         });
         if (sort_column==1)
             std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
@@ -124,6 +124,11 @@ public:
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
 
+        html <<   "<head>\n"
+             <<   "    <title>Active trunks</title>\n"
+             <<   "<meta http-equiv=\"refresh\" content=\"5\" >"
+             <<   "</head>\n";
+
         renderHeader(html);
 
         if (!ready())
@@ -136,6 +141,7 @@ public:
         shared_ptr<vector<Call>> calls = repository.currentCalls->getCallsWaitingSaving();
         ActiveTrunks activeTrunks(calls, cdrList);
 
+        html << "<body>\n";
         html << "<table width=100% border=0 cellspacing=0>\n";
         html << "<tr>\n";
         html << "<td>Active trunks: <b>" << activeTrunks.count() << "</b>" << "</td>\n";
@@ -222,6 +228,7 @@ public:
             html << "</tr>\n";
         }
         html << "</table>\n";
+        html << "</body>\n";
     }
 
     bool ready() {
