@@ -27,6 +27,8 @@ void ThreadSyncCdrs::run() {
 
     while (syncCallsCdr());
     while (syncCallsCdrUnfinished());
+
+    repository.billingData->prepareSyncCallsCentral(&db_main);
 }
 
 bool ThreadSyncCdrs::getCurrentMonths (string &local_prev_sync_month, string &local_curr_sync_month, string &local_next_sync_month) {
@@ -206,11 +208,11 @@ bool ThreadSyncCdrs::copyCallsCdrUnfinished(string month, int limit) {
         local_time = res_calls.get(1);
     }
     last_cdr_unfin_central_month = suffix;
-    last_cdr_unfin_central_time ;
+    last_cdr_unfin_central_time = central_time;
     last_cdr_unfin_central_id = central_id;
 
     last_cdr_unfin_local_month = suffix;
-    last_cdr_unfin_local_time;
+    last_cdr_unfin_local_time = local_time;
     last_cdr_unfin_local_id = local_id;
 
     if (local_id <= central_id)
