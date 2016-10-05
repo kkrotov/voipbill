@@ -77,5 +77,7 @@ protected:
     bool matchTariffPackageDestination(TariffPackage * tariff);
 
     void processNNP();
+
+    void setupNNPPackageMinute(set<int> &nnpDestinationIds, vector<NNPAccountTariffLight> &nnpAccountTariffLight);
 };
 

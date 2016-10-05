@@ -553,8 +553,10 @@ public:
         }
     }
 
-    void getActiveNNPAccountTariffLight(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight, int client_id) {
-        nnpAccountTariffLight->findAllActiveByClientID(resultNNPAccountTariffLight, client_id, trace);
+    void getActiveNNPAccountTariffLight(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight, int client_id,
+                                        time_t connect_time = time(nullptr)) {
+
+        nnpAccountTariffLight->findAllActiveByClientID(resultNNPAccountTariffLight, client_id, connect_time, trace);
     }
 
     void getServiceNumberByClientID(vector<ServiceNumber> &resultServiceNumber, int client_id) {
@@ -586,10 +588,21 @@ public:
     }
 
     bool getNNPDestinationByNum(set<int> &nnpDestinationIds, long long int num, stringstream *trace = nullptr) {
-
         bool fResult = false;
 
         NNPNumberRange *nnpNumberRange = getNNPNumberRange(num, trace);
+        fResult = getNNPDestinationByNumberRange(nnpDestinationIds, nnpNumberRange, trace);
+        if (trace != nullptr && !fResult) {
+            *trace << "NOT FOUND|NNPDestination|BY num '" << num << "'" << "\n";
+
+        }
+        return fResult;
+    }
+
+    bool getNNPDestinationByNumberRange(set<int> &nnpDestinationIds, NNPNumberRange *nnpNumberRange,
+                                        stringstream *trace = nullptr) {
+
+        bool fResult = false;
 
         if (nnpNumberRange != nullptr) {
             vector<int> nnpPrefixIds;
@@ -599,11 +612,6 @@ public:
 
         for (auto it = nnpDestinationIds.begin(); it != nnpDestinationIds.end(); it++)
             NNPDestination *nnpDestination = getNNPDestination(*it, trace);
-
-        if (trace != nullptr && !fResult) {
-            *trace << "NOT FOUND|NNPDestination|BY num '" << num << "'" << "\n";
-
-        }
 
         return fResult;
     }

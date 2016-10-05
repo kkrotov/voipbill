@@ -57,6 +57,5 @@ public:
 
     ServiceNumber *find(long long int numberPrefix, time_t timestamp, stringstream *trace = nullptr);
 
-    void findAllByClientID(vector<ServiceNumber> &resultServiceNumber, int client_id, stringstream *trace = nullptr);
-
+    void findAllByClientID(vector<ServiceNumber> &resultServiceNumber, int client_id, stringstream *trace);
 };

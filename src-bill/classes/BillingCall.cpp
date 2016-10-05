@@ -59,7 +59,7 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
         processDestinations();          // в структуру call рассчитывается поля mob и destination_id
         // флаг звонка на мобильный и тип звонка (локал,внутризоновый, МГ, МН)
 
-        processNNP();                   // Расчитываем nnp-параметры для расчитываемого плеча.
+        processNNP();                   // Расчитываем nnp-параметры для плеча.
 
         if (callInfo->trunk->auth_by_number) {
             calcByNumber();             // Дальше производятся тарификация плеча по схеме "авторизация по номеру"
@@ -208,39 +208,94 @@ void BillingCall::calcByNumber() {
 
 void BillingCall::calcOrigByNumber() {
 
-    setupLogTariff(); //  присоединяется действующий LogTariff для вызова на org-плече
+    if (call->account_version == CALL_ACCOUNT_VERSION_5) {
+        // Обсчитываем плечо по пакетной схеме
+        if (trace != nullptr) {
+            *trace << "INFO|CALL_ACCOUNT_VERSION_5" << "\n";
+        }
 
-    setupMainTariff(); // присоединяется действующий локальный тариф для вызова на org-плече
+        set<int> nnpDestinationIds; // Вычисляем все nnp-направления для номера получателя
+        vector<NNPAccountTariffLight> nnpAccountTariffLightList;
+        vector<ServiceNumber> serviceNumber;
 
-    setupBilledTime(); //  вычисляется тарифицируемая длительность звонка согласно настройкам
-    // (бесплатные секунды, тарификация по мин/по сек) действующего тарифа для оригинационного плеча.
+        vector<NNPPackageMinute> nnpPackageMinuteList;
+        map<int, NNPPackageMinute> EffectiveNnpPackageMinuteList;
 
-    setupPackagePricelist(); // поисх подходящего пакета для обсчета оригинационного плеча, если находим, используем его
+        // Загружаем список номеров у на лицевом счете.
+        repository->getServiceNumberByClientID(serviceNumber, call->account_id);
 
-    if (callInfo->servicePackagePricelist == nullptr) { // Для плеча нет подходящего пакета,
-        // считаем цену по прайслистам
+        // Загружаем список nnp-тарифов на лицевом счете действующих на время соединения
+        repository->getActiveNNPAccountTariffLight(nnpAccountTariffLightList, call->account_id,
+                                                   call->connect_time);
 
-        setupTariff();  //  Для расчитанного ранее типа звонка (моб не моб, тип зональности)
-        // в поле callInfo->tariff присоединяется действующий для этого случая тариф
+        // Вычисляем все nnp-направления для А-номера звонка
+        repository->getNNPDestinationByNumberRange(nnpDestinationIds, this->callInfo->nnpNumberRange, trace);
+
+        // Загружаем все nnp-пакеты с минутами для тарифов этого лицевого счета
+        for (auto it1 = nnpAccountTariffLightList.begin(); it1 != nnpAccountTariffLightList.end(); it1++) {
+            repository->getNNPPackageMinuteByTariff(nnpPackageMinuteList, it1->nnp_tariff_id);
+        }
+
+        // Оставляем только те пакеты с минутами, в которых есть nnp-направления номера А
+        for (auto it2 = nnpPackageMinuteList.begin(); it2 != nnpPackageMinuteList.end(); it2++) {
+            if (nnpDestinationIds.count(it2->nnp_destination_id) > 0)
+                EffectiveNnpPackageMinuteList.insert(pair<int, NNPPackageMinute>(it2->id, *it2));
+        }
+
+        // Смотрим остатки минут в пакетах
+
+//        setupNNPPackageMinute(nnpDestinationIds,nnpAccountTariffLightList); // поисх подходящего nnp-пакета с минутами для обсчета оригинационного плеча,
+//                                 // если находим, используем его
 
 
-        setupPricelist(callInfo->tariff->pricelist_id); // присоединяем в callInfo->pricelist прайслист по pricelist_id
-        // при расчете с авторизацией по транку прайслист должен быть
-        // выбран ранее по коду
 
-        setupPrice(call->dst_number);                   // Расчитываем по ранее выбранному прайслисту и B-номеру
-    } else {           // Для звонка найден подходящий пакет
-        setupPricelist();                               // присоединяем в callInfo->pricelist прайслист по pricelist_id
-        // при расчете с авторизацией по транку прайслист должен быть
-        // выбран ранее из пакета.
+        call->billed_time = 0;
+        call->package_time = 0;
+        call->rate = 1;
 
-        setupPrice();                                   //  Расчитываем по ранее выбранному прайслисту и
-        //  номера цену звонка на плече
+    } else if (call->account_version == CALL_ACCOUNT_VERSION_4) {
+        // Обсчитываем плечо по традиционной схеме
+        if (trace != nullptr) {
+            *trace << "INFO|CALL_ACCOUNT_VERSION_4" << "\n";
+        }
+
+        setupLogTariff(); //  присоединяется действующий LogTariff для вызова на org-плече
+        setupMainTariff(); // присоединяется действующий локальный тариф для вызова на org-плече
+
+        setupBilledTime(); //  вычисляется тарифицируемая длительность звонка согласно настройкам
+        // (бесплатные секунды, тарификация по мин/по сек) действующего тарифа для оригинационного плеча.
+
+        setupPackagePricelist(); // поисх подходящего пакета для обсчета оригинационного плеча, если находим, используем его
+
+        if (callInfo->servicePackagePricelist == nullptr) { // Для плеча нет подходящего пакета,
+            // считаем цену по прайслистам
+
+            setupTariff();  //  Для расчитанного ранее типа звонка (моб не моб, тип зональности)
+            // в поле callInfo->tariff присоединяется действующий для этого случая тариф
+
+
+            setupPricelist(
+                    callInfo->tariff->pricelist_id); // присоединяем в callInfo->pricelist прайслист по pricelist_id
+            // при расчете с авторизацией по транку прайслист должен быть
+            // выбран ранее по коду
+
+            setupPrice(call->dst_number);                   // Расчитываем по ранее выбранному прайслисту и B-номеру
+        } else {           // Для звонка найден подходящий пакет
+            setupPricelist();                               // присоединяем в callInfo->pricelist прайслист по pricelist_id
+            // при расчете с авторизацией по транку прайслист должен быть
+            // выбран ранее из пакета.
+
+            setupPrice();                                   //  Расчитываем по ранее выбранному прайслисту и
+            //  номера цену звонка на плече
+        }
+
+        setupFreemin();  // Учитываем расход предоплаченных минут при локальных звонках
+
+        setupPackagePrepaid();
+
+    } else {
+        throw CalcException("UNKNOW ACCOUNT VERSION");
     }
-
-    setupFreemin();  // Учитываем расход предоплаченных минут при локальных звонках
-
-    setupPackagePrepaid();
 
     setupCost();                                        // Расчет стоимости плеча. С учетом остатка по найденому пакету
 }
@@ -842,6 +897,20 @@ void BillingCall::setupTariff() {
         throw CalcException("TARIFF NOT FOUND");
     }
 }
+
+/******************************************************************************************************************
+ *   Поиск подходящего действующего nnp-пакета с неизрасходованными минутами
+ *   для ранее расчитанного nnp-направления звонка
+ *
+ */
+
+void BillingCall::setupNNPPackageMinute(set<int> &nnpDestinationIds,
+                                        vector<NNPAccountTariffLight> &nnpAccountTariffLight) {
+
+
+}
+
+
 
 /******************************************************************************************************************
  *   Поиск подходящего пакета для того, что бы тарифицировать им звонок.

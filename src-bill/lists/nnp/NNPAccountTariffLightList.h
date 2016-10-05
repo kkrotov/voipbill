@@ -39,6 +39,5 @@ public:
     NNPAccountTariffLight *find(int id, stringstream *trace = nullptr);
 
     void findAllActiveByClientID(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight, int client_id,
-                                 stringstream *trace = nullptr);
-
+                                 time_t connect_time, stringstream *trace);
 };

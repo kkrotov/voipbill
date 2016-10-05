@@ -153,33 +153,33 @@ void PageClient::render_client_balance_indicators(std::stringstream &html, Clien
     }
     int client_id = client->id;
 
-        double vat_rate = repository.getVatRate(client);
+    double vat_rate = repository.getVatRate(client);
 
-        double sum_month, sum_day, sum_mn_day, sum_balance;
-        double sum_month2, sum_day2, sum_mn_day2, sum_balance2;
-        ClientLockObj clientLock = repository.billingData->clientLock.get()->get(client_id);
-        sum_month = repository.billingData->statsAccountGetSumMonth(client_id, vat_rate);
-        sum_day = repository.billingData->statsAccountGetSumDay(client_id, vat_rate);
-        sum_mn_day = repository.billingData->statsAccountGetSumMNDay(client_id, vat_rate);
-        sum_balance = repository.billingData->statsAccountGetSumBalance(client_id, vat_rate);
+    double sum_month, sum_day, sum_mn_day, sum_balance;
+    double sum_month2, sum_day2, sum_mn_day2, sum_balance2;
+    ClientLockObj clientLock = repository.billingData->clientLock.get()->get(client_id);
+    sum_month = repository.billingData->statsAccountGetSumMonth(client_id, vat_rate);
+    sum_day = repository.billingData->statsAccountGetSumDay(client_id, vat_rate);
+    sum_mn_day = repository.billingData->statsAccountGetSumMNDay(client_id, vat_rate);
+    sum_balance = repository.billingData->statsAccountGetSumBalance(client_id, vat_rate);
 
 
-        auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
-        sum_balance2 = statsAccount2->getSumBalance(client_id, vat_rate);
-        sum_day2 = statsAccount2->getSumDay(client_id, vat_rate);
-        sum_mn_day2 = statsAccount2->getSumMNDay(client_id, vat_rate);
-        sum_month2 = statsAccount2->getSumMonth(client_id, vat_rate);
+    auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
+    sum_balance2 = statsAccount2->getSumBalance(client_id, vat_rate);
+    sum_day2 = statsAccount2->getSumDay(client_id, vat_rate);
+    sum_mn_day2 = statsAccount2->getSumMNDay(client_id, vat_rate);
+    sum_month2 = statsAccount2->getSumMonth(client_id, vat_rate);
 
-        double sum_month_global = 0, sum_day_global = 0, sum_mn_day_global = 0, sum_balance_global = 0;
-        if (repository.data->globalCounters.ready()) {
-            auto globalCounter = repository.data->globalCounters.get()->find(client_id);
-            if (globalCounter) {
-                sum_balance_global += globalCounter->sumBalance(vat_rate);
-                sum_day_global += globalCounter->sumDay(vat_rate);
-                sum_mn_day_global += globalCounter->sumMNDay(vat_rate);
-                sum_month_global += globalCounter->sumMonth(vat_rate);
-            }
+    double sum_month_global = 0, sum_day_global = 0, sum_mn_day_global = 0, sum_balance_global = 0;
+    if (repository.data->globalCounters.ready()) {
+        auto globalCounter = repository.data->globalCounters.get()->find(client_id);
+        if (globalCounter) {
+            sum_balance_global += globalCounter->sumBalance(vat_rate);
+            sum_day_global += globalCounter->sumDay(vat_rate);
+            sum_mn_day_global += globalCounter->sumMNDay(vat_rate);
+            sum_month_global += globalCounter->sumMonth(vat_rate);
         }
+    }
 
 
     if (client->hasCreditLimit()) {
@@ -199,8 +199,11 @@ void PageClient::render_client_balance_indicators(std::stringstream &html, Clien
     }
 
     if (client->hasDailyMNLimit()) {
-        html << "Daily MN available: <b>" << string_fmt("%.2f", client->limit_d_mn + sum_mn_day + sum_mn_day2 + sum_mn_day_global) << "</b> = ";
-        html << string_fmt("%d", client->limit_d_mn) << " (limit_d_mn) + " << string_fmt("%.2f", sum_mn_day) << " (local_mn) + " << string_fmt("%.2f", sum_mn_day2) << " (current_mn) + " << string_fmt("%.2f", sum_mn_day_global) << " (global_mn) <br/>\n";
+        html << "Daily MN available: <b>" <<
+        string_fmt("%.2f", client->limit_d_mn + sum_mn_day + sum_mn_day2 + sum_mn_day_global) << "</b> = ";
+        html << string_fmt("%d", client->limit_d_mn) << " (limit_d_mn) + " << string_fmt("%.2f", sum_mn_day) <<
+        " (local_mn) + " << string_fmt("%.2f", sum_mn_day2) << " (current_mn) + " <<
+        string_fmt("%.2f", sum_mn_day_global) << " (global_mn) <br/>\n";
     }
 
     html << "-----<br/>\n";
@@ -248,7 +251,7 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
     vector<ServiceNumber> serviceNumber;
 
     repository.getServiceNumberByClientID(serviceNumber, client_id);
-    repository.getActiveNNPAccountTariffLight(nnpAccountTariffLight, client_id);
+    repository.getActiveNNPAccountTariffLight(nnpAccountTariffLight, client_id, time(nullptr));
 
     for (auto it = serviceNumber.begin(); it != serviceNumber.end(); it++) {
         html << "did:<b>" << it->did << "</b>, lines_count:" << it->lines_count << "<br/>";
