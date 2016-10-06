@@ -32,6 +32,7 @@ public:
         }
     }
     void setCapacity(int capacity) {this->capacity=capacity;};
+    int getLoad () { return capacity>0? ((num_of_incoming+num_of_outgoing)*100/capacity):100; };
 };
 
 class ActiveTrunks {
@@ -61,7 +62,13 @@ class ActiveTrunks {
     }
 
 public:
-    ActiveTrunks (shared_ptr<vector<Call>> calls, shared_ptr<CurrentCdrList> cdrList) {
+    ActiveTrunks (Repository &repository) {
+
+        shared_ptr<CurrentCdrList> cdrList = repository.currentCalls->currentCdr.get();
+        if (cdrList == nullptr) {
+            return;
+        }
+        shared_ptr<vector<Call>> calls = repository.currentCalls->getCallsWaitingSaving();
 
         bool fullMode = calls->size() == cdrList->size() * 2;
         for (size_t i = 0; i < cdrList->size(); i++) {
@@ -78,6 +85,13 @@ public:
             add(cdr->src_route, true, orig_cost);
             add(cdr->dst_route, false, term_cost);
         }
+        for (size_t i = 0; i < this->trunkIoParams.size(); i++) {
+
+            TrunkIoParams trunkParam = this->trunkIoParams.at(i);
+            Trunk *trunk = repository.getTrunkByName(trunkParam.trunk_name.c_str());
+            trunkParam.capacity = trunk!= nullptr? trunk->capacity:0;
+            this->trunkIoParams[i] = trunkParam;
+        }
     }
 
     int count() { return trunkIoParams.size(); }
@@ -87,7 +101,7 @@ public:
         if (sort_column==0)
             std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
                 return b.trunk_name > a.trunk_name;
-        });
+            });
         if (sort_column==1)
             std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
                 return b.capacity < a.capacity;
@@ -106,12 +120,17 @@ public:
             });
         if (sort_column==8)
             std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
-                int a_load = ((a.num_of_incoming+a.num_of_outgoing)*100/a.capacity);
-                int b_load = ((b.num_of_incoming+b.num_of_outgoing)*100/b.capacity);
-                return a_load < b_load;
+                return b.getLoad() < a.getLoad();
             });
     }
+
     TrunkIoParams at(int i) { return trunkIoParams.at(i); }
+
+    void set (int i, TrunkIoParams params) {
+
+        if (i<this->trunkIoParams.size())
+            this->trunkIoParams[i] = params;
+    }
 };
 
 class PageTrunks : public BasePage {
@@ -126,7 +145,7 @@ public:
 
         html <<   "<head>\n"
              <<   "    <title>Active trunks</title>\n"
-             <<   "<meta http-equiv=\"refresh\" content=\"5\" >"
+//             <<   "<meta http-equiv=\"refresh\" content=\"5\" >"
              <<   "</head>\n";
 
         renderHeader(html);
@@ -139,8 +158,8 @@ public:
             return;
         }
         shared_ptr<vector<Call>> calls = repository.currentCalls->getCallsWaitingSaving();
-        ActiveTrunks activeTrunks(calls, cdrList);
 
+        ActiveTrunks activeTrunks(repository);
         html << "<body>\n";
         html << "<table width=100% border=0 cellspacing=0>\n";
         html << "<tr>\n";
@@ -161,7 +180,7 @@ public:
         bool fullMode = calls->size() == cdrList->size() * 2;
         html << "<table width=100% border=0 cellspacing=0>\n";
         html << "<tr>"
-                "<th nowrap><a href='/trunks?sort=0&order=0'>trunk_name</a></th>"
+                "<th nowrap><a href='/trunks?sort=0&order=1'>trunk_name</a></th>"
                 "<th nowrap><a href='/trunks?sort=1&order=0'>capacity</a></th>"
                 "<th nowrap><a href='/trunks?sort=2&order=0'>incoming count</a></th>";
         if (fullMode)
@@ -191,16 +210,12 @@ public:
 
             TrunkIoParams trunkParam = activeTrunks.at(i);
             html << "<tr class='tr_orig'>\n";
-            html << "<td nowrap><a class=orig href='/calls?trunkname=" << trunkParam.trunk_name << "'>" << trunkParam.trunk_name << "</a></td>\n";
+            html << "<td nowrap><a class=orig href='/calls?trunkname=" << trunkParam.trunk_name << "' style=\"text-decoration: none\">" << trunkParam.trunk_name << "</a></td>\n";
 
-            Trunk *trunk = repository.getTrunkByName(trunkParam.trunk_name.c_str());
-            int capacity = trunk!= nullptr? trunk->capacity:0;
-            trunkParam.setCapacity(capacity);
-
-            html << "<td nowrap>" << capacity << "</td>\n";
+            html << "<td nowrap>" << trunkParam.capacity << "</td>\n";
 
             if (trunkParam.num_of_incoming>0)
-                html << "<td nowrap><a class=orig href='/calls?trunkname=" << trunkParam.trunk_name << "&dest=in'>" << trunkParam.num_of_incoming << "</a></td>\n";
+                html << "<td nowrap><a class=orig href='/calls?trunkname=" << trunkParam.trunk_name << "&dest=in' style=\"text-decoration: none\">" << trunkParam.num_of_incoming << "</a></td>\n";
             else
                 html << "<td nowrap>" << trunkParam.num_of_incoming << "</td>\n";
 
@@ -208,22 +223,18 @@ public:
                 html << "<td nowrap>" << trunkParam.incoming_cost << "</td>\n";
 
             if (trunkParam.num_of_outgoing>0)
-                html << "<td nowrap><a class=term href='/calls?trunkname=" << trunkParam.trunk_name << "&dest=out'>" << trunkParam.num_of_outgoing << "</a></td>\n";
+                html << "<td nowrap><a class=term href='/calls?trunkname=" << trunkParam.trunk_name << "&dest=out' style=\"text-decoration: none\">" << trunkParam.num_of_outgoing << "</a></td>\n";
             else
                 html << "<td nowrap>" << trunkParam.num_of_outgoing << "</td>\n";
 
             if (fullMode)
                 html << "<td nowrap>" << trunkParam.outgoing_cost << "</td>\n";
 
-            html << "<td nowrap><a class=orig href='/calls?trunkname=" << trunkParam.trunk_name << "'>" << trunkParam.num_of_incoming+trunkParam.num_of_outgoing << "</a></td>\n";
+            html << "<td nowrap><a class=orig href='/calls?trunkname=" << trunkParam.trunk_name << "' style=\"text-decoration: none\">" << trunkParam.num_of_incoming+trunkParam.num_of_outgoing << "</a></td>\n";
             if (fullMode)
                 html << "<td nowrap>" << trunkParam.incoming_cost+trunkParam.outgoing_cost << "</td>\n";
 
-            int load = 0;
-            if (capacity>0)
-                load = ((trunkParam.num_of_incoming+trunkParam.num_of_outgoing)*100/capacity);
-
-            html << "<td nowrap>" <<  load << "%</td>\n";
+            html << "<td nowrap>" <<  trunkParam.getLoad() << "%</td>\n";
 
             html << "</tr>\n";
         }
