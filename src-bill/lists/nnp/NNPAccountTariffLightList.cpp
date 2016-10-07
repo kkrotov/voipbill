@@ -26,6 +26,8 @@ NNPAccountTariffLight *NNPAccountTariffLightList::find(int id, stringstream *tra
 
 // Возващаем только действующие для указанного времени пакеты минут
 
+// *************** Требует оптимизации на скорость поиска !!!!!!!!!!!!!!!!!!!!
+
 void NNPAccountTariffLightList::findAllActiveByClientID(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight,
                                                         int client_id, time_t connect_time,
                                                         stringstream *trace) {

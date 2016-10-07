@@ -1,5 +1,7 @@
 #include "NNPPackageMinuteList.h"
 
+// ************* Эту функцию нужно обязательно оптимизировать для быстрого поиска.
+
 void NNPPackageMinuteList::findAllByTariffID(vector<NNPPackageMinute> &resultNNPPackageMinute, int nnp_tariff_id,
                                              stringstream *trace) {
     auto begin = this->data.begin();

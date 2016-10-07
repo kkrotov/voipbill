@@ -33,6 +33,7 @@ protected:
         item->nnp_city_id = row.get_i(11);
         item->full_number_from = row.get_ll(12);
         item->full_number_to = row.get_ll(13);
+
     }
 
     struct key_full_number_from;

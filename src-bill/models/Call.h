@@ -63,8 +63,10 @@ struct Call {
     int nnp_country_prefix;
     int nnp_ndc;
     bool nnp_is_mob;
-    int trunk_group_id;
 
+    int nnp_package_minute_id;
+    int nnp_package_price_id;
+    int nnp_package_pricelist_id;
 
     void dump(stringstream &trace) {
 
@@ -107,7 +109,9 @@ struct Call {
         trace << "nnp_country_prefix: " << nnp_country_prefix << ", ";
         trace << "nnp_ndc: " << nnp_ndc << ", ";
         trace << "nnp_is_mob: " << (nnp_is_mob ? "true" : "false") << ", ";
-        trace << "trunk_group_id: " << trunk_group_id << ", ";
+        trace << "nnp_package_minute_id: " << nnp_package_minute_id << ", ";
+        trace << "nnp_package_price_id: " << nnp_package_price_id << ", ";
+        trace << "nnp_package_pricelist_id: " << nnp_package_pricelist_id << ", ";
         trace << ")";
     }
 
@@ -164,8 +168,10 @@ struct Call {
         nnp_country_prefix = 0;
         nnp_ndc = 0;
         nnp_is_mob = false;
-        trunk_group_id = 0;
 
+        nnp_package_pricelist_id = 0;
+        nnp_package_minute_id = 0;
+        nnp_package_price_id = 0;
     }
 
     bool isLocal() {

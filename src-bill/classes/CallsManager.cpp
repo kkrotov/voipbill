@@ -186,8 +186,20 @@ void CallsManager::calls_insert_row(Call *call, stringstream &q) {
 
     q << (call->nnp_is_mob ? "true" : "false") << ",";
 
-    if (call->trunk_group_id != 0) {
-        q << "'" << call->trunk_group_id << "',";
+    if (call->nnp_package_minute_id != 0) {
+        q << "'" << call->nnp_package_minute_id << "',";
+    } else {
+        q << "NULL,";
+    }
+
+    if (call->nnp_package_price_id != 0) {
+        q << "'" << call->nnp_package_price_id << "',";
+    } else {
+        q << "NULL,";
+    }
+
+    if (call->nnp_package_pricelist_id != 0) {
+        q << "'" << call->nnp_package_pricelist_id << "',";
     } else {
         q << "NULL,";
     }
@@ -227,7 +239,8 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth, 
                     "service_package_id,service_package_stats_id,package_time,package_credit,trunk_settings_stats_id," \
                     "destination_id,pricelist_id,prefix,geo_id,geo_operator_id,mob,geo_mob," \
                     "account_version,stats_nnp_package_minute_id, " \
-                    "nnp_operator_id,nnp_region_id,nnp_city_id,nnp_country_prefix,nnp_ndc,nnp_is_mob,trunk_group_id, " \
+                    "nnp_operator_id,nnp_region_id,nnp_city_id,nnp_country_prefix,nnp_ndc,nnp_is_mob, " \
+                    "nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id, " \
                     "disconnect_cause" \
                  ")VALUES\n";
 
