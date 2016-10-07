@@ -11,6 +11,7 @@ public:
 
     uint16_t web_port;
     vector<string> active_threads;
+    vector<string> skip_threads;
 
     uint16_t instance_id;
     string str_instance_id;
