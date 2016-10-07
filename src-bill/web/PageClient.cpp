@@ -246,7 +246,7 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
 
     int client_id = client->id;
 
-    html << "---- active packages with minutes ----<br/>\n";
+    html << "---- active nnp-packages with minutes ----<br/>\n";
     vector<NNPAccountTariffLight> nnpAccountTariffLight;
     vector<ServiceNumber> serviceNumber;
 
@@ -262,8 +262,8 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
 
                 if (nnpPackageMinute.size() > 0) {
                     html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                    html << "nnp_tariff_id=" << it2->nnp_tariff_id << ",";
-                    html << "package_minute_id=" << it2->id << ",";
+                    html << "nnp_tariff_id=<b>" << it2->nnp_tariff_id << "</b>,";
+                    html << "account_tariff_light_id=<b>" << it2->id << "</b>,";
                     html << "coefficient=" << string_fmt("%.4f", it2->coefficient) << ",";
                     html << "[" << string_time(it2->activate_from) << "," << string_time(it2->deactivate_from) <<
                     "]<br/>";
@@ -271,16 +271,17 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
                     for (auto it3 = nnpPackageMinute.begin(); it3 != nnpPackageMinute.end(); it3++) {
 
                         NNPDestination *nnpDestination = repository.getNNPDestination(it3->nnp_destination_id);
-                        int used_seconds = repository.billingData->statsNNPPackaeMinuteGetUsedSeconds(
+                        int used_seconds = repository.billingData->statsNNPPackageMinuteGetUsedSeconds(
                                 it2->nnp_tariff_id, it3->id);
 
                         html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                         html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                        html << "nnp_destination_id=" << it3->nnp_destination_id << " (<b>";
+                        html << "nnp_package_minute_id=<b>" << it3->id << "</b> ";
+                        html << "nnp_destination_id=<b>" << it3->nnp_destination_id << "</b> (<b>";
                         html << nnpDestination->name << "</b>),";
                         html << "minutes in package=" << it3->minute << " ";
                         html << "(effective minutes=" << string_fmt("%.2f", it3->minute * it2->coefficient) << "), ";
-                        html << "used minutes=" << string_fmt("%.2f", (double) used_seconds / 60.0) << ",";
+                        html << "used minutes=<b>" << string_fmt("%.2f", (double) used_seconds / 60.0) << "</b>,";
                         html << "left minutes=<b>" <<
                         string_fmt("%.2f", it3->minute * it2->coefficient - (double) used_seconds / 60.0) <<
                         "</b>";

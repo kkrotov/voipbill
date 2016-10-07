@@ -302,3 +302,31 @@ void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trun
         trunkSettingsOrderList.push_back(order);
     }
 }
+
+void Repository::findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPackagePricelistIds, int tariff_id,
+                                            long long int num, stringstream *trace) {
+
+    set<NNPPackagePricelist *> nnpPackagePricelistPtr;
+
+
+    nnpPackagePricelist->findPackagePricelistIds(nnpPackagePricelistPtr, tariff_id, num, trace);
+
+    for (auto item : nnpPackagePricelistPtr) {
+        NNPPackagePricelist *package = &*item;
+        PricelistPrice *pricelistPrice = getPrice(package->pricelist_id, num);
+        if (pricelistPrice != nullptr) {
+            double cost = pricelistPrice->price;
+
+            resultNNPPackagePricelistIds.insert(pair<double, int>(cost, package->id));
+
+            if (trace != nullptr) {
+                *trace << "FOUND|NNP PACKAGE PRICELIST|BY NNP_TARIFF_ID '" << tariff_id << "'" << "\n";
+                *trace << "||";
+                package->dump(*trace);
+                *trace << "\n";
+            }
+        }
+
+    }
+
+}

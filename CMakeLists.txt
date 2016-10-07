@@ -45,6 +45,7 @@ set(BILL_SOURCES
     src-bill/classes/Billing.cpp
     src-bill/classes/Billing.cpp
     src-bill/classes/BillingCall.cpp
+        src-bill/classes/BillingCall_nnp.cpp
     src-bill/classes/BlackList.cpp
     src-bill/classes/BlackListLocal.cpp
     src-bill/classes/BlackListGlobal.cpp

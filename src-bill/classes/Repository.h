@@ -616,4 +616,13 @@ public:
         return fResult;
     }
 
+    void findNNPPackagePriceIds(set<pair<double, int>> &resultNNPPackagePriceIds, int tariff_id,
+                                set<int> &nnpDestinationIds,
+                                stringstream *trace = nullptr) {
+        return nnpPackagePrice->findPackagePriceIds(resultNNPPackagePriceIds, tariff_id, nnpDestinationIds, trace);
+    }
+
+    void findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPackagePricelistIds, int tariff_id,
+                                    long long int num, stringstream *trace = nullptr);
+
 };

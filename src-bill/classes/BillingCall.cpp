@@ -194,44 +194,8 @@ void BillingCall::calcOrigByNumber() {
             *trace << "INFO|CALL_ACCOUNT_VERSION_5" << "\n";
         }
 
-        set<int> nnpDestinationIds; // Вычисляем все nnp-направления для номера получателя
-        vector<NNPAccountTariffLight> nnpAccountTariffLightList;
-        vector<ServiceNumber> serviceNumber;
+        calcOrigNNPByNumber();
 
-        vector<NNPPackageMinute> nnpPackageMinuteList;
-        map<int, NNPPackageMinute> EffectiveNnpPackageMinuteList;
-
-        // Загружаем список номеров у на лицевом счете.
-        repository->getServiceNumberByClientID(serviceNumber, call->account_id);
-
-        // Загружаем список nnp-тарифов на лицевом счете действующих на время соединения
-        repository->getActiveNNPAccountTariffLight(nnpAccountTariffLightList, call->account_id,
-                                                   call->connect_time);
-
-        // Вычисляем все nnp-направления для А-номера звонка
-        repository->getNNPDestinationByNumberRange(nnpDestinationIds, this->callInfo->nnpNumberRange, trace);
-
-        // Загружаем все nnp-пакеты с минутами для тарифов этого лицевого счета
-        for (auto it1 = nnpAccountTariffLightList.begin(); it1 != nnpAccountTariffLightList.end(); it1++) {
-            repository->getNNPPackageMinuteByTariff(nnpPackageMinuteList, it1->nnp_tariff_id);
-        }
-
-        // Оставляем только те пакеты с минутами, в которых есть nnp-направления номера А
-        for (auto it2 = nnpPackageMinuteList.begin(); it2 != nnpPackageMinuteList.end(); it2++) {
-            if (nnpDestinationIds.count(it2->nnp_destination_id) > 0)
-                EffectiveNnpPackageMinuteList.insert(pair<int, NNPPackageMinute>(it2->id, *it2));
-        }
-
-        // Смотрим остатки минут в пакетах
-
-//        setupNNPPackageMinute(nnpDestinationIds,nnpAccountTariffLightList); // поисх подходящего nnp-пакета с минутами для обсчета оригинационного плеча,
-//                                 // если находим, используем его
-
-
-
-        call->billed_time = 0;
-        call->package_time = 0;
-        call->rate = 1;
 
     } else if (call->account_version == CALL_ACCOUNT_VERSION_4) {
         // Обсчитываем плечо по традиционной схеме
@@ -877,19 +841,6 @@ void BillingCall::setupTariff() {
         throw CalcException("TARIFF NOT FOUND");
     }
 }
-
-/******************************************************************************************************************
- *   Поиск подходящего действующего nnp-пакета с неизрасходованными минутами
- *   для ранее расчитанного nnp-направления звонка
- *
- */
-
-void BillingCall::setupNNPPackageMinute(set<int> &nnpDestinationIds,
-                                        vector<NNPAccountTariffLight> &nnpAccountTariffLight) {
-
-
-}
-
 
 
 /******************************************************************************************************************
