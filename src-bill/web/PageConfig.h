@@ -12,6 +12,14 @@ public:
 
         html << "<h2>Config</h2>\n";
         html << "build date: <b>" << build_date() << " " << build_time() << "</b><br/>\n";
+        html << "start time: " << string_time(app().getStartTime()) << "<br/>\n";
+
+        int seconds=time(NULL)-app().getStartTime();
+        int minutes = seconds / 60;
+        int hours = minutes / 60;
+        html << "run time: " << int(hours) << " hours " << int(minutes%60) << " min " << int(seconds%60) << " sec";
+        html << "<hr>\n";
+        
         html << "config_file: " << app().conf.config_file << "<br/>\n";
         html << "pid_file: " << app().conf.pid_file << "<br/>\n";
         html << "<hr>\n";
@@ -24,6 +32,23 @@ public:
 
         html << "<br/>\n";
         html << "main.web_port: " << app().conf.web_port << "<br/>\n";
+        if (app().conf.active_threads.size()>0) {
+
+            html << "main.run_threads: " ;
+            for (auto active_thread: app().conf.active_threads)
+                html << active_thread << " ";
+
+            html << "<br/>\n";
+        }
+        if (app().conf.skip_threads.size()>0) {
+
+            html << "main.skip_threads: ";
+            for (auto skipped_thread: app().conf.skip_threads)
+                html << skipped_thread << " ";
+
+            html << "<br/>\n";
+        }
+        html << "main.calls_raw_sync_delay: " << app().conf.calls_raw_sync_delay << "<br/>\n";
         html << "<br/>\n";
         html << "log.grouping_interval: " << app().conf.log_grouping_interval << "<br/>\n";
         html << "<br/>\n";

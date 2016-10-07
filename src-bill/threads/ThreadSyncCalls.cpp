@@ -3,7 +3,7 @@
 ThreadSyncCalls::ThreadSyncCalls() {
     id = idName();
     name = "Sync Calls to central db";
-    threadSleepSeconds = 10;
+    threadSleepSeconds = app().conf.calls_raw_sync_delay;
 
     db_main.setCS(app().conf.db_main);
     db_calls.setCS(app().conf.db_calls);

@@ -12,6 +12,7 @@ bool App::start() {
 
     setRealStatus(AppStatus::APP_INITIALIZING);
 
+    start_time = time(NULL);
     runApp();
 }
 

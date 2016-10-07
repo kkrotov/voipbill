@@ -15,6 +15,7 @@ static const char * AppStatusNames[]{
 };
 
 class App {
+    time_t start_time;
 public:
     Logger logger;
     ThreadPool threads;
@@ -35,6 +36,7 @@ public:
     void setRealStatus(AppStatus real_status);
     AppStatus getStatus();
     AppStatus getRealStatus();
+    time_t getStartTime() { return this->start_time; }
 
 protected:
     virtual void runApp() = 0;
