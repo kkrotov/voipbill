@@ -22,6 +22,17 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
             active_threads.push_back(tmp);
         }
     }
+
+    threads = pt.get<string>("main.skip_threads", "");
+    if (threads.length()>0) {
+
+        std::stringstream ss(threads);
+        string tmp;
+
+        while (ss >> tmp) {
+            skip_threads.push_back(tmp);
+        }
+    }
     instance_id = pt.get<uint16_t>("geo.instance_id");
     str_instance_id = boost::lexical_cast<string>(instance_id);
 

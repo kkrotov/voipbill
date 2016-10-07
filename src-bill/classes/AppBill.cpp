@@ -140,6 +140,12 @@ void AppBill::runAppInSingleMode()
 
     for (auto thread: standardThreads) {
 
+        if (std::find(conf.skip_threads.begin(), conf.skip_threads.end(), thread) != conf.skip_threads.end()) {
+
+            cout << "Skipping thread " + thread + "...\n";
+            continue;
+        }
+        cout << "Running thread " + thread + "...\n";
         threads.run(newThreadObject(thread));
     }
 }
