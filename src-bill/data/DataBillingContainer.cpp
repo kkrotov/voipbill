@@ -422,7 +422,14 @@ void DataBillingContainer::statsNNPPackaeMinuteAddChanges(map<int, StatsNNPPacka
 }
 
 int DataBillingContainer::statsNNPPackageMinuteGetUsedSeconds(int nnp_account_tariff_light_id,
-                                                              int nnp_package_minute_id) {
+                                                              int nnp_package_minute_id, time_t connect_time) {
     lock_guard<Spinlock> guard(lock);
-    return statsNNPPackageMinute.getUsedSeconds(nnp_account_tariff_light_id, nnp_package_minute_id);
+    return statsNNPPackageMinute.getUsedSeconds(nnp_account_tariff_light_id, nnp_package_minute_id, connect_time);
+}
+
+StatsNNPPackageMinute *DataBillingContainer::statsNNPPackageMinuteGetCurrent(time_t connect_time, Client *account,
+                                                                             NNPPackageMinute *nnpPackageMinute,
+                                                                             NNPAccountTariffLight *nnpAccountTariffLight) {
+    lock_guard<Spinlock> guard(lock);
+    return statsNNPPackageMinute.getCurrent(connect_time, account, nnpPackageMinute, nnpAccountTariffLight);
 }

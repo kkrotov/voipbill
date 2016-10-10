@@ -272,7 +272,7 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
 
                         NNPDestination *nnpDestination = repository.getNNPDestination(it3->nnp_destination_id);
                         int used_seconds = repository.billingData->statsNNPPackageMinuteGetUsedSeconds(
-                                it2->nnp_tariff_id, it3->id);
+                                it2->id, it3->id, time(nullptr));
 
                         html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                         html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";

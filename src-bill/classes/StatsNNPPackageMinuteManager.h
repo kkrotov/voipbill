@@ -5,6 +5,8 @@
 #include "Spinlock.h"
 #include "../models/StatsNNPPackageMinute.h"
 #include "../models/CallInfo.h"
+#include "../models/nnp/NNPPackageMinute.h"
+#include "../models/nnp/NNPAccountTariffLight.h"
 
 class StatsNNPPackageMinuteManager
 {
@@ -16,7 +18,7 @@ private:
     bool loaded = false;
 public:
     map<int, StatsNNPPackageMinute> statsNNPPackageMinute;
-    map<int, list<int>> statsByNNPPackageMinuteId;
+    map<int, list<int>> statsByNNPAccountTariffLightId;
     set<int> forSync;
 
     StatsNNPPackageMinuteManager();
@@ -24,7 +26,8 @@ public:
     void load(BDb * db, time_t lastSaveCallTime);
     void recalc(BDb * db, long long int storedLastId);
 
-    StatsNNPPackageMinute * getCurrent(time_t connect_time, Client * account, StatsNNPPackageMinute * nnpPackageMinute);
+    StatsNNPPackageMinute *getCurrent(time_t connect_time, Client *account, NNPPackageMinute *nnpPackageMinute,
+                                      NNPAccountTariffLight *nnpAccountTariffLight);
 
 
     void getChanges(map<int, StatsNNPPackageMinute> &changes);
@@ -45,8 +48,10 @@ private:
     friend class DataBillingContainer;
     friend class Billing;
 
-    StatsNNPPackageMinute * createStatsNNPPackageMinute(time_t connect_time, Client * account, StatsNNPPackageMinute * nnpPackageMinute);
+    StatsNNPPackageMinute *createStatsNNPPackageMinute(time_t connect_time, Client *account,
+                                                       NNPPackageMinute *nnpPackageMinute,
+                                                       NNPAccountTariffLight *nnpAccountTariffLight);
     StatsNNPPackageMinute * updateStatsNNPPackageMinute(CallInfo *callInfo, int statNNPPackageMinuteId);
 
-    int getUsedSeconds(int nnp_account_tariff_light_id, int nnp_package_minute_id);
+    int getUsedSeconds(int nnp_account_tariff_light_id, int nnp_package_minute_id, time_t connect_time);
 };

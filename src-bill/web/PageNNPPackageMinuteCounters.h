@@ -28,7 +28,7 @@ public:
              "<th>min_call_id</th>" \
              "<th>max_call_id</th></tr>";
 
-        for (auto it : statsNNPPackageMinute->statsByNNPPackageMinuteId) {
+        for (auto it : statsNNPPackageMinute->statsByNNPAccountTariffLightId) {
             int nnpPackageMinuteId = it.first;
             list<int> &statIds = it.second;
 

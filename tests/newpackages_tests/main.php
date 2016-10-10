@@ -7,6 +7,9 @@ function clearCounters($db)
 {
     $query = 'delete from billing.stats_account';
     $result = pg_query($db,$query) or die('Ошибка запроса: ' . pg_last_error());
+
+    $query = 'delete from billing.stats_nnp_package_minute';
+    $result = pg_query($db,$query) or die('Ошибка запроса: ' . pg_last_error());
 }
 
 function clearCallRaws($db)
