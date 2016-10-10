@@ -98,30 +98,73 @@ public:
 
     void sort(int sort_column, bool order) {
 
-        if (sort_column==0)
-            std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
-                return b.trunk_name > a.trunk_name;
-            });
-        if (sort_column==1)
-            std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
-                return b.capacity < a.capacity;
-            });
-        if (sort_column==2)
-            std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
-                return b.num_of_incoming < a.num_of_incoming;
-            });
-        if (sort_column==4)
-            std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
-                return b.num_of_outgoing < a.num_of_outgoing;
-            });
-        if (sort_column==6)
-            std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
-                return (b.num_of_outgoing+b.num_of_incoming) < (a.num_of_outgoing+a.num_of_incoming);
-            });
-        if (sort_column==8)
-            std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
-                return b.getLoad() < a.getLoad();
-            });
+        switch (sort_column) {
+
+            case 0:
+                if (order)
+                    std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
+                        return b.trunk_name > a.trunk_name;
+                    });
+                else
+                    std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
+                        return b.trunk_name < a.trunk_name;
+                    });
+                break;
+
+            case 1:
+                if (order)
+                    std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
+                        return b.capacity < a.capacity;
+                    });
+                else
+                    std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
+                        return b.capacity > a.capacity;
+                    });
+                break;
+
+            case 2:
+                if (order)
+                    std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
+                        return b.num_of_incoming < a.num_of_incoming;
+                    });
+                else
+                    std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
+                        return b.num_of_incoming > a.num_of_incoming;
+                    });
+                break;
+
+            case 4:
+                if (order)
+                    std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
+                        return b.num_of_outgoing < a.num_of_outgoing;
+                    });
+                else
+                    std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
+                        return b.num_of_outgoing > a.num_of_outgoing;
+                    });
+                break;
+
+            case 6:
+                if (order)
+                    std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
+                        return (b.num_of_outgoing+b.num_of_incoming) < (a.num_of_outgoing+a.num_of_incoming);
+                    });
+                else
+                    std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
+                        return (b.num_of_outgoing+b.num_of_incoming) > (a.num_of_outgoing+a.num_of_incoming);
+                    });
+                break;
+
+            case 8:
+                if (order)
+                    std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
+                        return b.getLoad() < a.getLoad();
+                    });
+                else
+                    std::sort(trunkIoParams.begin(), trunkIoParams.end(), [](TrunkIoParams a, TrunkIoParams b) {
+                        return b.getLoad() > a.getLoad();
+                    });
+        }
     }
 
     TrunkIoParams at(int i) { return trunkIoParams.at(i); }
@@ -177,26 +220,6 @@ public:
         html << ".tr_term td { padding-bottom: 5px; }\n";
         html << "</style>\n";
 
-        bool fullMode = calls->size() == cdrList->size() * 2;
-        html << "<table width=100% border=0 cellspacing=0>\n";
-        html << "<tr>"
-                "<th nowrap><a href='/trunks?sort=0&order=1'>trunk_name</a></th>"
-                "<th nowrap><a href='/trunks?sort=1&order=0'>capacity</a></th>"
-                "<th nowrap><a href='/trunks?sort=2&order=0'>incoming count</a></th>";
-        if (fullMode)
-            html << "<th nowrap>incoming cost</th>";
-
-        html << "<th nowrap><a href='/trunks?sort=4&order=0'>outgoing count</a></th>";
-        if (fullMode)
-            html << "<th nowrap>outgoing cost</th>";
-
-        html << "<th nowrap><a href='/trunks?sort=6&order=0'>total count</a></th>";
-        if (fullMode)
-            html << "<th nowrap>total cost</th>";
-
-        html << "<th nowrap><a href='/trunks?sort=8&order=0'>load</a></th>";
-        html << "</tr>";
-
         string sort_column = parameters["sort"];
         int sort_col_num = 0;
         if (sort_column.size()>0)
@@ -204,6 +227,52 @@ public:
 
         string order = parameters["order"];
         bool asc = order.compare("1");
+        order = asc? string("1"):string("0");
+
+        bool fullMode = calls->size() == cdrList->size() * 2;
+        html << "<table width=100% border=0 cellspacing=0>\n";
+        html << "<tr>";
+        if (sort_col_num==0)
+            html << "<th nowrap><a href='/trunks?sort=0&order="+order+"'>trunk_name</a></th>";
+        else
+            html << "<th nowrap><a href='/trunks?sort=0&order=1'>trunk_name</a></th>";
+
+        if (sort_col_num==1)
+            html << "<th nowrap><a href='/trunks?sort=1&order="+order+"'>capacity</a></th>";
+        else
+            html << "<th nowrap><a href='/trunks?sort=1&order=0'>capacity</a></th>";
+
+        if (sort_col_num==2)
+            html << "<th nowrap><a href='/trunks?sort=2&order="+order+"'>incoming count</a></th>";
+        else
+            html << "<th nowrap><a href='/trunks?sort=2&order=0'>incoming count</a></th>";
+
+        if (fullMode)
+            html << "<th nowrap>incoming cost</th>";
+
+        if (sort_col_num==4)
+            html << "<th nowrap><a href='/trunks?sort=4&order="+order+"'>outgoing count</a></th>";
+        else
+            html << "<th nowrap><a href='/trunks?sort=4&order=0'>outgoing count</a></th>";
+
+        if (fullMode)
+            html << "<th nowrap>outgoing cost</th>";
+
+        if (sort_col_num==6)
+            html << "<th nowrap><a href='/trunks?sort=6&order="+order+"'>total count</a></th>";
+        else
+            html << "<th nowrap><a href='/trunks?sort=6&order=0'>total count</a></th>";
+
+        if (fullMode)
+            html << "<th nowrap>total cost</th>";
+
+        if (sort_col_num==8)
+            html << "<th nowrap><a href='/trunks?sort=8&order="+order+"'>load</a></th>";
+        else
+            html << "<th nowrap><a href='/trunks?sort=8&order=0'>load</a></th>";
+
+        html << "</tr>";
+
         activeTrunks.sort(sort_col_num, asc);
 
         for (size_t i = 0; i < activeTrunks.count(); i++) {
