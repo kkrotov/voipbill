@@ -2,9 +2,8 @@
 #include "../classes/AppBill.h"
 
 void ThreadRemoteLoader::run() {
-
     repository.data->globalCounters.load(&db_main);
-
+    repository.data->globalNNPPackageMinuteCounters.load(&db_main);
 }
 
 ThreadRemoteLoader::ThreadRemoteLoader() {

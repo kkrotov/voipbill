@@ -374,7 +374,7 @@ set(BILL_SOURCES
 
     src-bill/main.cpp
 
-)
+        src-bill/models/GlobalNNPPackageMinuteCounters.cpp src-bill/data/GlobalNNPPackageMinuteCountersData.cpp src-bill/lists/GlobalNNPPackageMinuteCountersList.cpp)
 
 add_definitions(-DHAVE_SYS_IOCTL_H -DHAVE_SOCKLEN_T)
 file(GLOB_RECURSE ACE_RADIUS_SOURCES "libs/ace-radius/*.cpp")
