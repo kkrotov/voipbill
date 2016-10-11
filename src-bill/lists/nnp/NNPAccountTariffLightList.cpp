@@ -29,7 +29,7 @@ NNPAccountTariffLight *NNPAccountTariffLightList::find(int id, stringstream *tra
 // *************** Требует оптимизации на скорость поиска !!!!!!!!!!!!!!!!!!!!
 
 void NNPAccountTariffLightList::findAllActiveByClientID(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight,
-                                                        int client_id, time_t connect_time,
+                                                        int client_id, time_t connect_time, int service_number_id,
                                                         stringstream *trace) {
     auto begin = this->data.begin();
     auto end = this->data.end();
@@ -42,6 +42,7 @@ void NNPAccountTariffLightList::findAllActiveByClientID(vector<NNPAccountTariffL
         //time(&connect_time); // Текущие время в UTC
 
         if (nnpTariff.account_client_id == client_id &&
+            nnpTariff.service_number_id == service_number_id &&
             nnpTariff.activate_from <= connect_time &&
             nnpTariff.deactivate_from >= connect_time) {
             f = true;

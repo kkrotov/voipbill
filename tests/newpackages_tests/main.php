@@ -113,6 +113,11 @@ $calls[] = array ( "src_number" => '74996851549' , "dst_number" => '33145620245'
 $calls[] = array ( "src_number" => '74996851549' , "dst_number" => '79282012083' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-10-06 12:00:00");
 $calls[] = array ( "src_number" => '74996851549' , "dst_number" => '33145620241' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-10-06 12:01:00");
 $calls[] = array ( "src_number" => '74996851549' , "dst_number" => '33145620245' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-10-06 11:02:00");
+$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '74986005829' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-10-08 17:00:00");
+$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '74955631670' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-10-08 18:00:00");
+$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '73832870122' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-10-08 18:01:00");
+$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '79263747216' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-10-08 18:02:00");
+$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '79262559281' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-10-08 18:03:00");
 
 doCalls($dbregion,$calls,$maxid);
 

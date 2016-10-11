@@ -251,9 +251,11 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
     vector<ServiceNumber> serviceNumber;
 
     repository.getServiceNumberByClientID(serviceNumber, client_id);
-    repository.getActiveNNPAccountTariffLight(nnpAccountTariffLight, client_id, time(nullptr));
 
     for (auto it = serviceNumber.begin(); it != serviceNumber.end(); it++) {
+        nnpAccountTariffLight.clear();
+        repository.getActiveNNPAccountTariffLight(nnpAccountTariffLight, client_id, time(nullptr), it->id);
+
         html << "did:<b>" << it->did << "</b>, lines_count:" << it->lines_count << "<br/>";
         for (auto it2 = nnpAccountTariffLight.begin(); it2 != nnpAccountTariffLight.end(); it2++) {
             if (it2->service_number_id == it->id) {

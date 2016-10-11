@@ -295,9 +295,10 @@ public:
                                    long long int srcNumber, long long int dstNumber, int destinationType);
 
     void getActiveNNPAccountTariffLight(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight, int client_id,
-                                        time_t connect_time = time(nullptr)) {
+                                        time_t connect_time, int service_number_id) {
 
-        nnpAccountTariffLight->findAllActiveByClientID(resultNNPAccountTariffLight, client_id, connect_time, trace);
+        nnpAccountTariffLight->findAllActiveByClientID(resultNNPAccountTariffLight, client_id, connect_time,
+                                                       service_number_id, trace);
     }
 
     void getServiceNumberByClientID(vector<ServiceNumber> &resultServiceNumber, int client_id) {

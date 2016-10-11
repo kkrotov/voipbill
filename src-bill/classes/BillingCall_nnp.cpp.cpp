@@ -10,14 +10,22 @@ void BillingCall::calcOrigNNPByNumber() {
     // Загружаем список номеров у на лицевом счете.
     repository->getServiceNumberByClientID(serviceNumber, call->account_id);
 
+    if (callInfo->serviceNumber == nullptr) throw CalcException("NOT FOUND serviceNumber");
+
     // Загружаем список nnp-тарифов на лицевом счете действующих на время соединения
     repository->getActiveNNPAccountTariffLight(nnpAccountTariffLightList, call->account_id,
-                                               call->connect_time);
-
-    // Вычисляем все nnp-направления для А-номера звонка
-    repository->getNNPDestinationByNumberRange(nnpDestinationIds, this->callInfo->nnpNumberRange, trace);
+                                               call->connect_time, callInfo->serviceNumber->id);
 
     if (nnpAccountTariffLightList.size() == 0) throw CalcException("NOT FOUND AccountTariffLight");
+
+    // Вычисляем все nnp-направления для B-номера звонка
+    NNPNumberRange *nnpNumberRange = repository->getNNPNumberRange(call->dst_number, trace);
+
+    if (nnpNumberRange == nullptr) throw CalcException("NOT FOUND NumberRange");
+
+    repository->getNNPDestinationByNumberRange(nnpDestinationIds, nnpNumberRange, trace);
+
+    if (nnpDestinationIds.size() == 0) throw CalcException("NOT FOUND Destination");
 
     setupBilledTimeNNP(*nnpAccountTariffLightList.begin());
 
