@@ -9,6 +9,9 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-
 include_directories(/usr/pgsql-9.4/include libs/jsoncpp-master/include libs/boost)
 link_directories(/usr/pgsql-9.4/lib)
 
+string(TIMESTAMP RUN_DATE "%Y-%m-%d")
+add_definitions(-D_DATECOMPILED_="${RUN_DATE}")
+
 set(BOOST_SOURCES
         libs/boost/system/src/error_code.cpp
         libs/boost/program_options/src/cmdline.cpp
