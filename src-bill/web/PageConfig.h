@@ -15,9 +15,18 @@ public:
         html << "start time: " << string_time(app().getStartTime()) << "<br/>\n";
 
         int seconds=time(NULL)-app().getStartTime();
-        int minutes = seconds / 60;
-        int hours = minutes / 60;
-        html << "run time: " << int(hours) << " hours " << int(minutes%60) << " min " << int(seconds%60) << " sec";
+        int numberOfDays = seconds / 86400;
+        int numberOfHours = (seconds % 86400 ) / 3600 ;
+        int numberOfMinutes = ((seconds % 86400 ) % 3600 ) / 60;
+        int numberOfSeconds = ((seconds % 86400 ) % 3600 ) % 60;
+        html << "run time: ";
+        if (numberOfDays)
+            html << int(numberOfDays) << " days";
+
+        if (numberOfHours || numberOfDays)
+            html << int(numberOfHours) << " hours ";
+
+        html << int(numberOfMinutes) << " min " << int(numberOfSeconds) << " sec";
         html << "<hr>\n";
         
         html << "config_file: " << app().conf.config_file << "<br/>\n";
