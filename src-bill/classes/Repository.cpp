@@ -447,9 +447,19 @@ bool Repository::getNNPDestinationByNumberRange(set<int> &nnpDestinationIds, NNP
         getNNPPrefixsByNumberRange(nnpPrefixIds, nnpNumberRange->id, trace);
         fResult = getNNPDestinationsByPrefix(nnpDestinationIds, nnpPrefixIds, trace);
     }
+    if (trace != nullptr) {
 
-    for (auto it = nnpDestinationIds.begin(); it != nnpDestinationIds.end(); it++)
-        NNPDestination *nnpDestination = getNNPDestination(*it, trace);
+        *trace << "INFO|NNP|NNP DESTINATION SET (";
+        for (auto it = nnpDestinationIds.begin(); it != nnpDestinationIds.end(); it++) {
+            NNPDestination *nnpDestination = getNNPDestination(*it);
+            if (nnpDestination != nullptr) nnpDestination->dump(*trace);
+            *trace << " ";
+        }
+        *trace << ")\n";
+    }
+
+//    for (auto it = nnpDestinationIds.begin(); it != nnpDestinationIds.end(); it++)
+//        NNPDestination *nnpDestination = getNNPDestination(*it, trace);
 
     return fResult;
 }

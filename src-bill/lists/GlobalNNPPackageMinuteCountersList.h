@@ -13,7 +13,7 @@ protected:
            "   from billing.stats_nnp_package_minute " \
            "     where server_id<>" + server_id + " " \
            "     group by nnp_account_tariff_light_id,nnp_package_minute_id " \
-           "     order by nnp_account_tariff_light_id ";
+           "     order by nnp_account_tariff_light_id,nnp_package_minute_id ";
     }
 
     inline void parse_item(BDbResult &row, GlobalNNPPackageMinuteCounters *item) {
@@ -22,7 +22,7 @@ protected:
         item->used_seconds = row.get_i(2);
     }
 
-    struct key_client_id {
+    struct key_account_tariff_light_id {
         bool operator()(const GlobalNNPPackageMinuteCounters &left, int client_id) {
             return left.nnp_account_tariff_light_id < client_id;
         }
@@ -32,15 +32,33 @@ protected:
         }
     };
 
+    struct key_package_minute_id {
+        bool operator()(const GlobalNNPPackageMinuteCounters &left, int client_id) {
+            return left.nnp_package_minute_id < client_id;
+        }
+
+        bool operator()(int client_id, const GlobalNNPPackageMinuteCounters &right) {
+            return client_id < right.nnp_package_minute_id;
+        }
+    };
+
+
 public:
-    GlobalNNPPackageMinuteCounters *find(int client_id) {
+    int getGlobalCounter(int account_tariff_light_id, int package_minute_id) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
-            auto p = equal_range(begin, end, client_id, key_client_id());
+            auto p = equal_range(begin, end, account_tariff_light_id, key_account_tariff_light_id());
             begin = p.first;
             end = p.second;
         }
-        return begin < end ? &*begin : nullptr;
+        {
+            auto p = equal_range(begin, end, package_minute_id, key_package_minute_id());
+            begin = p.first;
+            end = p.second;
+        }
+
+        return begin < end ? begin->used_seconds : 0;
+
     }
 };

@@ -305,8 +305,9 @@ public:
         serviceNumber->findAllByClientID(resultServiceNumber, client_id, trace);
     }
 
-    void getNNPPackageMinuteByTariff(vector<NNPPackageMinute> &resultNNPPackageMinute, int nnp_tariff_id) {
-        nnpPackageMinute->findAllByTariffID(resultNNPPackageMinute, nnp_tariff_id, trace);
+    void getNNPPackageMinuteByTariff(vector<NNPPackageMinute> &resultNNPPackageMinute, int nnp_tariff_id,
+                                     double coefficient) {
+        nnpPackageMinute->findAllByTariffID(resultNNPPackageMinute, nnp_tariff_id, coefficient, trace);
     }
 
     NNPDestination *getNNPDestination(int id, stringstream *trace = nullptr) {

@@ -55,6 +55,6 @@ public:
     }
 
     void findAllByTariffID(vector<NNPPackageMinute> &resultNNPPackageMinute, int nnp_tariff_id,
-                           stringstream *trace = nullptr);
+                           double coefficient, stringstream *trace = nullptr);
 
 };

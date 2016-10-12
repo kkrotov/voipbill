@@ -260,7 +260,7 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
         for (auto it2 = nnpAccountTariffLight.begin(); it2 != nnpAccountTariffLight.end(); it2++) {
             if (it2->service_number_id == it->id) {
                 vector<NNPPackageMinute> nnpPackageMinute;
-                repository.getNNPPackageMinuteByTariff(nnpPackageMinute, it2->nnp_tariff_id);
+                repository.getNNPPackageMinuteByTariff(nnpPackageMinute, it2->nnp_tariff_id, 1);
 
                 if (nnpPackageMinute.size() > 0) {
                     html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
@@ -276,6 +276,9 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
                         int used_seconds = repository.billingData->statsNNPPackageMinuteGetUsedSeconds(
                                 it2->id, it3->id, time(nullptr));
 
+                        int global_used_seconds = repository.data->globalNNPPackageMinuteCounters.
+                                get()->getGlobalCounter(it2->id, it3->id);
+
                         html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                         html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                         html << "nnp_package_minute_id=<b>" << it3->id << "</b> ";
@@ -283,9 +286,11 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
                         html << nnpDestination->name << "</b>),";
                         html << "minutes in package=" << it3->minute << " ";
                         html << "(effective minutes=" << string_fmt("%.2f", it3->minute * it2->coefficient) << "), ";
-                        html << "used minutes=<b>" << string_fmt("%.2f", (double) used_seconds / 60.0) << "</b>,";
+                        html << "used minutes(local/global)=<b>" << string_fmt("%.2f", (double) used_seconds / 60.0)
+                        << "/" << string_fmt("%.2f", (double) global_used_seconds / 60.0) << "</b>,";
                         html << "left minutes=<b>" <<
-                        string_fmt("%.2f", it3->minute * it2->coefficient - (double) used_seconds / 60.0) <<
+                        string_fmt("%.2f", it3->minute * it2->coefficient - (double) used_seconds / 60.0 -
+                                           (double) global_used_seconds / 60.0) <<
                         "</b>";
                         html << "<br/>";
                     }
