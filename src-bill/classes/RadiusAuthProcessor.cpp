@@ -397,6 +397,9 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
     vector<Trunk *> termTrunks;
     repository.getAllAutoRoutingTrunks(termTrunks);
 
+    bool fUseMinimalki = false;
+    if (origTrunk != nullptr) { fUseMinimalki = origTrunk->sw_minimalki; }
+
     for (auto termTrunk : termTrunks) {
         if (!autoTrunkFilterSrcTrunk(termTrunk)) {
             if (trace != nullptr) {
@@ -433,7 +436,8 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
         repository.getTrunkSettingsOrderList(trunkSettingsOrderList, termTrunk, atoll(aNumber.c_str()),
                                              atoll(bNumber.c_str()), SERVICE_TRUNK_SETTINGS_TERMINATION);
 
-        repository.orderTermTrunkSettingsOrderList(trunkSettingsOrderList, origTrunk->sw_minimalki, time(nullptr));
+
+        repository.orderTermTrunkSettingsOrderList(trunkSettingsOrderList, fUseMinimalki, time(nullptr));
 
         for (auto termOrder : trunkSettingsOrderList) {
             if (
@@ -502,7 +506,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
         }
     }
 
-    repository.orderTermTrunkSettingsOrderList(termServiceTrunks, origTrunk->sw_minimalki, time(nullptr));
+    repository.orderTermTrunkSettingsOrderList(termServiceTrunks, fUseMinimalki, time(nullptr));
 }
 
 bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double *pBuyRate,
