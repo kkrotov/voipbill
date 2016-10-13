@@ -302,3 +302,351 @@ void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trun
         trunkSettingsOrderList.push_back(order);
     }
 }
+
+void Repository::findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPackagePricelistIds, int tariff_id,
+                                            long long int num, stringstream *trace) {
+
+    set<NNPPackagePricelist *> nnpPackagePricelistPtr;
+
+
+    nnpPackagePricelist->findPackagePricelistIds(nnpPackagePricelistPtr, tariff_id, num, trace);
+
+    for (auto item : nnpPackagePricelistPtr) {
+        NNPPackagePricelist *package = &*item;
+        PricelistPrice *pricelistPrice = getPrice(package->pricelist_id, num);
+        if (pricelistPrice != nullptr) {
+            double cost = pricelistPrice->price;
+
+            resultNNPPackagePricelistIds.insert(pair<double, int>(cost, package->id));
+
+            if (trace != nullptr) {
+                *trace << "FOUND|NNP PACKAGE PRICELIST|BY NNP_TARIFF_ID '" << tariff_id << "'" << "\n";
+                *trace << "||";
+                package->dump(*trace);
+                *trace << "\n";
+            }
+        }
+
+    }
+
+}
+
+Trunk *Repository::getServiceTrunk(int trunk_settings_id, ServiceTrunkSettings &trunkSettings) {
+    if (serviceTrunkSettings == nullptr)
+        return nullptr;
+
+    int settings_trunk_id = 0;
+    for (int i = 0; i < serviceTrunkSettings->size(); i++) {
+
+        ServiceTrunkSettings *settings = serviceTrunkSettings->get(i);
+        if (settings->id == trunk_settings_id) {
+
+            trunkSettings = *settings;
+            settings_trunk_id = settings->trunk_id;
+            break;
+        }
+    }
+    if (settings_trunk_id == 0)
+        return nullptr;
+
+    int trunk_id = 0;
+    for (int i = 0; i < serviceTrunk->size(); i++) {
+
+        ServiceTrunk *st = serviceTrunk->get(i);
+        if (st->id == settings_trunk_id) {
+
+            trunk_id = st->trunk_id;
+            break;
+        }
+    }
+    if (trunk_id == 0)
+        return nullptr;
+
+    return this->getTrunk(trunk_id);
+}
+
+Trunk *Repository::getTrunkByName(const char *trunk_name) {
+    Trunk *trunk = trunkByName->find(trunk_name, trace);
+    if (trunk != nullptr) {
+        return trunk;
+    }
+
+    trunk = trunkByAlias->find(trunk_name, trace);
+    if (trunk != nullptr) {
+        return trunk;
+    }
+
+    return nullptr;
+}
+
+double Repository::priceToRoubles(double price, const Pricelist &pricelist) const {
+    double currencyRate = 1.0;
+    if (this->getCurrencyRate(pricelist.currency_id, &currencyRate)
+        && currencyRate > 0.00000001) {
+        return price * currencyRate;
+    } else {
+        return price;
+    }
+}
+
+bool Repository::getCurrencyRate(const char *currency_id, double *o_currencyRate) const {
+    if (!currency_id || !o_currencyRate) {
+        throw Exception("Invalid arguments passed into getCurrencyRate()");
+    }
+
+    const CurrencyRate *rate = this->currencyRate->find(currency_id);
+    if (rate) {
+        *o_currencyRate = rate->rate;
+        return true;
+    } else {
+        // "Безопасный" курс - 1:1
+        *o_currencyRate = 1.0;
+        return false;
+    }
+}
+
+bool Repository::matchNumber(int number_id, long long int numberPrefix) {
+    char tmpNumber[20];
+    sprintf(tmpNumber, "%lld", numberPrefix);
+
+    auto number = getNumber(number_id);
+    if (number == nullptr) {
+        return false;
+    }
+
+    auto prefixlistIds = number->getPrefixlistIds();
+    for (auto it = prefixlistIds.begin(); it != prefixlistIds.end(); ++it) {
+        if (matchPrefixlist(*it, tmpNumber)) {
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+bool Repository::priceLessThan(double priceLeft, const Pricelist &pricelistLeft,
+                               double priceRight, const Pricelist &pricelistRight) const {
+    if (0 == strncmp(pricelistLeft.currency_id, pricelistRight.currency_id, 4)) {
+        return priceLeft < priceRight;
+    } else {
+        double leftRoubles = this->priceToRoubles(priceLeft, pricelistLeft);
+        double rightRoubles = this->priceToRoubles(priceRight, pricelistRight);
+        return leftRoubles < rightRoubles;
+    }
+}
+
+
+bool Repository::getNNPDestinationByNumberRange(set<int> &nnpDestinationIds, NNPNumberRange *nnpNumberRange,
+                                                stringstream *trace) {
+
+    bool fResult = false;
+
+    if (nnpNumberRange != nullptr) {
+        vector<int> nnpPrefixIds;
+        getNNPPrefixsByNumberRange(nnpPrefixIds, nnpNumberRange->id, trace);
+        fResult = getNNPDestinationsByPrefix(nnpDestinationIds, nnpPrefixIds, trace);
+    }
+    if (trace != nullptr) {
+
+        *trace << "INFO|NNP|NNP DESTINATION SET (";
+        for (auto it = nnpDestinationIds.begin(); it != nnpDestinationIds.end(); it++) {
+            NNPDestination *nnpDestination = getNNPDestination(*it);
+            if (nnpDestination != nullptr) nnpDestination->dump(*trace);
+            *trace << " ";
+        }
+        *trace << ")\n";
+    }
+
+//    for (auto it = nnpDestinationIds.begin(); it != nnpDestinationIds.end(); it++)
+//        NNPDestination *nnpDestination = getNNPDestination(*it, trace);
+
+    return fResult;
+}
+
+bool Repository::getNNPDestinationByNum(set<int> &nnpDestinationIds, long long int num, stringstream *trace) {
+    bool fResult = false;
+
+    NNPNumberRange *nnpNumberRange = getNNPNumberRange(num, trace);
+    fResult = getNNPDestinationByNumberRange(nnpDestinationIds, nnpNumberRange, trace);
+    if (trace != nullptr && !fResult) {
+        *trace << "NOT FOUND|NNPDestination|BY num '" << num << "'" << "\n";
+
+    }
+    return fResult;
+}
+
+void Repository::getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
+                                           long long int srcNumber, long long int dstNumber, int destinationType) {
+    vector<ServiceTrunk *> serviceTrunks;
+    getAllServiceTrunk(serviceTrunks, trunk->id);
+
+    if (serviceTrunks.size() == 0) {
+        if (trace != nullptr) {
+            *trace << "DEBUG|SERVICE TRUNK DECLINE|CAUSE SERVICE TRUNK NOT FOUND BY TRUNK " << trunk->name <<
+            " (" << trunk->id << ")" << "\n";
+        }
+        return;
+    }
+
+    for (auto serviceTrunk : serviceTrunks) {
+        vector<ServiceTrunkSettings *> trunkSettingsList;
+        getAllServiceTrunkSettings(trunkSettingsList, serviceTrunk->id, destinationType);
+
+        for (auto trunkSettings : trunkSettingsList) {
+            Pricelist *pricelist;
+            PricelistPrice *price;
+            if (checkTrunkSettingsConditions(trunkSettings, srcNumber, dstNumber, pricelist, price)) {
+                auto account = getAccount(serviceTrunk->client_account_id);
+                if (account == nullptr) {
+                    if (trace != nullptr) {
+                        *trace << "DEBUG|TRUNK SETTINGS SKIP|ACCOUNT NOT FOUND BY ID " <<
+                        serviceTrunk->client_account_id << "\n";
+                    }
+                    continue;
+                }
+                ServiceTrunkOrder order;
+                order.trunk = trunk;
+                order.account = account;
+                order.serviceTrunk = serviceTrunk;
+                order.trunkSettings = trunkSettings;
+                order.statsTrunkSettings = nullptr;
+                order.pricelist = pricelist;
+                order.price = price;
+                resultTrunkSettingsTrunkOrderList.push_back(order);
+            }
+        }
+
+    }
+
+    if (resultTrunkSettingsTrunkOrderList.size() > 0) {
+        if (trace != nullptr) {
+            *trace << "FOUND|TRUNK SETTING ORDER LIST|" << "\n";
+        }
+
+        for (auto order : resultTrunkSettingsTrunkOrderList) {
+            if (trace != nullptr) {
+                *trace << "||";
+                order.dump(*trace);
+                *trace << "\n";
+            }
+        }
+    } else {
+        if (trace != nullptr) {
+            *trace << "NOT FOUND|TRUNK SETTING ORDER LIST|" << "\n";
+        }
+    }
+}
+
+bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
+                                              long long int dstNumber, Pricelist *&pricelist, PricelistPrice *&price) {
+
+    if (trunkSettings->src_number_id > 0 && !matchNumber(trunkSettings->src_number_id, srcNumber)) {
+        if (trace != nullptr) {
+            *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY SRC NUMBER MATCHING, TRUNK_SETTINGS_ID: " <<
+            trunkSettings->id << " / " << trunkSettings->order << "\n";
+        }
+        return false;
+    }
+
+    if (trunkSettings->dst_number_id > 0 && !matchNumber(trunkSettings->dst_number_id, dstNumber)) {
+        if (trace != nullptr) {
+            *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY DST NUMBER MATCHING, TRUNK_SETTINGS_ID: " <<
+            trunkSettings->id << " / " << trunkSettings->order << "\n";
+        }
+        return false;
+    }
+
+    pricelist = getPricelist(trunkSettings->pricelist_id);
+    if (pricelist == nullptr) {
+        if (trace != nullptr) {
+            *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICELIST NOT FOUND BY ID: " << trunkSettings->pricelist_id <<
+            ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+        }
+        return false;
+    }
+
+    if (pricelist->local) {
+
+        auto networkPrefix = getNetworkPrefix(pricelist->local_network_config_id, dstNumber);
+        if (networkPrefix == nullptr) {
+            if (trace != nullptr) {
+                *trace << "DEBUG|TRUNK SETTINGS DECLINE|NETWORK PREFIX NOT FOUND BY local_network_config_id: " <<
+                pricelist->local_network_config_id << ", PRICELIST_ID: " << pricelist->id <<
+                ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << " / " << "\n";
+            }
+            return false;
+        }
+
+        price = getPrice(trunkSettings->pricelist_id, networkPrefix->network_type_id);
+        if (price == nullptr) {
+            if (trace != nullptr) {
+                *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICE NOT FOUND: PRICELIST_ID: " << pricelist->id <<
+                ", PREFIX: " << networkPrefix->network_type_id << ", TRUNK_SETTINGS_ID: " << trunkSettings->id <<
+                " / " << trunkSettings->order << "\n";
+            }
+            return false;
+        }
+
+
+    } else {
+
+        price = getPrice(trunkSettings->pricelist_id, dstNumber);
+        if (price == nullptr) {
+            if (trace != nullptr) {
+                *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICE NOT FOUND: PRICELIST_ID: " << pricelist->id <<
+                ", PREFIX: " << dstNumber << ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " <<
+                trunkSettings->order << "\n";
+            }
+            return false;
+        }
+
+    }
+
+    if (trace != nullptr) {
+        *trace << "DEBUG|TRUNK SETTINGS ACCEPT|TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " <<
+        trunkSettings->order << "\n";
+    }
+
+    return true;
+}
+
+bool Repository::trunkOrderLessThan(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) const {
+    if (left.price && left.pricelist && right.price && right.pricelist) {
+        return priceLessThan(left.price->price, *left.pricelist, right.price->price, *right.pricelist);
+    }
+
+    if (left.price && left.pricelist && (!right.price || !right.pricelist)) {
+        // Известная цена всегда строго меньше любой неизвестной цены.
+        return true;
+    }
+
+    if ((!left.price || !left.pricelist) && right.price && right.pricelist) {
+        // Неизвестная цена никогда не меньше любой известной цены.
+        return false;
+    }
+
+    // Если у обоих нет ценника, неважно, что вернуть - мы всё равно не сможем гарантировать стабильность сортировки
+    return false;
+}
+
+double Repository::getVatRate(Client *client) {
+    if (client != nullptr && !client->price_include_vat) {
+        auto org = organization->find(client->organization_id, time(nullptr));
+        if (org != nullptr) {
+            return org->vat_rate;
+        }
+    }
+    return 0;
+}
+
+bool Repository::matchPrefixlist(int prefixlist_id, char *prefix) {
+    auto prefixlist = getPrefixlist(prefixlist_id);
+    if (prefixlist == nullptr) {
+        return false;
+    }
+
+    auto prefixlistPrefix = getPrefixlistPrefix(prefixlist->id, prefix);
+    return prefixlistPrefix != nullptr;
+}
+

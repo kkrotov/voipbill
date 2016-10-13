@@ -59,7 +59,7 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
         processDestinations();          // в структуру call рассчитывается поля mob и destination_id
         // флаг звонка на мобильный и тип звонка (локал,внутризоновый, МГ, МН)
 
-        processNNP();                   // Расчитываем nnp-параметры для расчитываемого плеча.
+        processNNP();                   // Расчитываем nnp-параметры для плеча.
 
         if (callInfo->trunk->auth_by_number) {
             calcByNumber();             // Дальше производятся тарификация плеча по схеме "авторизация по номеру"
@@ -74,27 +74,7 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
     }
 }
 
-/********************************************************************************************************************
- *  Рачсчитываем nnp- параметры для пдеча вызова.
- */
 
-
-void BillingCall::processNNP() {
-    NNPNumberRange *nnpNumberRange;
-
-    if (call->orig) nnpNumberRange = repository->getNNPNumberRange(call->src_number, trace);
-    else nnpNumberRange = repository->getNNPNumberRange(call->dst_number, trace);
-
-    if (nnpNumberRange != nullptr) {
-        this->callInfo->nnpNumberRange = nnpNumberRange;
-        this->call->nnp_operator_id = nnpNumberRange->nnp_operator_id;
-        this->call->nnp_region_id = nnpNumberRange->nnp_region_id;
-        this->call->nnp_city_id = nnpNumberRange->nnp_city_id;
-        this->call->nnp_country_prefix = nnpNumberRange->country_prefix;
-        this->call->nnp_ndc = nnpNumberRange->ndc;
-        this->call->nnp_is_mob = nnpNumberRange->is_mob;
-    }
-}
 
 /********************************************************************************************************************
  *  Реализация тарификации плеча по схеме "авторизация по транку"
@@ -208,39 +188,58 @@ void BillingCall::calcByNumber() {
 
 void BillingCall::calcOrigByNumber() {
 
-    setupLogTariff(); //  присоединяется действующий LogTariff для вызова на org-плече
+    if (call->account_version == CALL_ACCOUNT_VERSION_5) {
+        // Обсчитываем плечо по пакетной схеме
+        if (trace != nullptr) {
+            *trace << "INFO|CALL_ACCOUNT_VERSION_5" << "\n";
+        }
 
-    setupMainTariff(); // присоединяется действующий локальный тариф для вызова на org-плече
-
-    setupBilledTime(); //  вычисляется тарифицируемая длительность звонка согласно настройкам
-    // (бесплатные секунды, тарификация по мин/по сек) действующего тарифа для оригинационного плеча.
-
-    setupPackagePricelist(); // поисх подходящего пакета для обсчета оригинационного плеча, если находим, используем его
-
-    if (callInfo->servicePackagePricelist == nullptr) { // Для плеча нет подходящего пакета,
-        // считаем цену по прайслистам
-
-        setupTariff();  //  Для расчитанного ранее типа звонка (моб не моб, тип зональности)
-        // в поле callInfo->tariff присоединяется действующий для этого случая тариф
+        calcOrigNNPByNumber();
 
 
-        setupPricelist(callInfo->tariff->pricelist_id); // присоединяем в callInfo->pricelist прайслист по pricelist_id
-        // при расчете с авторизацией по транку прайслист должен быть
-        // выбран ранее по коду
+    } else if (call->account_version == CALL_ACCOUNT_VERSION_4) {
+        // Обсчитываем плечо по традиционной схеме
+        if (trace != nullptr) {
+            *trace << "INFO|CALL_ACCOUNT_VERSION_4" << "\n";
+        }
 
-        setupPrice(call->dst_number);                   // Расчитываем по ранее выбранному прайслисту и B-номеру
-    } else {           // Для звонка найден подходящий пакет
-        setupPricelist();                               // присоединяем в callInfo->pricelist прайслист по pricelist_id
-        // при расчете с авторизацией по транку прайслист должен быть
-        // выбран ранее из пакета.
+        setupLogTariff(); //  присоединяется действующий LogTariff для вызова на org-плече
+        setupMainTariff(); // присоединяется действующий локальный тариф для вызова на org-плече
 
-        setupPrice();                                   //  Расчитываем по ранее выбранному прайслисту и
-        //  номера цену звонка на плече
+        setupBilledTime(); //  вычисляется тарифицируемая длительность звонка согласно настройкам
+        // (бесплатные секунды, тарификация по мин/по сек) действующего тарифа для оригинационного плеча.
+
+        setupPackagePricelist(); // поисх подходящего пакета для обсчета оригинационного плеча, если находим, используем его
+
+        if (callInfo->servicePackagePricelist == nullptr) { // Для плеча нет подходящего пакета,
+            // считаем цену по прайслистам
+
+            setupTariff();  //  Для расчитанного ранее типа звонка (моб не моб, тип зональности)
+            // в поле callInfo->tariff присоединяется действующий для этого случая тариф
+
+
+            setupPricelist(
+                    callInfo->tariff->pricelist_id); // присоединяем в callInfo->pricelist прайслист по pricelist_id
+            // при расчете с авторизацией по транку прайслист должен быть
+            // выбран ранее по коду
+
+            setupPrice(call->dst_number);                   // Расчитываем по ранее выбранному прайслисту и B-номеру
+        } else {           // Для звонка найден подходящий пакет
+            setupPricelist();                               // присоединяем в callInfo->pricelist прайслист по pricelist_id
+            // при расчете с авторизацией по транку прайслист должен быть
+            // выбран ранее из пакета.
+
+            setupPrice();                                   //  Расчитываем по ранее выбранному прайслисту и
+            //  номера цену звонка на плече
+        }
+
+        setupFreemin();  // Учитываем расход предоплаченных минут при локальных звонках
+
+        setupPackagePrepaid();
+
+    } else {
+        throw CalcException("UNKNOW ACCOUNT VERSION");
     }
-
-    setupFreemin();  // Учитываем расход предоплаченных минут при локальных звонках
-
-    setupPackagePrepaid();
 
     setupCost();                                        // Расчет стоимости плеча. С учетом остатка по найденому пакету
 }
@@ -842,6 +841,7 @@ void BillingCall::setupTariff() {
         throw CalcException("TARIFF NOT FOUND");
     }
 }
+
 
 /******************************************************************************************************************
  *   Поиск подходящего пакета для того, что бы тарифицировать им звонок.

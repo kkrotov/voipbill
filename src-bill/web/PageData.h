@@ -284,6 +284,13 @@ public:
             html << "</tr>\n";
         }
         {
+            auto dl = &repository.data->globalNNPPackageMinuteCounters;
+            html << "<tr><th>globalNNPPackageMinuteCounters</th>";
+            html << "<td>" << string_time(dl->time()) << "</td><td>" << dl->size() / 1024 << " Kb</td><td>" <<
+            dl->rows() << "</td><td>" << dl->timer.sloop() << "</td><td>" << dl->timer.sfull() << "</td>";
+            html << "</tr>\n";
+        }
+        {
             auto dl = &repository.data->activeCounter;
             html << "<tr><th>Active counter</th>";
             if (dl != 0) {

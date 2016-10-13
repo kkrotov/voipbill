@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./app_bill -c ./build/app_bill.conf
+./app_bill -c ./app_bill.conf

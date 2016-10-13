@@ -140,19 +140,20 @@ bool ThreadSyncCalls::copyCallsPart(string month, unsigned long limit) {
 
     try {
 
-#if 1
         BDb::copy("calls_raw.calls_raw_" + suffix,
                   "",
                   " id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, "\
                 " src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id,"\
                 " service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix,"\
-                " nnp_operator_id, nnp_region_id, nnp_city_id, nnp_country_prefix, nnp_ndc, nnp_is_mob, trunk_group_id,"\
+                " nnp_operator_id, nnp_region_id, nnp_city_id, nnp_country_prefix, nnp_ndc, nnp_is_mob, "\
+                " nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id,  "
                 " geo_id, geo_operator_id, mob, geo_mob, server_id, disconnect_cause, account_version, stats_nnp_package_minute_id",
 
                   " select id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id,"\
                 " src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id,"\
                 " service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix,"\
-                " nnp_operator_id, nnp_region_id, nnp_city_id, nnp_country_prefix, nnp_ndc, nnp_is_mob, trunk_group_id,"\
+                " nnp_operator_id, nnp_region_id, nnp_city_id, nnp_country_prefix, nnp_ndc, nnp_is_mob, "\
+                " nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id,  "
                 " geo_id, geo_operator_id, mob, geo_mob, " + app().conf.str_instance_id +
                   ", disconnect_cause, account_version, stats_nnp_package_minute_id  " \
 
@@ -160,57 +161,7 @@ bool ThreadSyncCalls::copyCallsPart(string month, unsigned long limit) {
                   "   where id>" + lexical_cast<string>(central_id) +
                   "   order by id limit " + lexical_cast<string>(limit),
                   &db_calls, &db_main);
-#else
-        // использование dblink для копирования данных в центральную БД
-        // требует сетевую доступность источника данных (БД на региональном сервере) со стороны центральной базы.
-        // записи в app_bill.conf типа "calls = host=localhost" не прокатывают
-        string field_names ="server_id,id,orig,peer_id,cdr_id,connect_time,trunk_id,account_id,trunk_service_id,number_service_id,src_number,dst_number,billed_time,rate,"
-                "cost,tax_cost,interconnect_rate,interconnect_cost,service_package_id,service_package_stats_id,package_time,package_credit,destination_id,pricelist_id,prefix,"
-                "geo_id,geo_operator_id,mob,operator_id,geo_mob,our,trunk_settings_stats_id,disconnect_cause,account_version,stats_nnp_package_minute_id";
 
-        string field_types = "server_id integer,"
-                "  id bigint,"
-                "  orig boolean,"
-                "  peer_id bigint,"
-                "  cdr_id bigint,"
-                "  connect_time timestamp,"
-                "  trunk_id integer,"
-                "  account_id integer,"
-                "  trunk_service_id integer,"
-                "  number_service_id integer,"
-                "  src_number bigint,"
-                "  dst_number bigint,"
-                "  billed_time integer,"
-                "  rate double precision,"
-                "  cost double precision,"
-                "  tax_cost double precision,"
-                "  interconnect_rate double precision,"
-                "  interconnect_cost double precision,"
-                "  service_package_id integer,"
-                "  service_package_stats_id integer,"
-                "  package_time integer,"
-                "  package_credit double precision,"
-                "  destination_id integer,"
-                "  pricelist_id integer,"
-                "  prefix bigint,"
-                "  geo_id integer,"
-                "  geo_operator_id integer,"
-                "  mob boolean,"
-                "  operator_id integer,"
-                "  geo_mob boolean,"
-                "  our boolean,"
-                "  trunk_settings_stats_id integer,"
-                "  disconnect_cause smallint,"
-                "  account_version integer,"
-                "  stats_nnp_package_minute_id integer";
-
-        string select = "select "+ app().conf.str_instance_id + ", id,orig,peer_id,cdr_id,connect_time,trunk_id,account_id,trunk_service_id,number_service_id,src_number,dst_number,billed_time,rate,"
-                "cost,tax_cost,interconnect_rate,interconnect_cost,service_package_id,service_package_stats_id,package_time,package_credit,destination_id,pricelist_id,prefix,"
-                "geo_id,geo_operator_id,mob,operator_id,geo_mob,our,trunk_settings_stats_id,disconnect_cause,account_version,stats_nnp_package_minute_id "
-                "from " + relname + " where id>" + lexical_cast<string>(central_id) + " order by id limit " + lexical_cast<string>(limit);
-
-        BDb::copy_dblink("calls_raw.calls_raw", field_names, field_types, select, &db_calls, &db_main);
-#endif
     }
     catch (Exception e) {
 

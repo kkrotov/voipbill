@@ -81,7 +81,7 @@ public:
             html << "<th nowrap rowspan=2>rate/cost</th>\n";
 
             html << "<th nowrap rowspan=2>trunk</th>\n";
-            html << "<th nowrap rowspan=2>account</th>\n";
+            html << "<th nowrap rowspan=2>account/ver</th>\n";
             html << "<th nowrap rowspan=2>service</th>\n";
             html << "<th nowrap rowspan=2>pricelist</th>\n";
             html << "<th nowrap rowspan=2>prefix/dest/geo_id</th>\n";
@@ -143,7 +143,7 @@ public:
                 html << "<td nowrap class=orig>" << callOrig->rate << "/" << callOrig->cost << "</td>\n";
                 html << "<td nowrap class=orig>" << callOrig->trunk_id << "</td>\n";
                 html << "<td nowrap><a class=orig href='/client?id=" << callOrig->account_id << "'>" <<
-                callOrig->account_id << "</a></td>\n";
+                callOrig->account_id << "</a>/" << callOrig->account_version << "</td>\n";
                 html << "<td nowrap class=orig>" << origService << "</td>\n";
                 html << "<td nowrap class=orig>" << callOrig->pricelist_id << "</td>\n";
                 html << "<td nowrap class=orig>" << callOrig->prefix << "/" << callOrig->destination_id <<
@@ -185,7 +185,7 @@ public:
                 html << "<td nowrap class=term>" << callTerm->rate << "/" << callTerm->cost << "</td>\n";
                 html << "<td nowrap class=term>" << callTerm->trunk_id << "</td>\n";
                 html << "<td nowrap><a class=term href='/client?id=" << callTerm->account_id << "'>" <<
-                callTerm->account_id << "</a></td>\n";
+                callTerm->account_id << "</a>/" << callOrig->account_version << "</td>\n";
                 html << "<td nowrap class=term>" << termService << "</td>\n";
                 html << "<td nowrap class=term>" << callTerm->pricelist_id << "</td>\n";
 

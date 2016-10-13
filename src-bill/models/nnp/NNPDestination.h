@@ -9,7 +9,7 @@ struct NNPDestination {
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
-        trace << "name: " << name << ", ";
+        trace << "name: " << name << "";
         trace << ")";
     }
 };

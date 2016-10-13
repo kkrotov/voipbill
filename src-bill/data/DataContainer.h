@@ -41,6 +41,7 @@
 #include "TariffPackageData.h"
 #include "TariffChangeLogData.h"
 #include "GlobalCountersData.h"
+#include "GlobalNNPPackageMinuteCountersData.h"
 #include "StatDestinationPrefixlistsData.h"
 #include "StatPrefixlistData.h"
 #include "ActiveCounterData.h"
@@ -101,6 +102,8 @@ public:
     TariffPackageData tariffPackage;
     TariffChangeLogData tariffChangeLog;
     GlobalCountersData globalCounters;
+    GlobalNNPPackageMinuteCountersData globalNNPPackageMinuteCounters;
+
     StatDestinationPrefixlistsData statDestinationPrefixlists;
     StatPrefixlistData statPrefixlist;
     ActiveCounterData activeCounter;

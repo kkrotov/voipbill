@@ -9,7 +9,7 @@ protected:
 
     string sql(BDb *db) {
         return "select id,tariff_id,destination_id,price " \
-            "   from nnp.package_price order by id";
+            "   from nnp.package_price order by tariff_id";
     }
 
     inline void parse_item(BDbResult &row, NNPPackagePrice *item) {
@@ -19,38 +19,48 @@ protected:
         item->price = row.get_d(3);
     }
 
-    struct key_id {
-        bool operator()(const NNPPackagePrice &left, int id) {
-            return left.id < id;
+
+    struct key_tariff_id {
+        bool operator()(const NNPPackagePrice &left, int tariff_id) {
+            return left.nnp_tariff_id < tariff_id;
         }
 
-        bool operator()(int id, const NNPPackagePrice &right) {
-            return id < right.id;
+        bool operator()(int tariff_id, const NNPPackagePrice &right) {
+            return tariff_id < right.nnp_tariff_id;
         }
     };
 
 public:
-    NNPPackagePrice *find(int id, stringstream *trace = nullptr) {
+
+    void findPackagePriceIds(set<pair<double, int>> &resultNNPPackagePriceIds, int tariff_id,
+                             set<int> &nnpDestinationIds,
+                             stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
-            auto p = equal_range(begin, end, id, key_id());
+            auto p = equal_range(begin, end, tariff_id, key_tariff_id());
             begin = p.first;
             end = p.second;
         }
-        NNPPackagePrice *result = begin < end ? &*begin : nullptr;
 
-        if (trace != nullptr) {
-            if (result != nullptr) {
-                *trace << "FOUND|NNPPackagePrice|BY ID '" << id << "'" << "\n";
-                *trace << "||";
-                result->dump(*trace);
-                *trace << "\n";
-            } else {
-                *trace << "NOT FOUND|NNPPackagePrice|BY ID '" << id << "'" << "\n";
+        if (begin < end) {
+            for (auto it = begin; it != end; ++it) {
+                NNPPackagePrice *package = &*it;
+                if (nnpDestinationIds.count(package->nnp_destination_id) > 0) {
+                    resultNNPPackagePriceIds.insert(pair<double, int>(package->price, package->id));
+
+                    if (trace != nullptr) {
+                        *trace << "FOUND|NNP PACKAGE PRICE|BY NNP_TARIFF_ID '" << tariff_id << "'" << "\n";
+                        *trace << "||";
+                        package->dump(*trace);
+                        *trace << "\n";
+                    }
+                }
+            }
+        } else {
+            if (trace != nullptr) {
+                *trace << "NOT FOUND|NNP PACKAGE PRICE|BY NNP_TARIFF_ID '" << tariff_id << "'" << "\n";
             }
         }
-
-        return result;
     }
 };
