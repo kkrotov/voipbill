@@ -247,8 +247,6 @@ bool Repository::prepare(time_t currentTime) {
 void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, bool fUseMinimalki,
                                                  time_t connect_time) const {
 
-    if (fUseMinimalki) {
-
         vector<ServiceTrunkOrder> trunkSettingsOrderFreeList;
         vector<ServiceTrunkOrder> trunkSettingsOrderPayList;
 
@@ -265,7 +263,7 @@ void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trun
 
             if (!isAcceptedTrunk) continue;
 
-            if (order.trunkSettings->minimum_minutes > 0) {
+            if (order.trunkSettings->minimum_minutes > 0 && fUseMinimalki) {
                 if (order.statsTrunkSettings->used_seconds < order.trunkSettings->minimum_minutes * 60) {
                     trunkSettingsOrderFreeList.push_back(order);
                     if (trace != nullptr) {
@@ -277,7 +275,7 @@ void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trun
                 }
             }
 
-            if (order.trunkSettings->minimum_cost > 0) {
+            if (order.trunkSettings->minimum_cost > 0 && fUseMinimalki) {
                 if (order.statsTrunkSettings->used_credit <= order.trunkSettings->minimum_cost) {
                     trunkSettingsOrderFreeList.push_back(order);
                     if (trace != nullptr) {
@@ -304,8 +302,6 @@ void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trun
         for (auto order : trunkSettingsOrderPayList) {
             trunkSettingsOrderList.push_back(order);
         }
-    } else
-        sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
 
 }
 
