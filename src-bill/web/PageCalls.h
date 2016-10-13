@@ -185,7 +185,7 @@ public:
                 html << "<td nowrap class=term>" << callTerm->rate << "/" << callTerm->cost << "</td>\n";
                 html << "<td nowrap class=term>" << callTerm->trunk_id << "</td>\n";
                 html << "<td nowrap><a class=term href='/client?id=" << callTerm->account_id << "'>" <<
-                callTerm->account_id << "</a>/" << callOrig->account_version << "</td>\n";
+                callTerm->account_id << "</a>/" << callTerm->account_version << "</td>\n";
                 html << "<td nowrap class=term>" << termService << "</td>\n";
                 html << "<td nowrap class=term>" << callTerm->pricelist_id << "</td>\n";
 
