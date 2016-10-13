@@ -1,6 +1,6 @@
 
 char const * build_date() {
-    return __DATE__;
+    return _DATECOMPILED_;
 }
 
 char const * build_time() {
