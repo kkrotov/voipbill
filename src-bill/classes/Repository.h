@@ -286,7 +286,8 @@ public:
         sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
     }
 
-    void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, time_t connect_time) const;
+    void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, bool fUseMinimalki,
+                                         time_t connect_time) const;
 
     bool checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
                                       long long int dstNumber, Pricelist *&pricelist, PricelistPrice *&price);

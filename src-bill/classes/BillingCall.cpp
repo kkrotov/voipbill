@@ -618,8 +618,14 @@ void BillingCall::setupEffectiveTermTrunkSettings() {
                                           SERVICE_TRUNK_SETTINGS_TERMINATION);
     // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
 
-    // отсортировали по цене
-    repository->orderTermTrunkSettingsOrderList(trunkSettingsOrderList, call->connect_time);
+    Trunk *orig_trunk = repository->getTrunkByName(cdr->src_route);
+    if (orig_trunk == nullptr) {
+        throw CalcException("ORIG TRUNK WAS NOT FOUND");
+    }
+
+    // отсортировали по цене, причем применили настройку на оригинационном плече - использовать или нет минималки на терм-плече
+
+    repository->orderTermTrunkSettingsOrderList(trunkSettingsOrderList, orig_trunk->sw_minimalki, call->connect_time);
 
     if (trunkSettingsOrderList.size() > 0) {
         auto order = trunkSettingsOrderList.at(0);
