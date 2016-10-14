@@ -608,12 +608,21 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
 
 void RadiusAuthProcessor::processRouteCaseOutcome(Outcome *outcome) {
     auto routeCase = repository.getRouteCase(outcome->route_case_id);
+    auto routeCase1 = repository.getRouteCase(outcome->route_case_1_id);
+    auto routeCase2 = repository.getRouteCase(outcome->route_case_2_id);
+
+
     if (routeCase == nullptr) {
         throw Exception("Route case #" + lexical_cast<string>(outcome->route_case_id) + " not found",
                         "RadiusAuthProcessor::processRouteCaseOutcome");
     }
 
-    response->setRouteCase(routeCase->name);
+    string sRouteCase = routeCase->name;
+
+    if (routeCase1 != nullptr) sRouteCase += string(",") + routeCase1->name;
+    if (routeCase2 != nullptr) sRouteCase += string(",") + routeCase2->name;
+
+    response->setRouteCase(sRouteCase);
 
     if (outcome->calling_station_id[0] != 0) {
         response->srcNumber = outcome->calling_station_id;

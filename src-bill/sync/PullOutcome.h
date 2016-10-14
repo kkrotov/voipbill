@@ -18,6 +18,8 @@ public:
         fields.push_back("called_station_id");
         fields.push_back("type_id");
         fields.push_back("route_case_id");
+        fields.push_back("route_case_1_id");
+        fields.push_back("route_case_2_id");
         fields.push_back("release_reason_id");
         fields.push_back("airp_id");
 
@@ -28,6 +30,8 @@ public:
         datatype.push_back("called_station_id character varying(20)");
         datatype.push_back("type_id integer");
         datatype.push_back("route_case_id integer");
+        datatype.push_back("route_case_1_id integer");
+        datatype.push_back("route_case_2_id integer");
         datatype.push_back("release_reason_id integer");
         datatype.push_back("airp_id integer");
     }
