@@ -363,11 +363,16 @@ bool RadiusAuthProcessor::processAutoOutcome(double *pBuyRate, Pricelist **pFirs
     ServiceTrunkSettings *origSettings = nullptr;
     getAvailableOrigServiceTrunk(&origServiceTrunk, &origPricelist, &origPrice, &origSettings);
 
+    bool fUseMinimalki = false;
+
+    Trunk *orig_trunk = repository.getTrunk(origServiceTrunk->trunk_id);
+    if (orig_trunk != nullptr) fUseMinimalki = orig_trunk->sw_minimalki;
+
 
     vector<ServiceTrunkOrder> termServiceTrunks;
-    getAvailableTermServiceTrunk(termServiceTrunks, origPricelist, origPrice, origSettings);
+    getAvailableTermServiceTrunk(termServiceTrunks, origPricelist, origPrice, origSettings, fUseMinimalki);
 
-    double origRub = (origPrice!= nullptr)? this->repository.priceToRoubles(origPrice->price, *origPricelist):0;
+    double origRub = (origPrice != nullptr) ? this->repository.priceToRoubles(origPrice->price, *origPricelist) : 0;
     return processAutoRouteResponse(termServiceTrunks, pBuyRate, pFirstBuyPricelist, origRub);
 }
 
@@ -393,12 +398,13 @@ void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk **origServic
 
 void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks,
                                                        Pricelist *origPricelist, PricelistPrice *origPrice,
-                                                       ServiceTrunkSettings *origSettings) {
+                                                       ServiceTrunkSettings *origSettings, bool fUseMinimalki) {
     vector<Trunk *> termTrunks;
     repository.getAllAutoRoutingTrunks(termTrunks);
 
-    bool fUseMinimalki = false;
-    if (origTrunk != nullptr) { fUseMinimalki = origTrunk->sw_minimalki; }
+    if (trace != nullptr) {
+        *trace << "INFO| USE_MINIMALKI |  " << (fUseMinimalki ? "yes" : "no") << "" << "\n";
+    }
 
     for (auto termTrunk : termTrunks) {
         if (!autoTrunkFilterSrcTrunk(termTrunk)) {
