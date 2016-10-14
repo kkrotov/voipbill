@@ -19,6 +19,7 @@ struct Trunk {
     bool orig_redirect_number;
     bool term_redirect_number;
     int capacity;
+    bool sw_minimalki;
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -36,6 +37,8 @@ struct Trunk {
         trace << "orig_redirect_number_7800: " << orig_redirect_number_7800 << ", ";
         trace << "orig_redirect_number: " << orig_redirect_number << ", ";
         trace << "term_redirect_number: " << term_redirect_number << ", ";
+            trace << "capacity: " << capacity << ", ";
+            trace << "sw_minimalki: " << sw_minimalki << ", ";
         trace << ")";
     }
 };

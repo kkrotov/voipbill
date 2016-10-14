@@ -244,63 +244,65 @@ bool Repository::prepare(time_t currentTime) {
     return true;
 }
 
-void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList,
+void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, bool fUseMinimalki,
                                                  time_t connect_time) const {
 
-    vector<ServiceTrunkOrder> trunkSettingsOrderFreeList;
-    vector<ServiceTrunkOrder> trunkSettingsOrderPayList;
+        vector<ServiceTrunkOrder> trunkSettingsOrderFreeList;
+        vector<ServiceTrunkOrder> trunkSettingsOrderPayList;
 
-    for (auto order : trunkSettingsOrderList) {
-        order.statsTrunkSettings = billingData->statsTrunkSettingsGetCurrent(connect_time, order.account,
-                                                                             order.trunkSettings);
+        for (auto order : trunkSettingsOrderList) {
+            order.statsTrunkSettings = billingData->statsTrunkSettingsGetCurrent(connect_time, order.account,
+                                                                                 order.trunkSettings);
 
-        bool isAcceptedTrunk = false;
+            bool isAcceptedTrunk = false;
 
-        for (auto accepted_order : trunkSettingsOrderList)
-            if (accepted_order.trunkSettings->id == order.trunkSettings->id) {
-                isAcceptedTrunk = true;
-            }
-
-        if (!isAcceptedTrunk) continue;
-
-        if (order.trunkSettings->minimum_minutes > 0) {
-            if (order.statsTrunkSettings->used_seconds < order.trunkSettings->minimum_minutes * 60) {
-                trunkSettingsOrderFreeList.push_back(order);
-                if (trace != nullptr) {
-                    *trace << "DEBUG|TRUNK SETTINGS ORDER LIST|TRUNK_SETTINGS_ID: " << order.trunkSettings->id
-                    << " / used_seconds  = " << order.statsTrunkSettings->used_seconds
-                    << " / minimum_minutes * 60 = " << order.trunkSettings->minimum_minutes * 60 << "\n";
+            for (auto accepted_order : trunkSettingsOrderList)
+                if (accepted_order.trunkSettings->id == order.trunkSettings->id) {
+                    isAcceptedTrunk = true;
                 }
-                continue;
+
+            if (!isAcceptedTrunk) continue;
+
+            if (order.trunkSettings->minimum_minutes > 0 && fUseMinimalki) {
+                if (order.statsTrunkSettings->used_seconds < order.trunkSettings->minimum_minutes * 60) {
+                    trunkSettingsOrderFreeList.push_back(order);
+                    if (trace != nullptr) {
+                        *trace << "DEBUG|TRUNK SETTINGS ORDER LIST|TRUNK_SETTINGS_ID: " << order.trunkSettings->id
+                        << " / used_seconds  = " << order.statsTrunkSettings->used_seconds
+                        << " / minimum_minutes * 60 = " << order.trunkSettings->minimum_minutes * 60 << "\n";
+                    }
+                    continue;
+                }
             }
+
+            if (order.trunkSettings->minimum_cost > 0 && fUseMinimalki) {
+                if (order.statsTrunkSettings->used_credit <= order.trunkSettings->minimum_cost) {
+                    trunkSettingsOrderFreeList.push_back(order);
+                    if (trace != nullptr) {
+                        *trace << "DEBUG|TRUNK SETTINGS ORDER LIST|TRUNK_SETTINGS_ID: " << order.trunkSettings->id
+                        << " / used_credit = " << order.statsTrunkSettings->used_credit
+                        << " / minimum_cost = " << order.trunkSettings->minimum_cost << "\n";
+                    }
+                    continue;
+                }
+            }
+            trunkSettingsOrderPayList.push_back(order);
         }
 
-        if (order.trunkSettings->minimum_cost > 0) {
-            if (order.statsTrunkSettings->used_credit <= order.trunkSettings->minimum_cost) {
-                trunkSettingsOrderFreeList.push_back(order);
-                if (trace != nullptr) {
-                    *trace << "DEBUG|TRUNK SETTINGS ORDER LIST|TRUNK_SETTINGS_ID: " << order.trunkSettings->id
-                    << " / used_credit = " << order.statsTrunkSettings->used_credit
-                    << " / minimum_cost = " << order.trunkSettings->minimum_cost << "\n";
-                }
-                continue;
-            }
+        sort(trunkSettingsOrderFreeList.begin(), trunkSettingsOrderFreeList.end(),
+             trunk_settings_order_asc_price(*this));
+        sort(trunkSettingsOrderPayList.begin(), trunkSettingsOrderPayList.end(), trunk_settings_order_asc_price(*this));
+
+        trunkSettingsOrderList.clear();
+
+        for (auto order : trunkSettingsOrderFreeList) {
+            trunkSettingsOrderList.push_back(order);
         }
-        trunkSettingsOrderPayList.push_back(order);
-    }
 
-    sort(trunkSettingsOrderFreeList.begin(), trunkSettingsOrderFreeList.end(), trunk_settings_order_asc_price(*this));
-    sort(trunkSettingsOrderPayList.begin(), trunkSettingsOrderPayList.end(), trunk_settings_order_asc_price(*this));
+        for (auto order : trunkSettingsOrderPayList) {
+            trunkSettingsOrderList.push_back(order);
+        }
 
-    trunkSettingsOrderList.clear();
-
-    for (auto order : trunkSettingsOrderFreeList) {
-        trunkSettingsOrderList.push_back(order);
-    }
-
-    for (auto order : trunkSettingsOrderPayList) {
-        trunkSettingsOrderList.push_back(order);
-    }
 }
 
 void Repository::findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPackagePricelistIds, int tariff_id,
