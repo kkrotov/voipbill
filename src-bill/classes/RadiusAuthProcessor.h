@@ -72,7 +72,8 @@ private:
                                       PricelistPrice **origPrice, ServiceTrunkSettings **origSettings);
 
     void getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks, Pricelist *origPricelist,
-                                      PricelistPrice *origPrice, ServiceTrunkSettings *origSettings);
+                                      PricelistPrice *origPrice, ServiceTrunkSettings *origSettings,
+                                      bool fUseMinimalki);
 
     bool processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double *pBuyRate = 0,
                                   Pricelist **pFirstBuyPricelist = 0, double origRub = 0);
