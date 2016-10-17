@@ -10,10 +10,12 @@ public:
     int num_of_incoming,
         num_of_outgoing,
         capacity;
-    double incoming_cost,
+    double incoming_rate,
+        outgoing_rate,
+        incoming_cost,
         outgoing_cost;
 
-    TrunkIoParams (string name, bool incoming, double cost) {
+    TrunkIoParams (string name, bool incoming, double cost, double rate) {
 
         this->trunk_name = name;
         if (incoming) {
@@ -21,14 +23,18 @@ public:
             this->num_of_outgoing = 0;
             this->num_of_incoming = 1;
             incoming_cost = cost;
+            incoming_rate = rate;
             outgoing_cost = 0;
+            outgoing_rate = 0;
         }
         else {
 
             this->num_of_outgoing = 1;
             this->num_of_incoming = 0;
             incoming_cost = 0;
+            incoming_rate = 0;
             outgoing_cost = cost;
+            outgoing_rate = rate;
         }
     }
     void setCapacity(int capacity) {this->capacity=capacity;};
@@ -39,7 +45,7 @@ class ActiveTrunks {
 
     vector<TrunkIoParams> trunkIoParams;
 
-    void add (string name, bool incoming, double cost) {
+    void add (string name, bool incoming, double cost, double rate) {
 
         for (TrunkIoParams &trunk: trunkIoParams) {
 
@@ -58,7 +64,7 @@ class ActiveTrunks {
                 return;
             }
         }
-        trunkIoParams.push_back(TrunkIoParams(name, incoming, cost));
+        trunkIoParams.push_back(TrunkIoParams(name, incoming, cost, rate));
     }
 
 public:
@@ -74,16 +80,18 @@ public:
         for (size_t i = 0; i < cdrList->size(); i++) {
 
             Cdr *cdr = cdrList->get(i);
-            double orig_cost=0, term_cost=0;
+            double orig_cost=0, term_cost=0, orig_rate=0, term_rate=0;
             if (fullMode) {
 
                 Call *callOrig = &calls->at(i * 2);
                 orig_cost = callOrig->cost;
+                orig_rate = callOrig->rate;
                 Call *callTerm = &calls->at(i * 2 + 1);
                 term_cost = callTerm->cost;
+                term_rate = callTerm->rate;
             }
-            add(cdr->src_route, true, orig_cost);
-            add(cdr->dst_route, false, term_cost);
+            add(cdr->src_route, true, orig_cost, orig_rate);
+            add(cdr->dst_route, false, term_cost, term_rate);
         }
         for (size_t i = 0; i < this->trunkIoParams.size(); i++) {
 
@@ -247,25 +255,33 @@ public:
         else
             html << "<th nowrap><a href='/trunks?sort=2&order=0'>incoming count</a></th>";
 
-        if (fullMode)
+        if (fullMode) {
+
             html << "<th nowrap>incoming cost</th>";
+            html << "<th nowrap>incoming rate</th>";
+        }
 
         if (sort_col_num==4)
             html << "<th nowrap><a href='/trunks?sort=4&order="+order+"'>outgoing count</a></th>";
         else
             html << "<th nowrap><a href='/trunks?sort=4&order=0'>outgoing count</a></th>";
 
-        if (fullMode)
+        if (fullMode) {
+
             html << "<th nowrap>outgoing cost</th>";
+            html << "<th nowrap>outgoing rate</th>";
+        }
 
         if (sort_col_num==6)
             html << "<th nowrap><a href='/trunks?sort=6&order="+order+"'>total count</a></th>";
         else
             html << "<th nowrap><a href='/trunks?sort=6&order=0'>total count</a></th>";
 
-        if (fullMode)
-            html << "<th nowrap>total cost</th>";
+        if (fullMode) {
 
+            html << "<th nowrap>total cost</th>";
+            html << "<th nowrap>average rate</th>";
+        }
         if (sort_col_num==8)
             html << "<th nowrap><a href='/trunks?sort=8&order="+order+"'>load</a></th>";
         else
@@ -288,21 +304,30 @@ public:
             else
                 html << "<td nowrap>" << trunkParam.num_of_incoming << "</td>\n";
 
-            if (fullMode)
+            if (fullMode) {
+
                 html << "<td nowrap>" << trunkParam.incoming_cost << "</td>\n";
+                html << "<td nowrap>" << trunkParam.incoming_rate << "</td>\n";
+            }
 
             if (trunkParam.num_of_outgoing>0)
                 html << "<td nowrap><a class=term href='/calls?trunkname=" << trunkParam.trunk_name << "&dest=out' style=\"text-decoration: none\">" << trunkParam.num_of_outgoing << "</a></td>\n";
             else
                 html << "<td nowrap>" << trunkParam.num_of_outgoing << "</td>\n";
 
-            if (fullMode)
+            if (fullMode) {
+
                 html << "<td nowrap>" << trunkParam.outgoing_cost << "</td>\n";
+                html << "<td nowrap>" << trunkParam.outgoing_rate << "</td>\n";
+            }
 
             html << "<td nowrap><a class=orig href='/calls?trunkname=" << trunkParam.trunk_name << "' style=\"text-decoration: none\">" << trunkParam.num_of_incoming+trunkParam.num_of_outgoing << "</a></td>\n";
-            if (fullMode)
-                html << "<td nowrap>" << trunkParam.incoming_cost+trunkParam.outgoing_cost << "</td>\n";
+            if (fullMode) {
 
+                html << "<td nowrap>" << trunkParam.incoming_cost + trunkParam.outgoing_cost << "</td>\n";
+                double average_rate = (trunkParam.incoming_rate*trunkParam.num_of_incoming + trunkParam.outgoing_rate*trunkParam.num_of_outgoing)/(trunkParam.num_of_incoming+trunkParam.num_of_outgoing);
+                html << "<td nowrap>" << average_rate << "</td>\n";
+            }
             html << "<td nowrap>" <<  trunkParam.getLoad() << "%</td>\n";
 
             html << "</tr>\n";
