@@ -484,13 +484,20 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
 
                             if (trunkMargin < origSettings->minimum_margin) {
                                 if (trace != nullptr) {
-                                    *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE MIN MARGIN: " << termTrunk->name <<
+                                    *trace << "INFO|TRUNK MARGIN DECLINE|CAUSE MIN MARGIN: " << termTrunk->name <<
                                     " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: " << termOrder.serviceTrunk->id
                                     << ", MIN MARGIN: " << origSettings->minimum_margin << ", TRUNK MARGIN: " <<
-                                    trunkMargin << "\n";
+                                    trunkMargin << ", ORIGRUB:" << origRub << ", TERMRUB:" << termRub << "\n";
                                 }
 
                                 continue;
+                            } else {
+                                if (trace != nullptr) {
+                                    *trace << "INFO|TRUNK MARGIN ACCEPT|CAUSE MIN MARGIN: " << termTrunk->name <<
+                                    " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: " << termOrder.serviceTrunk->id
+                                    << ", MIN MARGIN: " << origSettings->minimum_margin << ", TRUNK MARGIN: " <<
+                                    trunkMargin << ", ORIGRUB:" << origRub << ", TERMRUB:" << termRub << "\n";
+                                }
                             }
                         }
                     } else {
