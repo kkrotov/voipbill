@@ -65,7 +65,7 @@ public:
         html << "<tr>";
         html << "<td style='text-align: left' nowrap>last sync central cdr unfinished id:</td>";
         html << "<td style='text-align: left' nowrap>" << billingData->lastSyncCentralCdrUnfinishedId << "<br/>";
-        html << "<td style='text-align: left' nowrap>last sync central cdr time:</td>";
+        html << "<td style='text-align: left' nowrap>last sync central cdr unfinished time:</td>";
         html << "<td style='text-align: left' nowrap>" << string_time(billingData->lastSyncCentralCdrUnfinishedTime) << "<br/>";
         html << "</tr>\n";
         html << "</table>\n";

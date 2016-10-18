@@ -19,7 +19,7 @@ ThreadSyncCdrs::ThreadSyncCdrs() {
 
 void ThreadSyncCdrs::run() {
 
-    unique_lock<mutex> lock(repository.billingData->syncCallsCentralLock, try_to_lock);
+    unique_lock<mutex> lock(repository.billingData->syncCdrsCentralLock, try_to_lock);
     if (!lock.owns_lock()) {
         return;
     }
