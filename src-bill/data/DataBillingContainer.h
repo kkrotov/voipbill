@@ -26,6 +26,7 @@ public:
     mutex calcCallsLock;
     mutex saveLock;
     mutex syncCallsCentralLock;
+    mutex syncCdrsCentralLock;
     mutex syncCountersCentralLock;
     mutex syncLocksCentralLock;
 
