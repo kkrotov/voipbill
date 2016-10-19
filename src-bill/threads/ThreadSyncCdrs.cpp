@@ -21,6 +21,8 @@ void ThreadSyncCdrs::run() {
 
     unique_lock<mutex> lock(repository.billingData->syncCdrsCentralLock, try_to_lock);
     if (!lock.owns_lock()) {
+
+        Log::error("ThreadSyncCdrs: mutex is locked");
         return;
     }
     repository.billingData->prepareSyncCallsCentral(&db_main);
@@ -33,9 +35,10 @@ void ThreadSyncCdrs::run() {
 
 bool ThreadSyncCdrs::getCurrentMonths (string &local_prev_sync_month, string &local_curr_sync_month, string &local_next_sync_month) {
 
+    string select;
     try {
 
-        string select = "select date_trunc('month', CURRENT_TIMESTAMP) - interval '1 month',date_trunc('month', CURRENT_TIMESTAMP),date_trunc('month', CURRENT_TIMESTAMP) + interval '1 month'";
+        select = "select date_trunc('month', CURRENT_TIMESTAMP) - interval '1 month',date_trunc('month', CURRENT_TIMESTAMP),date_trunc('month', CURRENT_TIMESTAMP) + interval '1 month'";
         BDbResult res = db_calls.query(select);
         if (!res.next()) {
             // nothing to sync
@@ -47,17 +50,18 @@ bool ThreadSyncCdrs::getCurrentMonths (string &local_prev_sync_month, string &lo
     }
     catch (Exception &e) {
 
-        e.addTrace("ThreadSyncCdrs::getCurrentMonths");
-        throw e;
+        std::string message = "ThreadSyncCdrs::getCurrentMonths ERROR: "+select+" "+e.message;
+        Log::error(message);
     }
     return true;
 }
 
 bool ThreadSyncCdrs::getCurrentMonths (string relname, string fieldname, long long int id, string &local_prev_sync_month, string &local_curr_sync_month, string &local_next_sync_month) {
 
+    string select;
     try {
 
-        string select = "select date_trunc('month', "+fieldname+") - interval '1 month', date_trunc('month', "+fieldname+"), date_trunc('month', "+fieldname+") + interval '1 month' "
+        select = "select date_trunc('month', "+fieldname+") - interval '1 month', date_trunc('month', "+fieldname+"), date_trunc('month', "+fieldname+") + interval '1 month' "
                                     "from "+relname+
                                     " where id>" + lexical_cast<string>(id) + " order by id limit 1";
         BDbResult res = db_calls.query(select);
@@ -70,8 +74,9 @@ bool ThreadSyncCdrs::getCurrentMonths (string relname, string fieldname, long lo
         local_next_sync_month = res.get_s(2);
     }
     catch (Exception &e) {
-        e.addTrace("ThreadSyncCdrs::getCurrentMonths");
-        throw e;
+
+        std::string message = "ThreadSyncCdrs::getCurrentMonths ERROR: "+select+" "+e.message;
+        Log::error(message);
     }
     return true;
 }
