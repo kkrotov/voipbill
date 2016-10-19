@@ -189,11 +189,14 @@ pair<int, int> BillingCall::setupNNPPackageMinute(vector<NNPAccountTariffLight> 
     vector<NNPPackageMinute> nnpPackageMinuteList;
     set<pair<int, int >> EffectiveNnpPackageMinuteList;
     map<int, int> tariffIdAccountTariffLightId;
+    map<int, NNPAccountTariffLight*> nnpAccountTariffLightMap;
 
     // Загружаем все nnp-пакеты с минутами для тарифов этого лицевого счета
     for (auto it1 = nnpAccountTariffLightList.begin(); it1 != nnpAccountTariffLightList.end(); it1++) {
+
         repository->getNNPPackageMinuteByTariff(nnpPackageMinuteList, it1->nnp_tariff_id, it1->coefficient);
         tariffIdAccountTariffLightId[it1->nnp_tariff_id] = it1->id;
+        nnpAccountTariffLightMap[it1->nnp_tariff_id] = &*it1;
     }
 
     // Оставляем только те пакеты с минутами, в которых есть nnp-направления номера А , учитываем остаток в минутах
@@ -204,8 +207,11 @@ pair<int, int> BillingCall::setupNNPPackageMinute(vector<NNPAccountTariffLight> 
             int global_used_seconds = repository->data->globalNNPPackageMinuteCounters.
                     get()->getGlobalCounter(tariffIdAccountTariffLightId[it2->nnp_tariff_id], it2->id);
 
+            NNPAccountTariffLight *nnpAccountTariffLight = nnpAccountTariffLightMap[it2->nnp_tariff_id];
+            int current_used_seconds = repository->currentCalls->getStatsNNPPackageMinute().
+                    get()->getCurrent(time(nullptr), callInfo->account, &*it2, nnpAccountTariffLight)->used_seconds;
 
-            if (it2->minute * 60 - used_seconds - global_used_seconds > 0)
+            if (it2->minute * 60 - used_seconds - global_used_seconds - current_used_seconds > 0)
                 EffectiveNnpPackageMinuteList.insert(
                         pair<int, int>((it2->minute * 60 - used_seconds - global_used_seconds), it2->id));
         }
