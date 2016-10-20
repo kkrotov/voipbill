@@ -368,6 +368,10 @@ Trunk *Repository::getServiceTrunk(int trunk_settings_id, ServiceTrunkSettings &
 }
 
 Trunk *Repository::getTrunkByName(const char *trunk_name) {
+
+    if (trunk_name==nullptr || (strlen(trunk_name)==0))
+        return nullptr;
+
     Trunk *trunk = trunkByName->find(trunk_name, trace);
     if (trunk != nullptr) {
         return trunk;
