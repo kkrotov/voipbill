@@ -14,6 +14,8 @@ struct NNPAccountTariffLight {
     bool tariffication_full_first_minute;
     bool tariffication_free_first_seconds;
 
+    double price;
+
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
@@ -23,11 +25,10 @@ struct NNPAccountTariffLight {
         trace << "activate_from: " << string_time(activate_from) << ", ";
         trace << "deactivate_from: " << string_time(deactivate_from) << ", ";
         trace << "coefficient: " << coefficient << ", ";
-
-            trace << "tariffication_by_minutes: " << tariffication_by_minutes << ", ";
-            trace << "tariffication_full_first_minute: " << tariffication_full_first_minute << ", ";
-            trace << "tariffication_free_first_seconds: " << tariffication_free_first_seconds << ", ";
-
+        trace << "tariffication_by_minutes: " << tariffication_by_minutes << ", ";
+        trace << "tariffication_full_first_minute: " << tariffication_full_first_minute << ", ";
+        trace << "tariffication_free_first_seconds: " << tariffication_free_first_seconds << ", ";
+        trace << "price: " << price << ", ";       
         trace << ")";
     }
 };

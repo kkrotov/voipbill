@@ -44,14 +44,14 @@ void BillingCall::calcOrigNNPByNumber() {
             call->nnp_package_price_id = effectivePackagePrice.second;
             if (trace != nullptr) {
                 *trace << "INFO|NNP|APPLY NNP_PackagePrice id=" << call->nnp_package_price_id <<
-                ", rate: " << call->rate << "\n";
+                       ", rate: " << call->rate << "\n";
             }
         } else {
             call->rate = effectivePackagePricelist.first;
             call->nnp_package_pricelist_id = effectivePackagePricelist.second;
             if (trace != nullptr) {
                 *trace << "INFO|NNP|APPLY NNP_PackagePricelist id=" << call->nnp_package_pricelist_id <<
-                ", rate: " << call->rate << "\n";
+                       ", rate: " << call->rate << "\n";
             }
         }
     } else {
@@ -60,7 +60,7 @@ void BillingCall::calcOrigNNPByNumber() {
             call->nnp_package_price_id = effectivePackagePrice.second;
             if (trace != nullptr) {
                 *trace << "INFO|NNP|APPLY NNP_PackagePrice id=" << call->nnp_package_price_id <<
-                ", rate: " << call->rate << "\n";
+                       ", rate: " << call->rate << "\n";
             }
         }
         if (effectivePackagePrice.second == 0 && effectivePackagePricelist.second != 0) {
@@ -68,7 +68,7 @@ void BillingCall::calcOrigNNPByNumber() {
             call->nnp_package_pricelist_id = effectivePackagePricelist.second;
             if (trace != nullptr) {
                 *trace << "INFO|NNP|APPLY NNP_PackagePricelist id=" << call->nnp_package_pricelist_id <<
-                ", rate: " << call->rate << "\n";
+                       ", rate: " << call->rate << "\n";
             }
         }
         if (effectivePackagePrice.second == 0 && effectivePackagePricelist.second == 0) {
@@ -111,8 +111,9 @@ void BillingCall::calcOrigNNPByNumber() {
                     call->stats_nnp_package_minute_id = stats->id; // запоминаем применный к вызову пакет из billing.stats_packege
                     if (trace != nullptr) {
                         *trace << "INFO|NNP|APPLY NNP PackageMimute id=" << call->nnp_package_minute_id
-                        << ", " << avalibleNNPPackageSeconds << " SECONDS, StatsNNPPackageMinute: " << stats->id <<
-                        ", Remain seconds: " << effectivePackageMinute.first << "\n";
+                               << ", " << avalibleNNPPackageSeconds << " SECONDS, StatsNNPPackageMinute: " << stats->id
+                               <<
+                               ", Remain seconds: " << effectivePackageMinute.first << "\n";
                     }
                     break;
                 }
@@ -187,9 +188,10 @@ pair<int, int> BillingCall::setupNNPPackageMinute(vector<NNPAccountTariffLight> 
                                                   set<int> &nnpDestinationIds) {
 
     vector<NNPPackageMinute> nnpPackageMinuteList;
-    set<pair<int, int >> EffectiveNnpPackageMinuteList;
+    set<pair<double, pair<int, int >>> EffectiveNnpPackageMinuteList;
     map<int, int> tariffIdAccountTariffLightId;
-    map<int, NNPAccountTariffLight*> nnpAccountTariffLightMap;
+    map<int, NNPAccountTariffLight *> nnpAccountTariffLightMap;
+    double minute_cost;
 
     // Загружаем все nnp-пакеты с минутами для тарифов этого лицевого счета
     for (auto it1 = nnpAccountTariffLightList.begin(); it1 != nnpAccountTariffLightList.end(); it1++) {
@@ -208,17 +210,24 @@ pair<int, int> BillingCall::setupNNPPackageMinute(vector<NNPAccountTariffLight> 
                     get()->getGlobalCounter(tariffIdAccountTariffLightId[it2->nnp_tariff_id], it2->id);
 
             NNPAccountTariffLight *nnpAccountTariffLight = nnpAccountTariffLightMap[it2->nnp_tariff_id];
+
+            if (it2->minute > 0)
+                minute_cost = fabs(nnpAccountTariffLight->price / it2->minute);
+            else minute_cost = 10000000;
+
             int current_used_seconds = repository->currentCalls->getStatsNNPPackageMinute().
                     get()->getCurrent(time(nullptr), callInfo->account, &*it2, nnpAccountTariffLight)->used_seconds;
 
-            if (it2->minute * 60 - used_seconds - global_used_seconds - current_used_seconds > 0)
+            int seconds_left = it2->minute * 60 - used_seconds - global_used_seconds - current_used_seconds;
+
+            if (seconds_left > 0)
                 EffectiveNnpPackageMinuteList.insert(
-                        pair<int, int>((it2->minute * 60 - used_seconds - global_used_seconds), it2->id));
+                        make_pair(minute_cost, make_pair(seconds_left, it2->id)));
         }
     }
 
     if (EffectiveNnpPackageMinuteList.size() > 0)
-        return *EffectiveNnpPackageMinuteList.rbegin();
+        return EffectiveNnpPackageMinuteList.begin()->second;
     else
         return pair<int, int>(0, 0);
 
