@@ -231,7 +231,7 @@ StatsNNPPackageMinute *StatsNNPPackageMinuteManager::updateStatsNNPPackageMinute
 
     StatsNNPPackageMinute &stats = itStatsNNPPackageMinute->second;
 
-    stats.used_seconds += callInfo->call->billed_time;
+    stats.used_seconds += callInfo->call->package_time;
     stats.used_credit += callInfo->call->cost;
     stats.min_call_id = stats.min_call_id == 0 ? callInfo->call->id : stats.min_call_id;
     stats.max_call_id = callInfo->call->id;

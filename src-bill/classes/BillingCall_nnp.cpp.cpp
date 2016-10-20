@@ -204,8 +204,9 @@ pair<int, int> BillingCall::setupNNPPackageMinute(vector<NNPAccountTariffLight> 
     // Оставляем только те пакеты с минутами, в которых есть nnp-направления номера А , учитываем остаток в минутах
     for (auto it2 = nnpPackageMinuteList.begin(); it2 != nnpPackageMinuteList.end(); it2++) {
         if (nnpDestinationIds.count(it2->nnp_destination_id) > 0) {
-            int used_seconds = repository->billingData->statsNNPPackageMinuteGetUsedSeconds(call->account_id,
-                                                                                            it2->id, cdr->connect_time);
+            int used_seconds = repository->billingData->statsNNPPackageMinuteGetUsedSeconds(
+                    tariffIdAccountTariffLightId[it2->nnp_tariff_id],
+                    it2->id, cdr->connect_time);
             int global_used_seconds = repository->data->globalNNPPackageMinuteCounters.
                     get()->getGlobalCounter(tariffIdAccountTariffLightId[it2->nnp_tariff_id], it2->id);
 
