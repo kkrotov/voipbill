@@ -295,4 +295,10 @@ void BillingCall::setupNNPCost() {
     } else {
         call->package_credit = 0;
     }
+
+    if (trace != nullptr) {
+        *trace << "INFO|NNP|SOLVED NNPCost (paid_time:" << paid_time << ", billed_time :" << call->billed_time <<
+               ", cost:" << call->cost << ", package_time:" << call->package_time << ", package_credit:"
+               << call->package_credit << ")\n";
+    }
 }
