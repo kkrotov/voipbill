@@ -13,27 +13,28 @@ public:
         key = "id";
 
         fields.push_back("id");
-            fields.push_back("account_tariff_id");
+        fields.push_back("account_tariff_id");
         fields.push_back("account_client_id");
         fields.push_back("tariff_id");
         fields.push_back("activate_from");
         fields.push_back("deactivate_from");
         fields.push_back("coefficient");
-            fields.push_back("tariffication_by_minutes");
-            fields.push_back("tariffication_full_first_minute");
-            fields.push_back("tariffication_free_first_seconds");
-
+        fields.push_back("tariffication_by_minutes");
+        fields.push_back("tariffication_full_first_minute");
+        fields.push_back("tariffication_free_first_seconds");
+        fields.push_back("price");
 
         datatype.push_back("id integer");
-            datatype.push_back("account_tariff_id integer");
+        datatype.push_back("account_tariff_id integer");
         datatype.push_back("account_client_id integer");
         datatype.push_back("tariff_id integer");
         datatype.push_back("activate_from timestamp");
         datatype.push_back("deactivate_from timestamp");
         datatype.push_back("coefficient real");
-            datatype.push_back("tariffication_by_minutes boolean");
-            datatype.push_back("tariffication_full_first_minute boolean");
-            datatype.push_back("tariffication_free_first_seconds boolean");
+        datatype.push_back("tariffication_by_minutes boolean");
+        datatype.push_back("tariffication_full_first_minute boolean");
+        datatype.push_back("tariffication_free_first_seconds boolean");
+        datatype.push_back("price double precision");
 
 
     }
