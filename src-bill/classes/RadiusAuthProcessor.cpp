@@ -365,10 +365,7 @@ bool RadiusAuthProcessor::processAutoOutcome(double *pBuyRate, Pricelist **pFirs
 
     bool fUseMinimalki = false;
 
-    if (origServiceTrunk != nullptr) {
-        Trunk *orig_trunk = repository.getTrunk(origServiceTrunk->trunk_id);
-        if (orig_trunk != nullptr) fUseMinimalki = orig_trunk->sw_minimalki;
-    }
+    if (this->origTrunk != nullptr) fUseMinimalki = this->origTrunk->sw_minimalki;
 
     vector<ServiceTrunkOrder> termServiceTrunks;
     getAvailableTermServiceTrunk(termServiceTrunks, origPricelist, origPrice, origSettings, fUseMinimalki);
