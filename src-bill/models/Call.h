@@ -127,6 +127,7 @@ struct Call {
         account_id = 0;
         trunk_service_id = 0;
         number_service_id = 0;
+        trunk_id = 0;
 
         src_number = atoll(cdr->src_number);
         dst_number = atoll(cdr->dst_number);
