@@ -207,8 +207,17 @@ pair<int, int> BillingCall::setupNNPPackageMinute(vector<NNPAccountTariffLight> 
             int used_seconds = repository->billingData->statsNNPPackageMinuteGetUsedSeconds(
                     tariffIdAccountTariffLightId[it2->nnp_tariff_id],
                     it2->id, cdr->connect_time);
-            int global_used_seconds = repository->data->globalNNPPackageMinuteCounters.
-                    get()->getGlobalCounter(tariffIdAccountTariffLightId[it2->nnp_tariff_id], it2->id);
+
+            int global_used_seconds = 0;
+
+            if (repository->data->globalNNPPackageMinuteCounters.ready()) {
+                auto globalCounter = repository->data->globalNNPPackageMinuteCounters.get();
+
+                if (globalCounter != nullptr)
+                    global_used_seconds = globalCounter->getGlobalCounter(
+                            tariffIdAccountTariffLightId[it2->nnp_tariff_id],
+                            it2->id);
+            }
 
             NNPAccountTariffLight *nnpAccountTariffLight = nnpAccountTariffLightMap[it2->nnp_tariff_id];
 
