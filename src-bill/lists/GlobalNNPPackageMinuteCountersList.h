@@ -45,6 +45,7 @@ protected:
 
 public:
     int getGlobalCounter(int account_tariff_light_id, int package_minute_id) {
+
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
