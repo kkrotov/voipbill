@@ -10,9 +10,9 @@ HOST_DB_REGIONAL=reg99.mcntelecom.ru
 NAME_DB_REGIONAL=nispd99
 
 HOST_DB_TEST_REGIONAL=127.0.0.1
-NAME_DB_TEST_REGIONAL=nispd99
+NAME_DB_TEST_REGIONAL=nispd99_test
 
-table_cdr=calls_cdr.cdr_201607
+table_cdr=calls_cdr.cdr_201610
 
 DB_USER=pgsqltest
 
@@ -32,7 +32,7 @@ echo "### Выолнятем перенос текущей таблички $tab
 
 echo "]]] 1. Дампим табличку $table_cdr из сервера [$HOST_DB_REGIONAL],база [$NAME_DB_REGIONAL]"
 
-/usr/pgsql-9.4/bin/pg_dump -Fc -O -h $HOST_DB_REGIONAL -U $DB_USER -t $table_cdr $NAME_DB_REGIONAL > $DIR/SQL/$table_cdr.sql
+/usr/pgsql-9.4/bin/pg_dump  -C -c -Fc -O -h $HOST_DB_REGIONAL -U $DB_USER -t $table_cdr $NAME_DB_REGIONAL > $DIR/SQL/$table_cdr.sql
 
 echo "]]] 2. Загружаем в тестовый региональный сервер. Таблица $table_cdr вз сервера [$HOST_DB_TEST_REGIONAL],база [$NAME_DB_TEST_REGIONAL]"
 /usr/pgsql-9.4/bin/pg_restore -U postgres -h $HOST_DB_TEST_REGIONAL -d $NAME_DB_TEST_REGIONAL -Fc $DIR/SQL/$table_cdr.sql
