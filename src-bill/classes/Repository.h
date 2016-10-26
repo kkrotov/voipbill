@@ -15,6 +15,7 @@ private:
     time_t currentTime;
     Server *server;
     InstanceSettings *instanceSettings;
+    Hub *hub;
     shared_ptr<AirpList> airp;
     shared_ptr<NumberList> number;
     shared_ptr<OutcomeList> outcome;

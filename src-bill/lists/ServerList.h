@@ -9,10 +9,10 @@ protected:
 
     string sql(BDb * db) {
         string server_id = app().conf.str_instance_id;
-        return "   select id, low_balance_outcome_id, blocked_outcome_id, min_price_for_autorouting, our_numbers_id, calling_station_id_for_line_without_number, service_numbers " \
+        return "   select id, low_balance_outcome_id, blocked_outcome_id, min_price_for_autorouting, our_numbers_id, calling_station_id_for_line_without_number, service_numbers, hub_id " \
             "   from public.server " \
             "   where id = " + server_id +
-            "   order by id asc ";
+               "   order by id asc ";
     }
 
     inline void parse_item(BDbResult &row, Server * item) {
@@ -28,6 +28,7 @@ protected:
         if (service_numbers.size() > 0) {
             split(item->service_numbers, service_numbers, is_any_of(","));
         }
+        item->hub_id = row.get_i(7);
     }
 
     struct key_id {

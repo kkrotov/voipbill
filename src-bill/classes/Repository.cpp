@@ -32,6 +32,18 @@ bool Repository::prepare(time_t currentTime) {
         }
     }
 
+    {
+        shared_ptr<HubList> list = data->hub.get();
+        if (list != nullptr) {
+            auto item = list->find(app().conf.hub_id);
+            if (item != nullptr) {
+                hub = item;
+            } else hub = nullptr;
+        } else {
+            return false;
+        }
+    }
+
     if ((airp = data->airp.get()) == nullptr) {
         return false;
     }

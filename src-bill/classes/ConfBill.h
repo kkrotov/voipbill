@@ -16,6 +16,9 @@ public:
     uint16_t instance_id;
     string str_instance_id;
 
+    uint16_t hub_id;
+    string str_hub_id;
+
     string openca_udp_host;
     uint16_t openca_udp_port;
     uint16_t udp_openca_select_interval;

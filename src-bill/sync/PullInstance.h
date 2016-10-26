@@ -16,5 +16,7 @@ public:
         fields.push_back("city_geo_id");
         fields.push_back("country_id");
         fields.push_back("city_id");
+        fields.push_back("hub_id");
+
     }
 };
