@@ -1,5 +1,4 @@
 #pragma once
-
 #include "../data/DataContainer.h"
 #include "../data/DataBillingContainer.h"
 #include "../data/DataCurrentCallsContainer.h"
@@ -13,10 +12,11 @@ public:
 
 private:
     time_t currentTime;
-    Server *server;
-    InstanceSettings *instanceSettings;
-    Hub *hub;
+
     shared_ptr<AirpList> airp;
+    shared_ptr<ServerList> server;
+    shared_ptr<InstanceSettingsList> instanceSettings;
+    shared_ptr<HubList> hub;
     shared_ptr<NumberList> number;
     shared_ptr<OutcomeList> outcome;
     shared_ptr<PrefixlistList> prefixlist;
@@ -85,12 +85,21 @@ public:
 
     bool prepare(time_t currentTime = 0);
 
-    InstanceSettings *getInstanceSettings() {
-        return instanceSettings;
+    InstanceSettings *getInstanceSettings(int instance_id) {
+        return instanceSettings->find(instance_id);
     }
 
-    Server *getServer() {
-        return server;
+    Server *getServer(int instance_id) {
+        return server->find(instance_id);
+    }
+
+    Hub *getHub(int instance_id) {
+        return hub->find(instance_id);
+    }
+
+
+    void getServersByHubId(vector<Server> &servers, int hub_id) {
+        server->getServersByHubId(servers, hub_id);
     }
 
     Client *getAccount(int account_id) {

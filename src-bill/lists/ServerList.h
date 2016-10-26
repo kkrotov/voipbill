@@ -11,7 +11,6 @@ protected:
         string server_id = app().conf.str_instance_id;
         return "   select id, low_balance_outcome_id, blocked_outcome_id, min_price_for_autorouting, our_numbers_id, calling_station_id_for_line_without_number, service_numbers, hub_id " \
             "   from public.server " \
-            "   where id = " + server_id +
                "   order by id asc ";
     }
 
@@ -51,4 +50,13 @@ public:
         }
         return begin <  end ? &*begin : nullptr;
     }
+
+    void getServersByHubId(vector<Server> &servers, int hub_id) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        for (auto i = begin; i < end; i++) {
+            if (i->hub_id == hub_id) servers.push_back(*i);
+        }
+    }
+
 };

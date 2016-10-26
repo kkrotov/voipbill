@@ -133,6 +133,10 @@ void ThreadLoader::run() {
 
                 repository.data->instanceSettings.load(&db_calls);
 
+            } else if (event == "hub") {
+
+                repository.data->hub.load(&db_calls);
+
             } else if (event == "network_prefix") {
 
                 repository.data->networkPrefix.load(&db_calls);

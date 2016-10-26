@@ -11,7 +11,6 @@ protected:
         string server_id = app().conf.str_instance_id;
         return "   select id, region_id, city_geo_id, country_id, city_id, hub_id " \
                 "   from billing.instance_settings " \
-                "   where id = " + server_id +
                "   order by id asc ";
     }
 

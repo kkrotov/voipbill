@@ -26,24 +26,25 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
     if (app().conf.hub_id > 0) {
 
         Repository repository;
-        auto hub = repository.data->hub.get();
-        auto server = repository.data->server.get();
 
-        if (hub != nullptr && server != nullptr) {
-            Hub *iHub = hub->find(app().conf.hub_id);
+        if (repository.prepare()) {
+            int hub_id = app().conf.hub_id;
+            Hub *iHub = repository.getHub(hub_id);
 
             if (iHub != nullptr) {
                 html << "[MULTIREGION MODE ON]<br>\n";
-                html << "main.hub_id=" << app().conf.hub_id << " (" << iHub->name << ")<br>\n";
-
+                html << "main.hub_id=" << hub_id << " (" << iHub->name << ")\n";
+                vector<Server> servers;
+                repository.getServersByHubId(servers, hub_id);
+                html << " (";
+                for (auto i:servers) {
+                    html << " " << i.id << " ";
+                }
+                html << ") <br>\n";
             }
-
-
+            html << "<hr>\n";
         }
-
-        html << "<hr>\n";
     }
-
 
     html << "config_file: " << app().conf.config_file << "<br/>\n";
     html << "pid_file: " << app().conf.pid_file << "<br/>\n";

@@ -13,7 +13,7 @@ void RadiusAuthProcessor::init() {
     }
 
     billingNotReady = false;
-    server = repository.getServer();
+    server = repository.getServer(app().conf.instance_id);
 
     origTrunk = repository.getTrunkByName(request->trunkName.c_str());
     if (origTrunk == nullptr) {
