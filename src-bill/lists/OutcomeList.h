@@ -8,11 +8,10 @@ class OutcomeList : public ObjList<Outcome> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
         return "   select id, name, type_id, route_case_id, release_reason_id, airp_id, calling_station_id, called_station_id, " \
             "   route_case_1_id,route_case_2_id from auth.outcome " \
-            "   where server_id = " + server_id +
-            "   order by id asc ";
+            "   where server_id in " + app().conf.get_sql_regions_list() +
+               "   order by id asc ";
     }
 
     inline void parse_item(BDbResult &row, Outcome * item) {

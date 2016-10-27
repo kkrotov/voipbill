@@ -8,7 +8,6 @@ class HubList : public ObjList<Hub> {
 protected:
 
     string sql(BDb *db) {
-        string server_id = app().conf.str_instance_id;
         return "   select id, name " \
             "   from auth.hub " \
             "   order by id asc ";

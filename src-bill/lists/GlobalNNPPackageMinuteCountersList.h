@@ -7,11 +7,10 @@
 class GlobalNNPPackageMinuteCountersList : public ObjList<GlobalNNPPackageMinuteCounters> {
 protected:
     string sql(BDb *db) {
-        string server_id = app().conf.str_instance_id;
 
         return "   select nnp_account_tariff_light_id,nnp_package_minute_id, sum(used_seconds) " \
            "   from billing.stats_nnp_package_minute " \
-           "     where server_id<>" + server_id + " " \
+           "     where server_id not in " + app().conf.get_sql_regions_list() + " " \
            "     group by nnp_account_tariff_light_id,nnp_package_minute_id " \
            "     order by nnp_account_tariff_light_id,nnp_package_minute_id ";
     }

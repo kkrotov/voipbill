@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../data/DataContainer.h"
 #include "../data/DataBillingContainer.h"
 #include "../data/DataCurrentCallsContainer.h"
@@ -97,9 +98,9 @@ public:
         return hub->find(instance_id);
     }
 
-
     void getServersByHubId(vector<Server> &servers, int hub_id) {
-        server->getServersByHubId(servers, hub_id);
+        if (hub_id > 0 && server != nullptr)
+            server->getServersByHubId(servers, hub_id);
     }
 
     Client *getAccount(int account_id) {
@@ -275,7 +276,7 @@ public:
             return this->repository.trunkOrderLessThan(right, left);
         }
 
-        trunk_settings_order_desc_price(const Repository &repository) : repository(repository) { }
+        trunk_settings_order_desc_price(const Repository &repository) : repository(repository) {}
 
     private:
         const Repository &repository;
@@ -286,7 +287,7 @@ public:
             return this->repository.trunkOrderLessThan(left, right);
         }
 
-        trunk_settings_order_asc_price(const Repository &repository) : repository(repository) { }
+        trunk_settings_order_asc_price(const Repository &repository) : repository(repository) {}
 
     private:
         const Repository &repository;

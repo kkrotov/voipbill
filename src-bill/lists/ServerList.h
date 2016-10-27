@@ -8,7 +8,6 @@ class ServerList : public ObjList<Server> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
         return "   select id, low_balance_outcome_id, blocked_outcome_id, min_price_for_autorouting, our_numbers_id, calling_station_id_for_line_without_number, service_numbers, hub_id " \
             "   from public.server " \
                "   order by id asc ";
@@ -39,6 +38,10 @@ protected:
         }
     };
 
+    virtual void after_load() {
+        app().conf.set_sql_regions_list(sql_regions_list());
+    };
+
 public:
     Server * find(int id) {
         auto begin = this->data.begin();
@@ -59,4 +62,29 @@ public:
         }
     }
 
+    string sql_regions_list() {
+        string sql;
+        int server_id = app().conf.instance_id;
+        int hub_id = app().conf.hub_id;
+
+        if (hub_id > 0) {
+            vector<Server> servers;
+            getServersByHubId(servers, hub_id);
+            if (servers.size() > 0) {
+                sql = '(';
+                for (auto i:servers) {
+                    sql += to_string(i.id) + ',';
+                }
+                auto sz = sql.size();
+                if (sz > 0 && sql[sz - 1] == ',') sql.erase(sz - 1, 1);
+                sql += ')';
+            } else {
+                sql = "(" + std::to_string(server_id) + ")";
+            }
+
+        } else {
+            sql = "(" + std::to_string(server_id) + ")";
+        }
+        return sql;
+    }
 };

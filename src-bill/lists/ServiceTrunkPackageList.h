@@ -8,7 +8,6 @@ class ServiceTrunkPackageList : public ObjList<ServicePackage> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
         return "    select id, service_trunk_id, tariff_package_id, periodical, extract(epoch from activation_dt), extract(epoch from expire_dt) " \
             "       from billing.service_package " \
             "       where service_trunk_id > 0 " \

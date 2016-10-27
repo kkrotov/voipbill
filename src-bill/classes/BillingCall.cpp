@@ -166,7 +166,7 @@ void BillingCall::calcByNumber() {
         // не тарифицируем звонки, которые переведены на сервисные номера см. поле в базе publiс.server.service_numbers
         // на этих сервисных номерах находятся автоответчики типи "недостаточно денег для звонка" и прочее.
         if (cdr->dst_replace[0] != 0) {
-            for (auto srvNumber : repository->getServer(app().conf.instance_id)->service_numbers) {
+            for (auto srvNumber : callInfo->server->service_numbers) {
                 if (srvNumber.compare(cdr->dst_replace) == 0) {
                     call->is_service_number = true;
                     return;
@@ -434,8 +434,6 @@ void BillingCall::processDestinations() {
 
 int BillingCall::getDest(int geo_id) {
 
-    InstanceSettings *instanceSettings = repository->getInstanceSettings(app().conf.instance_id);
-
     callInfo->geo = repository->getGeo(geo_id);
     if (callInfo->geo == nullptr) {
         if (trace != nullptr) {
@@ -444,20 +442,20 @@ int BillingCall::getDest(int geo_id) {
         return 2;
     }
 
-    if (!call->mob && instanceSettings->city_id > 0 &&
-        callInfo->geo->city_id == instanceSettings->city_id) {
+    if (!call->mob && callInfo->instanceSettings->city_id > 0 &&
+        callInfo->geo->city_id == callInfo->instanceSettings->city_id) {
         return -1;
     }
 
-    auto regionIds = instanceSettings->getRegionIds();
+    auto regionIds = callInfo->instanceSettings->getRegionIds();
     for (auto it = regionIds.begin(); it != regionIds.end(); ++it) {
         if (callInfo->geo->region_id == *it) {
             return 0;
         }
     }
 
-    if (instanceSettings->country_id > 0 &&
-        callInfo->geo->country_id == instanceSettings->country_id) {
+    if (callInfo->instanceSettings->country_id > 0 &&
+        callInfo->geo->country_id == callInfo->instanceSettings->country_id) {
         return 1;
     }
 
@@ -579,6 +577,20 @@ void BillingCall::setupTrunk() {
 
     call->trunk_id = callInfo->trunk->id;  // Из таблицы - auth.trunk
     call->our = callInfo->trunk->our_trunk || callInfo->trunk->auth_by_number;
+
+    callInfo->server = repository->getServer(callInfo->trunk->server_id);
+    if (callInfo->server == nullptr) {
+        throw CalcException("SERVER WAS NOT FOUND");
+    }
+
+    callInfo->instanceSettings = repository->getInstanceSettings(callInfo->trunk->server_id);
+    if (callInfo->instanceSettings == nullptr) {
+        throw CalcException("INSTANCESETTINGS WAS NOT FOUND");
+    }
+
+    if (trace != nullptr) {
+        *trace << "INFO|REGION_ID|" << callInfo->server->id << "\n";
+    }
 }
 
 /******************************************************************************************************************

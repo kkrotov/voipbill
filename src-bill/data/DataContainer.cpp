@@ -7,8 +7,8 @@ DataContainer * DataContainer::instance() {
 
 void DataContainer::loadAll(BDb * db) {
     server.load(db);
-    hub.load(db);
     instanceSettings.load(db);
+    hub.load(db);
     airp.load(db);
     number.load(db);
     outcome.load(db);

@@ -40,6 +40,12 @@ public:
     int cdr_parcer_interval;
     int calls_raw_sync_delay;
 
+    string sql_regions_list;
+
+    string get_sql_regions_list() { return sql_regions_list; }
+
+    void set_sql_regions_list(string sql) { sql_regions_list = sql; }
+
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);
 };

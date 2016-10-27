@@ -36,9 +36,7 @@ public:
         datatype.push_back("price_include_vat boolean");
         datatype.push_back("currency_id character(3)");
 
-        string server_id = app().conf.str_instance_id;
-
-        src_sql_where = " ( region  = " + server_id +" or is_global ) ";
+        src_sql_where = " ( region  in " + app().conf.get_sql_regions_list() + " or is_global ) ";
 
 
     }

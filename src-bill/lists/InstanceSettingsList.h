@@ -8,7 +8,6 @@ class InstanceSettingsList : public ObjList<InstanceSettings> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
         return "   select id, region_id, city_geo_id, country_id, city_id, hub_id " \
                 "   from billing.instance_settings " \
                "   order by id asc ";
