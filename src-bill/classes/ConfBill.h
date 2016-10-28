@@ -46,6 +46,8 @@ public:
 
     void set_sql_regions_list(string sql) { sql_regions_list = sql; }
 
+    string get_sql_hub_id() { return hub_id > 0 ? to_string(hub_id) : "NULL"; }
+
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);
 };

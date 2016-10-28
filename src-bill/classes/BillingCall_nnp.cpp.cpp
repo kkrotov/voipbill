@@ -155,7 +155,7 @@ void BillingCall::processNNP() {
             *trace << "INFO|SET NNP_CITY_ID = " << call->nnp_city_id << "\n";
             *trace << "INFO|SET NNP_COUNTRY_PREFIX = " << call->nnp_country_prefix << "\n";
             *trace << "INFO|SET NNP_NDC = " << call->nnp_ndc << "\n";
-            *trace << "INFO|SET NNP_NIS_MOB = " << call->nnp_is_mob << "\n";
+            *trace << "INFO|SET NNP_IS_MOB = " << call->nnp_is_mob << "\n";
         }
     }
 }

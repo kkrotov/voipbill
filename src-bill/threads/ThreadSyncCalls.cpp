@@ -87,8 +87,8 @@ bool ThreadSyncCalls::getLocalId(string month, long long &local_id, string &loca
 
 void ThreadSyncCalls::getCentalId(string month, long long int &central_id, string &central_time) {
 
-    auto res2 = db_main.query("select id, connect_time from calls_raw.calls_raw_" + month + " where server_id = " +
-                              app().conf.str_instance_id + " order by id desc limit 1");
+    auto res2 = db_main.query("select id, connect_time from calls_raw.calls_raw_" + month + " where server_id in " +
+                              app().conf.get_sql_regions_list() + " order by id desc limit 1");
     if (res2.next()) {
 
         central_id = res2.get_ll(0);
@@ -147,14 +147,14 @@ bool ThreadSyncCalls::copyCallsPart(string month, unsigned long limit) {
                 " service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix,"\
                 " nnp_operator_id, nnp_region_id, nnp_city_id, nnp_country_prefix, nnp_ndc, nnp_is_mob, "\
                 " nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id,  "
-                " geo_id, geo_operator_id, mob, geo_mob, server_id, disconnect_cause, account_version, stats_nnp_package_minute_id",
+                          " geo_id, geo_operator_id, mob, geo_mob, server_id, hub_id, disconnect_cause, account_version, stats_nnp_package_minute_id",
 
                   " select id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id,"\
                 " src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id,"\
                 " service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix,"\
                 " nnp_operator_id, nnp_region_id, nnp_city_id, nnp_country_prefix, nnp_ndc, nnp_is_mob, "\
                 " nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id,  "
-                " geo_id, geo_operator_id, mob, geo_mob, " + app().conf.str_instance_id +
+                          " geo_id, geo_operator_id, mob, geo_mob, server_id," + app().conf.get_sql_hub_id() +
                   ", disconnect_cause, account_version, stats_nnp_package_minute_id  " \
 
                           "   from calls_raw.calls_raw_" + suffix +

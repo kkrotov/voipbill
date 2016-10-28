@@ -38,7 +38,7 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
                 repository.getServersByHubId(servers, hub_id);
                 html << " (";
                 for (auto i:servers) {
-                    html << " " << i.id << " ";
+                    html << i.id << ",";
                 }
                 html << ") <br>\n";
             }
@@ -49,6 +49,7 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
     html << "config_file: " << app().conf.config_file << "<br/>\n";
     html << "pid_file: " << app().conf.pid_file << "<br/>\n";
     html << "<hr>\n";
+    html << "sql_regions_list: " << app().conf.get_sql_regions_list() << "<br/>\n";
     html << "log_file_filename: " << app().conf.log_file_filename << "<br/>\n";
     html << "log_file_min_level: " << app().conf.log_file_min_level << "<br/>\n";
     html << "log_file_max_level: " << app().conf.log_file_max_level << "<br/>\n";

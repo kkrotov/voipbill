@@ -68,10 +68,13 @@ struct Call {
     int nnp_package_price_id;
     int nnp_package_pricelist_id;
 
+    int server_id;
+
     void dump(stringstream &trace) {
 
         trace << "(";
         trace << "id " << id << ", ";
+        trace << "server_id " << server_id << ", ";
         trace << "peer_id: " << peer_id << ", ";
         trace << "cdr_id: " << cdr_id << ", ";
         trace << "connect_time: " << string_time(connect_time) << ", ";
@@ -118,6 +121,8 @@ struct Call {
     Call(Cdr *cdr, bool orig) {
         this->orig = orig;
         our = false;
+
+        server_id = 0;
 
         id = 0;
         peer_id = 0;
@@ -175,6 +180,7 @@ struct Call {
         nnp_package_pricelist_id = 0;
         nnp_package_minute_id = 0;
         nnp_package_price_id = 0;
+
     }
 
     bool isLocal() {

@@ -571,6 +571,7 @@ bool BillingCall::isUsage7800() {
 
 void BillingCall::setupTrunk() {
     callInfo->trunk = repository->getTrunkByName(getRoute());
+    call->server_id = app().conf.instance_id;
     if (callInfo->trunk == nullptr) {
         throw CalcException("TRUNK WAS NOT FOUND");
     }
@@ -583,6 +584,8 @@ void BillingCall::setupTrunk() {
         throw CalcException("SERVER WAS NOT FOUND");
     }
 
+    call->server_id = callInfo->server->id;
+
     callInfo->instanceSettings = repository->getInstanceSettings(callInfo->trunk->server_id);
     if (callInfo->instanceSettings == nullptr) {
         throw CalcException("INSTANCESETTINGS WAS NOT FOUND");
@@ -591,6 +594,7 @@ void BillingCall::setupTrunk() {
     if (trace != nullptr) {
         *trace << "INFO|REGION_ID|" << callInfo->server->id << "\n";
     }
+
 }
 
 /******************************************************************************************************************
