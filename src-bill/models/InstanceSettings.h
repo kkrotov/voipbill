@@ -8,7 +8,6 @@ struct InstanceSettings {
     int city_geo_id;
     int country_id;
     int city_id;
-    int hub_id;
 
     vector<int> getRegionIds() {
         string temp = string(region_id);

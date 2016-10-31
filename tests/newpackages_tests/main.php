@@ -98,6 +98,7 @@ clearCallRaws($dbregion);
 echo "]] 3. Очищаем записи в таблице CDR в региональной базе.\n";
 
 clearCallCDR($dbregion);
+clearCallCDR($dbmain);
 
 }
 

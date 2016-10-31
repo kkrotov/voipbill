@@ -8,7 +8,7 @@ class InstanceSettingsList : public ObjList<InstanceSettings> {
 protected:
 
     string sql(BDb * db) {
-        return "   select id, region_id, city_geo_id, country_id, city_id, hub_id " \
+        return "   select id, region_id, city_geo_id, country_id, city_id" \
                 "   from billing.instance_settings " \
                "   order by id asc ";
     }
@@ -19,7 +19,6 @@ protected:
         item->city_geo_id = row.get_i(2);
         item->country_id = row.get_i(3);
         item->city_id = row.get_i(4);
-        item->hub_id = row.get_i(5);
     }
 
     struct key_id {
