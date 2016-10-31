@@ -53,9 +53,10 @@ static size_t WriteCallback(void *contents_temp, size_t size, size_t nmemb, void
 /**
  * Инициализирует curl и BDb.
  *
+ * !!!
  */
 NNPNumberRangeFindTest :: NNPNumberRangeFindTest ()
-        : db ("host=127.0.0.1 dbname=nispd99_test user=markgrin password=") {
+        : db ("host=127.0.0.1 dbname=nispd99_test user=pgadmin password=NbhLhjn") {
     db.connect();
     curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
