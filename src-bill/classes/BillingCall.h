@@ -48,7 +48,8 @@ protected:
     void processGeo();
     void processDestinations();
     int getDest(int geo_id);
-    void processLineWithoutNumber(Call *call, Cdr *cdr);
+
+    void processLineWithoutNumber(Call *call, char *cdr_num);
     long long int getNumber();
     long long int getRemoteNumber();
     char * getRoute();
