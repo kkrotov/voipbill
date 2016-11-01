@@ -145,7 +145,8 @@ void BillingCall::calcByNumber() {
     }
 
     if (call->orig) {
-        processLineWithoutNumber(call, cdr); // на оригинационном плече отрабатывается случай выполнения звонка
+        processLineWithoutNumber(call,
+                                 cdr->src_number); // на оригинационном плече отрабатывается случай выполнения звонка
         // c линии без номера
 
     }
@@ -343,7 +344,8 @@ void BillingCall::processRedirectNumber() {
         long long int redirect_number = atoll(cdr->redirect_number);
 
         if (redirect_number > 0) {
-            call->src_number = redirect_number;
+
+            processLineWithoutNumber(call, cdr->redirect_number);
 
             if (trace != nullptr) {
                 *trace << "INFO|PROCESS REDIRECT NUMBER|SET SRC_NUMBER = " << call->src_number << "\n";
@@ -468,22 +470,22 @@ int BillingCall::getDest(int geo_id) {
  *  функция отрезазает префикс и оставляет в поле внутренний номер такой линии - здесь будет 4026
  */
 
-void BillingCall::processLineWithoutNumber(Call *call, Cdr *cdr) {
+void BillingCall::processLineWithoutNumber(Call *call, char *cdr_num) {
     char *pos = nullptr;
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "=2A");
+        pos = strstr(cdr_num, "=2A");
         if (pos != nullptr) pos += 3;
     }
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "=2B");
+        pos = strstr(cdr_num, "=2B");
         if (pos != nullptr) pos += 3;
     }
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "*");
+        pos = strstr(cdr_num, "*");
         if (pos != nullptr) pos += 1;
     }
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "+");
+        pos = strstr(cdr_num, "+");
         if (pos != nullptr) pos += 1;
     }
     if (pos != nullptr) {
