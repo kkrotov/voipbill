@@ -85,6 +85,7 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
     html << "udp.host: " << app().conf.openca_udp_host << "<br/>\n";
     html << "udp.port: " << app().conf.openca_udp_port << "<br/>\n";
     html << "<br/>\n";
+    html << "geo.instance_id: " << app().conf.instance_id << "<br/>\n";
     html << "billing.free_seconds: " << app().conf.billing_free_seconds << "<br/>\n";
     html << "billing.global_counters_select_interval: " << app().conf.global_counters_select_interval << "<br/>\n";
 
