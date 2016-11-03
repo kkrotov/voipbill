@@ -8,7 +8,6 @@ class TariffPackageList : public ObjList<TariffPackage> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
         return "   select id, destination_id, prepaid_minutes, pricelist_id " \
             "   from billing.tariff_package " \
             "   order by id asc ";

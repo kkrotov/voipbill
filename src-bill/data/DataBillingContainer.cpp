@@ -207,7 +207,9 @@ void DataBillingContainer::loadLastCallIdAndCdrIdAndTime(BDb * db_calls) {
 }
 
 void DataBillingContainer::loadSyncCentralCallIdAndTime(BDb * db_main) {
-    auto res = db_main->query("select id, connect_time from calls_raw.calls_raw where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
+    auto res = db_main->query(
+            "select id, connect_time from calls_raw.calls_raw where server_id in " + app().conf.get_sql_regions_list() +
+            " order by id desc limit 1");
     if (res.next()) {
         lastSyncCentralCallId   = res.get_ll(0);
         lastSyncCentralCallTime = parseDateTime(res.get(1));
@@ -219,7 +221,9 @@ void DataBillingContainer::loadSyncCentralCallIdAndTime(BDb * db_main) {
 
 void DataBillingContainer::loadSyncCentralCdrIdAndTime(BDb * db_main) {
 
-    auto res = db_main->query("select id, setup_time from calls_cdr.cdr where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
+    auto res = db_main->query(
+            "select id, setup_time from calls_cdr.cdr where server_id in " + app().conf.get_sql_regions_list() +
+            " order by id desc limit 1");
     if (res.next()) {
 
         lastSyncCentralCdrId = res.get_ll(0);
@@ -234,7 +238,8 @@ void DataBillingContainer::loadSyncCentralCdrIdAndTime(BDb * db_main) {
 
 void DataBillingContainer::loadSyncCentralCdrUnfinishedIdAndTime(BDb * db_main) {
 
-    auto res = db_main->query("select id, setup_time from calls_cdr.cdr_unfinished where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
+    auto res = db_main->query("select id, setup_time from calls_cdr.cdr_unfinished where server_id in " +
+                              app().conf.get_sql_regions_list() + " order by id desc limit 1");
     if (res.next()) {
 
         lastSyncCentralCdrUnfinishedId = res.get_ll(0);

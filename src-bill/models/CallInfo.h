@@ -15,6 +15,8 @@
 #include "Pricelist.h"
 #include "PricelistPrice.h"
 #include "Geo.h"
+#include "Server.h"
+#include "InstanceSettings.h"
 #include "nnp/NNPNumberRange.h"
 
 #include "ServiceTrunkSettings.h"
@@ -26,6 +28,8 @@ struct DT {
 
 struct CallInfo {
     Call * call;
+    Server *server;
+    InstanceSettings *instanceSettings;
     Trunk * trunk;
     Client * account;
     ServiceNumber * serviceNumber;
@@ -47,6 +51,8 @@ struct CallInfo {
 
     CallInfo() {
         call = nullptr;
+        instanceSettings = nullptr;
+        server = nullptr;
         trunk = nullptr;
         account = nullptr;
         serviceNumber = nullptr;

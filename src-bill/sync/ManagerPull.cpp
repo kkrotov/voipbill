@@ -17,7 +17,8 @@ void ManagerPull::add(BasePull * pull) {
 
 void ManagerPull::pull() {
     string select_events_query =
-            "select event, param, version from event.queue where server_id = " + app().conf.str_instance_id + " order by server_id, version limit " + lexical_cast<string>(part_size);
+            "select event, param, version from event.queue where server_id in " + app().conf.get_sql_regions_list() +
+            " order by server_id, version limit " + lexical_cast<string>(part_size);
 
     while (true) {
         BDbResult res = db_main.query(select_events_query);
@@ -36,7 +37,8 @@ void ManagerPull::pull() {
             if (it != pulls.end()) {
                 it->second->addId(id);
             } else {
-                db_main.exec("delete from event.queue where server_id = " + app().conf.str_instance_id + " and event = '" + event + "'");
+                db_main.exec("delete from event.queue where server_id in " + app().conf.get_sql_regions_list() +
+                             " and event = '" + event + "'");
             }
         }
 
@@ -46,7 +48,8 @@ void ManagerPull::pull() {
             for (auto it : pulls) {
                 try {
                     it.second->pull();
-                    db_main.exec("delete from event.queue where server_id = " + app().conf.str_instance_id + " and event = '" + it.second->event  + "' and version <= " + version);
+                    db_main.exec("delete from event.queue where server_id in " + app().conf.get_sql_regions_list() +
+                                 " and event = '" + it.second->event + "' and version <= " + version);
                 } catch (Exception &e) {
                     e.addTrace("ManagerPull:pull");
                     Log::exception(e);

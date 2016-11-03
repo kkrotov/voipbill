@@ -228,7 +228,8 @@ void StatsFreeminManager::addChanges(map<int, StatsFreemin> &changes) {
 
 size_t StatsFreeminManager::sync(BDb * db_main, BDb * db_calls) {
 
-    BDbResult resMax = db_main->query("SELECT max(max_call_id) FROM billing.stats_freemin WHERE server_id='" + app().conf.str_instance_id +"'");
+    BDbResult resMax = db_main->query("SELECT max(max_call_id) FROM billing.stats_freemin WHERE server_id in " +
+                                      app().conf.get_sql_regions_list());
     long long int central_max_call_id = resMax.next() ? resMax.get_ll(0) : 0;
 
     BDbResult res = db_calls->query(

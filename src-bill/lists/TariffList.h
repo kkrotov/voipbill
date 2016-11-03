@@ -8,7 +8,6 @@ class TariffList : public ObjList<Tariff> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
         return "   select id, freemin, freemin_for_number, pricelist_id, paid_redirect, tariffication_by_minutes, tariffication_full_first_minute, tariffication_free_first_seconds " \
             "   from billing.tariff " \
             "   order by id asc ";

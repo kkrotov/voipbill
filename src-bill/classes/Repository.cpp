@@ -4,33 +4,32 @@ bool Repository::prepare(time_t currentTime) {
 
     this->currentTime = currentTime == 0 ? time(nullptr) : currentTime;
 
+    if ((hub = data->hub.get()) == nullptr) {
+        return false;
+    }
     {
-        shared_ptr<ServerList> list = data->server.get();
-        if (list != nullptr) {
-            auto item = list->find(app().conf.instance_id);
-            if (item != nullptr) {
-                server = data->server.get()->find(app().conf.instance_id);
-            } else {
-                return false;
-            }
-        } else {
-            return false;
+        if (app().conf.hub_id > 0) {
+            auto item = hub->find(app().conf.hub_id);
+            if (item == nullptr) false;
         }
     }
 
-    {
-        shared_ptr<InstanceSettingsList> list = data->instanceSettings.get();
-        if (list != nullptr) {
-            auto item = list->find(app().conf.instance_id);
-            if (item != nullptr) {
-                instanceSettings = item;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+    if ((server = data->server.get()) == nullptr) {
+        return false;
     }
+    {
+        auto item = server->find(app().conf.instance_id);
+        if (item == nullptr) false;
+    }
+
+    if ((instanceSettings = data->instanceSettings.get()) == nullptr) {
+        return false;
+    }
+    {
+        auto item = instanceSettings->find(app().conf.instance_id);
+        if (item == nullptr) false;
+    }
+
 
     if ((airp = data->airp.get()) == nullptr) {
         return false;

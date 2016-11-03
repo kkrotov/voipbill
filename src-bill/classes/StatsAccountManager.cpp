@@ -330,7 +330,8 @@ size_t StatsAccountManager::sync(BDb * db_main, DataBillingContainer * billingDa
         try {
             if (needClear) {
                 BDbTransaction trans(db_main);
-                db_main->exec("DELETE FROM billing.stats_account WHERE server_id = " + app().conf.str_instance_id);
+                db_main->exec(
+                        "DELETE FROM billing.stats_account WHERE server_id in " + app().conf.get_sql_regions_list());
                 db_main->exec(query.str());
                 trans.commit();
             } else {

@@ -59,11 +59,13 @@
 #include "nnp/NNPPackagePricelistData.h"
 #include "nnp/NNPPrefixDestinationData.h"
 #include "nnp/NNPAccountTariffLightData.h"
+#include "HubData.h"
 
 
 class DataContainer {
 public:
     ServerData server;
+    HubData hub;
     InstanceSettingsData instanceSettings;
     AirpData airp;
     NumberData number;

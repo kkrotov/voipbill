@@ -8,11 +8,10 @@ class RouteTableList : public ObjList<RouteTable> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
         return "   select id, name " \
             "   from auth.route_table " \
-            "   where server_id = " + server_id +
-            "   order by id asc ";
+            "   where server_id in " + app().conf.get_sql_regions_list() +
+               "   order by id asc ";
     }
 
     inline void parse_item(BDbResult &row, RouteTable * item) {

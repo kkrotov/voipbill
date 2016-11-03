@@ -4,6 +4,7 @@
 
 struct Trunk {
     int id;
+    int server_id;
     char name[51];
     char trunk_name[33];
     int code;
@@ -26,6 +27,7 @@ struct Trunk {
         trace << "(";
         trace << "id: " << id << ", ";
         trace << "trunk_name: " << trunk_name << ", ";
+        trace << "server_id: " << server_id << ", ";
         trace << "code: " << code << ", ";
         trace << "source_rule_default_allowed: " << source_rule_default_allowed << ", ";
         trace << "destination_rule_default_allowed: " << destination_rule_default_allowed << ", ";
