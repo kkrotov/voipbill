@@ -75,7 +75,6 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
 }
 
 
-
 /********************************************************************************************************************
  *  Реализация тарификации плеча по схеме "авторизация по транку"
  */
@@ -144,8 +143,9 @@ void BillingCall::calcByNumber() {
         *trace << "INFO|TARIFFICATION BY NUMBER" << "\n";
     }
 
-    if (call->orig) {
-        processLineWithoutNumber(call, cdr); // на оригинационном плече отрабатывается случай выполнения звонка
+    if (call->orig && atoll(cdr->redirect_number) == 0) {
+        processLineWithoutNumber(call,
+                                 cdr->src_number); // на оригинационном плече отрабатывается случай выполнения звонка
         // c линии без номера
 
     }
@@ -343,7 +343,8 @@ void BillingCall::processRedirectNumber() {
         long long int redirect_number = atoll(cdr->redirect_number);
 
         if (redirect_number > 0) {
-            call->src_number = redirect_number;
+
+            processLineWithoutNumber(call, cdr->redirect_number);
 
             if (trace != nullptr) {
                 *trace << "INFO|PROCESS REDIRECT NUMBER|SET SRC_NUMBER = " << call->src_number << "\n";
@@ -467,22 +468,22 @@ int BillingCall::getDest(int geo_id) {
  *  функция отрезазает префикс и оставляет в поле внутренний номер такой линии - здесь будет 4026
  */
 
-void BillingCall::processLineWithoutNumber(Call *call, Cdr *cdr) {
+void BillingCall::processLineWithoutNumber(Call *call, char *cdr_num) {
     char *pos = nullptr;
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "=2A");
+        pos = strstr(cdr_num, "=2A");
         if (pos != nullptr) pos += 3;
     }
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "=2B");
+        pos = strstr(cdr_num, "=2B");
         if (pos != nullptr) pos += 3;
     }
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "*");
+        pos = strstr(cdr_num, "*");
         if (pos != nullptr) pos += 1;
     }
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "+");
+        pos = strstr(cdr_num, "+");
         if (pos != nullptr) pos += 1;
     }
     if (pos != nullptr) {
@@ -490,7 +491,10 @@ void BillingCall::processLineWithoutNumber(Call *call, Cdr *cdr) {
         if (trace != nullptr) {
             *trace << "INFO|LINE WITHOUT NUMBER|SET SRC_NUMBER = " << call->src_number << "\n";
         }
+    } else {
+        if (cdr_num != nullptr) call->src_number = atoll(cdr_num);
     }
+
 }
 
 
@@ -931,7 +935,7 @@ void BillingCall::setupFreemin() {
                             (callInfo->mainTariff->freemin_for_number ? 1 : callInfo->serviceNumber->lines_count);
     if (trace != nullptr) {
         *trace << "INFO|FREEMIN|TARIFF " << tariffFreeSeconds << " SECONDS, TARIFF_ID: " << callInfo->mainTariff->id <<
-        "\n";
+               "\n";
     }
 
     if (tariffFreeSeconds <= 0) {
