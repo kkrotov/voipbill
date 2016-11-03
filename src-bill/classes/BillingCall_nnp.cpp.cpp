@@ -24,9 +24,7 @@ void BillingCall::calcOrigNNPByNumber() {
     if (nnpNumberRange == nullptr) throw CalcException("NOT FOUND NumberRange");
 
     repository->getNNPDestinationByNumberRange(nnpDestinationIds, nnpNumberRange, trace);
-
-    if (nnpDestinationIds.size() == 0) throw CalcException("NOT FOUND Destination");
-
+    
     setupBilledTimeNNP(*nnpAccountTariffLightList.begin());
 
     auto effectivePackagePrice = setupNNPPackagePrice(nnpAccountTariffLightList,
@@ -188,6 +186,8 @@ int BillingCall::getCallLengthNNP(int len, int tarification_free_seconds, int ta
         return 0;
 
     int s = len % interval_seconds;
+
+    if (s == 0) return len;
 
     if (s <= interval_seconds / 2 && (tarification_type == 1))
         return ((int) len / interval_seconds) * interval_seconds;
