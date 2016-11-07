@@ -24,7 +24,7 @@ void BillingCall::calcOrigNNPByNumber() {
     if (nnpNumberRange == nullptr) throw CalcException("NOT FOUND NumberRange");
 
     repository->getNNPDestinationByNumberRange(nnpDestinationIds, nnpNumberRange, trace);
-    
+
     setupBilledTimeNNP(*nnpAccountTariffLightList.begin());
 
     auto effectivePackagePrice = setupNNPPackagePrice(nnpAccountTariffLightList,
@@ -168,12 +168,13 @@ void BillingCall::setupBilledTimeNNP(NNPAccountTariffLight nnpAccountTariffLight
             cdr->session_time,
             nnpAccountTariffLight.tarification_free_seconds,
             nnpAccountTariffLight.tarification_interval_seconds,
-            nnpAccountTariffLight.tarification_type
+            nnpAccountTariffLight.tarification_type,
+            nnpAccountTariffLight.tarification_min_paid_seconds
     );
 }
 
 int BillingCall::getCallLengthNNP(int len, int tarification_free_seconds, int tarification_interval_seconds,
-                                  int tarification_type) {
+                                  int tarification_type, int tarification_min_paid_seconds) {
 
     int interval_seconds = tarification_interval_seconds;
 
@@ -184,6 +185,9 @@ int BillingCall::getCallLengthNNP(int len, int tarification_free_seconds, int ta
 
     if (len <= std::abs(tarification_free_seconds))
         return 0;
+
+    if (len <= std::abs(tarification_min_paid_seconds))
+        return std::abs(tarification_min_paid_seconds);
 
     int s = len % interval_seconds;
 

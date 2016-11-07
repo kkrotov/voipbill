@@ -22,6 +22,8 @@ public:
         fields.push_back("tarification_free_seconds");
         fields.push_back("tarification_interval_seconds");
         fields.push_back("tarification_type");
+        fields.push_back("tarification_min_paid_seconds");
+
         fields.push_back("price");
 
         datatype.push_back("id integer");
@@ -34,6 +36,7 @@ public:
         datatype.push_back("tarification_free_seconds integer");
         datatype.push_back("tarification_interval_seconds integer");
         datatype.push_back("tarification_type integer");
+        datatype.push_back("tarification_min_paid_seconds integer");
         datatype.push_back("price double precision");
 
     }
