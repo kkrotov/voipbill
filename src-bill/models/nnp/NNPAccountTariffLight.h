@@ -13,7 +13,8 @@ struct NNPAccountTariffLight {
     int tarification_free_seconds;
     int tarification_interval_seconds;
     int tarification_type;
-
+    int tarification_min_paid_seconds;
+    
     double price;
 
     void dump(stringstream &trace) {
@@ -28,6 +29,7 @@ struct NNPAccountTariffLight {
         trace << "tarification_free_seconds: " << tarification_free_seconds << ", ";
         trace << "tarification_interval_seconds: " << tarification_interval_seconds << ", ";
         trace << "tarification_type: " << tarification_type << ", ";
+        trace << "tarification_min_paid_seconds: " << tarification_min_paid_seconds << ", ";
         trace << "price: " << price << ", ";       
         trace << ")";
     }

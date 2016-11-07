@@ -97,6 +97,7 @@ protected:
     void setupNNPCost();
 
     int
-    getCallLengthNNP(int len, int tarification_free_seconds, int tarification_interval_seconds, int tarification_type);
+    getCallLengthNNP(int len, int tarification_free_seconds, int tarification_interval_seconds,
+                     int tarification_type, int tarification_min_paid_seconds);
 };
 
