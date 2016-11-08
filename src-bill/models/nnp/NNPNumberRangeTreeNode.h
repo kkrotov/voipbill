@@ -28,9 +28,9 @@ public:
 
     Borders& getBorders () { return borders;}
 
-    int getHeight() { return height; }  // Возвращает высоту узла
+    int getHeight() { return height; }
 
-    void setHeight(int h) { height = h; }  // Возвращает высоту узла
+    void setHeight(int h) { height = h; }
 
     void setLeftNode(int64_t node) { leftNode = node; }
 
