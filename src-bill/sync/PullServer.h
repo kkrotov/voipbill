@@ -18,6 +18,7 @@ public:
         fields.push_back("min_price_for_autorouting");
         fields.push_back("our_numbers_id");
         fields.push_back("service_numbers");
+        fields.push_back("hub_id");
 
         datatype.push_back("id smallint");
         datatype.push_back("low_balance_outcome_id integer");
@@ -26,5 +27,6 @@ public:
         datatype.push_back("min_price_for_autorouting integer");
         datatype.push_back("our_numbers_id integer");
         datatype.push_back("service_numbers text");
+        datatype.push_back("hub_id integer");
     }
 };

@@ -110,12 +110,14 @@ void TaskRecalc::run() {
 
 
     setStatus("13. delete calls_raw from main");
-    db_main->exec("DELETE FROM calls_raw.calls_raw WHERE server_id = " + app().conf.str_instance_id + " and id >= " + lexical_cast<string>(recalc_from_call_id));
+    db_main->exec(
+            "DELETE FROM calls_raw.calls_raw WHERE server_id in " + app().conf.get_sql_regions_list() + " and id >= " +
+            lexical_cast<string>(recalc_from_call_id));
 
     setStatus("14. sync accounts");
     {
         BDbTransaction trans(db_main);
-        db_main->exec("DELETE FROM billing.stats_account WHERE server_id = " + app().conf.str_instance_id);
+        db_main->exec("DELETE FROM billing.stats_account WHERE server_id in " + app().conf.get_sql_regions_list());
         repository.billingData->statsAccount.sync(db_main, repository.billingData);
         trans.commit();
     }
@@ -123,7 +125,8 @@ void TaskRecalc::run() {
     setStatus("15. sync freemin");
     {
         BDbTransaction trans(db_main);
-        db_main->exec("DELETE FROM billing.stats_freemin WHERE server_id = " + app().conf.str_instance_id + " and max_call_id > " + lexical_cast<string>(oldStoredLastId));
+        db_main->exec("DELETE FROM billing.stats_freemin WHERE server_id in " + app().conf.get_sql_regions_list() +
+                      " and max_call_id > " + lexical_cast<string>(oldStoredLastId));
         repository.billingData->statsFreemin.sync(db_main, &db_calls);
         trans.commit();
     }
@@ -131,7 +134,8 @@ void TaskRecalc::run() {
     setStatus("16. sync package");
     {
         BDbTransaction trans(db_main);
-        db_main->exec("DELETE FROM billing.stats_package WHERE server_id = " + app().conf.str_instance_id + " and max_call_id > " + lexical_cast<string>(oldStoredLastId));
+        db_main->exec("DELETE FROM billing.stats_package WHERE server_id in " + app().conf.get_sql_regions_list() +
+                      " and max_call_id > " + lexical_cast<string>(oldStoredLastId));
         repository.billingData->statsPackage.sync(db_main, &db_calls);
         trans.commit();
     }
@@ -139,7 +143,9 @@ void TaskRecalc::run() {
     setStatus("17. sync trunk settings");
     {
         BDbTransaction trans(db_main);
-        db_main->exec("DELETE FROM billing.stats_trunk_settings WHERE server_id = " + app().conf.str_instance_id + " and max_call_id > " + lexical_cast<string>(oldStoredLastId));
+        db_main->exec(
+                "DELETE FROM billing.stats_trunk_settings WHERE server_id in " + app().conf.get_sql_regions_list() +
+                " and max_call_id > " + lexical_cast<string>(oldStoredLastId));
         repository.billingData->statsTrunkSettings.sync(db_main, &db_calls);
         trans.commit();
     }
@@ -147,7 +153,9 @@ void TaskRecalc::run() {
     setStatus("18. sync nnp package minute");
     {
         BDbTransaction trans(db_main);
-        db_main->exec("DELETE FROM billing.stats_nnp_package_minute WHERE server_id = " + app().conf.str_instance_id + " and max_call_id > " + lexical_cast<string>(oldStoredLastId));
+        db_main->exec(
+                "DELETE FROM billing.stats_nnp_package_minute WHERE server_id in " + app().conf.get_sql_regions_list() +
+                " and max_call_id > " + lexical_cast<string>(oldStoredLastId));
         repository.billingData->statsNNPPackageMinute.sync(db_main, &db_calls);
         trans.commit();
     }

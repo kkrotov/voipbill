@@ -13,12 +13,23 @@ void RadiusAuthProcessor::init() {
     }
 
     billingNotReady = false;
-    server = repository.getServer();
 
     origTrunk = repository.getTrunkByName(request->trunkName.c_str());
     if (origTrunk == nullptr) {
         throw Exception("Udp request validation: trunk not found: " + request->trunkName,
                         "RadiusAuthProcessor::process");
+    }
+
+    server = repository.getServer(origTrunk->server_id);
+    if (server == nullptr) {
+        throw Exception(
+                "Udp request validation: server_id" + to_string(origTrunk->server_id) + " by trunk not found: " +
+                request->trunkName,
+                "RadiusAuthProcessor::process");
+    }
+
+    if (trace != nullptr) {
+        *trace << "INFO|REGION_ID|" << server->id << "\n";
     }
 
     aNumber = request->srcNumber;

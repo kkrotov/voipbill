@@ -8,7 +8,6 @@ class RouteTableRouteList : public ObjList<RouteTableRoute> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
         return "   select route_table_id, \"order\", a_number_id, b_number_id, outcome_id, outcome_route_table_id " \
             "   from auth.route_table_route " \
             "   order by route_table_id asc, \"order\" asc ";

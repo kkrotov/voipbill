@@ -7,7 +7,6 @@
 class GlobalCountersList : public ObjList<GlobalCounters> {
 protected:
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
         string sDay = string_date(get_tday(time(nullptr)), 9);
         string sMonth = string_date(get_tmonth(time(nullptr)), 10);
         return "   select account_id, sum(sum), " \
@@ -15,7 +14,8 @@ protected:
            "          sum(case when amount_day = '" + sDay + "' then sum_mn_day else 0 end), " \
            "          sum(case when amount_month = '" + sMonth + "' then sum_month else 0 end) " \
            "   from billing.stats_account " \
-           "     where server_id<>" + server_id + " and (sum<>0 or sum_day<>0 or sum_mn_day<>0 or sum_month<>0) " \
+           "     where server_id not in " + app().conf.get_sql_regions_list() +
+               " and (sum<>0 or sum_day<>0 or sum_mn_day<>0 or sum_month<>0) " \
            "     group by account_id " \
            "     order by account_id asc ";
     }

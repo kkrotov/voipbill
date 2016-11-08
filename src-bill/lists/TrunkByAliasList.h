@@ -8,11 +8,10 @@ class TrunkByAliasList : public ObjList<Trunk> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
         return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, source_trunk_rule_default_allowed, default_priority, auto_routing, route_table_id, \
-                    our_trunk, auth_by_number, orig_redirect_number_7800, orig_redirect_number, term_redirect_number, capacity, sw_minimalki " \
+                    our_trunk, auth_by_number, orig_redirect_number_7800, orig_redirect_number, term_redirect_number, capacity, sw_minimalki,server_id  " \
             "   from auth.trunk " \
-            "   where server_id = " + server_id + " and trunk_name_alias is not null "
+            "   where server_id in " + app().conf.get_sql_regions_list() + " and trunk_name_alias is not null "
             "   order by trunk_name_alias asc ";
     }
 
@@ -34,6 +33,7 @@ protected:
         item->term_redirect_number = row.get_b(14);
         item->capacity = row.get_i(15);
         item->sw_minimalki = row.get_b(16);
+        item->server_id = row.get_i(17);
     }
 
     struct key_trunk_name {

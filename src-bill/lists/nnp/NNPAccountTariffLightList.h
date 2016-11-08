@@ -10,7 +10,7 @@ protected:
     string sql(BDb *db) {
         return "select id, account_tariff_id, account_client_id, " \
             "   tariff_id, extract(epoch from activate_from), extract(epoch from deactivate_from), coefficient, " \
-            "   tariffication_by_minutes, tariffication_full_first_minute, tariffication_free_first_seconds, price  " \
+            "   tarification_free_seconds, tarification_interval_seconds, tarification_type, tarification_min_paid_seconds, price  " \
             "   from nnp.account_tariff_light order by id asc";
 
     }
@@ -23,10 +23,11 @@ protected:
         item->activate_from = row.get_i(4);
         item->deactivate_from = row.get_i(5);
         item->coefficient = row.get_d(6);
-        item->tariffication_by_minutes = row.get_b(7);
-        item->tariffication_full_first_minute = row.get_b(8);
-        item->tariffication_free_first_seconds = row.get_b(9);
-        item->price = row.get_d(10);
+        item->tarification_free_seconds = row.get_i(7);
+        item->tarification_interval_seconds = row.get_i(8);
+        item->tarification_type = row.get_i(9);
+        item->tarification_min_paid_seconds = row.get_i(10);
+        item->price = row.get_d(11);
     }
 
     struct key_id {

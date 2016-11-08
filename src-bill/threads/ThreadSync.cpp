@@ -33,6 +33,8 @@
 #include "../sync/PullRouteTableRoute.h"
 #include "../sync/PullRoutingReportData.h"
 #include "../sync/PullTrunk.h"
+#include "../sync/PullHub.h"
+
 #include "../sync/PullTrunkGroup.h"
 #include "../sync/PullTrunkGroupItem.h"
 #include "../sync/PullTrunkNumberPreprocessing.h"
@@ -87,6 +89,8 @@ ThreadSync::ThreadSync() {
     manager->add(new PullCurrencyRate());
 
     manager->add(new PullServer());
+    manager->add(new PullHub());
+
     manager->add(new PullAirp());
     manager->add(new PullNumber());
     manager->add(new PullOutcome());

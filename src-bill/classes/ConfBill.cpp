@@ -35,7 +35,13 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     }
     calls_raw_sync_delay = pt.get<int>("main.calls_raw_sync_delay", 5);
     instance_id = pt.get<uint16_t>("geo.instance_id");
+
     str_instance_id = boost::lexical_cast<string>(instance_id);
+
+    sql_regions_list = pt.get<string>("main.sql_regions_list", "(" + str_instance_id + ")");
+
+    hub_id = pt.get<uint16_t>("main.hub_id", 0);
+
 
     openca_udp_host = pt.get<string>("udp.host", "");
     openca_udp_port = pt.get<uint16_t>("udp.port", 0);

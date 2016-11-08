@@ -22,6 +22,7 @@ public:
         fields.push_back("route_case_2_id");
         fields.push_back("release_reason_id");
         fields.push_back("airp_id");
+        fields.push_back("sw_shared");
 
         datatype.push_back("id integer");
         datatype.push_back("server_id integer");
@@ -34,5 +35,6 @@ public:
         datatype.push_back("route_case_2_id integer");
         datatype.push_back("release_reason_id integer");
         datatype.push_back("airp_id integer");
+        datatype.push_back("sw_shared boolean");
     }
 };

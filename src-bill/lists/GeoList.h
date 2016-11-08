@@ -7,7 +7,6 @@
 class GeoList : public ObjList<Geo> {
 protected:
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
         return "   select id, country, region, city " \
             "   from geo.geo " \
             "   order by id asc ";

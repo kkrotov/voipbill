@@ -16,6 +16,9 @@ public:
     uint16_t instance_id;
     string str_instance_id;
 
+    uint16_t hub_id;
+    string str_hub_id;
+
     string openca_udp_host;
     uint16_t openca_udp_port;
     uint16_t udp_openca_select_interval;
@@ -36,6 +39,14 @@ public:
     std::string cdr_nasip;
     int cdr_parcer_interval;
     int calls_raw_sync_delay;
+
+    string sql_regions_list;
+
+    string get_sql_regions_list() { return sql_regions_list; }
+
+    void set_sql_regions_list(string sql) { sql_regions_list = sql; }
+
+    string get_sql_hub_id() { return hub_id > 0 ? to_string(hub_id) : "NULL"; }
 
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);

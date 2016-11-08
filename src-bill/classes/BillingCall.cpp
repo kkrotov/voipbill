@@ -75,7 +75,6 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
 }
 
 
-
 /********************************************************************************************************************
  *  Реализация тарификации плеча по схеме "авторизация по транку"
  */
@@ -144,8 +143,9 @@ void BillingCall::calcByNumber() {
         *trace << "INFO|TARIFFICATION BY NUMBER" << "\n";
     }
 
-    if (call->orig) {
-        processLineWithoutNumber(call, cdr); // на оригинационном плече отрабатывается случай выполнения звонка
+    if (call->orig && atoll(cdr->redirect_number) == 0) {
+        processLineWithoutNumber(call,
+                                 cdr->src_number); // на оригинационном плече отрабатывается случай выполнения звонка
         // c линии без номера
 
     }
@@ -166,7 +166,7 @@ void BillingCall::calcByNumber() {
         // не тарифицируем звонки, которые переведены на сервисные номера см. поле в базе publiс.server.service_numbers
         // на этих сервисных номерах находятся автоответчики типи "недостаточно денег для звонка" и прочее.
         if (cdr->dst_replace[0] != 0) {
-            for (auto srvNumber : repository->getServer()->service_numbers) {
+            for (auto srvNumber : callInfo->server->service_numbers) {
                 if (srvNumber.compare(cdr->dst_replace) == 0) {
                     call->is_service_number = true;
                     return;
@@ -343,7 +343,8 @@ void BillingCall::processRedirectNumber() {
         long long int redirect_number = atoll(cdr->redirect_number);
 
         if (redirect_number > 0) {
-            call->src_number = redirect_number;
+
+            processLineWithoutNumber(call, cdr->redirect_number);
 
             if (trace != nullptr) {
                 *trace << "INFO|PROCESS REDIRECT NUMBER|SET SRC_NUMBER = " << call->src_number << "\n";
@@ -433,6 +434,7 @@ void BillingCall::processDestinations() {
 
 
 int BillingCall::getDest(int geo_id) {
+
     callInfo->geo = repository->getGeo(geo_id);
     if (callInfo->geo == nullptr) {
         if (trace != nullptr) {
@@ -441,20 +443,20 @@ int BillingCall::getDest(int geo_id) {
         return 2;
     }
 
-    if (!call->mob && repository->getInstanceSettings()->city_id > 0 &&
-        callInfo->geo->city_id == repository->getInstanceSettings()->city_id) {
+    if (!call->mob && callInfo->instanceSettings->city_id > 0 &&
+        callInfo->geo->city_id == callInfo->instanceSettings->city_id) {
         return -1;
     }
 
-    auto regionIds = repository->getInstanceSettings()->getRegionIds();
+    auto regionIds = callInfo->instanceSettings->getRegionIds();
     for (auto it = regionIds.begin(); it != regionIds.end(); ++it) {
         if (callInfo->geo->region_id == *it) {
             return 0;
         }
     }
 
-    if (repository->getInstanceSettings()->country_id > 0 &&
-        callInfo->geo->country_id == repository->getInstanceSettings()->country_id) {
+    if (callInfo->instanceSettings->country_id > 0 &&
+        callInfo->geo->country_id == callInfo->instanceSettings->country_id) {
         return 1;
     }
 
@@ -467,22 +469,22 @@ int BillingCall::getDest(int geo_id) {
  *  функция отрезазает префикс и оставляет в поле внутренний номер такой линии - здесь будет 4026
  */
 
-void BillingCall::processLineWithoutNumber(Call *call, Cdr *cdr) {
+void BillingCall::processLineWithoutNumber(Call *call, char *cdr_num) {
     char *pos = nullptr;
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "=2A");
+        pos = strstr(cdr_num, "=2A");
         if (pos != nullptr) pos += 3;
     }
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "=2B");
+        pos = strstr(cdr_num, "=2B");
         if (pos != nullptr) pos += 3;
     }
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "*");
+        pos = strstr(cdr_num, "*");
         if (pos != nullptr) pos += 1;
     }
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "+");
+        pos = strstr(cdr_num, "+");
         if (pos != nullptr) pos += 1;
     }
     if (pos != nullptr) {
@@ -490,7 +492,10 @@ void BillingCall::processLineWithoutNumber(Call *call, Cdr *cdr) {
         if (trace != nullptr) {
             *trace << "INFO|LINE WITHOUT NUMBER|SET SRC_NUMBER = " << call->src_number << "\n";
         }
+    } else {
+        if (cdr_num != nullptr) call->src_number = atoll(cdr_num);
     }
+
 }
 
 
@@ -570,12 +575,30 @@ bool BillingCall::isUsage7800() {
 
 void BillingCall::setupTrunk() {
     callInfo->trunk = repository->getTrunkByName(getRoute());
+    call->server_id = app().conf.instance_id;
     if (callInfo->trunk == nullptr) {
         throw CalcException("TRUNK WAS NOT FOUND");
     }
 
     call->trunk_id = callInfo->trunk->id;  // Из таблицы - auth.trunk
     call->our = callInfo->trunk->our_trunk || callInfo->trunk->auth_by_number;
+
+    callInfo->server = repository->getServer(callInfo->trunk->server_id);
+    if (callInfo->server == nullptr) {
+        throw CalcException("SERVER WAS NOT FOUND");
+    }
+
+    call->server_id = callInfo->server->id;
+
+    callInfo->instanceSettings = repository->getInstanceSettings(callInfo->trunk->server_id);
+    if (callInfo->instanceSettings == nullptr) {
+        throw CalcException("INSTANCESETTINGS WAS NOT FOUND");
+    }
+
+    if (trace != nullptr) {
+        *trace << "INFO|REGION_ID|" << callInfo->server->id << "\n";
+    }
+
 }
 
 /******************************************************************************************************************
@@ -931,7 +954,7 @@ void BillingCall::setupFreemin() {
                             (callInfo->mainTariff->freemin_for_number ? 1 : callInfo->serviceNumber->lines_count);
     if (trace != nullptr) {
         *trace << "INFO|FREEMIN|TARIFF " << tariffFreeSeconds << " SECONDS, TARIFF_ID: " << callInfo->mainTariff->id <<
-        "\n";
+               "\n";
     }
 
     if (tariffFreeSeconds <= 0) {
