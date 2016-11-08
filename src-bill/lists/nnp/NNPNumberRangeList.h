@@ -16,7 +16,6 @@ protected:
 
     inline void parse_item(BDbResult &row, NNPNumberRange *item);
 
-    struct key_full_number_from;
 
     int64_t insertNode(int64_t p, NNPNumberRange *item); // вставка ключа k в дерево с корнем p
 
@@ -34,6 +33,6 @@ public:
 
     NNPNumberRange *getNNPNumberRange(long long int num, stringstream *trace);
 
-    void searchNumberRanges(set<NNPNumberRange> &numberRangeSet, PhoneNumber num);
+    int searchNumberRanges(NNPNumberRange *&numberRange, PhoneNumber num, int64_t p);
 
 };

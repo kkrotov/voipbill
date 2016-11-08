@@ -27,47 +27,21 @@ void NNPNumberRangeList::parse_item(BDbResult &row, NNPNumberRange *item) {
     avlRoot = insertNode(avlRoot, item);
 }
 
-struct NNPNumberRangeList::key_full_number_from {
-    bool operator()(const NNPNumberRange &left, long long int num) {
-        return left.full_number_from <= num;
-    }
-
-    bool operator()(long long int num, const NNPNumberRange &right) {
-        return num <= right.full_number_to;
-    }
-};
-
 NNPNumberRange *NNPNumberRangeList::getNNPNumberRange(long long int num, stringstream *trace) {
     if (num > 0 && this->data.size() > 0) {
 
-        auto begin_orig = this->data.begin();
-        auto end_orig = this->data.end();
-
-        auto begin = begin_orig;
-        auto end = end_orig;
-        {
-            int i = 0;
-            do {
-                auto p = equal_range(begin, end, num, key_full_number_from());
-                begin = p.first;
-                end = p.second;
-
-                if ((begin != begin_orig) && (begin != end_orig)) {
-
-                    auto item = begin - 1;
-
-                    if (item->full_number_from <= num && num <= item->full_number_to) {
-                        if (trace != nullptr) {
-                            *trace << "FOUND|NNPNumberRange|BY NUM '" << num << "'" << "\n";
-                            *trace << "||";
-                            item->dump(*trace);
-                            *trace << "\n";
-                        }
-                        return &*item;
-                    }
+        NNPNumberRange *item = nullptr;
+        searchNumberRanges(item, num, avlRoot);
+        if (item) {
+            if (item->full_number_from <= num && num <= item->full_number_to) {
+                if (trace != nullptr) {
+                    *trace << "FOUND|NNPNumberRange|BY NUM '" << num << "'" << "\n";
+                    *trace << "||";
+                    item->dump(*trace);
+                    *trace << "\n";
                 }
-                i++;
-            } while (begin != end && i < 5);
+                return &*item;
+            }
         }
     }
     if (trace != nullptr) {
@@ -78,33 +52,48 @@ NNPNumberRange *NNPNumberRangeList::getNNPNumberRange(long long int num, strings
 }
 
 size_t NNPNumberRangeList::dataSize() {
-
-    map<int, int> count;
-
     size_t size = sizeof(NNPNumberRange) * this->data.size() + avlTree.size() * sizeof(NNPNumberRangeTreeNode);
 
-    for (auto i = avlTree.begin(); i != avlTree.end(); i++) {
-        count[i->getIntervalOverlapsCount()] += 1;
-        size += i->dataSize();
-    }
     return size;
 }
 
 
-void NNPNumberRangeList::searchNumberRanges(set<NNPNumberRange> &numberRangeSet, PhoneNumber num) {
-    if (avlRoot == -1) return;
+int NNPNumberRangeList::searchNumberRanges(NNPNumberRange *&numberRange, PhoneNumber num, int64_t p) {
+    if (avlRoot == -1) return 0;
 
+    int intersects = 0;
+    if (num==avlTree[p].getKey()) {
+        for (auto it = avlTree[p].getBorders().begin(); it != avlTree[p].getBorders().end(); ++it) {
+            if (numberRange) {
+                if (numberRange->getLength() >= (*it).second->getLength())
+                    numberRange = (*it).second;
+            }
+            else
+                numberRange = (*it).second;
 
-/*
-    if (node->getLeftNode() != nullptr) {
-        searchNumberRanges(numberRangeSet, num, node->getLeftNode());
+        }
+        intersects += avlTree[p].getBorders().size();
+        return intersects;
     }
-
-    if (node->getRightNode() != nullptr) {
-        searchNumberRanges(numberRangeSet, num, node->getRightNode());
+    for (auto it = avlTree[p].getBorders().begin(); it != avlTree[p].getBorders().end(); ++it) {
+        if (num <= (*it).first.second && num >= (*it).first.first) {
+            intersects++;
+            if (numberRange) {
+                if (numberRange->getLength() >= (*it).second->getLength())
+                    numberRange = (*it).second;
+            }
+            else
+                numberRange = (*it).second;
+        }
     }
-*/
-
+    if (num <= avlTree[p].getKey()) {
+        if (avlTree[p].getLeftNode() != -1)
+            intersects += searchNumberRanges(numberRange, num, avlTree[p].getLeftNode());
+    }
+    else if (num > avlTree[p].getKey())
+        if (avlTree[p].getRightNode() != -1)
+            intersects += searchNumberRanges(numberRange, num, avlTree[p].getRightNode());
+    return intersects;
 }
 
 
@@ -127,7 +116,18 @@ int64_t NNPNumberRangeList::rotateRight(int64_t n_node) // правый пово
 {
     int64_t q = avlTree[n_node].getLeftNode();
     avlTree[n_node].setLeftNode(avlTree[q].getRightNode());
-    avlTree[n_node].setRightNode(n_node);
+    avlTree[q].setRightNode(n_node);
+
+    for (auto i = avlTree[n_node].getBorders().begin(); i != avlTree[n_node].getBorders().end(); ) {
+        if ((*i).first.first <= avlTree[q].getKey() && (*i).first.second >= avlTree[q].getKey()) {
+            NNPNumberRange* upLift = (*i).second;
+            avlTree[q].addNNPNumberRange(upLift);
+            i = avlTree[n_node].getBorders().erase (i);
+            continue;
+        }
+        i++;
+    }
+
     fixHeight(n_node);
     fixHeight(q);
     return q;
@@ -137,7 +137,18 @@ int64_t NNPNumberRangeList::rotateLeft(int64_t n_node) // левый повор�
 {
     int64_t q = avlTree[n_node].getRightNode();
     avlTree[n_node].setRightNode(avlTree[q].getLeftNode());
-    avlTree[n_node].setLeftNode(n_node);
+    avlTree[q].setLeftNode(n_node);
+
+    for (auto i = avlTree[n_node].getBorders().begin(); i != avlTree[n_node].getBorders().end(); ) {
+        if ((*i).first.first <= avlTree[q].getKey() && (*i).first.second >= avlTree[q].getKey()) {
+            NNPNumberRange* upLift = (*i).second;
+            avlTree[q].addNNPNumberRange(upLift);
+            i = avlTree[n_node].getBorders().erase (i);
+            continue;
+        }
+        i++;
+    }
+
     fixHeight(n_node);
     fixHeight(q);
     return q;
@@ -169,8 +180,10 @@ int64_t NNPNumberRangeList::insertNode(int64_t p, NNPNumberRange *item) // вс�
         return avlTree.size() - 1;
     }
 
-    if (avlTree[p].isOverlaps(item))
+    if (avlTree[p].isOverlaps(item)) {
         avlTree[p].addNNPNumberRange(item);
+        return balance(p);
+    }
 
     if (item->getMidKey() < avlTree[p].getKey())
         avlTree[p].setLeftNode(insertNode(avlTree[p].getLeftNode(), item));

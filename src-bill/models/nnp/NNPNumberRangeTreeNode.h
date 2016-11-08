@@ -5,12 +5,18 @@
 class NNPNumberRangeTreeNode {
 private:
 
-    map<int, NNPNumberRange> ranges;
+
+
     int64_t leftNode, rightNode;
     PhoneNumber key;      // ключ узла
     int height; // высота поддерева с корнем в данном узле
 
+    /* Список пар ( (левая граница, правая граница) : NumberRange* ) */
+    typedef list<pair<pair<PhoneNumber, PhoneNumber> , NNPNumberRange*>> Borders;
+    Borders borders;
+
 public:
+
 
     NNPNumberRangeTreeNode(NNPNumberRange *item);
 
@@ -19,6 +25,8 @@ public:
     bool isOverlaps(NNPNumberRange *item);
 
     void addNNPNumberRange(NNPNumberRange *item);
+
+    Borders& getBorders () { return borders;}
 
     int getHeight() { return height; }  // Возвращает высоту узла
 
@@ -32,7 +40,8 @@ public:
 
     int64_t getRightNode() { return rightNode; }
 
-    unsigned long getIntervalOverlapsCount() { return ranges.size(); }
+    unsigned long getIntervalOverlapsCount() { return borders.size(); }
 
     size_t dataSize();
+
 };

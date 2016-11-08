@@ -23,11 +23,12 @@ bool NNPNumberRangeTreeNode::isOverlaps(NNPNumberRange *item) {
 
 void NNPNumberRangeTreeNode::addNNPNumberRange(NNPNumberRange *item) {
     if (item != nullptr) {
-        ranges[item->id] = *item;
+        borders.push_back(make_pair (make_pair(item->full_number_from, item->full_number_to), item));
     }
 }
 
 size_t NNPNumberRangeTreeNode::dataSize() {
-    return sizeof(map<int, NNPNumberRange>) * ranges.size();
+    return sizeof(Borders) * borders.size();
 }
+
 

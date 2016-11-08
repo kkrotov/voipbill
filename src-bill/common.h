@@ -18,6 +18,7 @@ using boost::algorithm::is_any_of;
 #include <queue>
 #include <deque>
 #include <set>
+#include <list>
 using namespace std;
 
 #include <boost/lexical_cast.hpp>

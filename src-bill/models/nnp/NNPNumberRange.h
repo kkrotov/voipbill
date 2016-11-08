@@ -17,6 +17,7 @@ struct NNPNumberRange {
     int country_prefix;
 
     PhoneNumber getMidKey() { return (full_number_to + full_number_from) / 2; };
+    PhoneNumber getLength() { return (full_number_to - full_number_from); };
 
     void dump(stringstream &trace) {
         trace << "(";
