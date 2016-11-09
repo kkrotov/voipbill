@@ -42,3 +42,4 @@ time_t get_tmonth_end(time_t timestamp, short timezone_offset = 0);
 
 char const * build_date();
 char const * build_time();
+char const * build_commit();

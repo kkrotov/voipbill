@@ -5,6 +5,8 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
     renderHeader(html);
 
     html << "<h2>Config</h2>\n";
+    html << "built on commit: <b><a href=\"https://github.com/welltime/billing_voip/commit/";
+    html << build_commit() << "\">" << build_commit() << "</a></b><br/>\n";
     html << "build date: <b>" << build_date() << " " << build_time() << "</b><br/>\n";
     html << "start time: " << string_time(app().getStartTime()) << "<br/>\n";
 
