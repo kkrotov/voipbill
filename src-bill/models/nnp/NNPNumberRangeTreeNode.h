@@ -12,19 +12,19 @@ private:
     int height; // высота поддерева с корнем в данном узле
 
     /* Список пар ( (левая граница, правая граница) : NumberRange* ) */
-    typedef list<pair<pair<PhoneNumber, PhoneNumber> , NNPNumberRange*>> Borders;
+    typedef list<pair<pair<PhoneNumber, PhoneNumber> , int64_t>> Borders;
     Borders borders;
 
 public:
 
 
-    NNPNumberRangeTreeNode(NNPNumberRange *item);
+    NNPNumberRangeTreeNode(int64_t index, PhoneNumber from, PhoneNumber to);
 
     PhoneNumber getKey() { return key; }
 
-    bool isOverlaps(NNPNumberRange *item);
+    bool isOverlaps(PhoneNumber from, PhoneNumber to);
 
-    void addNNPNumberRange(NNPNumberRange *item);
+    void addNNPNumberRange(int64_t index, PhoneNumber from, PhoneNumber to);
 
     Borders& getBorders () { return borders;}
 

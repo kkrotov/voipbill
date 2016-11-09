@@ -1,34 +1,27 @@
 #include "NNPNumberRangeTreeNode.h"
+#include "../../classes/BDb.h"
 
-NNPNumberRangeTreeNode::NNPNumberRangeTreeNode(NNPNumberRange *item) {
+NNPNumberRangeTreeNode::NNPNumberRangeTreeNode(int64_t index, PhoneNumber from, PhoneNumber to) {
 
-    if (item != nullptr) {
-        key = item->getMidKey();
-        if (isOverlaps(item)) addNNPNumberRange(item);
-
-    } else key = 0;
+    key = (to + from)/2;
+    if (isOverlaps(from, to)) addNNPNumberRange(index, from, to);
 
     leftNode = -1;
     rightNode = -1;
     height = 1;
 }
 
-bool NNPNumberRangeTreeNode::isOverlaps(NNPNumberRange *item) {
-    if (item == nullptr) return false;
-    if ((item->full_number_from <= key) && (key <= item->full_number_to))
+bool NNPNumberRangeTreeNode::isOverlaps(PhoneNumber from, PhoneNumber to) {
+    if ((from <= key) && (key <= to))
         return true;
     else
         return false;
 }
 
-void NNPNumberRangeTreeNode::addNNPNumberRange(NNPNumberRange *item) {
-    if (item != nullptr) {
-        borders.push_back(make_pair (make_pair(item->full_number_from, item->full_number_to), item));
-    }
+void NNPNumberRangeTreeNode::addNNPNumberRange(int64_t index, PhoneNumber from, PhoneNumber to) {
+    borders.push_back(make_pair (make_pair(from, to), index));
 }
 
 size_t NNPNumberRangeTreeNode::dataSize() {
     return sizeof (NNPNumberRangeTreeNode) + sizeof(Borders) * borders.size();
 }
-
-

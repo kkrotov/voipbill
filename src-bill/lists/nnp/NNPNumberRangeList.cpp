@@ -11,36 +11,23 @@ string NNPNumberRangeList::sql(BDb *db) {
 }
 
 void NNPNumberRangeList::parse_item(BDbResult &row, NNPNumberRange *item) {
-    item->id = row.get_i(0);
-    item->country_prefix = row.get_i(1);
-    item->ndc = row.get_i(2);
-    item->is_mob = row.get_b(3);
-    item->is_active = row.get_b(4);
-    item->nnp_operator_id = row.get_i(5);
-    item->nnp_region_id = row.get_i(6);
-    item->insert_time = row.get_i(7);
-    item->update_time = row.get_i(8);
-    item->nnp_city_id = row.get_i(9);
-    item->full_number_from = row.get_ll(10);
-    item->full_number_to = row.get_ll(11);
-
-    avlRoot = insertNode(avlRoot, item);
+    return ;
 }
 
 NNPNumberRange *NNPNumberRangeList::getNNPNumberRange(long long int num, stringstream *trace) {
     if (num > 0 && this->data.size() > 0) {
 
-        NNPNumberRange *item = nullptr;
-        searchNumberRanges(item, num, avlRoot);
-        if (item) {
-            if (item->full_number_from <= num && num <= item->full_number_to) {
+        int64_t result = -1;
+        searchNumberRanges(result, num, avlRoot);
+        if (result >= 0) {
+            if (data[result].full_number_from <= num && num <= data[result].full_number_to) {
                 if (trace != nullptr) {
                     *trace << "FOUND|NNPNumberRange|BY NUM '" << num << "'" << "\n";
                     *trace << "||";
-                    item->dump(*trace);
+                    data[result].dump(*trace);
                     *trace << "\n";
                 }
-                return &*item;
+                return &(data[result]);
             }
         }
     }
@@ -59,18 +46,18 @@ size_t NNPNumberRangeList::dataSize() {
 }
 
 
-int NNPNumberRangeList::searchNumberRanges(NNPNumberRange *&numberRange, PhoneNumber num, int64_t p) {
+int NNPNumberRangeList::searchNumberRanges(int64_t &result, PhoneNumber num, int64_t p) {
     if (avlRoot == -1) return 0;
 
     int intersects = 0;
     if (num==avlTree[p].getKey()) {
         for (auto it = avlTree[p].getBorders().begin(); it != avlTree[p].getBorders().end(); ++it) {
-            if (numberRange) {
-                if (numberRange->getLength() >= (*it).second->getLength())
-                    numberRange = (*it).second;
+            if (result >= 0) {
+                if (data[result].getLength() >= data[(*it).second].getLength())
+                    result = (*it).second;
             }
             else
-                numberRange = (*it).second;
+                result = (*it).second;
 
         }
         intersects += avlTree[p].getBorders().size();
@@ -79,21 +66,21 @@ int NNPNumberRangeList::searchNumberRanges(NNPNumberRange *&numberRange, PhoneNu
     for (auto it = avlTree[p].getBorders().begin(); it != avlTree[p].getBorders().end(); ++it) {
         if (num <= (*it).first.second && num >= (*it).first.first) {
             intersects++;
-            if (numberRange) {
-                if (numberRange->getLength() >= (*it).second->getLength())
-                    numberRange = (*it).second;
+            if (result >= 0) {
+                if (data[result].getLength() >= data[(*it).second].getLength())
+                    result = (*it).second;
             }
             else
-                numberRange = (*it).second;
+                result = (*it).second;
         }
     }
     if (num <= avlTree[p].getKey()) {
         if (avlTree[p].getLeftNode() != -1)
-            intersects += searchNumberRanges(numberRange, num, avlTree[p].getLeftNode());
+            intersects += searchNumberRanges(result, num, avlTree[p].getLeftNode());
     }
     else if (num > avlTree[p].getKey())
         if (avlTree[p].getRightNode() != -1)
-            intersects += searchNumberRanges(numberRange, num, avlTree[p].getRightNode());
+            intersects += searchNumberRanges(result, num, avlTree[p].getRightNode());
     return intersects;
 }
 
@@ -121,8 +108,8 @@ int64_t NNPNumberRangeList::rotateRight(int64_t n_node) // правый пово
 
     for (auto i = avlTree[n_node].getBorders().begin(); i != avlTree[n_node].getBorders().end(); ) {
         if ((*i).first.first <= avlTree[q].getKey() && (*i).first.second >= avlTree[q].getKey()) {
-            NNPNumberRange* upLift = (*i).second;
-            avlTree[q].addNNPNumberRange(upLift);
+            int64_t upLift = (*i).second;
+            avlTree[q].addNNPNumberRange(upLift, data[upLift].full_number_from, data[upLift].full_number_to);
             i = avlTree[n_node].getBorders().erase (i);
             continue;
         }
@@ -142,8 +129,8 @@ int64_t NNPNumberRangeList::rotateLeft(int64_t n_node) // левый повор�
 
     for (auto i = avlTree[n_node].getBorders().begin(); i != avlTree[n_node].getBorders().end(); ) {
         if ((*i).first.first <= avlTree[q].getKey() && (*i).first.second >= avlTree[q].getKey()) {
-            NNPNumberRange* upLift = (*i).second;
-            avlTree[q].addNNPNumberRange(upLift);
+            int64_t upLift = (*i).second;
+            avlTree[q].addNNPNumberRange(upLift, data[upLift].full_number_from, data[upLift].full_number_to);
             i = avlTree[n_node].getBorders().erase (i);
             continue;
         }
@@ -172,24 +159,54 @@ int64_t NNPNumberRangeList::balance(int64_t n_node) // балансировка 
     return n_node; // балансировка не нужна
 }
 
-int64_t NNPNumberRangeList::insertNode(int64_t p, NNPNumberRange *item) // вставка ключа k в дерево с корнем p
+int64_t NNPNumberRangeList::insertNode(int64_t p, int64_t index) // вставка ключа k в дерево с корнем p
 {
-    if (item == nullptr) return -1;
-
     if (p == -1) {
-        avlTree.push_back(NNPNumberRangeTreeNode(item));
+        avlTree.push_back(NNPNumberRangeTreeNode(index, data[index].full_number_from, data[index].full_number_to));
         return avlTree.size() - 1;
     }
 
-    if (avlTree[p].isOverlaps(item)) {
-        avlTree[p].addNNPNumberRange(item);
+    if (avlTree[p].isOverlaps(data[index].full_number_from, data[index].full_number_to)) {
+        avlTree[p].addNNPNumberRange(index, data[index].full_number_from, data[index].full_number_to);
         return balance(p);
     }
 
-    if (item->getMidKey() < avlTree[p].getKey())
-        avlTree[p].setLeftNode(insertNode(avlTree[p].getLeftNode(), item));
+    if (data[index].getMidKey() < avlTree[p].getKey())
+        avlTree[p].setLeftNode(insertNode(avlTree[p].getLeftNode(), index));
     else
-        avlTree[p].setRightNode(insertNode(avlTree[p].getRightNode(), item));
+        avlTree[p].setRightNode(insertNode(avlTree[p].getRightNode(), index));
 
     return balance(p);
+}
+void NNPNumberRangeList::load (BDb *db) {
+    if (!db)
+        return ;
+    BDbResult res = db->query(sql(db));
+
+    loadtime = time(NULL);
+
+    this->data.clear();
+    this->data.resize(res.size());
+
+    while (res.next()) {
+        parse_item_by_index(res, res.position());
+    }
+    after_load();
+}
+
+void NNPNumberRangeList::parse_item_by_index (BDbResult &row, int64_t index) {
+    data[index].id = row.get_i(0);
+    data[index].country_prefix = row.get_i(1);
+    data[index].ndc = row.get_i(2);
+    data[index].is_mob = row.get_b(3);
+    data[index].is_active = row.get_b(4);
+    data[index].nnp_operator_id = row.get_i(5);
+    data[index].nnp_region_id = row.get_i(6);
+    data[index].insert_time = row.get_i(7);
+    data[index].update_time = row.get_i(8);
+    data[index].nnp_city_id = row.get_i(9);
+    data[index].full_number_from = row.get_ll(10);
+    data[index].full_number_to = row.get_ll(11);
+
+    avlRoot = insertNode(avlRoot, index);
 }

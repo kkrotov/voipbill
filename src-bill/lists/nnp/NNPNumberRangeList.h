@@ -14,10 +14,11 @@ protected:
 
     string sql(BDb *db);
 
-    inline void parse_item(BDbResult &row, NNPNumberRange *item);
+    void load (BDb *db) override;
+    inline void parse_item_by_index (BDbResult& res, int64_t);
+    void parse_item (BDbResult& res, NNPNumberRange*);
 
-
-    int64_t insertNode(int64_t p, NNPNumberRange *item); // вставка ключа k в дерево с корнем p
+    int64_t insertNode(int64_t p, int64_t index); // вставка ключа k в дерево с корнем p
 
     int getBalanceFactor(int64_t n_node);  // возвращает баланс-фактор данного узла.
     void fixHeight(int64_t n_node);
@@ -33,6 +34,7 @@ public:
 
     NNPNumberRange *getNNPNumberRange(long long int num, stringstream *trace);
 
-    int searchNumberRanges(NNPNumberRange *&numberRange, PhoneNumber num, int64_t p);
+    int searchNumberRanges(int64_t &result, PhoneNumber num, int64_t p);
+
 
 };
