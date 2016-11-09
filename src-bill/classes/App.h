@@ -38,6 +38,10 @@ public:
     AppStatus getRealStatus();
     time_t getStartTime() { return this->start_time; }
 
+    time_t getRuntime();
+
 protected:
     virtual void runApp() = 0;
+
+
 };

@@ -8,6 +8,7 @@ configTemplate = """
 [main]
 web_port = 80%(region_id)s
 skip_threads = checkstarttable cdr_parser client_lock blacklist_fetch blacklist_calc limitcontrol checkstarttable radius_auth_server
+mode = SINGLEREGIONAL
 
 [db]
 main =  host=127.0.0.1 dbname=nispd_test user=bill_daemon_remote password=qRPCcAvrS4qWvGAhgzrXWuGJ2nwYEf8C

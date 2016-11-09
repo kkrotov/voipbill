@@ -2,18 +2,35 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include "Exception.h"
+
+void ConfBill::parse_biller_mode(string mode) {
+    string m = mode;
+    std::transform(m.begin(), m.end(), m.begin(), ::tolower);
+
+    if (m == "apihost") {
+        billerMode = APIHOST;
+    } else if (m == "multiregional") {
+        billerMode = MULTIREGIONAL;
+    } else if (m == "singleregional") {
+        billerMode = SINGLEREGIONAL;
+    } else
+        throw Exception("invalid biller mode:" + mode, "ConfBill::parse_biller_mode");
+}
+
 
 bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
 
     web_port = pt.get<uint16_t>("main.web_port", 8032);
 
-
     db_main = pt.get<string>("db.main");
     db_calls = pt.get<string>("db.calls");
     db_bandwidth_limit_mbits = pt.get<double>("db.bandwidth_limit_mbits");
 
+    parse_biller_mode(pt.get<string>("main.mode", "SINGLEREGIONAL"));
+
     string threads = pt.get<string>("main.run_threads", "");
-    if (threads.length()>0) {
+    if (threads.length() > 0) {
 
         std::stringstream ss(threads);
         string tmp;
@@ -24,7 +41,7 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     }
 
     threads = pt.get<string>("main.skip_threads", "");
-    if (threads.length()>0) {
+    if (threads.length() > 0) {
 
         std::stringstream ss(threads);
         string tmp;
@@ -38,10 +55,11 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
 
     str_instance_id = boost::lexical_cast<string>(instance_id);
 
-    sql_regions_list = pt.get<string>("main.sql_regions_list", "(" + str_instance_id + ")");
+    sql_regions_list = pt.get<string>("geo.sql_regions_list", "(" + str_instance_id + ")");
+    hub_id = pt.get<uint16_t>("geo.hub_id", 0);
 
-    hub_id = pt.get<uint16_t>("main.hub_id", 0);
-
+    if (hub_id > 0 && billerMode != MULTIREGIONAL)
+        throw Exception("hub_id can only be used in multiregional mode", "ConfBill::parse_biller_mode");
 
     openca_udp_host = pt.get<string>("udp.host", "");
     openca_udp_port = pt.get<uint16_t>("udp.port", 0);

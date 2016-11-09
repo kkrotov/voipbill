@@ -9,8 +9,8 @@ protected:
 
     string sql(BDb * db) {
         return "   select id, name " \
-            "   from auth.route_table " \
-            "   where server_id in " + app().conf.get_sql_regions_list() +
+               "   from auth.route_table " \
+               "   where server_id in " + app().conf.get_sql_regions_for_load_list_list() +
                "   order by id asc ";
     }
 
