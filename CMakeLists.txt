@@ -379,6 +379,9 @@ set(BILL_SOURCES
 
         src-bill/models/GlobalNNPPackageMinuteCounters.cpp src-bill/data/GlobalNNPPackageMinuteCountersData.cpp src-bill/lists/GlobalNNPPackageMinuteCountersList.cpp src-bill/models/Hub.cpp src-bill/models/Hub.h src-bill/lists/HubList.cpp src-bill/lists/HubList.h src-bill/data/HubData.cpp src-bill/data/HubData.h src-bill/sync/PullHub.cpp src-bill/sync/PullHub.h)
 
+add_custom_target(invalidate_files ALL
+        COMMAND ${CMAKE_COMMAND} -E touch src-bill/version.cpp)
+
 add_definitions(-DHAVE_SYS_IOCTL_H -DHAVE_SOCKLEN_T)
 file(GLOB_RECURSE ACE_RADIUS_SOURCES "libs/ace-radius/*.cpp")
 
