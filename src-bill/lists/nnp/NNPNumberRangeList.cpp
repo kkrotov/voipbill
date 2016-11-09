@@ -52,8 +52,9 @@ NNPNumberRange *NNPNumberRangeList::getNNPNumberRange(long long int num, strings
 }
 
 size_t NNPNumberRangeList::dataSize() {
-    size_t size = sizeof(NNPNumberRange) * this->data.size() + avlTree.size() * sizeof(NNPNumberRangeTreeNode);
-
+    size_t size = sizeof(NNPNumberRange) * this->data.size();
+    for (auto i : avlTree)
+        size += i.dataSize();
     return size;
 }
 

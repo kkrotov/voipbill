@@ -28,7 +28,7 @@ void NNPNumberRangeTreeNode::addNNPNumberRange(NNPNumberRange *item) {
 }
 
 size_t NNPNumberRangeTreeNode::dataSize() {
-    return sizeof(Borders) * borders.size();
+    return sizeof (NNPNumberRangeTreeNode) + sizeof(Borders) * borders.size();
 }
 
 
