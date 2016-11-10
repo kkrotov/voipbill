@@ -8,8 +8,9 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
     html << "build date: " << build_date() << " " << build_time() << "<br/>\n";
     html << "start time: " << string_time(app().getStartTime()) << "(UTC)<br/>\n";
     html << "&nbsp;&nbsp;run time: " << mask_first_3dig(string_time(app().getRuntime())) << "<br/>\n";
+    html << "built on commit: <b><a href=\"https://github.com/welltime/billing_voip/commit/";
+    html << build_commit() << "\">" << build_commit() << "</a></b><br/>\n";
     html << "<hr>\n";
-
     html << "mode: " << app().conf.getBillerMode() << "<br/>\n";
 
     if (app().conf.hub_id > 0) {
