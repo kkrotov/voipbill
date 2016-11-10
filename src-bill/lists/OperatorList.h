@@ -10,7 +10,7 @@ protected:
     string sql(BDb * db) {
         return "   select  id, pricelist_id, term_in_cost, local_network_pricelist_id, client_7800_pricelist_id, operator_7800_pricelist_id " \
             "   from billing.operator " \
-            "   where region = 0 or region in " + app().conf.get_sql_regions_list() +
+            "   where region = 0 or region in " + app().conf.get_sql_regions_for_load_list_list() +
                "   order by id asc ";
     }
 

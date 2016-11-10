@@ -9,10 +9,10 @@ protected:
 
     string sql(BDb * db) {
         return "    select trunk_id, id, client_account_id, " \
-            "               orig_enabled, term_enabled, orig_min_payment, term_min_payment, " \
-            "               extract(epoch from activation_dt), extract(epoch from expire_dt) " \
+            "              orig_enabled, term_enabled, orig_min_payment, term_min_payment, " \
+            "              extract(epoch from activation_dt), extract(epoch from expire_dt) " \
             "       from billing.service_trunk " \
-            "       where server_id in " + app().conf.get_sql_regions_list() + " " \
+            "       where server_id in " + app().conf.get_sql_regions_for_load_list_list() + " " \
             "       order by trunk_id asc, activation_dt asc ";
     }
 

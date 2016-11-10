@@ -4,7 +4,7 @@
 #include "../classes/AppBill.h"
 
 
-class PullDefs: public BasePull {
+class PullDefs : public BasePull {
 
 public:
     void init() {
@@ -28,9 +28,10 @@ public:
         datatype.push_back("date_to date");
         datatype.push_back("price numeric(8,4)");
 
-        src_sql_where =
-                " ( not deleted and date_to > ( now() - ''2 month''::interval ) and  pricelist_id in (select id from voip.pricelist where region in " +
-                app().conf.get_sql_regions_list() + " or is_global )   ) ";
+        if (!app().conf.isApiHostMode())
+            src_sql_where =
+                    " ( not deleted and date_to > ( now() - ''2 month''::interval ) and  pricelist_id in (select id from voip.pricelist where region in " +
+                    app().conf.get_sql_regions_list() + " or is_global )   ) ";
 
     }
 };

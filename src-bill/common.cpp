@@ -47,6 +47,16 @@ string string_date(const time_t dt, int debugFlag) {
     return string(buff);
 }
 
+string mask_first_3dig(string str) {
+    string s = str;
+    if (str.size() > 3) {
+        s[0] = '0';
+        s[1] = '0';
+        s[2] = '0';
+    }
+    return s;
+}
+
 string string_time(const time_t dt, int debugFlag) {
     char buff[40];
 

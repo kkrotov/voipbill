@@ -10,7 +10,7 @@ protected:
     string sql(BDb * db) {
         return "    select did, id, client_account_id, lines_count, extract(epoch from activation_dt), extract(epoch from expire_dt), tech_number, tech_number_operator_id " \
             "       from billing.service_number " \
-            "       where server_id in " + app().conf.get_sql_regions_list() + " " \
+            "       where server_id in " + app().conf.get_sql_regions_for_load_list_list() + " " \
             "       and tech_number is not null " \
             "       order by tech_number asc, activation_dt asc ";
         //  and expire_dt > now()

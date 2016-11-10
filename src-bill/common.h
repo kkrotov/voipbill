@@ -39,6 +39,7 @@ time_t get_tday_end(time_t timestamp, short timezone_offset = 0);
 time_t get_tmonth(time_t timestamp, short timezone_offset = 0);
 time_t get_tmonth_end(time_t timestamp, short timezone_offset = 0);
 
+string mask_first_3dig(string str);
 
 char const * build_date();
 char const * build_time();

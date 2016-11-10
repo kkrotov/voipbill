@@ -14,7 +14,7 @@ protected:
            "          sum(case when amount_day = '" + sDay + "' then sum_mn_day else 0 end), " \
            "          sum(case when amount_month = '" + sMonth + "' then sum_month else 0 end) " \
            "   from billing.stats_account " \
-           "     where server_id not in " + app().conf.get_sql_regions_list() +
+           "     where server_id not in " + app().conf.get_sql_regions_for_load_list_list() +
                " and (sum<>0 or sum_day<>0 or sum_mn_day<>0 or sum_month<>0) " \
            "     group by account_id " \
            "     order by account_id asc ";
