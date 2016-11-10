@@ -43,3 +43,4 @@ string mask_first_3dig(string str);
 
 char const * build_date();
 char const * build_time();
+char const * build_commit();
