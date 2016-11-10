@@ -108,11 +108,11 @@ echo "]] 4. Создаем записи в таблице CDR в региона�
 
 $maxid = getLastCallID($dbregion);
 
-$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '79164631212' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"", "dt"=>"2016-10-20 18:03:00");
+$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '79164631212' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"", "dt"=>"2016-11-08 18:03:00");
 
-$calls[] = array ( "src_number" => '79119888723' , "dst_number" => '73832870122' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2016-10-08 18:01:00");
-$calls[] = array ( "src_number" => '79119888723' , "dst_number" => '79263747216' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2016-10-08 18:02:00");
-$calls[] = array ( "src_number" => '78126465198' , "dst_number" => '79262559281' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2016-10-08 18:03:00");
+$calls[] = array ( "src_number" => '79119888723' , "dst_number" => '73832870122' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2016-11-09 18:01:00");
+$calls[] = array ( "src_number" => '79119888723' , "dst_number" => '79263747216' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2016-11-09 18:02:00");
+$calls[] = array ( "src_number" => '78126465198' , "dst_number" => '79262559281' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2016-11-09 18:03:00");
 
 doCalls($dbregion,$calls,$maxid);
 
