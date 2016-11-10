@@ -4,7 +4,17 @@
 #include <map>
 
 class ConfBill : public Conf {
+
+    typedef enum {
+        SINGLEREGIONAL, MULTIREGIONAL, APIHOST
+    } BillerMode;
+
+protected:
+
+    BillerMode billerMode;
+
 public:
+
     string db_main;
     string db_calls;
     double db_bandwidth_limit_mbits;
@@ -42,14 +52,50 @@ public:
 
     string sql_regions_list;
 
-    string get_sql_regions_list() { return sql_regions_list; }
+    string get_sql_regions_list() {
+        return sql_regions_list;
+    }
 
-    void set_sql_regions_list(string sql) { sql_regions_list = sql; }
+    string get_sql_regions_for_load_list_list() {
+        if (isApiHostMode()) return "(select id from public.server)";
+        else return sql_regions_list;
+    }
 
-    string get_sql_hub_id() { return hub_id > 0 ? to_string(hub_id) : "NULL"; }
+    void set_sql_regions_list(string sql) {
+        sql_regions_list = sql;
+    }
+
+    string get_sql_hub_id() {
+        return hub_id > 0 ? to_string(hub_id) : "NULL";
+    }
+
+    bool isSingleRegionalMode() {
+        return (billerMode == SINGLEREGIONAL);
+    }
+
+    bool isMultiRegionalMode() {
+        return (billerMode == MULTIREGIONAL);
+    }
+
+    bool isApiHostMode() {
+        return (billerMode == APIHOST);
+    }
+
+    string getBillerMode() {
+        switch (billerMode) {
+            case SINGLEREGIONAL :
+                return "SINGLE-REGIONAL";
+            case MULTIREGIONAL  :
+                return "MULTI-REGIONAL";
+            case APIHOST        :
+                return "API-HOST";
+        };
+    }
 
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);
+
+    void parse_biller_mode(string mode);
 };
 
 

@@ -5,25 +5,13 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
     renderHeader(html);
 
     html << "<h2>Config</h2>\n";
+    html << "build date: " << build_date() << " " << build_time() << "<br/>\n";
+    html << "start time: " << string_time(app().getStartTime()) << "(UTC)<br/>\n";
+    html << "&nbsp;&nbsp;run time: " << mask_first_3dig(string_time(app().getRuntime())) << "<br/>\n";
     html << "built on commit: <b><a href=\"https://github.com/welltime/billing_voip/commit/";
     html << build_commit() << "\">" << build_commit() << "</a></b><br/>\n";
-    html << "build date: <b>" << build_date() << " " << build_time() << "</b><br/>\n";
-    html << "start time: " << string_time(app().getStartTime()) << "<br/>\n";
-
-    int seconds = time(NULL) - app().getStartTime();
-    int numberOfDays = seconds / 86400;
-    int numberOfHours = (seconds % 86400) / 3600;
-    int numberOfMinutes = ((seconds % 86400) % 3600) / 60;
-    int numberOfSeconds = ((seconds % 86400) % 3600) % 60;
-    html << "run time: ";
-    if (numberOfDays)
-        html << int(numberOfDays) << " days ";
-
-    if (numberOfHours || numberOfDays)
-        html << int(numberOfHours) << " hours ";
-
-    html << int(numberOfMinutes) << " min " << int(numberOfSeconds) << " sec";
     html << "<hr>\n";
+    html << "mode: " << app().conf.getBillerMode() << "<br/>\n";
 
     if (app().conf.hub_id > 0) {
 
@@ -34,8 +22,7 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
             Hub *iHub = repository.getHub(hub_id);
 
             if (iHub != nullptr) {
-                html << "[MULTIREGION MODE ON]<br>\n";
-                html << "main.hub_id=" << hub_id << " (" << iHub->name << ")\n";
+                html << "geo.hub_id=" << hub_id << " table public.server (" << iHub->name << ")\n";
                 vector<Server> servers;
                 repository.getServersByHubId(servers, hub_id);
                 html << " (";
@@ -44,14 +31,16 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
                 }
                 html << ") <br>\n";
             }
-            html << "<hr>\n";
         }
     }
+    html << "geo.instance_id: " << app().conf.instance_id << "<br/>\n";
+    html << "geo.sql_regions_list: " << app().conf.get_sql_regions_list() << "<br/>\n";
+
+    html << "<hr>\n";
 
     html << "config_file: " << app().conf.config_file << "<br/>\n";
     html << "pid_file: " << app().conf.pid_file << "<br/>\n";
     html << "<hr>\n";
-    html << "sql_regions_list: " << app().conf.get_sql_regions_list() << "<br/>\n";
     html << "log_file_filename: " << app().conf.log_file_filename << "<br/>\n";
     html << "log_file_min_level: " << app().conf.log_file_min_level << "<br/>\n";
     html << "log_file_max_level: " << app().conf.log_file_max_level << "<br/>\n";
@@ -87,7 +76,6 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
     html << "udp.host: " << app().conf.openca_udp_host << "<br/>\n";
     html << "udp.port: " << app().conf.openca_udp_port << "<br/>\n";
     html << "<br/>\n";
-    html << "geo.instance_id: " << app().conf.instance_id << "<br/>\n";
     html << "billing.free_seconds: " << app().conf.billing_free_seconds << "<br/>\n";
     html << "billing.global_counters_select_interval: " << app().conf.global_counters_select_interval << "<br/>\n";
 

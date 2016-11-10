@@ -15,6 +15,9 @@ public:
 
         Repository repository;
 
+        html << "Mode: <b>" << app().conf.getBillerMode() << "</b>&nbsp; \n";
+        html << "<br/><br/>\n";
+
         html << "<table border=1 width=100%>";
         html << "<tr><th></th><th>Updated at</th><th>Size</th><th>Rows</th><th>Last time</th><th>Total time</th></tr>";
         {

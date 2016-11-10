@@ -10,7 +10,7 @@ protected:
     string sql(BDb * db) {
         return "   select id, name, type_id, route_case_id, release_reason_id, airp_id, calling_station_id, called_station_id, " \
             "   route_case_1_id,route_case_2_id from auth.outcome " \
-            "   where server_id in " + app().conf.get_sql_regions_list() +
+            "   where server_id in " + app().conf.get_sql_regions_for_load_list_list() +
                "   order by id asc ";
     }
 

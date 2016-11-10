@@ -24,7 +24,7 @@
 #include "../threads/ThreadCdrParser.h"
 #include "../threads/ThreadSyncCdrs.h"
 
-AppBill & app() {
+AppBill &app() {
     static AppBill appVar;
     return appVar;
 }
@@ -38,7 +38,7 @@ void AppBill::runApp() {
 
     std::thread web_thread(std::ref(web));
 
-    if (conf.active_threads.size()==0)
+    if (conf.active_threads.size() == 0)
         runAppInSingleMode();
     else
         runActiveThreads();
@@ -54,7 +54,7 @@ void AppBill::registerThread() {
     threadConstructorsMap[T::idName()] = []() -> Thread * { return new T(); };
 }
 
-Thread * AppBill::newThreadObject(std::string id) {
+Thread *AppBill::newThreadObject(std::string id) {
     auto fn = threadConstructorsMap[id];
     if (fn) {
         return fn();
@@ -89,9 +89,8 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadRadiusAuthServer>();
 }
 
-void AppBill::runAppInSingleMode()
-{
-    std::vector<std::string> standardThreads {
+void AppBill::runAppInSingleMode() {
+    std::vector<std::string> standardThreads{
             // Логирование
             "log",
             // Перемещение данных из таблиц центрального сервера на региональные
@@ -138,6 +137,11 @@ void AppBill::runAppInSingleMode()
             "radius_auth_server",
     };
 
+    if (app().conf.isApiHostMode()) {
+        standardThreads.clear();
+        standardThreads = {"log", "sync", "loader", "remote_loader"};
+    };
+
     for (auto thread: standardThreads) {
 
         if (std::find(conf.skip_threads.begin(), conf.skip_threads.end(), thread) != conf.skip_threads.end()) {
@@ -150,8 +154,7 @@ void AppBill::runAppInSingleMode()
     }
 }
 
-void AppBill::runActiveThreads()
-{
+void AppBill::runActiveThreads() {
     for (auto thread_name: conf.active_threads) {
 
         Thread *t = newThreadObject(thread_name);

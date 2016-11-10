@@ -45,3 +45,8 @@ AppStatus App::getStatus() {
 AppStatus App::getRealStatus() {
     return real_status;
 }
+
+time_t App::getRuntime() {
+
+    return time(NULL) - getStartTime();
+}
