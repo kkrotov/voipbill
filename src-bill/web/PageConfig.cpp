@@ -93,8 +93,6 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
 
     html << "<br/>\n";
     html << "cdr_parcer.cdr_ftp_host: " << app().conf.cdr_ftp_host << "<br/>\n";
-    html << "cdr_parcer.cdr_ftp_user: " << app().conf.cdr_ftp_user << "<br/>\n";
-    html << "cdr_parcer.cdr_ftp_password: " << app().conf.cdr_ftp_password << "<br/>\n";
     html << "cdr_parcer.cdr_ftp_dir: " << app().conf.cdr_ftp_dir << "<br/>\n";
     html << "cdr_parcer.cdr_nasip: " << app().conf.cdr_nasip << "<br/>\n";
     html << "cdr_parcer.interval: " << app().conf.cdr_parcer_interval << "<br/>\n";
