@@ -10,7 +10,11 @@ include_directories(/usr/pgsql-9.4/include libs/jsoncpp-master/include libs/boos
 link_directories(/usr/pgsql-9.4/lib)
 
 string(TIMESTAMP RUN_DATE "%Y-%m-%d")
-add_definitions(-D_DATECOMPILED_="${RUN_DATE}")
+execute_process (COMMAND git rev-parse --verify HEAD OUTPUT_VARIABLE CURRENT_HEAD
+                 OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+execute_process (COMMAND echo ${CURRENT_HEAD})
+add_definitions(-D_DATECOMPILED_="${RUN_DATE}" -D_CURRENT_HEAD_="${CURRENT_HEAD}")
+
 
 set(BOOST_SOURCES
         libs/boost/system/src/error_code.cpp
@@ -378,6 +382,9 @@ set(BILL_SOURCES
     src-bill/main.cpp
 
         src-bill/models/GlobalNNPPackageMinuteCounters.cpp src-bill/data/GlobalNNPPackageMinuteCountersData.cpp src-bill/lists/GlobalNNPPackageMinuteCountersList.cpp src-bill/models/Hub.cpp src-bill/models/Hub.h src-bill/lists/HubList.cpp src-bill/lists/HubList.h src-bill/data/HubData.cpp src-bill/data/HubData.h src-bill/sync/PullHub.cpp src-bill/sync/PullHub.h)
+
+add_custom_target(invalidate_files ALL
+        COMMAND ${CMAKE_COMMAND} -E touch src-bill/version.cpp)
 
 add_definitions(-DHAVE_SYS_IOCTL_H -DHAVE_SOCKLEN_T)
 file(GLOB_RECURSE ACE_RADIUS_SOURCES "libs/ace-radius/*.cpp")
