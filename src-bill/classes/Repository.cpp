@@ -246,61 +246,61 @@ bool Repository::prepare(time_t currentTime) {
 void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, bool fUseMinimalki,
                                                  time_t connect_time) const {
 
-        vector<ServiceTrunkOrder> trunkSettingsOrderFreeList;
-        vector<ServiceTrunkOrder> trunkSettingsOrderPayList;
+    vector<ServiceTrunkOrder> trunkSettingsOrderFreeList;
+    vector<ServiceTrunkOrder> trunkSettingsOrderPayList;
 
-        for (auto order : trunkSettingsOrderList) {
-            order.statsTrunkSettings = billingData->statsTrunkSettingsGetCurrent(connect_time, order.account,
-                                                                                 order.trunkSettings);
+    for (auto order : trunkSettingsOrderList) {
+        order.statsTrunkSettings = billingData->statsTrunkSettingsGetCurrent(connect_time, order.account,
+                                                                             order.trunkSettings);
 
-            bool isAcceptedTrunk = false;
+        bool isAcceptedTrunk = false;
 
-            for (auto accepted_order : trunkSettingsOrderList)
-                if (accepted_order.trunkSettings->id == order.trunkSettings->id) {
-                    isAcceptedTrunk = true;
-                }
-
-            if (!isAcceptedTrunk) continue;
-
-            if (order.trunkSettings->minimum_minutes > 0 && fUseMinimalki) {
-                if (order.statsTrunkSettings->used_seconds < order.trunkSettings->minimum_minutes * 60) {
-                    trunkSettingsOrderFreeList.push_back(order);
-                    if (trace != nullptr) {
-                        *trace << "DEBUG|TRUNK SETTINGS ORDER LIST|TRUNK_SETTINGS_ID: " << order.trunkSettings->id
-                        << " / used_seconds  = " << order.statsTrunkSettings->used_seconds
-                        << " / minimum_minutes * 60 = " << order.trunkSettings->minimum_minutes * 60 << "\n";
-                    }
-                    continue;
-                }
+        for (auto accepted_order : trunkSettingsOrderList)
+            if (accepted_order.trunkSettings->id == order.trunkSettings->id) {
+                isAcceptedTrunk = true;
             }
 
-            if (order.trunkSettings->minimum_cost > 0 && fUseMinimalki) {
-                if (order.statsTrunkSettings->used_credit <= order.trunkSettings->minimum_cost) {
-                    trunkSettingsOrderFreeList.push_back(order);
-                    if (trace != nullptr) {
-                        *trace << "DEBUG|TRUNK SETTINGS ORDER LIST|TRUNK_SETTINGS_ID: " << order.trunkSettings->id
-                        << " / used_credit = " << order.statsTrunkSettings->used_credit
-                        << " / minimum_cost = " << order.trunkSettings->minimum_cost << "\n";
-                    }
-                    continue;
+        if (!isAcceptedTrunk) continue;
+
+        if (order.trunkSettings->minimum_minutes > 0 && fUseMinimalki) {
+            if (order.statsTrunkSettings->used_seconds < order.trunkSettings->minimum_minutes * 60) {
+                trunkSettingsOrderFreeList.push_back(order);
+                if (trace != nullptr) {
+                    *trace << "DEBUG|TRUNK SETTINGS ORDER LIST|TRUNK_SETTINGS_ID: " << order.trunkSettings->id
+                           << " / used_seconds  = " << order.statsTrunkSettings->used_seconds
+                           << " / minimum_minutes * 60 = " << order.trunkSettings->minimum_minutes * 60 << "\n";
                 }
+                continue;
             }
-            trunkSettingsOrderPayList.push_back(order);
         }
 
-        sort(trunkSettingsOrderFreeList.begin(), trunkSettingsOrderFreeList.end(),
-             trunk_settings_order_asc_price(*this));
-        sort(trunkSettingsOrderPayList.begin(), trunkSettingsOrderPayList.end(), trunk_settings_order_asc_price(*this));
-
-        trunkSettingsOrderList.clear();
-
-        for (auto order : trunkSettingsOrderFreeList) {
-            trunkSettingsOrderList.push_back(order);
+        if (order.trunkSettings->minimum_cost > 0 && fUseMinimalki) {
+            if (order.statsTrunkSettings->used_credit <= order.trunkSettings->minimum_cost) {
+                trunkSettingsOrderFreeList.push_back(order);
+                if (trace != nullptr) {
+                    *trace << "DEBUG|TRUNK SETTINGS ORDER LIST|TRUNK_SETTINGS_ID: " << order.trunkSettings->id
+                           << " / used_credit = " << order.statsTrunkSettings->used_credit
+                           << " / minimum_cost = " << order.trunkSettings->minimum_cost << "\n";
+                }
+                continue;
+            }
         }
+        trunkSettingsOrderPayList.push_back(order);
+    }
 
-        for (auto order : trunkSettingsOrderPayList) {
-            trunkSettingsOrderList.push_back(order);
-        }
+    sort(trunkSettingsOrderFreeList.begin(), trunkSettingsOrderFreeList.end(),
+         trunk_settings_order_asc_price(*this));
+    sort(trunkSettingsOrderPayList.begin(), trunkSettingsOrderPayList.end(), trunk_settings_order_asc_price(*this));
+
+    trunkSettingsOrderList.clear();
+
+    for (auto order : trunkSettingsOrderFreeList) {
+        trunkSettingsOrderList.push_back(order);
+    }
+
+    for (auto order : trunkSettingsOrderPayList) {
+        trunkSettingsOrderList.push_back(order);
+    }
 
 }
 
@@ -368,7 +368,7 @@ Trunk *Repository::getServiceTrunk(int trunk_settings_id, ServiceTrunkSettings &
 
 Trunk *Repository::getTrunkByName(const char *trunk_name) {
 
-    if (trunk_name==nullptr || (strlen(trunk_name)==0))
+    if (trunk_name == nullptr || (strlen(trunk_name) == 0))
         return nullptr;
 
     Trunk *trunk = trunkByName->find(trunk_name, trace);
@@ -489,7 +489,7 @@ void Repository::getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrun
     if (serviceTrunks.size() == 0) {
         if (trace != nullptr) {
             *trace << "DEBUG|SERVICE TRUNK DECLINE|CAUSE SERVICE TRUNK NOT FOUND BY TRUNK " << trunk->name <<
-            " (" << trunk->id << ")" << "\n";
+                   " (" << trunk->id << ")" << "\n";
         }
         return;
     }
@@ -506,7 +506,7 @@ void Repository::getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrun
                 if (account == nullptr) {
                     if (trace != nullptr) {
                         *trace << "DEBUG|TRUNK SETTINGS SKIP|ACCOUNT NOT FOUND BY ID " <<
-                        serviceTrunk->client_account_id << "\n";
+                               serviceTrunk->client_account_id << "\n";
                     }
                     continue;
                 }
@@ -549,7 +549,7 @@ bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettin
     if (trunkSettings->src_number_id > 0 && !matchNumber(trunkSettings->src_number_id, srcNumber)) {
         if (trace != nullptr) {
             *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY SRC NUMBER MATCHING, TRUNK_SETTINGS_ID: " <<
-            trunkSettings->id << " / " << trunkSettings->order << "\n";
+                   trunkSettings->id << " / " << trunkSettings->order << "\n";
         }
         return false;
     }
@@ -557,7 +557,7 @@ bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettin
     if (trunkSettings->dst_number_id > 0 && !matchNumber(trunkSettings->dst_number_id, dstNumber)) {
         if (trace != nullptr) {
             *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY DST NUMBER MATCHING, TRUNK_SETTINGS_ID: " <<
-            trunkSettings->id << " / " << trunkSettings->order << "\n";
+                   trunkSettings->id << " / " << trunkSettings->order << "\n";
         }
         return false;
     }
@@ -566,7 +566,7 @@ bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettin
     if (pricelist == nullptr) {
         if (trace != nullptr) {
             *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICELIST NOT FOUND BY ID: " << trunkSettings->pricelist_id <<
-            ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
+                   ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << "\n";
         }
         return false;
     }
@@ -577,8 +577,8 @@ bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettin
         if (networkPrefix == nullptr) {
             if (trace != nullptr) {
                 *trace << "DEBUG|TRUNK SETTINGS DECLINE|NETWORK PREFIX NOT FOUND BY local_network_config_id: " <<
-                pricelist->local_network_config_id << ", PRICELIST_ID: " << pricelist->id <<
-                ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << " / " << "\n";
+                       pricelist->local_network_config_id << ", PRICELIST_ID: " << pricelist->id <<
+                       ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " << trunkSettings->order << " / " << "\n";
             }
             return false;
         }
@@ -587,8 +587,8 @@ bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettin
         if (price == nullptr) {
             if (trace != nullptr) {
                 *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICE NOT FOUND: PRICELIST_ID: " << pricelist->id <<
-                ", PREFIX: " << networkPrefix->network_type_id << ", TRUNK_SETTINGS_ID: " << trunkSettings->id <<
-                " / " << trunkSettings->order << "\n";
+                       ", PREFIX: " << networkPrefix->network_type_id << ", TRUNK_SETTINGS_ID: " << trunkSettings->id <<
+                       " / " << trunkSettings->order << "\n";
             }
             return false;
         }
@@ -600,8 +600,8 @@ bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettin
         if (price == nullptr) {
             if (trace != nullptr) {
                 *trace << "DEBUG|TRUNK SETTINGS DECLINE|PRICE NOT FOUND: PRICELIST_ID: " << pricelist->id <<
-                ", PREFIX: " << dstNumber << ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " <<
-                trunkSettings->order << "\n";
+                       ", PREFIX: " << dstNumber << ", TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " <<
+                       trunkSettings->order << "\n";
             }
             return false;
         }
@@ -610,7 +610,7 @@ bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettin
 
     if (trace != nullptr) {
         *trace << "DEBUG|TRUNK SETTINGS ACCEPT|TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " <<
-        trunkSettings->order << "\n";
+               trunkSettings->order << "\n";
     }
 
     return true;
@@ -657,6 +657,46 @@ bool Repository::matchPrefixlist(int prefixlist_id, char *prefix) {
 
 PhoneNumber
 Repository::getNNPBestGeoRoute(PhoneNumber NumAdef, vector<PhoneNumber> &vNumA, PhoneNumber NumB, stringstream *trace) {
+
+    NNPNumberRange *nr_numAdef = getNNPNumberRange(NumAdef);
+    NNPNumberRange *nr_numB = getNNPNumberRange(NumB);
+
+    vector<pair<PhoneNumber, NNPNumberRange>> vNr, vNrRes;
+
+    if (nr_numAdef == nullptr) return -1;
+    if (nr_numB == nullptr) return -1;
+
+    if (trace != nullptr) {
+        *trace << "DEBUG|FOUND NNP_NUMBER_RANGE|FOR NumbB: " << NumB;
+        *trace << "||";
+        nr_numB->dump(*trace);
+        *trace << "\n";
+    }
+
+    vNr.push_back(make_pair(NumAdef, *nr_numAdef));
+
+    for (auto inr : vNumA) {
+        NNPNumberRange *nr_temp = getNNPNumberRange(inr);
+        if (nr_temp != nullptr) vNr.push_back(make_pair(inr, *nr_temp));
+    }
+
+    for (auto inr: vNr) {
+        if (inr.second.nnp_city_id == nr_numB->nnp_city_id) vNrRes.push_back(inr);
+    }
+
+    for (auto inr: vNr) {
+        if (inr.second.nnp_region_id == nr_numB->nnp_region_id) vNrRes.push_back(inr);
+    }
+
+    if (vNrRes.size() > 0) {
+        if (trace != nullptr) {
+            *trace << "DEBUG|FOUND NNP_NUMBER_RANGE|BestGeoRoute from NumbA: " << vNrRes.begin()->first;
+            *trace << "||";
+            vNrRes.begin()->second.dump(*trace);
+            *trace << "\n";
+        }
+        return vNrRes.begin()->first;
+    }
 
     return -1;
 }
