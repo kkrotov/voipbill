@@ -53,7 +53,7 @@ public:
         return &data.at(i);
     }
 
-    size_t dataSize() {
+    virtual size_t dataSize() {
         return sizeof(T) * this->data.size();
     }
 
