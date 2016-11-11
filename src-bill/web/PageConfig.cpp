@@ -1,6 +1,5 @@
 #include "PageConfig.h"
 
-
 void PageConfig::render(std::stringstream &html, map<string, string> &parameters) {
     renderHeader(html);
 
@@ -9,9 +8,8 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
     html << "start time: " << string_time(app().getStartTime()) << "(UTC)<br/>\n";
     html << "&nbsp;&nbsp;run time: " << mask_first_3dig(string_time(app().getRuntime())) << "<br/>\n";
     html << "built on commit: <b><a href=\"https://github.com/welltime/billing_voip/commit/";
-    html << build_commit() << "\">jump to github</a></b><br/>\n";
+    html << build_commit() << "\">" << build_commit() << "</a></b><br/>\n";
     html << "<hr>\n";
-
     html << "mode: " << app().conf.getBillerMode() << "<br/>\n";
 
     if (app().conf.hub_id > 0) {
@@ -71,8 +69,6 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
     html << "<br/>\n";
     html << "log.grouping_interval: " << app().conf.log_grouping_interval << "<br/>\n";
     html << "<br/>\n";
-    //html << "db.main: " << app().conf.db_main << "<br/>\n";
-    //html << "db.calls: " << app().conf.db_calls << "<br/>\n";
     html << "<br/>\n";
     html << "udp.host: " << app().conf.openca_udp_host << "<br/>\n";
     html << "udp.port: " << app().conf.openca_udp_port << "<br/>\n";
@@ -82,8 +78,6 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
 
     html << "<br/>\n";
     html << "cdr_parcer.cdr_ftp_host: " << app().conf.cdr_ftp_host << "<br/>\n";
-    html << "cdr_parcer.cdr_ftp_user: " << app().conf.cdr_ftp_user << "<br/>\n";
-    html << "cdr_parcer.cdr_ftp_password: " << app().conf.cdr_ftp_password << "<br/>\n";
     html << "cdr_parcer.cdr_ftp_dir: " << app().conf.cdr_ftp_dir << "<br/>\n";
     html << "cdr_parcer.cdr_nasip: " << app().conf.cdr_nasip << "<br/>\n";
     html << "cdr_parcer.interval: " << app().conf.cdr_parcer_interval << "<br/>\n";
