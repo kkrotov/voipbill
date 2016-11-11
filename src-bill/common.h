@@ -18,6 +18,7 @@ using boost::algorithm::is_any_of;
 #include <queue>
 #include <deque>
 #include <set>
+#include <list>
 using namespace std;
 
 #include <boost/lexical_cast.hpp>
@@ -44,3 +45,5 @@ string mask_first_3dig(string str);
 char const * build_date();
 char const * build_time();
 char const * build_commit();
+
+typedef long long int PhoneNumber;
