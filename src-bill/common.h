@@ -18,6 +18,7 @@ using boost::algorithm::is_any_of;
 #include <queue>
 #include <deque>
 #include <set>
+#include <list>
 using namespace std;
 
 #include <boost/lexical_cast.hpp>
@@ -42,3 +43,5 @@ time_t get_tmonth_end(time_t timestamp, short timezone_offset = 0);
 
 char const * build_date();
 char const * build_time();
+
+typedef long long int PhoneNumber;
