@@ -38,7 +38,7 @@ public:
     AppStatus getRealStatus();
     time_t getStartTime() { return this->start_time; }
 
-    time_t getRuntime();
+    double getRuntime();
 
 protected:
     virtual void runApp() = 0;

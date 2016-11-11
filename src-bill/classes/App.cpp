@@ -46,7 +46,7 @@ AppStatus App::getRealStatus() {
     return real_status;
 }
 
-time_t App::getRuntime() {
+double App::getRuntime() {
 
-    return time(NULL) - getStartTime();
+    return difftime (time(NULL), getStartTime());
 }
