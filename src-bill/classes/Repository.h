@@ -361,4 +361,10 @@ public:
     void findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPackagePricelistIds, int tariff_id,
                                     long long int num, stringstream *trace = nullptr);
 
+
+    PhoneNumber getNNPBestGeoRoute(PhoneNumber NumAdef, vector<PhoneNumber> &vNumA, PhoneNumber NumB,
+                                   stringstream *trace = nullptr);
+
+    void getNNPBestPriceRoute(vector<pair<double, PhoneNumber>> &vResNum, vector<PhoneNumber> &vNumA, PhoneNumber NumB,
+                              stringstream *trace = nullptr);
 };

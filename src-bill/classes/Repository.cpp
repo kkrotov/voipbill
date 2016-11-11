@@ -655,3 +655,15 @@ bool Repository::matchPrefixlist(int prefixlist_id, char *prefix) {
     return prefixlistPrefix != nullptr;
 }
 
+PhoneNumber
+Repository::getNNPBestGeoRoute(PhoneNumber NumAdef, vector<PhoneNumber> &vNumA, PhoneNumber NumB, stringstream *trace) {
+
+    return -1;
+}
+
+void Repository::getNNPBestPriceRoute(vector<pair<double, PhoneNumber>> &vResNum, vector<PhoneNumber> &vNumA,
+                                      PhoneNumber NumB, stringstream *trace) {
+    vResNum.push_back(make_pair(1.23, 79263747216));
+    vResNum.push_back(make_pair(1.43, 73424234424));
+}
+
