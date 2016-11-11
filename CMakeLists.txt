@@ -9,10 +9,9 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-
 include_directories(/usr/pgsql-9.4/include libs/jsoncpp-master/include libs/boost)
 link_directories(/usr/pgsql-9.4/lib)
 
-string(TIMESTAMP RUN_DATE "%Y-%m-%d")
+string(TIMESTAMP RUN_DATE "%Y-%m-%d UTC")
 execute_process (COMMAND git rev-parse --verify HEAD OUTPUT_VARIABLE CURRENT_HEAD
                  OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
-execute_process (COMMAND echo ${CURRENT_HEAD})
 add_definitions(-D_DATECOMPILED_="${RUN_DATE}" -D_CURRENT_HEAD_="${CURRENT_HEAD}")
 
 
