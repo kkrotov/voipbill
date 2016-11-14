@@ -17,7 +17,7 @@ NAME_DB_TEST_REGIONAL=nispd99_test
 
 DB_USER=pgsqltest
 
-region_id=99
+region_id=10
 
 pid_file=/var/run/app_bill.pid
 

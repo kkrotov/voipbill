@@ -304,33 +304,6 @@ void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trun
 
 }
 
-void Repository::findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPackagePricelistIds, int tariff_id,
-                                            long long int num, stringstream *trace) {
-
-    set<NNPPackagePricelist *> nnpPackagePricelistPtr;
-
-
-    nnpPackagePricelist->findPackagePricelistIds(nnpPackagePricelistPtr, tariff_id, num, trace);
-
-    for (auto item : nnpPackagePricelistPtr) {
-        NNPPackagePricelist *package = &*item;
-        PricelistPrice *pricelistPrice = getPrice(package->pricelist_id, num);
-        if (pricelistPrice != nullptr) {
-            double cost = pricelistPrice->price;
-
-            resultNNPPackagePricelistIds.insert(pair<double, int>(cost, package->id));
-
-            if (trace != nullptr) {
-                *trace << "FOUND|NNP PACKAGE PRICELIST|BY NNP_TARIFF_ID '" << tariff_id << "'" << "\n";
-                *trace << "||";
-                package->dump(*trace);
-                *trace << "\n";
-            }
-        }
-
-    }
-
-}
 
 Trunk *Repository::getServiceTrunk(int trunk_settings_id, ServiceTrunkSettings &trunkSettings) {
     if (serviceTrunkSettings == nullptr)
@@ -442,44 +415,7 @@ bool Repository::priceLessThan(double priceLeft, const Pricelist &pricelistLeft,
 }
 
 
-bool Repository::getNNPDestinationByNumberRange(set<int> &nnpDestinationIds, NNPNumberRange *nnpNumberRange,
-                                                stringstream *trace) {
 
-    bool fResult = false;
-
-    if (nnpNumberRange != nullptr) {
-        vector<int> nnpPrefixIds;
-        getNNPPrefixsByNumberRange(nnpPrefixIds, nnpNumberRange->id, trace);
-        fResult = getNNPDestinationsByPrefix(nnpDestinationIds, nnpPrefixIds, trace);
-    }
-    if (trace != nullptr) {
-
-        *trace << "INFO|NNP|NNP DESTINATION SET (";
-        for (auto it = nnpDestinationIds.begin(); it != nnpDestinationIds.end(); it++) {
-            NNPDestination *nnpDestination = getNNPDestination(*it);
-            if (nnpDestination != nullptr) nnpDestination->dump(*trace);
-            *trace << " ";
-        }
-        *trace << ")\n";
-    }
-
-//    for (auto it = nnpDestinationIds.begin(); it != nnpDestinationIds.end(); it++)
-//        NNPDestination *nnpDestination = getNNPDestination(*it, trace);
-
-    return fResult;
-}
-
-bool Repository::getNNPDestinationByNum(set<int> &nnpDestinationIds, long long int num, stringstream *trace) {
-    bool fResult = false;
-
-    NNPNumberRange *nnpNumberRange = getNNPNumberRange(num, trace);
-    fResult = getNNPDestinationByNumberRange(nnpDestinationIds, nnpNumberRange, trace);
-    if (trace != nullptr && !fResult) {
-        *trace << "NOT FOUND|NNPDestination|BY num '" << num << "'" << "\n";
-
-    }
-    return fResult;
-}
 
 void Repository::getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
                                            long long int srcNumber, long long int dstNumber, int destinationType) {
@@ -655,55 +591,5 @@ bool Repository::matchPrefixlist(int prefixlist_id, char *prefix) {
     return prefixlistPrefix != nullptr;
 }
 
-PhoneNumber
-Repository::getNNPBestGeoRoute(PhoneNumber NumAdef, vector<PhoneNumber> &vNumA, PhoneNumber NumB, stringstream *trace) {
 
-    NNPNumberRange *nr_numAdef = getNNPNumberRange(NumAdef);
-    NNPNumberRange *nr_numB = getNNPNumberRange(NumB);
-
-    vector<pair<PhoneNumber, NNPNumberRange>> vNr, vNrRes;
-
-    if (nr_numAdef == nullptr) return -1;
-    if (nr_numB == nullptr) return -1;
-
-    if (trace != nullptr) {
-        *trace << "DEBUG|FOUND NNP_NUMBER_RANGE|FOR NumbB: " << NumB;
-        *trace << "||";
-        nr_numB->dump(*trace);
-        *trace << "\n";
-    }
-
-    vNr.push_back(make_pair(NumAdef, *nr_numAdef));
-
-    for (auto inr : vNumA) {
-        NNPNumberRange *nr_temp = getNNPNumberRange(inr);
-        if (nr_temp != nullptr) vNr.push_back(make_pair(inr, *nr_temp));
-    }
-
-    for (auto inr: vNr) {
-        if (inr.second.nnp_city_id == nr_numB->nnp_city_id) vNrRes.push_back(inr);
-    }
-
-    for (auto inr: vNr) {
-        if (inr.second.nnp_region_id == nr_numB->nnp_region_id) vNrRes.push_back(inr);
-    }
-
-    if (vNrRes.size() > 0) {
-        if (trace != nullptr) {
-            *trace << "DEBUG|FOUND NNP_NUMBER_RANGE|BestGeoRoute from NumbA: " << vNrRes.begin()->first;
-            *trace << "||";
-            vNrRes.begin()->second.dump(*trace);
-            *trace << "\n";
-        }
-        return vNrRes.begin()->first;
-    }
-
-    return -1;
-}
-
-void Repository::getNNPBestPriceRoute(vector<pair<double, PhoneNumber>> &vResNum, vector<PhoneNumber> &vNumA,
-                                      PhoneNumber NumB, stringstream *trace) {
-    vResNum.push_back(make_pair(1.23, 79263747216));
-    vResNum.push_back(make_pair(1.43, 73424234424));
-}
 
