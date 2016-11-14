@@ -81,6 +81,7 @@ set(BILL_SOURCES
     src-bill/classes/StatsPackageManager.cpp
     src-bill/classes/StatsTrunkSettingsManager.cpp
     src-bill/classes/Repository.cpp
+    src-bill/classes/Repository_npp.cpp
     src-bill/classes/Spinlock.cpp
     src-bill/classes/Task.cpp
     src-bill/classes/Thread.cpp

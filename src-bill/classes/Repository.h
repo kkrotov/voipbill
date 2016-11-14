@@ -3,6 +3,7 @@
 #include "../data/DataContainer.h"
 #include "../data/DataBillingContainer.h"
 #include "../data/DataCurrentCallsContainer.h"
+#include "RadiusAuthRequestResponse.h"
 
 class Repository {
 public:
@@ -111,6 +112,10 @@ public:
         return trunk->find(trunk_id, trace);
     }
 
+    Trunk *findAnyOurTrunk(int server_id) {
+        return trunk->findAnyOurTrunk(server_id, trace);
+    }
+
     Trunk *getTrunkByName(const char *trunk_name);
 
     TrunkGroup *getTrunkGroup(int trunk_group_id) {
@@ -121,7 +126,7 @@ public:
         trunkGroupItem->findTrunkIds(resultTrunkIds, trunk_group_id, trace);
     }
 
-    ServiceNumber *getServiceNumber(long long int numberPrefix) {
+    ServiceNumber *getServiceNumber(PhoneNumber numberPrefix) {
         return serviceNumber->find(numberPrefix, currentTime, trace);
     }
 
@@ -365,6 +370,8 @@ public:
     PhoneNumber getNNPBestGeoRoute(PhoneNumber NumAdef, vector<PhoneNumber> &vNumA, PhoneNumber NumB,
                                    stringstream *trace = nullptr);
 
-    void getNNPBestPriceRoute(vector<pair<double, PhoneNumber>> &vResNum, vector<PhoneNumber> &vNumA, PhoneNumber NumB,
+    void getNNPBestPriceRoute(set<pair<double, PhoneNumber>> &vResNum, vector<PhoneNumber> &vNumA, PhoneNumber NumB,
                               stringstream *trace = nullptr);
+
+    pair<int, RadiusAuthRequest> getNNPRegionTrunkByNum(PhoneNumber numA, PhoneNumber numB);
 };

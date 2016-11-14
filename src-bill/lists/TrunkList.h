@@ -12,7 +12,7 @@ protected:
                     our_trunk, auth_by_number, orig_redirect_number_7800, orig_redirect_number, term_redirect_number, capacity, sw_minimalki,server_id " \
                "   from auth.trunk " \
                "   where server_id in " + app().conf.get_sql_regions_for_load_list_list() +
-               "   order by id asc ";
+               "   order by id asc";
     }
 
     inline void parse_item(BDbResult &row, Trunk *item) {
@@ -103,4 +103,20 @@ public:
             }
         }
     }
+
+    Trunk *findAnyOurTrunk(int server_id, stringstream *trace = nullptr) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+
+        for (auto it = begin; it != end; ++it) {
+            Trunk *trunk = &*it;
+            if (trunk->our_trunk && trunk->server_id == server_id) return trunk;
+        }
+
+        return nullptr;
+    }
+
+
 };
+
+

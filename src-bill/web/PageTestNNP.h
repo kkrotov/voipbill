@@ -86,7 +86,7 @@ public:
             } else if (cmd == "getBestPriceRoute") {
                 PhoneNumber NumB = 0;
                 vector<PhoneNumber> vNumA;
-                vector<pair<double, PhoneNumber>> vResNum;
+                set<pair<double, PhoneNumber>> vResNum;
 
                 auto parNumB = parameters.find("num_b");
                 if (parNumB != parameters.end())
@@ -101,6 +101,7 @@ public:
 
                 if (NumB > 0 && vNumA.size() > 0) {
                     repository.getNNPBestPriceRoute(vResNum, vNumA, NumB, &html);
+
                     for (auto it : vResNum) {
                         html << "BestPriceRoute: " << it.second << " price:" << it.first << "\n";
                     }
