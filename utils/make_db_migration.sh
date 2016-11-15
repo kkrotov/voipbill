@@ -18,7 +18,7 @@ DBNAME="nispd${region_id}"
 USER=doleynik_rw
 
     echo "Делаем правку : HOST $HOST : USER $USER : DBNAME $DBNAME"
-    /usr/pgsql-9.4/bin/psql -h $HOST -U $USER $DBNAME < reg_11.sql
+    /usr/pgsql-9.4/bin/psql -h $HOST -U $USER $DBNAME < reg38.sql
 
 done
 
