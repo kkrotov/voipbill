@@ -1,6 +1,7 @@
-#pragma once
-
-#include "BaseTest.h"
+//#include "BaseTest.h"
+#include <string.h>
+#include <cxxtest/TestSuite.h>
+#include "../../src-bill/common.h"
 
 /**
  * Класс проверяющий корректную работу функции removeHtmlTags.
@@ -9,24 +10,36 @@
  *  работы функции и ожиданных.
  *
  */
-class RemoveHtmlTagsTest : public BaseTest {
+class RemoveHtmlTagsTest : public CxxTest::TestSuite {
 
-    RemoveHtmlTagsTest (RemoveHtmlTagsTest&);
-    RemoveHtmlTagsTest& operator= (RemoveHtmlTagsTest&);
+    public:
 
-    string resultStr;
-    bool   resultReturn;
+    void testThis (void) {
 
-    const static unsigned int maxIndex = 3;
+       const int TEST_NUM = 4;
+       string strToTest[TEST_NUM] = {"",
+                                     "Te<s  <s > >sted",
+                                     "Te<s >>s<s >ted",
+                                     "Te<<s<s >>sted"};
+       bool returnToTest[TEST_NUM];
 
-public:
+       string checkStr[TEST_NUM] = {"",
+                                    "Tested",
+                                    "Te>sted",
+                                    "Te<sted"};
+       bool checkReturn[TEST_NUM] = {false,
+                                     true,
+                                     true,
+                                     true};
 
-    RemoveHtmlTagsTest ();
 
-    virtual bool setResult   (unsigned int index) override;
-    virtual bool checkResult (unsigned int index) override;
+       for (int i = 0; i < TEST_NUM; i++)
+           returnToTest[i] = removeHtmlTags (strToTest[i]);
 
-    virtual unsigned int getMaxIndex () const override;
-    virtual const char* getTestName  () const override;
-
+       for (int i = 0; i < TEST_NUM; i++) {
+           TS_ASSERT (!strcmp(strToTest[i].c_str(), checkStr[i].c_str()))
+           TS_ASSERT (checkReturn[i] == returnToTest[i]);
+       }
+           
+    }
 };

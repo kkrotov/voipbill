@@ -13,6 +13,7 @@ yum install devtoolset-2-gcc devtoolset-2-binutils devtoolset-2-gcc-c++
 yum install git
 yum install svn
 yum install cmake
+yum install cxxtest
 yum install openssl-devel
 yum install curl-devel
 yum install postgresql94-devel

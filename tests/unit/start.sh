@@ -3,7 +3,7 @@
 THIS=`readlink -f "${BASH_SOURCE[0]}"`
 DIR=`dirname "${THIS}"`
 
-echo 'Unit testing...'
+echo 'Запускаеи unit-тесты'
 $DIR/utest
 [[ $? -ne 0 ]] && exit
 

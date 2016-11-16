@@ -385,7 +385,15 @@ target_link_libraries(app_bill app_bill_elf)
 #add_executable(auth-client src-auth-client/client.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
 
 #add_executable(auth-server src-auth-client/server.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
+find_package(CxxTest)
+if(CXXTEST_FOUND)
+    include_directories(${CXXTEST_INCLUDE_DIR})
+    enable_testing()
+    
+    set (CXXTEST_TESTGEN_ARGS --runner=XmlPrinter)
+    CXXTEST_ADD_TEST(tests/unit/utest tests/unit/RemoveHtmlTagsTest.cpp
+    tests/unit/RemoveHtmlTagsTest.h tests/unit/testTwo.h)
+    target_link_libraries(tests/unit/utest app_bill_elf) # as needed
+endif()
 
-add_executable(tests/unit/utest ${UNIT_TESTS_SOURCE})
-target_link_libraries (tests/unit/utest app_bill_elf)
 
