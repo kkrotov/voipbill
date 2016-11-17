@@ -12,6 +12,7 @@ bool App::start() {
 
     setRealStatus(AppStatus::APP_INITIALIZING);
 
+    start_time = time(NULL);
     runApp();
 }
 
@@ -43,4 +44,9 @@ AppStatus App::getStatus() {
 
 AppStatus App::getRealStatus() {
     return real_status;
+}
+
+time_t App::getRuntime() {
+
+    return time(NULL) - getStartTime();
 }

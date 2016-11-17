@@ -1,5 +1,4 @@
 #include "BillingCall.h"
-#include "../classes/AppBill.h"
 #include "../classes/CalcException.h"
 
 BillingCall::BillingCall(Repository *repository) {
@@ -33,7 +32,7 @@ void BillingCall::clearTrace() {
  *                указывается для какого плеча производится расчет (параметр bool orig).
  *  */
 
-void BillingCall::calc(Call *call, CallInfo * callInfo, Cdr *cdr) {
+void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
     try {
         this->cdr = cdr;
         this->call = call;
@@ -41,24 +40,26 @@ void BillingCall::calc(Call *call, CallInfo * callInfo, Cdr *cdr) {
         this->callInfo->call = call;
 
         setupTrunk();                   // Загружает в callInfo->trunk информацию по транку обсчитываемого плеча.
-                                        // При этом так же происходит вычисление действующей схемы авторизации
-                                        // для расчета - по номеру или по транку.
+        // При этом так же происходит вычисление действующей схемы авторизации
+        // для расчета - по номеру или по транку.
 
         if (call->orig) {               // При расчете оригинационного плеча
             numberPreprocessing();      // на основании значений noa и правил препроцессинга номера для транка
-                                        // (таблица auth.trunk_number_preprocessing) дополняет номера необходимыми
-                                        // префиксами слева, приводя их к 10-значному виду.
+            // (таблица auth.trunk_number_preprocessing) дополняет номера необходимыми
+            // префиксами слева, приводя их к 11-значному виду.
             processRedirectNumber();    // происходит подстановка в поле src_number из поля redirect number при
             // наличии. В случае наличие на транке флага orig_redirect_number_7800 выполняется подмена dst_номера
             // на технический на основании таблицы  billing.service_number
         }
 
         processGeo();                   // в структуру call рассчитываются поля  geo_mob и geo_id, geo_operator_id
-                                        // флаг вызова на мобильный,  регион и оператор - на противоположном плече?
-                                        // (для org плеча - рассчитываем гео-параметры  Б номера,
-                                        // для term плеча - для А- номера)
+        // флаг вызова на мобильный,  регион и оператор - на противоположном плече?
+        // (для org плеча - рассчитываем гео-параметры  Б номера,
+        // для term плеча - для А- номера)
         processDestinations();          // в структуру call рассчитывается поля mob и destination_id
-                                        // флаг звонка на мобильный и тип звонка (локал,внутризоновый, МГ, МН)
+        // флаг звонка на мобильный и тип звонка (локал,внутризоновый, МГ, МН)
+
+        processNNP();                   // Расчитываем nnp-параметры для плеча.
 
         if (callInfo->trunk->auth_by_number) {
             calcByNumber();             // Дальше производятся тарификация плеча по схеме "авторизация по номеру"
@@ -72,6 +73,7 @@ void BillingCall::calc(Call *call, CallInfo * callInfo, Cdr *cdr) {
         return;
     }
 }
+
 
 /********************************************************************************************************************
  *  Реализация тарификации плеча по схеме "авторизация по транку"
@@ -93,26 +95,26 @@ void BillingCall::calcByTrunk() {
     setupServiceTrunk();                    // Присоединение данных по услуге Транк на плече из структуры callInfo в call
 
     setupAccount();                         // в структуре callinfo заполняется структура account
-                                            // (информация о лицевом счете обсчитываемого плеча)
+    // (информация о лицевом счете обсчитываемого плеча)
 
     if (call->orig) {
         setupPackagePricelist();            // поисх подходящего пакета для обсчета оригинационного плеча, если находим, используем его
     }
 
     setupPricelist();                       // присоединяем в callInfo->pricelist прайслист по pricelist_id
-                                            // при расчете с авторизацией по транку прайслист должен быть
-                                            // выбран ранее. Из пакета?
+    // при расчете с авторизацией по транку прайслист должен быть
+    // выбран ранее. Из пакета?
 
     setupPrice();                           //  Расчитываем по ранее выбранному прайслисту и префиксу
-                                            // номера цену звонка на плече
+    // номера цену звонка на плече
 
     setupBilledTime();                      //  вычисляется тарифицируемая длительность звонка согласно настройкам
-                                            // (бесплатные секунды, тарификация по мин/по сек) действующего
-                                            // тарифа для расчитываемого плеча.
+    // (бесплатные секунды, тарификация по мин/по сек) действующего
+    // тарифа для расчитываемого плеча.
 
     if (call->orig) {
         setupPackagePrepaid();              // на оигинационном плече сохраняем в call секунды взятые из подходящего
-                                            // подключенного пакета, ссылку на сам пакет тоже сохраняем в call
+        // подключенного пакета, ссылку на сам пакет тоже сохраняем в call
     }
 
     setupCost();                            // Расчет стоимости плеча. С учетом остатка по найденому пакету
@@ -141,29 +143,30 @@ void BillingCall::calcByNumber() {
         *trace << "INFO|TARIFFICATION BY NUMBER" << "\n";
     }
 
-    if (call->orig) {
-        processLineWithoutNumber(call, cdr); // на оригинационном плече отрабатывается случай выполнения звонка
-                                             // c линии без номера
+    if (call->orig && atoll(cdr->redirect_number) == 0) {
+        processLineWithoutNumber(call,
+                                 cdr->src_number); // на оригинационном плече отрабатывается случай выполнения звонка
+        // c линии без номера
 
     }
 
     setupServiceNumber();                   // структуре callinfo заполняется структура ServiceNumber для
-                                            // обсчитываемого плеча ( инфомация об услуге номер,
-                                            // т.к. идет авторизация по номеру).
+    // обсчитываемого плеча ( инфомация об услуге номер,
+    // т.к. идет авторизация по номеру).
 
     setupServiceTrunkForNumber();           // в структуре callinfo заполняется структура ServiceTrunkForNumber
-                                            // для обсчитываемого плеча (информация о транке обсчитываемого плеча,
-                                            //  проверяем ситуацию совпадения клиента для транка и номера для
-                                            // не наших клиентов, что бы не приходили звонки с левых номеров?)
+    // для обсчитываемого плеча (информация о транке обсчитываемого плеча,
+    //  проверяем ситуацию совпадения клиента для транка и номера для
+    // не наших клиентов, что бы не приходили звонки с левых номеров?)
 
     setupAccount();                         // в структуре callinfo заполняется структура account
-                                            // (информация о лицевом счете обсчитываемого плеча)
+    // (информация о лицевом счете обсчитываемого плеча)
 
     if (call->orig) { // на оригинационном плече
         // не тарифицируем звонки, которые переведены на сервисные номера см. поле в базе publiс.server.service_numbers
         // на этих сервисных номерах находятся автоответчики типи "недостаточно денег для звонка" и прочее.
         if (cdr->dst_replace[0] != 0) {
-            for (auto srvNumber : repository->getServer()->service_numbers) {
+            for (auto srvNumber : callInfo->server->service_numbers) {
                 if (srvNumber.compare(cdr->dst_replace) == 0) {
                     call->is_service_number = true;
                     return;
@@ -172,10 +175,10 @@ void BillingCall::calcByNumber() {
         }
 
         calcOrigByNumber();                 // Дальше производится тарификация оригинационного плеча
-                                            // при схеме "авторизация по номеру"
+        // при схеме "авторизация по номеру"
     } else {
         calcTermByNumber();                 // Дальше производится тарификация терминационного плеча
-                                            // при схеме "авторизация по номеру"
+        // при схеме "авторизация по номеру"
     }
 }
 
@@ -185,39 +188,58 @@ void BillingCall::calcByNumber() {
 
 void BillingCall::calcOrigByNumber() {
 
-    setupLogTariff(); //  присоединяется действующий LogTariff для вызова на org-плече
+    if (call->account_version == CALL_ACCOUNT_VERSION_5) {
+        // Обсчитываем плечо по пакетной схеме
+        if (trace != nullptr) {
+            *trace << "INFO|CALL_ACCOUNT_VERSION_5" << "\n";
+        }
 
-    setupMainTariff(); // присоединяется действующий локальный тариф для вызова на org-плече
-
-    setupBilledTime(); //  вычисляется тарифицируемая длительность звонка согласно настройкам
-                       // (бесплатные секунды, тарификация по мин/по сек) действующего тарифа для оригинационного плеча.
-
-    setupPackagePricelist(); // поисх подходящего пакета для обсчета оригинационного плеча, если находим, используем его
-
-    if (callInfo->servicePackagePricelist == nullptr) { // Для плеча нет подходящего пакета,
-                                                        // считаем цену по прайслистам
-
-        setupTariff();  //  Для расчитанного ранее типа звонка (моб не моб, тип зональности)
-                        // в поле callInfo->tariff присоединяется действующий для этого случая тариф
+        calcOrigNNPByNumber();
 
 
-        setupPricelist(callInfo->tariff->pricelist_id); // присоединяем в callInfo->pricelist прайслист по pricelist_id
-                                                        // при расчете с авторизацией по транку прайслист должен быть
-                                                        // выбран ранее по коду
+    } else if (call->account_version == CALL_ACCOUNT_VERSION_4) {
+        // Обсчитываем плечо по традиционной схеме
+        if (trace != nullptr) {
+            *trace << "INFO|CALL_ACCOUNT_VERSION_4" << "\n";
+        }
 
-        setupPrice(call->dst_number);                   // Расчитываем по ранее выбранному прайслисту и B-номеру
-    } else {           // Для звонка найден подходящий пакет
-        setupPricelist();                               // присоединяем в callInfo->pricelist прайслист по pricelist_id
-                                                        // при расчете с авторизацией по транку прайслист должен быть
-                                                        // выбран ранее из пакета.
+        setupLogTariff(); //  присоединяется действующий LogTariff для вызова на org-плече
+        setupMainTariff(); // присоединяется действующий локальный тариф для вызова на org-плече
 
-        setupPrice();                                   //  Расчитываем по ранее выбранному прайслисту и
-                                                        //  номера цену звонка на плече
+        setupBilledTime(); //  вычисляется тарифицируемая длительность звонка согласно настройкам
+        // (бесплатные секунды, тарификация по мин/по сек) действующего тарифа для оригинационного плеча.
+
+        setupPackagePricelist(); // поисх подходящего пакета для обсчета оригинационного плеча, если находим, используем его
+
+        if (callInfo->servicePackagePricelist == nullptr) { // Для плеча нет подходящего пакета,
+            // считаем цену по прайслистам
+
+            setupTariff();  //  Для расчитанного ранее типа звонка (моб не моб, тип зональности)
+            // в поле callInfo->tariff присоединяется действующий для этого случая тариф
+
+
+            setupPricelist(
+                    callInfo->tariff->pricelist_id); // присоединяем в callInfo->pricelist прайслист по pricelist_id
+            // при расчете с авторизацией по транку прайслист должен быть
+            // выбран ранее по коду
+
+            setupPrice(call->dst_number);                   // Расчитываем по ранее выбранному прайслисту и B-номеру
+        } else {           // Для звонка найден подходящий пакет
+            setupPricelist();                               // присоединяем в callInfo->pricelist прайслист по pricelist_id
+            // при расчете с авторизацией по транку прайслист должен быть
+            // выбран ранее из пакета.
+
+            setupPrice();                                   //  Расчитываем по ранее выбранному прайслисту и
+            //  номера цену звонка на плече
+        }
+
+        setupFreemin();  // Учитываем расход предоплаченных минут при локальных звонках
+
+        setupPackagePrepaid();
+
+    } else {
+        throw CalcException("UNKNOW ACCOUNT VERSION");
     }
-
-    setupFreemin();  // Учитываем расход предоплаченных минут при локальных звонках
-
-    setupPackagePrepaid();
 
     setupCost();                                        // Расчет стоимости плеча. С учетом остатка по найденому пакету
 }
@@ -231,26 +253,27 @@ void BillingCall::calcTermByNumber() {
     setupLogTariff();   //  присоединяется действующий LogTariff для вызова на терм-плече
 
     setupMainTariff();  // присоединяется действующий локальный тариф для вызова на терм-плече
-                        // в поле callInfo->mainTariff
+    // в поле callInfo->mainTariff
 
     setupBilledTime();  //  вычисляется тарифицируемая длительность звонка согласно настройкам
-                        // (бесплатные секунды, тарификация по мин/по сек) действующего тарифа для терм-плеча.
+    // (бесплатные секунды, тарификация по мин/по сек) действующего тарифа для терм-плеча.
 
     if (isUsage7800()) {  // если обсчитвается терминационное плечо вызова на номер 7800
         if (trace != nullptr) {
             *trace << "INFO|TARIFFICATION 7800" << "\n";
         }
 
-        setupPricelist(callInfo->mainTariff->pricelist_id); // присоединяем в callInfo->pricelist прайслист по pricelist_id
-                                                            // при расчете с авторизацией по транку прайслист должен быть
-                                                            // выбран ранее по коду
+        setupPricelist(
+                callInfo->mainTariff->pricelist_id); // присоединяем в callInfo->pricelist прайслист по pricelist_id
+        // при расчете с авторизацией по транку прайслист должен быть
+        // выбран ранее по коду
 
         setupPrice(call->src_number);                       // Расчитываем по ранее выбранному прайслисту и
-                                                            // номеру на плече цену звонка на номер 7800 для
+        // номеру на плече цену звонка на номер 7800 для
 
         setupCost();                                        // Расчет стоимости плеча. С учетом остатка по найденому пакету
 
-        call->cost = - call->cost;                          // отрабатываем нюанс, что владелец 7800 сам платит за входящие звонки
+        call->cost = -call->cost;                          // отрабатываем нюанс, что владелец 7800 сам платит за входящие звонки
     }
 }
 
@@ -270,7 +293,8 @@ void BillingCall::numberPreprocessing() {
             break;
         }
 
-        if (!srcNumberPreprocessingDone && numberPreprocessing->src && cdr->src_noa == numberPreprocessing->noa && strlen(cdr->src_number) == numberPreprocessing->length) {
+        if (!srcNumberPreprocessingDone && numberPreprocessing->src && cdr->src_noa == numberPreprocessing->noa &&
+            strlen(cdr->src_number) == numberPreprocessing->length) {
             char tmpNumber[20];
             char tmp[20];
 
@@ -286,7 +310,8 @@ void BillingCall::numberPreprocessing() {
             srcNumberPreprocessingDone = true;
         }
 
-        if (!dstNumberPreprocessingDone && !numberPreprocessing->src && cdr->dst_noa == numberPreprocessing->noa && strlen(cdr->dst_number) == numberPreprocessing->length) {
+        if (!dstNumberPreprocessingDone && !numberPreprocessing->src && cdr->dst_noa == numberPreprocessing->noa &&
+            strlen(cdr->dst_number) == numberPreprocessing->length) {
             char tmpNumber[20];
             char tmp[20];
 
@@ -315,17 +340,18 @@ void BillingCall::numberPreprocessing() {
 void BillingCall::processRedirectNumber() {
     if (callInfo->trunk->orig_redirect_number) {
 
-        long long int redirect_number =  atoll(cdr->redirect_number);
+        long long int redirect_number = atoll(cdr->redirect_number);
 
         if (redirect_number > 0) {
-            call->src_number = redirect_number;
+
+            processLineWithoutNumber(call, cdr->redirect_number);
 
             if (trace != nullptr) {
                 *trace << "INFO|PROCESS REDIRECT NUMBER|SET SRC_NUMBER = " << call->src_number << "\n";
             }
         }
     } else if (callInfo->trunk->orig_redirect_number_7800) {
-        ServiceNumber* serviceNumber = repository->getServiceNumberByTechnicalNumber(getRemoteNumber());
+        ServiceNumber *serviceNumber = repository->getServiceNumberByTechnicalNumber(getRemoteNumber());
         if (serviceNumber) {
 
             long long int replacement_number = atoll(serviceNumber->did);
@@ -408,6 +434,7 @@ void BillingCall::processDestinations() {
 
 
 int BillingCall::getDest(int geo_id) {
+
     callInfo->geo = repository->getGeo(geo_id);
     if (callInfo->geo == nullptr) {
         if (trace != nullptr) {
@@ -416,18 +443,20 @@ int BillingCall::getDest(int geo_id) {
         return 2;
     }
 
-    if (!call->mob && repository->getInstanceSettings()->city_id > 0 && callInfo->geo->city_id == repository->getInstanceSettings()->city_id) {
+    if (!call->mob && callInfo->instanceSettings->city_id > 0 &&
+        callInfo->geo->city_id == callInfo->instanceSettings->city_id) {
         return -1;
     }
 
-    auto regionIds = repository->getInstanceSettings()->getRegionIds();
+    auto regionIds = callInfo->instanceSettings->getRegionIds();
     for (auto it = regionIds.begin(); it != regionIds.end(); ++it) {
         if (callInfo->geo->region_id == *it) {
             return 0;
         }
     }
 
-    if (repository->getInstanceSettings()->country_id > 0 && callInfo->geo->country_id == repository->getInstanceSettings()->country_id) {
+    if (callInfo->instanceSettings->country_id > 0 &&
+        callInfo->geo->country_id == callInfo->instanceSettings->country_id) {
         return 1;
     }
 
@@ -440,22 +469,22 @@ int BillingCall::getDest(int geo_id) {
  *  функция отрезазает префикс и оставляет в поле внутренний номер такой линии - здесь будет 4026
  */
 
-void BillingCall::processLineWithoutNumber(Call *call, Cdr *cdr) {
-    char * pos = nullptr;
+void BillingCall::processLineWithoutNumber(Call *call, char *cdr_num) {
+    char *pos = nullptr;
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "=2A");
+        pos = strstr(cdr_num, "=2A");
         if (pos != nullptr) pos += 3;
     }
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "=2B");
+        pos = strstr(cdr_num, "=2B");
         if (pos != nullptr) pos += 3;
     }
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "*");
+        pos = strstr(cdr_num, "*");
         if (pos != nullptr) pos += 1;
     }
     if (pos == nullptr) {
-        pos = strstr(cdr->src_number, "+");
+        pos = strstr(cdr_num, "+");
         if (pos != nullptr) pos += 1;
     }
     if (pos != nullptr) {
@@ -463,7 +492,10 @@ void BillingCall::processLineWithoutNumber(Call *call, Cdr *cdr) {
         if (trace != nullptr) {
             *trace << "INFO|LINE WITHOUT NUMBER|SET SRC_NUMBER = " << call->src_number << "\n";
         }
+    } else {
+        if (cdr_num != nullptr) call->src_number = atoll(cdr_num);
     }
+
 }
 
 
@@ -487,7 +519,7 @@ long long int BillingCall::getRemoteNumber() {
  *  Вычисление названия транка обсчитываемого плеча вызова
  */
 
-char * BillingCall::getRoute() {
+char *BillingCall::getRoute() {
     return call->orig ? cdr->src_route : cdr->dst_route;
 }
 
@@ -495,7 +527,7 @@ char * BillingCall::getRoute() {
  *  Вычисление названия противоположного транка для обсчитываемого плеча вызова
  */
 
-char * BillingCall::getRemoteRoute() {
+char *BillingCall::getRemoteRoute() {
     return call->orig ? cdr->dst_route : cdr->src_route;
 }
 
@@ -543,12 +575,30 @@ bool BillingCall::isUsage7800() {
 
 void BillingCall::setupTrunk() {
     callInfo->trunk = repository->getTrunkByName(getRoute());
+    call->server_id = app().conf.instance_id;
     if (callInfo->trunk == nullptr) {
         throw CalcException("TRUNK WAS NOT FOUND");
     }
 
     call->trunk_id = callInfo->trunk->id;  // Из таблицы - auth.trunk
     call->our = callInfo->trunk->our_trunk || callInfo->trunk->auth_by_number;
+
+    callInfo->server = repository->getServer(callInfo->trunk->server_id);
+    if (callInfo->server == nullptr) {
+        throw CalcException("SERVER WAS NOT FOUND");
+    }
+
+    call->server_id = callInfo->server->id;
+
+    callInfo->instanceSettings = repository->getInstanceSettings(callInfo->trunk->server_id);
+    if (callInfo->instanceSettings == nullptr) {
+        throw CalcException("INSTANCESETTINGS WAS NOT FOUND");
+    }
+
+    if (trace != nullptr) {
+        *trace << "INFO|REGION_ID|" << callInfo->server->id << "\n";
+    }
+
 }
 
 /******************************************************************************************************************
@@ -559,7 +609,8 @@ void BillingCall::setupTrunk() {
 void BillingCall::setupEffectiveOrigTrunkSettings() {
     vector<ServiceTrunkOrder> trunkSettingsOrderList;
 
-    repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number, SERVICE_TRUNK_SETTINGS_ORIGINATION);
+    repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
+                                          SERVICE_TRUNK_SETTINGS_ORIGINATION);
     // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
 
     repository->orderOrigTrunkSettingsOrderList(trunkSettingsOrderList);
@@ -586,11 +637,18 @@ void BillingCall::setupEffectiveOrigTrunkSettings() {
 void BillingCall::setupEffectiveTermTrunkSettings() {
     vector<ServiceTrunkOrder> trunkSettingsOrderList;
 
-    repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number, SERVICE_TRUNK_SETTINGS_TERMINATION);
+    repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
+                                          SERVICE_TRUNK_SETTINGS_TERMINATION);
     // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
 
-    // отсортировали по цене
-    repository->orderTermTrunkSettingsOrderList(trunkSettingsOrderList, call->connect_time);
+    Trunk *orig_trunk = repository->getTrunkByName(cdr->src_route);
+    if (orig_trunk == nullptr) {
+        throw CalcException("ORIG TRUNK WAS NOT FOUND");
+    }
+
+    // отсортировали по цене, причем применили настройку на оригинационном плече - использовать или нет минималки на терм-плече
+
+    repository->orderTermTrunkSettingsOrderList(trunkSettingsOrderList, orig_trunk->sw_minimalki, call->connect_time);
 
     if (trunkSettingsOrderList.size() > 0) {
         auto order = trunkSettingsOrderList.at(0);
@@ -813,6 +871,7 @@ void BillingCall::setupTariff() {
     }
 }
 
+
 /******************************************************************************************************************
  *   Поиск подходящего пакета для того, что бы тарифицировать им звонок.
  *
@@ -834,10 +893,10 @@ void BillingCall::setupPackagePricelist() {
         return;
     }
 
-    Pricelist * pricelist;
-    PricelistPrice * price;
+    Pricelist *pricelist;
+    PricelistPrice *price;
 
-    for(auto package : packages) {
+    for (auto package : packages) {
         auto tariff = repository->getTariffPackage(package->tariff_package_id);
         if (tariff == nullptr) {
             continue;
@@ -891,16 +950,18 @@ void BillingCall::setupFreemin() {
 
     // Только при локальных звонках
 
-    int tariffFreeSeconds = 60 * callInfo->mainTariff->freemin * (callInfo->mainTariff->freemin_for_number ? 1 : callInfo->serviceNumber->lines_count);
+    int tariffFreeSeconds = 60 * callInfo->mainTariff->freemin *
+                            (callInfo->mainTariff->freemin_for_number ? 1 : callInfo->serviceNumber->lines_count);
     if (trace != nullptr) {
-        *trace << "INFO|FREEMIN|TARIFF " << tariffFreeSeconds << " SECONDS, TARIFF_ID: " << callInfo->mainTariff->id << "\n";
+        *trace << "INFO|FREEMIN|TARIFF " << tariffFreeSeconds << " SECONDS, TARIFF_ID: " << callInfo->mainTariff->id <<
+               "\n";
     }
 
     if (tariffFreeSeconds <= 0) {
         return;
     }
 
-    StatsFreemin * stats = repository->billingData->statsFreeminGetCurrent(callInfo);
+    StatsFreemin *stats = repository->billingData->statsFreeminGetCurrent(callInfo);
 
     if (trace != nullptr) {
         *trace << "INFO|FREEMIN|USED " << stats->used_seconds << " SECONDS, STAT_ID: " << stats->id << "\n";
@@ -949,12 +1010,12 @@ void BillingCall::setupPackagePrepaid() {
     }
 
     int packageSeconds = 0;
-    ServicePackage * servicePackage = nullptr;
-    TariffPackage * tariffPackage = nullptr;
-    StatsPackage * statsPackage = nullptr;
+    ServicePackage *servicePackage = nullptr;
+    TariffPackage *tariffPackage = nullptr;
+    StatsPackage *statsPackage = nullptr;
 
 
-    for(auto package : packages) {
+    for (auto package : packages) {
         auto tariff = repository->getTariffPackage(package->tariff_package_id);
         if (tariff == nullptr) {
             continue;
@@ -970,7 +1031,7 @@ void BillingCall::setupPackagePrepaid() {
 
         // Можно
 
-        StatsPackage * stats = repository->billingData->statsPackageGetCurrent(callInfo, package, tariff);
+        StatsPackage *stats = repository->billingData->statsPackageGetCurrent(callInfo, package, tariff);
 
         if (trace != nullptr) {
             *trace << "DEBUG|STATS PACKAGE|";
@@ -1017,20 +1078,20 @@ void BillingCall::setupPackagePrepaid() {
  */
 
 
-bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
+bool BillingCall::matchTariffPackageDestination(TariffPackage *tariff) {
     vector<int> prefixlistIds;  // тут будет список префикс-листов
     repository->getAllStatPrefixlistIdsByStatDestinationId(prefixlistIds, tariff->destination_id);
-        // Вычисляем список все префикс-листов по направлению из тарифа
+    // Вычисляем список все префикс-листов по направлению из тарифа
 
     for (int prefixlistId : prefixlistIds) {
-        StatPrefixlist * prefixlist = repository->getStatPrefixlist(prefixlistId);
-                //  выбрали префикслиста из списка, дальше работаем с ним таблица
+        StatPrefixlist *prefixlist = repository->getStatPrefixlist(prefixlistId);
+        //  выбрали префикслиста из списка, дальше работаем с ним таблица
         if (prefixlist != nullptr) {
 
             if (prefixlist->type_id == STAT_PREFIXLIST_TYPE_MANUAL) {
 
                 for (long long int prefix : prefixlist->prefixes) {
-                        // Пытаемся найти подходящий префикс из списка в поле stat_prefixlist.prefixes
+                    // Пытаемся найти подходящий префикс из списка в поле stat_prefixlist.prefixes
                     if (trace != nullptr) {
                         *trace << "INFO|MATCH|TRY MATCH NUMBER " << call->dst_number << " BY PREFIX " << prefix << "\n";
                     }
@@ -1046,7 +1107,7 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
                                 *trace << "INFO|MATCH|OK. PREFIX " << prefix << "\n";
                             }
                             return true; // подходящий префикс с типом Мануал в поле  stat_prefixlist.prefixes
-                                         // нашелся
+                            // нашелся
                         }
                         len -= 1;
                     }
@@ -1077,21 +1138,24 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
                     continue;
                 }
 
-                if (prefixlist->country_id > 0 && callInfo->geo != nullptr && callInfo->geo->country_id != prefixlist->country_id) {
+                if (prefixlist->country_id > 0 && callInfo->geo != nullptr &&
+                    callInfo->geo->country_id != prefixlist->country_id) {
                     if (trace != nullptr) {
                         *trace << "INFO|MATCH|EXIT. NOT MATCH COUNTRY\n";
                     }
                     continue;
                 }
 
-                if (prefixlist->region_id > 0 && callInfo->geo != nullptr && callInfo->geo->region_id != prefixlist->region_id) {
+                if (prefixlist->region_id > 0 && callInfo->geo != nullptr &&
+                    callInfo->geo->region_id != prefixlist->region_id) {
                     if (trace != nullptr) {
                         *trace << "INFO|MATCH|EXIT. NOT MATCH REGION\n";
                     }
                     continue;
                 }
 
-                if (prefixlist->city_id > 0 && callInfo->geo != nullptr && callInfo->geo->city_id != prefixlist->city_id) {
+                if (prefixlist->city_id > 0 && callInfo->geo != nullptr &&
+                    callInfo->geo->city_id != prefixlist->city_id) {
                     if (trace != nullptr) {
                         *trace << "INFO|MATCH|EXIT. NOT MATCH CITY\n";
                     }
@@ -1117,7 +1181,7 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage * tariff) {
                 if (!prefixlist->exclude_operators && prefixlist->operators.size() > 0) {
                     bool exclude = true;
                     for (int includeOperatorId : prefixlist->operators) {
-                        if (call->geo_operator_id == includeOperatorId ) {
+                        if (call->geo_operator_id == includeOperatorId) {
                             exclude = false;
                             break;
                         }

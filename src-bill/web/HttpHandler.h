@@ -24,6 +24,7 @@
 #include "http/request.hpp"
 #include "http/reply.hpp"
 #include "PageCdrUnfinished.h"
+#include "PageTrunks.h"
 
 class HttpHandler {
 private:
@@ -31,6 +32,7 @@ private:
     static void spawnHandlers(vector<shared_ptr<BasePage>> &handlers) {
         handlers.push_back(shared_ptr<BasePage>(new PageHome));
         handlers.push_back(shared_ptr<BasePage>(new PageCalls));
+        handlers.push_back(shared_ptr<BasePage>(new PageTrunks));
         handlers.push_back(shared_ptr<BasePage>(new PageData));
         handlers.push_back(shared_ptr<BasePage>(new PageDataBilling));
         handlers.push_back(shared_ptr<BasePage>(new PageCounters));

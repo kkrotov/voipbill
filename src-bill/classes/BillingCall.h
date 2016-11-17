@@ -48,7 +48,8 @@ protected:
     void processGeo();
     void processDestinations();
     int getDest(int geo_id);
-    void processLineWithoutNumber(Call *call, Cdr *cdr);
+
+    void processLineWithoutNumber(Call *call, char *cdr_num);
     long long int getNumber();
     long long int getRemoteNumber();
     char * getRoute();
@@ -76,7 +77,27 @@ protected:
 
     bool matchTariffPackageDestination(TariffPackage * tariff);
 
-    bool matchNumberNNPDestination(long long int numberPrefix, int nnp_destination_id);
+    void processNNP();
 
+
+    void setupBilledTimeNNP(NNPAccountTariffLight nnpAccountTariffLight);
+
+    void calcOrigNNPByNumber();
+
+
+    pair<int, int> setupNNPPackageMinute(vector<NNPAccountTariffLight> &nnpAccountTariffLight,
+                                         set<int> &nnpDestinationIds);
+
+    pair<double, int> setupNNPPackagePricelist(vector<NNPAccountTariffLight> &nnpAccountTariffLightList,
+                                               set<int> &nnpDestinationIds);
+
+    pair<double, int> setupNNPPackagePrice(vector<NNPAccountTariffLight> &nnpAccountTariffLightList,
+                                           set<int> &nnpDestinationIds);
+
+    void setupNNPCost();
+
+    int
+    getCallLengthNNP(int len, int tarification_free_seconds, int tarification_interval_seconds,
+                     int tarification_type, int tarification_min_paid_seconds);
 };
 

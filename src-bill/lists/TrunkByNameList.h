@@ -3,33 +3,39 @@
 #include "../classes/ObjList.h"
 #include "../models/Trunk.h"
 #include "../classes/AppBill.h"
+#include "ServerList.h"
 
 class TrunkByNameList : public ObjList<Trunk> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
-        return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, default_priority, auto_routing, route_table_id, our_trunk, auth_by_number, orig_redirect_number_7800, orig_redirect_number, term_redirect_number " \
-            "   from auth.trunk " \
-            "   where server_id = " + server_id +
-            "   order by trunk_name asc ";
+        return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, source_trunk_rule_default_allowed, default_priority, auto_routing, route_table_id, "\
+               "   our_trunk, auth_by_number, orig_redirect_number_7800, orig_redirect_number, term_redirect_number, capacity, sw_minimalki,server_id  " \
+               "   from auth.trunk " \
+               "   where server_id in " + app().conf.get_sql_regions_for_load_list_list() +
+               "   order by trunk_name asc ";
     }
 
     inline void parse_item(BDbResult &row, Trunk * item) {
+
         item->id = row.get_i(0);
         row.fill_cs(1, item->name, sizeof(item->name));
         row.fill_cs(2, item->trunk_name, sizeof(item->trunk_name));
         item->code = row.get_i(3);
         item->source_rule_default_allowed = row.get_b(4);
         item->destination_rule_default_allowed = row.get_b(5);
-        item->default_priority = row.get_i(6);
-        item->auto_routing = row.get_b(7);
-        item->route_table_id = row.get_i(8);
-        item->our_trunk = row.get_b(9);
-        item->auth_by_number = row.get_b(10);
-        item->orig_redirect_number_7800 = row.get_b(11);
-        item->orig_redirect_number = row.get_b(12);
-        item->term_redirect_number = row.get_b(13);
+        item->source_trunk_rule_default_allowed = row.get_b(6);
+        item->default_priority = row.get_i(7);
+        item->auto_routing = row.get_b(8);
+        item->route_table_id = row.get_i(9);
+        item->our_trunk = row.get_b(10);
+        item->auth_by_number = row.get_b(11);
+        item->orig_redirect_number_7800 = row.get_b(12);
+        item->orig_redirect_number = row.get_b(13);
+        item->term_redirect_number = row.get_b(14);
+        item->capacity = row.get_i(15);
+        item->sw_minimalki = row.get_b(16);
+        item->server_id = row.get_i(17);
     }
 
     struct key_trunk_name {
@@ -84,4 +90,5 @@ public:
 
         sort(data.begin(), data.end(), key_trunk_name());
     };
+
 };

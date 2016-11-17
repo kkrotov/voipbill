@@ -9,7 +9,7 @@ StatsNNPPackageMinuteManager::StatsNNPPackageMinuteManager() {
 void StatsNNPPackageMinuteManager::load(BDb *db, time_t lastSaveCallTime) {
     forSync.clear();
     statsNNPPackageMinute.clear();
-    statsByNNPPackageMinuteId.clear();
+    statsByNNPAccountTariffLightId.clear();
     realtimeStatsNNPPackageMinuteParts.clear();
     realtimeStatsNNPPackageMinuteParts.push_back(map<int, StatsNNPPackageMinute>());
 
@@ -41,7 +41,7 @@ void StatsNNPPackageMinuteManager::load(BDb *db, time_t lastSaveCallTime) {
         stats.min_call_id = res.get_ll(8);
         stats.max_call_id = res.get_ll(9);
 
-        statsByNNPPackageMinuteId[stats.id].push_front(stats.id);
+        statsByNNPAccountTariffLightId[stats.nnp_account_tariff_light_id].push_front(stats.id);
     }
 
     loaded = true;
@@ -88,10 +88,12 @@ void StatsNNPPackageMinuteManager::recalc(BDb *db, long long int storedLastId) {
 }
 
 StatsNNPPackageMinute *StatsNNPPackageMinuteManager::getCurrent(time_t connect_time, Client *account,
-                                                                StatsNNPPackageMinute *nnpPackageMinute) {
-    auto itByNNPPackageMinuteId = statsByNNPPackageMinuteId.find(nnpPackageMinute->id);
-    if (itByNNPPackageMinuteId != statsByNNPPackageMinuteId.end()) {
-        for (int nnpPackageMinuteId : itByNNPPackageMinuteId->second) {
+                                                                NNPPackageMinute *nnpPackageMinute,
+                                                                NNPAccountTariffLight *nnpAccountTariffLight) {
+    auto itByNNPAccountTariffLightId = statsByNNPAccountTariffLightId.find(nnpAccountTariffLight->id);
+
+    if (itByNNPAccountTariffLightId != statsByNNPAccountTariffLightId.end()) {
+        for (int nnpPackageMinuteId : itByNNPAccountTariffLightId->second) {
             auto itNNPPackageMinute = statsNNPPackageMinute.find(nnpPackageMinuteId);
             if (itNNPPackageMinute == statsNNPPackageMinute.end()) continue;
 
@@ -104,7 +106,8 @@ StatsNNPPackageMinute *StatsNNPPackageMinuteManager::getCurrent(time_t connect_t
         }
     }
 
-    StatsNNPPackageMinute *stats = createStatsNNPPackageMinute(connect_time, account, nnpPackageMinute);
+    StatsNNPPackageMinute *stats = createStatsNNPPackageMinute(connect_time, account, nnpPackageMinute,
+                                                               nnpAccountTariffLight);
 
     size_t parts = realtimeStatsNNPPackageMinuteParts.size();
     map<int, StatsNNPPackageMinute> &realtimeStatsNNPPackageMinute = realtimeStatsNNPPackageMinuteParts.at(parts - 1);
@@ -187,7 +190,8 @@ void StatsNNPPackageMinuteManager::removePartitionAfterSave() {
 }
 
 StatsNNPPackageMinute *StatsNNPPackageMinuteManager::createStatsNNPPackageMinute(time_t connect_time, Client *account,
-                                                                                 StatsNNPPackageMinute *nnpPackageMinute) {
+                                                                                 NNPPackageMinute *nnpPackageMinute,
+                                                                                 NNPAccountTariffLight *nnpAccountTariffLight) {
 
     time_t activate_dt;
     time_t deactivate_dt;
@@ -196,15 +200,15 @@ StatsNNPPackageMinute *StatsNNPPackageMinuteManager::createStatsNNPPackageMinute
 //    activate_dt = get_tmonth(connect_time, account->timezone_offset);
 //    deactivate_dt = get_tmonth_end(connect_time, account->timezone_offset);
 
-    activate_dt = nnpPackageMinute->activate_from;
-    deactivate_dt = nnpPackageMinute->deactivate_from;
+    activate_dt = nnpAccountTariffLight->activate_from;
+    deactivate_dt = nnpAccountTariffLight->deactivate_from;
 
     lastTrunkNNPPackageMinuteId += 1;
 
     StatsNNPPackageMinute &stats = statsNNPPackageMinute[lastTrunkNNPPackageMinuteId];
     stats.id = lastTrunkNNPPackageMinuteId;
-    stats.nnp_package_minute_id = nnpPackageMinute->nnp_package_minute_id;
-    stats.nnp_account_tariff_light_id = nnpPackageMinute->nnp_account_tariff_light_id;
+    stats.nnp_package_minute_id = nnpPackageMinute->id;
+    stats.nnp_account_tariff_light_id = nnpAccountTariffLight->id;
     stats.activate_from = activate_dt;
     stats.deactivate_from = deactivate_dt;
     stats.used_seconds = 0;
@@ -212,7 +216,7 @@ StatsNNPPackageMinute *StatsNNPPackageMinuteManager::createStatsNNPPackageMinute
     stats.min_call_id = 0;
     stats.max_call_id = 0;
 
-    statsByNNPPackageMinuteId[stats.id].push_front(stats.id);
+    statsByNNPAccountTariffLightId[stats.nnp_account_tariff_light_id].push_front(stats.id);
 
     return &stats;
 }
@@ -227,7 +231,7 @@ StatsNNPPackageMinute *StatsNNPPackageMinuteManager::updateStatsNNPPackageMinute
 
     StatsNNPPackageMinute &stats = itStatsNNPPackageMinute->second;
 
-    stats.used_seconds += callInfo->call->billed_time;
+    stats.used_seconds += callInfo->call->package_time;
     stats.used_credit += callInfo->call->cost;
     stats.min_call_id = stats.min_call_id == 0 ? callInfo->call->id : stats.min_call_id;
     stats.max_call_id = callInfo->call->id;
@@ -251,9 +255,8 @@ void StatsNNPPackageMinuteManager::addChanges(map<int, StatsNNPPackageMinute> &c
 size_t StatsNNPPackageMinuteManager::sync(BDb *db_main, BDb *db_calls) {
 
     BDbResult resMax = db_main->query(
-            "SELECT max(max_call_id) FROM billing.stats_nnp_package_minute WHERE server_id='" +
-            app().conf.str_instance_id +
-            "'");
+            "SELECT max(max_call_id) FROM billing.stats_nnp_package_minute WHERE server_id in " +
+            app().conf.get_sql_regions_list());
     long long int central_max_call_id = resMax.next() ? resMax.get_ll(0) : 0;
 
     BDbResult res = db_calls->query(
@@ -296,13 +299,25 @@ size_t StatsNNPPackageMinuteManager::sync(BDb *db_main, BDb *db_calls) {
     return res.size();
 }
 
-int StatsNNPPackageMinuteManager::getUsedSeconds(int nnp_account_tariff_light_id, int nnp_package_minute_id) {
+int StatsNNPPackageMinuteManager::getUsedSeconds(int nnp_account_tariff_light_id, int nnp_package_minute_id,
+                                                 time_t connect_time) {
 
-    for (auto it = statsNNPPackageMinute.begin(); it != statsNNPPackageMinute.end(); it++) {
-        if (it->second.nnp_account_tariff_light_id == nnp_account_tariff_light_id &&
-            it->second.nnp_package_minute_id == nnp_package_minute_id)
-            return it->second.used_seconds;
+    auto itByNNPAccountTariffLightId = statsByNNPAccountTariffLightId.find(nnp_account_tariff_light_id);
+
+    if (itByNNPAccountTariffLightId != statsByNNPAccountTariffLightId.end()) {
+        for (int nnpPackageMinuteId : itByNNPAccountTariffLightId->second) {
+            auto itNNPPackageMinute = statsNNPPackageMinute.find(nnpPackageMinuteId);
+            if (itNNPPackageMinute == statsNNPPackageMinute.end()) continue;
+
+            StatsNNPPackageMinute &stats = itNNPPackageMinute->second;
+
+            if (stats.activate_from > connect_time) continue;
+            if (stats.deactivate_from < connect_time) continue;
+
+            return stats.used_seconds;
+        }
     }
+
     return 0;
 
 }

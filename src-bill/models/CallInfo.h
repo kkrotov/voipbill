@@ -15,6 +15,10 @@
 #include "Pricelist.h"
 #include "PricelistPrice.h"
 #include "Geo.h"
+#include "Server.h"
+#include "InstanceSettings.h"
+#include "nnp/NNPNumberRange.h"
+
 #include "ServiceTrunkSettings.h"
 
 struct DT {
@@ -24,6 +28,8 @@ struct DT {
 
 struct CallInfo {
     Call * call;
+    Server *server;
+    InstanceSettings *instanceSettings;
     Trunk * trunk;
     Client * account;
     ServiceNumber * serviceNumber;
@@ -38,12 +44,15 @@ struct CallInfo {
     Pricelist * pricelist;
     PricelistPrice * price;
     Geo * geo;
+    NNPNumberRange *nnpNumberRange;
 
     DT dt;
     DT dtUtc;
 
     CallInfo() {
         call = nullptr;
+        instanceSettings = nullptr;
+        server = nullptr;
         trunk = nullptr;
         account = nullptr;
         serviceNumber = nullptr;
@@ -56,6 +65,7 @@ struct CallInfo {
         pricelist = nullptr;
         price = nullptr;
         geo = nullptr;
+        nnpNumberRange = nullptr;
     }
 
     void make_dt() {

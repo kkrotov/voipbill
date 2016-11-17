@@ -1,8 +1,17 @@
 
 char const * build_date() {
-    return __DATE__;
+    return _DATECOMPILED_;
 }
 
 char const * build_time() {
     return __TIME__;
+}
+
+const char * build_commit() {
+#ifdef _CURRENT_HEAD_
+    return _CURRENT_HEAD_;
+#else
+    static const char* unknown = "unknown";
+    return unknown;
+#endif
 }

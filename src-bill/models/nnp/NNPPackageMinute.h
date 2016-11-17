@@ -6,7 +6,7 @@ struct NNPPackageMinute {
     int id;
     int nnp_tariff_id;
     int nnp_destination_id;
-    int minute;
+    double minute;
 
     void dump(stringstream &trace) {
         trace << "(";

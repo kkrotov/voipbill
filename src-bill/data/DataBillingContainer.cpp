@@ -207,7 +207,9 @@ void DataBillingContainer::loadLastCallIdAndCdrIdAndTime(BDb * db_calls) {
 }
 
 void DataBillingContainer::loadSyncCentralCallIdAndTime(BDb * db_main) {
-    auto res = db_main->query("select id, connect_time from calls_raw.calls_raw where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
+    auto res = db_main->query(
+            "select id, connect_time from calls_raw.calls_raw where server_id in " + app().conf.get_sql_regions_list() +
+            " order by id desc limit 1");
     if (res.next()) {
         lastSyncCentralCallId   = res.get_ll(0);
         lastSyncCentralCallTime = parseDateTime(res.get(1));
@@ -219,7 +221,9 @@ void DataBillingContainer::loadSyncCentralCallIdAndTime(BDb * db_main) {
 
 void DataBillingContainer::loadSyncCentralCdrIdAndTime(BDb * db_main) {
 
-    auto res = db_main->query("select id, setup_time from calls_cdr.cdr where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
+    auto res = db_main->query(
+            "select id, setup_time from calls_cdr.cdr where server_id in " + app().conf.get_sql_regions_list() +
+            " order by id desc limit 1");
     if (res.next()) {
 
         lastSyncCentralCdrId = res.get_ll(0);
@@ -234,16 +238,17 @@ void DataBillingContainer::loadSyncCentralCdrIdAndTime(BDb * db_main) {
 
 void DataBillingContainer::loadSyncCentralCdrUnfinishedIdAndTime(BDb * db_main) {
 
-    auto res = db_main->query("select id, setup_time from calls_cdr.cdr_unfinished where server_id = " + app().conf.str_instance_id + " order by id desc limit 1");
+    auto res = db_main->query("select id, setup_time from calls_cdr.cdr_unfinished where server_id in " +
+                              app().conf.get_sql_regions_list() + " order by id desc limit 1");
     if (res.next()) {
 
         lastSyncCentralCdrUnfinishedId = res.get_ll(0);
-        //lastSyncCentralCdrTime = parseDateTime(res.get(1));
+        lastSyncCentralCdrUnfinishedTime = parseDateTime(res.get(1));
     }
     else {
 
         lastSyncCentralCdrUnfinishedId = 0;
-        //lastSyncCentralCdrTime = 0;
+        lastSyncCentralCdrUnfinishedTime = 0;
     }
 }
 
@@ -421,8 +426,15 @@ void DataBillingContainer::statsNNPPackaeMinuteAddChanges(map<int, StatsNNPPacka
     statsNNPPackageMinute.addChanges(changes);
 }
 
-int DataBillingContainer::statsNNPPackaeMinuteGetUsedSeconds(int nnp_account_tariff_light_id,
-                                                             int nnp_package_minute_id) {
+int DataBillingContainer::statsNNPPackageMinuteGetUsedSeconds(int nnp_account_tariff_light_id,
+                                                              int nnp_package_minute_id, time_t connect_time) {
     lock_guard<Spinlock> guard(lock);
-    return statsNNPPackageMinute.getUsedSeconds(nnp_account_tariff_light_id, nnp_package_minute_id);
+    return statsNNPPackageMinute.getUsedSeconds(nnp_account_tariff_light_id, nnp_package_minute_id, connect_time);
+}
+
+StatsNNPPackageMinute *DataBillingContainer::statsNNPPackageMinuteGetCurrent(time_t connect_time, Client *account,
+                                                                             NNPPackageMinute *nnpPackageMinute,
+                                                                             NNPAccountTariffLight *nnpAccountTariffLight) {
+    lock_guard<Spinlock> guard(lock);
+    return statsNNPPackageMinute.getCurrent(connect_time, account, nnpPackageMinute, nnpAccountTariffLight);
 }

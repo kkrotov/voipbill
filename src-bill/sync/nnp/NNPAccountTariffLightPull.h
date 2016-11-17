@@ -13,19 +13,31 @@ public:
         key = "id";
 
         fields.push_back("id");
-            fields.push_back("account_tariff_id");
+        fields.push_back("account_tariff_id");
         fields.push_back("account_client_id");
         fields.push_back("tariff_id");
         fields.push_back("activate_from");
         fields.push_back("deactivate_from");
         fields.push_back("coefficient");
+        fields.push_back("tarification_free_seconds");
+        fields.push_back("tarification_interval_seconds");
+        fields.push_back("tarification_type");
+        fields.push_back("tarification_min_paid_seconds");
+
+        fields.push_back("price");
 
         datatype.push_back("id integer");
-            datatype.push_back("account_tariff_id integer");
+        datatype.push_back("account_tariff_id integer");
         datatype.push_back("account_client_id integer");
         datatype.push_back("tariff_id integer");
         datatype.push_back("activate_from timestamp");
         datatype.push_back("deactivate_from timestamp");
         datatype.push_back("coefficient real");
+        datatype.push_back("tarification_free_seconds integer");
+        datatype.push_back("tarification_interval_seconds integer");
+        datatype.push_back("tarification_type integer");
+        datatype.push_back("tarification_min_paid_seconds integer");
+        datatype.push_back("price double precision");
+
     }
 };

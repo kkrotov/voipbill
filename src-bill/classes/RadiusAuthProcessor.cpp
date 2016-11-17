@@ -13,12 +13,23 @@ void RadiusAuthProcessor::init() {
     }
 
     billingNotReady = false;
-    server = repository.getServer();
 
     origTrunk = repository.getTrunkByName(request->trunkName.c_str());
     if (origTrunk == nullptr) {
         throw Exception("Udp request validation: trunk not found: " + request->trunkName,
                         "RadiusAuthProcessor::process");
+    }
+
+    server = repository.getServer(origTrunk->server_id);
+    if (server == nullptr) {
+        throw Exception(
+                "Udp request validation: server_id" + to_string(origTrunk->server_id) + " by trunk not found: " +
+                request->trunkName,
+                "RadiusAuthProcessor::process");
+    }
+
+    if (trace != nullptr) {
+        *trace << "INFO|REGION_ID|" << server->id << "\n";
     }
 
     aNumber = request->srcNumber;
@@ -363,11 +374,14 @@ bool RadiusAuthProcessor::processAutoOutcome(double *pBuyRate, Pricelist **pFirs
     ServiceTrunkSettings *origSettings = nullptr;
     getAvailableOrigServiceTrunk(&origServiceTrunk, &origPricelist, &origPrice, &origSettings);
 
+    bool fUseMinimalki = false;
+
+    if (this->origTrunk != nullptr) fUseMinimalki = this->origTrunk->sw_minimalki;
 
     vector<ServiceTrunkOrder> termServiceTrunks;
-    getAvailableTermServiceTrunk(termServiceTrunks, origPricelist, origPrice, origSettings);
+    getAvailableTermServiceTrunk(termServiceTrunks, origPricelist, origPrice, origSettings, fUseMinimalki);
 
-    double origRub = (origPrice!= nullptr)? this->repository.priceToRoubles(origPrice->price, *origPricelist):0;
+    double origRub = (origPrice != nullptr) ? this->repository.priceToRoubles(origPrice->price, *origPricelist) : 0;
     return processAutoRouteResponse(termServiceTrunks, pBuyRate, pFirstBuyPricelist, origRub);
 }
 
@@ -393,9 +407,13 @@ void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk **origServic
 
 void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks,
                                                        Pricelist *origPricelist, PricelistPrice *origPrice,
-                                                       ServiceTrunkSettings *origSettings) {
+                                                       ServiceTrunkSettings *origSettings, bool fUseMinimalki) {
     vector<Trunk *> termTrunks;
     repository.getAllAutoRoutingTrunks(termTrunks);
+
+    if (trace != nullptr) {
+        *trace << "INFO| USE_MINIMALKI |  " << (fUseMinimalki ? "yes" : "no") << "" << "\n";
+    }
 
     for (auto termTrunk : termTrunks) {
         if (!autoTrunkFilterSrcTrunk(termTrunk)) {
@@ -433,7 +451,8 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
         repository.getTrunkSettingsOrderList(trunkSettingsOrderList, termTrunk, atoll(aNumber.c_str()),
                                              atoll(bNumber.c_str()), SERVICE_TRUNK_SETTINGS_TERMINATION);
 
-        repository.orderTermTrunkSettingsOrderList(trunkSettingsOrderList, time(nullptr));
+
+        repository.orderTermTrunkSettingsOrderList(trunkSettingsOrderList, fUseMinimalki, time(nullptr));
 
         for (auto termOrder : trunkSettingsOrderList) {
             if (
@@ -469,17 +488,24 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
                             double trunkMargin =
                                     origSettings->minimum_margin_type == SERVICE_TRUNK_SETTINGS_MIN_MARGIN_VALUE
                                     ? profit
-                                    : profit / termRub;
+                                    : profit / termRub * 100;
 
                             if (trunkMargin < origSettings->minimum_margin) {
                                 if (trace != nullptr) {
-                                    *trace << "INFO|TERM SERVICE TRUNK DECLINE|CAUSE MIN MARGIN: " << termTrunk->name <<
+                                    *trace << "INFO|TRUNK MARGIN DECLINE|CAUSE MIN MARGIN: " << termTrunk->name <<
                                     " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: " << termOrder.serviceTrunk->id
                                     << ", MIN MARGIN: " << origSettings->minimum_margin << ", TRUNK MARGIN: " <<
-                                    trunkMargin << "\n";
+                                    trunkMargin << ", ORIGRUB:" << origRub << ", TERMRUB:" << termRub << "\n";
                                 }
 
                                 continue;
+                            } else {
+                                if (trace != nullptr) {
+                                    *trace << "INFO|TRUNK MARGIN ACCEPT|CAUSE MIN MARGIN: " << termTrunk->name <<
+                                    " (" << termTrunk->id << ")" << ", SERVICE TRUNK ID: " << termOrder.serviceTrunk->id
+                                    << ", MIN MARGIN: " << origSettings->minimum_margin << ", TRUNK MARGIN: " <<
+                                    trunkMargin << ", ORIGRUB:" << origRub << ", TERMRUB:" << termRub << "\n";
+                                }
                             }
                         }
                     } else {
@@ -502,7 +528,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
         }
     }
 
-    repository.orderTermTrunkSettingsOrderList(termServiceTrunks, time(nullptr));
+    repository.orderTermTrunkSettingsOrderList(termServiceTrunks, fUseMinimalki, time(nullptr));
 }
 
 bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double *pBuyRate,
@@ -597,12 +623,21 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
 
 void RadiusAuthProcessor::processRouteCaseOutcome(Outcome *outcome) {
     auto routeCase = repository.getRouteCase(outcome->route_case_id);
+    auto routeCase1 = repository.getRouteCase(outcome->route_case_1_id);
+    auto routeCase2 = repository.getRouteCase(outcome->route_case_2_id);
+
+
     if (routeCase == nullptr) {
         throw Exception("Route case #" + lexical_cast<string>(outcome->route_case_id) + " not found",
                         "RadiusAuthProcessor::processRouteCaseOutcome");
     }
 
-    response->setRouteCase(routeCase->name);
+    string sRouteCase = routeCase->name;
+
+    if (routeCase1 != nullptr) sRouteCase += string(",") + routeCase1->name;
+    if (routeCase2 != nullptr) sRouteCase += string(",") + routeCase2->name;
+
+    response->setRouteCase(sRouteCase);
 
     if (outcome->calling_station_id[0] != 0) {
         response->srcNumber = outcome->calling_station_id;

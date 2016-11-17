@@ -1,7 +1,9 @@
 #include "NNPPackageMinuteList.h"
 
+// ************* Эту функцию нужно обязательно оптимизировать для быстрого поиска.
+
 void NNPPackageMinuteList::findAllByTariffID(vector<NNPPackageMinute> &resultNNPPackageMinute, int nnp_tariff_id,
-                                             stringstream *trace) {
+                                             double coefficient, stringstream *trace) {
     auto begin = this->data.begin();
     auto end = this->data.end();
 
@@ -11,6 +13,7 @@ void NNPPackageMinuteList::findAllByTariffID(vector<NNPPackageMinute> &resultNNP
         NNPPackageMinute nnpPackageMinute = *it;
         if (nnpPackageMinute.nnp_tariff_id == nnp_tariff_id) {
             f = true;
+            nnpPackageMinute.minute = (double) nnpPackageMinute.minute * coefficient;
             resultNNPPackageMinute.push_back(nnpPackageMinute);
             if (trace != nullptr) {
                 *trace << "FOUND|NNPPackageMinute|BY NNP_TARIFF_ID '" << nnp_tariff_id << "'\n";

@@ -7,6 +7,9 @@ function clearCounters($db)
 {
     $query = 'delete from billing.stats_account';
     $result = pg_query($db,$query) or die('Ошибка запроса: ' . pg_last_error());
+
+    $query = 'delete from billing.stats_nnp_package_minute';
+    $result = pg_query($db,$query) or die('Ошибка запроса: ' . pg_last_error());
 }
 
 function clearCallRaws($db)
@@ -55,7 +58,7 @@ function doCall($db,$v,&$maxid) {
     $dst_route         = "'".$v["dst_route"]."'";
     $src_noa           = 3;
     $dst_noa           = 3;
-    $hash              = "'34343434-4343-3434-3434-333333333333'";
+    $hash              = "calls_cdr.get_hash(".$id.",'".$v["dt"]."'::timestamp)";
     $dst_replace       = "''";
 
 
@@ -63,6 +66,8 @@ function doCall($db,$v,&$maxid) {
     $sql.= "values ($id,$call_id,$nasp_ip,$src_number,$dst_number,$redirect_number,$setup_time,$connect_time,$disconnect_time,$session_time,$disconnect_cause,$src_route,$dst_route,$src_noa,$dst_noa,$hash,$dst_replace);";
 
     $result = pg_query($db,$sql) or die('Ошибка запроса: ' . pg_last_error());
+
+    echo "SQL:".$sql."\n";
 
     $maxid++;
 }
@@ -93,6 +98,7 @@ clearCallRaws($dbregion);
 echo "]] 3. Очищаем записи в таблице CDR в региональной базе.\n";
 
 clearCallCDR($dbregion);
+clearCallCDR($dbmain);
 
 }
 
@@ -102,17 +108,13 @@ echo "]] 4. Создаем записи в таблице CDR в региона�
 
 $maxid = getLastCallID($dbregion);
 
-$calls1[] = array ( "src_number" => '74996851549' , "dst_number" => '79282012083' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-09-25 17:00:00");
-$calls1[] = array ( "src_number" => '74996851549' , "dst_number" => '33145620241' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-09-25 17:01:00");
-$calls1[] = array ( "src_number" => '74996851549' , "dst_number" => '33145620245' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-09-25 17:02:00");
+$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '79164631212' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"", "dt"=>"2016-11-08 18:03:00");
 
-doCalls($dbregion,$calls1,$maxid);
+$calls[] = array ( "src_number" => '79119888723' , "dst_number" => '73832870122' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2016-11-09 18:01:00");
+$calls[] = array ( "src_number" => '79119888723' , "dst_number" => '79263747216' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2016-11-09 18:02:00");
+$calls[] = array ( "src_number" => '78126465198' , "dst_number" => '79262559281' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2016-11-09 18:03:00");
 
-$calls2[] = array ( "src_number" => '74996851549' , "dst_number" => '79282012083' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-09-26 12:00:00");
-$calls2[] = array ( "src_number" => '74996851549' , "dst_number" => '33145620241' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-09-26 12:01:00");
-$calls2[] = array ( "src_number" => '74996851549' , "dst_number" => '33145620245' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"BEE_Loc", "dt"=>"2016-09-26 11:02:00");
-
-doCalls($dbregion,$calls2,$maxid);
+doCalls($dbregion,$calls,$maxid);
 
 //DoRecalcCurrentMounth($dbmain);
 

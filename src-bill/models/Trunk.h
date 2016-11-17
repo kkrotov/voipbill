@@ -4,6 +4,7 @@
 
 struct Trunk {
     int id;
+    int server_id;
     char name[51];
     char trunk_name[33];
     int code;
@@ -18,11 +19,15 @@ struct Trunk {
     bool orig_redirect_number_7800;
     bool orig_redirect_number;
     bool term_redirect_number;
+    bool sw_minimalki;
+    int capacity;
+
 
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
         trace << "trunk_name: " << trunk_name << ", ";
+        trace << "server_id: " << server_id << ", ";
         trace << "code: " << code << ", ";
         trace << "source_rule_default_allowed: " << source_rule_default_allowed << ", ";
         trace << "destination_rule_default_allowed: " << destination_rule_default_allowed << ", ";
@@ -35,6 +40,8 @@ struct Trunk {
         trace << "orig_redirect_number_7800: " << orig_redirect_number_7800 << ", ";
         trace << "orig_redirect_number: " << orig_redirect_number << ", ";
         trace << "term_redirect_number: " << term_redirect_number << ", ";
+            trace << "capacity: " << capacity << ", ";
+            trace << "sw_minimalki: " << sw_minimalki << ", ";
         trace << ")";
     }
 };

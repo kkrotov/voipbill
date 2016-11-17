@@ -4,6 +4,7 @@
 
 struct ServiceNumber {
     int id;
+    int server_id;
     int client_account_id;
     char did[20];
     int lines_count;
@@ -25,6 +26,7 @@ struct ServiceNumber {
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
+        trace << "server_id: " << server_id << ", ";
         trace << "client_account_id: " << client_account_id << ", ";
         trace << "did: " << did << ", ";
         trace << "lines_count: " << lines_count << ", ";

@@ -19,6 +19,7 @@ using boost::algorithm::is_any_of;
 #include <deque>
 #include <set>
 #include <stack>
+#include <list>
 using namespace std;
 
 #include <boost/lexical_cast.hpp>
@@ -40,9 +41,13 @@ time_t get_tday_end(time_t timestamp, short timezone_offset = 0);
 time_t get_tmonth(time_t timestamp, short timezone_offset = 0);
 time_t get_tmonth_end(time_t timestamp, short timezone_offset = 0);
 
+string mask_first_3dig(string str);
 
 bool removeHtmlTags (string & str);
 
 
 char const * build_date();
 char const * build_time();
+char const * build_commit();
+
+typedef long long int PhoneNumber;

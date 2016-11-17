@@ -41,6 +41,7 @@
 #include "TariffPackageData.h"
 #include "TariffChangeLogData.h"
 #include "GlobalCountersData.h"
+#include "GlobalNNPPackageMinuteCountersData.h"
 #include "StatDestinationPrefixlistsData.h"
 #include "StatPrefixlistData.h"
 #include "ActiveCounterData.h"
@@ -58,11 +59,13 @@
 #include "nnp/NNPPackagePricelistData.h"
 #include "nnp/NNPPrefixDestinationData.h"
 #include "nnp/NNPAccountTariffLightData.h"
+#include "HubData.h"
 
 
 class DataContainer {
 public:
     ServerData server;
+    HubData hub;
     InstanceSettingsData instanceSettings;
     AirpData airp;
     NumberData number;
@@ -101,6 +104,8 @@ public:
     TariffPackageData tariffPackage;
     TariffChangeLogData tariffChangeLog;
     GlobalCountersData globalCounters;
+    GlobalNNPPackageMinuteCountersData globalNNPPackageMinuteCounters;
+
     StatDestinationPrefixlistsData statDestinationPrefixlists;
     StatPrefixlistData statPrefixlist;
     ActiveCounterData activeCounter;

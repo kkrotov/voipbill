@@ -7,6 +7,9 @@ struct Outcome {
     char name[51];
     int type_id;
     int route_case_id;
+    int route_case_1_id;
+    int route_case_2_id;
+
     int release_reason_id;
     int airp_id;
     char calling_station_id[21];
@@ -37,6 +40,12 @@ struct Outcome {
         trace << "id: " << id << ", ";
         trace << "type_id: " << type_id << ", ";
         trace << "route_case_id: " << route_case_id << ", ";
+
+        if(route_case_1_id>0)
+            trace << "route_case_1_id: " << route_case_1_id << ", ";
+        if(route_case_2_id>0)
+            trace << "route_case_2_id: " << route_case_2_id << ", ";
+
         trace << "release_reason_id: " << release_reason_id << ", ";
         trace << "airp_id: " << airp_id << ", ";
         trace << "calling_station_id: " << calling_station_id << ", ";

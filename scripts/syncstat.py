@@ -196,13 +196,33 @@ class Sync(Daemon):
 
     def do_sync_usage_voip(self, partsize):
         cur_stat = self.db_stat.cursor()
-        cur_stat.execute("""        select z.rnd, z.tid, cc.id, c.activation_dt, c.expire_dt, c.E164, c.no_of_lines, c.region, vn.number_tech, vn.operator_account_id
+
+        cur_stat.execute("""    select z.rnd, z.tid, cc.id, c.activation_dt, c.expire_dt, c.E164, c.no_of_lines, c.region, vn.number_tech, vn.operator_account_id
                                 from z_sync_postgres z
                                 left join usage_voip c on z.tid=c.id
                                 left join clients cc on c.client=cc.client
                                 left join voip_numbers vn on vn.number = c.E164
                                 where z.tbase='"""+tbase+"""' and z.tname='usage_voip'
+                                UNION
+				select 
+				z.rnd, 
+				z.tid, 
+				cc.id, 
+				(SELECT MIN(actual_from_utc) FROM uu_account_tariff_log WHERE account_tariff_id = at.id) AS activation_dt, 
+				COALESCE((SELECT actual_from_utc FROM uu_account_tariff_log WHERE account_tariff_id = at.id AND tariff_period_id IS NULL LIMIT 1), '3000-01-01') AS expire_dt, 
+				COALESCE(vn.number, at.voip_number) as number, 
+				1 AS no_of_lines, 
+				city.connection_point_id as region_id, 
+				vn.number_tech, 
+				vn.operator_account_id
+				from z_sync_postgres z
+				left join uu_account_tariff at on z.tid=at.id
+				left join clients cc on at.client_account_id=cc.id
+				left join voip_numbers vn on vn.uu_account_tariff_id = at.id
+				left join city on at.city_id = city.id
+                                where z.tbase='"""+tbase+"""' and z.tname='uu_account_tariff'
                                 limit """+str(partsize))
+
         todel = []
         toins = []
         tofix = []
@@ -226,7 +246,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
         
-        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='usage_voip' and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and (tname='usage_voip' or tname='uu_account_tariff') and tid=%s and rnd=%s", tofix)
         
         return len(tofix)
         

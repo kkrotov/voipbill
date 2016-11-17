@@ -9,6 +9,13 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-
 include_directories(/usr/pgsql-9.4/include libs/jsoncpp-master/include libs/boost)
 link_directories(/usr/pgsql-9.4/lib)
 
+string(TIMESTAMP RUN_DATE "%Y-%m-%d")
+execute_process (COMMAND git rev-parse --verify HEAD OUTPUT_VARIABLE CURRENT_HEAD
+                 OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+execute_process (COMMAND echo ${CURRENT_HEAD})
+add_definitions(-D_DATECOMPILED_="${RUN_DATE}" -D_CURRENT_HEAD_="${CURRENT_HEAD}")
+
+
 set(BOOST_SOURCES
         libs/boost/system/src/error_code.cpp
         libs/boost/program_options/src/cmdline.cpp
@@ -45,6 +52,7 @@ set(BILL_SOURCES
     src-bill/classes/Billing.cpp
     src-bill/classes/Billing.cpp
     src-bill/classes/BillingCall.cpp
+        src-bill/classes/BillingCall_nnp.cpp
     src-bill/classes/BlackList.cpp
     src-bill/classes/BlackListLocal.cpp
     src-bill/classes/BlackListGlobal.cpp
@@ -73,6 +81,7 @@ set(BILL_SOURCES
     src-bill/classes/StatsPackageManager.cpp
     src-bill/classes/StatsTrunkSettingsManager.cpp
     src-bill/classes/Repository.cpp
+    src-bill/classes/Repository_npp.cpp
     src-bill/classes/Spinlock.cpp
     src-bill/classes/Task.cpp
     src-bill/classes/Thread.cpp
@@ -365,13 +374,54 @@ set(BILL_SOURCES
     src-bill/data/nnp/NNPRegionData.cpp
     src-bill/data/nnp/NNPRegionData.h
 
-        src-bill/sync/nnp/NNPDestinationPull.cpp src-bill/sync/nnp/NNPDestinationPull.h src-bill/sync/nnp/NNPNumberRangePull.cpp src-bill/sync/nnp/NNPNumberRangePull.h src-bill/sync/nnp/NNPNumberRangePrefixPull.cpp src-bill/sync/nnp/NNPNumberRangePrefixPull.h src-bill/sync/nnp/NNPOperatorPull.cpp src-bill/sync/nnp/NNPOperatorPull.h src-bill/sync/nnp/NNPPackagePull.cpp src-bill/sync/nnp/NNPPackagePull.h src-bill/sync/nnp/NNPPackageMinutePull.cpp src-bill/sync/nnp/NNPPackageMinutePull.h src-bill/sync/nnp/NNPPackagePricePull.cpp src-bill/sync/nnp/NNPPackagePricePull.h src-bill/sync/nnp/NNPPackagePricelistPull.cpp src-bill/sync/nnp/NNPPackagePricelistPull.h src-bill/sync/nnp/NNPPrefixPull.cpp src-bill/sync/nnp/NNPPrefixPull.h src-bill/sync/nnp/NNPPrefixDestinatioPull.cpp src-bill/sync/nnp/NNPPrefixDestinatioPull.h src-bill/sync/nnp/NNPRegionPull.cpp src-bill/sync/nnp/NNPRegionPull.h src-bill/data/nnp/NNPAccountTariffLightData.cpp src-bill/data/nnp/NNPAccountTariffLightData.h src-bill/sync/nnp/NNPAccountTariffLightPull.cpp src-bill/sync/nnp/NNPAccountTariffLightPull.h src-bill/classes/StatsNNPPackageMinuteManager.cpp src-bill/classes/nnp/NNPResolver.cpp)
+    src-bill/sync/nnp/NNPDestinationPull.cpp
+    src-bill/sync/nnp/NNPDestinationPull.h
+    src-bill/sync/nnp/NNPNumberRangePull.cpp
+    src-bill/sync/nnp/NNPNumberRangePull.h
+    src-bill/sync/nnp/NNPNumberRangePrefixPull.cpp
+    src-bill/sync/nnp/NNPNumberRangePrefixPull.h
+    src-bill/sync/nnp/NNPOperatorPull.cpp
+    src-bill/sync/nnp/NNPOperatorPull.h
+    src-bill/sync/nnp/NNPPackagePull.cpp
+    src-bill/sync/nnp/NNPPackagePull.h
+    src-bill/sync/nnp/NNPPackageMinutePull.cpp
+    src-bill/sync/nnp/NNPPackageMinutePull.h
+    src-bill/sync/nnp/NNPPackagePricePull.cpp
+    src-bill/sync/nnp/NNPPackagePricePull.h
+    src-bill/sync/nnp/NNPPackagePricelistPull.cpp
+    src-bill/sync/nnp/NNPPackagePricelistPull.h
+    src-bill/sync/nnp/NNPPrefixPull.cpp
+    src-bill/sync/nnp/NNPPrefixPull.h
+    src-bill/sync/nnp/NNPPrefixDestinatioPull.cpp
+    src-bill/sync/nnp/NNPPrefixDestinatioPull.h
+    src-bill/sync/nnp/NNPRegionPull.cpp
+    src-bill/sync/nnp/NNPRegionPull.h
+    src-bill/data/nnp/NNPAccountTariffLightData.cpp
+    src-bill/data/nnp/NNPAccountTariffLightData.h
+    src-bill/sync/nnp/NNPAccountTariffLightPull.cpp
+    src-bill/sync/nnp/NNPAccountTariffLightPull.h
+    src-bill/classes/StatsNNPPackageMinuteManager.cpp
+    src-bill/classes/nnp/NNPResolver.cpp
 
-set (UNIT_TESTS_SOURCE
-        tests/unit/main.cpp
-        tests/unit/BaseTest.cpp
-        tests/unit/RemoveHtmlTagsTest.cpp
-        tests/unit/NNPNumberRangeFindTest.cpp)
+    src-bill/models/StatsNNPPackageMinute.cpp
+    src-bill/classes/StatsNNPPackageMinuteManager.cpp
+    src-bill/classes/nnp/NNPResolver.cpp
+
+    src-bill/main.cpp
+
+    src-bill/models/GlobalNNPPackageMinuteCounters.cpp
+    src-bill/data/GlobalNNPPackageMinuteCountersData.cpp
+    src-bill/lists/GlobalNNPPackageMinuteCountersList.cpp
+    src-bill/models/nnp/NNPNumberRangeTreeNode.cpp
+    src-bill/models/Hub.cpp
+    src-bill/lists/HubList.cpp
+    src-bill/data/HubData.cpp
+    src-bill/sync/PullHub.cpp
+    src-bill/sync/PullHub.h
+    )
+
+add_custom_target(invalidate_files ALL
+        COMMAND ${CMAKE_COMMAND} -E touch src-bill/version.cpp)
 
 add_definitions(-DHAVE_SYS_IOCTL_H -DHAVE_SOCKLEN_T)
 file(GLOB_RECURSE ACE_RADIUS_SOURCES "libs/ace-radius/*.cpp")
@@ -393,7 +443,7 @@ if(CXXTEST_FOUND)
     set (CXXTEST_TESTGEN_ARGS --runner=XmlPrinter)
     CXXTEST_ADD_TEST(tests/unit/utest tests/unit/RemoveHtmlTagsTest.cpp
     tests/unit/RemoveHtmlTagsTest.h tests/unit/testTwo.h)
-    target_link_libraries(tests/unit/utest app_bill_elf) # as needed
+    target_link_libraries(tests/unit/utest app_bill_elf)
 endif()
 
 

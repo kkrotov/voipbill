@@ -29,11 +29,13 @@ void ThreadTasks::run() {
 
     current_task.reset();
 
-    BDbResult res = db_main.query("select id, task, params from billing.tasks where region_id=" + app().conf.str_instance_id + " order by created desc limit 1");
+    BDbResult res = db_main.query("select id, task, params, region_id from billing.tasks where region_id in " +
+                                  app().conf.get_sql_regions_list() + " order by created desc limit 1");
     if (res.next()) {
         string task_id = res.get(0);
         string task_name = res.get(1);
         string task_params = res.get(2);
+        string task_region_id = res.get(3);
 
         if (task_name == "recalc_current_month") {
             time_t rawtime = time(NULL);
@@ -50,13 +52,14 @@ void ThreadTasks::run() {
             time_t t_current_month = timegm(&timeinfo);
             t_current_month -= 12 * 3600;
 
-            TaskRecalc *task = new TaskRecalc(t_current_month, app().conf.str_instance_id);
+            TaskRecalc *task = new TaskRecalc(t_current_month, task_region_id);
             task->initTask(db_main, task_id, task_params);
             current_task.reset(task);
             task->run();
 
             db_main.exec(
-                    "delete from billing.tasks where region_id=" + app().conf.str_instance_id + " and id=" + task_id);
+                    "delete from billing.tasks where region_id in " + app().conf.get_sql_regions_list() + " and id=" +
+                    task_id);
         } else {
             if (task_name == "recalc_last_month") {
                 time_t rawtime = time(NULL);
@@ -78,12 +81,13 @@ void ThreadTasks::run() {
                 time_t t_previous_month = timegm(&timeinfo);
                 t_previous_month -= 12 * 3600;
 
-                TaskRecalc *task = new TaskRecalc(t_previous_month, app().conf.str_instance_id);
+                TaskRecalc *task = new TaskRecalc(t_previous_month, task_region_id);
                 task->initTask(db_main, task_id, task_params);
                 current_task.reset(task);
                 task->run();
 
-                db_main.exec("delete from billing.tasks where region_id=" + app().conf.str_instance_id + " and id=" + task_id);
+                db_main.exec("delete from billing.tasks where region_id in " + app().conf.get_sql_regions_list() +
+                             " and id=" + task_id);
             }
         }
 

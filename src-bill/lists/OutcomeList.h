@@ -8,11 +8,10 @@ class OutcomeList : public ObjList<Outcome> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
-        return "   select id, name, type_id, route_case_id, release_reason_id, airp_id, calling_station_id, called_station_id " \
-            "   from auth.outcome " \
-            "   where server_id = " + server_id +
-            "   order by id asc ";
+        return "   select id, name, type_id, route_case_id, release_reason_id, airp_id, calling_station_id, called_station_id, " \
+            "   route_case_1_id,route_case_2_id from auth.outcome " \
+            "   where server_id in " + app().conf.get_sql_regions_for_load_list_list() +
+               "   order by id asc ";
     }
 
     inline void parse_item(BDbResult &row, Outcome * item) {
@@ -24,6 +23,8 @@ protected:
         item->airp_id = row.get_i(5);
         row.fill_cs(6, item->calling_station_id, sizeof(item->calling_station_id));
         row.fill_cs(7, item->called_station_id, sizeof(item->called_station_id));
+        item->route_case_1_id = row.get_i(8);
+        item->route_case_2_id = row.get_i(9);
     }
 
     struct key_id {

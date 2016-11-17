@@ -65,7 +65,8 @@ void ThreadSyncLocks::save_client_locks() {
             if (needTotalSync) {
                 BDbTransaction trans(&db_main);
 
-                db_main.exec("DELETE FROM billing.clients_locks WHERE region_id=" + app().conf.str_instance_id);
+                db_main.exec(
+                        "DELETE FROM billing.clients_locks WHERE region_id in " + app().conf.get_sql_regions_list());
                 if (q.size()>0)
                     db_main.exec(q);
 

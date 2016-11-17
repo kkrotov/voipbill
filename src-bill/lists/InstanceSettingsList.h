@@ -8,11 +8,9 @@ class InstanceSettingsList : public ObjList<InstanceSettings> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
-        return "   select id, region_id, city_geo_id, country_id, city_id " \
+        return "   select id, region_id, city_geo_id, country_id, city_id" \
                 "   from billing.instance_settings " \
-                "   where id = " + server_id +
-                "   order by id asc ";
+               "   order by id asc ";
     }
 
     inline void parse_item(BDbResult &row, InstanceSettings * item) {

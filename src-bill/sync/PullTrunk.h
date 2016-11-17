@@ -28,6 +28,9 @@ public:
         fields.push_back("orig_redirect_number_7800");
         fields.push_back("orig_redirect_number");
         fields.push_back("term_redirect_number");
+        fields.push_back("capacity");
+        fields.push_back("sw_minimalki");
+        fields.push_back("sw_shared");
 
         datatype.push_back("id integer");
         datatype.push_back("server_id integer");
@@ -46,5 +49,9 @@ public:
         datatype.push_back("orig_redirect_number_7800 boolean");
         datatype.push_back("orig_redirect_number boolean");
         datatype.push_back("term_redirect_number boolean");
+        datatype.push_back("capacity integer");
+        datatype.push_back("sw_minimalki boolean");
+        datatype.push_back("sw_shared boolean");
+
     }
 };

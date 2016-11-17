@@ -17,7 +17,7 @@ NAME_DB_TEST_REGIONAL=nispd99_test
 
 DB_USER=pgsqltest
 
-region_id=99
+region_id=10
 
 pid_file=/var/run/app_bill.pid
 
@@ -27,6 +27,8 @@ pid_file=/var/run/app_bill.pid
 
    echo "Говорим демону биллинга, чтобы забрал в региональную БД $region_id все данные из центральной БД"
   /usr/pgsql-9.4/bin/psql -U postgres -h $HOST_DB_TEST_MAIN $NAME_DB_TEST_MAIN -c "delete from event.queue;SELECT event.notify_all(${region_id});"
+
+exit
 
   ($DIR/../app_bill -c $DIR/../build/app_bill.conf -p ${pid_file} ; echo "Daemon ${region_id} finished with exit code $?") &
 

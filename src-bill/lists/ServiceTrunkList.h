@@ -8,12 +8,11 @@ class ServiceTrunkList : public ObjList<ServiceTrunk> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
         return "    select trunk_id, id, client_account_id, " \
-            "               orig_enabled, term_enabled, orig_min_payment, term_min_payment, " \
-            "               extract(epoch from activation_dt), extract(epoch from expire_dt) " \
+            "              orig_enabled, term_enabled, orig_min_payment, term_min_payment, " \
+            "              extract(epoch from activation_dt), extract(epoch from expire_dt) " \
             "       from billing.service_trunk " \
-            "       where server_id='" + server_id + "' " \
+            "       where server_id in " + app().conf.get_sql_regions_for_load_list_list() + " " \
             "       order by trunk_id asc, activation_dt asc ";
     }
 

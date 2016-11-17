@@ -4,6 +4,7 @@
 ThreadSyncCdrs::ThreadSyncCdrs() {
     id = idName();
     name = "Sync Cdrs to central db";
+    threadSleepSeconds = app().conf.cdr_parcer_interval;
 
     db_main.setCS(app().conf.db_main);
     db_calls.setCS(app().conf.db_calls);
@@ -18,21 +19,26 @@ ThreadSyncCdrs::ThreadSyncCdrs() {
 
 void ThreadSyncCdrs::run() {
 
-    unique_lock<mutex> lock(repository.billingData->syncCallsCentralLock, try_to_lock);
+    unique_lock<mutex> lock(repository.billingData->syncCdrsCentralLock, try_to_lock);
     if (!lock.owns_lock()) {
+
+        Log::error("ThreadSyncCdrs: mutex is locked");
         return;
     }
     repository.billingData->prepareSyncCallsCentral(&db_main);
 
     while (syncCallsCdr());
     while (syncCallsCdrUnfinished());
+
+    repository.billingData->prepareSyncCallsCentral(&db_main);
 }
 
 bool ThreadSyncCdrs::getCurrentMonths (string &local_prev_sync_month, string &local_curr_sync_month, string &local_next_sync_month) {
 
+    string select;
     try {
 
-        string select = "select date_trunc('month', CURRENT_TIMESTAMP) - interval '1 month',date_trunc('month', CURRENT_TIMESTAMP),date_trunc('month', CURRENT_TIMESTAMP) + interval '1 month'";
+        select = "select date_trunc('month', CURRENT_TIMESTAMP) - interval '1 month',date_trunc('month', CURRENT_TIMESTAMP),date_trunc('month', CURRENT_TIMESTAMP) + interval '1 month'";
         BDbResult res = db_calls.query(select);
         if (!res.next()) {
             // nothing to sync
@@ -44,17 +50,18 @@ bool ThreadSyncCdrs::getCurrentMonths (string &local_prev_sync_month, string &lo
     }
     catch (Exception &e) {
 
-        e.addTrace("ThreadSyncCdrs::getCurrentMonths");
-        throw e;
+        std::string message = "ThreadSyncCdrs::getCurrentMonths ERROR: "+select+" "+e.message;
+        Log::error(message);
     }
     return true;
 }
 
 bool ThreadSyncCdrs::getCurrentMonths (string relname, string fieldname, long long int id, string &local_prev_sync_month, string &local_curr_sync_month, string &local_next_sync_month) {
 
+    string select;
     try {
 
-        string select = "select date_trunc('month', "+fieldname+") - interval '1 month', date_trunc('month', "+fieldname+"), date_trunc('month', "+fieldname+") + interval '1 month' "
+        select = "select date_trunc('month', "+fieldname+") - interval '1 month', date_trunc('month', "+fieldname+"), date_trunc('month', "+fieldname+") + interval '1 month' "
                                     "from "+relname+
                                     " where id>" + lexical_cast<string>(id) + " order by id limit 1";
         BDbResult res = db_calls.query(select);
@@ -67,8 +74,9 @@ bool ThreadSyncCdrs::getCurrentMonths (string relname, string fieldname, long lo
         local_next_sync_month = res.get_s(2);
     }
     catch (Exception &e) {
-        e.addTrace("ThreadSyncCdrs::getCurrentMonths");
-        throw e;
+
+        std::string message = "ThreadSyncCdrs::getCurrentMonths ERROR: "+select+" "+e.message;
+        Log::error(message);
     }
     return true;
 }
@@ -120,9 +128,9 @@ bool ThreadSyncCdrs::copyCallsCdr(string month, int limit) {
 
     BDb::copy(relname, "",
               "server_id,id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,dst_route,"
-                      "src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party",
+                      "src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party,in_sig_call_id,out_sig_call_id",
               "select "+app().conf.str_instance_id +",id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,dst_route,"
-                       "src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party "
+                       "src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party,in_sig_call_id,out_sig_call_id "
               "from "+relname+"  where id>"+lexical_cast<string>(central_id)+" order by id limit "+lexical_cast<string>(limit),
               &db_calls, &db_main);
 
@@ -187,6 +195,9 @@ bool ThreadSyncCdrs::copyCallsCdrUnfinished(string month, int limit) {
     string suffix = month.substr(0, 4)+month.substr(5, 2);
     string relname = "calls_cdr.cdr_unfinished_" + suffix;
 
+    if (!db_calls.rel_exists(relname))
+        return true;
+    
     if (!db_main.rel_exists(relname))
         db_main.query("select calls_cdr.create_calls_cdr_unfinished_partition('"+month+"'::timestamp without time zone)");
 
@@ -205,11 +216,11 @@ bool ThreadSyncCdrs::copyCallsCdrUnfinished(string month, int limit) {
         local_time = res_calls.get(1);
     }
     last_cdr_unfin_central_month = suffix;
-    last_cdr_unfin_central_time ;
+    last_cdr_unfin_central_time = central_time;
     last_cdr_unfin_central_id = central_id;
 
     last_cdr_unfin_local_month = suffix;
-    last_cdr_unfin_local_time;
+    last_cdr_unfin_local_time = local_time;
     last_cdr_unfin_local_id = local_id;
 
     if (local_id <= central_id)

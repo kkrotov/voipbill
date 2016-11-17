@@ -8,10 +8,9 @@ class ServiceNumberList : public ObjList<ServiceNumber> {
 protected:
 
     string sql(BDb * db) {
-        string server_id = app().conf.str_instance_id;
-        return "    select did, id, client_account_id, lines_count, extract(epoch from activation_dt), extract(epoch from expire_dt), tech_number, tech_number_operator_id " \
+        return "    select did, id, client_account_id, lines_count, extract(epoch from activation_dt), extract(epoch from expire_dt), tech_number, tech_number_operator_id, server_id " \
             "       from billing.service_number " \
-            "       where server_id='" + server_id + "' " \
+            "       where server_id in " + app().conf.get_sql_regions_for_load_list_list() + " " \
             "       order by did asc, activation_dt asc ";
         //  and expire_dt > now()
     }
@@ -25,6 +24,7 @@ protected:
         item->expire_dt = row.get_ll(5);
         row.fill_cs(6, item->tech_number, sizeof(item->tech_number));
         item->tech_number_operator_id = row.get_i(7);
+        item->server_id = row.get_i(8);
     }
 
     struct key {
@@ -57,6 +57,5 @@ public:
 
     ServiceNumber *find(long long int numberPrefix, time_t timestamp, stringstream *trace = nullptr);
 
-    void findAllByClientID(vector<ServiceNumber> &resultServiceNumber, int client_id, stringstream *trace = nullptr);
-
+    void findAllByClientID(vector<ServiceNumber> &resultServiceNumber, int client_id, stringstream *trace);
 };

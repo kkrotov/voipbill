@@ -44,13 +44,16 @@ public:
         while (res.next()) {
             parse_item(res, &this->data.at(res.position()));
         }
+        after_load();
     }
+
+    virtual void after_load() {};
 
     T * get(size_t i) {
         return &data.at(i);
     }
 
-    size_t dataSize() {
+    virtual size_t dataSize() {
         return sizeof(T) * this->data.size();
     }
 

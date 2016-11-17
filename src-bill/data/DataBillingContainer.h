@@ -26,6 +26,7 @@ public:
     mutex calcCallsLock;
     mutex saveLock;
     mutex syncCallsCentralLock;
+    mutex syncCdrsCentralLock;
     mutex syncCountersCentralLock;
     mutex syncLocksCentralLock;
 
@@ -46,6 +47,7 @@ public:
 
     time_t lastSyncCentralCallTime = 0;
     time_t lastSyncCentralCdrTime = 0;
+    time_t lastSyncCentralCdrUnfinishedTime = 0;
 
     static DataBillingContainer * instance();
 
@@ -87,6 +89,10 @@ public:
     StatsFreemin * statsFreeminGetCurrent(CallInfo * callInfo);
     StatsPackage * statsPackageGetCurrent(CallInfo * callInfo, ServicePackage * servicePackage, TariffPackage * tariffPackage);
     StatsTrunkSettings * statsTrunkSettingsGetCurrent(time_t connect_time, Client * account, ServiceTrunkSettings * trunkSettings);
+
+    StatsNNPPackageMinute *statsNNPPackageMinuteGetCurrent(time_t connect_time, Client *account,
+                                                           NNPPackageMinute *nnpPackageMinute,
+                                                           NNPAccountTariffLight *nnpAccountTariffLight);
     void statsAccountGetChanges(map<int, StatsAccount> &changes, bool &needClear);
     void statsAccountAddChanges(map<int, StatsAccount> &changes, bool needClear);
     void statsFreeminGetChanges(map<int, StatsFreemin> &changes);
@@ -98,7 +104,8 @@ public:
     void statsNNPPackaeMinuteGetChanges(map<int, StatsNNPPackageMinute> &changes);
     void statsNNPPackaeMinuteAddChanges(map<int, StatsNNPPackageMinute> &changes);
 
-    int statsNNPPackaeMinuteGetUsedSeconds(int nnp_account_tariff_light_id, int nnp_package_minute_id);
+    int statsNNPPackageMinuteGetUsedSeconds(int nnp_account_tariff_light_id, int nnp_package_minute_id,
+                                            time_t connect_time);
 private:
     void loadLastCallIdAndCdrIdAndTime(BDb * db_calls);
     void loadSyncCentralCallIdAndTime(BDb * db_main);
@@ -109,5 +116,6 @@ private:
 
     friend class PageFmins;
     friend class PagePackage;
+
 
 };

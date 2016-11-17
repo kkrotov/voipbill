@@ -23,6 +23,7 @@ public:
 
         html << " <a href='/'>Home</a> | ";
         html << " <a href='/calls'>Calls</a> | ";
+        html << " <a href='/trunks'>Trunks</a> | ";
         html << " <a href='/data'>Data</a> | ";
         html << " <a href='/data-billing'>Data billing</a> | ";
         html << " <a href='/counters'>Counters</a> | ";

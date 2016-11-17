@@ -40,9 +40,6 @@ struct Call {
 
     int trunk_settings_stats_id;
 
-    int account_version;              // Номер версии расчета примененного к звонку, 4 - обычная, 5 - nnp-пакеты.
-    int stats_nnp_package_minute_id;  // номер счетчика минут на nnp-пакете применнноного к этому звонку.
-
     int pricelist_id;
     long long int prefix;
 
@@ -57,11 +54,27 @@ struct Call {
 
     bool is_service_number;
 
+    int account_version;              // Номер версии расчета примененного к звонку, 4 - обычная, 5 - nnp-пакеты.
+    int stats_nnp_package_minute_id;  // номер счетчика минут на nnp-пакете применнноного к этому звонку.
+
+    int nnp_operator_id;
+    int nnp_region_id;
+    int nnp_city_id;
+    int nnp_country_prefix;
+    int nnp_ndc;
+    bool nnp_is_mob;
+
+    int nnp_package_minute_id;
+    int nnp_package_price_id;
+    int nnp_package_pricelist_id;
+
+    int server_id;
 
     void dump(stringstream &trace) {
 
         trace << "(";
         trace << "id " << id << ", ";
+        trace << "server_id " << server_id << ", ";
         trace << "peer_id: " << peer_id << ", ";
         trace << "cdr_id: " << cdr_id << ", ";
         trace << "connect_time: " << string_time(connect_time) << ", ";
@@ -93,12 +106,23 @@ struct Call {
         trace << "geo_operator_id: " << geo_operator_id << ", ";
         trace << "is_service_number: " << (is_service_number ? "true" : "false") << ", ";
         trace << "disconnect_cause: " << disconnect_cause;
+        trace << "nnp_operator_id: " << nnp_operator_id << ", ";
+        trace << "nnp_region_id: " << nnp_region_id << ", ";
+        trace << "nnp_city_id: " << nnp_city_id << ", ";
+        trace << "nnp_country_prefix: " << nnp_country_prefix << ", ";
+        trace << "nnp_ndc: " << nnp_ndc << ", ";
+        trace << "nnp_is_mob: " << (nnp_is_mob ? "true" : "false") << ", ";
+        trace << "nnp_package_minute_id: " << nnp_package_minute_id << ", ";
+        trace << "nnp_package_price_id: " << nnp_package_price_id << ", ";
+        trace << "nnp_package_pricelist_id: " << nnp_package_pricelist_id << ", ";
         trace << ")";
     }
 
     Call(Cdr *cdr, bool orig) {
         this->orig = orig;
         our = false;
+
+        server_id = 0;
 
         id = 0;
         peer_id = 0;
@@ -108,6 +132,9 @@ struct Call {
         account_id = 0;
         trunk_service_id = 0;
         number_service_id = 0;
+        trunk_id = 0;
+
+        trunk_id = 0;
 
         src_number = atoll(cdr->src_number);
         dst_number = atoll(cdr->dst_number);
@@ -141,8 +168,19 @@ struct Call {
         account_version = 4;
         stats_nnp_package_minute_id = 0;
 
-
         is_service_number = false;
+
+        nnp_operator_id = 0;
+        nnp_region_id = 0;
+        nnp_city_id = 0;
+        nnp_country_prefix = 0;
+        nnp_ndc = 0;
+        nnp_is_mob = false;
+
+        nnp_package_pricelist_id = 0;
+        nnp_package_minute_id = 0;
+        nnp_package_price_id = 0;
+
     }
 
     bool isLocal() {
