@@ -25,6 +25,8 @@ struct CallData
     std::string call_finished;
     std::string releasing_party;
     std::string release_timestamp;
+    std::string in_sig_call_id;
+    std::string out_sig_call_id;
 
     CallData() {
         session_time = 0;

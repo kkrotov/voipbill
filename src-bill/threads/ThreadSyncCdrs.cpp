@@ -128,9 +128,9 @@ bool ThreadSyncCdrs::copyCallsCdr(string month, int limit) {
 
     BDb::copy(relname, "",
               "server_id,id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,dst_route,"
-                      "src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party",
+                      "src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party,in_sig_call_id,out_sig_call_id",
               "select "+app().conf.str_instance_id +",id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,dst_route,"
-                       "src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party "
+                       "src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party,in_sig_call_id,out_sig_call_id "
               "from "+relname+"  where id>"+lexical_cast<string>(central_id)+" order by id limit "+lexical_cast<string>(limit),
               &db_calls, &db_main);
 

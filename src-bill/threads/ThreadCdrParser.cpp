@@ -157,7 +157,8 @@ void ThreadCdrParser::saveCall(const CallData &call) {
                        % call.src_route % call.dst_route
                        % call.src_noa % call.dst_noa
                        % call.dst_replace
-                       % call.call_finished % call.releasing_party).str();
+                       % call.call_finished % call.releasing_party
+                       % call.in_sig_call_id % call.out_sig_call_id).str();
     db_calls.query(query);
 
     cdrFile.insert_count++;
