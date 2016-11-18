@@ -419,11 +419,11 @@ if(CXXTEST_FOUND)
     add_library(test.obj ${TESTING_SOURCES} ${BILL_SOURCES} ${BOOST_SOURCES} ${JSON_SOURCES} ${ACE_RADIUS_SOURCES})
 
     set (CXXTEST_TESTGEN_ARGS --runner=XmlPrinter)
-    CXXTEST_ADD_TEST(tests/unit/utest tests/unit/RemoveHtmlTagsTest.cpp
+    CXXTEST_ADD_TEST(tests/unit/utest tests/unit/utest.cpp # unit тесты
     tests/unit/RemoveHtmlTagsTest.h)
     target_link_libraries(tests/unit/utest test.obj rt pthread pq curl crypto)
 
-    CXXTEST_ADD_TEST(tests/functional/ftest tests/functional/ftest.cpp
+    CXXTEST_ADD_TEST(tests/functional/ftest tests/functional/ftest.cpp # functional тесты
                      tests/functional/NNPNumberRangeFindTest.h)
     target_link_libraries(tests/functional/ftest test.obj rt pthread pq curl crypto)
 
