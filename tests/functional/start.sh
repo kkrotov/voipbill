@@ -4,5 +4,5 @@ THIS=`readlink -f "${BASH_SOURCE[0]}"`
 DIR=`dirname "${THIS}"`
 
 echo 'Запускаеи functional-тесты'
-$DIR/ftest
+$DIR/ftest > ./TEST-functional
 [[ $? -ne 0 ]] && exit
