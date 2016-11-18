@@ -101,7 +101,7 @@ echo 'Stopping new app version...'
 . "$DIR/stop.sh"
 
 echo 'Running comparative tests analyzis...'
-python "$DIR/comparative/start.sh"
+. "$DIR/comparative/start.sh"
 [[ $? -ne 0 ]] && exit
 
 exit 0
