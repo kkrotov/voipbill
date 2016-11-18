@@ -13,7 +13,7 @@ using namespace std;
  * Тестирование проводится через url запросы к запущенному биллеру.
  *
  */
-class NNPNumberRangeFindTest : public ComparisonTest, public CxxTest::TestSuite {
+class NNPNumberRangeFindTest : public CxxTest::TestSuite , public ComparisonTest {
 
     NNPNumberRangeFindTest (NNPNumberRangeFindTest&);
     NNPNumberRangeFindTest& operator = (NNPNumberRangeFindTest&);
