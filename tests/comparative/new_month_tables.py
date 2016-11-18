@@ -21,7 +21,7 @@ class TestComparativeNewMonthTables(unittest2.TestCase):
 
         parser = ConfigParser.RawConfigParser()
 
-        data = '[REGIONS]\n' + open ("tests2/regions-list", "r").read()
+        data = '[REGIONS]\n' + open ("tests/regions-list", "r").read()
         readable = StringIO.StringIO (data)
 
         parser.readfp (readable)
