@@ -418,7 +418,7 @@ if(CXXTEST_FOUND)
          )
     add_library(test.obj ${TESTING_SOURCES} ${BILL_SOURCES} ${BOOST_SOURCES} ${JSON_SOURCES} ${ACE_RADIUS_SOURCES})
 
-    set (CXXTEST_TESTGEN_ARGS --runner=XmlPrinter)
+    set (CXXTEST_TESTGEN_ARGS --runner=ErrorPrinter)
     CXXTEST_ADD_TEST(tests/unit/utest tests/unit/utest.cpp # unit тесты
     tests/unit/RemoveHtmlTagsTest.h)
     target_link_libraries(tests/unit/utest test.obj rt pthread pq curl crypto)
