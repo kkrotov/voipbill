@@ -4,11 +4,12 @@ void PageConfig::render(std::stringstream &html, map<string, string> &parameters
     renderHeader(html);
 
     html << "<h2>Config</h2>\n";
-    html << "build date: " << build_date() << " " << build_time() << "<br/>\n";
-    html << "start time: " << string_time(app().getStartTime()) << "(UTC)<br/>\n";
-    html << "&nbsp;&nbsp;run time: " << mask_first_3dig(string_time(app().getRuntime())) << "<br/>\n";
+    html << "build date: " << build_date() << " " << build_time() << " (UTC)<br/>\n";
     html << "built on commit: <b><a href=\"https://github.com/welltime/billing_voip/commit/";
-    html << build_commit() << "\">" << build_commit() << "</a></b><br/>\n";
+    html << build_commit() << "\">" << build_commit() << "</a></b><br/><br/>\n";
+
+    html << "start time: " << string_time(app().getStartTime()) << " (UTC)<br/>\n";
+    html << "&nbsp;&nbsp;run time: " << seconds_to_uptime((app().getRuntime())) << "<br/>\n";
     html << "<hr>\n";
     html << "mode: " << app().conf.getBillerMode() << "<br/>\n";
 

@@ -79,6 +79,25 @@ string string_time(const time_t dt, int debugFlag) {
     return string(buff);
 }
 
+string seconds_to_uptime(double seconds) {
+    std::string result;
+    result += boost::lexical_cast<std::string> ((int) (seconds/86400));
+    seconds = ((int)seconds) % 86400;
+    result += " days, ";
+
+    result += boost::lexical_cast<std::string> ((int) (seconds/3600));
+    seconds = ((int)seconds) % 3600;
+    result += ":";
+
+    result += boost::lexical_cast<std::string> ((int) (seconds/60));
+    seconds = ((int)seconds) % 60;
+    result += ":";
+
+    result += boost::lexical_cast<std::string> ((int) seconds);
+
+    return result;
+}
+
 time_t parseDate(char * str) {
     struct tm ttt;
     if (sscanf(str, "%d-%d-%d",
