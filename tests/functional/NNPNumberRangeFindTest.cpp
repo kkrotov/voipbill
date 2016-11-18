@@ -12,9 +12,9 @@
  * @param test - Объект NNPNumberRangeFindTest
  * @return size * nmemb
  */
-static size_t WriteCallback(void *contents_temp, size_t size, size_t nmemb, void *test)
+void NNPNumberRange :: curlWriteCallback(void *contents_temp, size_t size)
 {
-    size_t realsize = size * nmemb;
+    size_t realsize = size;
     char* contents = static_cast<char*>(contents_temp);
     string contentsString = contents;
 
@@ -45,9 +45,9 @@ static size_t WriteCallback(void *contents_temp, size_t size, size_t nmemb, void
         contentsString = matches.suffix();
     }
 
-    (static_cast<NNPNumberRangeFindTest*>(test))->setCurlResult(range.c_str(), &prefix, &destination);
+    this->setCurlResult (range.c_str(), &prefix, &destination);
 
-    return realsize;
+    return ;
 }
 
 /**
@@ -56,11 +56,8 @@ static size_t WriteCallback(void *contents_temp, size_t size, size_t nmemb, void
  * !!!
  */
 NNPNumberRangeFindTest :: NNPNumberRangeFindTest ()
-        : db ("host=127.0.0.1 dbname=nispd99_test user=pgadmin password=NbhLhjn") {
+        : db ("host=127.0.0.1 dbname=nispd99_test") {
     db.connect();
-    curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 }
 
 /**
@@ -144,7 +141,7 @@ bool NNPNumberRangeFindTest :: checkResult (unsigned int index) {
  * @return Максимальный индекс результата.
  *
  */
-unsigned int NNPNumberRangeFindTest :: getMaxIndex () const {
+unsigned int NNPNumberRangeFindTest :: getResultsNumber () const {
     return this->maxIndex;
 }
 
@@ -184,7 +181,6 @@ void NNPNumberRangeFindTest :: setCurlResult (const char* range, vector<string>*
  */
 NNPNumberRangeFindTest :: ~NNPNumberRangeFindTest() {
     db.disconnect();
-    curl_easy_cleanup(curl);
 }
 
 /**

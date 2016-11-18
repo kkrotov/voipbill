@@ -88,9 +88,14 @@ echo 'Генерируем тестовые примеры для новой (т
 nice -19 python "$DIR/sampler.py"
 [[ $? -ne 0 ]] && exit
 
-echo 'Running unit tests analyzis...'
-python "$DIR/unit/start.sh"
+echo 'Running unit tests analysis...'
+. "$DIR/unit/start.sh"
 [[ $? -ne 0 ]] && exit
+
+echo 'Running functional test analysis...'
+. "$DIR/functional/start.sh"
+[[ $? -ne 0]] && exit
+
 
 echo 'Stopping new app version...'
 . "$DIR/stop.sh"

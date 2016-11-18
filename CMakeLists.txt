@@ -410,14 +410,22 @@ find_package(CxxTest)
 if(CXXTEST_FOUND)
     include_directories(${CXXTEST_INCLUDE_DIR})
     enable_testing()
-    
-    add_library(utest.obj ${BILL_SOURCES} ${BOOST_SOURCES} ${JSON_SOURCES} ${ACE_RADIUS_SOURCES})
+
+    set (TESTING_SOURCES
+         tests/functional/common.cpp
+         tests/functional/BaseTest.cpp
+         tests/functional/ComparisonTest.cpp
+         )
+    add_library(test.obj ${TESTING_SOURCES} ${BILL_SOURCES} ${BOOST_SOURCES} ${JSON_SOURCES} ${ACE_RADIUS_SOURCES})
 
     set (CXXTEST_TESTGEN_ARGS --runner=XmlPrinter)
     CXXTEST_ADD_TEST(tests/unit/utest tests/unit/RemoveHtmlTagsTest.cpp
     tests/unit/RemoveHtmlTagsTest.h)
+    target_link_libraries(tests/unit/utest test.obj rt pthread pq curl crypto)
 
-    target_link_libraries(tests/unit/utest utest.obj rt pthread pq curl crypto)
+    CXXTEST_ADD_TEST(tests/functional/ftest tests/functional/ftest.cpp
+                     tests/functional/NNPNumberRangeFindTest.h)
+    target_link_libraries(tests/functional/ftest test.obj rt pthread pq curl crypto)
 
 endif()
 

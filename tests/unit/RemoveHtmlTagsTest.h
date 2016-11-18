@@ -2,6 +2,8 @@
 #include <string.h>
 #include <cxxtest/TestSuite.h>
 #include "../../src-bill/common.h"
+#include "../../src-bill/common.cpp"
+#include "../../src-bill/classes/Log.cpp"
 
 /**
  * Класс проверяющий корректную работу функции removeHtmlTags.
@@ -16,6 +18,7 @@ class RemoveHtmlTagsTest : public CxxTest::TestSuite {
 
     void testThis (void) {
 
+       TS_TRACE ("Running RemoveHtmlTags test function");
        const int TEST_NUM = 4;
        string strToTest[TEST_NUM] = {"",
                                      "Te<s  <s > >sted",
