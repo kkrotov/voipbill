@@ -86,11 +86,10 @@ bool ThreadSyncCdrs::syncCallsCdr() {
     string local_prev_sync_month;
     string local_curr_sync_month;
     string local_next_sync_month;
-    if (!getCurrentMonths("calls_cdr.cdr", "setup_time", repository.billingData->lastSyncCentralCdrId,
-                          local_prev_sync_month, local_curr_sync_month, local_next_sync_month))
+    if (!getCurrentMonths("calls_cdr.cdr", "setup_time", repository.billingData->lastSyncCentralCdrId, local_prev_sync_month, local_curr_sync_month, local_next_sync_month))
         return false;
 
-    return copyCallsCdr(local_curr_sync_month, 100000);
+    return copyCallsCdr(local_curr_sync_month, 100000)? true:copyCallsCdr(local_next_sync_month, 100000);
 }
 
 bool ThreadSyncCdrs::copyCallsCdr(string month, int limit) {
@@ -126,14 +125,22 @@ bool ThreadSyncCdrs::copyCallsCdr(string month, int limit) {
     if (local_id <= central_id)
         return false;
 
-    BDb::copy(relname, "",
+    try {
+
+        BDb::copy(relname, "",
               "server_id,id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,dst_route,"
                       "src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party,in_sig_call_id,out_sig_call_id",
               "select "+app().conf.str_instance_id +",id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,dst_route,"
                        "src_noa,dst_noa,hash,dst_replace,call_finished,releasing_party,in_sig_call_id,out_sig_call_id "
               "from "+relname+"  where id>"+lexical_cast<string>(central_id)+" order by id limit "+lexical_cast<string>(limit),
-              &db_calls, &db_main);
+                  &db_calls, &db_main);
+    }
+    catch (Exception e) {
 
+        std::string message = "Error syncronizing cdr tables: "+e.message;
+        Log::error(message);
+        return false;
+    }
     return true;
 }
 
@@ -226,12 +233,20 @@ bool ThreadSyncCdrs::copyCallsCdrUnfinished(string month, int limit) {
     if (local_id <= central_id)
         return false;
 
-    BDb::copy(relname, "",
+    try {
+
+        BDb::copy(relname, "",
               "server_id,id,call_id,setup_time,hash,dst_route,releasing_party,release_timestamp,disconnect_cause,src_number,dst_number,src_route",
               "select "+ app().conf.str_instance_id +",id::bigint,call_id,setup_time,hash,dst_route,releasing_party,release_timestamp,disconnect_cause,src_number,dst_number,src_route "
               "from "+relname+"  where id>"+lexical_cast<string>(central_id)+" order by id limit "+lexical_cast<string>(limit),
               &db_calls, &db_main);
+    }
+    catch (Exception e) {
 
+        std::string message = "Error syncronizing cdr tables: "+e.message;
+        Log::error(message);
+        return false;
+    }
     return true;
 }
 
