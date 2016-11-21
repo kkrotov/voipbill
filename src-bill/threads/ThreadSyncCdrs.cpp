@@ -109,11 +109,12 @@ bool ThreadSyncCdrs::copyCallsCdr(string month, int limit) {
     }
 
     auto res_calls = db_calls.query("select id, setup_time from " + relname + " order by id desc limit 1");
-    if (res_calls.next()) {
+    if (!res_calls.next())
+        return false;
 
-        local_id = res_calls.get_ll(0);
-        local_time = res_calls.get(1);
-    }
+    local_id = res_calls.get_ll(0);
+    local_time = res_calls.get(1);
+
     last_cdr_central_month = suffix;
     last_cdr_central_id = central_id;
     last_cdr_central_time = central_time;
