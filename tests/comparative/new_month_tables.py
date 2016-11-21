@@ -85,9 +85,9 @@ class TestComparativeNewMonthTables(unittest2.TestCase):
             conn.close()
 
 
-    def runTest(self):
+    def test_this(self):
         self.checkCentral()
         self.checkRegional()
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest2.main(testRunner=xmlrunner.XMLTestRunner(output='.'))

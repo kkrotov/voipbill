@@ -9,7 +9,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-class TestComparativeBilling:
+class TestComparativeBilling(unittest2.TestCase):
 
     # Выбираем обсчитанные звонки для двух итераций и сравниваем их между собой
 
@@ -177,7 +177,7 @@ class TestComparativeBilling:
 
         self.assertTrue(costOk and recordsOk and hasRecords, msg=msg)
 
-    def startTest(self):
+    def test_this(self):
         data = self.loadData()
         self.checkData(data)
 

@@ -70,10 +70,10 @@ class TestComparativeVoipRouting(unittest2.TestCase):
 
         self.assertTrue(recordsOk and hasRecords)
 
-    def runTest(self):
+    def test_this(self):
         calls = self.loadCalls()
         self.checkCalls(calls)
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest2.main(testRunner=xmlrunner.XMLTestRunner(output='.'))

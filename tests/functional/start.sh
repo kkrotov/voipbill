@@ -1,8 +1,5 @@
 #!/bin/bash
 
-THIS=`readlink -f "${BASH_SOURCE[0]}"`
-DIR=`dirname "${THIS}"`
-
-echo 'Запускаеи functional-тесты'
-$DIR/ftest
+echo 'Запускаем functional-тесты'
+$DIR/functional/ftest
 [[ $? -ne 0 ]] && exit

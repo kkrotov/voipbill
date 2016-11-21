@@ -90,11 +90,9 @@ nice -19 python "$DIR/sampler.py"
 
 echo 'Running unit tests analysis...'
 . "$DIR/unit/start.sh"
-[[ $? -ne 0 ]] && exit
 
 echo 'Running functional test analysis...'
 . "$DIR/functional/start.sh"
-[[ $? -ne 0]] && exit
 
 
 echo 'Stopping new app version...'
@@ -102,7 +100,6 @@ echo 'Stopping new app version...'
 
 echo 'Running comparative tests analyzis...'
 . "$DIR/comparative/start.sh"
-[[ $? -ne 0 ]] && exit
 
 exit 0
 # В случае успешного прохождения тестов, делаем коммит в tested - ветку, пригодную для деплоя.
