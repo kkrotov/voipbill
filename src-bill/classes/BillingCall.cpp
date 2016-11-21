@@ -43,6 +43,8 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
         // При этом так же происходит вычисление действующей схемы авторизации
         // для расчета - по номеру или по транку.
 
+        processSignalingCallId();
+
         if (call->orig) {               // При расчете оригинационного плеча
             numberPreprocessing();      // на основании значений noa и правил препроцессинга номера для транка
             // (таблица auth.trunk_number_preprocessing) дополняет номера необходимыми
@@ -1203,4 +1205,16 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage *tariff) {
         }
     }
     return false;
+}
+
+bool BillingCall::processSignalingCallId() {
+
+    if (call->orig && callInfo->trunk != nullptr && callInfo->trunk->our_trunk) {
+        call->signalling_call_id = cdr->in_sig_call_id;
+    }
+
+    if (!call->orig && callInfo->trunk != nullptr && callInfo->trunk->our_trunk) {
+        call->signalling_call_id = cdr->out_sig_call_id;
+    }
+
 }

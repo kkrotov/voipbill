@@ -43,6 +43,8 @@ struct Cdr {
     char call_finished[16];
     char releasing_party[32];
 
+    char in_sig_call_id[40], out_sig_call_id[40];
+
     Cdr() {
         id = 0;
         connect_time = 0;
@@ -58,6 +60,8 @@ struct Cdr {
         dst_noa = 0;
         call_id = 0;
         disconnect_cause = 0;
+        in_sig_call_id[0] = 0;
+        out_sig_call_id[0] = 0;
     }
 
     void dump(stringstream &trace) {
@@ -75,6 +79,8 @@ struct Cdr {
         trace << "dst_noa: " << dst_noa << ", ";
         trace << "call_id: " << call_id << ", ";
         trace << "disconnect_cause: " << disconnect_cause << ", ";
+        trace << "in_sig_call_id: " << in_sig_call_id << ", ";
+        trace << "out_sig_call_id: " << out_sig_call_id << ", ";
         trace << ")";
     }
 };

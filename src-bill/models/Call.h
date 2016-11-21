@@ -70,6 +70,8 @@ struct Call {
 
     int server_id;
 
+    string signalling_call_id;
+
     void dump(stringstream &trace) {
 
         trace << "(";
@@ -115,6 +117,7 @@ struct Call {
         trace << "nnp_package_minute_id: " << nnp_package_minute_id << ", ";
         trace << "nnp_package_price_id: " << nnp_package_price_id << ", ";
         trace << "nnp_package_pricelist_id: " << nnp_package_pricelist_id << ", ";
+        trace << "signalling_call_id: " << signalling_call_id << ", ";
         trace << ")";
     }
 
@@ -180,7 +183,7 @@ struct Call {
         nnp_package_pricelist_id = 0;
         nnp_package_minute_id = 0;
         nnp_package_price_id = 0;
-
+        signalling_call_id = "";
     }
 
     bool isLocal() {
