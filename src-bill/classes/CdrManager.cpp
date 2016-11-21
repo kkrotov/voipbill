@@ -43,7 +43,9 @@ bool CdrManager::loadPart(BDb * db_calls) {
             "       call_id, " \
             "       disconnect_cause, " \
             "       call_finished, " \
-            "       releasing_party " \
+            "       releasing_party, " \
+            "       in_sig_call_id, " \
+            "       out_sig_call_id " \
             "	from calls_cdr.cdr " \
             "	where " \
             "       id > '" + lexical_cast<string>(getLastId()) + "' " \
@@ -73,6 +75,9 @@ bool CdrManager::loadPart(BDb * db_calls) {
             cdr.disconnect_cause = res.get_i(12);
             strncpy((char*) &cdr.call_finished, res.get(13), sizeof(cdr.call_finished));
             strncpy((char*) &cdr.releasing_party, res.get(14), sizeof(cdr.releasing_party));
+
+            strncpy((char *) &cdr.in_sig_call_id, res.get(15), sizeof(cdr.in_sig_call_id));
+            strncpy((char *) &cdr.out_sig_call_id, res.get(16), sizeof(cdr.out_sig_call_id));
 
             queue.push_back(cdr);
 

@@ -210,6 +210,12 @@ void CallsManager::calls_insert_row(Call *call, stringstream &q) {
         q << "NULL,";
     }
 
+    if (call->signalling_call_id.size() > 0) {
+        q << "'" << call->signalling_call_id << "'::uuid,";
+    } else {
+        q << "NULL,";
+    }
+
     q << call->disconnect_cause;
 
     q << ")\n";
@@ -246,7 +252,7 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth, 
                     "destination_id,pricelist_id,prefix,geo_id,geo_operator_id,mob,geo_mob," \
                     "account_version,stats_nnp_package_minute_id, " \
                     "nnp_operator_id,nnp_region_id,nnp_city_id,nnp_country_prefix,nnp_ndc,nnp_is_mob, " \
-                    "nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id, server_id, " \
+                    "nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id, server_id, signalling_call_id, " \
                     "disconnect_cause" \
                  ")VALUES\n";
 
