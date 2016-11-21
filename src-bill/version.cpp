@@ -4,7 +4,7 @@ char const * build_date() {
 }
 
 char const * build_time() {
-    return __TIME__;
+    return _TIMECOMPILED_;
 }
 
 const char * build_commit() {
