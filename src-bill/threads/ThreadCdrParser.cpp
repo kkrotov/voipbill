@@ -148,7 +148,7 @@ void ThreadCdrParser::logCall(CallData &call) {
 
 void ThreadCdrParser::saveCall(const CallData &call) {
     std::string query = (boost::format(
-            "select public.insert_cdr2('%1%','%2%','%3%','%4%','%5%','%6%','%7%','%8%','%9%','%10%','%11%','%12%','%13%','%14%','%15%','%16%','%17%', '%18%', '%19%)")
+            "select public.insert_cdr2('%1%','%2%','%3%','%4%','%5%','%6%','%7%','%8%','%9%','%10%','%11%','%12%','%13%','%14%','%15%','%16%','%17%', '%18%', '%19%')")
                        % call.call_id % app().conf.cdr_nasip
                        % call.src_number % call.dst_number
                        % call.redirect_number % call.session_time
