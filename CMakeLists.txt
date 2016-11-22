@@ -412,11 +412,16 @@ if(CXXTEST_FOUND)
     enable_testing()
 
     set (TESTING_SOURCES
+         tests/unit/mock/src-bill/Log.cpp
+         src-bill/classes/BDb.cpp
+         src-bill/classes/BDbResult.cpp
+         src-bill/classes/BDbTransaction.cpp
+         src-bill/common.cpp
          tests/functional/common.cpp
          tests/functional/BaseTest.cpp
          tests/functional/ComparisonTest.cpp
          )
-    add_library(test.obj ${TESTING_SOURCES} ${BILL_SOURCES} ${BOOST_SOURCES} ${JSON_SOURCES} ${ACE_RADIUS_SOURCES})
+    add_library(test.obj ${TESTING_SOURCES} ${JSON_SOURCES})
 
     set (CXXTEST_TESTGEN_ARGS --runner=ErrorPrinter)
     CXXTEST_ADD_TEST(tests/unit/utest ./utest.cpp # unit тесты

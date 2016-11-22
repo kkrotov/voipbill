@@ -2,8 +2,7 @@
 #include <string.h>
 #include <cxxtest/TestSuite.h>
 #include "../../src-bill/common.h"
-#include "../../src-bill/common.cpp"
-#include "../../src-bill/classes/Log.cpp"
+#include "mock/src-bill/Log.cpp"
 
 /**
  * Класс проверяющий корректную работу функции removeHtmlTags.
