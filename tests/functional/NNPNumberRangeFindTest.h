@@ -106,7 +106,7 @@ void NNPNumberRangeFindTest :: curlWriteCallback(void *contents_temp, size_t siz
  * !!!
  */
 NNPNumberRangeFindTest :: NNPNumberRangeFindTest ()
-        : db ("host=127.0.0.1 dbname=nispd99_test") {
+        : db ("host=127.0.0.1 dbname=nispd99_test user=postgres") {
     db.connect();
 }
 
