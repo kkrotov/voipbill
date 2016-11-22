@@ -20,6 +20,7 @@ struct Trunk {
     bool orig_redirect_number;
     bool term_redirect_number;
     bool sw_minimalki;
+    bool sw_shared;
     int capacity;
 
 
@@ -42,6 +43,7 @@ struct Trunk {
         trace << "term_redirect_number: " << term_redirect_number << ", ";
             trace << "capacity: " << capacity << ", ";
             trace << "sw_minimalki: " << sw_minimalki << ", ";
+            trace << "sw_shared: " << sw_shared << ", ";
         trace << ")";
     }
 };

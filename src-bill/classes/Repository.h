@@ -248,8 +248,8 @@ public:
         trunkTrunkRule->findTrunkGroupRules(resultTrunkGroupRules, trunk_id, trace);
     }
 
-    void getAllAutoRoutingTrunks(vector<Trunk *> &resultTrunks) {
-        trunk->findAllAutorouting(resultTrunks, trace);
+    void getAllAutoRoutingTrunks(vector<Trunk *> &resultTrunks, int server_id) {
+        trunk->findAllAutorouting(resultTrunks, server_id, trace);
     }
 
     StatPrefixlist *getStatPrefixlist(int stat_prefixlist_id) {

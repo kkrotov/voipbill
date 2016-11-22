@@ -409,7 +409,12 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
                                                        Pricelist *origPricelist, PricelistPrice *origPrice,
                                                        ServiceTrunkSettings *origSettings, bool fUseMinimalki) {
     vector<Trunk *> termTrunks;
-    repository.getAllAutoRoutingTrunks(termTrunks);
+
+    int server_id = app().conf.instance_id;
+
+    if (server != nullptr) server_id = server->id;
+
+    repository.getAllAutoRoutingTrunks(termTrunks, server_id);
 
     if (trace != nullptr) {
         *trace << "INFO| USE_MINIMALKI |  " << (fUseMinimalki ? "yes" : "no") << "" << "\n";
