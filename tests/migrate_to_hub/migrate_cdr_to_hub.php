@@ -1,12 +1,12 @@
 <?php
 
 
-$dbregion = pg_connect("host=85.94.32.172 dbname=nispd78    user=bill_daemon_local password=gwvIg7OPTfoJE5vxWVKpmvAxBPMNP7t1") or die('Could not connect: ' . pg_last_error());
-$dbhub    = pg_connect("host=reg12.mcntelecom.ru dbname=nispd12 user=doleynik_rw password=Watcom10") or die('Could not connect: ' . pg_last_error());
-$dbcentral  = pg_connect("host=eridanus  dbname=nispd user=bill_daemon_remote password=qRPCcAvrS4qWvGAhgzrXWuGJ2nwYEf8C") or die('Could not connect: ' . pg_last_error());
+$dbregion = pg_connect("host=85.94.32.172 dbname=nispd78    user=bill_daemon_local") or die('Could not connect: ' . pg_last_error());
+//$dbhub    = pg_connect("host=reg12.mcntelecom.ru dbname=nispd12 user=doleynik_rw") or die('Could not connect: ' . pg_last_error());
+//$dbcentral  = pg_connect("host=eridanus  dbname=nispd user=bill_daemon_remote") or die('Could not connect: ' . pg_last_error());
 
-//$dbhub    = pg_connect("host=127.0.0.1    dbname=nispd99_test user=pgadmin   password=NbhLhjn") or die('Could not connect: ' . pg_last_error());
-//$dbcentral  = pg_connect("host=127.0.0.1  dbname=nispd_test user=pgadmin   password=NbhLhjn") or die('Could not connect: ' . pg_last_error());
+$dbhub    = pg_connect("host=127.0.0.1    dbname=nispd99_test user=pgadmin") or die('Could not connect: ' . pg_last_error());
+$dbcentral  = pg_connect("host=127.0.0.1  dbname=nispd_test user=pgadmin") or die('Could not connect: ' . pg_last_error());
 
 $hub_id   = 2;
 $region_id= 78; 
