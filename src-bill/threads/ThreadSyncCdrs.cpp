@@ -206,7 +206,7 @@ bool ThreadSyncCdrs::copyCallsCdrUnfinished(string month, int limit) {
     string relname = "calls_cdr.cdr_unfinished_" + suffix;
 
     if (!db_calls.rel_exists(relname))
-        return true;
+        return false;
     
     if (!db_main.rel_exists(relname))
         db_main.query("select calls_cdr.create_calls_cdr_unfinished_partition('"+month+"'::timestamp without time zone)");
