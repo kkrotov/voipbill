@@ -20,9 +20,7 @@ public:
         fields.push_back("number_to");
         fields.push_back("is_mob");
         fields.push_back("is_active");
-        fields.push_back("operator_source");
         fields.push_back("operator_id");
-        fields.push_back("region_source");
         fields.push_back("region_id");
         fields.push_back("insert_time");
         fields.push_back("insert_user_id");
@@ -39,9 +37,7 @@ public:
         datatype.push_back("number_to integer");
         datatype.push_back("is_mob boolean");
         datatype.push_back("is_active boolean");
-        datatype.push_back("operator_source character varying(255)");
         datatype.push_back("operator_id integer");
-        datatype.push_back("region_source character varying(255)");
         datatype.push_back("region_id integer");
         datatype.push_back("insert_time timestamp(0)");
         datatype.push_back("insert_user_id integer");
