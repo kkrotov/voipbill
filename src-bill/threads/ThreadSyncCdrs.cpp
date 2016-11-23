@@ -107,6 +107,8 @@ bool ThreadSyncCdrs::copyCallsCdr(string month, int limit) {
         central_id = res_main.get_ll(0);
         central_time = res_main.get(1);
     }
+    if (!db_calls.rel_exists(relname))
+        db_calls.query("select calls_cdr.create_calls_cdr_partition('"+month+"'::timestamp without time zone)");
 
     auto res_calls = db_calls.query("select id, setup_time from " + relname + " order by id desc limit 1");
     if (!res_calls.next())
