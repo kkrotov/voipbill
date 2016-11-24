@@ -97,7 +97,9 @@ public:
                 if (NumAdef > 0 && NumB > 0 && vNumA.size() > 0) {
                     PhoneNumber number = repository.getNNPBestGeoRoute(NumAdef, vNumA, NumB,
                                                                        is_need_debug_trace ? &html : nullptr);
-                    html << "{ \"src_num\" : " << number << " }";
+                    Json::Value value;
+                    value["src_num"] = number;
+                    html << value;
                 } else
                     throw CalcException(
                             "getBestGeoRoute: invalid arguments: num_a_def , num_b , num_a(.+) - must be phonenumbers");
@@ -121,10 +123,20 @@ public:
                 if (NumB > 0 && vNumA.size() > 0) {
                     repository.getNNPBestPriceRoute(vResNum, vNumA, NumB, is_need_debug_trace ? &html : nullptr);
 
+                    Json::Value value;
+
+                    int i = 1;
+
                     for (auto it : vResNum) {
-                        html << "{ \"src_num\" : " << it.second << ", \"price\" : " << it.first << " }";
+                        Json::Value subvalue;
+                        subvalue["src_num"] = it.second;
+                        subvalue["price"] = it.first;
+                        value["num" + to_string(i)] = subvalue;
+
+                        i++;
                     }
 
+                    html << value;
                 } else
                     throw CalcException(
                             "getBestPriceRoute: invalid arguments: num_b , num_a(.+) - must be phonenumbers");
