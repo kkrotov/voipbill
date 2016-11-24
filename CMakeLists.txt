@@ -423,7 +423,7 @@ if(CXXTEST_FOUND)
          )
     add_library(test.obj ${TESTING_SOURCES} ${JSON_SOURCES})
 
-    set (CXXTEST_TESTGEN_ARGS --runner=ErrorPrinter)
+    set (CXXTEST_TESTGEN_ARGS --runner=XUnitPrinter)
     CXXTEST_ADD_TEST(tests/unit/utest ./utest.cpp # unit тесты
     tests/unit/RemoveHtmlTagsTest.h)
     target_link_libraries(tests/unit/utest test.obj rt pthread pq curl crypto)
