@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../common.h"
+#include <json/json.h>
 
 struct NNPNumberRange {
     int id;
@@ -18,6 +19,23 @@ struct NNPNumberRange {
 
     PhoneNumber getMidKey() { return (full_number_to + full_number_from) / 2; };
     PhoneNumber getLength() { return (full_number_to - full_number_from); };
+
+    Json::Value writeJsonValue() {
+        Json::Value value;
+
+        value["id"] = id;
+        value["ndc"] = ndc;
+        value["full_number_from"] = full_number_from;
+        value["full_number_to"] = full_number_to;
+        value["is_mob"] = is_mob;
+        value["is_active"] = is_active;
+        value["nnp_operator_id"] = nnp_operator_id;
+        value["nnp_region_id"] = nnp_region_id;
+        value["nnp_city_id"] = nnp_city_id;
+        value["country_prefix"] = country_prefix;
+
+        return value;
+    }
 
     void dump(stringstream &trace) {
         trace << "(";
