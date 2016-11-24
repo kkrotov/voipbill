@@ -22,6 +22,7 @@ public:
     void render(std::stringstream &html, map<string, string> &parameters) {
 
         string cmd, sNum;
+        bool is_need_debug_trace = false;
         try {
 
             if (!repository.prepare()) {
@@ -32,6 +33,8 @@ public:
             if (parameters.find("cmd") != parameters.end())
                 cmd = parameters["cmd"];
 
+            if (parameters.find("is_need_debug_trace") != parameters.end())
+                is_need_debug_trace = true;
 
             if (cmd == "getDestinationByNum") {
 
@@ -42,7 +45,19 @@ public:
 
                     if (num > 0) {
                         set<int> nnpDestinationIds;
-                        repository.getNNPDestinationByNum(nnpDestinationIds, num, &html);
+                        repository.getNNPDestinationByNum(nnpDestinationIds, num,
+                                                          is_need_debug_trace ? &html : nullptr);
+
+                        Json::Value value;
+
+                        for (auto iNNNPDestination : nnpDestinationIds) {
+
+                            NNPDestination *nnpDestination = repository.getNNPDestination(iNNNPDestination);
+                            if (nnpDestination != nullptr)
+                                value["dest" + to_string(iNNNPDestination)] = nnpDestination->writeJsonValue();
+                        }
+
+                        html << value;
                     }
                 }
             } else if (cmd == "getNumberRangeByNum") {
@@ -54,7 +69,10 @@ public:
 
                     if (num > 0) {
                         set<int> nnpDestinationIds;
-                        NNPNumberRange *nnpNumberRange = repository.getNNPNumberRange(num, &html);
+                        NNPNumberRange *nnpNumberRange = repository.getNNPNumberRange(num, is_need_debug_trace ? &html
+                                                                                                               : nullptr);
+                        if (nnpNumberRange != nullptr)
+                            html << nnpNumberRange->writeJsonValue();
                     }
                 }
             } else if (cmd == "getBestGeoRoute") {
@@ -77,8 +95,11 @@ public:
                 }
 
                 if (NumAdef > 0 && NumB > 0 && vNumA.size() > 0) {
-                    PhoneNumber number = repository.getNNPBestGeoRoute(NumAdef, vNumA, NumB, &html);
-                    html << "BestGeoRoute:" << number << "\n";
+                    PhoneNumber number = repository.getNNPBestGeoRoute(NumAdef, vNumA, NumB,
+                                                                       is_need_debug_trace ? &html : nullptr);
+                    Json::Value value;
+                    value["src_num"] = number;
+                    html << value;
                 } else
                     throw CalcException(
                             "getBestGeoRoute: invalid arguments: num_a_def , num_b , num_a(.+) - must be phonenumbers");
@@ -100,12 +121,22 @@ public:
                 }
 
                 if (NumB > 0 && vNumA.size() > 0) {
-                    repository.getNNPBestPriceRoute(vResNum, vNumA, NumB, &html);
+                    repository.getNNPBestPriceRoute(vResNum, vNumA, NumB, is_need_debug_trace ? &html : nullptr);
+
+                    Json::Value value;
+
+                    int i = 1;
 
                     for (auto it : vResNum) {
-                        html << "BestPriceRoute: " << it.second << " price:" << it.first << "\n";
+                        Json::Value subvalue;
+                        subvalue["src_num"] = it.second;
+                        subvalue["price"] = it.first;
+                        value["num" + to_string(i)] = subvalue;
+
+                        i++;
                     }
 
+                    html << value;
                 } else
                     throw CalcException(
                             "getBestPriceRoute: invalid arguments: num_b , num_a(.+) - must be phonenumbers");
