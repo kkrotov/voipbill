@@ -1,6 +1,6 @@
 #!/bin/bash
 
 echo 'Запускаем functional-тесты'
-$DIR/functional/ftest > ../TEST-functional.XML
+$DIR/functional/ftest
 [[ $? -ne 0 ]] && exit
 

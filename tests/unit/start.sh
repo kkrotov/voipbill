@@ -1,6 +1,6 @@
 #!/bin/bash
 
 echo 'Запускаеи unit-тесты'
-$DIR/unit/utest > ../TEST_unit.xml
+$DIR/unit/utest
 [[ $? -ne 0 ]] && exit
 

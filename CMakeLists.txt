@@ -423,11 +423,12 @@ if(CXXTEST_FOUND)
          )
     add_library(test.obj ${TESTING_SOURCES} ${JSON_SOURCES})
 
-    set (CXXTEST_TESTGEN_ARGS --runner=XUnitPrinter)
+    set (CXXTEST_TESTGEN_ARGS --runner=XUnitPrinter --world=utest)
     CXXTEST_ADD_TEST(tests/unit/utest ./utest.cpp # unit тесты
     tests/unit/RemoveHtmlTagsTest.h)
     target_link_libraries(tests/unit/utest test.obj rt pthread pq curl crypto)
 
+    set (CXXTEST_TESTGEN_ARGS --runner=XUnitPrinter --world=ftest)
     CXXTEST_ADD_TEST(tests/functional/ftest ./ftest.cpp # functional тесты
                      tests/functional/NNPNumberRangeFindTest.h)
     target_link_libraries(tests/functional/ftest test.obj rt pthread pq curl crypto)
