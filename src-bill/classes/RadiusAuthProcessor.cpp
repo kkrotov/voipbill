@@ -893,15 +893,15 @@ bool RadiusAuthProcessor::isEmergencyCall(Call &call) {
             throw Exception("Prefixlist #" + lexical_cast<string>(server->emergency_prefixlist_id) + " not found",
                             "RadiusAuthProcessor::filterByNumber");
         }
-        auto prefix = repository.getPrefixlistPrefix(prefixlist->id, to_string(call.dst_number).c_str());
+        auto prefix = repository.getPrefixlistPrefix(prefixlist->id, bNumber.c_str());
         if (prefix) {
             if (trace != nullptr) {
-                *trace << "DEBUG|EMERGENCY PREFIXLIST MATCHED|" << to_string(call.dst_number) << " in "
+                *trace << "DEBUG|EMERGENCY PREFIXLIST MATCHED|" << bNumber << " in "
                        << prefixlist->name << " (" <<
                        prefixlist->id << ")" << "\n";
             }
             if (trace != nullptr) {
-                *trace << "INFO|NUMBER MATCHED|" << to_string(call.dst_number) << " in " << prefixlist->name << " ("
+                *trace << "INFO|NUMBER MATCHED|" << bNumber << " in " << prefixlist->name << " ("
                        << prefixlist->id << ")" <<
                        "\n";
             }
