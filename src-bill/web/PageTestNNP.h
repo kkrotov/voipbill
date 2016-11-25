@@ -23,6 +23,8 @@ public:
 
         string cmd, sNum;
         bool is_need_debug_trace = false;
+        bool use_simple_format = false;
+
         try {
 
             if (!repository.prepare()) {
@@ -35,6 +37,9 @@ public:
 
             if (parameters.find("is_need_debug_trace") != parameters.end())
                 is_need_debug_trace = true;
+
+            if (parameters.find("use_simple_format") != parameters.end())
+                use_simple_format = true;
 
             if (cmd == "getDestinationByNum") {
 
@@ -99,7 +104,14 @@ public:
                                                                        is_need_debug_trace ? &html : nullptr);
                     Json::Value value;
                     value["src_num"] = number;
-                    html << value;
+
+                    if (use_simple_format) {
+                        html << number;
+                    } else {
+                        html << value;
+                    }
+
+
                 } else
                     throw CalcException(
                             "getBestGeoRoute: invalid arguments: num_a_def , num_b , num_a(.+) - must be phonenumbers");
@@ -126,17 +138,22 @@ public:
                     Json::Value value;
 
                     int i = 1;
+                    string simple;
 
                     for (auto it : vResNum) {
                         Json::Value subvalue;
                         subvalue["src_num"] = it.second;
                         subvalue["price"] = it.first;
                         value["num" + to_string(i)] = subvalue;
-
+                        simple += to_string(it.first) + "," + to_string(it.second) + "||";
                         i++;
                     }
+                    if (use_simple_format) {
+                        html << simple;
+                    } else {
+                        html << value;
+                    }
 
-                    html << value;
                 } else
                     throw CalcException(
                             "getBestPriceRoute: invalid arguments: num_b , num_a(.+) - must be phonenumbers");
