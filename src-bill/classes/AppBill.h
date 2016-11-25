@@ -2,10 +2,12 @@
 
 #include "App.h"
 #include "ConfBill.h"
+#include "../healthcheck/HealthCheckController.h"
 
 class AppBill : public App {
 public:
     ConfBill conf;
+    HealthCheckController healthCheckController;
 
     Thread * newThreadObject(std::string id);
 

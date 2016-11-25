@@ -25,6 +25,7 @@
 #include "http/reply.hpp"
 #include "PageCdrUnfinished.h"
 #include "PageTrunks.h"
+#include "PageHealthStatus.h"
 
 class HttpHandler {
 private:
@@ -52,6 +53,7 @@ private:
         handlers.push_back(shared_ptr<BasePage>(new PageTestNNP));
         handlers.push_back(shared_ptr<BasePage>(new PageTestAuth));
         handlers.push_back(shared_ptr<BasePage>(new PageCdrUnfinished));
+        handlers.push_back(shared_ptr<BasePage>(new PageHealthStatus));
     }
 
 public:

@@ -23,6 +23,9 @@
 #include "../threads/ThreadTasks.h"
 #include "../threads/ThreadCdrParser.h"
 #include "../threads/ThreadSyncCdrs.h"
+#include "../healthcheck/HealthCheckController.h"
+#include "../healthcheck/DbConnectStatus.h"
+#include "../healthcheck/FtpConnectStatus.h"
 
 AppBill &app() {
     static AppBill appVar;
@@ -37,6 +40,9 @@ void AppBill::runApp() {
     ThreadWeb web;
 
     std::thread web_thread(std::ref(web));
+
+    healthCheckController.add(std::shared_ptr<DbConnectStatus>(new DbConnectStatus()));
+    healthCheckController.add(std::shared_ptr<FtpConnectStatus>(new FtpConnectStatus()));
 
     if (conf.active_threads.size() == 0)
         runAppInSingleMode();

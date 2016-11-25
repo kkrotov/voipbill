@@ -37,6 +37,7 @@ public:
         html << " <a href='/cdrunfinished'>CDR Log</a> | ";
         html << " <a href='/log'>Log</a> | ";
         html << " <a href='/config'>Config</a> | ";
+        html << " <a href='/health'>Health status</a> | ";
         html << string_time(time(NULL)) << " ";
 
         AppStatus status = app().getStatus();
