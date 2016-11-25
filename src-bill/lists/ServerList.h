@@ -8,7 +8,8 @@ class ServerList : public ObjList<Server> {
 protected:
 
     string sql(BDb * db) {
-        return "   select id, low_balance_outcome_id, blocked_outcome_id, min_price_for_autorouting, our_numbers_id, calling_station_id_for_line_without_number, service_numbers, hub_id " \
+        return "   select id, low_balance_outcome_id, blocked_outcome_id, min_price_for_autorouting, our_numbers_id," \
+               "   calling_station_id_for_line_without_number, service_numbers, hub_id, emergency_prefixlist_id " \
             "   from public.server " \
                "   order by id asc ";
     }
@@ -27,6 +28,7 @@ protected:
             split(item->service_numbers, service_numbers, is_any_of(","));
         }
         item->hub_id = row.get_i(7);
+        item->emergency_prefixlist_id = row.get_i(8);
     }
 
     struct key_id {

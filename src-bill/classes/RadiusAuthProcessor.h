@@ -99,5 +99,7 @@ private:
     bool matchTrunkGroup(const int trunkGroupId, const int trunkId);
 
     bool matchPrefixlist(const int prefixlistId, string strNumber);
+
+    bool isEmergencyCall(Call &call);
 };
 
