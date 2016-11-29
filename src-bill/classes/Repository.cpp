@@ -302,8 +302,9 @@ void Repository::orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trun
         trunkSettingsOrderList.push_back(order);
     }
 
-}
+    stable_sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_priority(*this));
 
+}
 
 Trunk *Repository::getServiceTrunk(int trunk_settings_id, ServiceTrunkSettings &trunkSettings) {
     if (serviceTrunkSettings == nullptr)
@@ -591,5 +592,7 @@ bool Repository::matchPrefixlist(int prefixlist_id, char *prefix) {
     return prefixlistPrefix != nullptr;
 }
 
-
+void Repository::getTrunkPriority(int trunk_id, vector<TrunkPriority> &trunkPriorityList) {
+    trunkPriority->findAllTrunkPriority(trunk_id, trunkPriorityList);
+}
 
