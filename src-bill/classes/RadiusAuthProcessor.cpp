@@ -1,5 +1,4 @@
 #include <vector>
-
 #include "../common.h"
 #include "Log.h"
 #include "RadiusAuthProcessor.h"
@@ -381,9 +380,12 @@ bool RadiusAuthProcessor::processAutoOutcome(double *pBuyRate, Pricelist **pFirs
     vector<ServiceTrunkOrder> termServiceTrunks;
     getAvailableTermServiceTrunk(termServiceTrunks, origPricelist, origPrice, origSettings, fUseMinimalki);
 
+
     double origRub = (origPrice != nullptr) ? this->repository.priceToRoubles(origPrice->price, *origPricelist) : 0;
+
     return processAutoRouteResponse(termServiceTrunks, pBuyRate, pFirstBuyPricelist, origRub);
 }
+
 
 void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk **origServiceTrunk, Pricelist **origPricelist,
                                                        PricelistPrice **origPrice,
@@ -419,6 +421,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
     if (trace != nullptr) {
         *trace << "INFO| USE_MINIMALKI |  " << (fUseMinimalki ? "yes" : "no") << "" << "\n";
     }
+
 
     for (auto termTrunk : termTrunks) {
         if (!autoTrunkFilterSrcTrunk(termTrunk)) {
@@ -536,6 +539,33 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
         }
     }
 
+    for (auto termServiceTrunk = termServiceTrunks.begin();
+         termServiceTrunk != termServiceTrunks.end(); termServiceTrunk++) { // Расчитываем приоритеты транков
+        if (termServiceTrunk->trunk != nullptr) {
+            int t = termServiceTrunk->trunk->default_priority;
+            termServiceTrunk->priority = t;
+            int trunk_id = termServiceTrunk->trunk->id;
+            vector<TrunkPriority> trunkPriorityList;
+            repository.getTrunkPriority(trunk_id, trunkPriorityList);
+            for (auto trunkPriority : trunkPriorityList) {
+
+                int num_a = trunkPriority.number_id_filter_a;
+                bool f_a = true;
+                int num_b = trunkPriority.number_id_filter_b;
+                bool f_b = true;
+
+                if (num_a > 0) f_a = filterByNumber(trunkPriority.number_id_filter_a, aNumber);
+                if (num_b > 0) f_b = filterByNumber(trunkPriority.number_id_filter_b, bNumber);
+
+                if (f_a && f_b) {
+                    termServiceTrunk->priority = trunkPriority.priority;
+                    break;
+                }
+
+            }
+        }
+    }
+
     repository.orderTermTrunkSettingsOrderList(termServiceTrunks, fUseMinimalki, time(nullptr));
 }
 
@@ -577,6 +607,7 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
         if (trace != nullptr) {
             *trace << "INFO||PRICE: " << trunkOrder.price->price;
             *trace << ", TRUNK: " << trunkOrder.trunk->name << " (" << trunkOrder.trunk->id << ")";
+            *trace << ", PRIORITY: " << trunkOrder.priority;
             *trace << ", SERVICE TRUNK " << trunkOrder.serviceTrunk->id;
             *trace << ", PRICELIST: " << trunkOrder.pricelist->id;
             *trace << ", PRICELIST CURRENCY: " << trunkOrder.pricelist->currency_id;

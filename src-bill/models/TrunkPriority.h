@@ -3,6 +3,7 @@
 #include "../common.h"
 
 struct TrunkPriority {
+    int id;
     int trunk_id;
     int order;
     int priority;
@@ -11,6 +12,7 @@ struct TrunkPriority {
     int number_id_filter_b;
 
     TrunkPriority() {
+        id = 0;
         trunk_id = 0;
         order = 0;
         priority = 0;
@@ -20,6 +22,7 @@ struct TrunkPriority {
 
     void dump(stringstream &trace) {
         trace << "(";
+        trace << "id: " << id << ", ";
         trace << "trunk_id: " << trunk_id << ", ";
         trace << "order: " << order << ", ";
         trace << "priority: " << priority << ", ";
