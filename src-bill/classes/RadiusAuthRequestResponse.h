@@ -5,6 +5,7 @@ struct RadiusAuthRequest {
     string srcNumber;
     string dstNumber;
     string redirectNumber;
+    string callingPartyCategory;
     int srcNoa = 3;
     int dstNoa = 3;
 
@@ -16,6 +17,8 @@ struct RadiusAuthRequest {
         trace << "redirect_number: " << redirectNumber << ", ";
         trace << "src_noa: " << srcNoa << ", ";
         trace << "dst_noa: " << dstNoa << ", ";
+        if (callingPartyCategory.size() > 0)
+            trace << "calling_party_category: " << callingPartyCategory << ", ";
         trace << ")";
     }
 };
