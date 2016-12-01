@@ -14,13 +14,18 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
     }
     string cmd;
     Json::Value jval;
+    uint16_t instance_id = app().conf.instance_id;
+    double run_time = app().getRuntime();
     if (parameters.find("cmd") != parameters.end()) {
 
         cmd = parameters["cmd"];
         SystemStatus systemStatus = app().healthCheckController.getStatus(cmd);
-        jval["systemId"] = systemStatus.systemId;
+        jval["instanceId"] = instance_id;
+        jval["itemId"] = systemStatus.itemId;
         jval["statusId"] = systemStatus.getStatusString();
         jval["statusMessage"] = systemStatus.statusMessage;
+        jval["runTime"] = run_time;
+        
         html << jval;
     }
     else {
@@ -31,10 +36,13 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
 
         for (auto sysstat: systemStatus) {
 
-            jval["systemId"] = sysstat.systemId;
+            jval["instanceId"] = instance_id;
+            jval["itemId"] = sysstat.itemId;
             jval["statusId"] = sysstat.getStatusString();
             jval["statusMessage"] = sysstat.statusMessage;
-            html << jval;
+            jval["runTime"] = run_time;
+
+            html << jval << std::endl;
         }
     }
 }

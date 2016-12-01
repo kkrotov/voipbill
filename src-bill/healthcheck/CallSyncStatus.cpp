@@ -6,9 +6,11 @@ CallSyncStatus::CallSyncStatus() : HealthCheck ("CallSyncStatus") {
 
 SystemStatus CallSyncStatus::getStatus() {
 
-    if (app().conf.call_sync_delay.size()<3)
-        return healthStatus;
+    if (app().conf.call_sync_delay.size()<3) {
 
+        healthStatus.statusMessage = "Error in system config file: key value call_sync_delay undefined";
+        return healthStatus;
+    }
     Repository repository;
     if (repository.prepare(time(nullptr))) {
 

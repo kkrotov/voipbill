@@ -7,9 +7,11 @@ CallsWaitSaving::CallsWaitSaving() : HealthCheck("CallsWaitSaving") {
 
 SystemStatus CallsWaitSaving::getStatus() {
 
-    if (app().conf.call_save_wait_count.size()<3)
-        return healthStatus;
+    if (app().conf.call_save_wait_count.size()<3) {
 
+        healthStatus.statusMessage = "Error in system config file: key value call_save_wait_count undefined";
+        return healthStatus;
+    }
     Repository repository;
     if (repository.prepare(time(nullptr))) {
 

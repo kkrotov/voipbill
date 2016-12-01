@@ -6,9 +6,11 @@ CdrSyncStatus::CdrSyncStatus() : HealthCheck("CdrSyncStatus") {
 
 SystemStatus CdrSyncStatus::getStatus() {
 
-    if (app().conf.cdr_sync_delay.size()<3)
-        return healthStatus;
+    if (app().conf.cdr_sync_delay.size()<3) {
 
+        healthStatus.statusMessage = "Error in system config file: key value cdr_sync_delay undefined";
+        return healthStatus;
+    }
     Repository repository;
     if (repository.prepare(time(nullptr))) {
 

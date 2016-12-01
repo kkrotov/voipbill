@@ -7,9 +7,11 @@ CdrWaitProcessing::CdrWaitProcessing() : HealthCheck("CdrWaitProcessing") {
 
 SystemStatus CdrWaitProcessing::getStatus() {
 
-    if (app().conf.cdr_proc_wait_count.size()<3)
-        return healthStatus;
+    if (app().conf.cdr_proc_wait_count.size()<3) {
 
+        healthStatus.statusMessage = "Error in system config file: key value cdr_proc_wait_count undefined";
+        return healthStatus;
+    }
     Repository repository;
     if (repository.prepare(time(nullptr))) {
 

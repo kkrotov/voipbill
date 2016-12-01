@@ -15,12 +15,12 @@ enum HealthStatus  {
 class SystemStatus {
 
 public:
-    std::string systemId;
+    std::string itemId;
     HealthStatus statusId;
     std::string statusMessage;
 
 public:
-    SystemStatus(std::string id) {systemId=id;statusId=STATUS_UNKNOWN;statusMessage="";};
+    SystemStatus(std::string id) {itemId=id;statusId=STATUS_UNKNOWN;statusMessage="";};
     std::string getStatusString() {
         if (statusId==HealthStatus::STATUS_OK)
             return "STATUS_OK";
@@ -55,7 +55,7 @@ public:
         }
         return healthStatus;
     }
-    std::string getSystemId() { return healthStatus.systemId; };
+    std::string getSystemId() { return healthStatus.itemId; };
     virtual SystemStatus getStatus() = 0;
 };
 

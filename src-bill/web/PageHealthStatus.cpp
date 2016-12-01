@@ -28,7 +28,7 @@ void PageHealthStatus::healthStatusData (stringstream &html, SystemStatus status
 
     html << "<tr>\n";
     html << "<tr class='tr_orig'>\n";
-    html << "<td style='text-align: left' nowrap>" << statusData.systemId << "</td>\n";
+    html << "<td style='text-align: left' nowrap>" << statusData.itemId << "</td>\n";
     html << "<td ";
     std::string tclass="unk";
     if(statusData.statusId==HealthStatus::STATUS_OK)
