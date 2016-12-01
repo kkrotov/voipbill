@@ -10,7 +10,7 @@ public:
     }
 
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
+        renderHeader("nnp-package-minute-counters", html);
 
         Repository repository;
 

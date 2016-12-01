@@ -199,7 +199,7 @@ public:
 //             <<   "<meta http-equiv=\"refresh\" content=\"5\" >"
              <<   "</head>\n";
 
-        renderHeader(html);
+        renderHeader("trunks", html);
 
         if (!ready())
             return;

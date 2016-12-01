@@ -49,6 +49,11 @@ public:
     std::string cdr_nasip;
     int cdr_parcer_interval;
     int calls_raw_sync_delay;
+    vector<int> call_sync_delay;
+    vector<int> cdr_sync_delay;
+    vector<int> call_save_delay;
+    vector<int> cdr_proc_wait_count;
+    vector<int> call_save_wait_count;
 
     string sql_regions_list;
 
@@ -91,6 +96,8 @@ public:
                 return "API-HOST";
         };
     }
+
+    vector<int> get_int_vector(boost::property_tree::ptree &pt, string key);
 
 protected:
     virtual bool parse_config_variables(boost::property_tree::ptree &pt);

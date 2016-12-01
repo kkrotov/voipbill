@@ -19,3 +19,13 @@ std::vector<SystemStatus> HealthCheckController::getStatus() {
     }
     return stat;
 }
+
+SystemStatus HealthCheckController::getStatus(std::string id) {
+
+    for (auto healthCheck : healthCheckList ) {
+
+        if (healthCheck->getSystemId() == id)
+            return healthCheck->getStatus();
+    }
+    return SystemStatus(id);
+}

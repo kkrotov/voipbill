@@ -9,7 +9,7 @@ public:
         return path == "/packages";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
+        renderHeader("packages", html);
 
         Repository repository;
 

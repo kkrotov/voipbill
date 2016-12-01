@@ -11,42 +11,30 @@
 using namespace std;
 
 class BasePage {
+
+    vector<pair<string,string>> header = {
+
+            {"", "Home"},
+            {"calls", "Calls"},
+            {"trunks", "Trunks"},
+            {"data", "Data"},
+            {"data-billing", "Data billing"},
+            {"counters", "Counters"},
+            {"fmins", "Free minutes"},
+            {"packages", "Old Packages"},
+            {"nnp-package-minute-counters", "NNP Packages"},
+            {"trunk-settings-counters", "Minimalki"},
+            {"locks", "Locks"},
+            {"blacklist", "Blacklist"},
+            {"sync", "Sync"},
+            {"cdrunfinished", "CDR Log"},
+            {"log", "Log"},
+            {"config", "Config"},
+            {"health", "Health status"}
+    };
+
 public:
     virtual bool canHandle(std::string &path) = 0;
     virtual void render(std::stringstream &html, map<string, string> &parameters) = 0;
-
-    void renderHeader(std::stringstream &html) {
-        html << "<style>\n";
-        html << "* {font-family:monospace !important;}\n";
-        html << "td { text-align: center }\n";
-        html << "</style>\n";
-
-        html << " <a href='/'>Home</a> | ";
-        html << " <a href='/calls'>Calls</a> | ";
-        html << " <a href='/trunks'>Trunks</a> | ";
-        html << " <a href='/data'>Data</a> | ";
-        html << " <a href='/data-billing'>Data billing</a> | ";
-        html << " <a href='/counters'>Counters</a> | ";
-        html << " <a href='/fmins'>Free minutes</a> | ";
-        html << " <a href='/packages'>Old Packages</a> | ";
-        html << " <a href='/nnp-package-minute-counters'>NNP Packages</a> | ";
-        html << " <a href='/trunk-settings-counters'>Minimalki</a> | ";
-        html << " <a href='/locks'>Locks</a> | ";
-        html << " <a href='/blacklist'>Blacklist</a> | ";
-        html << " <a href='/sync'>Sync</a> | ";
-        html << " <a href='/cdrunfinished'>CDR Log</a> | ";
-        html << " <a href='/log'>Log</a> | ";
-        html << " <a href='/config'>Config</a> | ";
-        html << " <a href='/health'>Health status</a> | ";
-        html << string_time(time(NULL)) << " ";
-
-        AppStatus status = app().getStatus();
-        AppStatus real_status = app().getRealStatus();
-        html << "<b>" << AppStatusNames[real_status] << "</b>";
-        if (status != real_status) {
-            html << " (" << AppStatusNames[status] << ")";
-        }
-
-        html << "\n<hr/><br/>\n";
-    }
+    void renderHeader(string active, std::stringstream &html);
 };

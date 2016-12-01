@@ -11,7 +11,7 @@ public:
         return path == "/data";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
+        renderHeader("data",html);
 
         Repository repository;
 

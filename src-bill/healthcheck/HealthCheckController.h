@@ -21,6 +21,17 @@ public:
 
 public:
     SystemStatus(std::string id) {systemId=id;statusId=STATUS_UNKNOWN;statusMessage="";};
+    std::string getStatusString() {
+        if (statusId==HealthStatus::STATUS_OK)
+            return "STATUS_OK";
+        if (statusId==HealthStatus::STATUS_WARNING)
+            return "STATUS_WARNING";
+        if (statusId==HealthStatus::STATUS_ERROR)
+            return "STATUS_ERROR";
+        if (statusId==HealthStatus::STATUS_CRITICAL)
+            return "STATUS_CRITICAL";
+        return "STATUS_UNKNOWN";
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,6 +42,20 @@ public:
 
 public:
     HealthCheck(std::string id) : healthStatus(id) {    };
+    SystemStatus checkStatus(std::vector<std::pair<time_t, HealthStatus>> delaymap, time_t delay) {
+
+        healthStatus.statusId = HealthStatus::STATUS_CRITICAL;
+        for (auto map : delaymap) {
+
+            if (map.first > delay) {
+
+                healthStatus.statusId = map.second;
+                break;
+            }
+        }
+        return healthStatus;
+    }
+    std::string getSystemId() { return healthStatus.systemId; };
     virtual SystemStatus getStatus() = 0;
 };
 
@@ -46,4 +71,5 @@ public:
     HealthCheckController();
     void add(std::shared_ptr<HealthCheck> check);
     std::vector<SystemStatus> getStatus();
+    SystemStatus getStatus(std::string id);
 };

@@ -213,7 +213,7 @@ public:
             return;
 
         html << "<!DOCTYPE html>\n" << "<html lang=\"en\">\n";
-        renderHeader(html);
+        renderHeader("cdrunfinished", html);
 
         string dateFrom = parameters["date_from"];
         string timeFrom = parameters["time_from"];

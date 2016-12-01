@@ -9,7 +9,7 @@ public:
         return path == "/trunk-settings-counters";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
+        renderHeader("trunk-settings-counters", html);
 
         Repository repository;
 

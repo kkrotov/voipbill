@@ -15,6 +15,7 @@ protected:
     void runApp();
     void runAppInSingleMode();
     void runActiveThreads();
+    void setHealthCheck();
 
     void registerAllThreads();    
     template<class T> void registerThread();
