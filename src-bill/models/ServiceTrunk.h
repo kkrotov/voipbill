@@ -2,6 +2,7 @@
 
 #include "../common.h"
 #include "Trunk.h"
+#include "TrunkPriority.h"
 #include "ServiceTrunkSettings.h"
 #include "Pricelist.h"
 #include "PricelistPrice.h"
@@ -43,6 +44,7 @@ struct ServiceTrunkOrder {
     PricelistPrice * price;
     Client * account;
     StatsTrunkSettings * statsTrunkSettings;
+    int priority = 0;
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -59,6 +61,9 @@ struct ServiceTrunkOrder {
         if (trunkSettings != nullptr) {
             trace << "trunk_settings_id: " << trunkSettings->id << ", ";
         }
+
+        trace << "priority: " << priority << ", ";
+
         if (statsTrunkSettings != nullptr) {
             trace << "stats_trunk_settings_id: " << statsTrunkSettings->id << ", ";
         }

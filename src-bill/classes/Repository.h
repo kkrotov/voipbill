@@ -298,6 +298,17 @@ public:
         const Repository &repository;
     };
 
+    struct trunk_settings_order_asc_priority {
+        bool operator()(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) {
+            return left.priority > right.priority;
+        }
+
+        trunk_settings_order_asc_priority(const Repository &repository) : repository(repository) {}
+
+    private:
+        const Repository &repository;
+    };
+
     void orderOrigTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList) const {
         sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
     }
@@ -374,4 +385,6 @@ public:
                               stringstream *trace = nullptr);
 
     pair<int, RadiusAuthRequest> getNNPRegionTrunkByNum(PhoneNumber numA, PhoneNumber numB);
+
+    void getTrunkPriority(int trunk_id, vector<TrunkPriority> &trunkPriorityList);
 };

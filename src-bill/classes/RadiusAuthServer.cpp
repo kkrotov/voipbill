@@ -85,6 +85,9 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
                 request.srcNoa = atoi(attrValue.c_str());
             } else if (attrName == "INCOMING-CALLED-ADDRESS-NOA") {
                 request.dstNoa = atoi(attrValue.c_str());
+            } else if (attrName == "CALLINGPARTYCATEGORY") {
+                request.callingPartyCategory = attrValue;
+                logRequest->params["calling_party_category"] = request.callingPartyCategory;
             } else if (attrName == "INCOMING-ROUTEID") {
                 request.trunkName = attrValue;
                 logRequest->params["req_trunk"] = request.trunkName;

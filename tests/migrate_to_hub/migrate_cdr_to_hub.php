@@ -1,15 +1,15 @@
 <?php
 
 
-$dbregion = pg_connect("host=85.94.32.172 dbname=nispd78    user=bill_daemon_local") or die('Could not connect: ' . pg_last_error());
-//$dbhub    = pg_connect("host=reg12.mcntelecom.ru dbname=nispd12 user=doleynik_rw") or die('Could not connect: ' . pg_last_error());
-//$dbcentral  = pg_connect("host=eridanus  dbname=nispd user=bill_daemon_remote") or die('Could not connect: ' . pg_last_error());
+$dbregion = pg_connect("host=85.94.32.170 dbname=nispd79 user=bill_daemon_local password=gwvIg7OPTfoJE5vxWVKpmvAxBPMNP7t1") or die('Could not connect: ' . pg_last_error());
+$dbhub    = pg_connect("host=reg11.mcntelecom.ru dbname=nispd11 user=doleynik_rw password=Watcom10") or die('Could not connect: ' . pg_last_error());
+$dbcentral  = pg_connect("host=eridanus  dbname=nispd user=doleynik_rw password=Watcom10") or die('Could not connect: ' . pg_last_error());
 
-$dbhub    = pg_connect("host=127.0.0.1    dbname=nispd99_test user=pgadmin") or die('Could not connect: ' . pg_last_error());
-$dbcentral  = pg_connect("host=127.0.0.1  dbname=nispd_test user=pgadmin") or die('Could not connect: ' . pg_last_error());
+//$dbhub    = pg_connect("host=127.0.0.1    dbname=nispd99_test user=pgadmin") or die('Could not connect: ' . pg_last_error());
+//$dbcentral  = pg_connect("host=127.0.0.1  dbname=nispd_test user=pgadmin") or die('Could not connect: ' . pg_last_error());
 
-$hub_id   = 2;
-$region_id= 78; 
+$hub_id   = 1;
+$region_id= 79; 
 
 function getNextCdrID($db) {
     $query = 'select max(call_id) from calls_cdr.cdr';
@@ -27,14 +27,16 @@ function deleteCounter($db,$id) {
 
 function getCDR($db,$db_trg,$table_name,$next_id) {
 
-$trunk_translate = array ( "mcn_tmn_ast58_78" => "tmn_mcn_ast48" ,
-                           "smg_RTK_Loc"      => "tmn_smg_RTK_Loc" , 
-                           "mcn_tmn_loop_78"  => "tmn_smg_loop" ,
-                           "smg_Beeline_Loc"  => "tmn_smg_Beeline_Loc" );
+$trunk_translate = array ( 
+    "mcn_tula_ast6_79"  => "tul_mcn_ast57",
+    "smg_RTK_Loc"      =>  "tul_smg_RTK_Loc",
+    "smg_Beeline_Loc"  =>  "tul_smg_Beeline_Loc",
+    "mcn_tula_loop_79"  => "tul_smg_loop",
+);
 
    $query =  "select id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,".
              "       session_time,disconnect_cause,src_route,dst_route,src_noa,dst_noa,hash,dst_replace,in_sig_call_id,out_sig_call_id ".
-             "from $table_name";
+             "from $table_name order by id";
    
 
    $result = pg_query($db,$query) or die('Ошибка запроса: ' . pg_last_error());
@@ -64,10 +66,11 @@ $trunk_translate = array ( "mcn_tmn_ast58_78" => "tmn_mcn_ast48" ,
     $sql = "insert into calls_cdr.cdr (id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,dst_route,src_noa,dst_noa,hash,dst_replace) ";
     $sql.= "values ($id,$call_id,$nasp_ip,$src_number,$dst_number,$redirect_number,$setup_time,$connect_time,$disconnect_time,$session_time,$disconnect_cause,$src_route,$dst_route,$src_noa,$dst_noa,$hash,$dst_replace);";
 
-    pg_query($db_trg,$sql) or die('Ошибка запроса: ' . pg_last_error());
 
-    echo $sql."\n"; $next_id++;
-   
+    if( !empty($src_route) && !empty($dst_route) && $dst_route != "''" && $src_route != "''" ) {
+      pg_query($db_trg,$sql) or die('Ошибка запроса: ' . pg_last_error());
+      echo $sql."\n"; $next_id++;
+    }
    }
 
 
@@ -75,8 +78,8 @@ $trunk_translate = array ( "mcn_tmn_ast58_78" => "tmn_mcn_ast48" ,
 
 echo "Выполняем миграцию CDR и региона [$region_id] в хаб[$hub_id].\n";
 
-//echo "]] В регионе next_cdr_id = ".getNextCdrID($dbregion)."\n";
-//echo "]] Hа хабе   next_cdr_id = ".getNextCdrID($dbhub)."\n";
+echo "]] В регионе next_cdr_id = ".getNextCdrID($dbregion)."\n";
+echo "]] Hа хабе   next_cdr_id = ".getNextCdrID($dbhub)."\n";
 
 getCDR($dbregion,$dbhub,'calls_cdr.cdr_201611',getNextCdrID($dbhub));
 
