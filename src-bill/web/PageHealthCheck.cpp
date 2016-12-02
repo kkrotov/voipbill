@@ -13,9 +13,10 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
         return;
     }
     string cmd;
-    Json::Value jval;
     uint16_t instance_id = app().conf.instance_id;
     double run_time = app().getRuntime();
+
+    Json::Value jval;
     if (parameters.find("cmd") != parameters.end()) {
 
         cmd = parameters["cmd"];
@@ -25,8 +26,6 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
         jval["statusId"] = systemStatus.getStatusString();
         jval["statusMessage"] = systemStatus.statusMessage;
         jval["runTime"] = run_time;
-        
-        html << jval;
     }
     else {
 
@@ -34,15 +33,19 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
         if (systemStatus.empty())
             return;
 
+        jval["instanceId"] = instance_id;
+        jval["runTime"] = run_time;
+
+        int i=0;
         for (auto sysstat: systemStatus) {
 
-            jval["instanceId"] = instance_id;
-            jval["itemId"] = sysstat.itemId;
-            jval["statusId"] = sysstat.getStatusString();
-            jval["statusMessage"] = sysstat.statusMessage;
-            jval["runTime"] = run_time;
+            Json::Value jsubval;
+            jsubval["itemId"] = sysstat.itemId;
+            jsubval["statusId"] = sysstat.getStatusString();
+            jsubval["statusMessage"] = sysstat.statusMessage;
 
-            html << jval << std::endl;
+            jval["item"+to_string(i++)] = jsubval;
         }
     }
+    html << jval;
 }

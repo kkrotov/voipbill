@@ -47,6 +47,12 @@ public:
 
     virtual bool hasFullHtml();
 
+    int errorCount(string &errorMsg) {
+
+        errorMsg=lastError;
+        return this->errorsCount;
+    };
+
 protected:
     string name;
 

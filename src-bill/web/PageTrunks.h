@@ -182,6 +182,21 @@ public:
         if (i<this->trunkIoParams.size())
             this->trunkIoParams[i] = params;
     }
+
+    int maxLoad(string &trunkname) {
+
+        int maxload=0;
+        for (int i=0; i<count(); i++) {
+
+            int curload = at(i).getLoad();
+            if (curload>maxload) {
+
+                maxload = curload;
+                trunkname = at(i).trunk_name;
+            }
+        }
+        return maxload;
+    }
 };
 
 class PageTrunks : public BasePage {

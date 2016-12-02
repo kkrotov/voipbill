@@ -86,6 +86,8 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     call_save_delay = get_int_vector(pt, "health.call_save_delay");
     cdr_proc_wait_count = get_int_vector(pt, "health.cdr_proc_wait_count");
     call_save_wait_count = get_int_vector(pt, "health.call_save_wait_count");
+    thread_error_count = get_int_vector(pt, "health.thread_error_count");
+    trunk_max_load = get_int_vector(pt, "health.trunk_max_load");
 }
 
 vector<int> ConfBill::get_int_vector(boost::property_tree::ptree &pt, string keyname) {

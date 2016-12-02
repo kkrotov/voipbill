@@ -31,6 +31,8 @@
 #include "../healthcheck/CdrWaitProcessing.h"
 #include "../healthcheck/CallsWaitSaving.h"
 #include "../healthcheck/RadiusAuthServerStatus.h"
+#include "../healthcheck/ThreadErrorStatus.h"
+#include "../healthcheck/TrunkLoadStatus.h"
 
 AppBill &app() {
     static AppBill appVar;
@@ -47,6 +49,8 @@ void AppBill::setHealthCheck() {
     healthCheckController.add(std::shared_ptr<CallSaveStatus>(new CallSaveStatus()));
     healthCheckController.add(std::shared_ptr<CdrWaitProcessing>(new CdrWaitProcessing()));
     healthCheckController.add(std::shared_ptr<CallsWaitSaving>(new CallsWaitSaving()));
+    healthCheckController.add(std::shared_ptr<ThreadErrorStatus>(new ThreadErrorStatus()));
+    healthCheckController.add(std::shared_ptr<TrunkLoadStatus>(new TrunkLoadStatus()));
     //healthCheckController.add(std::shared_ptr<RadiusAuthServerStatus>(new RadiusAuthServerStatus()));
 }
 
