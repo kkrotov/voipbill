@@ -9,7 +9,7 @@ public:
         return path == "/";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
+        renderHeader("",html);
 
         html << "<table width=100%>\n";
         bool firstRow = true;

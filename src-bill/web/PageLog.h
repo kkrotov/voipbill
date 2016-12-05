@@ -11,7 +11,7 @@ public:
         return path == "/log";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
+        renderHeader("log",html);
 
 
         list<pLogMessage> history = app().logger.getHistory();

@@ -313,7 +313,7 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
 }
 
 void PageClient::render(std::stringstream &html, map<string, string> &parameters) {
-    renderHeader(html);
+    renderHeader("client", html);
 
     int client_id = atoi(parameters["id"].c_str());
 

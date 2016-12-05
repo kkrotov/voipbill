@@ -13,7 +13,7 @@ public:
         return path == "/blacklist";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
+        renderHeader("blacklist", html);
 
         Repository repository;
         if (!repository.prepare(time(nullptr))) {

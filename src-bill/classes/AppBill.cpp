@@ -23,10 +23,35 @@
 #include "../threads/ThreadTasks.h"
 #include "../threads/ThreadCdrParser.h"
 #include "../threads/ThreadSyncCdrs.h"
+#include "../healthcheck/DbConnectStatus.h"
+#include "../healthcheck/FtpConnectStatus.h"
+#include "../healthcheck/CallSyncStatus.h"
+#include "../healthcheck/CdrSyncStatus.h"
+#include "../healthcheck/CallSaveStatus.h"
+#include "../healthcheck/CdrWaitProcessing.h"
+#include "../healthcheck/CallsWaitSaving.h"
+#include "../healthcheck/RadiusAuthServerStatus.h"
+#include "../healthcheck/ThreadErrorStatus.h"
+#include "../healthcheck/TrunkLoadStatus.h"
 
 AppBill &app() {
     static AppBill appVar;
     return appVar;
+}
+
+void AppBill::setHealthCheck() {
+
+    healthCheckController.add(std::shared_ptr<DbCallsConnectStatus>(new DbCallsConnectStatus()));
+    healthCheckController.add(std::shared_ptr<DbMainConnectStatus>(new DbMainConnectStatus()));
+    healthCheckController.add(std::shared_ptr<FtpConnectStatus>(new FtpConnectStatus()));
+    healthCheckController.add(std::shared_ptr<CallSyncStatus>(new CallSyncStatus()));
+    healthCheckController.add(std::shared_ptr<CdrSyncStatus>(new CdrSyncStatus()));
+    healthCheckController.add(std::shared_ptr<CallSaveStatus>(new CallSaveStatus()));
+    healthCheckController.add(std::shared_ptr<CdrWaitProcessing>(new CdrWaitProcessing()));
+    healthCheckController.add(std::shared_ptr<CallsWaitSaving>(new CallsWaitSaving()));
+    healthCheckController.add(std::shared_ptr<ThreadErrorStatus>(new ThreadErrorStatus()));
+    healthCheckController.add(std::shared_ptr<TrunkLoadStatus>(new TrunkLoadStatus()));
+    //healthCheckController.add(std::shared_ptr<RadiusAuthServerStatus>(new RadiusAuthServerStatus()));
 }
 
 void AppBill::runApp() {
@@ -37,6 +62,8 @@ void AppBill::runApp() {
     ThreadWeb web;
 
     std::thread web_thread(std::ref(web));
+
+    setHealthCheck();
 
     if (conf.active_threads.size() == 0)
         runAppInSingleMode();

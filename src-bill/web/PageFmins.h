@@ -9,7 +9,7 @@ public:
         return path == "/fmins";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
+        renderHeader("fmins",html);
 
         Repository repository;
 
