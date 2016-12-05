@@ -23,6 +23,13 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
         SystemStatus systemStatus = app().healthCheckController.getStatus(cmd);
         jval["instanceId"] = instance_id;
         jval["itemId"] = systemStatus.itemId;
+        jval["itemVal"] = systemStatus.itemValue;
+        if (!systemStatus.prevValue.empty())
+            jval["itemPrev"] = systemStatus.prevValue;
+
+        if (!systemStatus.nextValue.empty())
+            jval["itemNext"] = systemStatus.nextValue;
+
         jval["statusId"] = systemStatus.getStatusString();
         jval["statusMessage"] = systemStatus.statusMessage;
         jval["runTime"] = run_time;
@@ -41,6 +48,13 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
 
             Json::Value jsubval;
             jsubval["itemId"] = sysstat.itemId;
+            jsubval["itemVal"] = sysstat.itemValue;
+            if (!sysstat.prevValue.empty())
+                jsubval["itemPrev"] = sysstat.prevValue;
+
+            if (!sysstat.nextValue.empty())
+                jsubval["itemNext"] = sysstat.nextValue;
+            
             jsubval["statusId"] = sysstat.getStatusString();
             jsubval["statusMessage"] = sysstat.statusMessage;
 

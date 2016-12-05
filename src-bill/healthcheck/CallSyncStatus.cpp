@@ -16,6 +16,7 @@ SystemStatus CallSyncStatus::getStatus() {
 
         DataBillingContainer *billingData = repository.billingData;
         time_t delay = billingData->getCallsStoredLastTime() - billingData->lastSyncCentralCallTime;
+        healthStatus.itemValue = to_string(delay);
         healthStatus.statusMessage = "Delay is "+ to_string(delay)+" sec";
 
         std::vector<std::pair<time_t, HealthStatus>> delaymap = {

@@ -16,6 +16,7 @@ SystemStatus CdrSyncStatus::getStatus() {
 
         DataBillingContainer *billingData = repository.billingData;
         time_t delay = billingData->getCdrsLastTime() - billingData->lastSyncCentralCdrTime;
+        healthStatus.itemValue = to_string(delay);
         healthStatus.statusMessage = "Delay is "+ to_string(delay)+" sec";
 
         checkStatus (std::vector<std::pair<time_t, HealthStatus>> {

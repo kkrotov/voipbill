@@ -23,6 +23,7 @@ SystemStatus TrunkLoadStatus::getStatus() {
                 std::pair<time_t, HealthStatus>(app().conf.trunk_max_load[1],HealthStatus::STATUS_WARNING),
                 std::pair<time_t, HealthStatus>(app().conf.trunk_max_load[2],HealthStatus::STATUS_ERROR)
         }, maxload);
+        healthStatus.itemValue = to_string(maxload);
         healthStatus.statusMessage = "Maximum trunk load is "+to_string(maxload)+"%";
         if (maxload>0)
             healthStatus.statusMessage += ", Trunk name: "+trunkName;

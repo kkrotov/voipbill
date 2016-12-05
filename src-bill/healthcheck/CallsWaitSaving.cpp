@@ -17,6 +17,7 @@ SystemStatus CallsWaitSaving::getStatus() {
 
         DataBillingContainer *billingData = repository.billingData;
         time_t call_count = billingData->callsQueueSize();
+        healthStatus.itemValue = to_string(call_count);
         healthStatus.statusMessage = "Number of calls waiting to be processed: "+ to_string(call_count);
 
         checkStatus (std::vector<std::pair<time_t, HealthStatus>> {

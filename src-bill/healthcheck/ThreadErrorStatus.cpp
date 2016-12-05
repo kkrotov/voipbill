@@ -28,6 +28,7 @@ SystemStatus ThreadErrorStatus::getStatus() {
         }
         return true;
     });
+    healthStatus.itemValue = to_string(errorsCount);
     checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
 
             std::pair<time_t, HealthStatus>(app().conf.thread_error_count[0],HealthStatus::STATUS_OK),

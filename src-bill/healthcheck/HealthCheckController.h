@@ -16,6 +16,7 @@ class SystemStatus {
 
 public:
     std::string itemId;
+    std::string itemValue, prevValue, nextValue;
     HealthStatus statusId;
     std::string statusMessage;
 
@@ -44,13 +45,28 @@ public:
     HealthCheck(std::string id) : healthStatus(id) {    };
     SystemStatus checkStatus(std::vector<std::pair<time_t, HealthStatus>> delaymap, time_t delay) {
 
-        healthStatus.statusId = HealthStatus::STATUS_CRITICAL;
-        for (auto map : delaymap) {
+        if (delaymap.size() > 0) {
 
-            if (map.first > delay) {
+            int i;
+            for (i=0; i<delaymap.size(); i++) {
 
-                healthStatus.statusId = map.second;
-                break;
+                if (delaymap[i].first >= delay) {
+
+                    break;
+                }
+            }
+            if (i>0) {
+
+                healthStatus.prevValue = std::to_string(delaymap[i-1].first);
+            }
+            if (i>=delaymap.size()) {
+
+                healthStatus.statusId = HealthStatus::STATUS_CRITICAL;
+            }
+            else {
+
+                healthStatus.statusId = delaymap[i].second;
+                healthStatus.nextValue = std::to_string(delaymap[i].first);
             }
         }
         return healthStatus;

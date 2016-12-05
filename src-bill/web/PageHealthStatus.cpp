@@ -8,7 +8,9 @@ bool PageHealthStatus::canHandle(std::string &path) {
 void PageHealthStatus::healthStatusHeader (stringstream &html) {
 
     html << "<tr>\n";
-    html << "<td style='text-align: left' nowrap><b>System</b></td>\n";
+    html << "<td style='text-align: left' nowrap><b>Parameter</b></td>\n";
+    html << "<td style='text-align: left' nowrap><b>Current value</b></td>\n";
+    html << "<td style='text-align: left' nowrap><b>Interval</b></td>\n";
     html << "<td style='text-align: left' nowrap><b>Status</b></td>\n";
     html << "<td style='text-align: left' nowrap><b>Message</b></td>\n";
     html << "</tr>";
@@ -29,6 +31,19 @@ void PageHealthStatus::healthStatusData (stringstream &html, SystemStatus status
     html << "<tr>\n";
     html << "<tr class='tr_orig'>\n";
     html << "<td style='text-align: left' nowrap>" << statusData.itemId << "</td>\n";
+    html << "<td style='text-align: left' nowrap>" << statusData.itemValue << "</td>\n";
+    std::string statusInterval="";
+    if (statusData.prevValue.empty() && !statusData.nextValue.empty())
+        statusInterval = "< "+statusData.nextValue;
+
+    if (!statusData.prevValue.empty() && statusData.nextValue.empty())
+        statusInterval = "> "+statusData.prevValue;
+
+    if (!statusData.prevValue.empty() && !statusData.nextValue.empty())
+        statusInterval = "["+ statusData.prevValue + "," + statusData.nextValue+"]";
+
+    html << "<td style='text-align: left' nowrap><b>" << statusInterval << "</b></td>\n";
+
     html << "<td ";
     std::string tclass="unk";
     if(statusData.statusId==HealthStatus::STATUS_OK)

@@ -17,6 +17,7 @@ SystemStatus CdrWaitProcessing::getStatus() {
 
         DataBillingContainer *billingData = repository.billingData;
         time_t cdr_count = billingData->cdrsQueueSize();
+        healthStatus.itemValue = to_string(cdr_count);
         healthStatus.statusMessage = "Number of CDRs waiting to be processed: "+ to_string(cdr_count);
 
         checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
