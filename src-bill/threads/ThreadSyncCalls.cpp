@@ -2,7 +2,7 @@
 
 ThreadSyncCalls::ThreadSyncCalls() {
     id = idName();
-    name = "Sync Calls to central db";
+    name = "Sync Calls to central db / update calls_aggr";
     threadSleepSeconds = app().conf.calls_raw_sync_delay;
 
     db_main.setCS(app().conf.db_main);
@@ -44,6 +44,8 @@ void ThreadSyncCalls::run() {
         return;
     }
 
+    do_calls_aggr_update();
+
     repository.billingData->prepareSyncCallsCentral(&db_main);
 
     string local_prev_sync_month;
@@ -66,6 +68,19 @@ void ThreadSyncCalls::run() {
         e.addTrace("ThreadSyncCalls::run::copy(main_last_id:" +
                    lexical_cast<string>(repository.billingData->lastSyncCentralCallId) + ")");
         throw e;
+    }
+}
+
+void ThreadSyncCalls::do_calls_aggr_update() {
+    if(remain_count_to_update_aggr <= 0) {
+
+        db_main.query( "select calls_aggr.calls_aggr_update ('" + app().conf.get_sql_regions_for_load_list_list()  +  "'::varchar);" );
+        remain_count_to_update_aggr = 60*60 / ( threadSleepSeconds * 3);
+
+    } else {
+
+        remain_count_to_update_aggr--;
+
     }
 }
 
