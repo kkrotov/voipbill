@@ -54,7 +54,7 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
 
             if (!sysstat.nextValue.empty())
                 jsubval["itemNext"] = sysstat.nextValue;
-            
+
             jsubval["statusId"] = sysstat.getStatusString();
             jsubval["statusMessage"] = sysstat.statusMessage;
 
