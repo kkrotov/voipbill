@@ -12,11 +12,6 @@ SystemStatus TrunkLoadStatus::getStatus() {
 
     int trunk_max_load_warn = (app().conf.trunk_max_load.size()>0)? app().conf.trunk_max_load[1]:95;
     int trunk_max_load_err = (app().conf.trunk_max_load.size()>1)? app().conf.trunk_max_load[2]:99;
-    if (app().conf.trunk_max_load.size()<2) {
-
-        healthStatus.statusMessage = "Error in system config file: key value trunk_max_load undefined";
-        return healthStatus;
-    }
     ActiveTrunks activeTrunks(repository);
     vector<pair<int,string>> trunkLoad = activeTrunks.getLoad();
     std::sort(trunkLoad.begin(), trunkLoad.end(), [](pair<int,string> a, pair<int,string> b) {
@@ -24,7 +19,7 @@ SystemStatus TrunkLoadStatus::getStatus() {
         return b.first>a.first; // asc
     });
     healthStatus.statusMessage = "";
-    healthStatus.statusId = HealthStatus::STATUS_UNKNOWN;
+    healthStatus.statusId = HealthStatus::STATUS_OK;
     for (auto load : trunkLoad) {
 
         string trunkName = load.second;
