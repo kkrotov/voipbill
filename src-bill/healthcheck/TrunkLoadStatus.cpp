@@ -7,38 +7,46 @@ TrunkLoadStatus::TrunkLoadStatus() : HealthCheck("TrunkLoadStatus") {
 
 SystemStatus TrunkLoadStatus::getStatus() {
 
-    if (app().conf.trunk_max_load.size()<3) {
+    if (!ready())
+        return healthStatus;
+
+    int trunk_max_load_warn = (app().conf.trunk_max_load.size()>0)? app().conf.trunk_max_load[1]:95;
+    int trunk_max_load_err = (app().conf.trunk_max_load.size()>1)? app().conf.trunk_max_load[2]:99;
+    if (app().conf.trunk_max_load.size()<2) {
 
         healthStatus.statusMessage = "Error in system config file: key value trunk_max_load undefined";
         return healthStatus;
     }
-    if (ready()) {
+    ActiveTrunks activeTrunks(repository);
+    vector<pair<int,string>> trunkLoad = activeTrunks.getLoad();
+    std::sort(trunkLoad.begin(), trunkLoad.end(), [](pair<int,string> a, pair<int,string> b) {
 
-        ActiveTrunks activeTrunks(repository);
-        vector<pair<int,string>> trunkLoad = activeTrunks.getLoad();
-        std::sort(trunkLoad.begin(), trunkLoad.end(), [](pair<int,string> a, pair<int,string> b) {
+        return b.first>a.first; // asc
+    });
+    healthStatus.statusMessage = "";
+    healthStatus.statusId = HealthStatus::STATUS_UNKNOWN;
+    for (auto load : trunkLoad) {
 
-            return b.first>a.first; // asc
-        });
-        healthStatus.statusMessage = "";
-        healthStatus.statusId = HealthStatus::STATUS_UNKNOWN;
-        for (auto load : trunkLoad) {
+        string trunkName = load.second;
+        Trunk *trunk = repository.getTrunkByName(trunkName.c_str());
+        if (trunk== nullptr)
+            continue;
 
-            checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
+        int trunk_max_load_ok= trunk->load_warning;
+        checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
 
-                    std::pair<time_t, HealthStatus>(app().conf.trunk_max_load[0],HealthStatus::STATUS_OK),
-                    std::pair<time_t, HealthStatus>(app().conf.trunk_max_load[1],HealthStatus::STATUS_WARNING),
-                    std::pair<time_t, HealthStatus>(app().conf.trunk_max_load[2],HealthStatus::STATUS_ERROR)
-            }, load.first);
-            if (healthStatus.statusId == HealthStatus::STATUS_OK)
-                continue;
+                std::pair<time_t, HealthStatus>(trunk_max_load_ok,HealthStatus::STATUS_OK),
+                std::pair<time_t, HealthStatus>(trunk_max_load_warn,HealthStatus::STATUS_WARNING),
+                std::pair<time_t, HealthStatus>(trunk_max_load_err,HealthStatus::STATUS_ERROR)
+        }, load.first);
+        if (healthStatus.statusId == HealthStatus::STATUS_OK)
+            continue;
 
-            healthStatus.itemValue = to_string(load.first);
-            if (healthStatus.statusMessage.size()>0)
-                healthStatus.statusMessage += "; ";
+        healthStatus.itemValue = to_string(load.first);
+        if (healthStatus.statusMessage.size()>0)
+            healthStatus.statusMessage += "; ";
 
-            healthStatus.statusMessage += "Trunk name: "+load.second+", Trunk load: "+to_string(load.first)+"%";
-        }
+        healthStatus.statusMessage += "Trunk name: "+trunkName+", Trunk load: "+to_string(load.first)+"%";
     }
     return healthStatus;
 }
