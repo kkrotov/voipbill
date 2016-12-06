@@ -49,12 +49,6 @@ public:
     std::string cdr_nasip;
     int cdr_parcer_interval;
     int calls_raw_sync_delay;
-    vector<int> call_sync_delay;
-    vector<int> cdr_sync_delay;
-    vector<int> call_save_delay;
-    vector<int> cdr_proc_wait_count;
-    vector<int> call_save_wait_count;
-    vector<int> thread_error_count;
     vector<int> trunk_max_load;
 
     string sql_regions_list;
