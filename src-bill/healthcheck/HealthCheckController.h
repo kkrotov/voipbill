@@ -43,34 +43,7 @@ public:
 
 public:
     HealthCheck(std::string id) : healthStatus(id) {    };
-    SystemStatus checkStatus(std::vector<std::pair<time_t, HealthStatus>> delaymap, time_t delay) {
-
-        if (delaymap.size() > 0) {
-
-            int i;
-            for (i=0; i<delaymap.size(); i++) {
-
-                if (delaymap[i].first >= delay) {
-
-                    break;
-                }
-            }
-            if (i>0) {
-
-                healthStatus.prevValue = std::to_string(delaymap[i-1].first);
-            }
-            if (i>=delaymap.size()) {
-
-                healthStatus.statusId = HealthStatus::STATUS_CRITICAL;
-            }
-            else {
-
-                healthStatus.statusId = delaymap[i].second;
-                healthStatus.nextValue = std::to_string(delaymap[i].first);
-            }
-        }
-        return healthStatus;
-    }
+    SystemStatus checkStatus(std::vector<std::pair<time_t, HealthStatus>> delaymap, time_t delay);
     std::string getSystemId() { return healthStatus.itemId; };
     virtual SystemStatus getStatus() = 0;
 };
@@ -84,7 +57,7 @@ class HealthCheckController {
     std::vector<std::shared_ptr<HealthCheck>> healthCheckList;
 
 public:
-    HealthCheckController();
+    HealthCheckController() { };
     void add(std::shared_ptr<HealthCheck> check);
     std::vector<SystemStatus> getStatus();
     SystemStatus getStatus(std::string id);

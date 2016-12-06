@@ -21,6 +21,7 @@ public:
         ftpClient.setUserName(app().conf.cdr_ftp_user);
         ftpClient.setPassword(app().conf.cdr_ftp_password);
 
+        db_calls.setCS(app().conf.db_calls);
         healthStatus.statusId = HealthStatus::STATUS_UNKNOWN;
     }
     SystemStatus getStatus() override;
