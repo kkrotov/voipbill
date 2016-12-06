@@ -9,7 +9,7 @@ void PageHealthStatus::healthStatusHeader (stringstream &html) {
 
     html << "<tr>\n";
     html << "<td style='text-align: left' nowrap><a href='/test/healthcheck'><b>Parameter</b></td>\n";
-    html << "<td style='text-align: left' nowrap><b>Current value</b></td>\n";
+    html << "<td style='text-align: right' nowrap><b>Current value</b></td>\n";
     html << "<td style='text-align: left' nowrap><b>Interval</b></td>\n";
     html << "<td style='text-align: left' nowrap><b>Status</b></td>\n";
     html << "<td style='text-align: left' nowrap><b>Message</b></td>\n";
