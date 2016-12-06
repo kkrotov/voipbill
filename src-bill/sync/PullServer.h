@@ -20,7 +20,12 @@ public:
         fields.push_back("service_numbers");
         fields.push_back("hub_id");
         fields.push_back("emergency_prefixlist_id");
-
+        fields.push_back("h_call_sync_delay");
+        fields.push_back("h_cdr_sync_delay");
+        fields.push_back("h_call_save_delay");
+        fields.push_back("h_cdr_proc_wait_count");
+        fields.push_back("h_call_save_wait_count");
+        fields.push_back("h_thread_error_count");
 
         datatype.push_back("id smallint");
         datatype.push_back("low_balance_outcome_id integer");
@@ -31,5 +36,13 @@ public:
         datatype.push_back("service_numbers text");
         datatype.push_back("hub_id integer");
         datatype.push_back("emergency_prefixlist_id integer");
+
+        datatype.push_back("h_call_sync_delay varchar");
+        datatype.push_back("h_cdr_sync_delay varchar");
+        datatype.push_back("h_call_save_delay varchar");
+        datatype.push_back("h_cdr_proc_wait_count varchar");
+        datatype.push_back("h_call_save_wait_count varchar");
+        datatype.push_back("h_thread_error_count varchar");
+
     }
 };
