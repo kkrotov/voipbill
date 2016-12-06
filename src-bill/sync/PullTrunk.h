@@ -31,6 +31,9 @@ public:
         fields.push_back("capacity");
         fields.push_back("sw_minimalki");
         fields.push_back("sw_shared");
+        fields.push_back("load_warning");
+        fields.push_back("road_to_region");
+
 
         datatype.push_back("id integer");
         datatype.push_back("server_id integer");
@@ -52,6 +55,7 @@ public:
         datatype.push_back("capacity integer");
         datatype.push_back("sw_minimalki boolean");
         datatype.push_back("sw_shared boolean");
-
+        datatype.push_back("load_warning integer");
+        datatype.push_back("road_to_region integer");
     }
 };

@@ -22,6 +22,8 @@ struct Trunk {
     bool sw_minimalki;
     bool sw_shared;
     int capacity;
+    int load_warning;
+    int road_to_region;
 
 
     void dump(stringstream &trace) {
@@ -41,9 +43,11 @@ struct Trunk {
         trace << "orig_redirect_number_7800: " << orig_redirect_number_7800 << ", ";
         trace << "orig_redirect_number: " << orig_redirect_number << ", ";
         trace << "term_redirect_number: " << term_redirect_number << ", ";
-            trace << "capacity: " << capacity << ", ";
-            trace << "sw_minimalki: " << sw_minimalki << ", ";
-            trace << "sw_shared: " << sw_shared << ", ";
+        trace << "capacity: " << capacity << ", ";
+        trace << "sw_minimalki: " << sw_minimalki << ", ";
+        trace << "sw_shared: " << sw_shared << ", ";
+        trace << "load_warning: " << load_warning << ", ";
+        trace << "road_to_region: " << road_to_region << ", ";
         trace << ")";
     }
 };

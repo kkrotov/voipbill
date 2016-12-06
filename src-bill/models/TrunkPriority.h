@@ -11,6 +11,8 @@ struct TrunkPriority {
     int number_id_filter_a;
     int number_id_filter_b;
 
+    int trunk_group_id;
+
     TrunkPriority() {
         id = 0;
         trunk_id = 0;
@@ -18,6 +20,7 @@ struct TrunkPriority {
         priority = 0;
         number_id_filter_a = 0;
         number_id_filter_a = 0;
+        trunk_group_id = 0;
     }
 
     void dump(stringstream &trace) {
@@ -28,6 +31,7 @@ struct TrunkPriority {
         trace << "priority: " << priority << ", ";
         trace << "number_id_filter_a: " << number_id_filter_a << ", ";
         trace << "number_id_filter_b: " << number_id_filter_b << ", ";
+        trace << "trunk_group_id: " << trunk_group_id << ", ";
         trace << ")";
     }
 
