@@ -31,7 +31,7 @@ void PageHealthStatus::healthStatusData (stringstream &html, SystemStatus status
     html << "<tr>\n";
     html << "<tr class='tr_orig'>\n";
     html << "<td style='text-align: left' nowrap><a href='/test/healthcheck?cmd="+statusData.itemId+"'>" << statusData.itemId << "</td>\n";
-    html << "<td style='text-align: left' nowrap>" << statusData.itemValue << "</td>\n";
+    html << "<td style='text-align: right' nowrap>" << statusData.itemValue << "</td>\n";
     std::string statusInterval="";
     if (statusData.prevValue.empty() && !statusData.nextValue.empty())
         statusInterval = "<= "+statusData.nextValue;

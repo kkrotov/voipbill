@@ -12,7 +12,7 @@ SystemStatus HealthCheck::checkStatus(std::vector<std::pair<time_t, HealthStatus
                 break;
             }
         }
-        healthStatus.itemValue = delay;
+        healthStatus.itemValue = std::to_string(delay);
         healthStatus.prevValue = healthStatus.nextValue = "";
         if (i>0) {
 
