@@ -183,6 +183,17 @@ public:
             this->trunkIoParams[i] = params;
     }
 
+    vector<pair<int,string>> getLoad() {
+
+        vector<pair<int,string>> trunkLoad;
+        for (int i=0; i<count(); i++) {
+
+            int trunk_load = at(i).getLoad();
+            string trunk_name = at(i).trunk_name;
+            trunkLoad.push_back(pair<int,string>(trunk_load, trunk_name));
+        }
+        return trunkLoad;
+    };
     int maxLoad(string &trunkname) {
 
         int maxload=0;
