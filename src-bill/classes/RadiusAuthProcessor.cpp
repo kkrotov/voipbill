@@ -562,7 +562,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
                 if (num_a > 0) f_a = filterByNumber(trunkPriority.number_id_filter_a, aNumber);
                 if (num_b > 0) f_b = filterByNumber(trunkPriority.number_id_filter_b, bNumber);
 
-                if (f_a && f_b) {
+                if (f_a && f_b && matchTrunkGroup(trunkPriority.trunk_group_id, origTrunk->id)) {
                     termServiceTrunk->priority = trunkPriority.priority;
                     break;
                 }
@@ -812,10 +812,14 @@ bool RadiusAuthProcessor::autoTrunkFilterSrcTrunk(Trunk *termTrunk) {
             int num_b = resultTrunkGroupRules[i].number_id_filter_b;
             bool f_b = true;
 
-            if (num_a > 0) f_a = filterByNumber(resultTrunkGroupRules[i].number_id_filter_a, aNumber);
-            if (num_b > 0) f_b = filterByNumber(resultTrunkGroupRules[i].number_id_filter_b, bNumber);
+            int trunk_group = resultTrunkGroupRules[i].trunk_group_id;
+            bool f_trunk_group = true;
 
-            if (f_a && f_b && matchTrunkGroup(resultTrunkGroupRules[i].trunk_group_id, origTrunk->id)) {
+            if (num_a > 0) f_a = filterByNumber(num_a , aNumber);
+            if (num_b > 0) f_b = filterByNumber(num_b , bNumber);
+            if (origTrunk != nullptr && trunk_group > 0) f_trunk_group = matchTrunkGroup(trunk_group, origTrunk->id);
+
+            if (f_a && f_b && f_trunk_group) {
                 return false;
             }
         }
