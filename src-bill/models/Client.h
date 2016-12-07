@@ -41,11 +41,11 @@ struct Client {
     }
 
     bool hasDailyLimit() {
-        return limit_d != 0;
+        return limit_d > 0;
     }
 
     bool hasDailyMNLimit() {
-        return limit_d_mn != 0;
+        return limit_d_mn > 0;
     }
 
     bool isConsumedCreditLimit(double value) {
@@ -53,11 +53,11 @@ struct Client {
     }
 
     bool isConsumedDailyLimit(double value) {
-        return hasDailyLimit() && (limit_d + value < 0.00001); // || limit_d <= 0;
+        return hasDailyLimit() && (limit_d + value < 0.00001) || limit_d <= 0;
     }
 
     bool isConsumedDailyMNLimit(double value) {
-        return hasDailyMNLimit() && (limit_d_mn + value < 0.00001);// || limit_d_mn <= 0 ;
+        return hasDailyMNLimit() && (limit_d_mn + value < 0.00001) || limit_d_mn <= 0 ;
     }
 
 
