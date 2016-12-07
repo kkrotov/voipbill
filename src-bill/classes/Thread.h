@@ -53,6 +53,12 @@ public:
         return this->errorsCount;
     };
 
+    void resetErrors() {
+
+        errorsCount=0;
+        lastError="";
+    };
+
 protected:
     string name;
 

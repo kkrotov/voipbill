@@ -7,13 +7,11 @@ SystemStatus FtpConnectStatus::getStatus() {
         string nextFileToParse;
         size_t not_processed = getFileNameForParse(nextFileToParse);
         healthStatus.statusId = HealthStatus::STATUS_OK;
-        healthStatus.statusMessage = "Next file: "+nextFileToParse+" out of "+std::to_string(not_processed);
+        healthStatus.statusMessage = not_processed>0? "Next file to parse: "+nextFileToParse+" out of "+std::to_string(not_processed):"";
         return healthStatus;
     }
     catch (Exception &e) {
 
-//        std::string message((boost::format("File %1% status error") % Filename).str());
-//        Log::error(message);
         healthStatus.statusId = HealthStatus::STATUS_ERROR;
         healthStatus.statusMessage = e.what();
         return healthStatus;
