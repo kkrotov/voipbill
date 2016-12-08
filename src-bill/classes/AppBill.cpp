@@ -51,7 +51,7 @@ void AppBill::setHealthCheck() {
     healthCheckController.add(std::shared_ptr<CallsWaitSaving>(new CallsWaitSaving()));
     healthCheckController.add(std::shared_ptr<ThreadErrorStatus>(new ThreadErrorStatus()));
     healthCheckController.add(std::shared_ptr<TrunkLoadStatus>(new TrunkLoadStatus()));
-    //healthCheckController.add(std::shared_ptr<RadiusAuthServerStatus>(new RadiusAuthServerStatus()));
+    healthCheckController.add(std::shared_ptr<RadiusAuthServerStatus>(new RadiusAuthServerStatus()));
 }
 
 void AppBill::runApp() {

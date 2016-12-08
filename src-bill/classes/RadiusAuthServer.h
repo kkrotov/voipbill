@@ -16,7 +16,9 @@ public:
     size_t request_count = 0;
     size_t response_count = 0;
     string last_request;
+    time_t last_request_time = 0;
     string last_response;
+    time_t last_response_time = 0;
     string last_error;
 
     void run(string secret, uint16_t port);
