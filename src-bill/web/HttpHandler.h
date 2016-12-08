@@ -87,6 +87,25 @@ public:
                 }
             }
         }
+        if (req.method=="POST" && req.content.size()>0) {
+
+            string p;
+            string v;
+            vector<string> params;
+            boost::algorithm::split(params, req.content, boost::algorithm::is_any_of("&"));
+            for (vector<string>::iterator i = params.begin(); i != params.end(); i++) {
+                vector<string> pv;
+                boost::algorithm::split(pv, *i, boost::algorithm::is_any_of("="));
+                if (pv.size() == 2) {
+                    url_decode(pv[0], p);
+                    url_decode(pv[1], v);
+                    parameters[p] = v;
+                } else if (pv.size() == 2) {
+                    url_decode(pv[0], p);
+                    parameters[p] = "";
+                }
+            }
+        }
 
         // Decode url to path.
         std::string request_path;
