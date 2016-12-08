@@ -26,6 +26,7 @@ public:
         fields.push_back("h_cdr_proc_wait_count");
         fields.push_back("h_call_save_wait_count");
         fields.push_back("h_thread_error_count");
+        fields.push_back("h_radius_request_delay");
 
         datatype.push_back("id smallint");
         datatype.push_back("low_balance_outcome_id integer");
@@ -43,6 +44,6 @@ public:
         datatype.push_back("h_cdr_proc_wait_count varchar");
         datatype.push_back("h_call_save_wait_count varchar");
         datatype.push_back("h_thread_error_count varchar");
-
+        datatype.push_back("h_radius_request_delay varchar");
     }
 };
