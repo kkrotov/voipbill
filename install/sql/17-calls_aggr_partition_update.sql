@@ -59,7 +59,16 @@ BEGIN
 
 	sql := '
 
-delete from calls_aggr.calls_aggr_' || date || ' where aggr_time >= date_trunc(''hour'', now() at time zone ''utc'') - INTERVAL ''2 hour'';
+delete
+
+			from calls_aggr.calls_aggr_' || date || '
+
+where
+			aggr_time >= date_trunc(''hour'', now() at time zone ''utc'') - INTERVAL ''2 hour''
+
+				and
+
+			server_id IN (' || server_ids || ');
 
 insert into calls_aggr.calls_aggr_' || date || ' (
 
