@@ -49,13 +49,15 @@ public:
 
     int errorCount(string &errorMsg) {
 
-        errorMsg=lastError;
+        errorMsg = lastError;
         return this->errorsCount;
     };
+    time_t getResetTime() { return errorResetTime; }
 
     void resetErrors() {
 
         errorsCount=0;
+        errorResetTime = time(NULL);
         lastError="";
     };
 
@@ -67,6 +69,7 @@ protected:
     Timer timer;
     int errorsCount = 0;
     string lastError;
+    time_t errorResetTime=0;
     
     Thread();
 
