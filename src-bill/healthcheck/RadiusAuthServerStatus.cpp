@@ -8,14 +8,14 @@ RadiusAuthServerStatus::RadiusAuthServerStatus() : HealthCheck("RadiusAuthServer
 
 SystemStatus RadiusAuthServerStatus::getStatus() {
 
-    if (app().conf.radius_resquest_delay.size()<3)
-        return healthStatus;
-
     Repository repository;
     if (repository.prepare(time(nullptr))) {
 
-        time_t last_request_time;
-        app().threads.forAllThreads([&](Thread* thread) {
+        Server *server = repository.getServer(app().conf.instance_id);
+        if (server != nullptr && server->radius_request_delay.size() > 2) {
+
+            time_t last_request_time;
+            app().threads.forAllThreads([&](Thread* thread) {
 
                 if (thread->id=="radius_auth_server") {
 
@@ -24,18 +24,18 @@ SystemStatus RadiusAuthServerStatus::getStatus() {
                 return true;
             });
 
-        int last_resquest_delay = time(NULL) - last_request_time;
-        healthStatus.itemValue = to_string(last_resquest_delay);
+            int last_resquest_delay = time(NULL) - last_request_time;
+            healthStatus.itemValue = to_string(last_resquest_delay);
 
-        vector<int> radius_request_delay = app().conf.radius_resquest_delay;
-        checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
+            checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
 
-                std::pair<time_t, HealthStatus>(radius_request_delay[0],HealthStatus::STATUS_OK),
-                std::pair<time_t, HealthStatus>(radius_request_delay[1],HealthStatus::STATUS_WARNING),
-                std::pair<time_t, HealthStatus>(radius_request_delay[2],HealthStatus::STATUS_ERROR)
-        }, last_resquest_delay);
+                    std::pair<time_t, HealthStatus>(server->radius_request_delay[0],HealthStatus::STATUS_OK),
+                    std::pair<time_t, HealthStatus>(server->radius_request_delay[1],HealthStatus::STATUS_WARNING),
+                    std::pair<time_t, HealthStatus>(server->radius_request_delay[2],HealthStatus::STATUS_ERROR)
+            }, last_resquest_delay);
 
-        healthStatus.statusMessage = healthStatus.itemValue+" sec since last request";
+            healthStatus.statusMessage = healthStatus.itemValue+" sec since last request";
+        }
     }
     return healthStatus;
 }

@@ -17,5 +17,6 @@ struct Server {
     vector<int> cdr_proc_wait_count;
     vector<int> call_save_wait_count;
     vector<int> thread_error_count;
+    vector<int> radius_request_delay;
     vector<string> service_numbers;
 };
