@@ -124,7 +124,7 @@ class Sync(Daemon):
         cur_stat.execute("""        select z.rnd, z.tid, 
                                     c.voip_credit_limit, c.voip_credit_limit_day, c.voip_limit_mn_day, 
                                     case c.voip_disabled when true then 't' else 'f' end, 
-                                    if(c.balance > 1000000, 1000000, if(c.balance < -1000000, -1000000, c.balance)) as balance, 
+                                    if(c.balance > 9000000, 9000000, if(c.balance < -9000000, -9000000, c.balance)) as balance, 
                                     c.credit, 
                                     c.last_account_date, 
                                     c.last_payed_voip_month, 
