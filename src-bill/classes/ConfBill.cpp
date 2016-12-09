@@ -81,13 +81,8 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     cdr_nasip = pt.get<string>("cdr_parcer.cdr_nasip", "127.0.0.1");
     cdr_parcer_interval = pt.get<int>("cdr_parcer.interval", 1800);
 
-//    call_sync_delay = get_int_vector(pt, "health.call_sync_delay");
-//    cdr_sync_delay = get_int_vector(pt, "health.cdr_sync_delay");
-//    call_save_delay = get_int_vector(pt, "health.call_save_delay");
-//    cdr_proc_wait_count = get_int_vector(pt, "health.cdr_proc_wait_count");
-//    call_save_wait_count = get_int_vector(pt, "health.call_save_wait_count");
-//    thread_error_count = get_int_vector(pt, "health.thread_error_count");
     trunk_max_load = get_int_vector(pt, "health.trunk_max_load");
+    trunk_critical_load_delay = pt.get<int>("health.trunk_critical_load_delay", 10);
 }
 
 vector<int> ConfBill::get_int_vector(boost::property_tree::ptree &pt, string keyname) {
