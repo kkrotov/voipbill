@@ -181,6 +181,10 @@ void PageClient::render_client_balance_indicators(std::stringstream &html, Clien
         }
     }
 
+    if(client->is_trunk_client)
+        html << "is_trunk_client: <b>YES</b> <br>\n";
+    else
+        html << "is_trunk_client: <b>NO</b> <br>\n";
 
     if (client->hasCreditLimit()) {
         html << "Balance available: <b>" <<
