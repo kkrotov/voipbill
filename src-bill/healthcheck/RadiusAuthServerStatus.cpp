@@ -12,7 +12,8 @@ SystemStatus RadiusAuthServerStatus::getStatus() {
     if (repository.prepare(time(nullptr))) {
 
         Server *server = repository.getServer(app().conf.instance_id);
-        if (server != nullptr && server->radius_request_delay.size() > 2) {
+        if (server != nullptr && server->radius_request_delay.size() > 2 &&
+            !(server->radius_request_delay[0]==0 && server->radius_request_delay[1]==0 && server->radius_request_delay[2]==0)) {
 
             time_t last_request_time;
             app().threads.forAllThreads([&](Thread* thread) {

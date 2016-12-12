@@ -10,7 +10,8 @@ SystemStatus CallSaveStatus::getStatus() {
     if (repository.prepare(time(nullptr))) {
 
         Server *server = repository.getServer(app().conf.instance_id);
-        if (server!=nullptr && server->call_save_delay.size()>2) {
+        if (server!=nullptr && server->call_save_delay.size()>2 &&
+            !(server->call_save_delay[0]==0 && server->call_save_delay[1]==0 && server->call_save_delay[2]==0)) {
 
             time_t curtime;
             time(&curtime);

@@ -11,7 +11,8 @@ SystemStatus CallsWaitSaving::getStatus() {
     if (repository.prepare(time(nullptr))) {
 
         Server *server = repository.getServer(app().conf.instance_id);
-        if (server!=nullptr && server->call_save_wait_count.size()>2) {
+        if (server!=nullptr && server->call_save_wait_count.size()>2 &&
+            !(server->call_save_wait_count[0]==0 && server->call_save_wait_count[1]==0 && server->call_save_wait_count[2]==0)) {
 
             DataBillingContainer *billingData = repository.billingData;
             time_t call_count = billingData->callsQueueSize();
