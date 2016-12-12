@@ -2,6 +2,9 @@
 
 SystemStatus FtpConnectStatus::getStatus() {
 
+    if (!app().threads.isRegistered("cdr_parser"))
+        return healthStatus;
+
     try {
 
         string nextFileToParse;

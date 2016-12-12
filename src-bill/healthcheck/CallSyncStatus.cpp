@@ -6,6 +6,9 @@ CallSyncStatus::CallSyncStatus() : HealthCheck ("CallSyncStatus") {
 
 SystemStatus CallSyncStatus::getStatus() {
 
+    if (!app().threads.isRegistered("sync_calls"))
+        return healthStatus;
+
     Repository repository;
     if (repository.prepare(time(nullptr))) {
 

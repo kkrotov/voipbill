@@ -9,7 +9,7 @@ RadiusAuthServerStatus::RadiusAuthServerStatus() : HealthCheck("RadiusAuthServer
 SystemStatus RadiusAuthServerStatus::getStatus() {
 
     Repository repository;
-    if (repository.prepare(time(nullptr))) {
+    if (app().threads.isRegistered("radius_auth_server") && repository.prepare(time(nullptr))) {
 
         Server *server = repository.getServer(app().conf.instance_id);
         if (server != nullptr && server->radius_request_delay.size() > 2 &&
