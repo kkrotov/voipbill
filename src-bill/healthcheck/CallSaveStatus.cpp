@@ -6,6 +6,9 @@ CallSaveStatus::CallSaveStatus() : HealthCheck("CallSaveStatus") {
 
 SystemStatus CallSaveStatus::getStatus() {
 
+    if (!app().threads.isRegistered("runtime"))
+        return healthStatus;
+
     Repository repository;
     if (repository.prepare(time(nullptr))) {
 

@@ -7,6 +7,9 @@ CdrWaitProcessing::CdrWaitProcessing() : HealthCheck("CdrWaitProcessing") {
 
 SystemStatus CdrWaitProcessing::getStatus() {
 
+    if (!app().threads.isRegistered("cdr_parser"))
+        return healthStatus;
+
     Repository repository;
     if (repository.prepare(time(nullptr))) {
 

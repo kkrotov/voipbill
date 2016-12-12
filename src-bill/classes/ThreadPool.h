@@ -18,6 +18,17 @@ public:
     void app_real_status_changed();
     
     bool forAllThreads(std::function<bool(Thread*)> callback);
+    bool isRegistered(std::string thread_id) {
+        bool is_registered=false;
+        forAllThreads([&](Thread* thread) {
+
+            if (thread->id==thread_id)
+                is_registered=true;
+
+            return true;
+        });
+        return is_registered;
+    };
     
 private:
     std::mutex mutex;

@@ -6,6 +6,9 @@ CdrSyncStatus::CdrSyncStatus() : HealthCheck("CdrSyncStatus") {
 
 SystemStatus CdrSyncStatus::getStatus() {
 
+    if (!(app().threads.isRegistered("cdr_parser") || app().threads.isRegistered("current_calls")))
+        return healthStatus;
+
     Repository repository;
     if (repository.prepare(time(nullptr))) {
 

@@ -7,6 +7,9 @@ CallsWaitSaving::CallsWaitSaving() : HealthCheck("CallsWaitSaving") {
 
 SystemStatus CallsWaitSaving::getStatus() {
 
+    if (!app().threads.isRegistered("current_calls"))
+        return healthStatus;
+
     Repository repository;
     if (repository.prepare(time(nullptr))) {
 
