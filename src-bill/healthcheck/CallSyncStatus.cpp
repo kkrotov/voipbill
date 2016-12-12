@@ -10,7 +10,8 @@ SystemStatus CallSyncStatus::getStatus() {
     if (repository.prepare(time(nullptr))) {
 
         Server *server = repository.getServer(app().conf.instance_id);
-        if (server!=nullptr && server->call_sync_delay.size()>2) {
+        if (server!=nullptr && server->call_sync_delay.size()>2 &&
+            !(server->call_sync_delay[0]==0 && server->call_sync_delay[1]==0 && server->call_sync_delay[2]==0)) {
 
             DataBillingContainer *billingData = repository.billingData;
             time_t delay = billingData->getCallsStoredLastTime() - billingData->lastSyncCentralCallTime;

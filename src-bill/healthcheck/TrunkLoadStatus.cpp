@@ -10,8 +10,8 @@ SystemStatus TrunkLoadStatus::getStatus() {
     if (!ready())
         return healthStatus;
 
-    int trunk_max_load_warn = (app().conf.trunk_max_load.size()>0)? app().conf.trunk_max_load[1]:95;
-    int trunk_max_load_err = (app().conf.trunk_max_load.size()>1)? app().conf.trunk_max_load[2]:99;
+    int trunk_max_load_warn = (app().conf.trunk_max_load.size()>0)? app().conf.trunk_max_load[0]:95;
+    int trunk_max_load_err = (app().conf.trunk_max_load.size()>1)? app().conf.trunk_max_load[1]:99;
     ActiveTrunks activeTrunks(repository);
     vector<pair<int,string>> trunkLoad = activeTrunks.getLoad();
     std::sort(trunkLoad.begin(), trunkLoad.end(), [](pair<int,string> a, pair<int,string> b) {
@@ -28,6 +28,9 @@ SystemStatus TrunkLoadStatus::getStatus() {
             continue;
 
         int trunk_max_load_ok= trunk->load_warning;
+        if (trunk_max_load_ok==0)
+            continue;
+
         checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
 
                 std::pair<time_t, HealthStatus>(trunk_max_load_ok,HealthStatus::STATUS_OK),
