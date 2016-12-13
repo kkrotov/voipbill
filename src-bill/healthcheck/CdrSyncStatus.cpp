@@ -6,6 +6,7 @@ CdrSyncStatus::CdrSyncStatus() : HealthCheck("CdrSyncStatus") {
 
 SystemStatus CdrSyncStatus::getStatus() {
 
+    healthStatus.reset();
     if (!(app().threads.isRegistered("cdr_parser") || app().threads.isRegistered("current_calls")))
         return healthStatus;
 

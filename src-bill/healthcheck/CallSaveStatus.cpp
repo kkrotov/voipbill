@@ -6,6 +6,7 @@ CallSaveStatus::CallSaveStatus() : HealthCheck("CallSaveStatus") {
 
 SystemStatus CallSaveStatus::getStatus() {
 
+    healthStatus.reset();
     if (!app().threads.isRegistered("runtime"))
         return healthStatus;
 
