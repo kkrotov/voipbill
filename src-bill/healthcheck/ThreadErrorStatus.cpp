@@ -11,6 +11,7 @@ ThreadErrorStatus::ThreadErrorStatus() : HealthCheck("ThreadErrorStatus") {
 SystemStatus ThreadErrorStatus::getStatus() {
 
     Repository repository;
+    healthStatus.reset();
     if (repository.prepare(time(nullptr))) {
 
         Server *server = repository.getServer(app().conf.instance_id);

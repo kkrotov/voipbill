@@ -7,6 +7,7 @@ TrunkLoadStatus::TrunkLoadStatus() : HealthCheck("TrunkLoadStatus") {
 
 SystemStatus TrunkLoadStatus::getStatus() {
 
+    healthStatus.reset();
     if (!ready())
         return healthStatus;
 

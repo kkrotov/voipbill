@@ -7,6 +7,7 @@ CallsWaitSaving::CallsWaitSaving() : HealthCheck("CallsWaitSaving") {
 
 SystemStatus CallsWaitSaving::getStatus() {
 
+    healthStatus.reset();
     if (!app().threads.isRegistered("current_calls"))
         return healthStatus;
 

@@ -7,6 +7,7 @@ CdrWaitProcessing::CdrWaitProcessing() : HealthCheck("CdrWaitProcessing") {
 
 SystemStatus CdrWaitProcessing::getStatus() {
 
+    healthStatus.reset();
     if (!app().threads.isRegistered("cdr_parser"))
         return healthStatus;
 

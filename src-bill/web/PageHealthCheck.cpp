@@ -46,6 +46,9 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
         int i=0;
         for (auto sysstat: systemStatus) {
 
+            if (sysstat.statusId==HealthStatus::STATUS_UNKNOWN)
+                continue;
+
             Json::Value jsubval;
             jsubval["itemId"] = sysstat.itemId;
             jsubval["itemVal"] = sysstat.itemValue;

@@ -6,6 +6,7 @@ CallSyncStatus::CallSyncStatus() : HealthCheck ("CallSyncStatus") {
 
 SystemStatus CallSyncStatus::getStatus() {
 
+    healthStatus.reset();
     if (!app().threads.isRegistered("sync_calls"))
         return healthStatus;
 
