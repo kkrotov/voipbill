@@ -25,8 +25,8 @@ void ThreadHealthManager::run() {
                 pLogMessage logTrunk(new LogMessage());
                 logTrunk->level = LogLevel::ERROR;
                 logTrunk->type = "trunk";
-                logTrunk->params["trunk_name"] = trunkLoadStatus.itemName;
-                logTrunk->params["trunk_load"] = trunkLoadStatus.itemValue;
+                logTrunk->params["_trunk_name"] = trunkLoadStatus.itemName;
+                logTrunk->params["_trunk_load"] = trunkLoadStatus.itemValue;
                 logTrunk->params["status"] = trunkLoadStatus.getStatusString();
                 logTrunk->params["time_delay"] = trunk_critical_load_delay;
                 logTrunk->log_time = new_critical_err_time;
