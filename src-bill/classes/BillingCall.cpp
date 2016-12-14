@@ -88,51 +88,68 @@ void BillingCall::calcByTrunk() {
         *trace << "INFO|TARIFFICATION BY TRUNK" << "\n";
     }
 
-    if (call->orig) {
-        setupEffectiveOrigTrunkSettings();  // Вычисляем минимальную цену в присоединенных прайслистах на входящем транке
+    if (call->account_version == CALL_ACCOUNT_VERSION_5) {
+        // Обсчитываем плечо по пакетной схеме
+        if (trace != nullptr) {
+            *trace << "INFO|CALL_ACCOUNT_VERSION_5" << "\n";
+        }
+
+        calcNNPByTrunk();
+
+    } else if (call->account_version == CALL_ACCOUNT_VERSION_4) {
+        // Обсчитываем плечо по традиционной схеме
+        if (trace != nullptr) {
+            *trace << "INFO|CALL_ACCOUNT_VERSION_4" << "\n";
+        }
+
+        if (call->orig) {
+            setupEffectiveOrigTrunkSettings();  // Вычисляем минимальную цену в присоединенных прайслистах на входящем транке
+        } else {
+            setupEffectiveTermTrunkSettings();  // Вычисляем минимальную цену в присоединенных прайслистах на исходящем транке
+        }
+
+        setupServiceTrunk();                    // Присоединение данных по услуге Транк на плече из структуры callInfo в call
+
+        setupAccount();                         // в структуре callinfo заполняется структура account
+        // (информация о лицевом счете обсчитываемого плеча)
+
+        if (call->orig) {
+            setupPackagePricelist();            // поисх подходящего пакета для обсчета оригинационного плеча, если находим, используем его
+        }
+
+        setupPricelist();                       // присоединяем в callInfo->pricelist прайслист по pricelist_id
+        // при расчете с авторизацией по транку прайслист должен быть
+        // выбран ранее. Из пакета?
+
+        setupPrice();                           //  Расчитываем по ранее выбранному прайслисту и префиксу
+        // номера цену звонка на плече
+
+        setupBilledTime();                      //  вычисляется тарифицируемая длительность звонка согласно настройкам
+        // (бесплатные секунды, тарификация по мин/по сек) действующего
+        // тарифа для расчитываемого плеча.
+
+        if (call->orig) {
+            setupPackagePrepaid();              // на оигинационном плече сохраняем в call секунды взятые из подходящего
+            // подключенного пакета, ссылку на сам пакет тоже сохраняем в call
+        }
+
+        // В случае расчета терминационного плеча в поля call->interconnect_rate и call->interconnect_cost сохраняем
+        // дополнительную  цену и стоимость интерконнекта (для случая локального и МН МГ вызовов).
+
+        if (!call->orig && callInfo->pricelist->initiate_zona_cost > 0.00001 && call->destination_id == 0) {
+            call->interconnect_rate = callInfo->pricelist->initiate_zona_cost;
+            call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+        }
+        if (!call->orig && callInfo->pricelist->initiate_mgmn_cost > 0.00001 && call->destination_id > 0) {
+            call->interconnect_rate = callInfo->pricelist->initiate_mgmn_cost;
+            call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+        }
     } else {
-        setupEffectiveTermTrunkSettings();  // Вычисляем минимальную цену в присоединенных прайслистах на исходящем транке
-    }
-
-    setupServiceTrunk();                    // Присоединение данных по услуге Транк на плече из структуры callInfo в call
-
-    setupAccount();                         // в структуре callinfo заполняется структура account
-    // (информация о лицевом счете обсчитываемого плеча)
-
-    if (call->orig) {
-        setupPackagePricelist();            // поисх подходящего пакета для обсчета оригинационного плеча, если находим, используем его
-    }
-
-    setupPricelist();                       // присоединяем в callInfo->pricelist прайслист по pricelist_id
-    // при расчете с авторизацией по транку прайслист должен быть
-    // выбран ранее. Из пакета?
-
-    setupPrice();                           //  Расчитываем по ранее выбранному прайслисту и префиксу
-    // номера цену звонка на плече
-
-    setupBilledTime();                      //  вычисляется тарифицируемая длительность звонка согласно настройкам
-    // (бесплатные секунды, тарификация по мин/по сек) действующего
-    // тарифа для расчитываемого плеча.
-
-    if (call->orig) {
-        setupPackagePrepaid();              // на оигинационном плече сохраняем в call секунды взятые из подходящего
-        // подключенного пакета, ссылку на сам пакет тоже сохраняем в call
+        throw CalcException("UNKNOW ACCOUNT VERSION");
     }
 
     setupCost();                            // Расчет стоимости плеча. С учетом остатка по найденому пакету
 
-
-    // В случае расчета терминационного плеча в поля call->interconnect_rate и call->interconnect_cost сохраняем
-    // дополнительную  цену и стоимость интерконнекта (для случая локального и МН МГ вызовов).
-
-    if (!call->orig && callInfo->pricelist->initiate_zona_cost > 0.00001 && call->destination_id == 0) {
-        call->interconnect_rate = callInfo->pricelist->initiate_zona_cost;
-        call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
-    }
-    if (!call->orig && callInfo->pricelist->initiate_mgmn_cost > 0.00001 && call->destination_id > 0) {
-        call->interconnect_rate = callInfo->pricelist->initiate_mgmn_cost;
-        call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
-    }
 }
 
 /********************************************************************************************************************
@@ -197,8 +214,7 @@ void BillingCall::calcOrigByNumber() {
         }
 
         calcOrigNNPByNumber();
-
-
+        
     } else if (call->account_version == CALL_ACCOUNT_VERSION_4) {
         // Обсчитываем плечо по традиционной схеме
         if (trace != nullptr) {

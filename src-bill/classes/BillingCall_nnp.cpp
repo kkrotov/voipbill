@@ -1,6 +1,10 @@
 #include "BillingCall.h"
 #include "../classes/CalcException.h"
 
+void BillingCall::calcNNPByTrunk() {
+
+}
+
 void BillingCall::calcOrigNNPByNumber() {
 
     set<int> nnpDestinationIds; // Вычисляем все nnp-направления для номера получателя
