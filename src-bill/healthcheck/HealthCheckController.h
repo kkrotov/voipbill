@@ -15,7 +15,7 @@ enum HealthStatus  {
 class SystemStatus {
 
 public:
-    std::string itemId;
+    std::string itemId, itemName;
     std::string itemValue, prevValue, nextValue;
     HealthStatus statusId;
     std::string statusMessage;
