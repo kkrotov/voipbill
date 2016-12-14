@@ -424,11 +424,21 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
     repository.getAllAutoRoutingTrunks(termTrunks, server_id);
 
     if (trace != nullptr) {
-        *trace << "INFO| USE_MINIMALKI |  " << (fUseMinimalki ? "yes" : "no") << "" << "\n";
+        *trace << "INFO| USE_MINIMALKI |  " << (fUseMinimalki ? "YES" : "NO") << "" << "\n";
     }
 
 
     for (auto termTrunk : termTrunks) {
+
+        if(this->origTrunk!= nullptr && this->origTrunk->id == termTrunk->id) {
+            if (trace != nullptr) {
+                *trace << "INFO|TERM SERVICE TRUNK DECLINE|SKIP LOOP ROUTE, " << termTrunk->name << " (" <<
+                       termTrunk->id << ")" << "\n";
+            }
+            continue;
+
+        }
+
         if (!autoTrunkFilterSrcTrunk(termTrunk)) {
             if (trace != nullptr) {
                 *trace << "INFO|TERM SERVICE TRUNK DECLINE|BY TRUNK FILTER, " << termTrunk->name << " (" <<
