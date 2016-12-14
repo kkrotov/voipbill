@@ -159,7 +159,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
 
-        #cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='clients' and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='clients' and tid=%s and rnd=%s", tofix)
 
         return len(tofix)
 
@@ -190,7 +190,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
 
-        #cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='organization' and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='organization' and tid=%s and rnd=%s", tofix)
 
         return len(tofix)
 
@@ -246,7 +246,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
         
-        #cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and (tname='usage_voip' or tname='uu_account_tariff') and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and (tname='usage_voip' or tname='uu_account_tariff') and tid=%s and rnd=%s", tofix)
         
         return len(tofix)
         
@@ -280,7 +280,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
         
-        #cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='usage_voip_package' and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='usage_voip_package' and tid=%s and rnd=%s", tofix)
         
         return len(tofix)
 		
@@ -349,7 +349,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
         
-        #cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='usage_trunk' and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='usage_trunk' and tid=%s and rnd=%s", tofix)
         
         return len(tofix)
 
@@ -383,7 +383,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
 
-        #cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='usage_trunk_settings' and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='usage_trunk_settings' and tid=%s and rnd=%s", tofix)
 
         return len(tofix)
 
@@ -424,7 +424,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
         
-        #cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='tarifs_voip' and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='tarifs_voip' and tid=%s and rnd=%s", tofix)
         
         return len(tofix)
 
@@ -457,7 +457,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
 
-        #cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='log_tarif' and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='log_tarif' and tid=%s and rnd=%s", tofix)
         
         return len(tofix)
 
@@ -491,7 +491,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
         
-        #cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='prefixlist' and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='prefixlist' and tid=%s and rnd=%s", tofix)
         
         return len(tofix)
         
@@ -525,7 +525,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
         
-        #cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='dest_prefixes' and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='dest_prefixes' and tid=%s and rnd=%s", tofix)
         
         return len(tofix)
         
@@ -559,7 +559,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
         
-        #cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='tariff_package' and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='tariff_package' and tid=%s and rnd=%s", tofix)
         
         return len(tofix)
         
@@ -593,7 +593,7 @@ class Sync(Daemon):
 
         cur.execute('COMMIT')
         
-        #cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='currency_rate' and tid=%s and rnd=%s", tofix)
+        cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='currency_rate' and tid=%s and rnd=%s", tofix)
         
         return len(tofix)
 
