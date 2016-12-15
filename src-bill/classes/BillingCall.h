@@ -136,5 +136,10 @@ protected:
     bool processSignalingCallId();
 
     void calcNNPByTrunk();
+
+    void setupEffectiveOrigNNPTrunkSettings(set<int> &nnpDestinationIds);
+
+    void setupEffectiveTermNNPTrunkSettings();
+
 };
 

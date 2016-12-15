@@ -2,6 +2,135 @@
 #include "RadiusAuthProcessor.h"
 #include "BillingCall.h"
 
+
+void Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
+                                           long long int srcNumber, long long int dstNumber,set<int> &nnpDestinationIds,
+                                           int destinationType) {
+    vector<ServiceTrunk *> serviceTrunks;
+    getAllServiceTrunk(serviceTrunks, trunk->id);
+
+    if (serviceTrunks.size() == 0) {
+        if (trace != nullptr) {
+            *trace << "DEBUG|SERVICE TRUNK DECLINE|CAUSE SERVICE TRUNK NOT FOUND BY TRUNK " << trunk->name <<
+                   " (" << trunk->id << ")" << "\n";
+        }
+        return;
+    }
+
+    for (auto serviceTrunk : serviceTrunks) {
+        vector<ServiceTrunkSettings *> trunkSettingsList;
+        getAllServiceTrunkSettings(trunkSettingsList, serviceTrunk->id, destinationType);
+
+        for (auto trunkSettings : trunkSettingsList) {
+
+            if (checkNNPTrunkSettingsConditions(trunkSettings, srcNumber, dstNumber)) {
+
+                auto account = getAccount(serviceTrunk->client_account_id);
+                if (account == nullptr) {
+                    if (trace != nullptr) {
+                        *trace << "DEBUG|TRUNK SETTINGS SKIP|ACCOUNT NOT FOUND BY ID " <<
+                               serviceTrunk->client_account_id << "\n";
+                    }
+                    continue;
+                }
+
+                set<pair<double, int>> resultNNPPackagePriceIds;
+                set<pair<double, int>> resultNNPPackagePricelistIds;
+
+                findNNPPackagePriceIds(resultNNPPackagePriceIds, trunkSettings->nnp_tariff_id,
+                                                       nnpDestinationIds, trace);
+
+                findNNPPackagePricelistIds(resultNNPPackagePricelistIds, trunkSettings->nnp_tariff_id,
+                                                       dstNumber, trace);
+
+                if(resultNNPPackagePriceIds.size()==0 && resultNNPPackagePricelistIds.size()==0)
+                    continue;
+
+                set<pair<double,pair<int,int>>> resultNNPPackage;
+
+                for(auto i:resultNNPPackagePriceIds)
+                    resultNNPPackage.insert(make_pair(i.first,make_pair(0,i.second)));
+                for(auto i:resultNNPPackagePricelistIds)
+                    resultNNPPackage.insert(make_pair(i.first,make_pair(i.second,0)));
+
+                if(resultNNPPackage.size()==0) {
+                    if (trace != nullptr) {
+                        *trace << "DEBUG|TRUNK SETTINGS DECLINE|NNP_PACKAGE NOT FOUND TRUNK_SETTINGS_ID: " <<
+                               trunkSettings->id << " / " << trunkSettings->order << "\n";
+                    }
+                    continue;
+                }
+
+                pair<int,int> nnpPackage = (*(resultNNPPackage.begin())).second;
+
+                ServiceTrunkOrder order;
+                order.trunk = trunk;
+                order.account = account;
+                order.serviceTrunk = serviceTrunk;
+                order.trunkSettings = trunkSettings;
+                order.statsTrunkSettings = nullptr;
+                order.pricelist = nullptr ;
+
+                if(nnpPackage.first>0) {
+                    order.nnpPackagePrice_id = nnpPackage.first;
+                } else {
+                    order.nnpPackagePricelist_id = nnpPackage.second;
+                }
+                if (trace != nullptr) {
+                    *trace << "DEBUG|TRUNK SETTINGS ACCEPT|TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " <<
+                           trunkSettings->order << "\n";
+                }
+                order.nnp_price = (*(resultNNPPackage.begin())).first;
+                order.price = nullptr;
+                order.pricelist = nullptr;
+
+                resultTrunkSettingsTrunkOrderList.push_back(order);
+            }
+        }
+
+    }
+
+    if (resultTrunkSettingsTrunkOrderList.size() > 0) {
+        if (trace != nullptr) {
+            *trace << "FOUND|TRUNK SETTING ORDER LIST|" << "\n";
+        }
+
+        for (auto order : resultTrunkSettingsTrunkOrderList) {
+            if (trace != nullptr) {
+                *trace << "||";
+                order.dump(*trace);
+                *trace << "\n";
+            }
+        }
+    } else {
+        if (trace != nullptr) {
+            *trace << "NOT FOUND|TRUNK SETTING ORDER LIST|" << "\n";
+        }
+    }
+}
+
+bool Repository::checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
+                                              long long int dstNumber) {
+
+    if (trunkSettings->src_number_id > 0 && !matchNumber(trunkSettings->src_number_id, srcNumber)) {
+        if (trace != nullptr) {
+            *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY SRC NUMBER MATCHING, TRUNK_SETTINGS_ID: " <<
+                   trunkSettings->id << " / " << trunkSettings->order << "\n";
+        }
+        return false;
+    }
+
+    if (trunkSettings->dst_number_id > 0 && !matchNumber(trunkSettings->dst_number_id, dstNumber)) {
+        if (trace != nullptr) {
+            *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY DST NUMBER MATCHING, TRUNK_SETTINGS_ID: " <<
+                   trunkSettings->id << " / " << trunkSettings->order << "\n";
+        }
+        return false;
+    }
+
+    return true;
+}
+
 bool Repository::getNNPDestinationByNumberRange(set<int> &nnpDestinationIds, NNPNumberRange *nnpNumberRange,
                                                 stringstream *trace) {
 

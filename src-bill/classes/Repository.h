@@ -333,6 +333,7 @@ public:
         serviceNumber->findAllByClientID(resultServiceNumber, client_id, trace);
     }
 
+
     void getNNPPackageMinuteByTariff(vector<NNPPackageMinute> &resultNNPPackageMinute, int nnp_tariff_id,
                                      double coefficient) {
         nnpPackageMinute->findAllByTariffID(resultNNPPackageMinute, nnp_tariff_id, coefficient, trace);
@@ -387,4 +388,9 @@ public:
     pair<int, RadiusAuthRequest> getNNPRegionTrunkByNum(PhoneNumber numA, PhoneNumber numB);
 
     void getTrunkPriority(int trunk_id, vector<TrunkPriority> &trunkPriorityList);
+
+    void getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
+                                      long long int srcNumber, long long int dstNumber, set<int> &nnpDestinationIds, int destinationType);
+
+    bool checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber, long long int dstNumber);
 };

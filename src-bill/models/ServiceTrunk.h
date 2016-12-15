@@ -9,6 +9,9 @@
 #include "Client.h"
 #include "ServiceTrunkSettings.h"
 #include "StatsTrunkSettings.h"
+#include "nnp/NNPPackagePrice.h"
+#include "nnp/NNPPackagePricelist.h"
+
 
 struct ServiceTrunk {
     int id;
@@ -40,10 +43,14 @@ struct ServiceTrunkOrder {
     Trunk * trunk;
     ServiceTrunk * serviceTrunk;
     ServiceTrunkSettings * trunkSettings;
-    Pricelist * pricelist;
-    PricelistPrice * price;
+    Pricelist * pricelist = nullptr;
+    PricelistPrice * price = nullptr;
     Client * account;
     StatsTrunkSettings * statsTrunkSettings;
+    int nnpPackagePrice_id = 0;
+    int nnpPackagePricelist_id = 0;
+    double nnp_price = 0;
+
     int priority = 0;
 
     void dump(stringstream &trace) {
@@ -70,6 +77,15 @@ struct ServiceTrunkOrder {
         if (pricelist != nullptr) {
             trace << "pricelist_id: " << pricelist->id << ", ";
         }
+        if (nnpPackagePrice_id > 0) {
+            trace << "nnpPackagePrice_id: " << nnpPackagePrice_id << ", ";
+            trace << "nnp_price: " << nnp_price << ", ";
+        }
+        if (nnpPackagePricelist_id > 0) {
+            trace << "nnpPackagePricelist_id: " << nnpPackagePricelist_id << ", ";
+            trace << "nnp_price: " << nnp_price << ", ";
+        }
+
         if (price != nullptr) {
             trace << "prefix: " << price->prefix << ", ";
             trace << "price: " << price->price << ", ";

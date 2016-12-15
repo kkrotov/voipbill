@@ -214,7 +214,7 @@ void BillingCall::calcOrigByNumber() {
         }
 
         calcOrigNNPByNumber();
-        
+
     } else if (call->account_version == CALL_ACCOUNT_VERSION_4) {
         // Обсчитываем плечо по традиционной схеме
         if (trace != nullptr) {
@@ -255,11 +255,12 @@ void BillingCall::calcOrigByNumber() {
 
         setupPackagePrepaid();
 
+        setupCost();                                        // Расчет стоимости плеча. С учетом остатка по найденому пакету
     } else {
         throw CalcException("UNKNOW ACCOUNT VERSION");
     }
 
-    setupCost();                                        // Расчет стоимости плеча. С учетом остатка по найденому пакету
+
 }
 
 /********************************************************************************************************************
