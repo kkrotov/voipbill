@@ -23,18 +23,19 @@ void BillingCall::calcNNPByTrunk() {
 
     if (call->orig) {
         setupEffectiveOrigNNPTrunkSettings(nnpDestinationIds);  // Вычисляем минимальную цену в присоединенных прайслистах на входящем транке
-
-        // возвращать выбранный транксеттинкгс?
-
     } else {
         setupEffectiveTermNNPTrunkSettings();  // Вычисляем минимальную цену в присоединенных прайслистах на исходящем транке
     }
 
-    setupServiceTrunk();                    // Вроде подходит
+    setupServiceTrunk();
 
-    setupAccount();                         // Вроде подходит
+    setupAccount();
 
-//    setupBilledTimeNNP(); // Где-то нужно взять лайттариф для этой услуги
+    NNPPackage *nnpPackage = repository->getNNPPackage(call->nnp_package_id,trace);
+
+    if(nnpPackage == nullptr)  throw CalcException("NOT FOUND nnpPackages");
+
+    setupBilledTimeNNP(nnpPackage);
 
     setupNNPCost();
 }
@@ -49,7 +50,7 @@ void BillingCall::setupEffectiveOrigNNPTrunkSettings(set<int> &nnpDestinationIds
                                              nnpDestinationIds,SERVICE_TRUNK_SETTINGS_ORIGINATION);
     // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
 
-    repository->orderOrigTrunkSettingsOrderList(trunkSettingsOrderList);
+    repository->orderNNPOrigTrunkSettingsOrderList(trunkSettingsOrderList);
     // отсортировали по цене
 
     if (trunkSettingsOrderList.size() > 0) {
@@ -60,6 +61,7 @@ void BillingCall::setupEffectiveOrigNNPTrunkSettings(set<int> &nnpDestinationIds
 
         call->nnp_package_price_id = order.nnpPackagePrice_id;
         call->nnp_package_pricelist_id = order.nnpPackagePricelist_id;
+        call->nnp_package_id = order.nnpPackage_id;
         call->rate = order.nnp_price;
 
 //        callInfo->pricelist = order.pricelist;
@@ -98,7 +100,11 @@ void BillingCall::calcOrigNNPByNumber() {
 
     repository->getNNPDestinationByNumberRange(nnpDestinationIds, nnpNumberRange, trace);
 
-    setupBilledTimeNNP(*nnpAccountTariffLightList.begin());
+    NNPPackage *nnpPackage = repository->getNNPPackage((*nnpAccountTariffLightList.begin()).nnp_tariff_id,trace);
+
+    if(nnpPackage == nullptr)  throw CalcException("NOT FOUND nnpPackages");
+
+    setupBilledTimeNNP(nnpPackage);
 
     auto effectivePackagePrice = setupNNPPackagePrice(nnpAccountTariffLightList,
                                                       nnpDestinationIds);      // Подбираем самый выгодный пакет с ценой для звонка.
@@ -236,13 +242,13 @@ void BillingCall::processNNP() {
  *   (бесплатные секунды, тарификация по мин/по сек) действующего тарифа для расчитываемого плеча.
  */
 
-void BillingCall::setupBilledTimeNNP(NNPAccountTariffLight nnpAccountTariffLight) {
+void BillingCall::setupBilledTimeNNP(NNPPackage *nnpPackage) {
     call->billed_time = getCallLengthNNP(
             cdr->session_time,
-            nnpAccountTariffLight.tarification_free_seconds,
-            nnpAccountTariffLight.tarification_interval_seconds,
-            nnpAccountTariffLight.tarification_type,
-            nnpAccountTariffLight.tarification_min_paid_seconds
+            nnpPackage->tarification_free_seconds,
+            nnpPackage->tarification_interval_seconds,
+            nnpPackage->tarification_type,
+            nnpPackage->tarification_min_paid_seconds
     );
 }
 

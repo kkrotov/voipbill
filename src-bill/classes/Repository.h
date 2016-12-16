@@ -298,6 +298,17 @@ public:
         const Repository &repository;
     };
 
+    struct nnp_trunk_settings_order_asc_price {
+        bool operator()(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) {
+            return this->repository.NNPtrunkOrderLessThan(left, right);
+        }
+
+        nnp_trunk_settings_order_asc_price(const Repository &repository) : repository(repository) {}
+
+    private:
+        const Repository &repository;
+    };
+
     struct trunk_settings_order_asc_priority {
         bool operator()(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) {
             return left.priority > right.priority;
@@ -311,6 +322,10 @@ public:
 
     void orderOrigTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList) const {
         sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
+    }
+
+    void orderNNPOrigTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList) const {
+        sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), nnp_trunk_settings_order_asc_price(*this));
     }
 
     void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, bool fUseMinimalki,
@@ -351,6 +366,9 @@ public:
         return nnpPackageMinute->find(idNNPPackageMinute, trace);
     }
 
+    NNPPackage *getNNPPackage(int idNNPPackage, stringstream *trace = nullptr) {
+        return nnpPackage->find(idNNPPackage, trace);
+    }
 
     bool getNNPPrefixsByNumberRange(vector<int> &nnpPrefixIds,
                                     int nnpNumberRangeId, stringstream *trace = nullptr) {
@@ -393,4 +411,6 @@ public:
                                       long long int srcNumber, long long int dstNumber, set<int> &nnpDestinationIds, int destinationType);
 
     bool checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber, long long int dstNumber);
+
+    bool NNPtrunkOrderLessThan(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) const;
 };

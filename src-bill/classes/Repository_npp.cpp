@@ -3,9 +3,10 @@
 #include "BillingCall.h"
 
 
-void Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
-                                           long long int srcNumber, long long int dstNumber,set<int> &nnpDestinationIds,
-                                           int destinationType) {
+void
+Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
+                                         long long int srcNumber, long long int dstNumber, set<int> &nnpDestinationIds,
+                                         int destinationType) {
     vector<ServiceTrunk *> serviceTrunks;
     getAllServiceTrunk(serviceTrunks, trunk->id);
 
@@ -38,22 +39,22 @@ void Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultT
                 set<pair<double, int>> resultNNPPackagePricelistIds;
 
                 findNNPPackagePriceIds(resultNNPPackagePriceIds, trunkSettings->nnp_tariff_id,
-                                                       nnpDestinationIds, trace);
+                                       nnpDestinationIds, trace);
 
                 findNNPPackagePricelistIds(resultNNPPackagePricelistIds, trunkSettings->nnp_tariff_id,
-                                                       dstNumber, trace);
+                                           dstNumber, trace);
 
-                if(resultNNPPackagePriceIds.size()==0 && resultNNPPackagePricelistIds.size()==0)
+                if (resultNNPPackagePriceIds.size() == 0 && resultNNPPackagePricelistIds.size() == 0)
                     continue;
 
-                set<pair<double,pair<int,int>>> resultNNPPackage;
+                set<pair<double, pair<int, int>>> resultNNPPackage;
 
-                for(auto i:resultNNPPackagePriceIds)
-                    resultNNPPackage.insert(make_pair(i.first,make_pair(0,i.second)));
-                for(auto i:resultNNPPackagePricelistIds)
-                    resultNNPPackage.insert(make_pair(i.first,make_pair(i.second,0)));
+                for (auto i:resultNNPPackagePriceIds)
+                    resultNNPPackage.insert(make_pair(i.first, make_pair(0, i.second)));
+                for (auto i:resultNNPPackagePricelistIds)
+                    resultNNPPackage.insert(make_pair(i.first, make_pair(i.second, 0)));
 
-                if(resultNNPPackage.size()==0) {
+                if (resultNNPPackage.size() == 0) {
                     if (trace != nullptr) {
                         *trace << "DEBUG|TRUNK SETTINGS DECLINE|NNP_PACKAGE NOT FOUND TRUNK_SETTINGS_ID: " <<
                                trunkSettings->id << " / " << trunkSettings->order << "\n";
@@ -61,7 +62,7 @@ void Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultT
                     continue;
                 }
 
-                pair<int,int> nnpPackage = (*(resultNNPPackage.begin())).second;
+                pair<int, int> nnpPackage = (*(resultNNPPackage.begin())).second;
 
                 ServiceTrunkOrder order;
                 order.trunk = trunk;
@@ -69,13 +70,16 @@ void Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultT
                 order.serviceTrunk = serviceTrunk;
                 order.trunkSettings = trunkSettings;
                 order.statsTrunkSettings = nullptr;
-                order.pricelist = nullptr ;
+                order.pricelist = nullptr;
 
-                if(nnpPackage.first>0) {
+                if (nnpPackage.first > 0) {
                     order.nnpPackagePrice_id = nnpPackage.first;
                 } else {
                     order.nnpPackagePricelist_id = nnpPackage.second;
                 }
+
+                order.nnpPackage_id = trunkSettings->nnp_tariff_id;
+
                 if (trace != nullptr) {
                     *trace << "DEBUG|TRUNK SETTINGS ACCEPT|TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " <<
                            trunkSettings->order << "\n";
@@ -110,7 +114,7 @@ void Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultT
 }
 
 bool Repository::checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
-                                              long long int dstNumber) {
+                                                 long long int dstNumber) {
 
     if (trunkSettings->src_number_id > 0 && !matchNumber(trunkSettings->src_number_id, srcNumber)) {
         if (trace != nullptr) {
@@ -299,4 +303,12 @@ void Repository::getNNPBestPriceRoute(set<pair<double, PhoneNumber>> &vResNum, v
 
     }
 
+}
+
+bool Repository::NNPtrunkOrderLessThan(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) const {
+
+    if (left.nnp_price < right.nnp_price) {
+        return true;
+    }
+    return false;
 }

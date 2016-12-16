@@ -112,11 +112,9 @@ protected:
 
     void processNNP();
 
-
-    void setupBilledTimeNNP(NNPAccountTariffLight nnpAccountTariffLight);
+    void setupBilledTimeNNP(NNPPackage *nnpPackage);
 
     void calcOrigNNPByNumber();
-
 
     pair<int, int> setupNNPPackageMinute(vector<NNPAccountTariffLight> &nnpAccountTariffLight,
                                          set<int> &nnpDestinationIds);

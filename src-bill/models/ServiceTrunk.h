@@ -49,6 +49,7 @@ struct ServiceTrunkOrder {
     StatsTrunkSettings * statsTrunkSettings;
     int nnpPackagePrice_id = 0;
     int nnpPackagePricelist_id = 0;
+    int nnpPackage_id = 0;
     double nnp_price = 0;
 
     int priority = 0;
@@ -77,7 +78,10 @@ struct ServiceTrunkOrder {
         if (pricelist != nullptr) {
             trace << "pricelist_id: " << pricelist->id << ", ";
         }
-        if (nnpPackagePrice_id > 0) {
+        if (nnpPackage_id > 0) {
+            trace << "nnpPackage_id: " << nnpPackage_id << ", ";
+        }
+            if (nnpPackagePrice_id > 0) {
             trace << "nnpPackagePrice_id: " << nnpPackagePrice_id << ", ";
             trace << "nnp_price: " << nnp_price << ", ";
         }
