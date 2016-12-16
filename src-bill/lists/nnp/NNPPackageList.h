@@ -9,7 +9,7 @@ protected:
 
     string sql(BDb *db) {
         return " select tariff_id, " \
-               "   tarification_free_seconds, tarification_interval_seconds, tarification_type, tarification_min_paid_seconds, service_type_id " \
+               "   tarification_free_seconds, tarification_interval_seconds, tarification_type, tarification_min_paid_seconds, service_type_id, currency_id " \
                " from nnp.package order by tariff_id";
     }
 
@@ -20,6 +20,7 @@ protected:
         item->tarification_type = row.get_i(3);
         item->tarification_min_paid_seconds = row.get_i(4);
         item->service_type_id = row.get_i(5);
+        row.fill_cs(6, item->currency_id, sizeof(item->currency_id));
     }
 
     struct key_id {

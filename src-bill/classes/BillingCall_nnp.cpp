@@ -24,7 +24,7 @@ void BillingCall::calcNNPByTrunk() {
     if (call->orig) {
         setupEffectiveOrigNNPTrunkSettings(nnpDestinationIds);  // Вычисляем минимальную цену в присоединенных прайслистах на входящем транке
     } else {
-        setupEffectiveTermNNPTrunkSettings();  // Вычисляем минимальную цену в присоединенных прайслистах на исходящем транке
+        setupEffectiveTermNNPTrunkSettings(nnpDestinationIds);  // Вычисляем минимальную цену в присоединенных прайслистах на исходящем транке
     }
 
     setupServiceTrunk();
@@ -50,7 +50,7 @@ void BillingCall::setupEffectiveOrigNNPTrunkSettings(set<int> &nnpDestinationIds
                                              nnpDestinationIds,SERVICE_TRUNK_SETTINGS_ORIGINATION);
     // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
 
-    repository->orderNNPOrigTrunkSettingsOrderList(trunkSettingsOrderList);
+    repository->orderOrigTrunkSettingsOrderList(trunkSettingsOrderList);
     // отсортировали по цене
 
     if (trunkSettingsOrderList.size() > 0) {
@@ -64,11 +64,43 @@ void BillingCall::setupEffectiveOrigNNPTrunkSettings(set<int> &nnpDestinationIds
         call->nnp_package_id = order.nnpPackage_id;
         call->rate = order.nnp_price;
 
+        callInfo->pricelist = nullptr;
+        callInfo->price = nullptr;
     }
 }
 
-void BillingCall::setupEffectiveTermNNPTrunkSettings() {
+void BillingCall::setupEffectiveTermNNPTrunkSettings(set<int> &nnpDestinationIds) {
+    vector<ServiceTrunkOrder> trunkSettingsOrderList;
 
+    repository->getNNPTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
+                                             nnpDestinationIds,SERVICE_TRUNK_SETTINGS_TERMINATION);
+    // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
+
+    Trunk *orig_trunk = repository->getTrunkByName(cdr->src_route);
+    if (orig_trunk == nullptr) {
+        throw CalcException("ORIG TRUNK WAS NOT FOUND");
+    }
+
+    // отсортировали по цене, причем применили настройку на оригинационном плече - использовать или нет минималки на терм-плече
+
+    repository->orderTermTrunkSettingsOrderList(trunkSettingsOrderList, orig_trunk->sw_minimalki, call->connect_time);
+
+    if (trunkSettingsOrderList.size() > 0) {
+        auto order = trunkSettingsOrderList.at(0);
+        callInfo->account = order.account;
+        callInfo->serviceTrunk = order.serviceTrunk;
+        callInfo->trunkSettings = order.trunkSettings;
+
+        call->nnp_package_price_id = order.nnpPackagePrice_id;
+        call->nnp_package_pricelist_id = order.nnpPackagePricelist_id;
+        call->nnp_package_id = order.nnpPackage_id;
+        call->rate = order.nnp_price;
+
+        callInfo->pricelist = nullptr;
+        callInfo->price = nullptr;
+
+        call->trunk_settings_stats_id = order.statsTrunkSettings->id;
+    }
 }
 
 void BillingCall::calcOrigNNPByNumber() {

@@ -76,7 +76,6 @@ Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkS
                 order.serviceTrunk = serviceTrunk;
                 order.trunkSettings = trunkSettings;
                 order.statsTrunkSettings = nullptr;
-                order.pricelist = nullptr;
 
                 if (nnpPackage.first > 0) {
                     order.nnpPackagePrice_id = nnpPackage.first;
@@ -203,7 +202,6 @@ void Repository::findNNPPackagePricelistIds(set<pair<double, NNPPackagePricelist
         }
 
     }
-
 }
 
 PhoneNumber
@@ -310,12 +308,4 @@ void Repository::getNNPBestPriceRoute(set<pair<double, PhoneNumber>> &vResNum, v
 
     }
 
-}
-
-bool Repository::NNPtrunkOrderLessThan(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) const {
-
-    if (left.nnp_price < right.nnp_price) {
-        return true;
-    }
-    return false;
 }

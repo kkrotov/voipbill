@@ -9,11 +9,13 @@ struct NNPPackage {
     int tarification_interval_seconds;
     int tarification_type;
     int tarification_min_paid_seconds;
+    char currency_id[4];
 
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
         trace << "service_type_id: " << service_type_id << ", ";
+        trace << "currency_id: " << currency_id << ", ";
         trace << "tarification_free_seconds: " << tarification_free_seconds << ", ";
         trace << "tarification_interval_seconds: " << tarification_interval_seconds << ", ";
         trace << "tarification_type: " << tarification_type << ", ";

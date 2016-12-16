@@ -137,7 +137,7 @@ protected:
 
     void setupEffectiveOrigNNPTrunkSettings(set<int> &nnpDestinationIds);
 
-    void setupEffectiveTermNNPTrunkSettings();
+    void setupEffectiveTermNNPTrunkSettings(set<int> &nnpDestinationIds);
 
 };
 

@@ -554,6 +554,10 @@ bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettin
 }
 
 bool Repository::trunkOrderLessThan(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) const {
+    if(left.price == nullptr && left.pricelist == nullptr && right.price == nullptr && right.pricelist == nullptr) {
+        return left.nnp_price < right.nnp_price;
+    }
+
     if (left.price && left.pricelist && right.price && right.pricelist) {
         return priceLessThan(left.price->price, *left.pricelist, right.price->price, *right.pricelist);
     }
