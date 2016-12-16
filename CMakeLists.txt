@@ -324,7 +324,7 @@ set(BILL_SOURCES
         src-bill/web/PageTestCalc.cpp
         src-bill/web/PageTestCalcGui.cpp
         src-bill/web/PageTestAuth.cpp
-        src-bill/web/PageCdrUnfinished.cpp 
+        src-bill/web/PageCdrUnfinished.cpp src-bill/web/PageCdrUnfinished.h
 
         src-bill/models/nnp/NNPRegion.cpp
         src-bill/lists/nnp/NNPRegionList.cpp
@@ -415,10 +415,13 @@ set(BILL_SOURCES
         src-bill/web/PageHealthStatus.h
         src-bill/web/PageHealthCheck.cpp
         src-bill/web/PageHealthCheck.h
-        src-bill/healthcheck/ThreadErrorStatus.cpp 
-        src-bill/healthcheck/ThreadErrorStatus.h 
-        src-bill/healthcheck/TrunkLoadStatus.cpp 
-        src-bill/healthcheck/TrunkLoadStatus.h)
+        src-bill/healthcheck/ThreadErrorStatus.cpp
+        src-bill/healthcheck/ThreadErrorStatus.h
+        src-bill/healthcheck/TrunkLoadStatus.cpp
+        src-bill/healthcheck/TrunkLoadStatus.h
+
+        src-bill/threads/ThreadHealthManager.cpp
+        src-bill/threads/ThreadHealthManager.h)
 
 add_custom_target(invalidate_files ALL
         COMMAND ${CMAKE_COMMAND} -E touch src-bill/version.cpp)

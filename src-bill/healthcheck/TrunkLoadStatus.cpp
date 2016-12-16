@@ -42,6 +42,7 @@ SystemStatus TrunkLoadStatus::getStatus() {
             continue;
 
         healthStatus.itemValue = to_string(load.first);
+        healthStatus.itemName = trunkName;
         if (healthStatus.statusMessage.size()>0)
             healthStatus.statusMessage += "; ";
 

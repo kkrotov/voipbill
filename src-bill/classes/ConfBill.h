@@ -50,6 +50,7 @@ public:
     int cdr_parcer_interval;
     int calls_raw_sync_delay;
     vector<int> trunk_max_load;
+    int trunk_critical_load_delay;
 
     string sql_regions_list;
 

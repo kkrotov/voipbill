@@ -33,6 +33,7 @@
 #include "../healthcheck/RadiusAuthServerStatus.h"
 #include "../healthcheck/ThreadErrorStatus.h"
 #include "../healthcheck/TrunkLoadStatus.h"
+#include "../threads/ThreadHealthManager.h"
 
 AppBill &app() {
     static AppBill appVar;
@@ -114,6 +115,7 @@ void AppBill::registerAllThreads() {
     registerThread<ThreadTasks>();
     registerThread<ThreadCdrParser>();
     registerThread<ThreadRadiusAuthServer>();
+    registerThread<ThreadHealthManager>();
 }
 
 void AppBill::runAppInSingleMode() {
@@ -162,6 +164,8 @@ void AppBill::runAppInSingleMode() {
             "cdr_parser",
             // сервер обработки запросов по протоколу radius
             "radius_auth_server",
+            // контроль загрузки транков
+            "health_manager",
     };
 
     if (app().conf.isApiHostMode()) {
