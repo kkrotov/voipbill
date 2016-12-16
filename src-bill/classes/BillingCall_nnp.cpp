@@ -64,11 +64,6 @@ void BillingCall::setupEffectiveOrigNNPTrunkSettings(set<int> &nnpDestinationIds
         call->nnp_package_id = order.nnpPackage_id;
         call->rate = order.nnp_price;
 
-//        callInfo->pricelist = order.pricelist;
-//        callInfo->price = order.price;
-
-        // сохраняем в структуре callInfo самый дешевый прайслист и цену для этой пары АБ.
-
     }
 }
 
@@ -100,12 +95,6 @@ void BillingCall::calcOrigNNPByNumber() {
 
     repository->getNNPDestinationByNumberRange(nnpDestinationIds, nnpNumberRange, trace);
 
-    NNPPackage *nnpPackage = repository->getNNPPackage((*nnpAccountTariffLightList.begin()).nnp_tariff_id,trace);
-
-    if(nnpPackage == nullptr)  throw CalcException("NOT FOUND nnpPackages");
-
-    setupBilledTimeNNP(nnpPackage);
-
     auto effectivePackagePrice = setupNNPPackagePrice(nnpAccountTariffLightList,
                                                       nnpDestinationIds);      // Подбираем самый выгодный пакет с ценой для звонка.
     auto effectivePackagePricelist = setupNNPPackagePricelist(nnpAccountTariffLightList,
@@ -115,47 +104,59 @@ void BillingCall::calcOrigNNPByNumber() {
                                                         nnpDestinationIds); // Ищем неизрасходованный пакет с минутами для этого направления
 
     // Проверяем на минимальность цены у пакета с ценой и пакета с прайс-листом.
-    if (effectivePackagePricelist.second != 0 && effectivePackagePrice.second != 0) {
+    if (effectivePackagePricelist.second != nullptr && effectivePackagePrice.second != nullptr) {
         if (fabs(effectivePackagePrice.first) <= fabs(effectivePackagePricelist.first)) {
             call->rate = effectivePackagePrice.first;
-            call->nnp_package_price_id = effectivePackagePrice.second;
+            call->nnp_package_price_id = effectivePackagePrice.second->id;
+            call->nnp_package_id = effectivePackagePrice.second->nnp_tariff_id;
             if (trace != nullptr) {
                 *trace << "INFO|NNP|APPLY NNP_PackagePrice id=" << call->nnp_package_price_id <<
                        ", rate: " << call->rate << "\n";
             }
         } else {
             call->rate = effectivePackagePricelist.first;
-            call->nnp_package_pricelist_id = effectivePackagePricelist.second;
+            call->nnp_package_pricelist_id = effectivePackagePricelist.second->id;
+            call->nnp_package_id = effectivePackagePricelist.second->nnp_tariff_id;
             if (trace != nullptr) {
                 *trace << "INFO|NNP|APPLY NNP_PackagePricelist id=" << call->nnp_package_pricelist_id <<
                        ", rate: " << call->rate << "\n";
             }
         }
     } else {
-        if (effectivePackagePricelist.second == 0 && effectivePackagePrice.second != 0) {
+        if (effectivePackagePricelist.second == nullptr && effectivePackagePrice.second != nullptr) {
             call->rate = effectivePackagePrice.first;
-            call->nnp_package_price_id = effectivePackagePrice.second;
+            call->nnp_package_price_id = effectivePackagePrice.second->id;
+            call->nnp_package_id = effectivePackagePrice.second->nnp_tariff_id;
             if (trace != nullptr) {
                 *trace << "INFO|NNP|APPLY NNP_PackagePrice id=" << call->nnp_package_price_id <<
                        ", rate: " << call->rate << "\n";
             }
         }
-        if (effectivePackagePrice.second == 0 && effectivePackagePricelist.second != 0) {
+        if (effectivePackagePrice.second == nullptr && effectivePackagePricelist.second != nullptr) {
             call->rate = effectivePackagePricelist.first;
-            call->nnp_package_pricelist_id = effectivePackagePricelist.second;
+            call->nnp_package_pricelist_id = effectivePackagePricelist.second->id;
+            call->nnp_package_id = effectivePackagePricelist.second->nnp_tariff_id;
             if (trace != nullptr) {
                 *trace << "INFO|NNP|APPLY NNP_PackagePricelist id=" << call->nnp_package_pricelist_id <<
                        ", rate: " << call->rate << "\n";
             }
         }
-        if (effectivePackagePrice.second == 0 && effectivePackagePricelist.second == 0) {
+        if (effectivePackagePrice.second == nullptr && effectivePackagePricelist.second == nullptr) {
             call->rate = 0;
+            call->nnp_package_pricelist_id = 0;
+            call->nnp_package_id = 0;
         }
     }
 
     call->package_time = 0;
 
-    if (effectivePackageMinute.second != 0) {
+    if (effectivePackageMinute.second != nullptr) {
+
+        NNPPackage *nnpPackage = repository->getNNPPackage(effectivePackageMinute.second->nnp_tariff_id,trace);
+
+        if(nnpPackage == nullptr)  throw CalcException("NOT FOUND nnpPackages");
+        setupBilledTimeNNP(nnpPackage);
+
         // пакет с неизрасходованными минутами есть, применяем его.
         if (trace != nullptr) {
             *trace << "DETAIL|NNP|SOLVED BILLED_TIME = " << call->billed_time << "\n";
@@ -173,7 +174,8 @@ void BillingCall::calcOrigNNPByNumber() {
                 *trace << "DETAIL|NNP|SOLVED avalibleNNPPackageSeconds = " << avalibleNNPPackageSeconds << "\n";
             }
 
-            call->nnp_package_minute_id = effectivePackageMinute.second; //  Это значит, что минуты выбираются из предоплаченных локального тарифа
+            call->nnp_package_minute_id = effectivePackageMinute.second->id; //  Это значит, что минуты выбираются из предоплаченных локального тарифа
+            call->nnp_package_id = effectivePackageMinute.second->nnp_tariff_id;
             call->package_time = avalibleNNPPackageSeconds;
 
             NNPPackageMinute *nnpPackageMinute = repository->getNNPPackageMinute(call->nnp_package_minute_id, trace);
@@ -196,8 +198,11 @@ void BillingCall::calcOrigNNPByNumber() {
                 }
             }
 
-
         }
+    } else {
+        NNPPackage *nnpPackage = repository->getNNPPackage(call->nnp_package_id,trace);
+        if(nnpPackage == nullptr)  throw CalcException("NOT FOUND nnpPackages");
+        setupBilledTimeNNP(nnpPackage);
     }
 
     setupNNPCost();
@@ -288,11 +293,11 @@ int BillingCall::getCallLengthNNP(int len, int tarification_free_seconds, int ta
  *   ннп- пакетов с минутами. получится так, что примениться максимально полный пакет, а остаток минут тарифицируется за деньги
  */
 
-pair<int, int> BillingCall::setupNNPPackageMinute(vector<NNPAccountTariffLight> &nnpAccountTariffLightList,
+pair<int, NNPPackageMinute *> BillingCall::setupNNPPackageMinute(vector<NNPAccountTariffLight> &nnpAccountTariffLightList,
                                                   set<int> &nnpDestinationIds) {
 
     vector<NNPPackageMinute> nnpPackageMinuteList;
-    set<pair<double, pair<int, int >>> EffectiveNnpPackageMinuteList;
+    set<pair<double, pair<int, NNPPackageMinute *>>> EffectiveNnpPackageMinuteList;
     map<int, int> tariffIdAccountTariffLightId;
     map<int, NNPAccountTariffLight *> nnpAccountTariffLightMap;
     double minute_cost;
@@ -336,14 +341,14 @@ pair<int, int> BillingCall::setupNNPPackageMinute(vector<NNPAccountTariffLight> 
 
             if (seconds_left > 0)
                 EffectiveNnpPackageMinuteList.insert(
-                        make_pair(minute_cost, make_pair(seconds_left, it2->id)));
+                        make_pair(minute_cost, make_pair(seconds_left, &*it2)));
         }
     }
 
     if (EffectiveNnpPackageMinuteList.size() > 0)
         return EffectiveNnpPackageMinuteList.begin()->second;
     else
-        return pair<int, int>(0, 0);
+        return pair<int, NNPPackageMinute *>(0, nullptr);
 
 }
 
@@ -355,10 +360,10 @@ pair<int, int> BillingCall::setupNNPPackageMinute(vector<NNPAccountTariffLight> 
  */
 
 
-pair<double, int> BillingCall::setupNNPPackagePrice(vector<NNPAccountTariffLight> &nnpAccountTariffLightList,
+pair<double, NNPPackagePrice *> BillingCall::setupNNPPackagePrice(vector<NNPAccountTariffLight> &nnpAccountTariffLightList,
                                                     set<int> &nnpDestinationIds)      // Подбираем самый выгодный пакет с ценой для звонка.
 {
-    set<pair<double, int>> resultNNPPackagePriceIds;
+    set<pair<double, NNPPackagePrice *>> resultNNPPackagePriceIds;
 
     for (auto nnpAccountTariffLight:nnpAccountTariffLightList) {
         repository->findNNPPackagePriceIds(resultNNPPackagePriceIds, nnpAccountTariffLight.nnp_tariff_id,
@@ -366,7 +371,7 @@ pair<double, int> BillingCall::setupNNPPackagePrice(vector<NNPAccountTariffLight
                                            trace);
     }
 
-    if (resultNNPPackagePriceIds.size() == 0) return pair<double, int>(0, 0);
+    if (resultNNPPackagePriceIds.size() == 0) return pair<double, NNPPackagePrice *>(0, nullptr);
     else return *(resultNNPPackagePriceIds.begin());
 
 }
@@ -376,16 +381,16 @@ pair<double, int> BillingCall::setupNNPPackagePrice(vector<NNPAccountTariffLight
  *   Возвращает пару - минимальная цена , ключ ННП- пакета с прайслистом
  */
 
-pair<double, int> BillingCall::setupNNPPackagePricelist(
+pair<double,NNPPackagePricelist *> BillingCall::setupNNPPackagePricelist(
         vector<NNPAccountTariffLight> &nnpAccountTariffLightList,
         set<int> &nnpDestinationIds)  // Подбираем самый выгодный пакет с прайслистом для звонка.
 {
-    set<pair<double, int>> resultNNPPackagePricelistIds;
+    set<pair<double, NNPPackagePricelist *>> resultNNPPackagePricelistIds;
     for (auto nnpAccountTariffLight:nnpAccountTariffLightList) {
         repository->findNNPPackagePricelistIds(resultNNPPackagePricelistIds, nnpAccountTariffLight.nnp_tariff_id,
                                                call->dst_number, trace);
     }
-    if (resultNNPPackagePricelistIds.size() == 0) return pair<double, int>(0, 0);
+    if (resultNNPPackagePricelistIds.size() == 0) return pair<double, NNPPackagePricelist *>(0, nullptr);
     else return *(resultNNPPackagePricelistIds.begin());
 
 }

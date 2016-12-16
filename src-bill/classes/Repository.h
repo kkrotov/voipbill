@@ -387,13 +387,13 @@ public:
     bool getNNPDestinationByNumberRange(set<int> &nnpDestinationIds, NNPNumberRange *nnpNumberRange,
                                         stringstream *trace = nullptr);
 
-    void findNNPPackagePriceIds(set<pair<double, int>> &resultNNPPackagePriceIds, int tariff_id,
+    void findNNPPackagePriceIds(set<pair<double, NNPPackagePrice *>> &resultNNPPackagePriceIds, int tariff_id,
                                 set<int> &nnpDestinationIds,
                                 stringstream *trace = nullptr) {
         return nnpPackagePrice->findPackagePriceIds(resultNNPPackagePriceIds, tariff_id, nnpDestinationIds, trace);
     }
 
-    void findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPackagePricelistIds, int tariff_id,
+    void findNNPPackagePricelistIds(set<pair<double, NNPPackagePricelist *>> &resultNNPPackagePricelistIds, int tariff_id,
                                     long long int num, stringstream *trace = nullptr);
 
 

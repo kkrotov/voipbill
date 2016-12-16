@@ -35,8 +35,8 @@ Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkS
                     continue;
                 }
 
-                set<pair<double, int>> resultNNPPackagePriceIds;
-                set<pair<double, int>> resultNNPPackagePricelistIds;
+                set<pair<double, NNPPackagePrice *>> resultNNPPackagePriceIds;
+                set<pair<double, NNPPackagePricelist *>> resultNNPPackagePricelistIds;
 
                 findNNPPackagePriceIds(resultNNPPackagePriceIds, trunkSettings->nnp_tariff_id,
                                        nnpDestinationIds, trace);
@@ -49,10 +49,16 @@ Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkS
 
                 set<pair<double, pair<int, int>>> resultNNPPackage;
 
-                for (auto i:resultNNPPackagePriceIds)
-                    resultNNPPackage.insert(make_pair(i.first, make_pair(0, i.second)));
-                for (auto i:resultNNPPackagePricelistIds)
-                    resultNNPPackage.insert(make_pair(i.first, make_pair(i.second, 0)));
+                for (auto i:resultNNPPackagePriceIds) {
+                    if (i.second != nullptr)
+                        resultNNPPackage.insert(make_pair(i.first, make_pair(0, i.second->id)));
+                }
+
+                for (auto i:resultNNPPackagePricelistIds) {
+                    if (i.second != nullptr)
+                        resultNNPPackage.insert(make_pair(i.first, make_pair(i.second->id, 0)));
+                }
+
 
                 if (resultNNPPackage.size() == 0) {
                     if (trace != nullptr) {
@@ -171,7 +177,8 @@ bool Repository::getNNPDestinationByNum(set<int> &nnpDestinationIds, long long i
     return fResult;
 }
 
-void Repository::findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPackagePricelistIds, int tariff_id,
+void Repository::findNNPPackagePricelistIds(set<pair<double, NNPPackagePricelist *>> &resultNNPPackagePricelistIds,
+                                            int tariff_id,
                                             long long int num, stringstream *trace) {
 
     set<NNPPackagePricelist *> nnpPackagePricelistPtr;
@@ -185,7 +192,7 @@ void Repository::findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPac
         if (pricelistPrice != nullptr) {
             double cost = pricelistPrice->price;
 
-            resultNNPPackagePricelistIds.insert(pair<double, int>(cost, package->id));
+            resultNNPPackagePricelistIds.insert(pair<double, NNPPackagePricelist *>(cost, package));
 
             if (trace != nullptr) {
                 *trace << "FOUND|NNP PACKAGE PRICELIST|BY NNP_TARIFF_ID '" << tariff_id << "'" << "\n";
