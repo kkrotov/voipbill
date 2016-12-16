@@ -263,6 +263,7 @@ public:
     bool getCurrencyRate(const char *currency_id, double *o_currencyRate) const;
 
     double priceToRoubles(double price, const Pricelist &pricelist) const;
+    double priceToRoubles(double price, const char *currency_id) const;
 
     bool priceLessThan(double priceLeft, const Pricelist &pricelistLeft,
                        double priceRight, const Pricelist &pricelistRight) const;
@@ -397,4 +398,5 @@ public:
 
     bool checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber, long long int dstNumber);
 
+    bool priceLessThan(double priceLeft, NNPPackage *leftNNPPackage, double priceRight, NNPPackage *rightNNPPackage) const;
 };

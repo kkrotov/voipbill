@@ -368,6 +368,16 @@ double Repository::priceToRoubles(double price, const Pricelist &pricelist) cons
     }
 }
 
+double Repository::priceToRoubles(double price, const char *currency_id) const {
+    double currencyRate = 1.0;
+    if (this->getCurrencyRate(currency_id, &currencyRate)
+        && currencyRate > 0.00000001) {
+        return price * currencyRate;
+    } else {
+        return price;
+    }
+}
+
 bool Repository::getCurrencyRate(const char *currency_id, double *o_currencyRate) const {
     if (!currency_id || !o_currencyRate) {
         throw Exception("Invalid arguments passed into getCurrencyRate()");
@@ -415,8 +425,18 @@ bool Repository::priceLessThan(double priceLeft, const Pricelist &pricelistLeft,
     }
 }
 
+bool Repository::priceLessThan(double priceLeft, NNPPackage *leftNNPPackage, double priceRight , NNPPackage *rightNNPPackage) const{
+    if(leftNNPPackage== nullptr || rightNNPPackage == nullptr) return priceLeft < priceRight;
 
+    if (0 == strncmp(leftNNPPackage->currency_id, rightNNPPackage->currency_id, 4)) {
+        return priceLeft < priceRight;
+    } else {
+        double leftRoubles = this->priceToRoubles(priceLeft, leftNNPPackage->currency_id);
+        double rightRoubles = this->priceToRoubles(priceRight, rightNNPPackage->currency_id);
+        return leftRoubles < rightRoubles;
+    }
 
+}
 
 void Repository::getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
                                            long long int srcNumber, long long int dstNumber, int destinationType) {
@@ -555,7 +575,7 @@ bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettin
 
 bool Repository::trunkOrderLessThan(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) const {
     if(left.price == nullptr && left.pricelist == nullptr && right.price == nullptr && right.pricelist == nullptr) {
-        return left.nnp_price < right.nnp_price;
+        return priceLessThan(left.nnp_price, left.nnpPackage, right.nnp_price , right.nnpPackage);
     }
 
     if (left.price && left.pricelist && right.price && right.pricelist) {

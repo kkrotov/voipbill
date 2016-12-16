@@ -11,6 +11,8 @@
 #include "StatsTrunkSettings.h"
 #include "nnp/NNPPackagePrice.h"
 #include "nnp/NNPPackagePricelist.h"
+#include "nnp/NNPPackage.h"
+#include "nnp/NNPPackageMinute.h"
 
 
 struct ServiceTrunk {
@@ -47,9 +49,11 @@ struct ServiceTrunkOrder {
     PricelistPrice * price = nullptr;
     Client * account;
     StatsTrunkSettings * statsTrunkSettings;
-    int nnpPackagePrice_id = 0;
-    int nnpPackagePricelist_id = 0;
-    int nnpPackage_id = 0;
+
+    NNPPackage * nnpPackage = nullptr;
+    NNPPackagePrice * nnpPackagePrice = nullptr;
+    NNPPackagePricelist * nnpPackagePricelist = nullptr;
+
     double nnp_price = 0;
 
     int priority = 0;
@@ -78,17 +82,20 @@ struct ServiceTrunkOrder {
         if (pricelist != nullptr) {
             trace << "pricelist_id: " << pricelist->id << ", ";
         }
-        if (nnpPackage_id > 0) {
-            trace << "nnpPackage_id: " << nnpPackage_id << ", ";
+
+        if (nnpPackage != nullptr) {
+            trace << "nnpPackage_id: " << nnpPackage->id << ", ";
         }
-            if (nnpPackagePrice_id > 0) {
-            trace << "nnpPackagePrice_id: " << nnpPackagePrice_id << ", ";
-            trace << "nnp_price: " << nnp_price << ", ";
+
+        if (nnpPackagePrice != nullptr) {
+            trace << "nnpPackagePrice_id: " << nnpPackagePrice->id << ", ";
         }
-        if (nnpPackagePricelist_id > 0) {
-            trace << "nnpPackagePricelist_id: " << nnpPackagePricelist_id << ", ";
-            trace << "nnp_price: " << nnp_price << ", ";
+
+        if (nnpPackagePricelist != nullptr) {
+            trace << "nnpPackagePricelist_id: " << nnpPackagePricelist->id << ", ";
         }
+
+        trace << "nnp_price: " << nnp_price << ", ";
 
         if (price != nullptr) {
             trace << "prefix: " << price->prefix << ", ";

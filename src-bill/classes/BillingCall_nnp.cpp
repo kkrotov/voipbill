@@ -31,11 +31,9 @@ void BillingCall::calcNNPByTrunk() {
 
     setupAccount();
 
-    NNPPackage *nnpPackage = repository->getNNPPackage(call->nnp_package_id,trace);
+    if(callInfo->nnpPackage == nullptr)  throw CalcException("NOT FOUND nnpPackages");
 
-    if(nnpPackage == nullptr)  throw CalcException("NOT FOUND nnpPackages");
-
-    setupBilledTimeNNP(nnpPackage);
+    setupBilledTimeNNP(callInfo->nnpPackage);
 
     setupNNPCost();
 }
@@ -59,9 +57,21 @@ void BillingCall::setupEffectiveOrigNNPTrunkSettings(set<int> &nnpDestinationIds
         callInfo->serviceTrunk = order.serviceTrunk;
         callInfo->trunkSettings = order.trunkSettings;
 
-        call->nnp_package_price_id = order.nnpPackagePrice_id;
-        call->nnp_package_pricelist_id = order.nnpPackagePricelist_id;
-        call->nnp_package_id = order.nnpPackage_id;
+        callInfo->nnpPackage = order.nnpPackage;
+        callInfo->nnpPackagePricelist = order.nnpPackagePricelist;
+        callInfo->nnpPackagePrice = order.nnpPackagePrice;
+
+        if(order.nnpPackagePrice != nullptr) {
+            call->nnp_package_price_id = order.nnpPackagePrice->id;
+        }
+
+        if(order.nnpPackagePricelist != nullptr) {
+            call->nnp_package_pricelist_id = order.nnpPackagePricelist->id;
+        }
+
+        if(order.nnpPackage != nullptr) {
+            call->nnp_package_id = order.nnpPackage->id;
+        }
         call->rate = order.nnp_price;
 
         callInfo->pricelist = nullptr;
@@ -91,10 +101,21 @@ void BillingCall::setupEffectiveTermNNPTrunkSettings(set<int> &nnpDestinationIds
         callInfo->serviceTrunk = order.serviceTrunk;
         callInfo->trunkSettings = order.trunkSettings;
 
-        call->nnp_package_price_id = order.nnpPackagePrice_id;
-        call->nnp_package_pricelist_id = order.nnpPackagePricelist_id;
-        call->nnp_package_id = order.nnpPackage_id;
-        call->rate = order.nnp_price;
+        callInfo->nnpPackage = order.nnpPackage;
+        callInfo->nnpPackagePricelist = order.nnpPackagePricelist;
+        callInfo->nnpPackagePrice = order.nnpPackagePrice;
+
+        if(order.nnpPackagePrice != nullptr) {
+            call->nnp_package_price_id = order.nnpPackagePrice->id;
+        }
+
+        if(order.nnpPackagePricelist != nullptr) {
+            call->nnp_package_pricelist_id = order.nnpPackagePricelist->id;
+        }
+
+        if(order.nnpPackage != nullptr) {
+            call->nnp_package_id = order.nnpPackage->id;
+        }
 
         callInfo->pricelist = nullptr;
         callInfo->price = nullptr;

@@ -47,16 +47,16 @@ Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkS
                 if (resultNNPPackagePriceIds.size() == 0 && resultNNPPackagePricelistIds.size() == 0)
                     continue;
 
-                set<pair<double, pair<int, int>>> resultNNPPackage;
+                set<pair<double, pair<NNPPackagePricelist *, NNPPackagePrice *>>> resultNNPPackage;
 
                 for (auto i:resultNNPPackagePriceIds) {
                     if (i.second != nullptr)
-                        resultNNPPackage.insert(make_pair(i.first, make_pair(0, i.second->id)));
+                        resultNNPPackage.insert(make_pair(i.first, make_pair(nullptr, i.second)));
                 }
 
                 for (auto i:resultNNPPackagePricelistIds) {
                     if (i.second != nullptr)
-                        resultNNPPackage.insert(make_pair(i.first, make_pair(i.second->id, 0)));
+                        resultNNPPackage.insert(make_pair(i.first, make_pair(i.second, nullptr)));
                 }
 
 
@@ -68,7 +68,7 @@ Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkS
                     continue;
                 }
 
-                pair<int, int> nnpPackage = (*(resultNNPPackage.begin())).second;
+                pair<NNPPackagePricelist *, NNPPackagePrice *> nnpPackagesPair = (*(resultNNPPackage.begin())).second;
 
                 ServiceTrunkOrder order;
                 order.trunk = trunk;
@@ -77,13 +77,15 @@ Repository::getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkS
                 order.trunkSettings = trunkSettings;
                 order.statsTrunkSettings = nullptr;
 
-                if (nnpPackage.first > 0) {
-                    order.nnpPackagePrice_id = nnpPackage.first;
-                } else {
-                    order.nnpPackagePricelist_id = nnpPackage.second;
+                if (nnpPackagesPair.first != nullptr) {
+                    order.nnpPackagePricelist = nnpPackagesPair.first;
+                };
+
+                if ( nnpPackagesPair.second != nullptr) {
+                    order.nnpPackagePrice = nnpPackagesPair.second;
                 }
 
-                order.nnpPackage_id = trunkSettings->nnp_tariff_id;
+                order.nnpPackage = getNNPPackage(trunkSettings->nnp_tariff_id,trace);
 
                 if (trace != nullptr) {
                     *trace << "DEBUG|TRUNK SETTINGS ACCEPT|TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " <<
@@ -170,7 +172,7 @@ bool Repository::getNNPDestinationByNum(set<int> &nnpDestinationIds, long long i
     NNPNumberRange *nnpNumberRange = getNNPNumberRange(num, trace);
     fResult = getNNPDestinationByNumberRange(nnpDestinationIds, nnpNumberRange, trace);
     if (trace != nullptr && !fResult) {
-        *trace << "NOT FOUND|NNPDestination|BY num '" << num << "'" << "\n";
+        *trace << string("NOT FOUND|NNPDestination|BY num '") << num << "'" << "\n";
 
     }
     return fResult;
