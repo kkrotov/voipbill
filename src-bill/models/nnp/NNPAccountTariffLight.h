@@ -10,11 +10,6 @@ struct NNPAccountTariffLight {
     double coefficient;
     time_t activate_from, deactivate_from;
 
-    int tarification_free_seconds;
-    int tarification_interval_seconds;
-    int tarification_type;
-    int tarification_min_paid_seconds;
-    
     double price;
 
     void dump(stringstream &trace) {
@@ -26,10 +21,6 @@ struct NNPAccountTariffLight {
         trace << "activate_from: " << string_time(activate_from) << ", ";
         trace << "deactivate_from: " << string_time(deactivate_from) << ", ";
         trace << "coefficient: " << coefficient << ", ";
-        trace << "tarification_free_seconds: " << tarification_free_seconds << ", ";
-        trace << "tarification_interval_seconds: " << tarification_interval_seconds << ", ";
-        trace << "tarification_type: " << tarification_type << ", ";
-        trace << "tarification_min_paid_seconds: " << tarification_min_paid_seconds << ", ";
         trace << "price: " << price << ", ";       
         trace << ")";
     }
