@@ -203,9 +203,9 @@ void BillingCall::calcOrigNNPByNumber() {
 
     call->package_time = 0;
 
-    if (effectivePackageMinute.second != nullptr) {
+    if (effectivePackageMinute.second.id != 0) {
 
-        NNPPackage *nnpPackage = repository->getNNPPackage(effectivePackageMinute.second->nnp_tariff_id,trace);
+        NNPPackage *nnpPackage = repository->getNNPPackage(effectivePackageMinute.second.nnp_tariff_id,trace);
 
         if(nnpPackage == nullptr)  throw CalcException("NOT FOUND nnpPackages");
         setupBilledTimeNNP(nnpPackage);
@@ -227,8 +227,8 @@ void BillingCall::calcOrigNNPByNumber() {
                 *trace << "DETAIL|NNP|SOLVED avalibleNNPPackageSeconds = " << avalibleNNPPackageSeconds << "\n";
             }
 
-            call->nnp_package_minute_id = effectivePackageMinute.second->id; //  Это значит, что минуты выбираются из предоплаченных локального тарифа
-            call->nnp_package_id = effectivePackageMinute.second->nnp_tariff_id;
+            call->nnp_package_minute_id = effectivePackageMinute.second.id; //  Это значит, что минуты выбираются из предоплаченных локального тарифа
+            call->nnp_package_id = effectivePackageMinute.second.nnp_tariff_id;
             call->package_time = avalibleNNPPackageSeconds;
 
             NNPPackageMinute *nnpPackageMinute = repository->getNNPPackageMinute(call->nnp_package_minute_id, trace);
@@ -346,11 +346,11 @@ int BillingCall::getCallLengthNNP(int len, int tarification_free_seconds, int ta
  *   ннп- пакетов с минутами. получится так, что примениться максимально полный пакет, а остаток минут тарифицируется за деньги
  */
 
-pair<int, NNPPackageMinute *> BillingCall::setupNNPPackageMinute(vector<NNPAccountTariffLight> &nnpAccountTariffLightList,
+pair<int, NNPPackageMinute> BillingCall::setupNNPPackageMinute(vector<NNPAccountTariffLight> &nnpAccountTariffLightList,
                                                   set<int> &nnpDestinationIds) {
 
     vector<NNPPackageMinute> nnpPackageMinuteList;
-    set<pair<double, pair<int, NNPPackageMinute *>>> EffectiveNnpPackageMinuteList;
+    set<pair<double, pair<int, NNPPackageMinute>>> EffectiveNnpPackageMinuteList;
     map<int, int> tariffIdAccountTariffLightId;
     map<int, NNPAccountTariffLight *> nnpAccountTariffLightMap;
     double minute_cost;
@@ -394,14 +394,14 @@ pair<int, NNPPackageMinute *> BillingCall::setupNNPPackageMinute(vector<NNPAccou
 
             if (seconds_left > 0)
                 EffectiveNnpPackageMinuteList.insert(
-                        make_pair(minute_cost, make_pair(seconds_left, &*it2)));
+                        make_pair(minute_cost, make_pair(seconds_left, *it2)));
         }
     }
 
     if (EffectiveNnpPackageMinuteList.size() > 0)
         return EffectiveNnpPackageMinuteList.begin()->second;
     else
-        return pair<int, NNPPackageMinute *>(0, nullptr);
+        return pair<int, NNPPackageMinute>(0, NNPPackageMinute());
 
 }
 

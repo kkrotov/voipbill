@@ -116,7 +116,7 @@ protected:
 
     void calcOrigNNPByNumber();
 
-    pair<int, NNPPackageMinute *> setupNNPPackageMinute(vector<NNPAccountTariffLight> &nnpAccountTariffLight,
+    pair<int, NNPPackageMinute> setupNNPPackageMinute(vector<NNPAccountTariffLight> &nnpAccountTariffLight,
                                          set<int> &nnpDestinationIds);
 
     pair<double, NNPPackagePricelist *> setupNNPPackagePricelist(vector<NNPAccountTariffLight> &nnpAccountTariffLightList,

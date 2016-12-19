@@ -16,4 +16,14 @@ struct NNPPackageMinute {
         trace << "minute: " << minute << ", ";
         trace << ")";
     }
+
+    NNPPackageMinute() {
+        id = 0;
+        nnp_destination_id = 0;
+        nnp_tariff_id = 0;
+        minute = 0;
+    }
+
+    bool operator< (const NNPPackageMinute) const { return false; }
+
 };
