@@ -334,6 +334,9 @@ public:
         serviceNumber->findAllByClientID(resultServiceNumber, client_id, trace);
     }
 
+    void getServiceTrunkByClientID(vector<ServiceTrunk> &resultServiceTrunk, int client_id) {
+        serviceTrunk->findAllByClientID(resultServiceTrunk, client_id, trace);
+    }
 
     void getNNPPackageMinuteByTariff(vector<NNPPackageMinute> &resultNNPPackageMinute, int nnp_tariff_id,
                                      double coefficient) {
