@@ -1,88 +1,10 @@
 #include "BillingCall.h"
 #include "../classes/CalcException.h"
 
-void BillingCall::calcNNPByTrunk() {
-
-    set<int> nnpDestinationIds; // Вычисляем все nnp-направления для номера получателя
-    vector<NNPAccountTariffLight> nnpAccountTariffLightList;
-
-    if (callInfo->serviceTrunk == nullptr) throw CalcException("NOT FOUND serviceTrunk");
-
-    // Загружаем список nnp-тарифов на лицевом счете действующих на время соединения
-    repository->getActiveNNPAccountTariffLight(nnpAccountTariffLightList, call->account_id,
-                                               call->connect_time, callInfo->serviceTrunk->id);
-
-    if (nnpAccountTariffLightList.size() == 0) throw CalcException("NOT FOUND AccountTariffLight");
-
-    // Вычисляем все nnp-направления для B-номера звонка
-    NNPNumberRange *nnpNumberRange = repository->getNNPNumberRange(call->dst_number, trace);
-
-    if (nnpNumberRange == nullptr) throw CalcException("NOT FOUND NumberRange");
-
-    repository->getNNPDestinationByNumberRange(nnpDestinationIds, nnpNumberRange, trace);
-
-    if (call->orig) {
-        setupEffectiveOrigNNPTrunkSettings(nnpDestinationIds);  // Вычисляем минимальную цену в присоединенных прайслистах на входящем транке
-    } else {
-        setupEffectiveTermNNPTrunkSettings(nnpDestinationIds);  // Вычисляем минимальную цену в присоединенных прайслистах на исходящем транке
-    }
-
-    setupServiceTrunk();
-
-    setupAccount();
-
-    if(callInfo->nnpPackage == nullptr)  throw CalcException("NOT FOUND nnpPackages");
-
-    setupBilledTimeNNP(callInfo->nnpPackage);
-
-    setupNNPCost();
-}
-
-void BillingCall::setupEffectiveOrigNNPTrunkSettings(set<int> &nnpDestinationIds) {
-
-    vector<ServiceTrunk *> serviceTrunk;
-
-    vector<ServiceTrunkOrder> trunkSettingsOrderList;
-
-    repository->getNNPTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
-                                             nnpDestinationIds,SERVICE_TRUNK_SETTINGS_ORIGINATION);
-    // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
-
-    repository->orderOrigTrunkSettingsOrderList(trunkSettingsOrderList);
-    // отсортировали по цене
-
-    if (trunkSettingsOrderList.size() > 0) {
-        auto order = trunkSettingsOrderList.at(0);
-        callInfo->account = order.account;
-        callInfo->serviceTrunk = order.serviceTrunk;
-        callInfo->trunkSettings = order.trunkSettings;
-
-        callInfo->nnpPackage = order.nnpPackage;
-        callInfo->nnpPackagePricelist = order.nnpPackagePricelist;
-        callInfo->nnpPackagePrice = order.nnpPackagePrice;
-
-        if(order.nnpPackagePrice != nullptr) {
-            call->nnp_package_price_id = order.nnpPackagePrice->id;
-        }
-
-        if(order.nnpPackagePricelist != nullptr) {
-            call->nnp_package_pricelist_id = order.nnpPackagePricelist->id;
-        }
-
-        if(order.nnpPackage != nullptr) {
-            call->nnp_package_id = order.nnpPackage->id;
-        }
-        call->rate = order.nnp_price;
-
-        callInfo->pricelist = nullptr;
-        callInfo->price = nullptr;
-    }
-}
-
 void BillingCall::setupEffectiveTermNNPTrunkSettings(set<int> &nnpDestinationIds) {
     vector<ServiceTrunkOrder> trunkSettingsOrderList;
 
-    repository->getNNPTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
+    repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
                                              nnpDestinationIds,SERVICE_TRUNK_SETTINGS_TERMINATION);
     // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
 

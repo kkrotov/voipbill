@@ -84,39 +84,26 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
 
 void BillingCall::calcByTrunk() {
 
+
     if (trace != nullptr) {
         *trace << "INFO|TARIFFICATION BY TRUNK" << "\n";
     }
 
-    if (call->account_version == CALL_ACCOUNT_VERSION_5) {
-        // Обсчитываем плечо по пакетной схеме
-        if (trace != nullptr) {
-            *trace << "INFO|CALL_ACCOUNT_VERSION_5" << "\n";
-        }
 
-        calcNNPByTrunk();
+    if (call->orig) {
+        setupEffectiveOrigTrunkSettings();  // Вычисляем минимальную цену в присоединенных прайслистах на входящем транке
+    } else {
+        setupEffectiveTermTrunkSettings();  // Вычисляем минимальную цену в присоединенных прайслистах на исходящем транке
+    }
 
-    } else if (call->account_version == CALL_ACCOUNT_VERSION_4) {
-        // Обсчитываем плечо по традиционной схеме
-        if (trace != nullptr) {
-            *trace << "INFO|CALL_ACCOUNT_VERSION_4" << "\n";
-        }
+    setupServiceTrunk();                    // Присоединение данных по услуге Транк на плече из структуры callInfo в call
 
-        if (call->orig) {
-            setupEffectiveOrigTrunkSettings();  // Вычисляем минимальную цену в присоединенных прайслистах на входящем транке
-        } else {
-            setupEffectiveTermTrunkSettings();  // Вычисляем минимальную цену в присоединенных прайслистах на исходящем транке
-        }
-
-        setupServiceTrunk();                    // Присоединение данных по услуге Транк на плече из структуры callInfo в call
-
-        setupAccount();                         // в структуре callinfo заполняется структура account
-        // (информация о лицевом счете обсчитываемого плеча)
-
+    setupAccount();                         // в структуре callinfo заполняется структура account
+    // (информация о лицевом счете обсчитываемого плеча)
+    if (call->account_version == CALL_ACCOUNT_VERSION_4) {
         if (call->orig) {
             setupPackagePricelist();            // поисх подходящего пакета для обсчета оригинационного плеча, если находим, используем его
         }
-
         setupPricelist();                       // присоединяем в callInfo->pricelist прайслист по pricelist_id
         // при расчете с авторизацией по транку прайслист должен быть
         // выбран ранее. Из пакета?
@@ -144,11 +131,16 @@ void BillingCall::calcByTrunk() {
             call->interconnect_rate = callInfo->pricelist->initiate_mgmn_cost;
             call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
         }
+        setupCost();                            // Расчет стоимости плеча. С учетом остатка по найденому пакету
+    } else if (call->account_version == CALL_ACCOUNT_VERSION_5) {
+
+        setupBilledTimeNNP(callInfo->nnpPackage);
+
+        setupNNPCost();
+
     } else {
         throw CalcException("UNKNOW ACCOUNT VERSION");
     }
-
-    setupCost();                            // Расчет стоимости плеча. С учетом остатка по найденому пакету
 
 }
 
@@ -627,9 +619,12 @@ void BillingCall::setupTrunk() {
 
 void BillingCall::setupEffectiveOrigTrunkSettings() {
     vector<ServiceTrunkOrder> trunkSettingsOrderList;
+    set<int> nnpDestinationIds;
+
+    repository->getNNPDestinationByNumberRange(nnpDestinationIds, callInfo->nnpNumberRange, trace);
 
     repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
-                                          SERVICE_TRUNK_SETTINGS_ORIGINATION);
+                                          nnpDestinationIds, SERVICE_TRUNK_SETTINGS_ORIGINATION);
     // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
 
     repository->orderOrigTrunkSettingsOrderList(trunkSettingsOrderList);
@@ -643,7 +638,15 @@ void BillingCall::setupEffectiveOrigTrunkSettings() {
         callInfo->pricelist = order.pricelist;
         callInfo->price = order.price;
 
-        // сохраняем в структуре callInfo самый дешевый прайслист и цену для этой пары АБ.
+        if (callInfo->account != nullptr && callInfo->account->account_version == CALL_ACCOUNT_VERSION_5) {
+            callInfo->nnpPackage = order.nnpPackage;
+            callInfo->nnpPackagePricelist = order.nnpPackagePricelist;
+            callInfo->nnpPackagePrice = order.nnpPackagePrice;
+            call->nnp_package_price_id = order.nnpPackagePrice->id;
+            call->nnp_package_pricelist_id = order.nnpPackagePricelist->id;
+            call->nnp_package_id = order.nnpPackage->id;
+            call->rate = order.nnp_price;
+        }
 
     }
 }
@@ -655,10 +658,12 @@ void BillingCall::setupEffectiveOrigTrunkSettings() {
 
 void BillingCall::setupEffectiveTermTrunkSettings() {
     vector<ServiceTrunkOrder> trunkSettingsOrderList;
+    set<int> nnpDestinationIds;
+
+    repository->getNNPDestinationByNumberRange(nnpDestinationIds, callInfo->nnpNumberRange, trace);
 
     repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
-                                          SERVICE_TRUNK_SETTINGS_TERMINATION);
-    // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
+                                          nnpDestinationIds, SERVICE_TRUNK_SETTINGS_TERMINATION);
 
     Trunk *orig_trunk = repository->getTrunkByName(cdr->src_route);
     if (orig_trunk == nullptr) {
@@ -678,6 +683,17 @@ void BillingCall::setupEffectiveTermTrunkSettings() {
         callInfo->price = order.price;
         // сохраняем в структуре callInfo самый дешевый прайслист и цену для этой пары АБ.
         call->trunk_settings_stats_id = order.statsTrunkSettings->id;
+
+        if (callInfo->account != nullptr && callInfo->account->account_version == CALL_ACCOUNT_VERSION_5) {
+            callInfo->nnpPackage = order.nnpPackage;
+            callInfo->nnpPackagePricelist = order.nnpPackagePricelist;
+            callInfo->nnpPackagePrice = order.nnpPackagePrice;
+            call->nnp_package_price_id = order.nnpPackagePrice->id;
+            call->nnp_package_pricelist_id = order.nnpPackagePricelist->id;
+            call->nnp_package_id = order.nnpPackage->id;
+            call->rate = order.nnp_price;
+        }
+
     }
 }
 

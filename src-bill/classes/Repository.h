@@ -320,9 +320,6 @@ public:
     bool checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
                                       long long int dstNumber, Pricelist *&pricelist, PricelistPrice *&price);
 
-    void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
-                                   long long int srcNumber, long long int dstNumber, int destinationType);
-
     void getActiveNNPAccountTariffLight(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight, int client_id,
                                         time_t connect_time, int service_number_id) {
 
@@ -396,7 +393,7 @@ public:
 
     void getTrunkPriority(int trunk_id, vector<TrunkPriority> &trunkPriorityList);
 
-    void getNNPTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
+    void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
                                       long long int srcNumber, long long int dstNumber, set<int> &nnpDestinationIds, int destinationType);
 
     bool checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber, long long int dstNumber);

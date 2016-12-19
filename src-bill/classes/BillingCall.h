@@ -76,8 +76,6 @@ protected:
 
     void setupTrunk();
 
-    void setupEffectiveOrigTrunkSettings();
-
     void setupEffectiveTermTrunkSettings();
 
     void setupServiceTrunk();
@@ -133,9 +131,7 @@ protected:
 
     bool processSignalingCallId();
 
-    void calcNNPByTrunk();
-
-    void setupEffectiveOrigNNPTrunkSettings(set<int> &nnpDestinationIds);
+    void setupEffectiveOrigTrunkSettings();
 
     void setupEffectiveTermNNPTrunkSettings(set<int> &nnpDestinationIds);
 

@@ -439,7 +439,7 @@ bool Repository::priceLessThan(double priceLeft, NNPPackage *leftNNPPackage, dou
 }
 
 void Repository::getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
-                                           long long int srcNumber, long long int dstNumber, int destinationType) {
+                                           long long int srcNumber, long long int dstNumber,set<int> &nnpDestinationIds, int destinationType) {
     vector<ServiceTrunk *> serviceTrunks;
     getAllServiceTrunk(serviceTrunks, trunk->id);
 
@@ -574,6 +574,9 @@ bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettin
 }
 
 bool Repository::trunkOrderLessThan(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) const {
+
+// Нужно переделывать. Неккоректно сравнивает транк-сервисы #4 и #5
+
     if(left.price == nullptr && left.pricelist == nullptr && right.price == nullptr && right.pricelist == nullptr) {
         return priceLessThan(left.nnp_price, left.nnpPackage, right.nnp_price , right.nnpPackage);
     }

@@ -42,13 +42,13 @@ struct ServiceTrunk {
 };
 
 struct ServiceTrunkOrder {
-    Trunk * trunk;
-    ServiceTrunk * serviceTrunk;
-    ServiceTrunkSettings * trunkSettings;
+    Trunk * trunk = nullptr;
+    ServiceTrunk * serviceTrunk = nullptr;
+    ServiceTrunkSettings * trunkSettings = nullptr;
     Pricelist * pricelist = nullptr;
     PricelistPrice * price = nullptr;
-    Client * account;
-    StatsTrunkSettings * statsTrunkSettings;
+    Client * account = nullptr;
+    StatsTrunkSettings * statsTrunkSettings = nullptr;
 
     NNPPackage * nnpPackage = nullptr;
     NNPPackagePrice * nnpPackagePrice = nullptr;
