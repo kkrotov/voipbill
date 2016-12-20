@@ -1,51 +1,6 @@
 #include "BillingCall.h"
 #include "../classes/CalcException.h"
 
-void BillingCall::setupEffectiveTermNNPTrunkSettings(set<int> &nnpDestinationIds) {
-    vector<ServiceTrunkOrder> trunkSettingsOrderList;
-
-    repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
-                                             nnpDestinationIds,SERVICE_TRUNK_SETTINGS_TERMINATION);
-    // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
-
-    Trunk *orig_trunk = repository->getTrunkByName(cdr->src_route);
-    if (orig_trunk == nullptr) {
-        throw CalcException("ORIG TRUNK WAS NOT FOUND");
-    }
-
-    // отсортировали по цене, причем применили настройку на оригинационном плече - использовать или нет минималки на терм-плече
-
-    repository->orderTermTrunkSettingsOrderList(trunkSettingsOrderList, orig_trunk->sw_minimalki, call->connect_time);
-
-    if (trunkSettingsOrderList.size() > 0) {
-        auto order = trunkSettingsOrderList.at(0);
-        callInfo->account = order.account;
-        callInfo->serviceTrunk = order.serviceTrunk;
-        callInfo->trunkSettings = order.trunkSettings;
-
-        callInfo->nnpPackage = order.nnpPackage;
-        callInfo->nnpPackagePricelist = order.nnpPackagePricelist;
-        callInfo->nnpPackagePrice = order.nnpPackagePrice;
-
-        if(order.nnpPackagePrice != nullptr) {
-            call->nnp_package_price_id = order.nnpPackagePrice->id;
-        }
-
-        if(order.nnpPackagePricelist != nullptr) {
-            call->nnp_package_pricelist_id = order.nnpPackagePricelist->id;
-        }
-
-        if(order.nnpPackage != nullptr) {
-            call->nnp_package_id = order.nnpPackage->id;
-        }
-
-        callInfo->pricelist = nullptr;
-        callInfo->price = nullptr;
-
-        call->trunk_settings_stats_id = order.statsTrunkSettings->id;
-    }
-}
-
 void BillingCall::calcOrigNNPByNumber() {
 
     set<int> nnpDestinationIds; // Вычисляем все nnp-направления для номера получателя
@@ -312,7 +267,7 @@ pair<int, NNPPackageMinute> BillingCall::setupNNPPackageMinute(vector<NNPAccount
             int current_used_seconds = repository->currentCalls->getStatsNNPPackageMinute().
                     get()->getCurrent(time(nullptr), callInfo->account, &*it2, nnpAccountTariffLight)->used_seconds;
 
-            int seconds_left = it2->minute * 60 - used_seconds - global_used_seconds - current_used_seconds;
+            int seconds_left = (int)(it2->minute * 60 - used_seconds - global_used_seconds - current_used_seconds);
 
             if (seconds_left > 0)
                 EffectiveNnpPackageMinuteList.insert(

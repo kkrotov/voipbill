@@ -1,4 +1,5 @@
 #include "Repository.h"
+#include "../models/Price.h"
 
 bool Repository::prepare(time_t currentTime) {
 
@@ -368,16 +369,6 @@ double Repository::priceToRoubles(double price, const Pricelist &pricelist) cons
     }
 }
 
-double Repository::priceToRoubles(double price, const char *currency_id) const {
-    double currencyRate = 1.0;
-    if (this->getCurrencyRate(currency_id, &currencyRate)
-        && currencyRate > 0.00000001) {
-        return price * currencyRate;
-    } else {
-        return price;
-    }
-}
-
 bool Repository::getCurrencyRate(const char *currency_id, double *o_currencyRate) const {
     if (!currency_id || !o_currencyRate) {
         throw Exception("Invalid arguments passed into getCurrencyRate()");
@@ -414,32 +405,10 @@ bool Repository::matchNumber(int number_id, long long int numberPrefix) {
 
 }
 
-bool Repository::priceLessThan(double priceLeft, const Pricelist &pricelistLeft,
-                               double priceRight, const Pricelist &pricelistRight) const {
-    if (0 == strncmp(pricelistLeft.currency_id, pricelistRight.currency_id, 4)) {
-        return priceLeft < priceRight;
-    } else {
-        double leftRoubles = this->priceToRoubles(priceLeft, pricelistLeft);
-        double rightRoubles = this->priceToRoubles(priceRight, pricelistRight);
-        return leftRoubles < rightRoubles;
-    }
-}
-
-bool Repository::priceLessThan(double priceLeft, NNPPackage *leftNNPPackage, double priceRight , NNPPackage *rightNNPPackage) const{
-    if(leftNNPPackage== nullptr || rightNNPPackage == nullptr) return priceLeft < priceRight;
-
-    if (0 == strncmp(leftNNPPackage->currency_id, rightNNPPackage->currency_id, 4)) {
-        return priceLeft < priceRight;
-    } else {
-        double leftRoubles = this->priceToRoubles(priceLeft, leftNNPPackage->currency_id);
-        double rightRoubles = this->priceToRoubles(priceRight, rightNNPPackage->currency_id);
-        return leftRoubles < rightRoubles;
-    }
-
-}
 
 void Repository::getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
-                                           long long int srcNumber, long long int dstNumber,set<int> &nnpDestinationIds, int destinationType) {
+                                           long long int srcNumber, long long int dstNumber,
+                                           set<int> &nnpDestinationIds, int destinationType) {
     vector<ServiceTrunk *> serviceTrunks;
     getAllServiceTrunk(serviceTrunks, trunk->id);
 
@@ -456,26 +425,94 @@ void Repository::getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrun
         getAllServiceTrunkSettings(trunkSettingsList, serviceTrunk->id, destinationType);
 
         for (auto trunkSettings : trunkSettingsList) {
-            Pricelist *pricelist;
-            PricelistPrice *price;
-            if (checkTrunkSettingsConditions(trunkSettings, srcNumber, dstNumber, pricelist, price)) {
-                auto account = getAccount(serviceTrunk->client_account_id);
-                if (account == nullptr) {
-                    if (trace != nullptr) {
-                        *trace << "DEBUG|TRUNK SETTINGS SKIP|ACCOUNT NOT FOUND BY ID " <<
-                               serviceTrunk->client_account_id << "\n";
-                    }
-                    continue;
+            auto account = getAccount(serviceTrunk->client_account_id);
+            if (account == nullptr) {
+                if (trace != nullptr) {
+                    *trace << "DEBUG|TRUNK SETTINGS SKIP|ACCOUNT NOT FOUND BY ID " <<
+                           serviceTrunk->client_account_id << "\n";
                 }
-                ServiceTrunkOrder order;
-                order.trunk = trunk;
-                order.account = account;
-                order.serviceTrunk = serviceTrunk;
-                order.trunkSettings = trunkSettings;
-                order.statsTrunkSettings = nullptr;
-                order.pricelist = pricelist;
-                order.price = price;
-                resultTrunkSettingsTrunkOrderList.push_back(order);
+                continue;
+            }
+
+            if (account->account_version == CALL_ACCOUNT_VERSION_4) {
+                Pricelist *pricelist;
+                PricelistPrice *price;
+                if (checkTrunkSettingsOldPricelistConditions(trunkSettings, srcNumber, dstNumber, pricelist, price)) {
+
+                    ServiceTrunkOrder order;
+                    order.trunk = trunk;
+                    order.account = account;
+                    order.serviceTrunk = serviceTrunk;
+                    order.trunkSettings = trunkSettings;
+                    order.statsTrunkSettings = nullptr;
+                    order.pricelist = pricelist;
+                    order.price = price;
+                    resultTrunkSettingsTrunkOrderList.push_back(order);
+                }
+            } else if (account->account_version == CALL_ACCOUNT_VERSION_5) {
+                if (checkNNPTrunkSettingsConditions(trunkSettings, srcNumber, dstNumber)) {
+                    set<pair<double, NNPPackagePrice *>> resultNNPPackagePriceIds;
+                    set<pair<double, NNPPackagePricelist *>> resultNNPPackagePricelistIds;
+
+                    findNNPPackagePriceIds(resultNNPPackagePriceIds, trunkSettings->nnp_tariff_id,
+                                           nnpDestinationIds, trace);
+
+                    findNNPPackagePricelistIds(resultNNPPackagePricelistIds, trunkSettings->nnp_tariff_id,
+                                               dstNumber, trace);
+
+                    if (resultNNPPackagePriceIds.size() == 0 && resultNNPPackagePricelistIds.size() == 0)
+                        continue;
+
+                    set<pair<double, pair<NNPPackagePricelist *, NNPPackagePrice *>>> resultNNPPackage;
+
+                    for (auto i:resultNNPPackagePriceIds) {
+                        if (i.second != nullptr)
+                            resultNNPPackage.insert(make_pair(i.first, make_pair(nullptr, i.second)));
+                    }
+
+                    for (auto i:resultNNPPackagePricelistIds) {
+                        if (i.second != nullptr)
+                            resultNNPPackage.insert(make_pair(i.first, make_pair(i.second, nullptr)));
+                    }
+
+
+                    if (resultNNPPackage.size() == 0) {
+                        if (trace != nullptr) {
+                            *trace << "DEBUG|TRUNK SETTINGS DECLINE|NNP_PACKAGE NOT FOUND TRUNK_SETTINGS_ID: " <<
+                                   trunkSettings->id << " / " << trunkSettings->order << "\n";
+                        }
+                        continue;
+                    }
+
+                    pair<NNPPackagePricelist *, NNPPackagePrice *> nnpPackagesPair = (*(resultNNPPackage.begin())).second;
+
+                    ServiceTrunkOrder order;
+                    order.trunk = trunk;
+                    order.account = account;
+                    order.serviceTrunk = serviceTrunk;
+                    order.trunkSettings = trunkSettings;
+                    order.statsTrunkSettings = nullptr;
+
+                    if (nnpPackagesPair.first != nullptr) {
+                        order.nnpPackagePricelist = nnpPackagesPair.first;
+                    };
+
+                    if (nnpPackagesPair.second != nullptr) {
+                        order.nnpPackagePrice = nnpPackagesPair.second;
+                    }
+
+                    order.nnpPackage = getNNPPackage(trunkSettings->nnp_tariff_id, trace);
+
+                    if (trace != nullptr) {
+                        *trace << "DEBUG|TRUNK SETTINGS ACCEPT|TRUNK_SETTINGS_ID: " << trunkSettings->id << " / " <<
+                               trunkSettings->order << "\n";
+                    }
+                    order.nnp_price = (*(resultNNPPackage.begin())).first;
+                    order.price = nullptr;
+                    order.pricelist = nullptr;
+
+                    resultTrunkSettingsTrunkOrderList.push_back(order);
+                }
             }
         }
 
@@ -500,8 +537,9 @@ void Repository::getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrun
     }
 }
 
-bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
-                                              long long int dstNumber, Pricelist *&pricelist, PricelistPrice *&price) {
+bool Repository::checkTrunkSettingsOldPricelistConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
+                                                          long long int dstNumber, Pricelist *&pricelist,
+                                                          PricelistPrice *&price) {
 
     if (trunkSettings->src_number_id > 0 && !matchNumber(trunkSettings->src_number_id, srcNumber)) {
         if (trace != nullptr) {
@@ -573,30 +611,56 @@ bool Repository::checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettin
     return true;
 }
 
+bool Repository::priceLessThan(double priceLeft, const Pricelist &pricelistLeft,
+                               double priceRight, const Pricelist &pricelistRight) const {
+    if (0 == strncmp(pricelistLeft.currency_id, pricelistRight.currency_id, 4)) {
+        return priceLeft < priceRight;
+    } else {
+        double leftRoubles = this->priceToRoubles(priceLeft, pricelistLeft);
+        double rightRoubles = this->priceToRoubles(priceRight, pricelistRight);
+        return leftRoubles < rightRoubles;
+    }
+}
+
+void Repository::setCurrencyRate(Price &price) const {
+    double currencyRate = 1.0;
+    if (this->getCurrencyRate(price.currency.c_str(), &currencyRate)
+        && currencyRate > 0.00000001) {
+         price.currency_rate=currencyRate;
+    } else {
+         price.currency_rate=1;
+    }
+}
+
 bool Repository::trunkOrderLessThan(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) const {
 
-// Нужно переделывать. Неккоректно сравнивает транк-сервисы #4 и #5
+    Price leftPrice, rightPrice;
 
-    if(left.price == nullptr && left.pricelist == nullptr && right.price == nullptr && right.pricelist == nullptr) {
-        return priceLessThan(left.nnp_price, left.nnpPackage, right.nnp_price , right.nnpPackage);
+    if (left.account != nullptr) {
+        if (left.nnpPackage != nullptr && left.account->account_version == CALL_ACCOUNT_VERSION_5) {
+            leftPrice.set(left.nnp_price, left.nnpPackage->currency_id);
+        }
+        if (left.account->account_version == CALL_ACCOUNT_VERSION_4 && left.price && left.pricelist) {
+            leftPrice.set(left.price->price, left.pricelist->currency_id);
+        }
     }
 
-    if (left.price && left.pricelist && right.price && right.pricelist) {
-        return priceLessThan(left.price->price, *left.pricelist, right.price->price, *right.pricelist);
+    if (right.account != nullptr) {
+        if (right.nnpPackage != nullptr && right.account->account_version == CALL_ACCOUNT_VERSION_5) {
+            rightPrice.set(right.nnp_price, right.nnpPackage->currency_id);
+        }
+        if (right.account->account_version == CALL_ACCOUNT_VERSION_4 && right.price && right.pricelist) {
+            rightPrice.set(left.price->price, left.pricelist->currency_id);
+        }
     }
 
-    if (left.price && left.pricelist && (!right.price || !right.pricelist)) {
-        // Известная цена всегда строго меньше любой неизвестной цены.
-        return true;
+    if (leftPrice.currency != rightPrice.currency) {
+        setCurrencyRate(leftPrice);
+        setCurrencyRate(rightPrice);
     }
 
-    if ((!left.price || !left.pricelist) && right.price && right.pricelist) {
-        // Неизвестная цена никогда не меньше любой известной цены.
-        return false;
-    }
+    return leftPrice < rightPrice;
 
-    // Если у обоих нет ценника, неважно, что вернуть - мы всё равно не сможем гарантировать стабильность сортировки
-    return false;
 }
 
 double Repository::getVatRate(Client *client) {

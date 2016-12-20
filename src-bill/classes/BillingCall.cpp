@@ -621,7 +621,10 @@ void BillingCall::setupEffectiveOrigTrunkSettings() {
     vector<ServiceTrunkOrder> trunkSettingsOrderList;
     set<int> nnpDestinationIds;
 
-    repository->getNNPDestinationByNumberRange(nnpDestinationIds, callInfo->nnpNumberRange, trace);
+    // Вычисляем все nnp-направления для B-номера звонка
+    NNPNumberRange *term_nnpNumberRange = repository->getNNPNumberRange(call->dst_number, trace);
+
+    repository->getNNPDestinationByNumberRange(nnpDestinationIds, term_nnpNumberRange, trace);
 
     repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
                                           nnpDestinationIds, SERVICE_TRUNK_SETTINGS_ORIGINATION);

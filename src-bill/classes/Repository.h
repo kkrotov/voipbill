@@ -4,6 +4,7 @@
 #include "../data/DataBillingContainer.h"
 #include "../data/DataCurrentCallsContainer.h"
 #include "RadiusAuthRequestResponse.h"
+#include "../models/Price.h"
 
 class Repository {
 public:
@@ -317,8 +318,9 @@ public:
     void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, bool fUseMinimalki,
                                          time_t connect_time) const;
 
-    bool checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
-                                      long long int dstNumber, Pricelist *&pricelist, PricelistPrice *&price);
+    bool checkTrunkSettingsOldPricelistConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
+                                                  long long int dstNumber, Pricelist *&pricelist,
+                                                  PricelistPrice *&price);
 
     void getActiveNNPAccountTariffLight(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight, int client_id,
                                         time_t connect_time, int service_number_id) {
@@ -398,5 +400,6 @@ public:
 
     bool checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber, long long int dstNumber);
 
-    bool priceLessThan(double priceLeft, NNPPackage *leftNNPPackage, double priceRight, NNPPackage *rightNNPPackage) const;
+    void setCurrencyRate(Price &price) const;
+
 };

@@ -409,6 +409,7 @@ void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunk **origServic
         *origPricelist = order.pricelist;
         *origPrice = order.price;
         *origSettings = order.trunkSettings;
+
     }
 }
 
