@@ -619,15 +619,9 @@ void BillingCall::setupTrunk() {
 
 void BillingCall::setupEffectiveOrigTrunkSettings() {
     vector<ServiceTrunkOrder> trunkSettingsOrderList;
-    set<int> nnpDestinationIds;
-
-    // Вычисляем все nnp-направления для B-номера звонка
-    NNPNumberRange *term_nnpNumberRange = repository->getNNPNumberRange(call->dst_number, trace);
-
-    repository->getNNPDestinationByNumberRange(nnpDestinationIds, term_nnpNumberRange, trace);
 
     repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
-                                          nnpDestinationIds, SERVICE_TRUNK_SETTINGS_ORIGINATION);
+                                          SERVICE_TRUNK_SETTINGS_ORIGINATION);
     // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
 
     repository->orderOrigTrunkSettingsOrderList(trunkSettingsOrderList);
@@ -661,12 +655,9 @@ void BillingCall::setupEffectiveOrigTrunkSettings() {
 
 void BillingCall::setupEffectiveTermTrunkSettings() {
     vector<ServiceTrunkOrder> trunkSettingsOrderList;
-    set<int> nnpDestinationIds;
-
-    repository->getNNPDestinationByNumberRange(nnpDestinationIds, callInfo->nnpNumberRange, trace);
 
     repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
-                                          nnpDestinationIds, SERVICE_TRUNK_SETTINGS_TERMINATION);
+                                          SERVICE_TRUNK_SETTINGS_TERMINATION);
 
     Trunk *orig_trunk = repository->getTrunkByName(cdr->src_route);
     if (orig_trunk == nullptr) {

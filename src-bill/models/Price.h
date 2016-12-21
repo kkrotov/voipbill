@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../classes/Repository.h"
+#include "../common.h"
 
 class Price {
 public:
@@ -42,4 +42,5 @@ public:
 
     }
 };
+
 

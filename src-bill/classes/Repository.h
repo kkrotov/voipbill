@@ -396,7 +396,7 @@ public:
     void getTrunkPriority(int trunk_id, vector<TrunkPriority> &trunkPriorityList);
 
     void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
-                                      long long int srcNumber, long long int dstNumber, set<int> &nnpDestinationIds, int destinationType);
+                                      long long int srcNumber, long long int dstNumber, int destinationType);
 
     bool checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber, long long int dstNumber);
 

@@ -1,5 +1,5 @@
 #include "Repository.h"
-#include "../models/Price.h"
+
 
 bool Repository::prepare(time_t currentTime) {
 
@@ -369,6 +369,16 @@ double Repository::priceToRoubles(double price, const Pricelist &pricelist) cons
     }
 }
 
+double Repository::priceToRoubles(double price, const char *currency_id) const {
+    double currencyRate = 1.0;
+    if (this->getCurrencyRate(currency_id, &currencyRate)
+        && currencyRate > 0.00000001) {
+        return price * currencyRate;
+    } else {
+        return price;
+    }
+}
+
 bool Repository::getCurrencyRate(const char *currency_id, double *o_currencyRate) const {
     if (!currency_id || !o_currencyRate) {
         throw Exception("Invalid arguments passed into getCurrencyRate()");
@@ -407,8 +417,13 @@ bool Repository::matchNumber(int number_id, long long int numberPrefix) {
 
 
 void Repository::getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
-                                           long long int srcNumber, long long int dstNumber,
-                                           set<int> &nnpDestinationIds, int destinationType) {
+                                           long long int srcNumber, long long int dstNumber, int destinationType) {
+
+    set<int> nnpDestinationIds;
+
+    NNPNumberRange *term_nnpNumberRange = getNNPNumberRange(dstNumber, trace);
+    getNNPDestinationByNumberRange(nnpDestinationIds, term_nnpNumberRange, trace);
+
     vector<ServiceTrunk *> serviceTrunks;
     getAllServiceTrunk(serviceTrunks, trunk->id);
 
