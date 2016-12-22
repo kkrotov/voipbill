@@ -615,9 +615,26 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
             *trace << ", TRUNK: " << trunkOrder.trunk->name << " (" << trunkOrder.trunk->id << ")";
             *trace << ", PRIORITY: " << trunkOrder.priority;
             *trace << ", SERVICE TRUNK " << trunkOrder.serviceTrunk->id;
-            *trace << ", PRICELIST: " << trunkOrder.pricelist->id;
-            *trace << ", PRICELIST CURRENCY: " << trunkOrder.pricelist->currency_id;
-            *trace << ", PREFIX: " << trunkOrder.price->prefix;
+            if(trunkOrder.pricelist) {
+                *trace << ", PRICELIST: " << trunkOrder.pricelist->id;
+                *trace << ", PRICELIST CURRENCY: " << trunkOrder.pricelist->currency_id;
+            }
+            if(trunkOrder.price) {
+                *trace << ", PREFIX: " << trunkOrder.price->prefix;
+            }
+            if(trunkOrder.nnpPackage) {
+                *trace << ", NNPPACKAGE_ID: " << trunkOrder.nnpPackage->id;
+                *trace << ", NNPPACKAGE_CURRENCY: " << trunkOrder.nnpPackage->currency_id;
+                *trace << ", NNP_PRICE: " << trunkOrder.nnp_price;
+            }
+            if(trunkOrder.nnpPackagePrice) {
+                *trace << ", NNPPACKAGEPRICE_ID: " << trunkOrder.nnpPackagePrice->id;
+            }
+            if(trunkOrder.nnpPackagePricelist) {
+                *trace << ", NNPPACKAGEPRICELIST_ID: " << trunkOrder.nnpPackagePricelist->id;
+            }
+
+
             if (trunkOrder.trunkSettings != nullptr && trunkOrder.statsTrunkSettings != nullptr) {
                 if (trunkOrder.trunkSettings->minimum_cost > 0) {
                     *trace << ", MINIMUM_COST: " << trunkOrder.trunkSettings->minimum_cost;
