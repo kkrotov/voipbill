@@ -51,7 +51,7 @@ DECLARE
      date varchar;
      count integer;
 BEGIN
-     EXECUTE 'SELECT calls_aggr.create_calls_aggr_partition(now() at time zone ''utc'');';
+     EXECUTE 'SELECT calls_aggr.create_calls_aggr_partition(now()::timestamp without time zone);';
 
 	server_ids := btrim(server_ids, '()');
 
@@ -64,7 +64,7 @@ delete
 			from calls_aggr.calls_aggr_' || date || '
 
 where
-			aggr_time >= date_trunc(''hour'', now() at time zone ''utc'') - INTERVAL ''2 hour''
+			aggr_time >= date_trunc(''hour'', now()::timestamp without time zone) - INTERVAL ''2 hour''
 
 				and
 
@@ -99,7 +99,7 @@ select
 
 	 where
 
-			 connect_time < date_trunc(''hour'', now() at time zone ''utc'')
+			 connect_time < date_trunc(''hour'', now()::timestamp without time zone)
 
 					and
 
@@ -128,8 +128,8 @@ select
 			 (select * from unnest(string_to_array(' || server_ids || '::varchar, '','')) AS s limit 1) AS s,
 
 				generate_series (
-					date_trunc(''hour'', now() at time zone ''utc'') - INTERVAL ''2 hour'',
-					date_trunc(''hour'', now() at time zone ''utc'') - INTERVAL ''1 hour'',
+					date_trunc(''hour'', now()::timestamp without time zone) - INTERVAL ''2 hour'',
+					date_trunc(''hour'', now()::timestamp without time zone) - INTERVAL ''1 hour'',
 					''1 hour''::interval) AS gs;';
 	EXECUTE sql;
 	GET DIAGNOSTICS count = ROW_COUNT;
