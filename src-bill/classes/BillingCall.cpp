@@ -1209,8 +1209,6 @@ bool BillingCall::matchTariffPackageDestination(TariffPackage *tariff) {
 
 bool BillingCall::processSignalingCallId() {
 
-    call->hash = cdr->hash;
-
     if (call->orig && callInfo->trunk != nullptr && callInfo->trunk->our_trunk) {
         call->signalling_call_id = cdr->in_sig_call_id;
     }
