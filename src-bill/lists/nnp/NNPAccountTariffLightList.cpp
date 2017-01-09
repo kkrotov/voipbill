@@ -42,7 +42,9 @@ void NNPAccountTariffLightList::findAllActiveByClientID(vector<NNPAccountTariffL
         //time(&connect_time); // Текущие время в UTC
 
         if (nnpTariff.account_client_id == client_id &&
-            nnpTariff.service_number_id == service_number_id &&
+                ( nnpTariff.service_number_id == service_number_id ||
+                  nnpTariff.service_trunk_id  == service_number_id
+                ) &&
             nnpTariff.activate_from <= connect_time &&
             nnpTariff.deactivate_from >= connect_time) {
             f = true;

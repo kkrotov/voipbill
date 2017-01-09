@@ -20,6 +20,7 @@ public:
         fields.push_back("deactivate_from");
         fields.push_back("coefficient");
         fields.push_back("price");
+        fields.push_back("service_type_id");
 
         datatype.push_back("id integer");
         datatype.push_back("account_tariff_id integer");
@@ -29,6 +30,6 @@ public:
         datatype.push_back("deactivate_from timestamp");
         datatype.push_back("coefficient real");
         datatype.push_back("price double precision");
-
+        datatype.push_back("service_type_id integer");
     }
 };

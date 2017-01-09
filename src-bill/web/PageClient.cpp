@@ -343,12 +343,13 @@ void PageClient::render_trunk_client_packages_info(std::stringstream &html, Clie
         repository.getActiveNNPAccountTariffLight(nnpAccountTariffLight, client_id, time(nullptr), it->id);
         Trunk *trunk = repository.getTrunk(it->trunk_id);
 
-        if(trunk != nullptr)
-                html << "trunk<b> #" << it->trunk_id << "</b>:" << trunk->name << "<br/>";
         for (auto it2 = nnpAccountTariffLight.begin(); it2 != nnpAccountTariffLight.end(); it2++) {
-            //if (it2->it) {
-// Недоделано!!!!!!!
-
+            if (it2->service_trunk_id == it->id) {
+                if(trunk != nullptr)
+                    html << "trunk<b> #" << it->trunk_id << "</b>:" << trunk->name << ":";
+                it2->dump(html);
+                html << "\n<br/>\n";
+            }
         }
     }
 
