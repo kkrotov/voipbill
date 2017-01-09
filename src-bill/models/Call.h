@@ -14,6 +14,7 @@ struct Call {
     long long int id;
     long long int peer_id;
     long long int cdr_id;
+
     time_t connect_time;
     bool orig;                      // Плечо вызова.
     bool our;
@@ -71,6 +72,7 @@ struct Call {
     int server_id;
 
     string signalling_call_id;
+    string hash;
 
     void dump(stringstream &trace) {
 
@@ -118,6 +120,7 @@ struct Call {
         trace << "nnp_package_price_id: " << nnp_package_price_id << ", ";
         trace << "nnp_package_pricelist_id: " << nnp_package_pricelist_id << ", ";
         trace << "signalling_call_id: " << signalling_call_id << ", ";
+        trace << "hash: " << hash << ", ";
         trace << ")";
     }
 
@@ -184,6 +187,7 @@ struct Call {
         nnp_package_minute_id = 0;
         nnp_package_price_id = 0;
         signalling_call_id = "";
+        hash = "";
     }
 
     bool isLocal() {
