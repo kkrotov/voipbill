@@ -135,5 +135,8 @@ protected:
 
     void setupEffectiveTermNNPTrunkSettings(set<int> &nnpDestinationIds);
 
+    void setupNNPInterconnect();
+
+    void setupInterconnect();
 };
 

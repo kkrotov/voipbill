@@ -122,19 +122,14 @@ void BillingCall::calcByTrunk() {
 
         // В случае расчета терминационного плеча в поля call->interconnect_rate и call->interconnect_cost сохраняем
         // дополнительную  цену и стоимость интерконнекта (для случая локального и МН МГ вызовов).
+        setupInterconnect();
 
-        if (!call->orig && callInfo->pricelist->initiate_zona_cost > 0.00001 && call->destination_id == 0) {
-            call->interconnect_rate = callInfo->pricelist->initiate_zona_cost;
-            call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
-        }
-        if (!call->orig && callInfo->pricelist->initiate_mgmn_cost > 0.00001 && call->destination_id > 0) {
-            call->interconnect_rate = callInfo->pricelist->initiate_mgmn_cost;
-            call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
-        }
         setupCost();                            // Расчет стоимости плеча. С учетом остатка по найденому пакету
     } else if (call->account_version == CALL_ACCOUNT_VERSION_5) {
 
         setupBilledTimeNNP(callInfo->nnpPackage);
+
+        setupNNPInterconnect();
 
         setupNNPCost();
 
@@ -143,6 +138,49 @@ void BillingCall::calcByTrunk() {
     }
 
 }
+
+void BillingCall::setupNNPInterconnect() {
+
+   if(call->orig) return;
+
+    if(callInfo->nnpPackagePrice != nullptr) {
+        if (callInfo->nnpPackagePrice->interconnect_price > 0.00001) {
+            call->interconnect_rate = callInfo->nnpPackagePrice->interconnect_price;
+            call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+        }
+    }
+
+    if(callInfo->nnpPackagePricelist != nullptr) { // Внимание! Тут определяется зональность по старой схеме, нужно переделывать.
+                                                   // Пока работает. Возможно неправильное определение для Венгрии.
+        int pricelist_id = callInfo->nnpPackagePricelist->pricelist_id;
+        Pricelist *pricelist = repository->getPricelist(pricelist_id);
+
+        if(pricelist!= nullptr) {
+            if (pricelist->initiate_zona_cost > 0.00001 && call->destination_id == 0) { // Вот здесь
+                call->interconnect_rate = pricelist->initiate_zona_cost;
+                call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+            }
+            if (pricelist->initiate_mgmn_cost > 0.00001 && call->destination_id > 0) { // и Вот здесь
+                call->interconnect_rate = pricelist->initiate_mgmn_cost;
+                call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+            }
+        }
+
+    }
+
+}
+
+void BillingCall::setupInterconnect() {
+    if (!call->orig && callInfo->pricelist->initiate_zona_cost > 0.00001 && call->destination_id == 0) {
+        call->interconnect_rate = callInfo->pricelist->initiate_zona_cost;
+        call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+    }
+    if (!call->orig && callInfo->pricelist->initiate_mgmn_cost > 0.00001 && call->destination_id > 0) {
+        call->interconnect_rate = callInfo->pricelist->initiate_mgmn_cost;
+        call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+    }
+}
+
 
 /********************************************************************************************************************
  *  Дальше производятся тарификация плеча по схеме "авторизация по номеру"

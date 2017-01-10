@@ -8,7 +8,7 @@ class NNPPackagePriceList : public ObjList<NNPPackagePrice> {
 protected:
 
     string sql(BDb *db) {
-        return "select id,tariff_id,destination_id,price " \
+        return "select id,tariff_id,destination_id,price,interconnect_price " \
             "   from nnp.package_price order by tariff_id";
     }
 
@@ -17,6 +17,7 @@ protected:
         item->nnp_tariff_id = row.get_i(1);
         item->nnp_destination_id = row.get_i(2);
         item->price = row.get_d(3);
+        item->interconnect_price = row.get_d(4);
     }
 
 
