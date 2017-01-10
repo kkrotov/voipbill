@@ -639,9 +639,15 @@ void BillingCall::setupEffectiveOrigTrunkSettings() {
             callInfo->nnpPackage = order.nnpPackage;
             callInfo->nnpPackagePricelist = order.nnpPackagePricelist;
             callInfo->nnpPackagePrice = order.nnpPackagePrice;
-            call->nnp_package_price_id = order.nnpPackagePrice->id;
-            call->nnp_package_pricelist_id = order.nnpPackagePricelist->id;
-            call->nnp_package_id = order.nnpPackage->id;
+            if(order.nnpPackagePrice != nullptr) {
+                call->nnp_package_price_id = order.nnpPackagePrice->id;
+            }
+            if(order.nnpPackagePricelist != nullptr) {
+                call->nnp_package_pricelist_id = order.nnpPackagePricelist->id;
+            }
+            if(order.nnpPackage != nullptr) {
+                call->nnp_package_id = order.nnpPackage->id;
+            }
             call->rate = order.nnp_price;
         }
 
@@ -682,9 +688,15 @@ void BillingCall::setupEffectiveTermTrunkSettings() {
             callInfo->nnpPackage = order.nnpPackage;
             callInfo->nnpPackagePricelist = order.nnpPackagePricelist;
             callInfo->nnpPackagePrice = order.nnpPackagePrice;
-            call->nnp_package_price_id = order.nnpPackagePrice->id;
-            call->nnp_package_pricelist_id = order.nnpPackagePricelist->id;
-            call->nnp_package_id = order.nnpPackage->id;
+            if(order.nnpPackagePrice != nullptr) {
+                call->nnp_package_price_id = order.nnpPackagePrice->id;
+            }
+            if(order.nnpPackagePricelist != nullptr) {
+                call->nnp_package_pricelist_id = order.nnpPackagePricelist->id;
+            }
+            if(order.nnpPackage != nullptr) {
+                call->nnp_package_id = order.nnpPackage->id;
+            }
             call->rate = order.nnp_price;
         }
 

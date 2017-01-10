@@ -6,6 +6,14 @@
 bool Repository::checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
                                                  long long int dstNumber) {
 
+    if(trunkSettings->nnp_tariff_id == 0) {
+        if (trace != nullptr) {
+            *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY NNP_TARIFF_ID IS 0 , TRUNK_SETTINGS_ID: " <<
+                   trunkSettings->id << " / " << trunkSettings->order << "\n";
+        }
+        return false;
+    }
+
     if (trunkSettings->src_number_id > 0 && !matchNumber(trunkSettings->src_number_id, srcNumber)) {
         if (trace != nullptr) {
             *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY SRC NUMBER MATCHING, TRUNK_SETTINGS_ID: " <<
