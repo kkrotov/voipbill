@@ -383,7 +383,6 @@ set(BILL_SOURCES
         src-bill/classes/nnp/NNPResolver.cpp
 
         src-bill/main.cpp
-
         src-bill/models/GlobalNNPPackageMinuteCounters.cpp
         src-bill/data/GlobalNNPPackageMinuteCountersData.cpp
         src-bill/lists/GlobalNNPPackageMinuteCountersList.cpp
@@ -393,35 +392,20 @@ set(BILL_SOURCES
         src-bill/data/HubData.cpp
         src-bill/sync/PullHub.cpp
         src-bill/sync/PullHub.h
-
         src-bill/healthcheck/FtpConnectStatus.cpp
-        src-bill/healthcheck/FtpConnectStatus.h
         src-bill/healthcheck/HealthCheckController.cpp
-        src-bill/healthcheck/HealthCheckController.h
-        src-bill/healthcheck/DbConnectStatus.h
         src-bill/healthcheck/CallSyncStatus.cpp
-        src-bill/healthcheck/CallSyncStatus.h
         src-bill/healthcheck/CdrSyncStatus.cpp
-        src-bill/healthcheck/CdrSyncStatus.h
         src-bill/healthcheck/CallSaveStatus.cpp
-        src-bill/healthcheck/CallSaveStatus.h
         src-bill/healthcheck/CdrWaitProcessing.cpp
-        src-bill/healthcheck/CdrWaitProcessing.h
         src-bill/healthcheck/CallsWaitSaving.cpp
-        src-bill/healthcheck/CallsWaitSaving.h
         src-bill/healthcheck/RadiusAuthServerStatus.cpp
-        src-bill/healthcheck/RadiusAuthServerStatus.h
         src-bill/web/PageHealthStatus.cpp
-        src-bill/web/PageHealthStatus.h
         src-bill/web/PageHealthCheck.cpp
-        src-bill/web/PageHealthCheck.h
         src-bill/healthcheck/ThreadErrorStatus.cpp
-        src-bill/healthcheck/ThreadErrorStatus.h
         src-bill/healthcheck/TrunkLoadStatus.cpp
-        src-bill/healthcheck/TrunkLoadStatus.h
-
         src-bill/threads/ThreadHealthManager.cpp
-        src-bill/threads/ThreadHealthManager.h)
+        src-bill/models/Price.cpp)
 
 add_custom_target(invalidate_files ALL
         COMMAND ${CMAKE_COMMAND} -E touch src-bill/version.cpp)

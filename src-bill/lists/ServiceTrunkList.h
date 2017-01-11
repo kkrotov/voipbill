@@ -51,6 +51,8 @@ public:
     ServiceTrunk * find(int trunk_id, time_t timestamp, stringstream *trace = nullptr);
 
     void findAll(vector<ServiceTrunk *> &resultTrunks, int trunk_id, time_t timestamp, stringstream *trace = nullptr);
+
+    void findAllByClientID(vector<ServiceTrunk> &resultServiceTrunk, int client_id, stringstream *trace);
 };
 
 

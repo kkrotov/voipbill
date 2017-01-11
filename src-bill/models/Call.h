@@ -68,6 +68,7 @@ struct Call {
     int nnp_package_minute_id;
     int nnp_package_price_id;
     int nnp_package_pricelist_id;
+    int nnp_package_id;
 
     int server_id;
 
@@ -116,6 +117,7 @@ struct Call {
         trace << "nnp_country_prefix: " << nnp_country_prefix << ", ";
         trace << "nnp_ndc: " << nnp_ndc << ", ";
         trace << "nnp_is_mob: " << (nnp_is_mob ? "true" : "false") << ", ";
+        trace << "nnp_package_id: " << nnp_package_id << ", ";
         trace << "nnp_package_minute_id: " << nnp_package_minute_id << ", ";
         trace << "nnp_package_price_id: " << nnp_package_price_id << ", ";
         trace << "nnp_package_pricelist_id: " << nnp_package_pricelist_id << ", ";

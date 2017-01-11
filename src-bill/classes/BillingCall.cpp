@@ -84,9 +84,11 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
 
 void BillingCall::calcByTrunk() {
 
+
     if (trace != nullptr) {
         *trace << "INFO|TARIFFICATION BY TRUNK" << "\n";
     }
+
 
     if (call->orig) {
         setupEffectiveOrigTrunkSettings();  // Вычисляем минимальную цену в присоединенных прайслистах на входящем транке
@@ -98,33 +100,77 @@ void BillingCall::calcByTrunk() {
 
     setupAccount();                         // в структуре callinfo заполняется структура account
     // (информация о лицевом счете обсчитываемого плеча)
+    if (call->account_version == CALL_ACCOUNT_VERSION_4) {
+        if (call->orig) {
+            setupPackagePricelist();            // поисх подходящего пакета для обсчета оригинационного плеча, если находим, используем его
+        }
+        setupPricelist();                       // присоединяем в callInfo->pricelist прайслист по pricelist_id
+        // при расчете с авторизацией по транку прайслист должен быть
+        // выбран ранее. Из пакета?
 
-    if (call->orig) {
-        setupPackagePricelist();            // поисх подходящего пакета для обсчета оригинационного плеча, если находим, используем его
+        setupPrice();                           //  Расчитываем по ранее выбранному прайслисту и префиксу
+        // номера цену звонка на плече
+
+        setupBilledTime();                      //  вычисляется тарифицируемая длительность звонка согласно настройкам
+        // (бесплатные секунды, тарификация по мин/по сек) действующего
+        // тарифа для расчитываемого плеча.
+
+        if (call->orig) {
+            setupPackagePrepaid();              // на оигинационном плече сохраняем в call секунды взятые из подходящего
+            // подключенного пакета, ссылку на сам пакет тоже сохраняем в call
+        }
+
+        // В случае расчета терминационного плеча в поля call->interconnect_rate и call->interconnect_cost сохраняем
+        // дополнительную  цену и стоимость интерконнекта (для случая локального и МН МГ вызовов).
+        setupInterconnect();
+
+        setupCost();                            // Расчет стоимости плеча. С учетом остатка по найденому пакету
+    } else if (call->account_version == CALL_ACCOUNT_VERSION_5) {
+
+        setupBilledTimeNNP(callInfo->nnpPackage);
+
+        setupNNPInterconnect();
+
+        setupNNPCost();
+
+    } else {
+        throw CalcException("UNKNOW ACCOUNT VERSION");
     }
 
-    setupPricelist();                       // присоединяем в callInfo->pricelist прайслист по pricelist_id
-    // при расчете с авторизацией по транку прайслист должен быть
-    // выбран ранее. Из пакета?
+}
 
-    setupPrice();                           //  Расчитываем по ранее выбранному прайслисту и префиксу
-    // номера цену звонка на плече
+void BillingCall::setupNNPInterconnect() {
 
-    setupBilledTime();                      //  вычисляется тарифицируемая длительность звонка согласно настройкам
-    // (бесплатные секунды, тарификация по мин/по сек) действующего
-    // тарифа для расчитываемого плеча.
+   if(call->orig) return;
 
-    if (call->orig) {
-        setupPackagePrepaid();              // на оигинационном плече сохраняем в call секунды взятые из подходящего
-        // подключенного пакета, ссылку на сам пакет тоже сохраняем в call
+    if(callInfo->nnpPackagePrice != nullptr) {
+        if (callInfo->nnpPackagePrice->interconnect_price > 0.00001) {
+            call->interconnect_rate = callInfo->nnpPackagePrice->interconnect_price;
+            call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+        }
     }
 
-    setupCost();                            // Расчет стоимости плеча. С учетом остатка по найденому пакету
+    if(callInfo->nnpPackagePricelist != nullptr) { // Внимание! Тут определяется зональность по старой схеме, нужно переделывать.
+                                                   // Пока работает. Возможно неправильное определение для Венгрии.
+        int pricelist_id = callInfo->nnpPackagePricelist->pricelist_id;
+        Pricelist *pricelist = repository->getPricelist(pricelist_id);
 
+        if(pricelist!= nullptr) {
+            if (pricelist->initiate_zona_cost > 0.00001 && call->destination_id == 0) { // Вот здесь
+                call->interconnect_rate = pricelist->initiate_zona_cost;
+                call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+            }
+            if (pricelist->initiate_mgmn_cost > 0.00001 && call->destination_id > 0) { // и Вот здесь
+                call->interconnect_rate = pricelist->initiate_mgmn_cost;
+                call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
+            }
+        }
 
-    // В случае расчета терминационного плеча в поля call->interconnect_rate и call->interconnect_cost сохраняем
-    // дополнительную  цену и стоимость интерконнекта (для случая локального и МН МГ вызовов).
+    }
 
+}
+
+void BillingCall::setupInterconnect() {
     if (!call->orig && callInfo->pricelist->initiate_zona_cost > 0.00001 && call->destination_id == 0) {
         call->interconnect_rate = callInfo->pricelist->initiate_zona_cost;
         call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
@@ -134,6 +180,7 @@ void BillingCall::calcByTrunk() {
         call->interconnect_cost = call->billed_time * call->interconnect_rate / 60.0;
     }
 }
+
 
 /********************************************************************************************************************
  *  Дальше производятся тарификация плеча по схеме "авторизация по номеру"
@@ -198,7 +245,6 @@ void BillingCall::calcOrigByNumber() {
 
         calcOrigNNPByNumber();
 
-
     } else if (call->account_version == CALL_ACCOUNT_VERSION_4) {
         // Обсчитываем плечо по традиционной схеме
         if (trace != nullptr) {
@@ -239,11 +285,12 @@ void BillingCall::calcOrigByNumber() {
 
         setupPackagePrepaid();
 
+        setupCost();                                        // Расчет стоимости плеча. С учетом остатка по найденому пакету
     } else {
         throw CalcException("UNKNOW ACCOUNT VERSION");
     }
 
-    setupCost();                                        // Расчет стоимости плеча. С учетом остатка по найденому пакету
+
 }
 
 /********************************************************************************************************************
@@ -626,7 +673,21 @@ void BillingCall::setupEffectiveOrigTrunkSettings() {
         callInfo->pricelist = order.pricelist;
         callInfo->price = order.price;
 
-        // сохраняем в структуре callInfo самый дешевый прайслист и цену для этой пары АБ.
+        if (callInfo->account != nullptr && callInfo->account->account_version == CALL_ACCOUNT_VERSION_5) {
+            callInfo->nnpPackage = order.nnpPackage;
+            callInfo->nnpPackagePricelist = order.nnpPackagePricelist;
+            callInfo->nnpPackagePrice = order.nnpPackagePrice;
+            if(order.nnpPackagePrice != nullptr) {
+                call->nnp_package_price_id = order.nnpPackagePrice->id;
+            }
+            if(order.nnpPackagePricelist != nullptr) {
+                call->nnp_package_pricelist_id = order.nnpPackagePricelist->id;
+            }
+            if(order.nnpPackage != nullptr) {
+                call->nnp_package_id = order.nnpPackage->id;
+            }
+            call->rate = order.nnp_price;
+        }
 
     }
 }
@@ -641,7 +702,6 @@ void BillingCall::setupEffectiveTermTrunkSettings() {
 
     repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
                                           SERVICE_TRUNK_SETTINGS_TERMINATION);
-    // получили список возможных прайсов на этом транке для обсчитываемой пары АБ.
 
     Trunk *orig_trunk = repository->getTrunkByName(cdr->src_route);
     if (orig_trunk == nullptr) {
@@ -661,6 +721,23 @@ void BillingCall::setupEffectiveTermTrunkSettings() {
         callInfo->price = order.price;
         // сохраняем в структуре callInfo самый дешевый прайслист и цену для этой пары АБ.
         call->trunk_settings_stats_id = order.statsTrunkSettings->id;
+
+        if (callInfo->account != nullptr && callInfo->account->account_version == CALL_ACCOUNT_VERSION_5) {
+            callInfo->nnpPackage = order.nnpPackage;
+            callInfo->nnpPackagePricelist = order.nnpPackagePricelist;
+            callInfo->nnpPackagePrice = order.nnpPackagePrice;
+            if(order.nnpPackagePrice != nullptr) {
+                call->nnp_package_price_id = order.nnpPackagePrice->id;
+            }
+            if(order.nnpPackagePricelist != nullptr) {
+                call->nnp_package_pricelist_id = order.nnpPackagePricelist->id;
+            }
+            if(order.nnpPackage != nullptr) {
+                call->nnp_package_id = order.nnpPackage->id;
+            }
+            call->rate = order.nnp_price;
+        }
+
     }
 }
 
