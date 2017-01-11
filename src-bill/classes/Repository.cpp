@@ -422,7 +422,7 @@ void Repository::getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrun
     set<int> nnpDestinationIds;
 
     NNPNumberRange *term_nnpNumberRange = getNNPNumberRange(dstNumber, trace);
-    getNNPDestinationByNumberRange(nnpDestinationIds, term_nnpNumberRange, trace);
+    getNNPDestinationByNumberRange(nnpDestinationIds, term_nnpNumberRange);
 
     vector<ServiceTrunk *> serviceTrunks;
     getAllServiceTrunk(serviceTrunks, trunk->id);
@@ -665,7 +665,7 @@ bool Repository::trunkOrderLessThan(const ServiceTrunkOrder &left, const Service
             rightPrice.set(right.nnp_price, right.nnpPackage->currency_id);
         }
         if (right.account->account_version == CALL_ACCOUNT_VERSION_4 && right.price && right.pricelist) {
-            rightPrice.set(left.price->price, left.pricelist->currency_id);
+            rightPrice.set(right.price->price, right.pricelist->currency_id);
         }
     }
 
