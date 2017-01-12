@@ -69,11 +69,16 @@ struct Call {
     int nnp_package_price_id;
     int nnp_package_pricelist_id;
     int nnp_package_id;
+    int nnp_number_range_id;
 
     int server_id;
 
     string signalling_call_id;
     string hash;
+
+    int32_t pdd;
+
+
 
     void dump(stringstream &trace) {
 
@@ -83,6 +88,7 @@ struct Call {
         trace << "peer_id: " << peer_id << ", ";
         trace << "cdr_id: " << cdr_id << ", ";
         trace << "connect_time: " << string_time(connect_time) << ", ";
+        trace << "pdd: " << pdd << ", ";
         trace << "orig: " << (orig ? "true" : "false") << ", ";
         trace << "our: " << (our ? "true" : "false") << ", ";
         trace << "account_id: " << account_id << ", ";
@@ -111,6 +117,7 @@ struct Call {
         trace << "geo_operator_id: " << geo_operator_id << ", ";
         trace << "is_service_number: " << (is_service_number ? "true" : "false") << ", ";
         trace << "disconnect_cause: " << disconnect_cause;
+        trace << "nnp_number_range_id: " << nnp_number_range_id << ", ";
         trace << "nnp_operator_id: " << nnp_operator_id << ", ";
         trace << "nnp_region_id: " << nnp_region_id << ", ";
         trace << "nnp_city_id: " << nnp_city_id << ", ";
@@ -136,6 +143,7 @@ struct Call {
         peer_id = 0;
         cdr_id = cdr->id;
         connect_time = cdr->connect_time;
+        pdd =(int32_t ) ( cdr->connect_time - cdr->setup_time );
 
         account_id = 0;
         trunk_service_id = 0;
@@ -182,6 +190,7 @@ struct Call {
         nnp_region_id = 0;
         nnp_city_id = 0;
         nnp_country_prefix = 0;
+        nnp_number_range_id = 0;
         nnp_ndc = 0;
         nnp_is_mob = false;
 

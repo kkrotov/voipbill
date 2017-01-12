@@ -50,7 +50,7 @@ function doCall($db,$v,&$maxid) {
     $redirect_number   = "''";
 
     $setup_time        ="'". $v["dt"]."'::timestamp";
-    $connect_time      ="'". $v["dt"]."'::timestamp";
+    $connect_time      ="'". $v["dt"]."'::timestamp + interval '00:00:02'";
     $disconnect_time   = "'".$v["dt"]."'::timestamp";
     $session_time      = 60; 
     $disconnect_cause  = 16;

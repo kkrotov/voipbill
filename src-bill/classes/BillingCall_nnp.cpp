@@ -152,6 +152,7 @@ void BillingCall::processNNP() {
 
     if (nnpNumberRange != nullptr) {
         this->callInfo->nnpNumberRange = nnpNumberRange;
+        this->call->nnp_number_range_id = nnpNumberRange->id;
         this->call->nnp_operator_id = nnpNumberRange->nnp_operator_id;
         this->call->nnp_region_id = nnpNumberRange->nnp_region_id;
         this->call->nnp_city_id = nnpNumberRange->nnp_city_id;
