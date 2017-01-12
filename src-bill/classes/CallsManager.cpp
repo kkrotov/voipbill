@@ -65,6 +65,7 @@ void CallsManager::calls_insert_row(Call *call, stringstream &q) {
     q << "'" << call->peer_id << "',";
     q << "'" << call->cdr_id << "',";
     q << "'" << string_time(call->connect_time, 2) << "',";
+    q << " " << call->pdd << " ,";
     if (call->trunk_id != 0) {
         q << "'" << call->trunk_id << "',";
     } else {
@@ -150,6 +151,12 @@ void CallsManager::calls_insert_row(Call *call, stringstream &q) {
 
     if (call->stats_nnp_package_minute_id != 0) {
         q << "'" << call->stats_nnp_package_minute_id << "',";
+    } else {
+        q << "NULL,";
+    }
+
+    if (call->nnp_number_range_id != 0) {
+        q << "'" << call->nnp_number_range_id << "',";
     } else {
         q << "NULL,";
     }
@@ -252,12 +259,12 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth, 
 
             stringstream &q = queryPerMonth[dt_month];
             q << "INSERT INTO calls_raw.calls_raw_" + string(buff) + "(" \
-                    "id,orig,our,peer_id,cdr_id,connect_time,trunk_id,account_id,trunk_service_id,number_service_id," \
+                    "id,orig,our,peer_id,cdr_id,connect_time,pdd,trunk_id,account_id,trunk_service_id,number_service_id," \
                     "src_number,dst_number,billed_time,rate,cost,tax_cost,interconnect_rate,interconnect_cost," \
                     "service_package_id,service_package_stats_id,package_time,package_credit,trunk_settings_stats_id," \
                     "destination_id,pricelist_id,prefix,geo_id,geo_operator_id,mob,geo_mob," \
                     "account_version,stats_nnp_package_minute_id, " \
-                    "nnp_operator_id,nnp_region_id,nnp_city_id,nnp_country_prefix,nnp_ndc,nnp_is_mob, " \
+                    "nnp_number_range_id,nnp_operator_id,nnp_region_id,nnp_city_id,nnp_country_prefix,nnp_ndc,nnp_is_mob, " \
                     "nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id, server_id, signalling_call_id, hash, " \
                     "disconnect_cause" \
                  ")VALUES\n";
