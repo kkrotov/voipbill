@@ -6,6 +6,8 @@
 class PageHealthCheck : public BasePage {
 
     Repository repository;
+    vector<pair<int,string>> getRegionList();
+    Json::Value getJsonRegionList();
 
 public:
     bool canHandle(std::string &path);
