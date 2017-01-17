@@ -5,6 +5,45 @@ bool PageHealthCheck::canHandle(std::string &path) {
     return path == "/test/healthcheck";
 }
 
+vector<pair<int,string>> PageHealthCheck::getRegionList() {
+
+    int server_id = app().conf.instance_id;
+    int hub_id = app().conf.hub_id;
+
+    vector<pair<int,string>> regionList;
+    if (hub_id > 0) {
+
+        vector<Server> servers;
+        repository.getServersByHubId(servers, hub_id);
+        for (auto server: servers) {
+
+            regionList.push_back(pair<int,string>(server.id,server.name));
+        }
+    }
+    if (regionList.size()==0) {
+
+        Server *server = repository.getServer(server_id);
+        if(server!= nullptr)
+           regionList.push_back(pair<int,string>(server->id,server->name));
+    }
+    return regionList;
+}
+
+Json::Value PageHealthCheck::getJsonRegionList() {
+
+    Json::Value jval;
+    vector<pair<int,string>> regionList = getRegionList();
+    for (auto reg: regionList) {
+
+        Json::Value jsubval;
+        jsubval["regionId"] = reg.first;
+        jsubval["regionName"] = reg.second;
+
+        jval.append(jsubval);
+    }
+    return jval;
+}
+
 void PageHealthCheck::render(std::stringstream &html, map<string, string> &parameters) {
 
     if (!repository.prepare()) {
@@ -15,13 +54,18 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
     string cmd;
     uint16_t instance_id = app().conf.instance_id;
     double run_time = app().getRuntime();
+    shared_ptr<CurrentCdrList> cdrList = repository.currentCalls->currentCdr.get();
+    int currentCalls = (cdrList== nullptr)? 0:cdrList->size();
 
     Json::Value jval;
+    jval["instanceId"] = instance_id;
+    jval["regionList"] = getJsonRegionList();
+    jval["currentCalls"] = currentCalls;
+    jval["runTime"] = run_time;
     if (parameters.find("cmd") != parameters.end()) {
 
         cmd = parameters["cmd"];
         SystemStatus systemStatus = app().healthCheckController.getStatus(cmd);
-        jval["instanceId"] = instance_id;
         jval["itemId"] = systemStatus.itemId;
         jval["itemVal"] = systemStatus.itemValue;
         if (!systemStatus.prevValue.empty())
@@ -32,16 +76,12 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
 
         jval["statusId"] = systemStatus.getStatusString();
         jval["statusMessage"] = systemStatus.statusMessage;
-        jval["runTime"] = run_time;
     }
     else {
 
         std::vector<SystemStatus> systemStatus = app().healthCheckController.getStatus();
         if (systemStatus.empty())
             return;
-
-        jval["instanceId"] = instance_id;
-        jval["runTime"] = run_time;
 
         int i=0;
         for (auto sysstat: systemStatus) {
