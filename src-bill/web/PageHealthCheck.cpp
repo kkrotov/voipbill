@@ -23,7 +23,8 @@ vector<pair<int,string>> PageHealthCheck::getRegionList() {
     if (regionList.size()==0) {
 
         Server *server = repository.getServer(server_id);
-        regionList.push_back(pair<int,string>(server->id,server->name));
+        if(server!= nullptr)
+           regionList.push_back(pair<int,string>(server->id,server->name));
     }
     return regionList;
 }
@@ -34,8 +35,11 @@ Json::Value PageHealthCheck::getJsonRegionList() {
     vector<pair<int,string>> regionList = getRegionList();
     for (auto reg: regionList) {
 
-        jval["regionId"] = reg.first;
-        jval["regionName"] = reg.second;
+        Json::Value jsubval;
+        jsubval["regionId"] = reg.first;
+        jsubval["regionName"] = reg.second;
+
+        jval.append(jsubval);
     }
     return jval;
 }
