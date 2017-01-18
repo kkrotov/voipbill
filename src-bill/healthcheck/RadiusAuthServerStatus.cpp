@@ -26,6 +26,9 @@ SystemStatus RadiusAuthServerStatus::getStatus() {
                 return true;
             });
 
+            if (last_request_time==0)
+                last_request_time = app().getStartTime();
+            
             int last_resquest_delay = time(NULL) - last_request_time;
             healthStatus.itemValue = to_string(last_resquest_delay);
 
