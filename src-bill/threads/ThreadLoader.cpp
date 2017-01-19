@@ -266,6 +266,11 @@ void ThreadLoader::run() {
                 repository.data->nnpRegion.load(&db_calls);
             }
 
+            else if (event == "nnp_country") {
+
+                repository.data->nnpCountryCode.load(&db_calls);
+            }
+
             db_calls.exec("DELETE from event.queue WHERE event='" + event + "' and version = '" +
                           lexical_cast<string>(version) + "'");
 

@@ -54,6 +54,7 @@
 #include "../sync/nnp/NNPPackagePricePull.h"
 #include "../sync/nnp/NNPPrefixDestinatioPull.h"
 #include "../sync/nnp/NNPRegionPull.h"
+#include "../sync/nnp/NNPCountryCodePull.h"
 
 void ThreadSync::run() {
 
@@ -121,4 +122,5 @@ ThreadSync::ThreadSync() {
     manager->add(new NNPPackagePricePull());
     manager->add(new NNPPrefixDestinatioPull());
     manager->add(new NNPRegionPull());
+    manager->add(new NNPCountryCodePull());
 }

@@ -62,6 +62,7 @@ struct Call {
     int nnp_region_id;
     int nnp_city_id;
     int nnp_country_prefix;
+    int nnp_country_code;
     int nnp_ndc;
     bool nnp_is_mob;
 
@@ -122,6 +123,7 @@ struct Call {
         trace << "nnp_region_id: " << nnp_region_id << ", ";
         trace << "nnp_city_id: " << nnp_city_id << ", ";
         trace << "nnp_country_prefix: " << nnp_country_prefix << ", ";
+        trace << "nnp_country_code: " << nnp_country_code << ", ";
         trace << "nnp_ndc: " << nnp_ndc << ", ";
         trace << "nnp_is_mob: " << (nnp_is_mob ? "true" : "false") << ", ";
         trace << "nnp_package_id: " << nnp_package_id << ", ";
@@ -190,6 +192,7 @@ struct Call {
         nnp_region_id = 0;
         nnp_city_id = 0;
         nnp_country_prefix = 0;
+        nnp_country_code = 0;
         nnp_number_range_id = 0;
         nnp_ndc = 0;
         nnp_is_mob = false;

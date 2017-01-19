@@ -5,6 +5,7 @@
 #include "../data/DataCurrentCallsContainer.h"
 #include "RadiusAuthRequestResponse.h"
 #include "../models/Price.h"
+#include "../lists/nnp/NNPCounryCodeList.h"
 
 class Repository {
 public:
@@ -63,6 +64,7 @@ private:
     shared_ptr<NNPDestinationList> nnpDestination;
     shared_ptr<NNPOperatorList> nnpOperator;
     shared_ptr<NNPPrefixList> nnpPrefix;
+    shared_ptr<NNPCounryCodeList> nnpCounryCodeList;
     shared_ptr<NNPNumberRangeList> nnpNumberRange;
     shared_ptr<NNPNumberRangePrefixList> nnpNumberRangePrefix;
     shared_ptr<NNPPrefixDestinationList> nnpPrefixDestination;
@@ -348,6 +350,11 @@ public:
 
     NNPNumberRange *getNNPNumberRange(long long int num, stringstream *trace = nullptr) {
         return nnpNumberRange->getNNPNumberRange(num, trace);
+    }
+
+    int getNNPCountryCode (int country_prefix) {
+
+        return nnpCounryCodeList->get_code_by_prefix(country_prefix);
     }
 
     NNPPackageMinute *getNNPPackageMinute(int idNNPPackageMinute, stringstream *trace = nullptr) {

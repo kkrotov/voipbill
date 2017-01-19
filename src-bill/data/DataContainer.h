@@ -60,6 +60,7 @@
 #include "nnp/NNPPrefixDestinationData.h"
 #include "nnp/NNPAccountTariffLightData.h"
 #include "HubData.h"
+#include "nnp/NNPCountryCodeData.h"
 
 
 class DataContainer {
@@ -116,6 +117,7 @@ public:
     NNPPackageData nnpPackage;
     NNPPackagePriceData nnpPackagePrice;
     NNPPrefixData nnpPrefix;
+    NNPCountryCodeData nnpCountryCode;
     NNPRegionData nnpRegion;
     NNPNumberRangeData nnpNumberRange;
     NNPOperatorData nnpOperator;

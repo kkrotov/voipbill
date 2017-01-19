@@ -16,6 +16,7 @@ struct NNPNumberRange {
     time_t update_time;
     int nnp_city_id;
     int country_prefix;
+    int country_code;
 
     PhoneNumber getMidKey() { return (full_number_to + full_number_from) / 2; };
     PhoneNumber getLength() { return (full_number_to - full_number_from); };
@@ -40,10 +41,10 @@ struct NNPNumberRange {
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
-            trace << "country_prefix: " << country_prefix << ", ";
+        trace << "country_prefix: " << country_prefix << ", ";
         trace << "ndc: " << ndc << ", ";
-            trace << "full_number_from: " << full_number_from << ", ";
-            trace << "full_number_to: " << full_number_to << ", ";
+        trace << "full_number_from: " << full_number_from << ", ";
+        trace << "full_number_to: " << full_number_to << ", ";
         trace << "is_mob: " << is_mob << ", ";
         trace << "is_active: " << is_active << ", ";
         trace << "nnp_operator_id: " << nnp_operator_id << ", ";
