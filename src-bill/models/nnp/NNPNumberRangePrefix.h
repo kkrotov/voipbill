@@ -7,11 +7,13 @@ struct NNPNumberRangePrefix {
     int nnp_number_range_id;
     time_t insert_time;
 
-    void dump(stringstream &trace) {
+    void dump(stringstream &trace) const {
         trace << "(";
         trace << "nnp_prefix_id: " << nnp_prefix_id << ", ";
         trace << "nnp_number_range_id: " << nnp_number_range_id << ", ";
         trace << "insert_time: " << string_time(insert_time) << ", ";
         trace << ")";
     }
+    struct byPrefixId{};      // Нужны как метки для boost::multi_index
+    struct byNumberRangeId{};
 };
