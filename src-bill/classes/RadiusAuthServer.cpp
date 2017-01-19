@@ -54,6 +54,7 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
     char buffer[66000] = "";
     p_request.dump(buffer);
     last_request = string(buffer);
+    last_request_time = time(NULL);
     last_response = "";
     last_error = "";
     request_count++;
@@ -173,6 +174,7 @@ void RadiusAuthServer::sendResponse(RadiusServerStack &p_stack, RadiusAuthRespon
     char buffer[66000] = "";
     l_response.dump(buffer);
     last_response = string(buffer);
+    last_response_time = time(NULL);
     last_error = response.error;
     response_count++;
 

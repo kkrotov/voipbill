@@ -8,7 +8,7 @@ class NNPPackagePriceList : public ObjList<NNPPackagePrice> {
 protected:
 
     string sql(BDb *db) {
-        return "select id,tariff_id,destination_id,price " \
+        return "select id,tariff_id,destination_id,price,interconnect_price " \
             "   from nnp.package_price order by tariff_id";
     }
 
@@ -17,6 +17,7 @@ protected:
         item->nnp_tariff_id = row.get_i(1);
         item->nnp_destination_id = row.get_i(2);
         item->price = row.get_d(3);
+        item->interconnect_price = row.get_d(4);
     }
 
 
@@ -32,7 +33,7 @@ protected:
 
 public:
 
-    void findPackagePriceIds(set<pair<double, int>> &resultNNPPackagePriceIds, int tariff_id,
+    void findPackagePriceIds(set<pair<double, NNPPackagePrice *>> &resultNNPPackagePriceIds, int tariff_id,
                              set<int> &nnpDestinationIds,
                              stringstream *trace = nullptr) {
         auto begin = this->data.begin();
@@ -47,7 +48,7 @@ public:
             for (auto it = begin; it != end; ++it) {
                 NNPPackagePrice *package = &*it;
                 if (nnpDestinationIds.count(package->nnp_destination_id) > 0) {
-                    resultNNPPackagePriceIds.insert(pair<double, int>(package->price, package->id));
+                    resultNNPPackagePriceIds.insert(pair<double, NNPPackagePrice *>(package->price, package));
 
                     if (trace != nullptr) {
                         *trace << "FOUND|NNP PACKAGE PRICE|BY NNP_TARIFF_ID '" << tariff_id << "'" << "\n";

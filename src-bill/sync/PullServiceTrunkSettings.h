@@ -18,6 +18,7 @@ public:
         fields.push_back("src_number_id");
         fields.push_back("dst_number_id");
         fields.push_back("pricelist_id");
+        fields.push_back("nnp_tariff_id");
         fields.push_back("minimum_minutes");
         fields.push_back("minimum_cost");
         fields.push_back("minimum_margin_type");
@@ -30,6 +31,7 @@ public:
         datatype.push_back("src_number_id integer");
         datatype.push_back("dst_number_id integer");
         datatype.push_back("pricelist_id integer");
+        datatype.push_back("nnp_tariff_id integer");
         datatype.push_back("minimum_minutes integer");
         datatype.push_back("minimum_cost integer");
         datatype.push_back("minimum_margin_type smallint");

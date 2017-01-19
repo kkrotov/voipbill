@@ -8,10 +8,12 @@ class ServerList : public ObjList<Server> {
 protected:
 
     string sql(BDb * db) {
-        return "   select id, low_balance_outcome_id, blocked_outcome_id, min_price_for_autorouting, our_numbers_id," \
-               "   calling_station_id_for_line_without_number, service_numbers, hub_id, emergency_prefixlist_id " \
-            "   from public.server " \
-               "   order by id asc ";
+        return "select id, low_balance_outcome_id, blocked_outcome_id, min_price_for_autorouting, our_numbers_id," \
+               "   calling_station_id_for_line_without_number, service_numbers, hub_id, emergency_prefixlist_id, " \
+               "   h_call_sync_delay, h_cdr_sync_delay, h_call_save_delay, h_cdr_proc_wait_count, h_call_save_wait_count, " \
+               "   h_thread_error_count, h_radius_request_delay, name " \
+               "from public.server " \
+               "order by id asc ";
     }
 
     inline void parse_item(BDbResult &row, Server * item) {
@@ -29,6 +31,14 @@ protected:
         }
         item->hub_id = row.get_i(7);
         item->emergency_prefixlist_id = row.get_i(8);
+        item->call_sync_delay = get_int_vector(row.get_s(9));
+        item->cdr_sync_delay = get_int_vector(row.get_s(10));
+        item->call_save_delay = get_int_vector(row.get_s(11));
+        item->cdr_proc_wait_count = get_int_vector(row.get_s(12));
+        item->call_save_wait_count = get_int_vector(row.get_s(13));
+        item->thread_error_count = get_int_vector(row.get_s(14));
+        item->radius_request_delay = get_int_vector(row.get_s(15));
+        item->name = row.get_s (16);
     }
 
     struct key_id {
@@ -88,5 +98,17 @@ public:
             sql = "(" + std::to_string(server_id) + ")";
         }
         return sql;
+    }
+    vector<int> get_int_vector(string keyval) {
+
+        vector<int> v;
+        if (keyval.length() > 0) {
+
+            std::stringstream ss(keyval);
+            string tmp;
+            while (ss >> tmp)
+                v.push_back(std::stoi(tmp));
+        }
+        return v;
     }
 };

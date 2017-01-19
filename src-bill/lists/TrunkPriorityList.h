@@ -7,7 +7,7 @@ class TrunkPriorityList : public ObjList<TrunkPriority> {
 protected:
 
     string sql(BDb * db) {
-        return "   select id, trunk_id, \"order\", priority, number_id_filter_a, number_id_filter_b " \
+        return "   select id, trunk_id, \"order\", priority, number_id_filter_a, number_id_filter_b, trunk_group_id " \
             "   from auth.trunk_priority " \
             "   order by trunk_id asc, \"order\" asc ";
     }
@@ -19,6 +19,7 @@ protected:
         item->priority = row.get_i(3);
         item->number_id_filter_a = row.get_i(4);
         item->number_id_filter_b = row.get_i(5);
+        item->trunk_group_id = row.get_i(6);
     }
 
     struct key_trunk_id {

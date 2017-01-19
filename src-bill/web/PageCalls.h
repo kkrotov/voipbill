@@ -11,7 +11,7 @@ public:
 
     void render(std::stringstream &html, map<string, string> &parameters) {
 
-        renderHeader(html);
+        renderHeader("calls", html);
 
         bool show_incoming = true, show_outgoing = true;
         string trunk_name = parameters["trunkname"];

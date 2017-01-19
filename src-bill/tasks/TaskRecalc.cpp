@@ -114,6 +114,11 @@ void TaskRecalc::run() {
             "DELETE FROM calls_raw.calls_raw WHERE server_id in " + app().conf.get_sql_regions_list() + " and id >= " +
             lexical_cast<string>(recalc_from_call_id));
 
+    setStatus("13.5 delete calls_aggr from main");
+    db_main->exec(
+            "DELETE FROM calls_aggr.calls_aggr WHERE server_id in " + app().conf.get_sql_regions_list() + " and aggr_time >= "
+                    + "'" + string_time(date_from) + "'");
+
     setStatus("14. sync accounts");
     {
         BDbTransaction trans(db_main);

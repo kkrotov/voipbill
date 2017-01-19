@@ -25,7 +25,7 @@ public:
             return; // false
         }
 
-        renderHeader(html);
+        renderHeader("task",html);
 
         thread->htmlfull(html);
 

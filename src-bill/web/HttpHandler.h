@@ -25,6 +25,8 @@
 #include "http/reply.hpp"
 #include "PageCdrUnfinished.h"
 #include "PageTrunks.h"
+#include "PageHealthStatus.h"
+#include "PageHealthCheck.h"
 
 class HttpHandler {
 private:
@@ -52,6 +54,8 @@ private:
         handlers.push_back(shared_ptr<BasePage>(new PageTestNNP));
         handlers.push_back(shared_ptr<BasePage>(new PageTestAuth));
         handlers.push_back(shared_ptr<BasePage>(new PageCdrUnfinished));
+        handlers.push_back(shared_ptr<BasePage>(new PageHealthStatus));
+        handlers.push_back(shared_ptr<BasePage>(new PageHealthCheck));
     }
 
 public:
@@ -70,6 +74,25 @@ public:
             string v;
             vector<string> params;
             boost::algorithm::split(params, uri[1], boost::algorithm::is_any_of("&"));
+            for (vector<string>::iterator i = params.begin(); i != params.end(); i++) {
+                vector<string> pv;
+                boost::algorithm::split(pv, *i, boost::algorithm::is_any_of("="));
+                if (pv.size() == 2) {
+                    url_decode(pv[0], p);
+                    url_decode(pv[1], v);
+                    parameters[p] = v;
+                } else if (pv.size() == 2) {
+                    url_decode(pv[0], p);
+                    parameters[p] = "";
+                }
+            }
+        }
+        if (req.method=="POST" && req.content.size()>0) {
+
+            string p;
+            string v;
+            vector<string> params;
+            boost::algorithm::split(params, req.content, boost::algorithm::is_any_of("&"));
             for (vector<string>::iterator i = params.begin(); i != params.end(); i++) {
                 vector<string> pv;
                 boost::algorithm::split(pv, *i, boost::algorithm::is_any_of("="));

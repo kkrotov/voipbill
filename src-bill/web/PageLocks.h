@@ -9,7 +9,7 @@ public:
         return path == "/locks";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
+        renderHeader("locks", html);
 
         Repository repository;
 

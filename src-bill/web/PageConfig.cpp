@@ -1,7 +1,7 @@
 #include "PageConfig.h"
 
 void PageConfig::render(std::stringstream &html, map<string, string> &parameters) {
-    renderHeader(html);
+    renderHeader("config", html);
 
     html << "<h2>Config</h2>\n";
     html << "build date: " << build_date() << " " << build_time() << " (UTC)<br/>\n";

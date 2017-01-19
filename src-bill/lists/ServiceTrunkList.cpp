@@ -44,3 +44,30 @@ void ServiceTrunkList::findAll(vector<ServiceTrunk *> &resultTrunks, int trunk_i
         }
     }
 }
+
+void ServiceTrunkList::findAllByClientID(vector<ServiceTrunk> &resultServiceTrunk, int client_id,
+                                          stringstream *trace) {
+    auto begin = this->data.begin();
+    auto end = this->data.end();
+
+    bool f = false;
+
+    for (auto it = begin; it != end; ++it) {
+        ServiceTrunk serviceTrunk = *it;
+        if (serviceTrunk.client_account_id == client_id) {
+            f = true;
+            resultServiceTrunk.push_back(serviceTrunk);
+            if (trace != nullptr) {
+                *trace << "FOUND|SERVICETRUNK|BY CLIENT_ID '" << client_id << "'\n";
+                *trace << "||";
+                serviceTrunk.dump(*trace);
+                *trace << "\n";
+            }
+        }
+    }
+    if (!f) {
+        if (trace != nullptr) {
+            *trace << "NOT FOUND|SERVICETRUNK|BY CLIENT_ID '" << client_id << "'\n";
+        }
+    }
+}

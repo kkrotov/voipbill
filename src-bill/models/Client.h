@@ -16,6 +16,7 @@ struct Client {
     short timezone_offset;
     bool is_blocked;
     bool anti_fraud_disabled;
+    bool is_trunk_client;
     int account_version;
 
     void dump(stringstream &trace) {
@@ -31,6 +32,7 @@ struct Client {
         trace << "price_include_vat: " << price_include_vat << ", ";
         trace << "timezone_offset: " << timezone_offset << ", ";
         trace << "is_blocked: " << is_blocked << ", ";
+        trace << "is_trunk_client: " << is_trunk_client << ", ";
         trace << "anti_fraud_disabled: " << anti_fraud_disabled << ", ";
         trace << "account_version: " << account_version << ", ";
         trace << ")";
@@ -41,11 +43,11 @@ struct Client {
     }
 
     bool hasDailyLimit() {
-        return limit_d != 0;
+        return limit_d > 0 && !is_trunk_client;
     }
 
     bool hasDailyMNLimit() {
-        return limit_d_mn != 0;
+        return limit_d_mn > 0 && !is_trunk_client;
     }
 
     bool isConsumedCreditLimit(double value) {
@@ -53,11 +55,11 @@ struct Client {
     }
 
     bool isConsumedDailyLimit(double value) {
-        return hasDailyLimit() && (limit_d + value < 0.00001);
+        return !is_trunk_client && ( hasDailyLimit() && (limit_d + value < 0.00001) || limit_d <= 0 );
     }
 
     bool isConsumedDailyMNLimit(double value) {
-        return hasDailyMNLimit() && (limit_d_mn + value < 0.00001);
+        return !is_trunk_client && ( hasDailyMNLimit() && (limit_d_mn + value < 0.00001) || limit_d_mn <= 0 );
     }
 
 

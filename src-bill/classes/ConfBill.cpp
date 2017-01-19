@@ -80,4 +80,21 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
     cdr_ftp_dir = pt.get<string>("cdr_parcer.cdr_ftp_dir", "");
     cdr_nasip = pt.get<string>("cdr_parcer.cdr_nasip", "127.0.0.1");
     cdr_parcer_interval = pt.get<int>("cdr_parcer.interval", 1800);
+
+    trunk_max_load = get_int_vector(pt, "health.trunk_max_load");
+    trunk_critical_load_delay = pt.get<int>("health.trunk_critical_load_delay", 10);
+}
+
+vector<int> ConfBill::get_int_vector(boost::property_tree::ptree &pt, string keyname) {
+
+    vector<int> v;
+    string keyval = pt.get<string>(keyname, "");
+    if (keyval.length() > 0) {
+
+        std::stringstream ss(keyval);
+        string tmp;
+        while (ss >> tmp)
+            v.push_back(std::stoi(tmp));
+    }
+    return v;
 }

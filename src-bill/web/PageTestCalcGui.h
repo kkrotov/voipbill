@@ -17,7 +17,7 @@ public:
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
 
-        renderHeader(html);
+        renderHeader("test",html);
 
         long long int call_id = 0;
         bool orig = true;

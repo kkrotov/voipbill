@@ -182,6 +182,32 @@ public:
         if (i<this->trunkIoParams.size())
             this->trunkIoParams[i] = params;
     }
+
+    vector<pair<int,string>> getLoad() {
+
+        vector<pair<int,string>> trunkLoad;
+        for (int i=0; i<count(); i++) {
+
+            int trunk_load = at(i).getLoad();
+            string trunk_name = at(i).trunk_name;
+            trunkLoad.push_back(pair<int,string>(trunk_load, trunk_name));
+        }
+        return trunkLoad;
+    };
+    int maxLoad(string &trunkname) {
+
+        int maxload=0;
+        for (int i=0; i<count(); i++) {
+
+            int curload = at(i).getLoad();
+            if (curload>maxload) {
+
+                maxload = curload;
+                trunkname = at(i).trunk_name;
+            }
+        }
+        return maxload;
+    }
 };
 
 class PageTrunks : public BasePage {
@@ -199,7 +225,7 @@ public:
 //             <<   "<meta http-equiv=\"refresh\" content=\"5\" >"
              <<   "</head>\n";
 
-        renderHeader(html);
+        renderHeader("trunks", html);
 
         if (!ready())
             return;

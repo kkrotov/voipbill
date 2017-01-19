@@ -162,6 +162,8 @@ void ThreadLoader::run() {
 
             } else if (event == "service_trunk") {
 
+                repository.data->client.load(&db_calls); // Для того, что бы корректно расчитался флаг is_trunk_client
+
                 repository.data->serviceTrunk.load(&db_calls);
                 repository.data->activeCounter.load(repository.data->serviceNumber.get(),
                                                     repository.data->serviceTrunk.get());
