@@ -99,5 +99,12 @@ private:
     bool matchPrefixlist(const int prefixlistId, string strNumber);
 
     bool isEmergencyCall(Call &call);
+
+    pair<bool, int>  isNeedTransferToTrunkBeam(Call &call);
+
+    void prepareAuthLogReguestStage1(Call &call, CallInfo &callInfo);
+    void prepareAuthLogReguestStage2(Call &call, CallInfo &callInfo, double buyRate,
+                                                          Pricelist *firstBuyPricelist);
+
 };
 

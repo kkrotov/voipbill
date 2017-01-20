@@ -17,6 +17,7 @@
 
 struct ServiceTrunk {
     int id;
+    int server_id;
     int client_account_id;
     int trunk_id;
     time_t activation_dt;
@@ -29,6 +30,7 @@ struct ServiceTrunk {
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";
+        trace << "server_id: " << server_id << ", ";
         trace << "client_account_id: " << client_account_id << ", ";
         trace << "trunk_id: " << trunk_id << ", ";
         trace << "activation_dt: " << string_time(activation_dt) << ", ";
@@ -56,6 +58,7 @@ struct ServiceTrunkOrder {
 
     double nnp_price = 0;
     int priority = 0;
+    int server_id = 0;
 
     bool is_price_present() {
         if (price && pricelist && abs(price->price) > 0.000001)
