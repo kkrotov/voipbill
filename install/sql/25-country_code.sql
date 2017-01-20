@@ -16,3 +16,5 @@ GRANT SELECT ON TABLE nnp.country TO g_readonly;
 GRANT ALL ON TABLE nnp.country TO g_stat;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE nnp.country TO g_bill_daemon_remote;
 GRANT ALL ON TABLE nnp.country TO g_bill_daemon_local;
+
+ALTER TABLE calls_raw.calls_raw ADD COLUMN country_code integer;
