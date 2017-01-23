@@ -253,6 +253,10 @@ public:
         trunk->findAllAutorouting(resultTrunks, server_id, trace);
     }
 
+    void getAllRoadToRegion(vector<Trunk *> &resultTrunks, int server_id, int road_to_region, stringstream *trace = nullptr) {
+        trunk->findAllRoadToRegion(resultTrunks,server_id, road_to_region,trace);
+    }
+
     StatPrefixlist *getStatPrefixlist(int stat_prefixlist_id) {
         return statPrefixlist->find(stat_prefixlist_id, trace);
     }

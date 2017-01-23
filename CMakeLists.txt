@@ -405,7 +405,7 @@ set(BILL_SOURCES
         src-bill/healthcheck/ThreadErrorStatus.cpp
         src-bill/healthcheck/TrunkLoadStatus.cpp
         src-bill/threads/ThreadHealthManager.cpp
-        src-bill/models/Price.cpp)
+        src-bill/models/Price.cpp src-bill/classes/StateMegaTrunk.cpp src-bill/classes/StateMegaTrunk.h)
 
 add_custom_target(invalidate_files ALL
         COMMAND ${CMAKE_COMMAND} -E touch src-bill/version.cpp)

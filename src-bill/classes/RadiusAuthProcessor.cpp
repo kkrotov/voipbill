@@ -81,9 +81,12 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
         int outcomeId;
 
         BillingCall billingCall(&repository);
+        StateMegaTrunk stateMegaTrunk(&repository);
 
         Call call = Call(&cdr, CALL_ORIG);
+
         CallInfo callInfo;
+
         billingCall.calc(&call, &callInfo, &cdr);
 
         account = callInfo.account;
@@ -93,6 +96,11 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
             call.dump(*trace);
             *trace << "\n";
         }
+
+        stateMegaTrunk.setTrace(trace);
+        stateMegaTrunk.prepareFromCdr(&cdr); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка.
+
+        stateMegaTrunk.PhaseCalc(); // Расчет фаз маршутизации для Мегатранков
 
         string billResponse = analyzeCall(call, o_pAccountIdsBlockedBefore);
         if (trace != nullptr) {
@@ -127,8 +135,9 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
             }
             response->setReject();
             return;
+
         } else {
-            outcomeId = processRouteTable(origTrunk->route_table_id);
+            outcomeId = processRouteTable(origTrunk->route_table_id , stateMegaTrunk);
             if (outcomeId == 0) {
                 Log::warning("Route table: Outcome not found");
                 response->setReleaseReason("NO_ROUTE_TO_DESTINATION");
@@ -139,7 +148,7 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
         double buyRate = 0.0;
         Pricelist *firstBuyPricelist = 0;
 
-        if (processOutcome(outcomeId, &buyRate, &firstBuyPricelist)) {
+        if (processOutcome(outcomeId, stateMegaTrunk, &buyRate, &firstBuyPricelist)) {
 
             prepareAuthLogReguestStage2(call, callInfo, buyRate, firstBuyPricelist);
 
@@ -167,7 +176,7 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
     response->setAccept();
 }
 
-int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
+int RadiusAuthProcessor::processRouteTable(const int routeTableId  , StateMegaTrunk & megaTrunk) {
 
     auto routeTable = repository.getRouteTable(routeTableId);
     if (routeTable == nullptr) {
@@ -195,11 +204,20 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
         }
 
         if (route->outcome_id) {
+
+            auto outcome = repository.getOutcome(route->outcome_id);
+
+            if(outcome != nullptr && outcome->isMegaTrunkPhase1() && !megaTrunk.isMegaPhase1())
+                continue;
+
+            if(outcome != nullptr && outcome->isMegaTrunkPhase2() && !megaTrunk.isMegaPhase2())
+                continue;
+
             return route->outcome_id;
         }
 
         if (route->outcome_route_table_id) {
-            int outcomeId = processRouteTable(route->outcome_route_table_id);
+            int outcomeId = processRouteTable(route->outcome_route_table_id, megaTrunk);
             if (outcomeId != 0) {
                 return outcomeId;
             }
@@ -210,7 +228,7 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
 }
 
 // Возвращает true, если в pBuyRate возвращается себестоимость одной минуты звонка на транк.
-bool RadiusAuthProcessor::processOutcome(int outcomeId, double *pBuyRate, Pricelist **pFirstBuyPricelist) {
+bool RadiusAuthProcessor::processOutcome(int outcomeId, StateMegaTrunk &stateMegaTrunk, double *pBuyRate, Pricelist **pFirstBuyPricelist) {
     if (pBuyRate) {
         *pBuyRate = 0;
     }
@@ -229,7 +247,6 @@ bool RadiusAuthProcessor::processOutcome(int outcomeId, double *pBuyRate, Pricel
         *trace << "INFO|OUTCOME|" << outcome->name << " (" << outcomeId << ")" << "\n";
     }
 
-
     if (outcome->isAuto()) {
 
         return processAutoOutcome(pBuyRate, pFirstBuyPricelist);
@@ -247,6 +264,16 @@ bool RadiusAuthProcessor::processOutcome(int outcomeId, double *pBuyRate, Pricel
     } else if (outcome->isAirp()) {
 
         processAirpOutcome(outcome);
+        return false;
+
+    } else if (outcome->isMegaTrunkPhase1()) {
+
+        processMegaTrunkPhase1(stateMegaTrunk);
+        return false;
+
+    } else if (outcome->isMegaTrunkPhase2()) {
+
+        processMegaTrunkPhase2(stateMegaTrunk);
         return false;
 
     } else if (outcome->isAccept()) {
@@ -288,7 +315,7 @@ bool RadiusAuthProcessor::processAutoOutcome(double *pBuyRate, Pricelist **pFirs
             origServiceTrunkOrder.getPrice(), origServiceTrunkOrder.getCurrency()) : 0;
 
     return processAutoRouteResponse(termServiceTrunks, pBuyRate, pFirstBuyPricelist,
-                                    origRub); /////////////////////////////// Нужно переделывать
+                                    origRub);
 }
 
 
@@ -958,53 +985,12 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
         if (!call.isLocal() && client->disabled) {
             return "voip_disabled";
         }
-/*
-        pair<bool,int> isNeedTransferToTrunkBeam = isNeedTransferToTrunkBeam(call.dst_number);
 
-        if(isNeedTransferToTrunkBeam.first) {
-            if (trace != nullptr) {
-                *trace << "INFO|TRUNKBEAM|must transfer to region " << isNeedTransferToTrunkBeam.second<< ",";
-                *trace << "\n";
-            }
-            return "must_transfer_to_region:" + isNeedTransferToTrunkBeam.second;
-        }
-*/
     }
 
     return "accept";
 }
 
-/*************************************************************************************************
- * Реализация механизма TrunkBeam - подключение клиента с множеством  номеров через один транк "Beam"
- *
- * isNeedTransferToTrunkBeam - проверяет необходимость выполнения "Фазы 1" - перемещение звонка
- *                             в регион подключения транка-"Beam" при входящем звонке на номер клиента,
- *                             либо перемещения звонка в регион присоединения номера А, при исходящем звонке, когда
- *                             мы приняли звонок из транка "Beam" клиента.
- *
- *
- * @param call
- * @return pair.first - нужно перемещать pait.second - номер региона в который нужно перемещать
- */
-
-pair<bool, int> RadiusAuthProcessor::isNeedTransferToTrunkBeam(Call &call) {
-    vector<ServiceTrunk> resultServiceTrunk;
-
-    repository.getServiceTrunkByClientID(resultServiceTrunk,
-                                         call.account_id); // Проверяем наличие услуги "Транк" на лицевом счете номера B
-
-    if (resultServiceTrunk.size() > 0) {
-        ServiceTrunk trunk = *resultServiceTrunk.begin();
-
-        if (trunk.server_id != call.server_id) { //
-
-        }
-
-
-    }
-
-
-}
 
 bool RadiusAuthProcessor::isLowBalance(bool (Client::*checkLimit)(double), RejectReason reason, Client *client,
                                        double spentBalanceSum, Call &call,
@@ -1158,5 +1144,54 @@ void RadiusAuthProcessor::prepareAuthLogReguestStage2(Call &call, CallInfo &call
             }
         }
     }
+
+}
+
+
+void RadiusAuthProcessor::processMegaTrunkPhase1(StateMegaTrunk &megaTrunk) {
+
+    int regionNum = megaTrunk.getDestinationRegion(); // Получаем номер региона, куда нужно направить звонок
+
+    if (trace != nullptr) {
+        *trace << "INFO|MEGATRUNK|PHASE 1: Transfer to region #" << regionNum;
+        *trace << "\n";
+    }
+
+    string routeCase;
+    vector<Trunk *> resultTrunks;
+
+    repository.getAllRoadToRegion(resultTrunks, AppBill().conf.instance_id, regionNum, trace);
+
+    std::random_shuffle( resultTrunks.begin(), resultTrunks.end() );
+
+    for (Trunk *trunk : resultTrunks) {
+        if(!routeCase.empty()) routeCase+=',';
+        routeCase += trunk->trunk_name;
+    }
+
+    if (routeCase.empty()) {
+        throw Exception("not found road to Region #" + lexical_cast<string>(regionNum),
+                        "RadiusAuthProcessor::processMegaTrunkPhase1");
+    }
+
+    response->setRouteCase(routeCase);
+
+}
+
+void RadiusAuthProcessor::processMegaTrunkPhase2(StateMegaTrunk &megaTrunk) {
+
+    Trunk *trunk = megaTrunk.getDestinationMegaTrunk();
+
+    if(trunk == nullptr) {
+        throw Exception("not found MegaTrunk",
+                        "RadiusAuthProcessor::processMegaTrunkPhase1");
+    }
+
+    if (trace != nullptr) {
+        *trace << "INFO|MEGATRUNK|PHASE 2: Transfer to MegaTrunk [" << trunk->trunk_name << "]";
+        *trace << "\n";
+    }
+
+    response->setRouteCase(trunk->trunk_name);
 
 }

@@ -4,6 +4,7 @@
 #include <map>
 
 #include "Repository.h"
+#include "StateMegaTrunk.h"
 //#include "RadiusAuthServer.h"
 
 enum RejectReason {
@@ -54,11 +55,11 @@ private:
 
     void init();
 
-    int processRouteTable(const int routeTableId);
+    int processRouteTable(const int routeTableId , StateMegaTrunk & megaTrunk);
 
     bool filterByNumber(const int numberId, string strNumber);
 
-    bool processOutcome(int outcomeId, double *pBuyRate = 0, Pricelist **pFirstBuyPricelist = 0);
+    bool processOutcome(int outcomeId, StateMegaTrunk &stateMegaTrunk, double *pBuyRate = 0, Pricelist **pFirstBuyPricelist = 0);
 
     bool processAutoOutcome(double *pBuyRate = 0, Pricelist **pFirstBuyPricelist = 0);
 
@@ -106,5 +107,8 @@ private:
     void prepareAuthLogReguestStage2(Call &call, CallInfo &callInfo, double buyRate,
                                                           Pricelist *firstBuyPricelist);
 
+    void processMegaTrunkPhase1(StateMegaTrunk &megaTrunk);
+
+    void processMegaTrunkPhase2(StateMegaTrunk &megaTrunk);
 };
 
