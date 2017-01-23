@@ -54,6 +54,7 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
     char buffer[66000] = "";
     p_request.dump(buffer);
     last_request = string(buffer);
+    last_request_time = time(NULL);
     last_response = "";
     last_error = "";
     request_count++;
@@ -85,6 +86,9 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
                 request.srcNoa = atoi(attrValue.c_str());
             } else if (attrName == "INCOMING-CALLED-ADDRESS-NOA") {
                 request.dstNoa = atoi(attrValue.c_str());
+            } else if (attrName == "CALLINGPARTYCATEGORY") {
+                request.callingPartyCategory = attrValue;
+                logRequest->params["calling_party_category"] = request.callingPartyCategory;
             } else if (attrName == "INCOMING-ROUTEID") {
                 request.trunkName = attrValue;
                 logRequest->params["req_trunk"] = request.trunkName;
@@ -170,6 +174,7 @@ void RadiusAuthServer::sendResponse(RadiusServerStack &p_stack, RadiusAuthRespon
     char buffer[66000] = "";
     l_response.dump(buffer);
     last_response = string(buffer);
+    last_response_time = time(NULL);
     last_error = response.error;
     response_count++;
 

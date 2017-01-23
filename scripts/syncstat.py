@@ -124,7 +124,7 @@ class Sync(Daemon):
         cur_stat.execute("""        select z.rnd, z.tid, 
                                     c.voip_credit_limit, c.voip_credit_limit_day, c.voip_limit_mn_day, 
                                     case c.voip_disabled when true then 't' else 'f' end, 
-                                    if(c.balance > 1000000, 1000000, if(c.balance < -1000000, -1000000, c.balance)) as balance, 
+                                    if(c.balance > 9000000, 9000000, if(c.balance < -9000000, -9000000, c.balance)) as balance, 
                                     c.credit, 
                                     c.last_account_date, 
                                     c.last_payed_voip_month, 
@@ -133,7 +133,8 @@ class Sync(Daemon):
                                     case c.is_blocked when true then 't' else 'f' end,
                                     c.timezone_offset,
                                     case c.anti_fraud_disabled when true then 't' else 'f' end,
-                                    c.account_version
+                                    c.account_version,
+                                    c.currency
                                 from z_sync_postgres z left join clients c on z.tid=c.id
                                 left join client_contract cc on cc.id=c.contract_id
                                 where z.tbase='"""+tbase+"' and z.tname='clients' limit "+str(partsize))
@@ -145,7 +146,7 @@ class Sync(Daemon):
             if r[2] == None:
                 todel.append( (r[1],) )
             else:
-                toins.append( (r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11],r[12],r[13],r[14],r[15]) )
+                toins.append( (r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11],r[12],r[13],r[14],r[15],r[16]) )
 
         if len(tofix) == 0:
             return 0
@@ -153,7 +154,7 @@ class Sync(Daemon):
         cur = self.db.cursor();
         cur.execute('BEGIN')
         if len(toins) > 0:
-            cur.executemany("INSERT INTO billing.clients(id, voip_limit_month, voip_limit_day, voip_limit_mn_day, voip_disabled, balance, credit,amount_date,last_payed_month,organization_id,price_include_vat,is_blocked,timezone_offset,anti_fraud_disabled,account_version)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", toins)
+            cur.executemany("INSERT INTO billing.clients(id, voip_limit_month, voip_limit_day, voip_limit_mn_day, voip_disabled, balance, credit,amount_date,last_payed_month,organization_id,price_include_vat,is_blocked,timezone_offset,anti_fraud_disabled,account_version,currency)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", toins)
         if len(todel) > 0:
             cur.executemany("delete from billing.clients where id=%s", todel)
 
@@ -320,7 +321,7 @@ class Sync(Daemon):
 
     def do_sync_usage_trunk_settings(self, partsize):
         cur_stat = self.db_stat.cursor()
-        cur_stat.execute("""    select z.rnd, z.tid, c.usage_id, c.type, c.order, c.src_number_id, c.dst_number_id, c.pricelist_id, c.minimum_minutes, c.minimum_cost, c.minimum_margin, c.minimum_margin_type
+        cur_stat.execute("""    select z.rnd, z.tid, c.usage_id, c.type, c.order, c.src_number_id, c.dst_number_id, c.pricelist_id, c.minimum_minutes, c.minimum_cost, c.minimum_margin, c.minimum_margin_type, c.package_id
                                 from z_sync_postgres z
                                 left join usage_trunk_settings c on z.tid=c.id
                                 where z.tbase='"""+tbase+"""' and z.tname='usage_trunk_settings'
@@ -333,7 +334,7 @@ class Sync(Daemon):
             if r[2] == None:
                 todel.append( (r[1],) )
             else:
-                toins.append( (r[1],r[2],fix_date(r[3]),fix_date(r[4]),r[5],r[6],r[7],r[8],r[9],r[10],r[11]) )
+                toins.append( (r[1],r[2],fix_date(r[3]),fix_date(r[4]),r[5],r[6],r[7],r[8],r[9],r[10],r[11],r[12]) )
 
         if len(tofix) == 0:
             return 0
@@ -342,7 +343,7 @@ class Sync(Daemon):
         cur.execute('BEGIN')
 
         if len(toins) > 0:
-            cur.executemany("INSERT INTO billing.service_trunk_settings(id, trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id, minimum_minutes, minimum_cost, minimum_margin, minimum_margin_type)VALUES(%s,%s,'%s','%s',%s,%s,%s,%s,%s,%s,%s)", toins)
+            cur.executemany("INSERT INTO billing.service_trunk_settings(id, trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id, minimum_minutes, minimum_cost, minimum_margin, minimum_margin_type,nnp_tariff_id)VALUES(%s,%s,'%s','%s',%s,%s,%s,%s,%s,%s,%s,%s)", toins)
         if len(todel) > 0:
             cur.executemany("delete from billing.service_trunk_settings where id=%s", todel)
 

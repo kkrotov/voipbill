@@ -2,7 +2,6 @@
 
 #include "../common.h"
 
-
 // Коды причин завершения звонка Q.850/Q.931 https://ru.wikipedia.org/wiki/Q.931
 // Cisco-специфичные http://www.cisco.com/c/en/us/td/docs/voice_ip_comm/cucm/service/8_5_1/cdrdef/cdradmin/cdrcodes.html
 enum CauseCode {
@@ -43,6 +42,8 @@ struct Cdr {
     char call_finished[16];
     char releasing_party[32];
 
+    char in_sig_call_id[40], out_sig_call_id[40], hash[40];
+
     Cdr() {
         id = 0;
         connect_time = 0;
@@ -58,6 +59,9 @@ struct Cdr {
         dst_noa = 0;
         call_id = 0;
         disconnect_cause = 0;
+        in_sig_call_id[0] = 0;
+        out_sig_call_id[0] = 0;
+        hash[0] = 0;
     }
 
     void dump(stringstream &trace) {
@@ -75,6 +79,9 @@ struct Cdr {
         trace << "dst_noa: " << dst_noa << ", ";
         trace << "call_id: " << call_id << ", ";
         trace << "disconnect_cause: " << disconnect_cause << ", ";
+        trace << "in_sig_call_id: " << in_sig_call_id << ", ";
+        trace << "out_sig_call_id: " << out_sig_call_id << ", ";
+        trace << "hash: " << hash << ", ";
         trace << ")";
     }
 };

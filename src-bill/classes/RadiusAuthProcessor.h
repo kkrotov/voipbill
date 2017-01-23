@@ -68,11 +68,9 @@ private:
 
     void processAirpOutcome(Outcome *outcome);
 
-    void getAvailableOrigServiceTrunk(ServiceTrunk **origServiceTrunk, Pricelist **origPricelist,
-                                      PricelistPrice **origPrice, ServiceTrunkSettings **origSettings);
+    void getAvailableOrigServiceTrunk(ServiceTrunkOrder &origServiceTrunkOrder);
 
-    void getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks, Pricelist *origPricelist,
-                                      PricelistPrice *origPrice, ServiceTrunkSettings *origSettings,
+    void getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks,ServiceTrunkOrder &origServiceTrunkOrder,
                                       bool fUseMinimalki);
 
     bool processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double *pBuyRate = 0,
@@ -99,5 +97,7 @@ private:
     bool matchTrunkGroup(const int trunkGroupId, const int trunkId);
 
     bool matchPrefixlist(const int prefixlistId, string strNumber);
+
+    bool isEmergencyCall(Call &call);
 };
 

@@ -2,12 +2,18 @@
 
 #include "../common.h"
 #include "Trunk.h"
+#include "TrunkPriority.h"
 #include "ServiceTrunkSettings.h"
 #include "Pricelist.h"
 #include "PricelistPrice.h"
 #include "Client.h"
 #include "ServiceTrunkSettings.h"
 #include "StatsTrunkSettings.h"
+#include "nnp/NNPPackagePrice.h"
+#include "nnp/NNPPackagePricelist.h"
+#include "nnp/NNPPackage.h"
+#include "nnp/NNPPackageMinute.h"
+
 
 struct ServiceTrunk {
     int id;
@@ -36,13 +42,44 @@ struct ServiceTrunk {
 };
 
 struct ServiceTrunkOrder {
-    Trunk * trunk;
-    ServiceTrunk * serviceTrunk;
-    ServiceTrunkSettings * trunkSettings;
-    Pricelist * pricelist;
-    PricelistPrice * price;
-    Client * account;
-    StatsTrunkSettings * statsTrunkSettings;
+    Trunk *trunk = nullptr;
+    ServiceTrunk *serviceTrunk = nullptr;
+    ServiceTrunkSettings *trunkSettings = nullptr;
+    Pricelist *pricelist = nullptr;
+    PricelistPrice *price = nullptr;
+    Client *account = nullptr;
+    StatsTrunkSettings *statsTrunkSettings = nullptr;
+
+    NNPPackage *nnpPackage = nullptr;
+    NNPPackagePrice *nnpPackagePrice = nullptr;
+    NNPPackagePricelist *nnpPackagePricelist = nullptr;
+
+    double nnp_price = 0;
+    int priority = 0;
+
+    bool is_price_present() {
+        if (price && pricelist && abs(price->price) > 0.000001)
+            return true;
+        if (nnpPackage && nnpPackagePrice && abs(nnpPackagePrice->price) > 0.000001)
+            return true;
+        if (nnpPackage && nnpPackagePricelist && nnpPackagePricelist && abs(nnp_price) > 0.000001)
+            return true;
+        return false;
+    }
+
+    char *getCurrency() {
+        if(pricelist)
+            return pricelist->currency_id;
+        if(nnpPackage)
+            return nnpPackage->currency_id;
+        return nullptr;
+    }
+
+    double getPrice() {
+        if(price)
+            return price->price;
+        return nnp_price;
+    }
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -59,12 +96,30 @@ struct ServiceTrunkOrder {
         if (trunkSettings != nullptr) {
             trace << "trunk_settings_id: " << trunkSettings->id << ", ";
         }
+
+        trace << "priority: " << priority << ", ";
+
         if (statsTrunkSettings != nullptr) {
             trace << "stats_trunk_settings_id: " << statsTrunkSettings->id << ", ";
         }
         if (pricelist != nullptr) {
             trace << "pricelist_id: " << pricelist->id << ", ";
         }
+
+        if (nnpPackage != nullptr) {
+            trace << "nnpPackage_id: " << nnpPackage->id << ", ";
+        }
+
+        if (nnpPackagePrice != nullptr) {
+            trace << "nnpPackagePrice_id: " << nnpPackagePrice->id << ", ";
+        }
+
+        if (nnpPackagePricelist != nullptr) {
+            trace << "nnpPackagePricelist_id: " << nnpPackagePricelist->id << ", ";
+        }
+
+        trace << "nnp_price: " << nnp_price << ", ";
+
         if (price != nullptr) {
             trace << "prefix: " << price->prefix << ", ";
             trace << "price: " << price->price << ", ";

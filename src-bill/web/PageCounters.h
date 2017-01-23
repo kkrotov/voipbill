@@ -9,7 +9,7 @@ public:
         return path == "/counters";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
+        renderHeader("counters",html);
 
         Repository repository;
 

@@ -130,8 +130,8 @@ bool CdrParser::ParseCall(const std::string &RawCallData, CallData &Call) {
         bool call_is_finished = Call.IsFinished();
 
         Call.call_id = GetValue("CallReference", RawCallData);
-        Call.in_sig_call_id = GetValue("IncomingSignallingCallID", RawCallData);
-        Call.out_sig_call_id = GetValue("OutgoingSignallingCallID", RawCallData);
+        Call.in_sig_call_id = GetValue("IncomingSignallingCallID", RawCallData, true);
+        Call.out_sig_call_id = GetValue("OutgoingSignallingCallID", RawCallData, true);
 
         ParseNumber("IncomingCallingAddress", RawCallData, Call.src_number, Call.src_noa, true);
 

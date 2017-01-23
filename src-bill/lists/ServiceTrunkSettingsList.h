@@ -8,7 +8,7 @@ protected:
 
     string sql(BDb * db) {
         return "    select id, trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id, minimum_minutes, minimum_cost, " \
-            "              minimum_margin_type, minimum_margin "
+            "              minimum_margin_type, minimum_margin, nnp_tariff_id "
             "       from billing.service_trunk_settings " \
             "       order by trunk_id asc, \"type\" asc, \"order\" asc ";
     }
@@ -25,6 +25,7 @@ protected:
         item->minimum_cost = row.get_i(8);
         item->minimum_margin_type = row.get_i(9);
         item->minimum_margin = row.get_d(10);
+        item->nnp_tariff_id = row.get_i(11);
     }
 
     struct key_trunk_id {

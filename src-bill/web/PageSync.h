@@ -10,7 +10,7 @@ public:
         return path == "/sync";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
+        renderHeader("sync",html);
 
         auto manager = ManagerPull::instance();
 

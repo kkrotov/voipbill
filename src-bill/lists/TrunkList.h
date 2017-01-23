@@ -9,7 +9,8 @@ protected:
 
     string sql(BDb *db) {
         return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, source_trunk_rule_default_allowed, default_priority, auto_routing, route_table_id, \
-                    our_trunk, auth_by_number, orig_redirect_number_7800, orig_redirect_number, term_redirect_number, capacity, sw_minimalki,server_id " \
+                   our_trunk, auth_by_number, orig_redirect_number_7800, orig_redirect_number, term_redirect_number, capacity, sw_minimalki,server_id, sw_shared, " \
+               "   load_warning, road_to_region" \
                "   from auth.trunk " \
                "   where server_id in " + app().conf.get_sql_regions_for_load_list_list() +
                "   order by id asc";
@@ -34,6 +35,9 @@ protected:
         item->capacity = row.get_i(15);
         item->sw_minimalki = row.get_b(16);
         item->server_id = row.get_i(17);
+        item->sw_shared = row.get_b(18);
+        item->load_warning = row.get_i(19);
+        item->road_to_region = row.get_i(20);
     }
 
     struct key_id {
@@ -73,14 +77,14 @@ public:
         return result;
     }
 
-    void findAllAutorouting(vector<Trunk *> &resultTrunks, stringstream *trace = nullptr) {
+    void findAllAutorouting(vector<Trunk *> &resultTrunks, int server_id, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
 
         for (auto it = begin; it != end; ++it) {
             Trunk *trunk = &*it;
 
-            if (trunk->auto_routing) {
+            if (trunk->auto_routing && (trunk->server_id == server_id || trunk->sw_shared)) {
                 if (resultTrunks.size() == 0) {
                     if (trace != nullptr) {
                         *trace << "FOUND|TRUNKS|BY AUTOROUTING" << "\n";

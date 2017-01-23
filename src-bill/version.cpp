@@ -4,14 +4,13 @@ char const * build_date() {
 }
 
 char const * build_time() {
-    return __TIME__;
+    return _TIMECOMPILED_;
 }
 
 const char * build_commit() {
 #ifdef _CURRENT_HEAD_
     return _CURRENT_HEAD_;
 #else
-    static const char* unknown = "unknown";
-    return unknown;
+    return "unknown";
 #endif
 }

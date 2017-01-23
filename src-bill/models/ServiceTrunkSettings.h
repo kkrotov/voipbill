@@ -23,6 +23,7 @@ struct ServiceTrunkSettings {
     int pricelist_id;
     int minimum_minutes;
     int minimum_cost;
+    int nnp_tariff_id;
 
     // SERVICE_TRUNK_SETTINGS_MIN_MARGIN_...
     int minimum_margin_type;
@@ -41,7 +42,12 @@ struct ServiceTrunkSettings {
         trace << "order: " << order << ", ";
         trace << "src_number_id: " << src_number_id << ", ";
         trace << "dst_number_id: " << dst_number_id << ", ";
-        trace << "pricelist_id: " << pricelist_id << ", ";
+        if(nnp_tariff_id>0) {
+            trace << "pricelist_id: " << pricelist_id << ", ";
+        }
+        if(nnp_tariff_id>0) {
+            trace << "nnp_tariff_id:" << nnp_tariff_id << ", ";
+        }
         trace << "minimum_minutes: " << minimum_minutes << ", ";
         trace << "minimum_cost: " << minimum_cost << ", ";
         trace << "minimum_margin_type: " << minimum_margin_type << ", ";

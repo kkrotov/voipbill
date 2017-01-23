@@ -14,6 +14,8 @@ class ThreadSyncCalls : public Thread {
     string last_local_time;
     long long int last_local_id;
 
+    int remain_count_to_update_aggr = 0;
+
     Repository repository;
 
     void run();
@@ -27,4 +29,6 @@ public:
     ThreadSyncCalls();
     static const char* idName() { return "sync_calls"; }
     bool hasFullHtml() override;
+
+    void do_calls_aggr_update();
 };

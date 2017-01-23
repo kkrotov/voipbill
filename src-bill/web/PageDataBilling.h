@@ -11,7 +11,7 @@ public:
         return path == "/data-billing";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader(html);
+        renderHeader("data-billing",html);
 
         Repository repository;
 

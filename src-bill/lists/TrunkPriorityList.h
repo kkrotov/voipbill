@@ -7,16 +7,19 @@ class TrunkPriorityList : public ObjList<TrunkPriority> {
 protected:
 
     string sql(BDb * db) {
-        return "   select trunk_id, \"order\", priority, prefixlist_id " \
+        return "   select id, trunk_id, \"order\", priority, number_id_filter_a, number_id_filter_b, trunk_group_id " \
             "   from auth.trunk_priority " \
             "   order by trunk_id asc, \"order\" asc ";
     }
 
     inline void parse_item(BDbResult &row, TrunkPriority * item) {
-        item->trunk_id = row.get_i(0);
-        item->order = row.get_i(1);
-        item->priority = row.get_i(2);
-        item->prefixlist_id = row.get_i(3);
+        item->id = row.get_i(0);
+        item->trunk_id = row.get_i(1);
+        item->order = row.get_i(2);
+        item->priority = row.get_i(3);
+        item->number_id_filter_a = row.get_i(4);
+        item->number_id_filter_b = row.get_i(5);
+        item->trunk_group_id = row.get_i(6);
     }
 
     struct key_trunk_id {
@@ -52,5 +55,20 @@ public:
             end = p.second;
         }
         return begin <  end ? &*begin : nullptr;
+    }
+
+
+    void findAllTrunkPriority(int trunk_id, vector<TrunkPriority> &trunkPriorityList) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+        {
+            auto p = equal_range(begin, end, trunk_id, key_trunk_id());
+            begin = p.first;
+            end = p.second;
+            for (auto it = begin; it != end; ++it) {
+                trunkPriorityList.push_back(*it);
+            }
+        }
+
     }
 };

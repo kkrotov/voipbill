@@ -4,6 +4,7 @@
 #include "../data/DataBillingContainer.h"
 #include "../data/DataCurrentCallsContainer.h"
 #include "RadiusAuthRequestResponse.h"
+#include "../models/Price.h"
 
 class Repository {
 public:
@@ -248,8 +249,8 @@ public:
         trunkTrunkRule->findTrunkGroupRules(resultTrunkGroupRules, trunk_id, trace);
     }
 
-    void getAllAutoRoutingTrunks(vector<Trunk *> &resultTrunks) {
-        trunk->findAllAutorouting(resultTrunks, trace);
+    void getAllAutoRoutingTrunks(vector<Trunk *> &resultTrunks, int server_id) {
+        trunk->findAllAutorouting(resultTrunks, server_id, trace);
     }
 
     StatPrefixlist *getStatPrefixlist(int stat_prefixlist_id) {
@@ -263,6 +264,7 @@ public:
     bool getCurrencyRate(const char *currency_id, double *o_currencyRate) const;
 
     double priceToRoubles(double price, const Pricelist &pricelist) const;
+    double priceToRoubles(double price, const char *currency_id) const;
 
     bool priceLessThan(double priceLeft, const Pricelist &pricelistLeft,
                        double priceRight, const Pricelist &pricelistRight) const;
@@ -298,6 +300,17 @@ public:
         const Repository &repository;
     };
 
+    struct trunk_settings_order_asc_priority {
+        bool operator()(const ServiceTrunkOrder &left, const ServiceTrunkOrder &right) {
+            return left.priority > right.priority;
+        }
+
+        trunk_settings_order_asc_priority(const Repository &repository) : repository(repository) {}
+
+    private:
+        const Repository &repository;
+    };
+
     void orderOrigTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList) const {
         sort(trunkSettingsOrderList.begin(), trunkSettingsOrderList.end(), trunk_settings_order_asc_price(*this));
     }
@@ -305,11 +318,9 @@ public:
     void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, bool fUseMinimalki,
                                          time_t connect_time) const;
 
-    bool checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
-                                      long long int dstNumber, Pricelist *&pricelist, PricelistPrice *&price);
-
-    void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
-                                   long long int srcNumber, long long int dstNumber, int destinationType);
+    bool checkTrunkSettingsOldPricelistConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
+                                                  long long int dstNumber, Pricelist *&pricelist,
+                                                  PricelistPrice *&price);
 
     void getActiveNNPAccountTariffLight(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight, int client_id,
                                         time_t connect_time, int service_number_id) {
@@ -320,6 +331,10 @@ public:
 
     void getServiceNumberByClientID(vector<ServiceNumber> &resultServiceNumber, int client_id) {
         serviceNumber->findAllByClientID(resultServiceNumber, client_id, trace);
+    }
+
+    void getServiceTrunkByClientID(vector<ServiceTrunk> &resultServiceTrunk, int client_id) {
+        serviceTrunk->findAllByClientID(resultServiceTrunk, client_id, trace);
     }
 
     void getNNPPackageMinuteByTariff(vector<NNPPackageMinute> &resultNNPPackageMinute, int nnp_tariff_id,
@@ -339,6 +354,9 @@ public:
         return nnpPackageMinute->find(idNNPPackageMinute, trace);
     }
 
+    NNPPackage *getNNPPackage(int idNNPPackage, stringstream *trace = nullptr) {
+        return nnpPackage->find(idNNPPackage, trace);
+    }
 
     bool getNNPPrefixsByNumberRange(vector<int> &nnpPrefixIds,
                                     int nnpNumberRangeId, stringstream *trace = nullptr) {
@@ -357,13 +375,13 @@ public:
     bool getNNPDestinationByNumberRange(set<int> &nnpDestinationIds, NNPNumberRange *nnpNumberRange,
                                         stringstream *trace = nullptr);
 
-    void findNNPPackagePriceIds(set<pair<double, int>> &resultNNPPackagePriceIds, int tariff_id,
+    void findNNPPackagePriceIds(set<pair<double, NNPPackagePrice *>> &resultNNPPackagePriceIds, int tariff_id,
                                 set<int> &nnpDestinationIds,
                                 stringstream *trace = nullptr) {
         return nnpPackagePrice->findPackagePriceIds(resultNNPPackagePriceIds, tariff_id, nnpDestinationIds, trace);
     }
 
-    void findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPackagePricelistIds, int tariff_id,
+    void findNNPPackagePricelistIds(set<pair<double, NNPPackagePricelist *>> &resultNNPPackagePricelistIds, int tariff_id,
                                     long long int num, stringstream *trace = nullptr);
 
 
@@ -374,4 +392,14 @@ public:
                               stringstream *trace = nullptr);
 
     pair<int, RadiusAuthRequest> getNNPRegionTrunkByNum(PhoneNumber numA, PhoneNumber numB);
+
+    void getTrunkPriority(int trunk_id, vector<TrunkPriority> &trunkPriorityList);
+
+    void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
+                                      long long int srcNumber, long long int dstNumber, int destinationType);
+
+    bool checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber, long long int dstNumber);
+
+    void setCurrencyRate(Price &price) const;
+
 };

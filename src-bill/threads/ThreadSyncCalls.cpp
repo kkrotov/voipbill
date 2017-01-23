@@ -2,7 +2,7 @@
 
 ThreadSyncCalls::ThreadSyncCalls() {
     id = idName();
-    name = "Sync Calls to central db";
+    name = "Sync Calls to central db / update calls_aggr";
     threadSleepSeconds = app().conf.calls_raw_sync_delay;
 
     db_main.setCS(app().conf.db_main);
@@ -44,6 +44,8 @@ void ThreadSyncCalls::run() {
         return;
     }
 
+    do_calls_aggr_update();
+
     repository.billingData->prepareSyncCallsCentral(&db_main);
 
     string local_prev_sync_month;
@@ -66,6 +68,19 @@ void ThreadSyncCalls::run() {
         e.addTrace("ThreadSyncCalls::run::copy(main_last_id:" +
                    lexical_cast<string>(repository.billingData->lastSyncCentralCallId) + ")");
         throw e;
+    }
+}
+
+void ThreadSyncCalls::do_calls_aggr_update() {
+    if(remain_count_to_update_aggr <= 0) {
+
+        db_main.query( "select calls_aggr.calls_aggr_update ('" + app().conf.get_sql_regions_for_load_list_list()  +  "'::varchar);" );
+        remain_count_to_update_aggr = 60*60 / ( threadSleepSeconds * 3);
+
+    } else {
+
+        remain_count_to_update_aggr--;
+
     }
 }
 
@@ -142,18 +157,18 @@ bool ThreadSyncCalls::copyCallsPart(string month, unsigned long limit) {
 
         BDb::copy("calls_raw.calls_raw_" + suffix,
                   "",
-                  " id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id, "\
+                  " id, orig, our, peer_id, cdr_id, connect_time, pdd, trunk_id, account_id, trunk_service_id, number_service_id, "\
                 " src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id,"\
                 " service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix,"\
-                " nnp_operator_id, nnp_region_id, nnp_city_id, nnp_country_prefix, nnp_ndc, nnp_is_mob, "\
-                " nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id,  "
+                " nnp_number_range_id, nnp_operator_id, nnp_region_id, nnp_city_id, nnp_country_prefix, nnp_ndc, nnp_is_mob, "\
+                " nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id, signalling_call_id, hash, "
                 " geo_id, geo_operator_id, mob, geo_mob, server_id, hub_id, disconnect_cause, account_version, stats_nnp_package_minute_id",
 
-                  " select id, orig, our, peer_id, cdr_id, connect_time, trunk_id, account_id, trunk_service_id, number_service_id,"\
+                  " select id, orig, our, peer_id, cdr_id, connect_time, pdd, trunk_id, account_id, trunk_service_id, number_service_id,"\
                 " src_number, dst_number, billed_time, rate, cost, tax_cost, interconnect_rate, interconnect_cost, service_package_id,"\
                 " service_package_stats_id, package_time, package_credit, trunk_settings_stats_id, destination_id, pricelist_id, prefix,"\
-                " nnp_operator_id, nnp_region_id, nnp_city_id, nnp_country_prefix, nnp_ndc, nnp_is_mob, "\
-                " nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id,  "
+                " nnp_number_range_id, nnp_operator_id, nnp_region_id, nnp_city_id, nnp_country_prefix, nnp_ndc, nnp_is_mob, "\
+                " nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id, signalling_call_id, hash, "
                 " geo_id, geo_operator_id, mob, geo_mob, coalesce(server_id," +app().conf.str_instance_id + ") as safe_server_id," + app().conf.get_sql_hub_id() +
                 ", disconnect_cause, account_version, stats_nnp_package_minute_id  " \
 

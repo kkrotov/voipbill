@@ -50,7 +50,7 @@ function doCall($db,$v,&$maxid) {
     $redirect_number   = "''";
 
     $setup_time        ="'". $v["dt"]."'::timestamp";
-    $connect_time      ="'". $v["dt"]."'::timestamp";
+    $connect_time      ="'". $v["dt"]."'::timestamp + interval '00:00:02'";
     $disconnect_time   = "'".$v["dt"]."'::timestamp";
     $session_time      = 60; 
     $disconnect_cause  = 16;
@@ -61,9 +61,14 @@ function doCall($db,$v,&$maxid) {
     $hash              = "calls_cdr.get_hash(".$id.",'".$v["dt"]."'::timestamp)";
     $dst_replace       = "''";
 
+    $in_sig_call_id    = "md5(".$hash."||'1')::uuid";
+    $out_sig_call_id   = "md5(".$hash."||'2')::uuid";
 
-    $sql = "insert into calls_cdr.cdr (id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,session_time,disconnect_cause,src_route,dst_route,src_noa,dst_noa,hash,dst_replace) ";
-    $sql.= "values ($id,$call_id,$nasp_ip,$src_number,$dst_number,$redirect_number,$setup_time,$connect_time,$disconnect_time,$session_time,$disconnect_cause,$src_route,$dst_route,$src_noa,$dst_noa,$hash,$dst_replace);";
+
+    $sql = "insert into calls_cdr.cdr (id,call_id,nas_ip,src_number,dst_number,redirect_number,setup_time,connect_time,disconnect_time,".
+           " session_time,disconnect_cause,src_route,dst_route,src_noa,dst_noa,hash,dst_replace,in_sig_call_id,out_sig_call_id) ";
+    $sql.= "values ($id,$call_id,$nasp_ip,$src_number,$dst_number,$redirect_number,$setup_time,$connect_time,$disconnect_time,".
+           "$session_time,$disconnect_cause,$src_route,$dst_route,$src_noa,$dst_noa,$hash,$dst_replace,$in_sig_call_id,$out_sig_call_id);";
 
     $result = pg_query($db,$sql) or die('Ошибка запроса: ' . pg_last_error());
 
@@ -102,21 +107,25 @@ clearCallCDR($dbmain);
 
 }
 
+// DoRecalcCurrentMounth($dbmain);
+
+
+
 doPrepare_otfix_mn_counter($dbmain,$dbregion);
+
 
 echo "]] 4. Создаем записи в таблице CDR в региональной базе.\n";
 
 $maxid = getLastCallID($dbregion);
 
-$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '79164631212' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"", "dt"=>"2016-11-08 18:03:00");
+$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '79164631212' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"", "dt"=>"2017-01-08 18:03:00");
 
-$calls[] = array ( "src_number" => '79119888723' , "dst_number" => '73832870122' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2016-11-09 18:01:00");
-$calls[] = array ( "src_number" => '79119888723' , "dst_number" => '79263747216' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2016-11-09 18:02:00");
-$calls[] = array ( "src_number" => '78126465198' , "dst_number" => '79262559281' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2016-11-09 18:03:00");
+$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '73832870122' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2017-01-08 18:01:00");
+$calls[] = array ( "src_number" => '79119888723' , "dst_number" => '74996851549' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2017-01-08 18:02:00");
+$calls[] = array ( "src_number" => '78126465198' , "dst_number" => '74996851549' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2017-01-08 18:03:00");
 
 doCalls($dbregion,$calls,$maxid);
 
-//DoRecalcCurrentMounth($dbmain);
 
 
 

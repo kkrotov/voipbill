@@ -7,9 +7,10 @@ class ClientList : public ObjList<Client> {
 protected:
 
     string sql(BDb * db) {
-        return "   select id, voip_limit_day,voip_limit_mn_day, credit, balance, amount_date, voip_disabled, organization_id, price_include_vat, timezone_offset, is_blocked, anti_fraud_disabled, account_version " \
-                "   from billing.clients " \
-                "   order by id asc ";
+        return "   select id, voip_limit_day,voip_limit_mn_day, credit, balance, amount_date, voip_disabled, organization_id, price_include_vat, timezone_offset, is_blocked, anti_fraud_disabled, account_version, " \
+               " id in (select client_account_id from billing.service_trunk where now() < expire_dt and activation_dt < now()) as is_trunk_client"
+               "   from billing.clients " \
+               "   order by id asc ";
     }
 
     inline void parse_item(BDbResult &row, Client * item) {
@@ -26,6 +27,7 @@ protected:
         item->is_blocked = row.get_b(10);
         item->anti_fraud_disabled = row.get_b(11);
         item->account_version = row.get_i(12);
+        item->is_trunk_client = row.get_b(13);
     }
 
     struct key_id {

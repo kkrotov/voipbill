@@ -31,6 +31,8 @@ string string_date(const time_t dt, int debugFlag = -1);
 
 string string_time(const time_t dt, int debugFlag = -1);
 
+string seconds_to_uptime(double seconds);
+
 time_t parseDate(char * str);
 
 time_t parseDateTime(const char * str);
