@@ -1,7 +1,3 @@
-//
-// Created by nedlosster on 20.01.17.
-//
-
 #include "StateMegaTrunk.h"
 
 
@@ -20,88 +16,64 @@ void StateMegaTrunk::clearTrace() {
     repository->trace = nullptr;
 }
 
-bool StateMegaTrunk::isFromMegaTrunkPhase1() {
-    return false;
-}
-
-bool StateMegaTrunk::isFromMegaTrunkPhase2() {
-    return false;
-}
-
-bool StateMegaTrunk::isToMegaTrunkPhase1() {
-    return false;
-}
-
-bool StateMegaTrunk::isToMegaTrunkPhase2() {
-    return false;
-}
-
 void StateMegaTrunk::prepareFromCdr(Cdr *cdr) {
+    if(cdr != nullptr) {
+        src_trunk = repository->getTrunkByName(cdr->src_route);
 
+        if(src_trunk != nullptr) {
+            serviceTrunkSrc = repository->getServiceTrunk(src_trunk->id);
+        }
+
+        serviceNumberNumA = repository->getServiceNumber(cdr->src_number);
+        serviceNumberNumB = repository->getServiceNumber(cdr->dst_number);
+
+    }
 }
 
 void StateMegaTrunk::PhaseCalc() {
-// Расчитываем фазу машрутизации мегатранка
+    // Расчитываем фазу машрутизации мегатранка
 
-}
-
-bool StateMegaTrunk::isMegaPhase1(){
-    if(isFromMegaTrunkPhase1()) {
-        return true;
-    }
-
-    if(isToMegaTrunkPhase1()) {
-
-        return true;
-    }
-    return false;
-}
-
-bool StateMegaTrunk::isMegaPhase2(){
-    if(isToMegaTrunkPhase2()) {
-        return true;
-    }
-    return false;
-}
-
-int StateMegaTrunk::getDestinationRegion() {
-    return 0;
-}
-
-Trunk *StateMegaTrunk::getDestinationMegaTrunk() {
-    return nullptr;
-}
-
-
-/*************************************************************************************************
- * Реализация механизма TrunkBeam - подключение клиента с множеством  номеров через один транк "Beam"
- *
- * isNeedTransferToTrunkBeam - проверяет необходимость выполнения "Фазы 1" - перемещение звонка
- *                             в регион подключения транка-"Beam" при входящем звонке на номер клиента,
- *                             либо перемещения звонка в регион присоединения номера А, при исходящем звонке, когда
- *                             мы приняли звонок из транка "Beam" клиента.
- *
- *
- * @param call
- * @return pair.first - нужно перемещать pait.second - номер региона в который нужно перемещать
- */
-
-/*
-
-pair<bool, int> RadiusAuthProcessor::isNeedTransferToTrunkBeam(Call &call) {
     vector<ServiceTrunk> resultServiceTrunk;
 
-    repository.getServiceTrunkByClientID(resultServiceTrunk,
-                                         call.account_id); // Проверяем наличие услуги "Транк" на лицевом счете номера B
+    if( serviceNumberNumB!= nullptr ) {
+        repository->getServiceTrunkByClientID(resultServiceTrunk, serviceNumberNumB->client_account_id);
+        for(auto serviceTrunk : resultServiceTrunk) {
+            if(serviceTrunk.client_account_id == serviceNumberNumB->client_account_id && serviceTrunk.term_enabled &&
+               serviceTrunk.activation_dt <= time(nullptr) && time(nullptr) <= serviceTrunk.expire_dt) {
 
-    if (resultServiceTrunk.size() > 0) {
-        ServiceTrunk trunk = *resultServiceTrunk.begin();
+                if(serviceNumberNumB->server_id != serviceTrunk.server_id ) {
+                    // Провеяем, есть на лицевом счете номера B услуга транк,
+                    // если такой транк находится в другом регионе, включаем Фазу 1 и перемещаемся в этот регион.
+                    destRegion = serviceTrunk.server_id;
+                    isPhase1 = true;
+                    return;
 
-        if (trunk.server_id != call.server_id) { //
+                } else {
+                    destTrunk = repository->getTrunk(serviceTrunk.trunk_id);
+                    if(destTrunk!= nullptr)
+                    {
+                        // Если лицевой счет номера B совпадает с лицевым счетом транка в этом регионе, то включаем
+                        // фазу 2 и направляем в такой транк.
+                        isPhase2 = true;
+                        return;
+                    }
 
+                }
+
+            }
         }
-
-
     }
-*/
 
+    // Если лицевые счете номера А и исходного транка совпадают - и номер А принадлежит другому региону,
+    // включаем Фазу 1 и перемещаем звонок в регион номера А.
+
+    if(serviceNumberNumA != nullptr && serviceTrunkSrc != nullptr) {
+        if(serviceNumberNumA->client_account_id == serviceTrunkSrc->client_account_id &&
+           serviceNumberNumA->server_id !=  serviceTrunkSrc->server_id ) {
+            isPhase1 = true;
+            destRegion =serviceNumberNumA->server_id;
+            return;
+        }
+    }
+
+}

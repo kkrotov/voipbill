@@ -207,10 +207,10 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId  , StateMegaTr
 
             auto outcome = repository.getOutcome(route->outcome_id);
 
-            if(outcome != nullptr && outcome->isMegaTrunkPhase1() && !megaTrunk.isMegaPhase1())
+            if(outcome != nullptr && outcome->isMegaTrunkPhase1() && !megaTrunk.isMegaTrunkPhase1())
                 continue;
 
-            if(outcome != nullptr && outcome->isMegaTrunkPhase2() && !megaTrunk.isMegaPhase2())
+            if(outcome != nullptr && outcome->isMegaTrunkPhase2() && !megaTrunk.isMegaTrunkPhase2())
                 continue;
 
             return route->outcome_id;
@@ -1152,11 +1152,6 @@ void RadiusAuthProcessor::processMegaTrunkPhase1(StateMegaTrunk &megaTrunk) {
 
     int regionNum = megaTrunk.getDestinationRegion(); // Получаем номер региона, куда нужно направить звонок
 
-    if (trace != nullptr) {
-        *trace << "INFO|MEGATRUNK|PHASE 1: Transfer to region #" << regionNum;
-        *trace << "\n";
-    }
-
     string routeCase;
     vector<Trunk *> resultTrunks;
 
@@ -1174,13 +1169,18 @@ void RadiusAuthProcessor::processMegaTrunkPhase1(StateMegaTrunk &megaTrunk) {
                         "RadiusAuthProcessor::processMegaTrunkPhase1");
     }
 
+    if (trace != nullptr) {
+        *trace << "INFO|MEGATRUNK|PHASE 1: Transfer to region #" << regionNum;
+        *trace << "\n";
+    }
+
     response->setRouteCase(routeCase);
 
 }
 
 void RadiusAuthProcessor::processMegaTrunkPhase2(StateMegaTrunk &megaTrunk) {
 
-    Trunk *trunk = megaTrunk.getDestinationMegaTrunk();
+    Trunk *trunk = megaTrunk.getDestinationMegaTrunk(); // Получаем Мегатранк, в котором нужно собрать звонки.
 
     if(trunk == nullptr) {
         throw Exception("not found MegaTrunk",

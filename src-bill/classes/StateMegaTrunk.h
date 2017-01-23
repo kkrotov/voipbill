@@ -50,36 +50,47 @@ private:
     CallInfo *callInfo;
     Cdr *cdr;
 
-    Trunk origTrunk,termTrunk;
+    Trunk *src_trunk = nullptr;
+
+    ServiceNumber *serviceNumberNumA = nullptr;
+    ServiceNumber *serviceNumberNumB = nullptr;
+
+    ServiceTrunk  *serviceTrunkSrc = nullptr;
+
+    bool isPhase1 = false;
+    bool isPhase2 = false;
 
     stringstream *trace;
 
-    Trunk *DestTrunk = nullptr;
-    InstanceSettings *DestRegion = nullptr;
+    Trunk *destTrunk = nullptr;
+
+    int destRegion = 0;
 
 public:
 
     StateMegaTrunk(Repository *repository);
 
-    void prepareFromCdr(Cdr *cdr);
-
     void setTrace(stringstream *trace);
 
     void clearTrace();
 
-    bool isFromMegaTrunkPhase1();
-    bool isFromMegaTrunkPhase2();
+    bool isMegaTrunkPhase1()  {
+        return isPhase1;
+    };
 
-    bool isToMegaTrunkPhase1();
-    bool isToMegaTrunkPhase2();
+    bool isMegaTrunkPhase2()  {
+        return isPhase2;
+    };
 
-    bool isMegaPhase1();
-    bool isMegaPhase2();
+    Trunk *getDestinationMegaTrunk() {
+        return destTrunk;
+    }
 
+    void prepareFromCdr(Cdr *cdr);
     void PhaseCalc();
 
-    int getDestinationRegion();
-
-    Trunk *getDestinationMegaTrunk();
+    int getDestinationRegion() {
+        return destRegion;
+    };
 
 };

@@ -2,7 +2,7 @@
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-     DaemonApp daemon(argc, argv);
+    DaemonApp daemon(argc, argv);
 
     if (!daemon.parseCommand()) {
         return 1;
