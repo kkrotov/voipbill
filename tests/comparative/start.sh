@@ -13,3 +13,6 @@ echo 'Billing testing'
 python "$DIR/comparative/billing.py"
 [[ $? -ne 0 ]] && exit
 
+echo 'Auth testing'
+python "$DIR/comparative/auth_comparer.py"
+[[ $? -ne 0 ]] && exit

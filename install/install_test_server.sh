@@ -45,3 +45,4 @@ EOF
 pip install unittest2
 pip install xmlrunner
 pip install pgpubsub
+pip install requests

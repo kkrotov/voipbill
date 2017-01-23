@@ -49,6 +49,10 @@ echo 'Генерируем тестовые примеры для уже про�
 nice -19 python "$DIR/sampler.py"
 [[ $? -ne 0 ]] && exit
 
+echo 'Запускаем auth тесты для уже протестированной версии...'
+nice -19 python "$DIR/comparative/auth_caller.py"
+[[ $? -ne 0 ]] && exit
+
 echo 'Stopping tested app version...'
 . "$DIR/stop.sh"
 
@@ -86,6 +90,10 @@ sleep 360s
 
 echo 'Генерируем тестовые примеры для новой (тестируемой) версии и ждём завершения синхронизации...'
 nice -19 python "$DIR/sampler.py"
+[[ $? -ne 0 ]] && exit
+
+echo 'Запускаем auth тесты для новой (тестируемой) версии...'
+nice -19 python "$DIR/comparative/auth_caller.py"
 [[ $? -ne 0 ]] && exit
 
 echo 'Running unit tests analysis...'
