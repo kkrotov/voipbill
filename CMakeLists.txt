@@ -441,6 +441,8 @@ if(CXXTEST_FOUND)
          src-bill/classes/BDbResult.cpp
          src-bill/classes/BDbTransaction.cpp
          src-bill/common.cpp
+         src-bill/classes/nnp/PrefixTree.cpp
+         src-bill/classes/nnp/PrefixNode.cpp
          tests/functional/common.cpp
          tests/functional/BaseTest.cpp
          tests/functional/ComparisonTest.cpp
@@ -449,7 +451,8 @@ if(CXXTEST_FOUND)
 
     set (CXXTEST_TESTGEN_ARGS --runner=XUnitPrinter --world=utest)
     CXXTEST_ADD_TEST(tests/unit/utest ./utest.cpp # unit тесты
-    tests/unit/RemoveHtmlTagsTest.h)
+    tests/unit/RemoveHtmlTagsTest.h
+    tests/unit/PrefixTreeTest.h)
     target_link_libraries(tests/unit/utest test.obj rt pthread pq curl crypto)
 
     set (CXXTEST_TESTGEN_ARGS --runner=XUnitPrinter --world=ftest)
