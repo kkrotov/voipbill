@@ -372,6 +372,8 @@ public:
 
     bool getNNPDestinationByNum(set<int> &nnpDestinationIds, long long int num, stringstream *trace = nullptr);
 
+    bool getPrefixByNNPDestination(vector<PhoneNumber> &prefixList, int destinationId);
+
     bool getNNPDestinationByNumberRange(set<int> &nnpDestinationIds, NNPNumberRange *nnpNumberRange,
                                         stringstream *trace = nullptr);
 
