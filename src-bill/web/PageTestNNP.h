@@ -160,8 +160,8 @@ public:
 
             }
             else if (cmd == "getPrefixListByDestinationID") {
-                if (parameters.find("num") != parameters.end()) {
-                    sNum = parameters["num"];
+                if (parameters.find("id") != parameters.end()) {
+                    sNum = parameters["id"];
 
                     int num = std::atoi(sNum.c_str());
 
