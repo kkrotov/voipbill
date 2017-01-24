@@ -64,7 +64,7 @@ private:
     shared_ptr<NNPDestinationList> nnpDestination;
     shared_ptr<NNPOperatorList> nnpOperator;
     shared_ptr<NNPPrefixList> nnpPrefix;
-    shared_ptr<NNPCounryCodeList> nnpCountryCodeList;
+    shared_ptr<NNPCountryCodeList> nnpCountryCodeList;
     shared_ptr<NNPNumberRangeList> nnpNumberRange;
     shared_ptr<NNPNumberRangePrefixList> nnpNumberRangePrefix;
     shared_ptr<NNPPrefixDestinationList> nnpPrefixDestination;

@@ -268,7 +268,7 @@ void ThreadLoader::run() {
 
             else if (event == "nnp_country") {
 
-                repository.data->nnpCountryCode.load(&db_calls);
+                repository.data->nnpCountry.load(&db_calls);
             }
 
             db_calls.exec("DELETE from event.queue WHERE event='" + event + "' and version = '" +

@@ -117,7 +117,7 @@ public:
     NNPPackageData nnpPackage;
     NNPPackagePriceData nnpPackagePrice;
     NNPPrefixData nnpPrefix;
-    NNPCountryCodeData nnpCountryCode;
+    NNPCountryCodeData nnpCountry;
     NNPRegionData nnpRegion;
     NNPNumberRangeData nnpNumberRange;
     NNPOperatorData nnpOperator;

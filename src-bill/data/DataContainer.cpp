@@ -61,5 +61,5 @@ void DataContainer::loadAll(BDb * db) {
     nnpPackagePricelist.load(db);
     nnpPrefixDestination.load(db);
     nnpAccountTariffLight.load(db);
-    nnpCountryCode.load(db);
+    nnpCountry.load(db);
 }
