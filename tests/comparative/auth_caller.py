@@ -46,7 +46,7 @@ testRows = centralDbCur.fetchall()
 def getRegions():
     parser = ConfigParser.RawConfigParser()
 
-    data = '[REGIONS]\n' + open ("../regions-list", "r").read()
+    data = '[REGIONS]\n' + open ("tests/regions-list", "r").read()
     readable = StringIO.StringIO (data)
 
     parser.readfp (readable)
