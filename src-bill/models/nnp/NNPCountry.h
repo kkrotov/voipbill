@@ -2,7 +2,7 @@
 
 #include "../../common.h"
 
-class NNPCountryCode {
+class NNPCountry {
 
 public:
     int code;
