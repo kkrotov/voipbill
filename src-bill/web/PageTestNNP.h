@@ -158,7 +158,30 @@ public:
                     throw CalcException(
                             "getBestPriceRoute: invalid arguments: num_b , num_a(.+) - must be phonenumbers");
 
-            } else {
+            }
+            else if (cmd == "getPrefixListByDestinationID") {
+                if (parameters.find("id") != parameters.end()) {
+                    sNum = parameters["id"];
+
+                    int num = std::atoi(sNum.c_str());
+
+                    std::vector<PhoneNumber> list;
+                    repository.getPrefixByNNPDestination(list,num);
+
+                    Json::Value main;
+
+                    main["size"] = boost::lexical_cast<int>(list.size());
+                    Json::Value enumiration;
+                    for (int i = 0; i < list.size();i++) {
+                        enumiration[boost::lexical_cast<int>(i)] = boost::lexical_cast<PhoneNumber>(list.at(i));
+                    }
+                    main["list"] = enumiration;
+
+                    html << main;
+
+                }
+            }
+            else {
                 throw CalcException(
                         "unknow command:" + cmd);
             }
