@@ -1,9 +1,16 @@
 import sys, os, time, atexit
+import logging
 from signal import SIGTERM
- 
+
+logging.basicConfig(
+    format='%(asctime)s.%(msecs)d %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    level=logging.DEBUG,
+    filename='/var/log/syncstat/log.log')
+
 class Daemon:
 
-        def __init__(self, pidfile, stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
+        def __init__(self, pidfile, stdin='/var/log/syncstat/stdin.log', stdout='/var/log/syncstat/stdout.log', stderr='/var/log/syncstat/stderr.log'):
                 self.stdin = stdin
                 self.stdout = stdout
                 self.stderr = stderr
@@ -16,7 +23,7 @@ class Daemon:
                                 # exit first parent
                                 sys.exit(0)
                 except OSError, e:
-                        sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
+                        logging.error("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
                         sys.exit(1)
        
                 # decouple from parent environment
@@ -31,7 +38,7 @@ class Daemon:
                                 # exit from second parent
                                 sys.exit(0)
                 except OSError, e:
-                        sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
+                        logging.error("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
                         sys.exit(1)
        
                 # redirect standard file descriptors
@@ -69,7 +76,8 @@ class Daemon:
        
                 if pid:
                         message = "pidfile %s already exist. Daemon already running?\n"
-                        sys.stderr.write(message % self.pidfile)
+                        print message
+                        logging.error(message % self.pidfile)
                         sys.exit(1)        
 
 		
@@ -95,7 +103,8 @@ class Daemon:
        
                 if not pid:
                         message = "pidfile %s does not exist. Daemon not running?\n"
-                        sys.stderr.write(message % self.pidfile)
+                        print message
+                        logging.error(message % self.pidfile)
                         return # not an error in a restart
  
                 # Try killing the daemon process       
@@ -109,7 +118,7 @@ class Daemon:
                                 if os.path.exists(self.pidfile):
                                         os.remove(self.pidfile)
                         else:
-                                print str(err)
+                                logging.error(str(err))
                                 sys.exit(1)
  
         def restartd(self):
