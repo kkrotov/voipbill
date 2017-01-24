@@ -407,7 +407,15 @@ set(BILL_SOURCES
         src-bill/healthcheck/ThreadErrorStatus.cpp
         src-bill/healthcheck/TrunkLoadStatus.cpp
         src-bill/threads/ThreadHealthManager.cpp
-        src-bill/models/Price.cpp)
+        src-bill/models/Price.cpp
+        src-bill/models/nnp/NNPCountry.cpp
+        src-bill/models/nnp/NNPCountry.h
+        src-bill/lists/nnp/NNPCountryCodeList.cpp
+        src-bill/lists/nnp/NNPCountryCodeList.h
+        src-bill/sync/nnp/NNPCountryCodePull.cpp
+        src-bill/sync/nnp/NNPCountryCodePull.h
+        src-bill/data/nnp/NNPCountryCodeData.cpp
+        src-bill/data/nnp/NNPCountryCodeData.h)
 
 add_custom_target(invalidate_files ALL
         COMMAND ${CMAKE_COMMAND} -E touch src-bill/version.cpp)

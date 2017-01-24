@@ -229,7 +229,14 @@ void CallsManager::calls_insert_row(Call *call, stringstream &q) {
         q << "NULL,";
     }
 
-    q << call->disconnect_cause;
+    q << call->disconnect_cause << ",";
+
+    if (call->nnp_country_code>0) {
+        q << call->nnp_country_code;
+    }
+    else {
+        q << "NULL";
+    }
 
     q << ")\n";
 }
@@ -266,7 +273,7 @@ void CallsManager::prepareSaveQueries(map<time_t, stringstream> &queryPerMonth, 
                     "account_version,stats_nnp_package_minute_id, " \
                     "nnp_number_range_id,nnp_operator_id,nnp_region_id,nnp_city_id,nnp_country_prefix,nnp_ndc,nnp_is_mob, " \
                     "nnp_package_minute_id, nnp_package_price_id, nnp_package_pricelist_id, server_id, signalling_call_id, hash, " \
-                    "disconnect_cause" \
+                    "disconnect_cause, nnp_country_code " \
                  ")VALUES\n";
 
             calls_insert_row(&call, q);
