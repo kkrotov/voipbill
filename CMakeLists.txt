@@ -409,7 +409,7 @@ set(BILL_SOURCES
         src-bill/threads/ThreadHealthManager.cpp
         src-bill/models/Price.cpp
         src-bill/classes/StateMegaTrunk.cpp
-        src-bill/classes/StateMegaTrunk.h)
+        src-bill/classes/StateMegaTrunk.h
         src-bill/models/nnp/NNPCountry.cpp
         src-bill/models/nnp/NNPCountry.h
         src-bill/lists/nnp/NNPCountryCodeList.cpp
