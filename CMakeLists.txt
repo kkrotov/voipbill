@@ -381,6 +381,8 @@ set(BILL_SOURCES
         src-bill/models/StatsNNPPackageMinute.cpp
         src-bill/classes/StatsNNPPackageMinuteManager.cpp
         src-bill/classes/nnp/NNPResolver.cpp
+        src-bill/classes/nnp/PrefixTree.cpp
+        src-bill/classes/nnp/PrefixNode.cpp
 
         src-bill/main.cpp
         src-bill/models/GlobalNNPPackageMinuteCounters.cpp
@@ -405,7 +407,17 @@ set(BILL_SOURCES
         src-bill/healthcheck/ThreadErrorStatus.cpp
         src-bill/healthcheck/TrunkLoadStatus.cpp
         src-bill/threads/ThreadHealthManager.cpp
-        src-bill/models/Price.cpp src-bill/classes/StateMegaTrunk.cpp src-bill/classes/StateMegaTrunk.h)
+        src-bill/models/Price.cpp
+        src-bill/classes/StateMegaTrunk.cpp
+        src-bill/classes/StateMegaTrunk.h)
+        src-bill/models/nnp/NNPCountry.cpp
+        src-bill/models/nnp/NNPCountry.h
+        src-bill/lists/nnp/NNPCountryCodeList.cpp
+        src-bill/lists/nnp/NNPCountryCodeList.h
+        src-bill/sync/nnp/NNPCountryCodePull.cpp
+        src-bill/sync/nnp/NNPCountryCodePull.h
+        src-bill/data/nnp/NNPCountryCodeData.cpp
+        src-bill/data/nnp/NNPCountryCodeData.h)
 
 add_custom_target(invalidate_files ALL
         COMMAND ${CMAKE_COMMAND} -E touch src-bill/version.cpp)

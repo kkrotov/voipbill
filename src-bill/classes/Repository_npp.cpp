@@ -1,6 +1,8 @@
 #include "Repository.h"
 #include "RadiusAuthProcessor.h"
 #include "BillingCall.h"
+#include "nnp/PrefixTree.h"
+#include <stdio.h>
 
 
 bool Repository::checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
@@ -67,6 +69,42 @@ bool Repository::getNNPDestinationByNum(set<int> &nnpDestinationIds, long long i
 
     }
     return fResult;
+}
+
+bool Repository::getPrefixByNNPDestination(vector<PhoneNumber> &prefixList, int destinationId) {
+
+    std::vector<int> prefixPlus, prefixMinus, rangePlus, rangeMinus;
+    this->nnpPrefixDestination->getPrefixsByNNPDestination(destinationId, prefixPlus, prefixMinus);
+
+    for (int i : prefixPlus)
+        this->nnpNumberRangePrefix->getNumberRangesByNNPPrefix(rangePlus, i);
+    for (int i : prefixMinus)
+        this->nnpNumberRangePrefix->getNumberRangesByNNPPrefix(rangeMinus, i);
+
+    PrefixTree plusTree  (10000);
+    PrefixTree minusTree (10000);
+
+    for (int i = 0; i < rangePlus.size(); i++) {
+        NNPNumberRange* range = this->nnpNumberRange->getNNPNumberRangeById(rangePlus.at(i));
+        if ( !range )
+            continue;
+        std::pair<PhoneNumber, PhoneNumber> pair = {range->full_number_from, range->full_number_to};
+        plusTree.addRange(pair);
+    }
+    for (int i = 0; i < rangeMinus.size(); i++) {
+        NNPNumberRange* range = this->nnpNumberRange->getNNPNumberRangeById(rangeMinus.at(i));
+        if ( !range )
+            continue;
+        std::pair<PhoneNumber, PhoneNumber> pair = {range->full_number_from, range->full_number_to};
+        minusTree.addRange (pair);
+    }
+    plusTree.subTree(minusTree);
+
+    char array[32] = {};
+    plusTree.print(array, 0, 0, prefixList);
+
+    return true;
+
 }
 
 void Repository::findNNPPackagePricelistIds(set<pair<double, NNPPackagePricelist *>> &resultNNPPackagePricelistIds,

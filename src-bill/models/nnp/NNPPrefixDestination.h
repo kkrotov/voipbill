@@ -8,11 +8,14 @@ struct NNPPrefixDestination {
     bool is_addition;
     time_t insert_time;
 
-    void dump(stringstream &trace) {
+    void dump(stringstream &trace) const {
         trace << "(";
         trace << "nnp_prefix_id: " << nnp_prefix_id << ", ";
         trace << "nnp_destination_id: " << nnp_destination_id << ", ";
         trace << "insert_time: " << string_time(insert_time) << ", ";
         trace << ")";
     }
+
+    struct byPrefixId {};      // Нужно как метка для boost
+    struct byDestinationId {}; //
 };
