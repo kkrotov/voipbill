@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../lists/nnp/NNPCounryCodeList.h"
+#include "../../lists/nnp/NNPCountryCodeList.h"
 #include "../BaseData.h"
 
-class NNPCountryCodeData : public BaseData<NNPCounryCodeList> {
+class NNPCountryCodeData : public BaseData<NNPCountryCodeList> {
 
 };

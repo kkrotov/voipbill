@@ -213,7 +213,7 @@ bool Repository::prepare(time_t currentTime) {
         return false;
     }
 
-    if ((nnpCounryCodeList = data->nnpCountryCode.get()) == nullptr) {
+    if ((nnpCountryCodeList = data->nnpCountryCode.get()) == nullptr) {
         return false;
     }
 

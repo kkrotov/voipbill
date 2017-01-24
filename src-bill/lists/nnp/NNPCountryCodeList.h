@@ -1,10 +1,10 @@
 #pragma once
 
 #include "../../classes/BDb.h"
-#include "../../models/nnp/NNPCountryCode.h"
+#include "../../models/nnp/NNPCountry.h"
 #include "../../classes/ObjList.h"
 
-class NNPCounryCodeList : public ObjList<NNPCountryCode> {
+class NNPCountryCodeList : public ObjList<NNPCountry> {
 
 protected:
     string sql(BDb *db) {
@@ -12,7 +12,7 @@ protected:
         return "select code, name, prefix from nnp.country order by code ";
     }
 
-    inline void parse_item(BDbResult &row, NNPCountryCode *item) {
+    inline void parse_item(BDbResult &row, NNPCountry *item) {
 
         item->code = row.get_i(0);
         item->name = row.get_s(1);
@@ -21,16 +21,17 @@ protected:
 
     struct key_code {
 
-        bool operator()(const NNPCountryCode &left, int code) {
+        bool operator()(const NNPCountry &left, int code) {
             return left.code < code;
         }
-        bool operator()(int code, const NNPCountryCode &right) {
+
+        bool operator()(int code, const NNPCountry &right) {
             return code < right.code;
         }
     };
 
 public:
-    NNPCountryCode *find(int code, stringstream *trace = nullptr) {
+    NNPCountry *find(int code, stringstream *trace = nullptr) {
 
         auto begin = this->data.begin();
         auto end = this->data.end();
@@ -39,26 +40,26 @@ public:
             begin = p.first;
             end = p.second;
         }
-        NNPCountryCode *result = begin < end ? &*begin : nullptr;
+        NNPCountry *result = begin < end ? &*begin : nullptr;
 
         if (trace != nullptr) {
 
             if (result != nullptr) {
 
-                *trace << "FOUND|NNPCountryCode|BY CODE '" << code << "'" << "\n";
+                *trace << "FOUND|NNPCountry|BY CODE '" << code << "'" << "\n";
                 *trace << "||";
                 result->dump(*trace);
                 *trace << "\n";
             }
             else {
-                *trace << "NOT FOUND|NNPCountryCode|BY CODE '" << code << "'" << "\n";
+                *trace << "NOT FOUND|NNPCountry|BY CODE '" << code << "'" << "\n";
             }
         }
         return result;
     }
     int get_code_by_prefix (int prefix) {
 
-        for (NNPCountryCode &i: this->data) {
+        for (NNPCountry &i: this->data) {
 
             if (i.prefix == prefix)
                 return i.code;
