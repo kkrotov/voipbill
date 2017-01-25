@@ -1155,7 +1155,7 @@ void RadiusAuthProcessor::processMegaTrunkPhase1(StateMegaTrunk &megaTrunk) {
     string routeCase;
     vector<Trunk *> resultTrunks;
 
-    repository.getAllRoadToRegion(resultTrunks, AppBill().conf.instance_id, regionNum, trace);
+    repository.getAllRoadToRegion(resultTrunks, app().conf.instance_id, regionNum, trace);
 
     std::random_shuffle( resultTrunks.begin(), resultTrunks.end() );
 

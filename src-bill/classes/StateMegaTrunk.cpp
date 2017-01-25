@@ -17,10 +17,10 @@ void StateMegaTrunk::clearTrace() {
 }
 
 void StateMegaTrunk::prepareFromCdr(Cdr *cdr) {
-    if(cdr != nullptr) {
+    if (cdr != nullptr) {
         src_trunk = repository->getTrunkByName(cdr->src_route);
 
-        if(src_trunk != nullptr) {
+        if (src_trunk != nullptr) {
             serviceTrunkSrc = repository->getServiceTrunk(src_trunk->id);
         }
 
@@ -35,27 +35,30 @@ void StateMegaTrunk::PhaseCalc() {
 
     vector<ServiceTrunk> resultServiceTrunk;
 
-    if( serviceNumberNumB!= nullptr ) {
+    if (serviceNumberNumB != nullptr) {
         repository->getServiceTrunkByClientID(resultServiceTrunk, serviceNumberNumB->client_account_id);
-        for(auto serviceTrunk : resultServiceTrunk) {
-            if(serviceTrunk.client_account_id == serviceNumberNumB->client_account_id && serviceTrunk.term_enabled &&
-               serviceTrunk.activation_dt <= time(nullptr) && time(nullptr) <= serviceTrunk.expire_dt) {
+        for (auto serviceTrunk : resultServiceTrunk) {
+            if (time(nullptr) <= serviceTrunk.expire_dt && serviceTrunk.activation_dt <= time(nullptr)) {
 
-                if(serviceNumberNumB->server_id != serviceTrunk.server_id ) {
-                    // Провеяем, есть на лицевом счете номера B услуга транк,
-                    // если такой транк находится в другом регионе, включаем Фазу 1 и перемещаемся в этот регион.
-                    destRegion = serviceTrunk.server_id;
-                    isPhase1 = true;
-                    return;
+                if (serviceTrunk.client_account_id == serviceNumberNumB->client_account_id &&
+                    serviceTrunk.term_enabled) {
 
-                } else {
-                    destTrunk = repository->getTrunk(serviceTrunk.trunk_id);
-                    if(destTrunk!= nullptr)
-                    {
-                        // Если лицевой счет номера B совпадает с лицевым счетом транка в этом регионе, то включаем
-                        // фазу 2 и направляем в такой транк.
-                        isPhase2 = true;
+                    if (app().conf.instance_id != serviceTrunk.server_id) {  // Тут нужно сравнивать со всеми регионами хаба !!!!
+                        // Провеяем, есть на лицевом счете номера B услуга транк,
+                        // если такой транк находится в другом регионе, включаем Фазу 1 и перемещаемся в этот регион.
+                        destRegion = serviceTrunk.server_id;
+                        isPhase1 = true;
                         return;
+
+                    } else {
+                        destTrunk = repository->getTrunk(serviceTrunk.trunk_id);
+                        if (destTrunk != nullptr) {
+                            // Если лицевой счет номера B совпадает с лицевым счетом транка в этом регионе, то включаем
+                            // фазу 2 и направляем в такой транк.
+                            isPhase2 = true;
+                            return;
+                        }
+
                     }
 
                 }
@@ -67,11 +70,11 @@ void StateMegaTrunk::PhaseCalc() {
     // Если лицевые счете номера А и исходного транка совпадают - и номер А принадлежит другому региону,
     // включаем Фазу 1 и перемещаем звонок в регион номера А.
 
-    if(serviceNumberNumA != nullptr && serviceTrunkSrc != nullptr) {
-        if(serviceNumberNumA->client_account_id == serviceTrunkSrc->client_account_id &&
-           serviceNumberNumA->server_id !=  serviceTrunkSrc->server_id ) {
+    if (serviceNumberNumA != nullptr && serviceTrunkSrc != nullptr) {
+        if (serviceNumberNumA->client_account_id == serviceTrunkSrc->client_account_id &&
+            serviceNumberNumA->server_id != serviceTrunkSrc->server_id) {
             isPhase1 = true;
-            destRegion =serviceNumberNumA->server_id;
+            destRegion = serviceNumberNumA->server_id;
             return;
         }
     }
