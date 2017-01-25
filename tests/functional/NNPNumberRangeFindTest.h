@@ -75,23 +75,10 @@ void NNPNumberRangeFindTest :: curlWriteCallback(void *contents_temp, size_t siz
     vector<string> prefix;
     vector<string> destination;
 
-    regEx = ("FOUND\\|NNPNumberRange\\|BY NUM '(.*?)'\n\\|\\|\\(id: (.*?),");
-    while ( regex_search (contentsString, matches, regEx) ) {
-        range = matches.str(2);
-        contentsString = matches.suffix();
-    }
-
     contentsString = contents;
-    regEx = "FOUND\\|NNPPrefix\\|BY NNPNumberRange '(.*?)'\n\\|\\|\\(nnp_prefix_id: (.*?),";
+    regEx = " \"id\" : (.*?),";
     while (regex_search(contentsString, matches, regEx) ) {
-        prefix.push_back(matches.str(2));
-        contentsString = matches.suffix();
-    }
-
-    contentsString = contents;
-    regEx = "FOUND\\|NNPDestination\\|BY ID '(.*?)'\n\\|\\|\\(id: (.*?),";
-    while (regex_search(contentsString, matches, regEx) ) {
-        destination.push_back(matches.str(2));
+        destination.push_back(matches.str(1));
         contentsString = matches.suffix();
     }
 
@@ -167,17 +154,7 @@ bool NNPNumberRangeFindTest :: checkResult (unsigned int index) {
         number.push_back ('0' + (rand()%9));
     string fullNumber = prefix + number;
 
-    bool success = checkRange (fullNumber);
-    if (!success)
-        return false;
-    if (!resultDestination.size())
-        return true;
-
-    success = checkPrefix();
-    if (!success)
-        return false;
-    if (!resultPrefix.size())
-        return true;
+    bool success = true;;
 
     success = checkDestination();
     if (!success)
