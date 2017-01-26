@@ -1,0 +1,4 @@
+check process syncstat with pidfile /var/run/syncstat.pid
+    start program = "/opt/mcnispd/bin/voipbill/scripts/syncstat.py start"
+    stop program = "/opt/mcnispd/bin/voipbill/scripts/syncstat.py stop"
+    if 5 restarts within 5 cycles then timeout

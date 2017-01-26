@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/python
 import time
 import traceback
 import MySQLdb
@@ -95,7 +95,7 @@ class Sync(Daemon):
                 if n == 100:
                     need = True
 
-            n = self.do_sync_client_contract_type()
+            n = self.do_sync_client_contract_type(100)
             if n > 0:
                 self.log_oprations(n, 'client_contract_type')
                 # print '+', n, 'usage_trunk'
@@ -397,24 +397,44 @@ class Sync(Daemon):
 
         return len(tofix)
 
-    def do_sync_client_contract_type(self):
+    def do_sync_client_contract_type(self, partsize):
         cur_stat = self.db_stat.cursor()
         cur_stat.execute("""select
-							  id,
-					    	  name
+                              z.rnd,
+                              z.tid,
+                              cct.name
                             from
-                              client_contract_type""")
+                              z_sync_postgres z
+                            left join
+                              client_contract_type cct
+                              on
+                                z.tid = cct.id
+                            where
+                              z.tbase='""" + tbase + """' and z.tname = 'client_contract_type'
+                            limit """ + str(partsize))
+        todel = []
         toins = []
+        tofix = []
         for r in cur_stat.fetchall():
-            toins.append((r[0], r[1]))
+            tofix.append((r[1], r[0]))
+            if r[2] == None:
+                todel.append((r[1],))
+            else:
+                toins.append((r[1], r[2]))
 
         cur = self.db.cursor()
-        cur.execute("truncate table billing.client_contract_type")
+        cur.execute('BEGIN')
 
         if len(toins) > 0:
-            cur.executemany("INSERT INTO billing.client_contract_type (id, name) VALUES(%s,%s)", toins)
+            cur.executemany("INSERT INTO stat.client_contract_type (id, name) VALUES(%s,%s)", toins)
+        if len(todel) > 0:
+            cur.executemany("delete from stat.client_contract_type where id=%s", todel)
 
-        return len(toins)
+        cur.execute('COMMIT')
+
+        # cur_stat.executemany("delete from z_sync_postgres where tbase='"+tbase+"' and tname='client_contract_type' and tid=%s and rnd=%s", tofix)
+
+        return len(tofix)
 
     def do_sync_usage_trunk(self, partsize):
         cur_stat = self.db_stat.cursor()

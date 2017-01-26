@@ -10,7 +10,7 @@ logging.basicConfig(
 
 class Daemon:
 
-        def __init__(self, pidfile, stdin='/var/log/syncstat/stdin.log', stdout='/var/log/syncstat/stdout.log', stderr='/var/log/syncstat/stderr.log'):
+        def __init__(self, pidfile, stdin='/dev/null', stdout='/var/log/syncstat/stdout.log', stderr='/var/log/syncstat/stderr.log'):
                 self.stdin = stdin
                 self.stdout = stdout
                 self.stderr = stderr
