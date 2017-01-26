@@ -59,6 +59,9 @@ public:
     }
     int get_code_by_prefix (int prefix) {
 
+        if (prefix==7) // во избежание путаницы с Казахстаном
+            return 643;
+
         for (NNPCountry &i: this->data) {
 
             if (i.prefix == prefix)

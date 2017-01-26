@@ -11,3 +11,5 @@ git checkout -b new
 git pull origin released:released
 git checkout released
 
+git checkout new -- tests
+
