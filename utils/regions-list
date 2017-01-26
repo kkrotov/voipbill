@@ -1,7 +1,7 @@
 
 HOST_DB_MAIN=eridanus.mcn.ru
 NAME_DB_MAIN=nispd
-DB_USER=pgsqltest
+DB_USER=kkrotov
 
 REGIONS_LIST=`/usr/pgsql-9.4/bin/psql -h $HOST_DB_MAIN -t -U $DB_USER $NAME_DB_MAIN -c "select id from public.server where is_need_db_do_migrate order by id"`
 

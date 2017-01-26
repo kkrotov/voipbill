@@ -118,8 +118,7 @@ echo "]] 4. Создаем записи в таблице CDR в региона�
 
 $maxid = getLastCallID($dbregion);
 
-$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '79164631212' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"", "dt"=>"2017-01-08 18:03:00");
-
+//$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '59224631212' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"Beeline_SIP", "dt"=>"2017-01-26 19:03:00");
 $calls[] = array ( "src_number" => '74996851549' , "dst_number" => '73832870122' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2017-01-08 18:01:00");
 $calls[] = array ( "src_number" => '79119888723' , "dst_number" => '74996851549' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2017-01-08 18:02:00");
 $calls[] = array ( "src_number" => '78126465198' , "dst_number" => '74996851549' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2017-01-08 18:03:00");

@@ -39,6 +39,8 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
         this->callInfo = callInfo;
         this->callInfo->call = call;
 
+        processNNP();                   // Расчитываем nnp-параметры для плеча.
+
         setupTrunk();                   // Загружает в callInfo->trunk информацию по транку обсчитываемого плеча.
         // При этом так же происходит вычисление действующей схемы авторизации
         // для расчета - по номеру или по транку.
@@ -60,8 +62,6 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
         // для term плеча - для А- номера)
         processDestinations();          // в структуру call рассчитывается поля mob и destination_id
         // флаг звонка на мобильный и тип звонка (локал,внутризоновый, МГ, МН)
-
-        processNNP();                   // Расчитываем nnp-параметры для плеча.
 
         if (callInfo->trunk->auth_by_number) {
             calcByNumber();             // Дальше производятся тарификация плеча по схеме "авторизация по номеру"
