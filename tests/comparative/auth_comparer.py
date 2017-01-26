@@ -45,9 +45,9 @@ class TestAuth(unittest2.TestCase):
             msg += ('\'\nid: ')
             msg += str(prev_id)
             msg += ('\n============================\n')
-            hadErrors = False
+            noErrors = False
 
-        self.assertTrue (hadErrors, msg=msg)
+        self.assertTrue (noErrors, msg=msg)
 
     def test_this(self):
         data = self.loadData()
