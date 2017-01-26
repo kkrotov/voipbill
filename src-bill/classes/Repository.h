@@ -352,9 +352,14 @@ public:
         return nnpNumberRange->getNNPNumberRange(num, trace);
     }
 
+    pair<int,int> getNNPCountryPrefix(long long int number) {
+
+        return nnpCountryCodeList->get_prefix_by_number(number);
+    }
     int getNNPCountryCode (int country_prefix) {
 
-        return nnpCountryCodeList->get_code_by_prefix(country_prefix);
+        pair<int,int> prefix_code = nnpCountryCodeList->get_code_by_prefix(country_prefix);
+        return prefix_code.second;
     }
 
     NNPPackageMinute *getNNPPackageMinute(int idNNPPackageMinute, stringstream *trace = nullptr) {

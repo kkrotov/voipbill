@@ -147,37 +147,44 @@ void BillingCall::calcOrigNNPByNumber() {
 void BillingCall::processNNP() {
 
     NNPNumberRange *nnpNumberRange;
-    if (call->orig)
-        nnpNumberRange = repository->getNNPNumberRange(call->src_number, trace);
-    else
-        nnpNumberRange = repository->getNNPNumberRange(call->dst_number, trace);
+    long long int phone_number = call->orig?  call->src_number:call->dst_number;
+    nnpNumberRange = repository->getNNPNumberRange(phone_number, trace);
+    if (nnpNumberRange == nullptr) {
 
-    if (nnpNumberRange != nullptr) {
+        pair<int,int> prefix_code = repository->getNNPCountryPrefix(phone_number);
+        this->call->nnp_country_prefix = prefix_code.first;
+        this->call->nnp_country_code = prefix_code.second;
+        return;
+    }
+    if (nnpNumberRange->country_prefix==0) {
 
-        this->callInfo->nnpNumberRange = nnpNumberRange;
-        this->call->nnp_number_range_id = nnpNumberRange->id;
-        this->call->nnp_operator_id = nnpNumberRange->nnp_operator_id;
-        this->call->nnp_region_id = nnpNumberRange->nnp_region_id;
-        this->call->nnp_city_id = nnpNumberRange->nnp_city_id;
-        this->call->nnp_country_prefix = nnpNumberRange->country_prefix;
-        this->call->nnp_ndc = nnpNumberRange->ndc;
-        this->call->nnp_is_mob = nnpNumberRange->is_mob;
-        if (nnpNumberRange->country_code!=0)
-            this->call->nnp_country_code = nnpNumberRange->country_code;
-        else
-            this->call->nnp_country_code = repository->getNNPCountryCode(this->call->nnp_country_prefix);
+        pair<int,int> prefix_code = repository->getNNPCountryPrefix(phone_number);
+        nnpNumberRange->country_prefix = prefix_code.first;
+        nnpNumberRange->country_code = prefix_code.second;
+    }
+    if (nnpNumberRange->country_code==0)
+        nnpNumberRange->country_code = repository->getNNPCountryCode(nnpNumberRange->country_prefix);
 
-        if (trace != nullptr) {
-            *trace << "INFO|SET NNP_NUMBER_RANGE|";
-            callInfo->nnpNumberRange->dump(*trace);
-            *trace << "\n";
-            *trace << "INFO|SET NNP_OPERATOR_ID = " << call->nnp_operator_id << "\n";
-            *trace << "INFO|SET NNP_REGION_ID = " << call->nnp_region_id << "\n";
-            *trace << "INFO|SET NNP_CITY_ID = " << call->nnp_city_id << "\n";
-            *trace << "INFO|SET NNP_COUNTRY_PREFIX = " << call->nnp_country_prefix << "\n";
-            *trace << "INFO|SET NNP_NDC = " << call->nnp_ndc << "\n";
-            *trace << "INFO|SET NNP_IS_MOB = " << call->nnp_is_mob << "\n";
-        }
+    this->callInfo->nnpNumberRange = nnpNumberRange;
+    this->call->nnp_number_range_id = nnpNumberRange->id;
+    this->call->nnp_operator_id = nnpNumberRange->nnp_operator_id;
+    this->call->nnp_region_id = nnpNumberRange->nnp_region_id;
+    this->call->nnp_city_id = nnpNumberRange->nnp_city_id;
+    this->call->nnp_country_prefix = nnpNumberRange->country_prefix;
+    this->call->nnp_ndc = nnpNumberRange->ndc;
+    this->call->nnp_is_mob = nnpNumberRange->is_mob;
+    this->call->nnp_country_code = nnpNumberRange->country_code;
+
+    if (trace != nullptr) {
+        *trace << "INFO|SET NNP_NUMBER_RANGE|";
+        callInfo->nnpNumberRange->dump(*trace);
+        *trace << "\n";
+        *trace << "INFO|SET NNP_OPERATOR_ID = " << call->nnp_operator_id << "\n";
+        *trace << "INFO|SET NNP_REGION_ID = " << call->nnp_region_id << "\n";
+        *trace << "INFO|SET NNP_CITY_ID = " << call->nnp_city_id << "\n";
+        *trace << "INFO|SET NNP_COUNTRY_PREFIX = " << call->nnp_country_prefix << "\n";
+        *trace << "INFO|SET NNP_NDC = " << call->nnp_ndc << "\n";
+        *trace << "INFO|SET NNP_IS_MOB = " << call->nnp_is_mob << "\n";
     }
 }
 
