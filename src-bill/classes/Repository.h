@@ -255,8 +255,9 @@ public:
         trunk->findAllAutorouting(resultTrunks, server_id, trace);
     }
 
-    void getAllRoadToRegion(vector<Trunk *> &resultTrunks, int server_id, int road_to_region, stringstream *trace = nullptr) {
-        trunk->findAllRoadToRegion(resultTrunks,server_id, road_to_region,trace);
+    void getAllRoadToRegion(vector<Trunk *> &resultTrunks, int server_id, int road_to_region,
+                            stringstream *trace = nullptr) {
+        trunk->findAllRoadToRegion(resultTrunks, server_id, road_to_region, trace);
     }
 
     StatPrefixlist *getStatPrefixlist(int stat_prefixlist_id) {
@@ -270,6 +271,7 @@ public:
     bool getCurrencyRate(const char *currency_id, double *o_currencyRate) const;
 
     double priceToRoubles(double price, const Pricelist &pricelist) const;
+
     double priceToRoubles(double price, const char *currency_id) const;
 
     bool priceLessThan(double priceLeft, const Pricelist &pricelistLeft,
@@ -356,7 +358,7 @@ public:
         return nnpNumberRange->getNNPNumberRange(num, trace);
     }
 
-    int getNNPCountryCode (int country_prefix) {
+    int getNNPCountryCode(int country_prefix) {
 
         return nnpCountryCodeList->get_code_by_prefix(country_prefix);
     }
@@ -394,8 +396,9 @@ public:
         return nnpPackagePrice->findPackagePriceIds(resultNNPPackagePriceIds, tariff_id, nnpDestinationIds, trace);
     }
 
-    void findNNPPackagePricelistIds(set<pair<double, NNPPackagePricelist *>> &resultNNPPackagePricelistIds, int tariff_id,
-                                    long long int num, stringstream *trace = nullptr);
+    void
+    findNNPPackagePricelistIds(set<pair<double, NNPPackagePricelist *>> &resultNNPPackagePricelistIds, int tariff_id,
+                               long long int num, stringstream *trace = nullptr);
 
 
     PhoneNumber getNNPBestGeoRoute(PhoneNumber NumAdef, vector<PhoneNumber> &vNumA, PhoneNumber NumB,
@@ -409,10 +412,15 @@ public:
     void getTrunkPriority(int trunk_id, vector<TrunkPriority> &trunkPriorityList);
 
     void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
-                                      long long int srcNumber, long long int dstNumber, int destinationType);
+                                   long long int srcNumber, long long int dstNumber, int destinationType);
 
-    bool checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber, long long int dstNumber);
+    bool checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
+                                         long long int dstNumber);
 
     void setCurrencyRate(Price &price) const;
+
+    bool isRegionOnHub(int region) {
+        return server->isRegionOnHub(region);
+    }
 
 };

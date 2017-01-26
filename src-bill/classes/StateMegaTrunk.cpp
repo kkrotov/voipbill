@@ -20,10 +20,6 @@ void StateMegaTrunk::prepareFromCdr(Cdr *cdr) {
     if (cdr != nullptr) {
         src_trunk = repository->getTrunkByName(cdr->src_route);
 
-        if (src_trunk != nullptr) {
-            serviceTrunkSrc = repository->getServiceTrunk(src_trunk->id);
-        }
-
         serviceNumberNumA = repository->getServiceNumber(cdr->src_number);
         serviceNumberNumB = repository->getServiceNumber(cdr->dst_number);
 
@@ -43,7 +39,7 @@ void StateMegaTrunk::PhaseCalc() {
                 if (serviceTrunk.client_account_id == serviceNumberNumB->client_account_id &&
                     serviceTrunk.term_enabled) {
 
-                    if (app().conf.instance_id != serviceTrunk.server_id) {  // Тут нужно сравнивать со всеми регионами хаба !!!!
+                    if (!repository->isRegionOnHub(serviceTrunk.server_id)) {
                         // Провеяем, есть на лицевом счете номера B услуга транк,
                         // если такой транк находится в другом регионе, включаем Фазу 1 и перемещаемся в этот регион.
                         destRegion = serviceTrunk.server_id;
@@ -70,12 +66,23 @@ void StateMegaTrunk::PhaseCalc() {
     // Если лицевые счете номера А и исходного транка совпадают - и номер А принадлежит другому региону,
     // включаем Фазу 1 и перемещаем звонок в регион номера А.
 
-    if (serviceNumberNumA != nullptr && serviceTrunkSrc != nullptr) {
-        if (serviceNumberNumA->client_account_id == serviceTrunkSrc->client_account_id &&
-            serviceNumberNumA->server_id != serviceTrunkSrc->server_id) {
-            isPhase1 = true;
-            destRegion = serviceNumberNumA->server_id;
-            return;
+    resultServiceTrunk.clear();
+
+    if (serviceNumberNumA != nullptr && src_trunk != nullptr) {
+        repository->getServiceTrunkByClientID(resultServiceTrunk, serviceNumberNumA->client_account_id);
+        for (auto serviceTrunk : resultServiceTrunk) {
+            if (time(nullptr) <= serviceTrunk.expire_dt && serviceTrunk.activation_dt <= time(nullptr)) {
+
+                if (serviceTrunk.client_account_id == serviceNumberNumA->client_account_id &&
+                    serviceTrunk.orig_enabled && src_trunk->id == serviceTrunk.trunk_id ) {
+
+                    if(!repository->isRegionOnHub(serviceNumberNumA->server_id)) {
+                        isPhase1 = true;
+                        destRegion = serviceNumberNumA->server_id;
+                        return;
+                    }
+                }
+            }
         }
     }
 

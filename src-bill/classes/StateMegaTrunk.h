@@ -55,8 +55,6 @@ private:
     ServiceNumber *serviceNumberNumA = nullptr;
     ServiceNumber *serviceNumberNumB = nullptr;
 
-    ServiceTrunk  *serviceTrunkSrc = nullptr;
-
     bool isPhase1 = false;
     bool isPhase2 = false;
 
