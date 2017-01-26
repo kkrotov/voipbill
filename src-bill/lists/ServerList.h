@@ -7,7 +7,7 @@
 class ServerList : public ObjList<Server> {
 protected:
 
-    string sql(BDb * db) {
+    string sql(BDb *db) {
         return "select id, low_balance_outcome_id, blocked_outcome_id, min_price_for_autorouting, our_numbers_id," \
                "   calling_station_id_for_line_without_number, service_numbers, hub_id, emergency_prefixlist_id, " \
                "   h_call_sync_delay, h_cdr_sync_delay, h_call_save_delay, h_cdr_proc_wait_count, h_call_save_wait_count, " \
@@ -16,13 +16,14 @@ protected:
                "order by id asc ";
     }
 
-    inline void parse_item(BDbResult &row, Server * item) {
+    inline void parse_item(BDbResult &row, Server *item) {
         item->id = row.get_i(0);
         item->low_balance_outcome_id = row.get_i(1);
         item->blocked_outcome_id = row.get_i(2);
         item->min_price_for_autorouting = row.get_i(3);
         item->our_numbers_id = row.get_i(4);
-        row.fill_cs(5, item->calling_station_id_for_line_without_number, sizeof(item->calling_station_id_for_line_without_number));
+        row.fill_cs(5, item->calling_station_id_for_line_without_number,
+                    sizeof(item->calling_station_id_for_line_without_number));
 
         string service_numbers = row.get_s(6);
         replace_all(service_numbers, " ", "");
@@ -38,14 +39,15 @@ protected:
         item->call_save_wait_count = get_int_vector(row.get_s(13));
         item->thread_error_count = get_int_vector(row.get_s(14));
         item->radius_request_delay = get_int_vector(row.get_s(15));
-        item->name = row.get_s (16);
+        item->name = row.get_s(16);
     }
 
     struct key_id {
-        bool operator() (const Server & left, int id) {
+        bool operator()(const Server &left, int id) {
             return left.id < id;
         }
-        bool operator() (int id, const Server & right) {
+
+        bool operator()(int id, const Server &right) {
             return id < right.id;
         }
     };
@@ -55,7 +57,7 @@ protected:
     };
 
 public:
-    Server * find(int id) {
+    Server *find(int id) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -63,7 +65,7 @@ public:
             begin = p.first;
             end = p.second;
         }
-        return begin <  end ? &*begin : nullptr;
+        return begin < end ? &*begin : nullptr;
     }
 
     void getServersByHubId(vector<Server> &servers, int hub_id) {
@@ -72,6 +74,22 @@ public:
         for (auto i = begin; i < end; i++) {
             if (i->hub_id == hub_id) servers.push_back(*i);
         }
+    }
+
+    bool isRegionOnHub(int region) {
+        if (app().conf.instance_id == region) {
+            return true;
+        }
+
+        if (app().conf.hub_id > 0) {
+            Server *server = find(region);
+
+            if (server != nullptr && server->hub_id == app().conf.hub_id)
+                return true;
+        }
+
+        return false;
+
     }
 
     string sql_regions_list() {
@@ -99,6 +117,7 @@ public:
         }
         return sql;
     }
+
     vector<int> get_int_vector(string keyval) {
 
         vector<int> v;

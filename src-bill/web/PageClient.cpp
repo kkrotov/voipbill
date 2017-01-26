@@ -289,9 +289,14 @@ void PageClient::render_num_client_packages_info(std::stringstream &html, Client
 
                         html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                         html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+
                         html << "nnp_package_minute_id=<b>" << it3->id << "</b> ";
                         html << "nnp_destination_id=<b>" << it3->nnp_destination_id << "</b> (<b>";
-                        html << nnpDestination->name << "</b>),";
+
+                        string strippedName = nnpDestination->name;
+                        removeHtmlTags (strippedName);
+                        html << strippedName << "</b>),";
+
                         html << "minutes in package=" << it3->minute << " ";
                         html << "(effective minutes=" << string_fmt("%.2f", it3->minute * it2->coefficient) << "), ";
                         html << "used minutes(local/current/global)=<b>" << string_fmt("%.2f", (double) used_seconds / 60.0)

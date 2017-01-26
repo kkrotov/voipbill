@@ -39,4 +39,5 @@ public:
         }
         return begin < end ? &*begin : nullptr;
     }
+
 };

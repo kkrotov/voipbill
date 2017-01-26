@@ -55,11 +55,15 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
     try {
         init();
 
+        // Костыль для СОРМ-ирования в Москве.
+
         if (app().conf.instance_id == 99 && this->request->callingPartyCategory == "INTERCEPT") {
             response->setAccept();
             return;
         }
- 
+
+        //////
+
         processRedirectNumber();
         processLineWithoutNumber();
 
@@ -74,13 +78,15 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
         cdr.src_noa = request->srcNoa;
         cdr.dst_noa = request->dstNoa;
 
-
         int outcomeId;
 
         BillingCall billingCall(&repository);
+        StateMegaTrunk stateMegaTrunk(&repository);
 
         Call call = Call(&cdr, CALL_ORIG);
+
         CallInfo callInfo;
+
         billingCall.calc(&call, &callInfo, &cdr);
 
         account = callInfo.account;
@@ -91,92 +97,17 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
             *trace << "\n";
         }
 
+        stateMegaTrunk.setTrace(trace);
+        stateMegaTrunk.prepareFromCdr(&cdr); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка.
+
+        stateMegaTrunk.PhaseCalc(); // Расчет фаз маршутизации для Мегатранков
+
         string billResponse = analyzeCall(call, o_pAccountIdsBlockedBefore);
         if (trace != nullptr) {
             *trace << "INFO|BILL RESPONSE|" << billResponse << "\n";
         }
 
-        logRequest->params["orig"] = call.orig ? "true" : "false";
-        logRequest->params["src"] = call.src_number;
-        logRequest->params["dst"] = call.dst_number;
-        logRequest->params["trunk_id"] = call.trunk_id;
-        logRequest->params["account_id"] = call.account_id;
-        logRequest->params["trunk_service_id"] = call.trunk_service_id;
-        logRequest->params["number_service_id"] = call.number_service_id;
-        logRequest->params["service_package_id"] = call.service_package_id;
-        logRequest->params["pricelist_id"] = call.pricelist_id;
-        logRequest->params["pricelist_prefix"] = lexical_cast<string>(call.prefix);
-        logRequest->params["geo_id"] = call.geo_id;
-        logRequest->params["rate"] = call.rate;
-
-        if (callInfo.pricelist && callInfo.pricelist->currency_id[0]) {
-            logRequest->params["rate_currency"] = callInfo.pricelist->currency_id;
-            if (trace != nullptr) {
-                *trace << "INFO|SELL PRICELIST CURRENCY: " << callInfo.pricelist->currency_id << "\n";
-            }
-        }
-
-        if (callInfo.account != nullptr) {
-            double vat_rate = repository.getVatRate(callInfo.account);
-
-            double sumBalance = repository.billingData->statsAccountGetSumBalance(callInfo.account->id, vat_rate);
-            double sumDay = repository.billingData->statsAccountGetSumDay(callInfo.account->id, vat_rate);
-            double sumMNDay = repository.billingData->statsAccountGetSumMNDay(callInfo.account->id, vat_rate);
-
-            auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
-            double sumBalance2 = statsAccount2->getSumBalance(callInfo.account->id, vat_rate) + call.cost;
-            double sumDay2 = statsAccount2->getSumDay(callInfo.account->id, vat_rate) + call.cost;
-            double sumMNDay2 = statsAccount2->getSumMNDay(callInfo.account->id, vat_rate) + call.cost;
-
-            double globalBalanceSum, globalDaySum, globalDayMNSum;
-            fetchGlobalCounters(callInfo.account->id, globalBalanceSum, globalDaySum, globalDayMNSum, vat_rate);
-
-            double spentBalanceSum, spentDaySum, spentDayMNSum;
-            spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
-            spentDaySum = sumDay + sumDay2 + globalDaySum;
-            spentDayMNSum = sumMNDay + sumMNDay2 + globalDayMNSum;
-
-
-            logRequest->params["balance_stat"] = callInfo.account->balance;
-            logRequest->params["balance_local"] = sumBalance;
-            logRequest->params["balance_current"] = sumBalance2;
-            logRequest->params["balance_global"] = globalBalanceSum;
-            logRequest->params["balance_realtime"] = callInfo.account->balance + spentBalanceSum;
-            if (callInfo.account->hasCreditLimit()) {
-                logRequest->params["credit_limit"] = callInfo.account->credit;
-                logRequest->params["credit_available"] =
-                        callInfo.account->balance + callInfo.account->credit + spentBalanceSum;
-            }
-
-            logRequest->params["daily_local"] = sumDay;
-            logRequest->params["daily_current"] = sumDay2;
-            logRequest->params["daily_global"] = globalDaySum;
-            logRequest->params["daily_total"] = spentDaySum;
-            if (callInfo.account->hasDailyLimit()) {
-                logRequest->params["daily_limit"] = callInfo.account->limit_d;
-                logRequest->params["daily_available"] = callInfo.account->limit_d + spentDaySum;
-            }
-            if (callInfo.account->hasDailyMNLimit()) {
-                logRequest->params["daily_mn_limit"] = callInfo.account->limit_d_mn;
-                logRequest->params["daily_mn_available"] = callInfo.account->limit_d_mn + spentDayMNSum;
-            }
-
-            if (callInfo.account->is_blocked) {
-                logRequest->params["block_full_flag"] = "true";
-            }
-
-            if (callInfo.account->disabled) {
-                logRequest->params["block_mgmn_flag"] = "true";
-            }
-
-            if (callInfo.account->isConsumedCreditLimit(spentBalanceSum)) {
-                logRequest->params["block_credit_flag"] = "true";
-            }
-
-            if (callInfo.account->isConsumedDailyLimit(spentDaySum)) {
-                logRequest->params["block_daily_flag"] = "true";
-            }
-        }
+        prepareAuthLogReguestStage1(call, callInfo);
 
         logRequest->params["resp_bill"] = billResponse;
 
@@ -204,8 +135,9 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
             }
             response->setReject();
             return;
+
         } else {
-            outcomeId = processRouteTable(origTrunk->route_table_id);
+            outcomeId = processRouteTable(origTrunk->route_table_id , stateMegaTrunk);
             if (outcomeId == 0) {
                 Log::warning("Route table: Outcome not found");
                 response->setReleaseReason("NO_ROUTE_TO_DESTINATION");
@@ -216,33 +148,10 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
         double buyRate = 0.0;
         Pricelist *firstBuyPricelist = 0;
 
-        if (processOutcome(outcomeId, &buyRate, &firstBuyPricelist)) {
+        if (processOutcome(outcomeId, stateMegaTrunk, &buyRate, &firstBuyPricelist)) {
 
-            // Логируем себестоимость минуты звонка
-            logRequest->params["rate_buy"] = buyRate;
+            prepareAuthLogReguestStage2(call, callInfo, buyRate, firstBuyPricelist);
 
-            if (firstBuyPricelist && firstBuyPricelist->currency_id[0]) {
-                logRequest->params["rate_buy_currency"] = firstBuyPricelist->currency_id;
-                if (trace != nullptr) {
-                    *trace << "INFO|BUY PRICELIST CURRENCY: " << firstBuyPricelist->currency_id << "\n";
-                }
-
-                if (callInfo.pricelist && callInfo.pricelist->currency_id[0]) {
-
-                    double buyPriceRub = repository.priceToRoubles(buyRate, *firstBuyPricelist);
-                    double sellPriceRub = repository.priceToRoubles(call.rate, *callInfo.pricelist);
-
-                    logRequest->params["rate_buy_rub"] = buyPriceRub;
-                    logRequest->params["rate_rub"] = sellPriceRub;
-
-                    double profit = sellPriceRub - buyPriceRub;
-
-                    if (abs(call.rate) > 0.000001 && abs(buyRate) > 0.000001) {
-                        logRequest->params["profit_per_minute"] = profit;
-                        logRequest->params["profit_markup_per_minute"] = profit / buyPriceRub * 100.0;
-                    }
-                }
-            }
         }
 
         return;
@@ -267,7 +176,7 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
     response->setAccept();
 }
 
-int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
+int RadiusAuthProcessor::processRouteTable(const int routeTableId  , StateMegaTrunk & megaTrunk) {
 
     auto routeTable = repository.getRouteTable(routeTableId);
     if (routeTable == nullptr) {
@@ -295,11 +204,20 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
         }
 
         if (route->outcome_id) {
+
+            auto outcome = repository.getOutcome(route->outcome_id);
+
+            if(outcome != nullptr && outcome->isMegaTrunkPhase1() && !megaTrunk.isMegaTrunkPhase1())
+                continue;
+
+            if(outcome != nullptr && outcome->isMegaTrunkPhase2() && !megaTrunk.isMegaTrunkPhase2())
+                continue;
+
             return route->outcome_id;
         }
 
         if (route->outcome_route_table_id) {
-            int outcomeId = processRouteTable(route->outcome_route_table_id);
+            int outcomeId = processRouteTable(route->outcome_route_table_id, megaTrunk);
             if (outcomeId != 0) {
                 return outcomeId;
             }
@@ -310,7 +228,7 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId) {
 }
 
 // Возвращает true, если в pBuyRate возвращается себестоимость одной минуты звонка на транк.
-bool RadiusAuthProcessor::processOutcome(int outcomeId, double *pBuyRate, Pricelist **pFirstBuyPricelist) {
+bool RadiusAuthProcessor::processOutcome(int outcomeId, StateMegaTrunk &stateMegaTrunk, double *pBuyRate, Pricelist **pFirstBuyPricelist) {
     if (pBuyRate) {
         *pBuyRate = 0;
     }
@@ -329,7 +247,6 @@ bool RadiusAuthProcessor::processOutcome(int outcomeId, double *pBuyRate, Pricel
         *trace << "INFO|OUTCOME|" << outcome->name << " (" << outcomeId << ")" << "\n";
     }
 
-
     if (outcome->isAuto()) {
 
         return processAutoOutcome(pBuyRate, pFirstBuyPricelist);
@@ -347,6 +264,16 @@ bool RadiusAuthProcessor::processOutcome(int outcomeId, double *pBuyRate, Pricel
     } else if (outcome->isAirp()) {
 
         processAirpOutcome(outcome);
+        return false;
+
+    } else if (outcome->isMegaTrunkPhase1()) {
+
+        processMegaTrunkPhase1(stateMegaTrunk);
+        return false;
+
+    } else if (outcome->isMegaTrunkPhase2()) {
+
+        processMegaTrunkPhase2(stateMegaTrunk);
         return false;
 
     } else if (outcome->isAccept()) {
@@ -384,9 +311,11 @@ bool RadiusAuthProcessor::processAutoOutcome(double *pBuyRate, Pricelist **pFirs
 
     getAvailableTermServiceTrunk(termServiceTrunks, origServiceTrunkOrder, fUseMinimalki);
 
-    double origRub = origServiceTrunkOrder.is_price_present() ? this->repository.priceToRoubles(origServiceTrunkOrder.getPrice(),origServiceTrunkOrder.getCurrency()) : 0;
+    double origRub = origServiceTrunkOrder.is_price_present() ? this->repository.priceToRoubles(
+            origServiceTrunkOrder.getPrice(), origServiceTrunkOrder.getCurrency()) : 0;
 
-    return processAutoRouteResponse(termServiceTrunks, pBuyRate, pFirstBuyPricelist, origRub); /////////////////////////////// Нужно переделывать
+    return processAutoRouteResponse(termServiceTrunks, pBuyRate, pFirstBuyPricelist,
+                                    origRub);
 }
 
 
@@ -421,7 +350,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
 
     for (auto termTrunk : termTrunks) {
 
-        if(this->origTrunk!= nullptr && this->origTrunk->id == termTrunk->id) {
+        if (this->origTrunk != nullptr && this->origTrunk->id == termTrunk->id) {
             if (trace != nullptr) {
                 *trace << "INFO|TERM SERVICE TRUNK DECLINE|SKIP LOOP ROUTE, " << termTrunk->name << " (" <<
                        termTrunk->id << ")" << "\n";
@@ -491,8 +420,9 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
                     if (origSettings->minimum_margin_type == SERVICE_TRUNK_SETTINGS_MIN_MARGIN_PERCENT
                         || origSettings->minimum_margin_type == SERVICE_TRUNK_SETTINGS_MIN_MARGIN_VALUE) {
 
-                        double origRub = this->repository.priceToRoubles(origServiceTrunkOrder.getPrice(),origServiceTrunkOrder.getCurrency());
-                        double termRub = this->repository.priceToRoubles(termOrder.getPrice(),termOrder.getCurrency());
+                        double origRub = this->repository.priceToRoubles(origServiceTrunkOrder.getPrice(),
+                                                                         origServiceTrunkOrder.getCurrency());
+                        double termRub = this->repository.priceToRoubles(termOrder.getPrice(), termOrder.getCurrency());
 
                         if (origRub > 0.000001 && termRub > 0.000001) {
 
@@ -615,22 +545,22 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
             *trace << ", TRUNK: " << trunkOrder.trunk->name << " (" << trunkOrder.trunk->id << ")";
             *trace << ", PRIORITY: " << trunkOrder.priority;
             *trace << ", SERVICE TRUNK " << trunkOrder.serviceTrunk->id;
-            if(trunkOrder.pricelist) {
+            if (trunkOrder.pricelist) {
                 *trace << ", PRICELIST: " << trunkOrder.pricelist->id;
                 *trace << ", PRICELIST CURRENCY: " << trunkOrder.pricelist->currency_id;
             }
-            if(trunkOrder.price) {
+            if (trunkOrder.price) {
                 *trace << ", PREFIX: " << trunkOrder.price->prefix;
             }
-            if(trunkOrder.nnpPackage) {
+            if (trunkOrder.nnpPackage) {
                 *trace << ", NNPPACKAGE_ID: " << trunkOrder.nnpPackage->id;
                 *trace << ", NNPPACKAGE_CURRENCY: " << trunkOrder.nnpPackage->currency_id;
                 *trace << ", NNP_PRICE: " << trunkOrder.nnp_price;
             }
-            if(trunkOrder.nnpPackagePrice) {
+            if (trunkOrder.nnpPackagePrice) {
                 *trace << ", NNPPACKAGEPRICE_ID: " << trunkOrder.nnpPackagePrice->id;
             }
-            if(trunkOrder.nnpPackagePricelist) {
+            if (trunkOrder.nnpPackagePricelist) {
                 *trace << ", NNPPACKAGEPRICELIST_ID: " << trunkOrder.nnpPackagePricelist->id;
             }
 
@@ -833,8 +763,8 @@ bool RadiusAuthProcessor::autoTrunkFilterSrcTrunk(Trunk *termTrunk) {
             int trunk_group = resultTrunkGroupRules[i].trunk_group_id;
             bool f_trunk_group = true;
 
-            if (num_a > 0) f_a = filterByNumber(num_a , aNumber);
-            if (num_b > 0) f_b = filterByNumber(num_b , bNumber);
+            if (num_a > 0) f_a = filterByNumber(num_a, aNumber);
+            if (num_b > 0) f_b = filterByNumber(num_b, bNumber);
             if (origTrunk != nullptr && trunk_group > 0) f_trunk_group = matchTrunkGroup(trunk_group, origTrunk->id);
 
             if (f_a && f_b && f_trunk_group) {
@@ -1046,7 +976,6 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
             return "voip_disabled";
         }
 
-
         // Глобальная блокировка
         if (client->is_blocked) {
             return "voip_disabled";
@@ -1056,10 +985,12 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
         if (!call.isLocal() && client->disabled) {
             return "voip_disabled";
         }
+
     }
 
     return "accept";
 }
+
 
 bool RadiusAuthProcessor::isLowBalance(bool (Client::*checkLimit)(double), RejectReason reason, Client *client,
                                        double spentBalanceSum, Call &call,
@@ -1097,4 +1028,170 @@ void RadiusAuthProcessor::fetchGlobalCounters(int accountId, double &globalBalan
         globalDaySum = 0.0;
         globalDayMNSum = 0.0;
     }
+}
+
+void RadiusAuthProcessor::prepareAuthLogReguestStage1(Call &call, CallInfo &callInfo) {
+
+    logRequest->params["orig"] = call.orig ? "true" : "false";
+    logRequest->params["src"] = call.src_number;
+    logRequest->params["dst"] = call.dst_number;
+    logRequest->params["trunk_id"] = call.trunk_id;
+    logRequest->params["account_id"] = call.account_id;
+    logRequest->params["trunk_service_id"] = call.trunk_service_id;
+    logRequest->params["number_service_id"] = call.number_service_id;
+    logRequest->params["service_package_id"] = call.service_package_id;
+    logRequest->params["pricelist_id"] = call.pricelist_id;
+    logRequest->params["pricelist_prefix"] = lexical_cast<string>(call.prefix);
+    logRequest->params["geo_id"] = call.geo_id;
+    logRequest->params["rate"] = call.rate;
+
+    if (callInfo.pricelist && callInfo.pricelist->currency_id[0]) {
+        logRequest->params["rate_currency"] = callInfo.pricelist->currency_id;
+        if (trace != nullptr) {
+            *trace << "INFO|SELL PRICELIST CURRENCY: " << callInfo.pricelist->currency_id << "\n";
+        }
+    }
+
+    if (callInfo.account != nullptr) {
+        double vat_rate = repository.getVatRate(callInfo.account);
+
+        double sumBalance = repository.billingData->statsAccountGetSumBalance(callInfo.account->id, vat_rate);
+        double sumDay = repository.billingData->statsAccountGetSumDay(callInfo.account->id, vat_rate);
+        double sumMNDay = repository.billingData->statsAccountGetSumMNDay(callInfo.account->id, vat_rate);
+
+        auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
+        double sumBalance2 = statsAccount2->getSumBalance(callInfo.account->id, vat_rate) + call.cost;
+        double sumDay2 = statsAccount2->getSumDay(callInfo.account->id, vat_rate) + call.cost;
+        double sumMNDay2 = statsAccount2->getSumMNDay(callInfo.account->id, vat_rate) + call.cost;
+
+        double globalBalanceSum, globalDaySum, globalDayMNSum;
+        fetchGlobalCounters(callInfo.account->id, globalBalanceSum, globalDaySum, globalDayMNSum, vat_rate);
+
+        double spentBalanceSum, spentDaySum, spentDayMNSum;
+        spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
+        spentDaySum = sumDay + sumDay2 + globalDaySum;
+        spentDayMNSum = sumMNDay + sumMNDay2 + globalDayMNSum;
+
+
+        logRequest->params["balance_stat"] = callInfo.account->balance;
+        logRequest->params["balance_local"] = sumBalance;
+        logRequest->params["balance_current"] = sumBalance2;
+        logRequest->params["balance_global"] = globalBalanceSum;
+        logRequest->params["balance_realtime"] = callInfo.account->balance + spentBalanceSum;
+        if (callInfo.account->hasCreditLimit()) {
+            logRequest->params["credit_limit"] = callInfo.account->credit;
+            logRequest->params["credit_available"] =
+                    callInfo.account->balance + callInfo.account->credit + spentBalanceSum;
+        }
+
+        logRequest->params["daily_local"] = sumDay;
+        logRequest->params["daily_current"] = sumDay2;
+        logRequest->params["daily_global"] = globalDaySum;
+        logRequest->params["daily_total"] = spentDaySum;
+        if (callInfo.account->hasDailyLimit()) {
+            logRequest->params["daily_limit"] = callInfo.account->limit_d;
+            logRequest->params["daily_available"] = callInfo.account->limit_d + spentDaySum;
+        }
+        if (callInfo.account->hasDailyMNLimit()) {
+            logRequest->params["daily_mn_limit"] = callInfo.account->limit_d_mn;
+            logRequest->params["daily_mn_available"] = callInfo.account->limit_d_mn + spentDayMNSum;
+        }
+
+        if (callInfo.account->is_blocked) {
+            logRequest->params["block_full_flag"] = "true";
+        }
+
+        if (callInfo.account->disabled) {
+            logRequest->params["block_mgmn_flag"] = "true";
+        }
+
+        if (callInfo.account->isConsumedCreditLimit(spentBalanceSum)) {
+            logRequest->params["block_credit_flag"] = "true";
+        }
+
+        if (callInfo.account->isConsumedDailyLimit(spentDaySum)) {
+            logRequest->params["block_daily_flag"] = "true";
+        }
+    }
+
+}
+
+void RadiusAuthProcessor::prepareAuthLogReguestStage2(Call &call, CallInfo &callInfo, double buyRate,
+                                                      Pricelist *firstBuyPricelist) {
+
+// Логируем себестоимость минуты звонка
+    logRequest->params["rate_buy"] = buyRate;
+
+    if (firstBuyPricelist && firstBuyPricelist->currency_id[0]) {
+        logRequest->params["rate_buy_currency"] = firstBuyPricelist->currency_id;
+        if (trace != nullptr) {
+            *trace << "INFO|BUY PRICELIST CURRENCY: " << firstBuyPricelist->currency_id << "\n";
+        }
+
+        if (callInfo.pricelist && callInfo.pricelist->currency_id[0]) {
+
+            double buyPriceRub = repository.priceToRoubles(buyRate, *firstBuyPricelist);
+            double sellPriceRub = repository.priceToRoubles(call.rate, *callInfo.pricelist);
+
+            logRequest->params["rate_buy_rub"] = buyPriceRub;
+            logRequest->params["rate_rub"] = sellPriceRub;
+
+            double profit = sellPriceRub - buyPriceRub;
+
+            if (abs(call.rate) > 0.000001 && abs(buyRate) > 0.000001) {
+                logRequest->params["profit_per_minute"] = profit;
+                logRequest->params["profit_markup_per_minute"] = profit / buyPriceRub * 100.0;
+            }
+        }
+    }
+
+}
+
+
+void RadiusAuthProcessor::processMegaTrunkPhase1(StateMegaTrunk &megaTrunk) {
+
+    int regionNum = megaTrunk.getDestinationRegion(); // Получаем номер региона, куда нужно направить звонок
+
+    string routeCase;
+    vector<Trunk *> resultTrunks;
+
+    repository.getAllRoadToRegion(resultTrunks, app().conf.instance_id, regionNum, trace);
+
+    std::random_shuffle( resultTrunks.begin(), resultTrunks.end() );
+
+    for (Trunk *trunk : resultTrunks) {
+        if(!routeCase.empty()) routeCase+=',';
+        routeCase += trunk->trunk_name;
+    }
+
+    if (routeCase.empty()) {
+        throw Exception("not found road to Region #" + lexical_cast<string>(regionNum),
+                        "RadiusAuthProcessor::processMegaTrunkPhase1");
+    }
+
+    if (trace != nullptr) {
+        *trace << "INFO|MEGATRUNK|PHASE 1: Transfer to region #" << regionNum;
+        *trace << "\n";
+    }
+
+    response->setRouteCase(routeCase);
+
+}
+
+void RadiusAuthProcessor::processMegaTrunkPhase2(StateMegaTrunk &megaTrunk) {
+
+    Trunk *trunk = megaTrunk.getDestinationMegaTrunk(); // Получаем Мегатранк, в котором нужно собрать звонки.
+
+    if(trunk == nullptr) {
+        throw Exception("not found MegaTrunk",
+                        "RadiusAuthProcessor::processMegaTrunkPhase1");
+    }
+
+    if (trace != nullptr) {
+        *trace << "INFO|MEGATRUNK|PHASE 2: Transfer to MegaTrunk [" << trunk->trunk_name << "]";
+        *trace << "\n";
+    }
+
+    response->setRouteCase(trunk->trunk_name);
+
 }

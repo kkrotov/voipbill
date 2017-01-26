@@ -381,6 +381,8 @@ set(BILL_SOURCES
         src-bill/models/StatsNNPPackageMinute.cpp
         src-bill/classes/StatsNNPPackageMinuteManager.cpp
         src-bill/classes/nnp/NNPResolver.cpp
+        src-bill/classes/nnp/PrefixTree.cpp
+        src-bill/classes/nnp/PrefixNode.cpp
 
         src-bill/main.cpp
         src-bill/models/GlobalNNPPackageMinuteCounters.cpp
@@ -406,6 +408,8 @@ set(BILL_SOURCES
         src-bill/healthcheck/TrunkLoadStatus.cpp
         src-bill/threads/ThreadHealthManager.cpp
         src-bill/models/Price.cpp
+        src-bill/classes/StateMegaTrunk.cpp
+        src-bill/classes/StateMegaTrunk.h
         src-bill/models/nnp/NNPCountry.cpp
         src-bill/models/nnp/NNPCountry.h
         src-bill/lists/nnp/NNPCountryCodeList.cpp
@@ -427,4 +431,37 @@ target_link_libraries(app_bill rt pthread pq curl crypto)
 #add_executable(auth-client src-auth-client/client.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
 
 #add_executable(auth-server src-auth-client/server.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
+
+find_package(CxxTest)
+if(CXXTEST_FOUND)
+    include_directories(${CXXTEST_INCLUDE_DIR})
+    enable_testing()
+
+    set (TESTING_SOURCES
+         tests/unit/mock/src-bill/Log.cpp
+         src-bill/classes/BDb.cpp
+         src-bill/classes/BDbResult.cpp
+         src-bill/classes/BDbTransaction.cpp
+         src-bill/common.cpp
+         src-bill/classes/nnp/PrefixTree.cpp
+         src-bill/classes/nnp/PrefixNode.cpp
+         tests/functional/common.cpp
+         tests/functional/BaseTest.cpp
+         tests/functional/ComparisonTest.cpp
+         )
+    add_library(test.obj ${TESTING_SOURCES} ${JSON_SOURCES})
+
+    set (CXXTEST_TESTGEN_ARGS --runner=XUnitPrinter --world=utest)
+    CXXTEST_ADD_TEST(tests/unit/utest ./utest.cpp # unit тесты
+    tests/unit/RemoveHtmlTagsTest.h
+    tests/unit/PrefixTreeTest.h)
+    target_link_libraries(tests/unit/utest test.obj rt pthread pq curl crypto)
+
+    set (CXXTEST_TESTGEN_ARGS --runner=XUnitPrinter --world=ftest)
+    CXXTEST_ADD_TEST(tests/functional/ftest ./ftest.cpp # functional тесты
+                     tests/functional/NNPNumberRangeFindTest.h)
+    target_link_libraries(tests/functional/ftest test.obj rt pthread pq curl crypto)
+
+endif()
+
 
