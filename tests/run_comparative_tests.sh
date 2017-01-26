@@ -49,6 +49,10 @@ echo 'Генерируем тестовые примеры для уже про�
 nice -19 python "$DIR/sampler.py"
 [[ $? -ne 0 ]] && exit
 
+echo 'Запускаем auth тесты для уже протестированной версии...'
+nice -19 python "$DIR/comparative/auth_caller.py"
+[[ $? -ne 0 ]] && exit
+
 echo 'Stopping tested app version...'
 . "$DIR/stop.sh"
 
@@ -88,12 +92,22 @@ echo 'Генерируем тестовые примеры для новой (т
 nice -19 python "$DIR/sampler.py"
 [[ $? -ne 0 ]] && exit
 
+echo 'Запускаем auth тесты для новой (тестируемой) версии...'
+nice -19 python "$DIR/comparative/auth_caller.py"
+[[ $? -ne 0 ]] && exit
+
+echo 'Running unit tests analysis...'
+. "$DIR/unit/start.sh"
+
+echo 'Running functional test analysis...'
+. "$DIR/functional/start.sh"
+
+
 echo 'Stopping new app version...'
 . "$DIR/stop.sh"
 
-echo 'Running tests analyzis...'
-python "$DIR/comparative_test.py"
-[[ $? -ne 0 ]] && exit
+echo 'Running comparative tests analyzis...'
+. "$DIR/comparative/start.sh"
 
 exit 0
 # В случае успешного прохождения тестов, делаем коммит в tested - ветку, пригодную для деплоя.

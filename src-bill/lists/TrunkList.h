@@ -120,6 +120,36 @@ public:
         return nullptr;
     }
 
+    void findAllRoadToRegion(vector<Trunk *> &resultTrunks, int server_id, int road_to_region, stringstream *trace = nullptr) {
+        auto begin = this->data.begin();
+        auto end = this->data.end();
+
+        for (auto it = begin; it != end; ++it) {
+            Trunk *trunk = &*it;
+
+            if (trunk->road_to_region == road_to_region && (trunk->server_id == server_id || trunk->sw_shared)) {
+                if (resultTrunks.size() == 0) {
+                    if (trace != nullptr) {
+                        *trace << "FOUND|TRUNKS|BY ROADTOREGION #" << road_to_region << "\n";
+                    }
+                }
+
+                resultTrunks.push_back(trunk);
+
+                if (trace != nullptr) {
+                    *trace << "||";
+                    trunk->dump(*trace);
+                    *trace << "\n";
+                }
+            }
+        }
+
+        if (resultTrunks.size() == 0) {
+            if (trace != nullptr) {
+                *trace << "NOT FOUND|TRUNKS|BY ROADTOREGION #" << road_to_region << "\n";
+            }
+        }
+    }
 
 };
 
