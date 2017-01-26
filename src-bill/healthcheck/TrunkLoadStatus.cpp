@@ -7,8 +7,12 @@ TrunkLoadStatus::TrunkLoadStatus() : HealthCheck("TrunkLoadStatus") {
 
 SystemStatus TrunkLoadStatus::getStatus() {
 
-    if (!ready())
+    if (!ready()) {
+
+        healthStatus.statusId = HealthStatus::STATUS_CRITICAL;
+        healthStatus.statusMessage = "Billing not ready";
         return healthStatus;
+    }
 
     int trunk_max_load_warn = (app().conf.trunk_max_load.size()>0)? app().conf.trunk_max_load[1]:95;
     int trunk_max_load_err = (app().conf.trunk_max_load.size()>1)? app().conf.trunk_max_load[2]:99;

@@ -9,36 +9,39 @@ RadiusAuthServerStatus::RadiusAuthServerStatus() : HealthCheck("RadiusAuthServer
 SystemStatus RadiusAuthServerStatus::getStatus() {
 
     Repository repository;
-    if (repository.prepare(time(nullptr))) {
+    if (!repository.prepare(time(nullptr))) {
 
-        Server *server = repository.getServer(app().conf.instance_id);
-        if (server != nullptr && server->radius_request_delay.size() > 2) {
+        healthStatus.statusId = HealthStatus::STATUS_CRITICAL;
+        healthStatus.statusMessage = "Billing not ready";
+        return healthStatus;
+    }
+    Server *server = repository.getServer(app().conf.instance_id);
+    if (server != nullptr && server->radius_request_delay.size() > 2) {
 
-            time_t last_request_time;
-            app().threads.forAllThreads([&](Thread* thread) {
+        time_t last_request_time;
+        app().threads.forAllThreads([&](Thread* thread) {
 
-                if (thread->id=="radius_auth_server") {
+            if (thread->id=="radius_auth_server") {
 
-                    last_request_time = ((ThreadRadiusAuthServer*)thread)->lastRequestTime();
-                }
-                return true;
-            });
+                last_request_time = ((ThreadRadiusAuthServer*)thread)->lastRequestTime();
+            }
+            return true;
+        });
 
-            if (last_request_time==0)
-                last_request_time = app().getStartTime();
-            
-            int last_resquest_delay = time(NULL) - last_request_time;
-            healthStatus.itemValue = to_string(last_resquest_delay);
+        if (last_request_time==0)
+            last_request_time = app().getStartTime();
 
-            checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
+        int last_resquest_delay = time(NULL) - last_request_time;
+        healthStatus.itemValue = to_string(last_resquest_delay);
 
-                    std::pair<time_t, HealthStatus>(server->radius_request_delay[0],HealthStatus::STATUS_OK),
-                    std::pair<time_t, HealthStatus>(server->radius_request_delay[1],HealthStatus::STATUS_WARNING),
-                    std::pair<time_t, HealthStatus>(server->radius_request_delay[2],HealthStatus::STATUS_ERROR)
-            }, last_resquest_delay);
+        checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
 
-            healthStatus.statusMessage = healthStatus.itemValue+" sec since last request";
-        }
+                std::pair<time_t, HealthStatus>(server->radius_request_delay[0],HealthStatus::STATUS_OK),
+                std::pair<time_t, HealthStatus>(server->radius_request_delay[1],HealthStatus::STATUS_WARNING),
+                std::pair<time_t, HealthStatus>(server->radius_request_delay[2],HealthStatus::STATUS_ERROR)
+        }, last_resquest_delay);
+
+        healthStatus.statusMessage = healthStatus.itemValue+" sec since last request";
     }
     return healthStatus;
 }
