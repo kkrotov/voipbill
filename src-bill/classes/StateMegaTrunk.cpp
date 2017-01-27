@@ -29,7 +29,7 @@ void StateMegaTrunk::prepareFromCdr(Cdr *cdr) {
 void StateMegaTrunk::PhaseCalc() {
     // Расчитываем фазу машрутизации мегатранка
 
-    vector<ServiceTrunk> resultServiceTrunk;
+    vector <ServiceTrunk> resultServiceTrunk;
 
     if (serviceNumberNumB != nullptr) {
         repository->getServiceTrunkByClientID(resultServiceTrunk, serviceNumberNumB->client_account_id);
@@ -42,22 +42,39 @@ void StateMegaTrunk::PhaseCalc() {
                     if (!repository->isRegionOnHub(serviceTrunk.server_id)) {
                         // Провеяем, есть на лицевом счете номера B услуга транк,
                         // если такой транк находится в другом регионе, включаем Фазу 1 и перемещаемся в этот регион.
+
                         destRegion = serviceTrunk.server_id;
                         isPhase1 = true;
+                        if (trace != nullptr) {
+                            *trace << "INFO|FOUND MEGATRANK|#" << serviceTrunk.trunk_id
+                                   << ", SERVICE TRUNK ID: " << serviceTrunk.id << " IN REGION #"
+                                   << serviceTrunk.server_id
+                                   << ", isPhase1 = true\n";
+                        }
                         return;
 
                     } else {
                         destTrunk = repository->getTrunk(serviceTrunk.trunk_id);
                         if (destTrunk != nullptr) {
+
+
+                            if (trace != nullptr) {
+                                *trace << "INFO|FOUND MEGATRANK|" << destTrunk->name << " ("
+                                       << serviceTrunk.trunk_id
+                                       << ")" <<
+                                       ", SERVICE TRUNK ID: " << serviceTrunk.id
+                                       << " AT THIS REGION(HUB). isPhase2 = true\n";
+                            }
+
                             // Если лицевой счет номера B совпадает с лицевым счетом транка в этом регионе, то включаем
                             // фазу 2 и направляем в такой транк.
                             isPhase2 = true;
-                            return;
                         }
+                        return;
 
                     }
-
                 }
+
 
             }
         }
@@ -74,9 +91,17 @@ void StateMegaTrunk::PhaseCalc() {
             if (time(nullptr) <= serviceTrunk.expire_dt && serviceTrunk.activation_dt <= time(nullptr)) {
 
                 if (serviceTrunk.client_account_id == serviceNumberNumA->client_account_id &&
-                    serviceTrunk.orig_enabled && src_trunk->id == serviceTrunk.trunk_id ) {
+                    serviceTrunk.orig_enabled && src_trunk->id == serviceTrunk.trunk_id) {
 
-                    if(!repository->isRegionOnHub(serviceNumberNumA->server_id)) {
+                    destTrunk = repository->getTrunk(serviceTrunk.trunk_id);
+
+                    if (!repository->isRegionOnHub(serviceNumberNumA->server_id) && destTrunk != nullptr) {
+                        if (trace != nullptr) {
+                            *trace << "INFO|CALL FROM MEGATRANK|" << destTrunk->name << " (" << serviceTrunk.trunk_id
+                                   << ") FROM REGION #" << destTrunk->server_id <<
+                                   ", DID: " << serviceNumberNumA->did << " FROM REGION #"
+                                   << serviceNumberNumA->server_id << ", isPhase1 = true\n";
+                        }
                         isPhase1 = true;
                         destRegion = serviceNumberNumA->server_id;
                         return;
