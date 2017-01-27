@@ -7,6 +7,10 @@ CallsWaitSaving::CallsWaitSaving() : HealthCheck("CallsWaitSaving") {
 
 SystemStatus CallsWaitSaving::getStatus() {
 
+    healthStatus.reset();
+    if (!app().threads.isRegistered("current_calls"))
+        return healthStatus;
+
     Repository repository;
     if (!repository.prepare(time(nullptr))) {
 
@@ -15,7 +19,8 @@ SystemStatus CallsWaitSaving::getStatus() {
         return healthStatus;
     }
     Server *server = repository.getServer(app().conf.instance_id);
-    if (server!=nullptr && server->call_save_wait_count.size()>2) {
+    if (server!=nullptr && server->call_save_wait_count.size()>2 &&
+        !(server->call_save_wait_count[0]==0 && server->call_save_wait_count[1]==0 && server->call_save_wait_count[2]==0)) {
 
         DataBillingContainer *billingData = repository.billingData;
         time_t call_count = billingData->callsQueueSize();
@@ -24,10 +29,10 @@ SystemStatus CallsWaitSaving::getStatus() {
 
         checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
 
-                        std::pair<time_t, HealthStatus>(server->call_save_wait_count[0],HealthStatus::STATUS_OK),
-                        std::pair<time_t, HealthStatus>(server->call_save_wait_count[1],HealthStatus::STATUS_WARNING),
-                        std::pair<time_t, HealthStatus>(server->call_save_wait_count[2],HealthStatus::STATUS_ERROR)
-                }, call_count);
+                std::pair<time_t, HealthStatus>(server->call_save_wait_count[0],HealthStatus::STATUS_OK),
+                std::pair<time_t, HealthStatus>(server->call_save_wait_count[1],HealthStatus::STATUS_WARNING),
+                std::pair<time_t, HealthStatus>(server->call_save_wait_count[2],HealthStatus::STATUS_ERROR)
+        }, call_count);
     }
     return healthStatus;
 }

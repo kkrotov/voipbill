@@ -25,6 +25,7 @@ public:
 
     void render_client_balance_indicators(std::stringstream &html, Client *client);
 
-    void render_client_packeges_info(std::stringstream &html, Client *client);
+    void render_num_client_packages_info(std::stringstream &html, Client *client);
 
+    void render_trunk_client_packages_info(stringstream &html, Client *client);
 };

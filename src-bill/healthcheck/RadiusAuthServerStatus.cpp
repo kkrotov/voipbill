@@ -8,6 +8,10 @@ RadiusAuthServerStatus::RadiusAuthServerStatus() : HealthCheck("RadiusAuthServer
 
 SystemStatus RadiusAuthServerStatus::getStatus() {
 
+    healthStatus.reset();
+    if (!app().threads.isRegistered("radius_auth_server"))
+        return healthStatus;
+
     Repository repository;
     if (!repository.prepare(time(nullptr))) {
 
@@ -16,9 +20,10 @@ SystemStatus RadiusAuthServerStatus::getStatus() {
         return healthStatus;
     }
     Server *server = repository.getServer(app().conf.instance_id);
-    if (server != nullptr && server->radius_request_delay.size() > 2) {
+    if (server != nullptr && server->radius_request_delay.size() > 2 &&
+        !(server->radius_request_delay[0]==0 && server->radius_request_delay[1]==0 && server->radius_request_delay[2]==0)) {
 
-        time_t last_request_time;
+        time_t last_request_time=0;
         app().threads.forAllThreads([&](Thread* thread) {
 
             if (thread->id=="radius_auth_server") {

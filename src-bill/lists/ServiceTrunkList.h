@@ -10,9 +10,12 @@ protected:
     string sql(BDb * db) {
         return "    select trunk_id, id, client_account_id, " \
             "              orig_enabled, term_enabled, orig_min_payment, term_min_payment, " \
-            "              extract(epoch from activation_dt), extract(epoch from expire_dt) " \
+            "              extract(epoch from activation_dt), extract(epoch from expire_dt),server_id " \
             "       from billing.service_trunk " \
-            "       where server_id in " + app().conf.get_sql_regions_for_load_list_list() + " " \
+
+//            "       where server_id in " + app().conf.get_sql_regions_for_load_list_list() + " " \
+//  Теперь на региональном узле в пямять загружаются все логические транки, а не только для регионов этого узла.
+
             "       order by trunk_id asc, activation_dt asc ";
     }
 
@@ -26,6 +29,7 @@ protected:
         item->term_min_payment = row.get_d(6);
         item->activation_dt = row.get_ll(7);
         item->expire_dt = row.get_ll(8);
+        item->server_id = row.get_i(9);
     }
 
 
@@ -51,6 +55,8 @@ public:
     ServiceTrunk * find(int trunk_id, time_t timestamp, stringstream *trace = nullptr);
 
     void findAll(vector<ServiceTrunk *> &resultTrunks, int trunk_id, time_t timestamp, stringstream *trace = nullptr);
+
+    void findAllByClientID(vector<ServiceTrunk> &resultServiceTrunk, int client_id, stringstream *trace);
 };
 
 

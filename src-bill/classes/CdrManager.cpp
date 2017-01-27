@@ -45,7 +45,9 @@ bool CdrManager::loadPart(BDb * db_calls) {
             "       call_finished, " \
             "       releasing_party, " \
             "       in_sig_call_id, " \
-            "       out_sig_call_id " \
+            "       out_sig_call_id, " \
+            "       hash, " \
+            "       setup_time " \
             "	from calls_cdr.cdr " \
             "	where " \
             "       id > '" + lexical_cast<string>(getLastId()) + "' " \
@@ -62,6 +64,7 @@ bool CdrManager::loadPart(BDb * db_calls) {
             Cdr cdr;
             cdr.id = res.get_ll(0);
             cdr.connect_time = parseDateTime(res.get(1));
+            cdr.setup_time = parseDateTime(res.get(18));
             cdr.session_time = res.get_i(2);
             strcpy((char *) &cdr.src_number, res.get(3));
             strcpy((char *) &cdr.dst_number, res.get(4));
@@ -78,6 +81,7 @@ bool CdrManager::loadPart(BDb * db_calls) {
 
             strncpy((char *) &cdr.in_sig_call_id, res.get(15), sizeof(cdr.in_sig_call_id));
             strncpy((char *) &cdr.out_sig_call_id, res.get(16), sizeof(cdr.out_sig_call_id));
+            strncpy((char *) &cdr.hash, res.get(17), sizeof(cdr.hash));
 
             queue.push_back(cdr);
 

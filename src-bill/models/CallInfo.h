@@ -18,6 +18,10 @@
 #include "Server.h"
 #include "InstanceSettings.h"
 #include "nnp/NNPNumberRange.h"
+#include "nnp/NNPPackagePrice.h"
+#include "nnp/NNPPackagePricelist.h"
+#include "nnp/NNPPackage.h"
+#include "nnp/NNPPackageMinute.h"
 
 #include "ServiceTrunkSettings.h"
 
@@ -46,6 +50,10 @@ struct CallInfo {
     Geo * geo;
     NNPNumberRange *nnpNumberRange;
 
+    NNPPackage * nnpPackage = nullptr;
+    NNPPackagePrice * nnpPackagePrice = nullptr;
+    NNPPackagePricelist * nnpPackagePricelist = nullptr;
+
     DT dt;
     DT dtUtc;
 
@@ -66,6 +74,10 @@ struct CallInfo {
         price = nullptr;
         geo = nullptr;
         nnpNumberRange = nullptr;
+        nnpPackage = nullptr;
+        nnpPackagePrice = nullptr;
+        nnpPackagePricelist = nullptr;
+
     }
 
     void make_dt() {

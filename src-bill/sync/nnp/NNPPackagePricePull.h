@@ -17,10 +17,12 @@ public:
         fields.push_back("tariff_id");
         fields.push_back("destination_id");
         fields.push_back("price");
+        fields.push_back("interconnect_price");
 
         datatype.push_back("id integer");
         datatype.push_back("tariff_id integer");
         datatype.push_back("destination_id integer");
         datatype.push_back("price double precision");
+        datatype.push_back("interconnect_price double precision");
     }
 };

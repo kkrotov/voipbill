@@ -1,13 +1,14 @@
 #include "NNPNumberRangeList.h"
+#include <algorithm>
 
 string NNPNumberRangeList::sql(BDb *db) {
     return "select id, country_prefix, ndc, is_mob, " \
             "   is_active, operator_id, region_id, extract(epoch from insert_time), extract(epoch from update_time), city_id, " \
-            "   full_number_from, full_number_to " \
+            "   full_number_from, full_number_to, country_code " \
             "   from nnp.number_range  " \
             "   where is_active and ( full_number_from <= full_number_to ) and  ( full_number_from >= 0 ) and " \
             "   length(full_number_from::varchar) = length(full_number_to::varchar)  " \
-            "   order by full_number_from, full_number_to";
+            "   order by id";
 }
 
 void NNPNumberRangeList::parse_item(BDbResult &row, NNPNumberRange *item) {
@@ -207,6 +208,28 @@ void NNPNumberRangeList::parse_item_by_index (BDbResult &row, int64_t index) {
     data[index].nnp_city_id = row.get_i(9);
     data[index].full_number_from = row.get_ll(10);
     data[index].full_number_to = row.get_ll(11);
+    data[index].country_code = row.get_i(12);
 
     avlRoot = insertNode(avlRoot, index);
+}
+struct NNPNumberRangeList::key_number_range_id {
+    bool operator()(const NNPNumberRange &left, int nnp_id) {
+        return left.id < nnp_id;
+    }
+
+    bool operator()(int nnp_id, const NNPNumberRange &right) {
+        return nnp_id < right.id;
+    }
+};
+NNPNumberRange* NNPNumberRangeList::getNNPNumberRangeById(int id) {
+    if ( id < 1 || data.size() < 1) return nullptr;
+    auto begin = data.begin();
+    auto end = data.end();
+    auto it = std::equal_range(begin, end, id, key_number_range_id());
+    begin = it.first;
+    end = it.second;
+    if (begin != end){
+        return &(*begin);
+    }
+    return nullptr;
 }

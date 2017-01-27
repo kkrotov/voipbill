@@ -181,6 +181,10 @@ void PageClient::render_client_balance_indicators(std::stringstream &html, Clien
         }
     }
 
+    if(client->is_trunk_client)
+        html << "is_trunk_client: <b>YES</b> <br>\n";
+    else
+        html << "is_trunk_client: <b>NO</b> <br>\n";
 
     if (client->hasCreditLimit()) {
         html << "Balance available: <b>" <<
@@ -232,7 +236,7 @@ void PageClient::render_client_balance_indicators(std::stringstream &html, Clien
 
 }
 
-void PageClient::render_client_packeges_info(std::stringstream &html, Client *client) {
+void PageClient::render_num_client_packages_info(std::stringstream &html, Client *client) {
     if (client == nullptr) {
         html << "Passed a null pointer - Client *client ";
         return;
@@ -285,9 +289,14 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
 
                         html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                         html << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+
                         html << "nnp_package_minute_id=<b>" << it3->id << "</b> ";
                         html << "nnp_destination_id=<b>" << it3->nnp_destination_id << "</b> (<b>";
-                        html << nnpDestination->name << "</b>),";
+
+                        string strippedName = nnpDestination->name;
+                        removeHtmlTags (strippedName);
+                        html << strippedName << "</b>),";
+
                         html << "minutes in package=" << it3->minute << " ";
                         html << "(effective minutes=" << string_fmt("%.2f", it3->minute * it2->coefficient) << "), ";
                         html << "used minutes(local/current/global)=<b>" << string_fmt("%.2f", (double) used_seconds / 60.0)
@@ -310,6 +319,45 @@ void PageClient::render_client_packeges_info(std::stringstream &html, Client *cl
     html << "-----<br/>\n";
 
     return;
+}
+
+void PageClient::render_trunk_client_packages_info(std::stringstream &html, Client *client) {
+    if (client == nullptr) {
+        html << "Passed a null pointer - Client *client ";
+        return;
+    }
+
+    if (!repository.data->nnpAccountTariffLight.ready() ||
+        !repository.data->serviceNumber.ready() ||
+        !repository.data->nnpPackageMinute.ready() ||
+        !repository.data->nnpDestination.ready() ||
+        !repository.data->globalNNPPackageMinuteCounters.ready())
+        return;
+
+    int client_id = client->id;
+
+    html << "---- active nnp-packages with pricelist or price. ----<br/>\n";
+
+    vector<ServiceTrunk> serviceTrunk;
+    vector<NNPAccountTariffLight> nnpAccountTariffLight;
+
+    repository.getServiceTrunkByClientID(serviceTrunk, client_id);
+
+    for (auto it = serviceTrunk.begin(); it != serviceTrunk.end(); it++) {
+        nnpAccountTariffLight.clear();
+        repository.getActiveNNPAccountTariffLight(nnpAccountTariffLight, client_id, time(nullptr), it->id);
+        Trunk *trunk = repository.getTrunk(it->trunk_id);
+
+        for (auto it2 = nnpAccountTariffLight.begin(); it2 != nnpAccountTariffLight.end(); it2++) {
+            if (it2->service_trunk_id == it->id) {
+                if(trunk != nullptr)
+                    html << "trunk<b> #" << it->trunk_id << "</b>:" << trunk->name << ":";
+                it2->dump(html);
+                html << "\n<br/>\n";
+            }
+        }
+    }
+
 }
 
 void PageClient::render(std::stringstream &html, map<string, string> &parameters) {
@@ -336,8 +384,13 @@ void PageClient::render(std::stringstream &html, map<string, string> &parameters
 
     render_client_balance_indicators(html, client);
 
-    if (client->account_version == CALL_ACCOUNT_VERSION_5)
-        render_client_packeges_info(html, client);
+    if (client->account_version == CALL_ACCOUNT_VERSION_5) {
+        if(client->is_trunk_client) {
+            render_trunk_client_packages_info(html, client);
+        } else {
+            render_num_client_packages_info(html, client);
+        }
+    }
 
     render_client_locks(html, client);
     render_client_current_calls(html, client);

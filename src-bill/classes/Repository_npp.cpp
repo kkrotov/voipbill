@@ -1,6 +1,39 @@
 #include "Repository.h"
 #include "RadiusAuthProcessor.h"
 #include "BillingCall.h"
+#include "nnp/PrefixTree.h"
+#include <stdio.h>
+
+
+bool Repository::checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
+                                                 long long int dstNumber) {
+
+    if(trunkSettings->nnp_tariff_id == 0) {
+        if (trace != nullptr) {
+            *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY NNP_TARIFF_ID IS 0 , TRUNK_SETTINGS_ID: " <<
+                   trunkSettings->id << " / " << trunkSettings->order << "\n";
+        }
+        return false;
+    }
+
+    if (trunkSettings->src_number_id > 0 && !matchNumber(trunkSettings->src_number_id, srcNumber)) {
+        if (trace != nullptr) {
+            *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY SRC NUMBER MATCHING, TRUNK_SETTINGS_ID: " <<
+                   trunkSettings->id << " / " << trunkSettings->order << "\n";
+        }
+        return false;
+    }
+
+    if (trunkSettings->dst_number_id > 0 && !matchNumber(trunkSettings->dst_number_id, dstNumber)) {
+        if (trace != nullptr) {
+            *trace << "DEBUG|TRUNK SETTINGS DECLINE|BY DST NUMBER MATCHING, TRUNK_SETTINGS_ID: " <<
+                   trunkSettings->id << " / " << trunkSettings->order << "\n";
+        }
+        return false;
+    }
+
+    return true;
+}
 
 bool Repository::getNNPDestinationByNumberRange(set<int> &nnpDestinationIds, NNPNumberRange *nnpNumberRange,
                                                 stringstream *trace) {
@@ -32,13 +65,50 @@ bool Repository::getNNPDestinationByNum(set<int> &nnpDestinationIds, long long i
     NNPNumberRange *nnpNumberRange = getNNPNumberRange(num, trace);
     fResult = getNNPDestinationByNumberRange(nnpDestinationIds, nnpNumberRange, trace);
     if (trace != nullptr && !fResult) {
-        *trace << "NOT FOUND|NNPDestination|BY num '" << num << "'" << "\n";
+        *trace << string("NOT FOUND|NNPDestination|BY num '") << num << "'" << "\n";
 
     }
     return fResult;
 }
 
-void Repository::findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPackagePricelistIds, int tariff_id,
+bool Repository::getPrefixByNNPDestination(vector<PhoneNumber> &prefixList, int destinationId) {
+
+    std::vector<int> prefixPlus, prefixMinus, rangePlus, rangeMinus;
+    this->nnpPrefixDestination->getPrefixsByNNPDestination(destinationId, prefixPlus, prefixMinus);
+
+    for (int i : prefixPlus)
+        this->nnpNumberRangePrefix->getNumberRangesByNNPPrefix(rangePlus, i);
+    for (int i : prefixMinus)
+        this->nnpNumberRangePrefix->getNumberRangesByNNPPrefix(rangeMinus, i);
+
+    PrefixTree plusTree  (10000);
+    PrefixTree minusTree (10000);
+
+    for (int i = 0; i < rangePlus.size(); i++) {
+        NNPNumberRange* range = this->nnpNumberRange->getNNPNumberRangeById(rangePlus.at(i));
+        if ( !range )
+            continue;
+        std::pair<PhoneNumber, PhoneNumber> pair = {range->full_number_from, range->full_number_to};
+        plusTree.addRange(pair);
+    }
+    for (int i = 0; i < rangeMinus.size(); i++) {
+        NNPNumberRange* range = this->nnpNumberRange->getNNPNumberRangeById(rangeMinus.at(i));
+        if ( !range )
+            continue;
+        std::pair<PhoneNumber, PhoneNumber> pair = {range->full_number_from, range->full_number_to};
+        minusTree.addRange (pair);
+    }
+    plusTree.subTree(minusTree);
+
+    char array[32] = {};
+    plusTree.print(array, 0, 0, prefixList);
+
+    return true;
+
+}
+
+void Repository::findNNPPackagePricelistIds(set<pair<double, NNPPackagePricelist *>> &resultNNPPackagePricelistIds,
+                                            int tariff_id,
                                             long long int num, stringstream *trace) {
 
     set<NNPPackagePricelist *> nnpPackagePricelistPtr;
@@ -52,7 +122,7 @@ void Repository::findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPac
         if (pricelistPrice != nullptr) {
             double cost = pricelistPrice->price;
 
-            resultNNPPackagePricelistIds.insert(pair<double, int>(cost, package->id));
+            resultNNPPackagePricelistIds.insert(pair<double, NNPPackagePricelist *>(cost, package));
 
             if (trace != nullptr) {
                 *trace << "FOUND|NNP PACKAGE PRICELIST|BY NNP_TARIFF_ID '" << tariff_id << "'" << "\n";
@@ -63,7 +133,6 @@ void Repository::findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPac
         }
 
     }
-
 }
 
 PhoneNumber

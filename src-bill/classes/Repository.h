@@ -4,6 +4,8 @@
 #include "../data/DataBillingContainer.h"
 #include "../data/DataCurrentCallsContainer.h"
 #include "RadiusAuthRequestResponse.h"
+#include "../models/Price.h"
+#include "../lists/nnp/NNPCountryCodeList.h"
 
 class Repository {
 public:
@@ -62,6 +64,7 @@ private:
     shared_ptr<NNPDestinationList> nnpDestination;
     shared_ptr<NNPOperatorList> nnpOperator;
     shared_ptr<NNPPrefixList> nnpPrefix;
+    shared_ptr<NNPCountryCodeList> nnpCountryCodeList;
     shared_ptr<NNPNumberRangeList> nnpNumberRange;
     shared_ptr<NNPNumberRangePrefixList> nnpNumberRangePrefix;
     shared_ptr<NNPPrefixDestinationList> nnpPrefixDestination;
@@ -252,6 +255,11 @@ public:
         trunk->findAllAutorouting(resultTrunks, server_id, trace);
     }
 
+    void getAllRoadToRegion(vector<Trunk *> &resultTrunks, int server_id, int road_to_region,
+                            stringstream *trace = nullptr) {
+        trunk->findAllRoadToRegion(resultTrunks, server_id, road_to_region, trace);
+    }
+
     StatPrefixlist *getStatPrefixlist(int stat_prefixlist_id) {
         return statPrefixlist->find(stat_prefixlist_id, trace);
     }
@@ -263,6 +271,8 @@ public:
     bool getCurrencyRate(const char *currency_id, double *o_currencyRate) const;
 
     double priceToRoubles(double price, const Pricelist &pricelist) const;
+
+    double priceToRoubles(double price, const char *currency_id) const;
 
     bool priceLessThan(double priceLeft, const Pricelist &pricelistLeft,
                        double priceRight, const Pricelist &pricelistRight) const;
@@ -316,11 +326,9 @@ public:
     void orderTermTrunkSettingsOrderList(vector<ServiceTrunkOrder> &trunkSettingsOrderList, bool fUseMinimalki,
                                          time_t connect_time) const;
 
-    bool checkTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
-                                      long long int dstNumber, Pricelist *&pricelist, PricelistPrice *&price);
-
-    void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
-                                   long long int srcNumber, long long int dstNumber, int destinationType);
+    bool checkTrunkSettingsOldPricelistConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
+                                                  long long int dstNumber, Pricelist *&pricelist,
+                                                  PricelistPrice *&price);
 
     void getActiveNNPAccountTariffLight(vector<NNPAccountTariffLight> &resultNNPAccountTariffLight, int client_id,
                                         time_t connect_time, int service_number_id) {
@@ -331,6 +339,10 @@ public:
 
     void getServiceNumberByClientID(vector<ServiceNumber> &resultServiceNumber, int client_id) {
         serviceNumber->findAllByClientID(resultServiceNumber, client_id, trace);
+    }
+
+    void getServiceTrunkByClientID(vector<ServiceTrunk> &resultServiceTrunk, int client_id) {
+        serviceTrunk->findAllByClientID(resultServiceTrunk, client_id, trace);
     }
 
     void getNNPPackageMinuteByTariff(vector<NNPPackageMinute> &resultNNPPackageMinute, int nnp_tariff_id,
@@ -346,10 +358,24 @@ public:
         return nnpNumberRange->getNNPNumberRange(num, trace);
     }
 
+    pair<int,int> getNNPCountryPrefix(long long int number) {
+
+        return nnpCountryCodeList->get_prefix_by_number(number);
+    }
+
+    int getNNPCountryCode(int country_prefix) {
+
+        pair<int,int> prefix_code = nnpCountryCodeList->get_code_by_prefix(country_prefix);
+        return prefix_code.second;
+    }
+
     NNPPackageMinute *getNNPPackageMinute(int idNNPPackageMinute, stringstream *trace = nullptr) {
         return nnpPackageMinute->find(idNNPPackageMinute, trace);
     }
 
+    NNPPackage *getNNPPackage(int idNNPPackage, stringstream *trace = nullptr) {
+        return nnpPackage->find(idNNPPackage, trace);
+    }
 
     bool getNNPPrefixsByNumberRange(vector<int> &nnpPrefixIds,
                                     int nnpNumberRangeId, stringstream *trace = nullptr) {
@@ -365,17 +391,20 @@ public:
 
     bool getNNPDestinationByNum(set<int> &nnpDestinationIds, long long int num, stringstream *trace = nullptr);
 
+    bool getPrefixByNNPDestination(vector<PhoneNumber> &prefixList, int destinationId);
+
     bool getNNPDestinationByNumberRange(set<int> &nnpDestinationIds, NNPNumberRange *nnpNumberRange,
                                         stringstream *trace = nullptr);
 
-    void findNNPPackagePriceIds(set<pair<double, int>> &resultNNPPackagePriceIds, int tariff_id,
+    void findNNPPackagePriceIds(set<pair<double, NNPPackagePrice *>> &resultNNPPackagePriceIds, int tariff_id,
                                 set<int> &nnpDestinationIds,
                                 stringstream *trace = nullptr) {
         return nnpPackagePrice->findPackagePriceIds(resultNNPPackagePriceIds, tariff_id, nnpDestinationIds, trace);
     }
 
-    void findNNPPackagePricelistIds(set<pair<double, int>> &resultNNPPackagePricelistIds, int tariff_id,
-                                    long long int num, stringstream *trace = nullptr);
+    void
+    findNNPPackagePricelistIds(set<pair<double, NNPPackagePricelist *>> &resultNNPPackagePricelistIds, int tariff_id,
+                               long long int num, stringstream *trace = nullptr);
 
 
     PhoneNumber getNNPBestGeoRoute(PhoneNumber NumAdef, vector<PhoneNumber> &vNumA, PhoneNumber NumB,
@@ -387,4 +416,17 @@ public:
     pair<int, RadiusAuthRequest> getNNPRegionTrunkByNum(PhoneNumber numA, PhoneNumber numB);
 
     void getTrunkPriority(int trunk_id, vector<TrunkPriority> &trunkPriorityList);
+
+    void getTrunkSettingsOrderList(vector<ServiceTrunkOrder> &resultTrunkSettingsTrunkOrderList, Trunk *trunk,
+                                   long long int srcNumber, long long int dstNumber, int destinationType);
+
+    bool checkNNPTrunkSettingsConditions(ServiceTrunkSettings *&trunkSettings, long long int srcNumber,
+                                         long long int dstNumber);
+
+    void setCurrencyRate(Price &price) const;
+
+    bool isRegionOnHub(int region) {
+        return server->isRegionOnHub(region);
+    }
+
 };

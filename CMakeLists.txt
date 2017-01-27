@@ -381,9 +381,10 @@ set(BILL_SOURCES
         src-bill/models/StatsNNPPackageMinute.cpp
         src-bill/classes/StatsNNPPackageMinuteManager.cpp
         src-bill/classes/nnp/NNPResolver.cpp
+        src-bill/classes/nnp/PrefixTree.cpp
+        src-bill/classes/nnp/PrefixNode.cpp
 
         src-bill/main.cpp
-
         src-bill/models/GlobalNNPPackageMinuteCounters.cpp
         src-bill/data/GlobalNNPPackageMinuteCountersData.cpp
         src-bill/lists/GlobalNNPPackageMinuteCountersList.cpp
@@ -393,35 +394,30 @@ set(BILL_SOURCES
         src-bill/data/HubData.cpp
         src-bill/sync/PullHub.cpp
         src-bill/sync/PullHub.h
-
         src-bill/healthcheck/FtpConnectStatus.cpp
-        src-bill/healthcheck/FtpConnectStatus.h
         src-bill/healthcheck/HealthCheckController.cpp
-        src-bill/healthcheck/HealthCheckController.h
-        src-bill/healthcheck/DbConnectStatus.h
         src-bill/healthcheck/CallSyncStatus.cpp
-        src-bill/healthcheck/CallSyncStatus.h
         src-bill/healthcheck/CdrSyncStatus.cpp
-        src-bill/healthcheck/CdrSyncStatus.h
         src-bill/healthcheck/CallSaveStatus.cpp
-        src-bill/healthcheck/CallSaveStatus.h
         src-bill/healthcheck/CdrWaitProcessing.cpp
-        src-bill/healthcheck/CdrWaitProcessing.h
         src-bill/healthcheck/CallsWaitSaving.cpp
-        src-bill/healthcheck/CallsWaitSaving.h
         src-bill/healthcheck/RadiusAuthServerStatus.cpp
-        src-bill/healthcheck/RadiusAuthServerStatus.h
         src-bill/web/PageHealthStatus.cpp
-        src-bill/web/PageHealthStatus.h
         src-bill/web/PageHealthCheck.cpp
-        src-bill/web/PageHealthCheck.h
         src-bill/healthcheck/ThreadErrorStatus.cpp
-        src-bill/healthcheck/ThreadErrorStatus.h
         src-bill/healthcheck/TrunkLoadStatus.cpp
-        src-bill/healthcheck/TrunkLoadStatus.h
-
         src-bill/threads/ThreadHealthManager.cpp
-        src-bill/threads/ThreadHealthManager.h)
+        src-bill/models/Price.cpp
+        src-bill/classes/StateMegaTrunk.cpp
+        src-bill/classes/StateMegaTrunk.h
+        src-bill/models/nnp/NNPCountry.cpp
+        src-bill/models/nnp/NNPCountry.h
+        src-bill/lists/nnp/NNPCountryCodeList.cpp
+        src-bill/lists/nnp/NNPCountryCodeList.h
+        src-bill/sync/nnp/NNPCountryCodePull.cpp
+        src-bill/sync/nnp/NNPCountryCodePull.h
+        src-bill/data/nnp/NNPCountryCodeData.cpp
+        src-bill/data/nnp/NNPCountryCodeData.h)
 
 add_custom_target(invalidate_files ALL
         COMMAND ${CMAKE_COMMAND} -E touch src-bill/version.cpp)
@@ -435,4 +431,37 @@ target_link_libraries(app_bill rt pthread pq curl crypto)
 #add_executable(auth-client src-auth-client/client.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
 
 #add_executable(auth-server src-auth-client/server.cpp ${BOOST_SOURCES} ${ACE_RADIUS_SOURCES})
+
+find_package(CxxTest)
+if(CXXTEST_FOUND)
+    include_directories(${CXXTEST_INCLUDE_DIR})
+    enable_testing()
+
+    set (TESTING_SOURCES
+         tests/unit/mock/src-bill/Log.cpp
+         src-bill/classes/BDb.cpp
+         src-bill/classes/BDbResult.cpp
+         src-bill/classes/BDbTransaction.cpp
+         src-bill/common.cpp
+         src-bill/classes/nnp/PrefixTree.cpp
+         src-bill/classes/nnp/PrefixNode.cpp
+         tests/functional/common.cpp
+         tests/functional/BaseTest.cpp
+         tests/functional/ComparisonTest.cpp
+         )
+    add_library(test.obj ${TESTING_SOURCES} ${JSON_SOURCES})
+
+    set (CXXTEST_TESTGEN_ARGS --runner=XUnitPrinter --world=utest)
+    CXXTEST_ADD_TEST(tests/unit/utest ./utest.cpp # unit тесты
+    tests/unit/RemoveHtmlTagsTest.h
+    tests/unit/PrefixTreeTest.h)
+    target_link_libraries(tests/unit/utest test.obj rt pthread pq curl crypto)
+
+    set (CXXTEST_TESTGEN_ARGS --runner=XUnitPrinter --world=ftest)
+    CXXTEST_ADD_TEST(tests/functional/ftest ./ftest.cpp # functional тесты
+                     tests/functional/NNPNumberRangeFindTest.h)
+    target_link_libraries(tests/functional/ftest test.obj rt pthread pq curl crypto)
+
+endif()
+
 

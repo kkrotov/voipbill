@@ -14,7 +14,8 @@ public:
         key = "id";
 
         fields.push_back("id");
-            fields.push_back("country_prefix");
+        fields.push_back("country_prefix");
+        fields.push_back("country_code");
         fields.push_back("ndc");
         fields.push_back("number_from");
         fields.push_back("number_to");
@@ -31,7 +32,8 @@ public:
             fields.push_back("full_number_to");
 
         datatype.push_back("id integer");
-            datatype.push_back("country_prefix integer");
+        datatype.push_back("country_prefix integer");
+        datatype.push_back("country_code integer");
         datatype.push_back("ndc integer");
         datatype.push_back("number_from integer");
         datatype.push_back("number_to integer");

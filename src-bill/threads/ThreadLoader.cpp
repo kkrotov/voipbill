@@ -162,6 +162,8 @@ void ThreadLoader::run() {
 
             } else if (event == "service_trunk") {
 
+                repository.data->client.load(&db_calls); // Для того, что бы корректно расчитался флаг is_trunk_client
+
                 repository.data->serviceTrunk.load(&db_calls);
                 repository.data->activeCounter.load(repository.data->serviceNumber.get(),
                                                     repository.data->serviceTrunk.get());
@@ -262,6 +264,11 @@ void ThreadLoader::run() {
             else if (event == "nnp_region") {
 
                 repository.data->nnpRegion.load(&db_calls);
+            }
+
+            else if (event == "nnp_country") {
+
+                repository.data->nnpCountry.load(&db_calls);
             }
 
             db_calls.exec("DELETE from event.queue WHERE event='" + event + "' and version = '" +

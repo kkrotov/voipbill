@@ -1,4 +1,5 @@
 #include "NNPPrefixDestinationList.h"
+#include <tuple>
 
 struct NNPPrefixDestinationList::key_prefix_id_range {
     bool operator()(const NNPPrefixDestination &left, int nnp_prefix_id) {
@@ -17,7 +18,7 @@ bool NNPPrefixDestinationList::getNNPDestinationsByPrefix(set<int> &nnpDestinati
     set<int> idsIns, idsDel;
     bool fResult = false;
 
-    if (this->data.size() == 0) return false;
+    if (this->size() == 0) return false;
     if (nnpNumberRangePrefixIds.size() == 0)return false;
 
     for (auto itNumberRangePrefix = nnpNumberRangePrefixIds.begin();
@@ -26,16 +27,13 @@ bool NNPPrefixDestinationList::getNNPDestinationsByPrefix(set<int> &nnpDestinati
 
         int id = *itNumberRangePrefix;
 
-        auto begin = this->data.begin();
-        auto end = this->data.end();
         {
-            auto p = equal_range(begin, end, id, key_prefix_id_range());
-            auto begin2 = p.first;
-            auto end2 = p.second;
+            MultiIndexData::index<NNPPrefixDestination::byPrefixId>::type::iterator it, end;
+            std::tie(it, end) = prefixDestinationData.get<NNPPrefixDestination::byPrefixId>().equal_range(id);
 
-            for (auto itPrefixDestination = begin2; itPrefixDestination != end2; itPrefixDestination++) {
-                if (itPrefixDestination->is_addition) idsIns.insert(itPrefixDestination->nnp_destination_id);
-                else idsDel.insert(itPrefixDestination->nnp_destination_id);
+            for (; it != end; ++it) {
+                if (it->is_addition) idsIns.insert(it->nnp_destination_id);
+                else idsDel.insert(it->nnp_destination_id);
             }
         }
     }
@@ -49,4 +47,23 @@ bool NNPPrefixDestinationList::getNNPDestinationsByPrefix(set<int> &nnpDestinati
 
     return fResult;
 
+}
+
+bool NNPPrefixDestinationList::getPrefixsByNNPDestination(int nnpDestinationId, vector<int> &nnpPrefixesPlus,
+                                vector<int> &nnpPrefixesMinus) {
+    bool fResult = false;
+
+    if (this->size() == 0) return false;
+    {
+        MultiIndexData::index<NNPPrefixDestination::byDestinationId>::type::iterator it, end;
+        std::tie(it, end) = prefixDestinationData.get<NNPPrefixDestination::byDestinationId>().equal_range(nnpDestinationId);
+
+        for (; it != end; ++it) {
+            if (it->is_addition) nnpPrefixesPlus.push_back(it->nnp_prefix_id);
+            else nnpPrefixesMinus.push_back(it->nnp_prefix_id);
+            fResult = true;
+        }
+    }
+
+    return fResult;
 }

@@ -17,8 +17,10 @@ SystemStatus ThreadErrorStatus::getStatus() {
         healthStatus.statusMessage = "Billing not ready";
         return healthStatus;
     }
+    healthStatus.reset();
     Server *server = repository.getServer(app().conf.instance_id);
-    if (server != nullptr && server->thread_error_count.size() > 2) {
+    if (server != nullptr && server->thread_error_count.size() > 2 &&
+        !(server->thread_error_count[0]==0 && server->thread_error_count[1]==0 && server->thread_error_count[2]==0)) {
 
         int errorsCount=0;
         std::string threadId;

@@ -36,5 +36,8 @@ public:
 
     int searchNumberRanges(int64_t &result, PhoneNumber num, int64_t p);
 
+    struct key_number_range_id;
+    NNPNumberRange* getNNPNumberRangeById(int id);
+
 
 };

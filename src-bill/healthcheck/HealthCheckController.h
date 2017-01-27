@@ -21,7 +21,8 @@ public:
     std::string statusMessage;
 
 public:
-    SystemStatus(std::string id) {itemId=id;statusId=STATUS_UNKNOWN;statusMessage="";};
+    SystemStatus(std::string id) {itemId=id;reset();};
+    void reset() {statusId=STATUS_UNKNOWN;itemValue=prevValue=nextValue=statusMessage="";};
     std::string getStatusString() {
         if (statusId==HealthStatus::STATUS_OK)
             return "STATUS_OK";

@@ -362,6 +362,9 @@ void Billing::calc(bool realtimePurpose) {
         termCall.id = lastCallId + 2;
         termCall.peer_id = lastCallId + 1;
 
+        termCall.hash = cdr->hash;
+        origCall.hash = cdr->hash;
+
         billingCall.calc(&origCall, &origCallInfo, cdr);
 
         termCall.src_number = origCall.src_number;
