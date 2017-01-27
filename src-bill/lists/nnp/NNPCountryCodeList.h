@@ -36,7 +36,7 @@ protected:
     };
     struct compare_prefix {
 
-        bool operator()(const pair<int,int> &left, pair<int,int> &right) {
+        bool operator()(const pair<int,int> &left, const pair<int,int> &right) {
             return left.first < right.first;
         }
 
@@ -44,7 +44,7 @@ protected:
             return left.first < prefix;
         }
 
-        bool operator()(const int prefix, pair<int,int> &right) {
+        bool operator()(int prefix, const pair<int,int> &right) {
             return prefix < right.first;
         }
     };
