@@ -46,7 +46,7 @@ void StateMegaTrunk::PhaseCalc() {
                         destRegion = serviceTrunk.server_id;
                         isPhase1 = true;
                         if (trace != nullptr) {
-                            *trace << "INFO|FOUND MEGATRANK|#" << serviceTrunk.trunk_id
+                            *trace << "INFO|FOUND MEGATRUNK|#" << serviceTrunk.trunk_id
                                    << ", SERVICE TRUNK ID: " << serviceTrunk.id << " IN REGION #"
                                    << serviceTrunk.server_id
                                    << ", isPhase1 = true\n";
@@ -59,7 +59,7 @@ void StateMegaTrunk::PhaseCalc() {
 
 
                             if (trace != nullptr) {
-                                *trace << "INFO|FOUND MEGATRANK|" << destTrunk->name << " ("
+                                *trace << "INFO|FOUND MEGATRUNK|" << destTrunk->name << " ("
                                        << serviceTrunk.trunk_id
                                        << ")" <<
                                        ", SERVICE TRUNK ID: " << serviceTrunk.id
@@ -97,9 +97,9 @@ void StateMegaTrunk::PhaseCalc() {
 
                     if (!repository->isRegionOnHub(serviceNumberNumA->server_id) && destTrunk != nullptr) {
                         if (trace != nullptr) {
-                            *trace << "INFO|CALL FROM MEGATRANK|" << destTrunk->name << " (" << serviceTrunk.trunk_id
-                                   << ") FROM REGION #" << destTrunk->server_id <<
-                                   ", DID: " << serviceNumberNumA->did << " FROM REGION #"
+                            *trace << "INFO|MEGATRUNK|CALL FROM MEGATRUNK " << destTrunk->name << " (" << serviceTrunk.trunk_id
+                                   << ") IN REGION #" << destTrunk->server_id <<
+                                   ", DID: " << serviceNumberNumA->did << " IN REGION #"
                                    << serviceNumberNumA->server_id << ", isPhase1 = true\n";
                         }
                         isPhase1 = true;
