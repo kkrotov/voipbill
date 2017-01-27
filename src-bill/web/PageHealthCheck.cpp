@@ -7,24 +7,27 @@ bool PageHealthCheck::canHandle(std::string &path) {
 
 vector<pair<int,string>> PageHealthCheck::getRegionList() {
 
-    int server_id = app().conf.instance_id;
-    int hub_id = app().conf.hub_id;
-
     vector<pair<int,string>> regionList;
-    if (hub_id > 0) {
+    if (repository.prepare()) {
 
-        vector<Server> servers;
-        repository.getServersByHubId(servers, hub_id);
-        for (auto server: servers) {
+        int server_id = app().conf.instance_id;
+        int hub_id = app().conf.hub_id;
 
-            regionList.push_back(pair<int,string>(server.id,server.name));
+        if (hub_id > 0) {
+
+            vector<Server> servers;
+            repository.getServersByHubId(servers, hub_id);
+            for (auto server: servers) {
+
+                regionList.push_back(pair<int,string>(server.id,server.name));
+            }
         }
-    }
-    if (regionList.size()==0) {
+        if (regionList.size()==0) {
 
-        Server *server = repository.getServer(server_id);
-        if(server!= nullptr)
-           regionList.push_back(pair<int,string>(server->id,server->name));
+            Server *server = repository.getServer(server_id);
+            if(server!= nullptr)
+                regionList.push_back(pair<int,string>(server->id,server->name));
+        }
     }
     return regionList;
 }
@@ -46,17 +49,15 @@ Json::Value PageHealthCheck::getJsonRegionList() {
 
 void PageHealthCheck::render(std::stringstream &html, map<string, string> &parameters) {
 
-    if (!repository.prepare()) {
-
-        html << "ERROR|BILLING NOT READY";
-        return;
-    }
     string cmd;
     uint16_t instance_id = app().conf.instance_id;
     double run_time = app().getRuntime();
-    shared_ptr<CurrentCdrList> cdrList = repository.currentCalls->currentCdr.get();
-    int currentCalls = (cdrList== nullptr)? 0:cdrList->size();
+    int currentCalls = 0;
+    if (repository.prepare()) {
 
+        shared_ptr<CurrentCdrList> cdrList = repository.currentCalls->currentCdr.get();
+        currentCalls = (cdrList== nullptr)? 0:cdrList->size();
+    }
     Json::Value jval;
     jval["instanceId"] = instance_id;
     jval["regionList"] = getJsonRegionList();

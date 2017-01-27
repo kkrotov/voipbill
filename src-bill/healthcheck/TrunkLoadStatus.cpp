@@ -8,9 +8,12 @@ TrunkLoadStatus::TrunkLoadStatus() : HealthCheck("TrunkLoadStatus") {
 SystemStatus TrunkLoadStatus::getStatus() {
 
     healthStatus.reset();
-    if (!ready())
-        return healthStatus;
+    if (!ready()) {
 
+        healthStatus.statusId = HealthStatus::STATUS_CRITICAL;
+        healthStatus.statusMessage = "Billing not ready";
+        return healthStatus;
+    }
     int trunk_max_load_warn = (app().conf.trunk_max_load.size()>0)? app().conf.trunk_max_load[0]:95;
     int trunk_max_load_err = (app().conf.trunk_max_load.size()>1)? app().conf.trunk_max_load[1]:99;
     ActiveTrunks activeTrunks(repository);

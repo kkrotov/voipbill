@@ -8,39 +8,45 @@ RadiusAuthServerStatus::RadiusAuthServerStatus() : HealthCheck("RadiusAuthServer
 
 SystemStatus RadiusAuthServerStatus::getStatus() {
 
-    Repository repository;
     healthStatus.reset();
-    if (app().threads.isRegistered("radius_auth_server") && repository.prepare(time(nullptr))) {
+    if (!app().threads.isRegistered("radius_auth_server"))
+        return healthStatus;
 
-        Server *server = repository.getServer(app().conf.instance_id);
-        if (server != nullptr && server->radius_request_delay.size() > 2 &&
-            !(server->radius_request_delay[0]==0 && server->radius_request_delay[1]==0 && server->radius_request_delay[2]==0)) {
+    Repository repository;
+    if (!repository.prepare(time(nullptr))) {
 
-            time_t last_request_time=0;
-            app().threads.forAllThreads([&](Thread* thread) {
+        healthStatus.statusId = HealthStatus::STATUS_CRITICAL;
+        healthStatus.statusMessage = "Billing not ready";
+        return healthStatus;
+    }
+    Server *server = repository.getServer(app().conf.instance_id);
+    if (server != nullptr && server->radius_request_delay.size() > 2 &&
+        !(server->radius_request_delay[0]==0 && server->radius_request_delay[1]==0 && server->radius_request_delay[2]==0)) {
 
-                if (thread->id=="radius_auth_server") {
+        time_t last_request_time=0;
+        app().threads.forAllThreads([&](Thread* thread) {
 
-                    last_request_time = ((ThreadRadiusAuthServer*)thread)->lastRequestTime();
-                }
-                return true;
-            });
+            if (thread->id=="radius_auth_server") {
 
-            if (last_request_time==0)
-                last_request_time = app().getStartTime();
-            
-            int last_resquest_delay = time(NULL) - last_request_time;
-            healthStatus.itemValue = to_string(last_resquest_delay);
+                last_request_time = ((ThreadRadiusAuthServer*)thread)->lastRequestTime();
+            }
+            return true;
+        });
 
-            checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
+        if (last_request_time==0)
+            last_request_time = app().getStartTime();
 
-                    std::pair<time_t, HealthStatus>(server->radius_request_delay[0],HealthStatus::STATUS_OK),
-                    std::pair<time_t, HealthStatus>(server->radius_request_delay[1],HealthStatus::STATUS_WARNING),
-                    std::pair<time_t, HealthStatus>(server->radius_request_delay[2],HealthStatus::STATUS_ERROR)
-            }, last_resquest_delay);
+        int last_resquest_delay = time(NULL) - last_request_time;
+        healthStatus.itemValue = to_string(last_resquest_delay);
 
-            healthStatus.statusMessage = healthStatus.itemValue+" sec since last request";
-        }
+        checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
+
+                std::pair<time_t, HealthStatus>(server->radius_request_delay[0],HealthStatus::STATUS_OK),
+                std::pair<time_t, HealthStatus>(server->radius_request_delay[1],HealthStatus::STATUS_WARNING),
+                std::pair<time_t, HealthStatus>(server->radius_request_delay[2],HealthStatus::STATUS_ERROR)
+        }, last_resquest_delay);
+
+        healthStatus.statusMessage = healthStatus.itemValue+" sec since last request";
     }
     return healthStatus;
 }
