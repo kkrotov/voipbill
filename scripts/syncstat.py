@@ -159,7 +159,7 @@ class Sync(Daemon):
                               c.voip_credit_limit_day,
                               c.voip_limit_mn_day,
                               case c.voip_disabled when true then 't' else 'f' end,
-                              if(c.balance > 1000000, 1000000, if(c.balance < -1000000, -1000000, c.balance)) as balance,
+                              if(c.balance > 9000000, 9000000, if(c.balance < -9000000, -9000000, c.balance)) as balance,
                               c.credit,
                               c.last_account_date,
                               c.last_payed_voip_month,
@@ -530,7 +530,8 @@ class Sync(Daemon):
                               c.minimum_minutes,
                               c.minimum_cost,
                               c.minimum_margin,
-                              c.minimum_margin_type
+                              c.minimum_margin_type,
+                              c.package_id
                             from
                               z_sync_postgres z
                             left join
@@ -548,7 +549,7 @@ class Sync(Daemon):
             if r[2] == None:
                 todel.append((r[1],))
             else:
-                toins.append((r[1], r[2], fix_date(r[3]), fix_date(r[4]), r[5], r[6], r[7], r[8], r[9], r[10], r[11]))
+                toins.append((r[1], r[2], fix_date(r[3]), fix_date(r[4]), r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12]))
 
         if len(tofix) == 0:
             return 0
@@ -558,7 +559,7 @@ class Sync(Daemon):
 
         if len(toins) > 0:
             cur.executemany(
-                "INSERT INTO billing.service_trunk_settings(id, trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id, minimum_minutes, minimum_cost, minimum_margin, minimum_margin_type)VALUES(%s,%s,'%s','%s',%s,%s,%s,%s,%s,%s,%s)",
+                "INSERT INTO billing.service_trunk_settings(id, trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id, minimum_minutes, minimum_cost, minimum_margin, minimum_margin_type, nnp_tariff_id)VALUES(%s,%s,'%s','%s',%s,%s,%s,%s,%s,%s,%s)",
                 toins)
         if len(todel) > 0:
             cur.executemany("delete from billing.service_trunk_settings where id=%s", todel)
