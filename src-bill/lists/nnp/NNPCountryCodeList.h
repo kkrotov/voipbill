@@ -83,10 +83,12 @@ public:
 
         sort_prefix_list();
         vector<pair<int,int>> ::iterator it = lower_bound(prefixList.begin(), prefixList.end(), prefix, compare_prefix());
-        pair<int,int> p = *it;
-        if (it!=prefixList.end() && p.first==prefix)
-            return p;
+        if (it!=prefixList.end()) {
 
+            pair<int,int> p = *it;
+            if (p.first==prefix)
+                return p;
+        }
         return make_pair(0,0);
     }
     pair<int,int> get_prefix_by_number (long long int number) {
