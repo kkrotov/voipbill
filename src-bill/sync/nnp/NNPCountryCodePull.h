@@ -17,10 +17,12 @@ public:
         fields.push_back("name");
         fields.push_back("name_rus");
         fields.push_back("prefix");
+        fields.push_back("prefixes");
 
         datatype.push_back("code integer");
         datatype.push_back("name varchar");
         datatype.push_back("name_rus varchar");
         datatype.push_back("prefix integer");
+        datatype.push_back("prefixes integer[]");
     }
 };
