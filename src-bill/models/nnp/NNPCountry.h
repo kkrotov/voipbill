@@ -7,14 +7,14 @@ class NNPCountry {
 public:
     int code;
     string name;
-    int prefix;
+    std::set<int> prefixes;
 
     void dump(stringstream &trace) {
 
         trace << "(";
         trace << "code: " << code << ", ";
         trace << "name: " << name << ", ";
-        trace << "prefix: " << prefix << "";
+//        trace << "prefix: " << prefixes << "";
         trace << ")";
     }
 };

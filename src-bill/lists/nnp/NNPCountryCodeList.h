@@ -11,17 +11,41 @@ class NNPCountryCodeList : public ObjList<NNPCountry> {
 protected:
     string sql(BDb *db) {
 
-        return "select code, name, prefix from nnp.country order by code ";
+        return "select code, name, prefixes from nnp.country order by code ";
     }
 
     inline void parse_item(BDbResult &row, NNPCountry *item) {
 
         item->code = row.get_i(0);
         item->name = row.get_s(1);
-        item->prefix = row.get_i(2);
+        string prefixes = row.get_s(2);
+        item->prefixes = parse_int_array(prefixes);
 
-        prefixList.push_back(pair<int,int>(item->prefix,item->code));
+        std::set<int>::iterator it;
+        for (it = item->prefixes.begin(); it != item->prefixes.end(); ++it) {
+
+            prefixList.push_back(pair<int,int>(*it,item->code));
+        }
         sorted = false;
+    }
+
+    std::set<int> parse_int_array(string prefixes) {
+
+        unsigned first = prefixes.find("{");
+        unsigned last = prefixes.find("}");
+        if (first<last)
+            prefixes = prefixes.substr (first+1,last-first-1);
+
+        std::set<int> res;
+        std::stringstream ss(prefixes);
+        int prefix;
+        while (ss >> prefix) {
+
+            res.insert(prefix);
+            if (ss.peek() == ',')
+                ss.ignore();
+        }
+        return res;
     }
 
     struct key_code {
@@ -77,9 +101,6 @@ public:
         return result;
     }
     pair<int,int> get_code_by_prefix (int prefix) {
-
-        if (prefix==7) // во избежание путаницы с Казахстаном
-            return make_pair(7,643);
 
         sort_prefix_list();
         vector<pair<int,int>> ::iterator it = lower_bound(prefixList.begin(), prefixList.end(), prefix, compare_prefix());
