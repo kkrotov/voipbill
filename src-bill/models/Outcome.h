@@ -35,15 +35,6 @@ struct Outcome {
         return type_id == 5;
     }
 
-    bool isMegaTrunkPhase1() {
-        return type_id == 6;
-    }
-
-    bool isMegaTrunkPhase2() {
-        return type_id == 7;
-    }
-
-
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";

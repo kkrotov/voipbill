@@ -31,6 +31,9 @@ void StateMegaTrunk::PhaseCalc() {
 
     vector <ServiceTrunk> resultServiceTrunk;
 
+    if(src_trunk == nullptr) return;
+
+
     if (serviceNumberNumB != nullptr) {
         repository->getServiceTrunkByClientID(resultServiceTrunk, serviceNumberNumB->client_account_id);
         for (auto serviceTrunk : resultServiceTrunk) {
@@ -39,7 +42,7 @@ void StateMegaTrunk::PhaseCalc() {
                 if (serviceTrunk.client_account_id == serviceNumberNumB->client_account_id &&
                     serviceTrunk.term_enabled) {
 
-                    if (!repository->isRegionOnHub(serviceTrunk.server_id)) {
+                    if (!repository->isRegionOnHub(serviceTrunk.server_id) && src_trunk->megatrunk_transfer_to_region) {
                         // Провеяем, есть на лицевом счете номера B услуга транк,
                         // если такой транк находится в другом регионе, включаем Фазу 1 и перемещаемся в этот регион.
 
@@ -55,7 +58,7 @@ void StateMegaTrunk::PhaseCalc() {
 
                     } else {
                         destTrunk = repository->getTrunk(serviceTrunk.trunk_id);
-                        if (destTrunk != nullptr) {
+                        if (destTrunk != nullptr && src_trunk->megatrunk_transfer_to_megatrunk) {
 
 
                             if (trace != nullptr) {
@@ -85,7 +88,7 @@ void StateMegaTrunk::PhaseCalc() {
 
     resultServiceTrunk.clear();
 
-    if (serviceNumberNumA != nullptr && src_trunk != nullptr) {
+    if (serviceNumberNumA != nullptr && src_trunk != nullptr && src_trunk->megatrunk_transfer_to_region) {
         repository->getServiceTrunkByClientID(resultServiceTrunk, serviceNumberNumA->client_account_id);
         for (auto serviceTrunk : resultServiceTrunk) {
             if (time(nullptr) <= serviceTrunk.expire_dt && serviceTrunk.activation_dt <= time(nullptr)) {
