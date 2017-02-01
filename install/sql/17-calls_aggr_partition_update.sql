@@ -47,91 +47,75 @@ CREATE OR REPLACE FUNCTION calls_aggr.calls_aggr_update(server_ids character var
   RETURNS integer AS
 $BODY$
 DECLARE
-     sql varchar;
-     date varchar;
-     count integer;
+	sql varchar;
+	date varchar;
+	count integer;
 BEGIN
-     EXECUTE 'SELECT calls_aggr.create_calls_aggr_partition(now()::timestamp without time zone);';
+	EXECUTE 'SELECT calls_aggr.create_calls_aggr_partition(now()::timestamp without time zone);';
 
 	server_ids := btrim(server_ids, '()');
 
 	date := to_char(now(), 'YYYYMM');
 
-	sql := '
+	BEGIN
 
-delete
-
-			from calls_aggr.calls_aggr_' || date || '
-
-where
+		sql := '
+		delete from
+			calls_aggr.calls_aggr_' || date || '
+		where
 			aggr_time >= date_trunc(''hour'', now()::timestamp without time zone) - INTERVAL ''2 hour''
-
 				and
-
 			server_id IN (' || server_ids || ');
-
-insert into calls_aggr.calls_aggr_' || date || ' (
-
-       server_id, aggr_time, orig, trunk_id, account_id,
-
-       trunk_service_id, number_service_id, destination_id, mob,
-
-       last_call_id, billed_time, cost, tax_cost, interconnect_cost,
-
-       total_calls, notzero_calls
-
-)
-select
-
+		insert
+			 into calls_aggr.calls_aggr_' || date || ' (
+				 server_id, aggr_time, orig, trunk_id, account_id,
+				 trunk_service_id, number_service_id, destination_id, mob,
+				 last_call_id, billed_time, cost, tax_cost, interconnect_cost,
+				 total_calls, notzero_calls)
+		select
        server_id, date_trunc(''hour'', connect_time) as aggr_time, orig, trunk_id, account_id,
-
        trunk_service_id, number_service_id, destination_id, mob,
-
        max(id) as last_call_id, sum(billed_time) as billed_time,
-
        sum(cost) as cost, sum(tax_cost) as tax_cost,
-
        sum(interconnect_cost) as interconnect_cost, sum(1) as total_calls,
-
        sum(case abs(cost) >= 0.0001 when true then 1 else 0 end) as notzero_calls
-
-   from calls_raw.calls_raw_' || date || '
-
-	 where
-
+		from
+			 calls_raw.calls_raw_' || date || '
+		where
 			 connect_time < date_trunc(''hour'', now()::timestamp without time zone)
-
 					and
-
-			 connect_time >= (SELECT COALESCE(max(aggr_time), to_timestamp(0)) from calls_aggr.calls_aggr_' || date || ')::TIMESTAMP + INTERVAL ''1 hour''
-
+			 connect_time >= (select
+													COALESCE(max(aggr_time),
+													to_timestamp(0))
+												from
+													calls_aggr.calls_aggr_' || date || '
+												where
+													server_id IN (' || server_ids || '))::TIMESTAMP + INTERVAL ''1 hour''
 					and
-
 			 server_id IN (' || server_ids || ')
-
-   group by
-
+		group by
        server_id, aggr_time, orig, trunk_id, account_id,
+       trunk_service_id, number_service_id, destination_id, mob;';
 
-       trunk_service_id, number_service_id, destination_id, mob;
+		EXECUTE sql;
 
-	 insert into calls_aggr.calls_aggr_' || date || ' (server_id, aggr_time)
-
-	 select
-
+		sql := '
+		insert into
+				calls_aggr.calls_aggr_' || date || ' (server_id, aggr_time)
+		select
 				s.s::int AS server_id,
-
 				gs.gs AS aggr_time
-
 			from
-
-			 (select * from unnest(string_to_array(' || server_ids || '::varchar, '','')) AS s limit 1) AS s,
-
+			 (select * from unnest(string_to_array(''' || server_ids || '''::varchar, '','')) AS s limit 1) AS s,
 				generate_series (
 					date_trunc(''hour'', now()::timestamp without time zone) - INTERVAL ''2 hour'',
 					date_trunc(''hour'', now()::timestamp without time zone) - INTERVAL ''1 hour'',
 					''1 hour''::interval) AS gs;';
-	EXECUTE sql;
+
+		EXECUTE sql;
+		EXCEPTION
+		WHEN check_violation THEN raise notice 'NEW MONTH!';-- do nothing
+	END;
 	GET DIAGNOSTICS count = ROW_COUNT;
 	RETURN count;
 END;
