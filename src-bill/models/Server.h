@@ -19,5 +19,6 @@ struct Server {
     vector<int> thread_error_count;
     vector<int> radius_request_delay;
     vector<string> service_numbers;
+    vector<int> event_count;
     string name;
 };
