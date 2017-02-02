@@ -114,4 +114,70 @@ void StateMegaTrunk::PhaseCalc() {
         }
     }
 
+
+
+}
+
+// Если пришлел звонок с номера у которого есть транк на лиц-счете в другом регионе при вхождении из региона меганранка
+// То нужно форсировать авторизацию по номеру
+
+bool StateMegaTrunk::isForceAuthByNumber() {
+
+    vector <ServiceTrunk> resultServiceTrunk;
+
+    if(src_trunk == nullptr) return false;
+
+    if (serviceNumberNumA != nullptr && src_trunk != nullptr) {
+        repository->getServiceTrunkByClientID(resultServiceTrunk, serviceNumberNumA->client_account_id);
+        for (auto serviceTrunk : resultServiceTrunk) {
+            if (time(nullptr) <= serviceTrunk.expire_dt && serviceTrunk.activation_dt <= time(nullptr)) {
+
+                if (serviceTrunk.client_account_id == serviceNumberNumA->client_account_id &&
+                    serviceTrunk.server_id == src_trunk->road_to_region) {
+
+                    if (trace != nullptr) {
+                        *trace << "INFO|MEGATRUNK|CALL FROM MEGATRUNK #" << serviceTrunk.trunk_id <<
+                               ", DID: " << serviceNumberNumA->did << " FROM REGION #"
+                               << serviceTrunk.server_id << ", isForceAuthByNumber = true\n";
+                    }
+                    return true;
+
+                }
+            }
+        }
+    }
+    return false;
+}
+
+// Не тариффицируем звонок, который выходит из мегатранка и направляется в другой регион
+
+bool StateMegaTrunk::isForceTarificationSkip() {
+    vector<ServiceTrunk> resultServiceTrunk;
+
+    if (src_trunk == nullptr) return false;
+
+    if (serviceNumberNumA != nullptr && src_trunk != nullptr && src_trunk->megatrunk_transfer_to_region) {
+        repository->getServiceTrunkByClientID(resultServiceTrunk, serviceNumberNumA->client_account_id);
+        for (auto serviceTrunk : resultServiceTrunk) {
+            if (time(nullptr) <= serviceTrunk.expire_dt && serviceTrunk.activation_dt <= time(nullptr)) {
+
+                if (serviceTrunk.client_account_id == serviceNumberNumA->client_account_id &&
+                    serviceTrunk.orig_enabled && src_trunk->id == serviceTrunk.trunk_id) {
+
+                    destTrunk = repository->getTrunk(serviceTrunk.trunk_id);
+
+                    if (!repository->isRegionOnHub(serviceNumberNumA->server_id) && destTrunk != nullptr) {
+                        if (trace != nullptr) {
+                            *trace << "INFO|MEGATRUNK|CALL FROM MEGATRUNK #" << src_trunk->trunk_name <<
+                                   ", DID: " << serviceNumberNumA->did << " FROM REGION #"
+                                   << serviceNumberNumA->server_id << ", isForceTarificationSkip = true\n";
+                        }
+
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }

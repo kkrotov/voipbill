@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Repository.h"
+#include "StateMegaTrunk.h"
 
 /************************************************************************************************************
  *
@@ -138,5 +139,7 @@ protected:
     void setupNNPInterconnect();
 
     void setupInterconnect();
+
+    bool isNeedForceCalcByNumber(StateMegaTrunk &stateMegaTrunk);
 };
 
