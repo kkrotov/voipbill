@@ -1,9 +1,11 @@
 #include "BillingCall.h"
 #include "../classes/CalcException.h"
+#include "StateMegaTrunk.h"
 
 BillingCall::BillingCall(Repository *repository) {
     this->repository = repository;
     this->trace = nullptr;
+
 }
 
 void BillingCall::setTrace(stringstream *trace) {
@@ -39,6 +41,10 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
         this->callInfo = callInfo;
         this->callInfo->call = call;
 
+        StateMegaTrunk stateMegaTrunk(repository);
+        stateMegaTrunk.setTrace(trace);
+        stateMegaTrunk.prepareFromCdr(cdr); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка
+
         setupTrunk();                   // Загружает в callInfo->trunk информацию по транку обсчитываемого плеча.
         // При этом так же происходит вычисление действующей схемы авторизации
         // для расчета - по номеру или по транку.
@@ -63,8 +69,10 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
 
         processNNP();                   // Расчитываем nnp-параметры для плеча.
 
-        if (callInfo->trunk->auth_by_number) {
-            calcByNumber();             // Дальше производятся тарификация плеча по схеме "авторизация по номеру"
+        if (callInfo->trunk->auth_by_number || isNeedForceCalcByNumber(stateMegaTrunk)) {
+            if(!stateMegaTrunk.isForceTarificationSkip()) {
+                calcByNumber();             // Дальше производятся тарификация плеча по схеме "авторизация по номеру"
+            }
         } else {
             calcByTrunk();              // Дальше производятся тарификация плеча по схеме "авторизация по транку"
         }
@@ -75,6 +83,24 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
         return;
     }
 }
+
+/***************************************************************************************************************
+ *   Проверка необходимости форсирования авторизации по номеру.
+ *   Необходимо в случае, когда идет звонок из мегатранка в регион принадлежности номера А.
+ *   Это необходимо для корректной тарификации звонка.
+ *
+ */
+
+bool BillingCall::isNeedForceCalcByNumber(StateMegaTrunk &stateMegaTrunk) {
+
+    if (call->orig) {
+
+        return stateMegaTrunk.isForceAuthByNumber();
+    }
+
+    return false;
+}
+
 
 
 /********************************************************************************************************************
@@ -222,6 +248,11 @@ void BillingCall::calcByNumber() {
                 }
             }
         }
+
+        // Не тарифицируем оригинацию звонков, которые выходят из мегатранков и направляются в другой регион
+
+
+
 
         calcOrigByNumber();                 // Дальше производится тарификация оригинационного плеча
         // при схеме "авторизация по номеру"

@@ -57,6 +57,7 @@ private:
 
     bool isPhase1 = false;
     bool isPhase2 = false;
+    bool isAuthByNumber = false;
 
     stringstream *trace;
 
@@ -80,6 +81,8 @@ public:
         return isPhase2;
     };
 
+    bool isForceAuthByNumber();
+
     Trunk *getDestinationMegaTrunk() {
         return destTrunk;
     }
@@ -91,4 +94,5 @@ public:
         return destRegion;
     };
 
+    bool isForceTarificationSkip();
 };
