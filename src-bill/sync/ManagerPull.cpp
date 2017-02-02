@@ -6,6 +6,7 @@ ManagerPull::ManagerPull() {
     db_main.setCS(app().conf.db_main);
     db_calls.setCS(app().conf.db_calls);
     errors_count = 0;
+    event_count = 0;
     bandwidth_limit_mbits = app().conf.db_bandwidth_limit_mbits;
 }
 
@@ -22,7 +23,7 @@ void ManagerPull::pull() {
 
     while (true) {
         BDbResult res = db_main.query(select_events_query);
-        if (res.size() == 0) {
+        if ((event_count=res.size()) == 0) {
             break;
         }
 

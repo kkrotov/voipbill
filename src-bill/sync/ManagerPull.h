@@ -16,6 +16,7 @@ public:
     map<string, BasePull *> pulls;
     int part_size;
     int errors_count;
+    int event_count;
 
     ManagerPull();
     void add(BasePull * pull);
