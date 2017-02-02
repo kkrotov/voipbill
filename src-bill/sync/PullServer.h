@@ -27,6 +27,7 @@ public:
         fields.push_back("h_call_save_wait_count");
         fields.push_back("h_thread_error_count");
         fields.push_back("h_radius_request_delay");
+        fields.push_back("h_event_management");
         fields.push_back("name");
 
         datatype.push_back("id smallint");
@@ -46,6 +47,7 @@ public:
         datatype.push_back("h_call_save_wait_count varchar");
         datatype.push_back("h_thread_error_count varchar");
         datatype.push_back("h_radius_request_delay varchar");
+        datatype.push_back("h_event_management varchar");
         datatype.push_back("name varchar");
     }
 };
