@@ -48,6 +48,7 @@ public:
     std::string cdr_ftp_dir;
     std::string cdr_nasip;
     int cdr_parcer_interval;
+    int cdr_sync_delay;
     int calls_raw_sync_delay;
     vector<int> trunk_max_load;
     int trunk_critical_load_delay;

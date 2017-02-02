@@ -51,6 +51,7 @@ bool ConfBill::parse_config_variables(boost::property_tree::ptree &pt) {
         }
     }
     calls_raw_sync_delay = pt.get<int>("main.calls_raw_sync_delay", 5);
+    cdr_sync_delay = pt.get<int>("main.cdr_sync_delay", 60);
     instance_id = pt.get<uint16_t>("geo.instance_id");
 
     str_instance_id = boost::lexical_cast<string>(instance_id);
