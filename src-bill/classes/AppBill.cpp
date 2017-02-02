@@ -34,6 +34,7 @@
 #include "../healthcheck/ThreadErrorStatus.h"
 #include "../healthcheck/TrunkLoadStatus.h"
 #include "../threads/ThreadHealthManager.h"
+#include "../healthcheck/EventManagementStatus.h"
 
 AppBill &app() {
     static AppBill appVar;
@@ -53,6 +54,7 @@ void AppBill::setHealthCheck() {
     healthCheckController.add(std::shared_ptr<ThreadErrorStatus>(new ThreadErrorStatus()));
     healthCheckController.add(std::shared_ptr<TrunkLoadStatus>(new TrunkLoadStatus()));
     healthCheckController.add(std::shared_ptr<RadiusAuthServerStatus>(new RadiusAuthServerStatus()));
+    healthCheckController.add(std::shared_ptr<EventManagementStatus>(new EventManagementStatus()));
 }
 
 void AppBill::runApp() {
