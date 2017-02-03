@@ -48,11 +48,12 @@ void StateMegaTrunk::PhaseCalc() {
 
                         destRegion = serviceTrunk.server_id;
                         isPhase1 = true;
+                        isNeedForceTermAuthByNumber = true;
                         if (trace != nullptr) {
                             *trace << "INFO|FOUND MEGATRUNK|#" << serviceTrunk.trunk_id
                                    << ", SERVICE TRUNK ID: " << serviceTrunk.id << " IN REGION #"
                                    << serviceTrunk.server_id
-                                   << ", isPhase1 = true\n";
+                                   << ", isPhase1 = true,  isForceTermAuthByNumber = true\n";
                         }
                         return;
 
@@ -71,6 +72,7 @@ void StateMegaTrunk::PhaseCalc() {
 
                             // Если лицевой счет номера B совпадает с лицевым счетом транка в этом регионе, то включаем
                             // фазу 2 и направляем в такой транк.
+                            isNeedForceTermTarifficationSkip = true;
                             isPhase2 = true;
                         }
                         return;
@@ -121,7 +123,7 @@ void StateMegaTrunk::PhaseCalc() {
 // Если пришлел звонок с номера у которого есть транк на лиц-счете в другом регионе при вхождении из региона меганранка
 // То нужно форсировать авторизацию по номеру
 
-bool StateMegaTrunk::isForceAuthByNumber() {
+bool StateMegaTrunk::isForceOrgAuthByNumber() {
 
     vector <ServiceTrunk> resultServiceTrunk;
 
@@ -138,7 +140,7 @@ bool StateMegaTrunk::isForceAuthByNumber() {
                     if (trace != nullptr) {
                         *trace << "INFO|MEGATRUNK|CALL FROM MEGATRUNK #" << serviceTrunk.trunk_id <<
                                ", DID: " << serviceNumberNumA->did << " FROM REGION #"
-                               << serviceTrunk.server_id << ", isForceAuthByNumber = true\n";
+                               << serviceTrunk.server_id << ", isForceOrgAuthByNumber = true\n";
                     }
                     return true;
 
@@ -149,9 +151,18 @@ bool StateMegaTrunk::isForceAuthByNumber() {
     return false;
 }
 
+// Если звонок уходит в мегатранк в дугой регион, форсировать Авторизацию по номеру Б.
+
+bool StateMegaTrunk::isForceTermAuthByNumber() {
+
+    return isNeedForceTermAuthByNumber;
+}
+
+
+
 // Не тариффицируем звонок, который выходит из мегатранка и направляется в другой регион
 
-bool StateMegaTrunk::isForceTarifficationSkip() {
+bool StateMegaTrunk::isForceOrigTarifficationSkip() {
     vector<ServiceTrunk> resultServiceTrunk;
 
     if (src_trunk == nullptr) return false;
@@ -170,7 +181,7 @@ bool StateMegaTrunk::isForceTarifficationSkip() {
                         if (trace != nullptr) {
                             *trace << "INFO|MEGATRUNK|CALL FROM MEGATRUNK #" << src_trunk->trunk_name <<
                                    ", DID: " << serviceNumberNumA->did << " FROM REGION #"
-                                   << serviceNumberNumA->server_id << ", isForceTarifficationSkip = true\n";
+                                   << serviceNumberNumA->server_id << ", isForceOrigTarifficationSkip = true\n";
                         }
 
                         return true;
@@ -180,4 +191,8 @@ bool StateMegaTrunk::isForceTarifficationSkip() {
         }
     }
     return false;
+}
+
+bool StateMegaTrunk::isForceTermTarifficationSkip() {
+    return  isNeedForceTermTarifficationSkip;
 }

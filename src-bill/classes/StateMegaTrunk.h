@@ -59,6 +59,9 @@ private:
     bool isPhase2 = false;
     bool isAuthByNumber = false;
 
+    bool isNeedForceTermAuthByNumber = false;
+    bool isNeedForceTermTarifficationSkip = false;
+
     stringstream *trace;
 
     Trunk *destTrunk = nullptr;
@@ -81,7 +84,8 @@ public:
         return isPhase2;
     };
 
-    bool isForceAuthByNumber();
+    bool isForceOrgAuthByNumber();
+    bool isForceTermAuthByNumber();
 
     Trunk *getDestinationMegaTrunk() {
         return destTrunk;
@@ -94,5 +98,8 @@ public:
         return destRegion;
     };
 
-    bool isForceTarifficationSkip();
+    bool isForceOrigTarifficationSkip();
+
+
+    bool isForceTermTarifficationSkip();
 };
