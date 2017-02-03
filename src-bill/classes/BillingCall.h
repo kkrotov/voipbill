@@ -144,7 +144,7 @@ protected:
 
     bool isNeedForceCalcByNumber();
 
-    bool isForceTarifficationSkip();
+    bool isForceOrigTarifficationSkip();
 };
 
 

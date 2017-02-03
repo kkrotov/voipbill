@@ -66,8 +66,8 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr, StateMegaTrunk 
 
         processNNP();                   // Расчитываем nnp-параметры для плеча.
 
-        if (callInfo->trunk->auth_by_number || isNeedForceCalcByNumber()) {
-               calcByNumber(isForceTarifficationSkip());             // Дальше производятся тарификация плеча по схеме "авторизация по номеру"
+        if (callInfo->trunk->auth_by_number || isNeedForceCalcByNumber() ) {
+               calcByNumber(isForceOrigTarifficationSkip());             // Дальше производятся тарификация плеча по схеме "авторизация по номеру"
         } else {
             calcByTrunk();              // Дальше производятся тарификация плеча по схеме "авторизация по транку"
         }
@@ -90,15 +90,20 @@ bool BillingCall::isNeedForceCalcByNumber() {
 
     if (call->orig && stateMegaTrunk != nullptr) {
 
-        return stateMegaTrunk->isForceAuthByNumber();
+        return stateMegaTrunk->isForceOrgAuthByNumber();
+    }
+
+    if (!call->orig && stateMegaTrunk != nullptr) {
+
+        return stateMegaTrunk->isForceTermAuthByNumber();
     }
 
     return false;
 }
 
-bool BillingCall:: isForceTarifficationSkip() {
+bool BillingCall:: isForceOrigTarifficationSkip() {
     if(stateMegaTrunk != nullptr) {
-        return stateMegaTrunk->isForceTarifficationSkip();
+        return stateMegaTrunk->isForceOrigTarifficationSkip();
     }
     return false;
 }
