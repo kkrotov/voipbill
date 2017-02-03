@@ -151,7 +151,7 @@ bool StateMegaTrunk::isForceAuthByNumber() {
 
 // Не тариффицируем звонок, который выходит из мегатранка и направляется в другой регион
 
-bool StateMegaTrunk::isForceTarificationSkip() {
+bool StateMegaTrunk::isForceTarifficationSkip() {
     vector<ServiceTrunk> resultServiceTrunk;
 
     if (src_trunk == nullptr) return false;
@@ -170,7 +170,7 @@ bool StateMegaTrunk::isForceTarificationSkip() {
                         if (trace != nullptr) {
                             *trace << "INFO|MEGATRUNK|CALL FROM MEGATRUNK #" << src_trunk->trunk_name <<
                                    ", DID: " << serviceNumberNumA->did << " FROM REGION #"
-                                   << serviceNumberNumA->server_id << ", isForceTarificationSkip = true\n";
+                                   << serviceNumberNumA->server_id << ", isForceTarifficationSkip = true\n";
                         }
 
                         return true;

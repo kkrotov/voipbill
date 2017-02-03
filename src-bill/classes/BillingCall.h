@@ -45,7 +45,7 @@ public:
 protected:
     void calcByTrunk();
 
-    void calcByNumber();
+    void calcByNumber(bool fTarifficationSkip = false);
 
     void calcOrigByNumber();
 
