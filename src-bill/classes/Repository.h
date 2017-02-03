@@ -13,6 +13,7 @@ public:
     DataBillingContainer *billingData;
     DataCurrentCallsContainer *currentCalls;
     stringstream *trace;
+    string notReadyObj;
 
 private:
     time_t currentTime;

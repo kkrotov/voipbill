@@ -9,6 +9,7 @@ class ThreadLoader : public Thread {
     Repository repository;
     BDb db_calls;
     string current_event;
+    int event_count;
 
     // флаг устанавливается когда счетчики посчитаны и загружены в память
     bool init_load_counters_done;
@@ -31,4 +32,5 @@ public:
 
     ThreadLoader();
     static const char* idName() { return "loader"; }
+    int events_count() { return event_count; }
 };

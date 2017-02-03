@@ -35,6 +35,7 @@
 #include "../healthcheck/TrunkLoadStatus.h"
 #include "../threads/ThreadHealthManager.h"
 #include "../healthcheck/EventManagementStatus.h"
+#include "../healthcheck/EventLoadStatus.h"
 
 AppBill &app() {
     static AppBill appVar;
@@ -55,6 +56,7 @@ void AppBill::setHealthCheck() {
     healthCheckController.add(std::shared_ptr<TrunkLoadStatus>(new TrunkLoadStatus()));
     healthCheckController.add(std::shared_ptr<RadiusAuthServerStatus>(new RadiusAuthServerStatus()));
     healthCheckController.add(std::shared_ptr<EventManagementStatus>(new EventManagementStatus()));
+    healthCheckController.add(std::shared_ptr<EventLoadStatus>(new EventLoadStatus()));
 }
 
 void AppBill::runApp() {
@@ -126,7 +128,7 @@ void AppBill::runAppInSingleMode() {
             "log",
             // Перемещение данных из таблиц центрального сервера на региональные
             "sync",
-            // Блок считывания данных в оперативную память
+            // Обработка событий загрузки содержимого локальных таблиц на центральный сервер
             "loader",
             // синхронизация данных по балансу таблиц billing.clients и billing.stats_accounts
             "account_balance_recalc",

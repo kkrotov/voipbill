@@ -11,7 +11,7 @@ SystemStatus TrunkLoadStatus::getStatus() {
     if (!ready()) {
 
         healthStatus.statusId = HealthStatus::STATUS_CRITICAL;
-        healthStatus.statusMessage = "Billing not ready";
+        healthStatus.statusMessage = repository.notReadyObj.size()>0? "Billing not ready: "+repository.notReadyObj:"DataBillingContainer not ready";
         return healthStatus;
     }
     int trunk_max_load_warn = (app().conf.trunk_max_load.size()>0)? app().conf.trunk_max_load[0]:95;
@@ -56,8 +56,8 @@ SystemStatus TrunkLoadStatus::getStatus() {
 
 bool TrunkLoadStatus::ready() {
 
-    if (!repository.billingData->ready())
+    if (!repository.prepare())
         return false;
 
-    return repository.prepare();
+    return repository.billingData->ready();
 }

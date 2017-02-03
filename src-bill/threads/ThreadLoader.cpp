@@ -25,6 +25,7 @@ void ThreadLoader::run() {
 
     try {
         BDbResult res = db_calls.query("SELECT event, version from event.queue");
+        event_count = res.size();
         while (res.next()) {
 
             string event = res.get_s(0);

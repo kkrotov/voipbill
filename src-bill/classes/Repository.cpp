@@ -4,244 +4,306 @@
 bool Repository::prepare(time_t currentTime) {
 
     this->currentTime = currentTime == 0 ? time(nullptr) : currentTime;
+    notReadyObj = "";
 
     if ((hub = data->hub.get()) == nullptr) {
+        notReadyObj = "HubList";
         return false;
     }
-    {
-        if (app().conf.hub_id > 0) {
-            auto item = hub->find(app().conf.hub_id);
-            if (item == nullptr) false;
-        }
+    if (app().conf.hub_id > 0) {
+        auto item = hub->find(app().conf.hub_id);
+        if (item == nullptr)
+            return false;
     }
 
     if ((server = data->server.get()) == nullptr) {
+        notReadyObj = "ServerList";
         return false;
     }
     {
         auto item = server->find(app().conf.instance_id);
-        if (item == nullptr) false;
+        if (item == nullptr) {
+
+            notReadyObj = "instance_id="+app().conf.instance_id;
+            return false;
+        }
     }
 
     if ((instanceSettings = data->instanceSettings.get()) == nullptr) {
+        notReadyObj = "InstanceSettingsList";
         return false;
     }
     {
         auto item = instanceSettings->find(app().conf.instance_id);
-        if (item == nullptr) false;
+        if (item == nullptr) {
+
+            notReadyObj = "instance_id="+app().conf.instance_id;
+            return false;
+        }
     }
 
-
     if ((airp = data->airp.get()) == nullptr) {
+        notReadyObj = "AirpList";
         return false;
     }
 
     if ((number = data->number.get()) == nullptr) {
+        notReadyObj = "NumberList";
         return false;
     }
 
     if ((outcome = data->outcome.get()) == nullptr) {
+        notReadyObj = "OutcomeList";
         return false;
     }
 
     if ((prefixlist = data->prefixlist.get()) == nullptr) {
+        notReadyObj = "PrefixlistList";
         return false;
     }
 
     if ((prefixlistPrefix = data->prefixlistPrefix.get()) == nullptr) {
+        notReadyObj = "PrefixlistPrefixList";
         return false;
     }
 
     if ((releaseReason = data->releaseReason.get()) == nullptr) {
+        notReadyObj = "ReleaseReasonList";
         return false;
     }
 
     if ((routeCase = data->routeCase.get()) == nullptr) {
+        notReadyObj = "RouteCaseList";
         return false;
     }
 
     if ((routeTable = data->routeTable.get()) == nullptr) {
+        notReadyObj = "RouteTableList";
         return false;
     }
 
     if ((routeTableRoute = data->routeTableRoute.get()) == nullptr) {
+        notReadyObj = "RouteTableRouteList";
         return false;
     }
 
     if ((trunk = data->trunk.get()) == nullptr) {
+        notReadyObj = "TrunkList";
         return false;
     }
 
     if ((trunkGroup = data->trunkGroup.get()) == nullptr) {
+        notReadyObj = "TrunkGroupList";
         return false;
     }
 
     if ((trunkGroupItem = data->trunkGroupItem.get()) == nullptr) {
+        notReadyObj = "TrunkGroupItemList";
         return false;
     }
 
     if ((trunkByName = data->trunkByName.get()) == nullptr) {
+        notReadyObj = "TrunkByNameList";
         return false;
     }
 
     if ((trunkByAlias = data->trunkByAlias.get()) == nullptr) {
+        notReadyObj = "TrunkByAliasList";
         return false;
     }
 
     if ((trunkNumberPreprocessing = data->trunkNumberPreprocessing.get()) == nullptr) {
+        notReadyObj = "TrunkNumberPreprocessingList";
         return false;
     }
 
     if ((trunkPriority = data->trunkPriority.get()) == nullptr) {
+        notReadyObj = "TrunkPriorityList";
         return false;
     }
 
     if ((trunkRule = data->trunkRule.get()) == nullptr) {
+        notReadyObj = "TrunkRuleList";
         return false;
     }
 
     if ((trunkTrunkRule = data->trunkTrunkRule.get()) == nullptr) {
+        notReadyObj = "TrunkTrunkRuleList";
         return false;
     }
 
     if ((client = data->client.get()) == nullptr) {
+        notReadyObj = "ClientList";
         return false;
     }
 
     if ((organization = data->organization.get()) == nullptr) {
+        notReadyObj = "OrganizationList";
         return false;
     }
 
     if ((voipOperator = data->voipOperator.get()) == nullptr) {
+        notReadyObj = "OperatorList";
         return false;
     }
 
     if ((pricelist = data->pricelist.get()) == nullptr) {
+        notReadyObj = "PricelistList";
         return false;
     }
 
     if ((pricelistPrice = data->pricelistPrice.get()) == nullptr) {
+        notReadyObj = "PricelistPriceList";
         return false;
     }
 
     if ((networkPrefix = data->networkPrefix.get()) == nullptr) {
+        notReadyObj = "NetworkPrefixList";
         return false;
     }
 
     if ((geo = data->geo.get()) == nullptr) {
+        notReadyObj = "GeoList";
         return false;
     }
 
     if ((mobPrefix = data->mobPrefix.get()) == nullptr) {
+        notReadyObj = "MobPrefixList";
         return false;
     }
 
     if ((geoPrefix = data->geoPrefix.get()) == nullptr) {
+        notReadyObj = "GeoPrefixList";
         return false;
     }
 
     if ((serviceNumber = data->serviceNumber.get()) == nullptr) {
+        notReadyObj = "ServiceNumberList";
         return false;
     }
 
     if ((serviceNumberByTechNumber = data->serviceNumberByTechNumber.get()) == nullptr) {
+        notReadyObj = "ServiceNumberByTechNumberList";
         return false;
     }
 
     if ((serviceNumberPackage = data->serviceNumberPackage.get()) == nullptr) {
+        notReadyObj = "ServiceNumberPackageList";
         return false;
     }
 
     if ((serviceTrunk = data->serviceTrunk.get()) == nullptr) {
+        notReadyObj = "ServiceTrunkList";
         return false;
     }
 
     if ((serviceTrunkPackage = data->serviceTrunkPackage.get()) == nullptr) {
+        notReadyObj = "ServiceTrunkPackageList";
         return false;
     }
 
     if ((serviceTrunkSettings = data->serviceTrunkSettings.get()) == nullptr) {
+        notReadyObj = "ServiceTrunkSettingsList";
         return false;
     }
 
     if ((tariff = data->tariff.get()) == nullptr) {
+        notReadyObj = "TariffList";
         return false;
     }
 
     if ((tariffPackage = data->tariffPackage.get()) == nullptr) {
+        notReadyObj = "TariffPackageList";
         return false;
     }
 
     if ((tariffChangeLog = data->tariffChangeLog.get()) == nullptr) {
+        notReadyObj = "TariffChangeLogList";
         return false;
     }
 
     if ((statDestinationPrefixlists = data->statDestinationPrefixlists.get()) == nullptr) {
+        notReadyObj = "StatDestinationPrefixlistsList";
         return false;
     }
 
     if ((statPrefixlist = data->statPrefixlist.get()) == nullptr) {
+        notReadyObj = "StatPrefixlistList";
         return false;
     }
 
     if ((activeCounter = data->activeCounter.get()) == nullptr) {
+        notReadyObj = "ActiveCounter";
         return false;
     }
 
     if ((currencyRate = data->currencyRate.get()) == nullptr) {
+        notReadyObj = "CurrencyRateList";
         return false;
     }
 
-
     if ((nnpDestination = data->nnpDestination.get()) == nullptr) {
+        notReadyObj = "NNPDestinationList";
         return false;
     }
 
     if ((nnpNumberRangePrefix = data->nnpNumberRangePrefix.get()) == nullptr) {
+        notReadyObj = "NNPNumberRangePrefixList";
         return false;
     }
 
     if ((nnpPackage = data->nnpPackage.get()) == nullptr) {
+        notReadyObj = "NNPPackageList";
         return false;
     }
 
     if ((nnpPackagePrice = data->nnpPackagePrice.get()) == nullptr) {
+        notReadyObj = "NNPPackagePriceList";
         return false;
     }
 
     if ((nnpPrefix = data->nnpPrefix.get()) == nullptr) {
+        notReadyObj = "NNPPrefixList";
         return false;
     }
 
     if ((nnpCountryCodeList = data->nnpCountry.get()) == nullptr) {
+        notReadyObj = "NNPCountryCodeList";
         return false;
     }
 
     if ((nnpRegion = data->nnpRegion.get()) == nullptr) {
+        notReadyObj = "NNPRegionList";
         return false;
     }
 
     if ((nnpNumberRange = data->nnpNumberRange.get()) == nullptr) {
+        notReadyObj = "NNPNumberRangeList";
         return false;
     }
 
     if ((nnpOperator = data->nnpOperator.get()) == nullptr) {
+        notReadyObj = "NNPOperatorList";
         return false;
     }
 
     if ((nnpPackageMinute = data->nnpPackageMinute.get()) == nullptr) {
+        notReadyObj = "NNPPackageMinuteList";
         return false;
     }
 
     if ((nnpPackagePricelist = data->nnpPackagePricelist.get()) == nullptr) {
+        notReadyObj = "NNPPackagePricelistList";
         return false;
     }
 
     if ((nnpPrefixDestination = data->nnpPrefixDestination.get()) == nullptr) {
+        notReadyObj = "NNPPrefixDestinationList";
         return false;
     }
 
     if ((nnpAccountTariffLight = data->nnpAccountTariffLight.get()) == nullptr) {
+        notReadyObj = "NNPAccountTariffLightList";
         return false;
     }
 
