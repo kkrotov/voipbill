@@ -53,6 +53,10 @@ echo 'Запускаем auth тесты для уже протестирова�
 nice -19 python "$DIR/comparative/auth_caller.py"
 [[ $? -ne 0 ]] && exit
 
+echo 'Запускаем call тесты для уже протестированной версии...'
+nice -19 python "$DIR/comparative/call_caller.py"
+[[ $? -ne 0 ]] && exit
+
 echo 'Stopping tested app version...'
 . "$DIR/stop.sh"
 
@@ -94,6 +98,10 @@ nice -19 python "$DIR/sampler.py"
 
 echo 'Запускаем auth тесты для новой (тестируемой) версии...'
 nice -19 python "$DIR/comparative/auth_caller.py"
+[[ $? -ne 0 ]] && exit
+
+echo 'Запускаем call тесты для новой (тестируемой) версии...'
+nice -19 python "$DIR/comparative/call_caller.py"
 [[ $? -ne 0 ]] && exit
 
 echo 'Running unit tests analysis...'

@@ -12,3 +12,6 @@ python "$DIR/comparative/billing.py"
 
 echo 'Auth testing'
 python "$DIR/comparative/auth_comparer.py"
+
+echo 'Auth testing'
+python "$DIR/comparative/call_comparer.py"
