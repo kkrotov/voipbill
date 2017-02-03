@@ -13,7 +13,7 @@ SystemStatus EventManagementStatus::getStatus() {
     if (!repository.prepare(time(nullptr))) {
 
         healthStatus.statusId = HealthStatus::STATUS_CRITICAL;
-        healthStatus.statusMessage = "Billing not ready";
+        healthStatus.statusMessage = "Billing not ready: "+repository.notReadyObj;
         return healthStatus;
     }
     Server *server = repository.getServer(app().conf.instance_id);
