@@ -30,6 +30,7 @@ protected:
     Call *call;
     CallInfo *callInfo;
     Cdr *cdr;
+    StateMegaTrunk *stateMegaTrunk;
 
     stringstream *trace;
 
@@ -40,7 +41,7 @@ public:
 
     void clearTrace();
 
-    void calc(Call *call, CallInfo *callInfo, Cdr *cdr);
+    void calc(Call *call, CallInfo *callInfo, Cdr *cdr, StateMegaTrunk *stateMegaTrunk);
 
 protected:
     void calcByTrunk();
@@ -116,13 +117,14 @@ protected:
     void calcOrigNNPByNumber();
 
     pair<int, NNPPackageMinute> setupNNPPackageMinute(vector<NNPAccountTariffLight> &nnpAccountTariffLight,
-                                         set<int> &nnpDestinationIds);
+                                                      set<int> &nnpDestinationIds);
 
-    pair<double, NNPPackagePricelist *> setupNNPPackagePricelist(vector<NNPAccountTariffLight> &nnpAccountTariffLightList,
-                                               set<int> &nnpDestinationIds);
+    pair<double, NNPPackagePricelist *>
+    setupNNPPackagePricelist(vector<NNPAccountTariffLight> &nnpAccountTariffLightList,
+                             set<int> &nnpDestinationIds);
 
     pair<double, NNPPackagePrice *> setupNNPPackagePrice(vector<NNPAccountTariffLight> &nnpAccountTariffLightList,
-                                           set<int> &nnpDestinationIds);
+                                                         set<int> &nnpDestinationIds);
 
     void setupNNPCost();
 
@@ -140,6 +142,10 @@ protected:
 
     void setupInterconnect();
 
-    bool isNeedForceCalcByNumber(StateMegaTrunk &stateMegaTrunk);
+    bool isNeedForceCalcByNumber();
+
+    bool isForceTarifficationSkip();
 };
+
+
 

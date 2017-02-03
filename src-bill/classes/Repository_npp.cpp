@@ -227,10 +227,15 @@ void Repository::getNNPBestPriceRoute(set<pair<double, PhoneNumber>> &vResNum, v
             cdr.call_id = 0;
 
             BillingCall billingCall(this);
+            StateMegaTrunk stateMegaTrunk(this);
+
+            stateMegaTrunk.setTrace(trace);
+            stateMegaTrunk.prepareFromCdr(&cdr); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка.
+            stateMegaTrunk.PhaseCalc(); // Расчет фаз маршутизации для Мегатранков
 
             Call call = Call(&cdr, CALL_ORIG);
             CallInfo callInfo;
-            billingCall.calc(&call, &callInfo, &cdr);
+            billingCall.calc(&call, &callInfo, &cdr, &stateMegaTrunk);
 
             vResNum.insert(make_pair(-call.cost, it));
 

@@ -85,9 +85,15 @@ public:
         BillingCall billingCall(&repository);
         billingCall.setTrace(&html);
 
+        StateMegaTrunk stateMegaTrunk(&repository);
+
+        stateMegaTrunk.setTrace(&html);
+        stateMegaTrunk.prepareFromCdr(&cdr); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка.
+        stateMegaTrunk.PhaseCalc(); // Расчет фаз маршутизации для Мегатранков
+
         Call call = Call(&cdr, orig == "true" ? CALL_ORIG : CALL_TERM);
         CallInfo callInfo;
-        billingCall.calc(&call, &callInfo, &cdr);
+        billingCall.calc(&call, &callInfo, &cdr, &stateMegaTrunk);
 
         html << "INFO|CALL|";
         call.dump(html);
