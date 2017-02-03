@@ -94,5 +94,5 @@ public:
         return destRegion;
     };
 
-    bool isForceTarificationSkip();
+    bool isForceTarifficationSkip();
 };

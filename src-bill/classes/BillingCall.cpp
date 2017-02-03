@@ -70,9 +70,7 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr) {
         processNNP();                   // Расчитываем nnp-параметры для плеча.
 
         if (callInfo->trunk->auth_by_number || isNeedForceCalcByNumber(stateMegaTrunk)) {
-            if(!stateMegaTrunk.isForceTarificationSkip()) {
-                calcByNumber();             // Дальше производятся тарификация плеча по схеме "авторизация по номеру"
-            }
+               calcByNumber(stateMegaTrunk.isForceTarifficationSkip());             // Дальше производятся тарификация плеча по схеме "авторизация по номеру"
         } else {
             calcByTrunk();              // Дальше производятся тарификация плеча по схеме "авторизация по транку"
         }
@@ -212,7 +210,7 @@ void BillingCall::setupInterconnect() {
  *  Дальше производятся тарификация плеча по схеме "авторизация по номеру"
  */
 
-void BillingCall::calcByNumber() {
+void BillingCall::calcByNumber(bool fTarifficationSkip) {
 
     if (trace != nullptr) {
         *trace << "INFO|TARIFFICATION BY NUMBER" << "\n";
@@ -249,10 +247,9 @@ void BillingCall::calcByNumber() {
             }
         }
 
+        if(fTarifficationSkip) return;
+
         // Не тарифицируем оригинацию звонков, которые выходят из мегатранков и направляются в другой регион
-
-
-
 
         calcOrigByNumber();                 // Дальше производится тарификация оригинационного плеча
         // при схеме "авторизация по номеру"
