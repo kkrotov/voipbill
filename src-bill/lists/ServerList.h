@@ -11,7 +11,7 @@ protected:
         return "select id, low_balance_outcome_id, blocked_outcome_id, min_price_for_autorouting, our_numbers_id," \
                "   calling_station_id_for_line_without_number, service_numbers, hub_id, emergency_prefixlist_id, " \
                "   h_call_sync_delay, h_cdr_sync_delay, h_call_save_delay, h_cdr_proc_wait_count, h_call_save_wait_count, " \
-               "   h_thread_error_count, h_radius_request_delay, h_event_management, name " \
+               "   h_thread_error_count, h_radius_request_delay, h_event_management, h_local_events, name " \
                "from public.server " \
                "order by id asc ";
     }
@@ -39,8 +39,9 @@ protected:
         item->call_save_wait_count = get_int_vector(row.get_s(13));
         item->thread_error_count = get_int_vector(row.get_s(14));
         item->radius_request_delay = get_int_vector(row.get_s(15));
-        item->event_count = get_int_vector(row.get_s(16));
-        item->name = row.get_s(17);
+        item->main_event_count = get_int_vector(row.get_s(16));
+        item->local_event_count = get_int_vector(row.get_s(17));
+        item->name = row.get_s(18);
     }
 
     struct key_id {
