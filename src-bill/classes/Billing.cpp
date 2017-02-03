@@ -33,17 +33,23 @@ void Billing::calcCurrentCalls() {
             break;
         }
 
+        StateMegaTrunk stateMegaTrunk(&repository);
+
+        stateMegaTrunk.prepareFromCdr(cdr); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка.
+        stateMegaTrunk.PhaseCalc(); // Расчет фаз маршутизации для Мегатранков
+
         Call origCall = Call(cdr, CALL_ORIG);
         Call termCall = Call(cdr, CALL_TERM);
 
         CallInfo origCallInfo;
         CallInfo termCallInfo;
 
-        billingCall.calc(&origCall, &origCallInfo, cdr);
+        billingCall.calc(&origCall, &origCallInfo, cdr, &stateMegaTrunk);
 
         termCall.src_number = origCall.src_number;
         termCall.dst_number = origCall.dst_number;
-        billingCall.calc(&termCall, &termCallInfo, cdr);
+        billingCall.calc(&termCall, &termCallInfo, cdr, &stateMegaTrunk);
+
 
         statsAccount.get()->add(&origCallInfo);
         statsFreemin.get()->add(&origCallInfo);
@@ -59,6 +65,7 @@ void Billing::calcCurrentCalls() {
         statsTrunkSettings.get()->add(&termCallInfo);
         statsNNPPackageMinute.get()->add(&termCallInfo);
         callsWaitSaving->push_back(termCall);
+
     }
 
     repository.currentCalls->setCallsWaitingSaving(callsWaitSaving);
@@ -69,27 +76,29 @@ void Billing::calcCurrentCalls() {
     repository.currentCalls->setStatsNNPPackageMinute(statsNNPPackageMinute);
 }
 
-void fetchGlobalCounters(int accountId, double vat_rate, Repository& repository, double* globalBalanceSum, double* globalDaySum) {
+void fetchGlobalCounters(int accountId, double vat_rate, Repository &repository, double *globalBalanceSum,
+                         double *globalDaySum) {
 
-    GlobalCounters * globalCounter = nullptr;
+    GlobalCounters *globalCounter = nullptr;
     if (repository.data->globalCounters.ready()) {
         globalCounter = repository.data->globalCounters.get()->find(accountId);
     }
 
     if (globalCounter) {
-        * globalBalanceSum = globalCounter->sumBalance(vat_rate);
-        * globalDaySum = globalCounter->sumDay(vat_rate);
+        *globalBalanceSum = globalCounter->sumBalance(vat_rate);
+        *globalDaySum = globalCounter->sumDay(vat_rate);
     } else {
-        * globalBalanceSum = 0.0;
-        * globalDaySum = 0.0;
+        *globalBalanceSum = 0.0;
+        *globalDaySum = 0.0;
     }
 }
 
 
-void logFinishedCall(const Cdr& cdr, const Call& origCall, const Call& termCall, const CallInfo& origInfo, const CallInfo& termInfo, Trunk* origTrunk, Trunk* termTrunk, Repository& repository) {
+void logFinishedCall(const Cdr &cdr, const Call &origCall, const Call &termCall, const CallInfo &origInfo,
+                     const CallInfo &termInfo, Trunk *origTrunk, Trunk *termTrunk, Repository &repository) {
 
-    Client* origAccount = origInfo.account;
-    Client* termAccount = termInfo.account;
+    Client *origAccount = origInfo.account;
+    Client *termAccount = termInfo.account;
 
     // interconnect_cost ??? vat ??? как влияют на стоимость и себестоимость?
 
@@ -117,7 +126,7 @@ void logFinishedCall(const Cdr& cdr, const Call& origCall, const Call& termCall,
     logCall->type = "call";
     logCall->params["call_finished"] = "Yes";
 
-    logCall->message = "Call "+to_string(origCall.id)+" is FINISHED"; //lexical_cast<string>(origCall.cdr_id);
+    logCall->message = "Call " + to_string(origCall.id) + " is FINISHED"; //lexical_cast<string>(origCall.cdr_id);
 
     logCall->params["orig_id"] = origCall.id;
     logCall->params["term_id"] = termCall.id;
@@ -132,7 +141,7 @@ void logFinishedCall(const Cdr& cdr, const Call& origCall, const Call& termCall,
 
     logCall->params["orig_trunk_id"] = origCall.trunk_id;
     logCall->params["term_trunk_id"] = termCall.trunk_id;
-    
+
     if (origInfo.trunk && origInfo.trunk->trunk_name[0]) {
         logCall->params["orig_trunk_name"] = origInfo.trunk->trunk_name;
     }
@@ -229,78 +238,78 @@ void logFinishedCall(const Cdr& cdr, const Call& origCall, const Call& termCall,
     logCall->params["term_package_time"] = termCall.package_time;
 
     if (origAccount) {
-	double vat_rate = repository.getVatRate(origAccount);
+        double vat_rate = repository.getVatRate(origAccount);
 
-	double sumBalance = repository.billingData->statsAccountGetSumBalance(origAccount->id, vat_rate);
-	double sumDay = repository.billingData->statsAccountGetSumDay(origAccount->id, vat_rate);
+        double sumBalance = repository.billingData->statsAccountGetSumBalance(origAccount->id, vat_rate);
+        double sumDay = repository.billingData->statsAccountGetSumDay(origAccount->id, vat_rate);
 
-	auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
-	double sumBalance2 = statsAccount2->getSumBalance(origAccount->id, vat_rate) + origCall.cost;
-	double sumDay2 = statsAccount2->getSumDay(origAccount->id, vat_rate) + origCall.cost;
+        auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
+        double sumBalance2 = statsAccount2->getSumBalance(origAccount->id, vat_rate) + origCall.cost;
+        double sumDay2 = statsAccount2->getSumDay(origAccount->id, vat_rate) + origCall.cost;
 
-	double globalBalanceSum, globalDaySum;
-	fetchGlobalCounters(origAccount->id, vat_rate, repository, & globalBalanceSum, & globalDaySum);
+        double globalBalanceSum, globalDaySum;
+        fetchGlobalCounters(origAccount->id, vat_rate, repository, &globalBalanceSum, &globalDaySum);
 
-	double spentBalanceSum, spentDaySum;
-	spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
-	spentDaySum = sumDay + sumDay2 + globalDaySum;
+        double spentBalanceSum, spentDaySum;
+        spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
+        spentDaySum = sumDay + sumDay2 + globalDaySum;
 
-	logCall->params["orig_balance_stat"] = origAccount->balance;
-	logCall->params["orig_balance_local"] = sumBalance;
-	logCall->params["orig_balance_current"] = sumBalance2;
-	logCall->params["orig_balance_global"] = globalBalanceSum;
-	logCall->params["orig_balance_realtime"] = origAccount->balance + spentBalanceSum;
-	if (origAccount->hasCreditLimit()) {
-	    logCall->params["orig_credit_limit"] = origAccount->credit;
-	    logCall->params["orig_credit_available"] = origAccount->balance + origAccount->credit + spentBalanceSum;
-	}
+        logCall->params["orig_balance_stat"] = origAccount->balance;
+        logCall->params["orig_balance_local"] = sumBalance;
+        logCall->params["orig_balance_current"] = sumBalance2;
+        logCall->params["orig_balance_global"] = globalBalanceSum;
+        logCall->params["orig_balance_realtime"] = origAccount->balance + spentBalanceSum;
+        if (origAccount->hasCreditLimit()) {
+            logCall->params["orig_credit_limit"] = origAccount->credit;
+            logCall->params["orig_credit_available"] = origAccount->balance + origAccount->credit + spentBalanceSum;
+        }
 
-	logCall->params["orig_daily_local"] = sumDay;
-	logCall->params["orig_daily_current"] = sumDay2;
-	logCall->params["orig_daily_global"] = globalDaySum;
-	logCall->params["orig_daily_total"] = spentDaySum;
-	if (origAccount->hasDailyLimit()) {
-	    logCall->params["orig_daily_limit"] = origAccount->limit_d;
-	    logCall->params["orig_daily_available"] = origAccount->limit_d + spentDaySum;
-	}
-    } 
-   
+        logCall->params["orig_daily_local"] = sumDay;
+        logCall->params["orig_daily_current"] = sumDay2;
+        logCall->params["orig_daily_global"] = globalDaySum;
+        logCall->params["orig_daily_total"] = spentDaySum;
+        if (origAccount->hasDailyLimit()) {
+            logCall->params["orig_daily_limit"] = origAccount->limit_d;
+            logCall->params["orig_daily_available"] = origAccount->limit_d + spentDaySum;
+        }
+    }
+
     if (termAccount) {
-	double vat_rate = repository.getVatRate(termAccount);
+        double vat_rate = repository.getVatRate(termAccount);
 
-	double sumBalance = repository.billingData->statsAccountGetSumBalance(termAccount->id, vat_rate);
-	double sumDay = repository.billingData->statsAccountGetSumDay(termAccount->id, vat_rate);
+        double sumBalance = repository.billingData->statsAccountGetSumBalance(termAccount->id, vat_rate);
+        double sumDay = repository.billingData->statsAccountGetSumDay(termAccount->id, vat_rate);
 
-	auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
-	double sumBalance2 = statsAccount2->getSumBalance(termAccount->id, vat_rate) + termCall.cost;
-	double sumDay2 = statsAccount2->getSumDay(termAccount->id, vat_rate) + termCall.cost;
+        auto statsAccount2 = repository.currentCalls->getStatsAccount().get();
+        double sumBalance2 = statsAccount2->getSumBalance(termAccount->id, vat_rate) + termCall.cost;
+        double sumDay2 = statsAccount2->getSumDay(termAccount->id, vat_rate) + termCall.cost;
 
-	double globalBalanceSum, globalDaySum;
-	fetchGlobalCounters(termAccount->id, vat_rate, repository, & globalBalanceSum, & globalDaySum);
+        double globalBalanceSum, globalDaySum;
+        fetchGlobalCounters(termAccount->id, vat_rate, repository, &globalBalanceSum, &globalDaySum);
 
-	double spentBalanceSum, spentDaySum;
-	spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
-	spentDaySum = sumDay + sumDay2 + globalDaySum;
+        double spentBalanceSum, spentDaySum;
+        spentBalanceSum = sumBalance + sumBalance2 + globalBalanceSum;
+        spentDaySum = sumDay + sumDay2 + globalDaySum;
 
-	logCall->params["term_balance_stat"] = termAccount->balance;
-	logCall->params["term_balance_local"] = sumBalance;
-	logCall->params["term_balance_current"] = sumBalance2;
-	logCall->params["term_balance_global"] = globalBalanceSum;
-	logCall->params["term_balance_realtime"] = termAccount->balance + spentBalanceSum;
-	if (termAccount->hasCreditLimit()) {
-	    logCall->params["term_credit_limit"] = termAccount->credit;
-	    logCall->params["term_credit_available"] = termAccount->balance + termAccount->credit + spentBalanceSum;
-	}
+        logCall->params["term_balance_stat"] = termAccount->balance;
+        logCall->params["term_balance_local"] = sumBalance;
+        logCall->params["term_balance_current"] = sumBalance2;
+        logCall->params["term_balance_global"] = globalBalanceSum;
+        logCall->params["term_balance_realtime"] = termAccount->balance + spentBalanceSum;
+        if (termAccount->hasCreditLimit()) {
+            logCall->params["term_credit_limit"] = termAccount->credit;
+            logCall->params["term_credit_available"] = termAccount->balance + termAccount->credit + spentBalanceSum;
+        }
 
-	logCall->params["term_daily_local"] = sumDay;
-	logCall->params["term_daily_current"] = sumDay2;
-	logCall->params["term_daily_global"] = globalDaySum;
-	logCall->params["term_daily_total"] = spentDaySum;
-	if (termAccount->hasDailyLimit()) {
-	    logCall->params["term_daily_limit"] = termAccount->limit_d;
-	    logCall->params["term_daily_available"] = termAccount->limit_d + spentDaySum;
-	}
-    }    
+        logCall->params["term_daily_local"] = sumDay;
+        logCall->params["term_daily_current"] = sumDay2;
+        logCall->params["term_daily_global"] = globalDaySum;
+        logCall->params["term_daily_total"] = spentDaySum;
+        if (termAccount->hasDailyLimit()) {
+            logCall->params["term_daily_limit"] = termAccount->limit_d;
+            logCall->params["term_daily_available"] = termAccount->limit_d + spentDaySum;
+        }
+    }
 
     Log::info(logCall); // Call "+to_string(origCall.id)+" is FINISHED
 }
@@ -351,36 +360,49 @@ void Billing::calc(bool realtimePurpose) {
 
         long long int lastCallId = repository.billingData->getCallsLastId();
 
-        Call origCall = Call(cdr, CALL_ORIG);
-        Call termCall = Call(cdr, CALL_TERM);
+        StateMegaTrunk stateMegaTrunk(&repository);
 
-        CallInfo origCallInfo;
-        CallInfo termCallInfo;
+        stateMegaTrunk.prepareFromCdr(cdr); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка.
+        stateMegaTrunk.PhaseCalc(); // Расчет фаз маршутизации для Мегатранков
 
-        origCall.id = lastCallId + 1;
-        origCall.peer_id = lastCallId + 2;
-        termCall.id = lastCallId + 2;
-        termCall.peer_id = lastCallId + 1;
+        if (!stateMegaTrunk.isForceTarifficationSkip() && !stateMegaTrunk.isMegaTrunkPhase2()) {
 
-        termCall.hash = cdr->hash;
-        origCall.hash = cdr->hash;
+            // Не пишем в call_raw технические плечи при пересылке в регион подключения мегатранка и
+            // при перемещения звонка из региона мегатранка в регион подключения номера
 
-        billingCall.calc(&origCall, &origCallInfo, cdr);
+            Call origCall = Call(cdr, CALL_ORIG);
+            Call termCall = Call(cdr, CALL_TERM);
 
-        termCall.src_number = origCall.src_number;
-        termCall.dst_number = origCall.dst_number;
-        billingCall.calc(&termCall, &termCallInfo, cdr);
+            CallInfo origCallInfo;
+            CallInfo termCallInfo;
 
-        repository.billingData->addCall(&origCallInfo);
-        repository.billingData->addCall(&termCallInfo);
+            origCall.id = lastCallId + 1;
+            origCall.peer_id = lastCallId + 2;
+            termCall.id = lastCallId + 2;
+            termCall.peer_id = lastCallId + 1;
+
+            termCall.hash = cdr->hash;
+            origCall.hash = cdr->hash;
+
+            billingCall.calc(&origCall, &origCallInfo, cdr, &stateMegaTrunk);
+
+            termCall.src_number = origCall.src_number;
+            termCall.dst_number = origCall.dst_number;
+            billingCall.calc(&termCall, &termCallInfo, cdr, &stateMegaTrunk);
+
+            repository.billingData->addCall(&origCallInfo);
+            repository.billingData->addCall(&termCallInfo);
+
+
+            if (realtimePurpose) {
+                // Логируем завершённый звонок
+                logFinishedCall(*cdr, origCall, termCall, origCallInfo, termCallInfo,
+                                origCallInfo.trunk, termCallInfo.trunk, repository);
+            }
+        }
 
         repository.billingData->removeFirstCdr();
 
-        if (realtimePurpose) {
-            // Логируем завершённый звонок
-            logFinishedCall(*cdr, origCall, termCall, origCallInfo, termCallInfo,
-                            origCallInfo.trunk, termCallInfo.trunk, repository);
-        }
     }
 
 }

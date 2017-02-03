@@ -65,26 +65,32 @@ public:
         Billing billing;
         BillingCall billingCall(&repository);
 
+        StateMegaTrunk stateMegaTrunk(&repository);
+
+        stateMegaTrunk.setTrace(&trace);
+        stateMegaTrunk.prepareFromCdr(cdr); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка.
+        stateMegaTrunk.PhaseCalc(); // Расчет фаз маршутизации для Мегатранков
+
         Call call = Call(cdr, orig);
         CallInfo callInfo;
 
         if (orig) {
 
             billingCall.setTrace(&trace);
-            billingCall.calc(&call, &callInfo, cdr);
+            billingCall.calc(&call, &callInfo, cdr, &stateMegaTrunk);
 
         } else {
 
             Call origCall = Call(cdr, CALL_ORIG);
             CallInfo origCallInfo;
 
-            billingCall.calc(&origCall, &origCallInfo, cdr);
+            billingCall.calc(&origCall, &origCallInfo, cdr, &stateMegaTrunk);
 
             call.src_number = origCall.src_number;
             call.dst_number = origCall.dst_number;
 
             billingCall.setTrace(&trace);
-            billingCall.calc(&call, &callInfo, cdr);
+            billingCall.calc(&call, &callInfo, cdr,  &stateMegaTrunk);
         }
 
 
