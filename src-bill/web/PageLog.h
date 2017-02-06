@@ -20,13 +20,14 @@ public:
         html << "History length: <b>" << history.size() << "</b><br/>\n";
         html << "<br/>\n";
 
-        html << "<table width=100%>\n";
+        html << "<table width=100% border=0 cellspacing=5 cellpadding=5>\n";
         for (auto it = history.begin(); it != history.end(); ++it) {
+            
             pLogMessage message = *it;
             html << "<tr>\n";
-            html << "<td nowrap>" << message->countInGroup << "</td>\n";
-            html << "<td nowrap>" << string_time(message->timeInGroup) << "</td>\n";
-            html << "<td width=100%>" << message->message << "</td>\n";
+            html << "<td style='text-align: left;vertical-align:top'>" << message->countInGroup << "</td>\n";
+            html << "<td nowrap style='text-align: left;vertical-align:top'>" << string_time(message->timeInGroup) << "</td>\n";
+            html << "<td style='word-break:break-all; text-align: left'>" << message->message << "</td>\n";
             html << "</tr>\n";
         }
         html << "</table>\n";
