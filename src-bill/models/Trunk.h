@@ -22,9 +22,6 @@ struct Trunk {
     bool sw_minimalki;
     bool sw_shared;
 
-    bool megatrunk_transfer_to_megatrunk;
-    bool megatrunk_transfer_to_region;
-
     int capacity;
     int load_warning;
     int road_to_region;
@@ -52,9 +49,6 @@ struct Trunk {
         trace << "sw_shared: " << sw_shared << ", ";
         trace << "load_warning: " << load_warning << ", ";
         trace << "road_to_region: " << road_to_region << ", ";
-        trace << "megatrunk_transfer_to_megatrunk: " << megatrunk_transfer_to_megatrunk << ", ";
-        trace << "megatrunk_transfer_to_region: " << megatrunk_transfer_to_region << ", ";
-
         trace << ")";
     }
 };
