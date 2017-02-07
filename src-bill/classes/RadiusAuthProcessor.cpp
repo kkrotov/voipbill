@@ -208,10 +208,10 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId, StateMegaTrun
 
             auto outcome = repository.getOutcome(route->outcome_id);
 
-            if(outcome != nullptr && outcome->isMegToReg() && !megaTrunk.isMegaTrunkPhase1())
+            if (outcome != nullptr && outcome->isMegToReg() && !megaTrunk.isMegaTrunkPhase1())
                 continue;
 
-            if(outcome != nullptr && outcome->isMegToMeg() && !megaTrunk.isMegaTrunkPhase2())
+            if (outcome != nullptr && outcome->isMegToMeg() && !megaTrunk.isMegaTrunkPhase2())
                 continue;
 
             return route->outcome_id;
@@ -904,6 +904,10 @@ bool RadiusAuthProcessor::isEmergencyCall(Call &call) {
 
 string RadiusAuthProcessor::analyzeCall(Call &call,
                                         std::map<int, std::pair<RejectReason, time_t> > *o_pAccountIdsBlockedBefore) {
+
+    if (origTrunk != nullptr && origTrunk->tech_trunk) {
+        return "accept";
+    }
 
     if (isEmergencyCall(call)) {
         return "accept";

@@ -10,7 +10,7 @@ protected:
     string sql(BDb * db) {
         return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, source_trunk_rule_default_allowed, default_priority, auto_routing, route_table_id, "\
                "   our_trunk, auth_by_number, orig_redirect_number_7800, orig_redirect_number, term_redirect_number, capacity, sw_minimalki,server_id,sw_shared,  " \
-               "   load_warning, road_to_region" \
+               "   load_warning, road_to_region, tech_trunk" \
                "   from auth.trunk " \
                "   where server_id in " + app().conf.get_sql_regions_for_load_list_list() +
                " and trunk_name_alias is not null "
@@ -39,6 +39,7 @@ protected:
         item->sw_shared = row.get_b(18);
         item->load_warning = row.get_i(19);
         item->road_to_region = row.get_i(20);
+        item->tech_trunk = row.get_b(21);
 
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 $dbmain   = pg_connect("host=127.0.0.1 dbname=nispd_test user=pgadmin password=NbhLhjn") or die('Could not connect: ' . pg_last_error());
-$dbregion = pg_connect("host=127.0.0.1 dbname=nispd99_test user=pgadmin password=NbhLhjn") or die('Could not connect: ' . pg_last_error());
+$dbregion = pg_connect("host=127.0.0.1 dbname=nispd89_test user=pgadmin password=NbhLhjn") or die('Could not connect: ' . pg_last_error());
 
 function clearCounters($db)
 {
@@ -119,9 +119,8 @@ echo "]] 4. Создаем записи в таблице CDR в региона�
 $maxid = getLastCallID($dbregion);
 
 //$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '59224631212' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"Beeline_SIP", "dt"=>"2017-01-26 19:03:00");
-$calls[] = array ( "src_number" => '74996851549' , "dst_number" => '73832870122' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2017-01-08 18:01:00");
-$calls[] = array ( "src_number" => '79119888723' , "dst_number" => '74996851549' , "src_route"=>"smg_MTS_Nat" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2017-01-08 18:02:00");
-$calls[] = array ( "src_number" => '78126465198' , "dst_number" => '74996851549' , "src_route"=>"mcn_msk_ast16_99" , "dst_route"=>"smg_MTS_Nat", "dt"=>"2017-01-08 18:03:00");
+$calls[] = array ( "src_number" => '74232060081' , "dst_number" => '74955633636' , "src_route"=>"MCN_MSK" , "dst_route"=>"smg_RTK_Loc", "dt"=>"2017-02-06 18:01:00");
+$calls[] = array ( "src_number" => '74955636969' , "dst_number" => '74232060081' , "src_route"=>"smg_RTK_Loc" , "dst_route"=>"MCN_MSK", "dt"=>"2017-02-06 18:02:00");
 
 doCalls($dbregion,$calls,$maxid);
 
