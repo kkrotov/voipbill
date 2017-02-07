@@ -10,7 +10,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-class TestCall(unittest2.TestCase):
+class TestAuth(unittest2.TestCase):
 
     def loadData(self):
 
@@ -21,9 +21,9 @@ class TestCall(unittest2.TestCase):
       --SET search_path=tests;
       SELECT curr.id, prev.id, curr.date, prev.date, curr.answer, prev.answer
 
-      FROM   tests.auth_tests curr
+      FROM   tests.call_tests curr
 
-      LEFT JOIN tests.auth_tests prev
+      LEFT JOIN tests.call_tests prev
 
       ON (curr.id = prev.id AND curr.date != prev.date AND curr.date > prev.date)
       WHERE curr.answer != prev.answer;
@@ -42,9 +42,9 @@ class TestCall(unittest2.TestCase):
             msg += str(prev_answer)
             msg += '\'\ncurr_answer: \''
             msg += str (curr_answer)
-            msg += ('\'\nid: ')
+            msg += ('\'\nid: \'')
             msg += str(prev_id)
-            msg += ('\n============================\n')
+            msg += ('\'\n============================\n')
             noErrors = False
 
         self.assertTrue (noErrors, msg=msg)
