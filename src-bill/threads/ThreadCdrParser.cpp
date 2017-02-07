@@ -126,6 +126,7 @@ void ThreadCdrParser::logCall(CallData &call) {
     pLogMessage logCall(new LogMessage());
 
     logCall->type = "cdr";
+    logCall->message = "Call " + call.call_id + (call.IsFinished()? " is FINISHED":" is NOT FINISHED");
     logCall->params["call_id"] = call.call_id;
     logCall->params["src"] = call.src_number;
     logCall->params["dst"] = call.dst_number;
