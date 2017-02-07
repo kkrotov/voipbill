@@ -35,6 +35,14 @@ struct Outcome {
         return type_id == 5;
     }
 
+    bool isMegToReg() {
+        return type_id == 6;
+    }
+
+    bool isMegToMeg() {
+        return type_id == 7;
+    }
+
     void dump(stringstream &trace) {
         trace << "(";
         trace << "id: " << id << ", ";

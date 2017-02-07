@@ -136,16 +136,6 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
             response->setReject();
             return;
 
-        } else if (stateMegaTrunk.isMegaTrunkPhase1()) {
-
-            processMegaTrunkPhase1(stateMegaTrunk);
-            return;
-
-        } else if (stateMegaTrunk.isMegaTrunkPhase2()) {
-
-            processMegaTrunkPhase2(stateMegaTrunk);
-            return;
-
         } else {
 
             outcomeId = processRouteTable(origTrunk->route_table_id, stateMegaTrunk);
@@ -218,6 +208,12 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId, StateMegaTrun
 
             auto outcome = repository.getOutcome(route->outcome_id);
 
+            if (outcome != nullptr && outcome->isMegToReg() && !megaTrunk.isMegaTrunkPhase1())
+                continue;
+
+            if (outcome != nullptr && outcome->isMegToMeg() && !megaTrunk.isMegaTrunkPhase2())
+                continue;
+
             return route->outcome_id;
         }
 
@@ -256,6 +252,16 @@ bool RadiusAuthProcessor::processOutcome(int outcomeId, StateMegaTrunk &stateMeg
     if (outcome->isAuto()) {
 
         return processAutoOutcome(pBuyRate, pFirstBuyPricelist);
+
+    } else if (outcome->isMegToReg()) {
+
+        processMegaTrunkPhase1(stateMegaTrunk);
+        return false;
+
+    } else if (outcome->isMegToMeg()) {
+
+        processMegaTrunkPhase2(stateMegaTrunk);
+        return false;
 
     } else if (outcome->isRouteCase()) {
 
@@ -898,6 +904,10 @@ bool RadiusAuthProcessor::isEmergencyCall(Call &call) {
 
 string RadiusAuthProcessor::analyzeCall(Call &call,
                                         std::map<int, std::pair<RejectReason, time_t> > *o_pAccountIdsBlockedBefore) {
+
+    if (origTrunk != nullptr && origTrunk->tech_trunk) {
+        return "accept";
+    }
 
     if (isEmergencyCall(call)) {
         return "accept";
