@@ -10,7 +10,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-class TestAuth(unittest2.TestCase):
+class TestCall(unittest2.TestCase):
 
     def loadData(self):
 
