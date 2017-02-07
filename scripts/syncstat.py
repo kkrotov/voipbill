@@ -559,7 +559,7 @@ class Sync(Daemon):
 
         if len(toins) > 0:
             cur.executemany(
-                "INSERT INTO billing.service_trunk_settings(id, trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id, minimum_minutes, minimum_cost, minimum_margin, minimum_margin_type, nnp_tariff_id)VALUES(%s,%s,'%s','%s',%s,%s,%s,%s,%s,%s,%s)",
+                "INSERT INTO billing.service_trunk_settings(id, trunk_id, \"type\", \"order\", src_number_id, dst_number_id, pricelist_id, minimum_minutes, minimum_cost, minimum_margin, minimum_margin_type, nnp_tariff_id)VALUES(%s,%s,'%s','%s',%s,%s,%s,%s,%s,%s,%s,%s)",
                 toins)
         if len(todel) > 0:
             cur.executemany("delete from billing.service_trunk_settings where id=%s", todel)

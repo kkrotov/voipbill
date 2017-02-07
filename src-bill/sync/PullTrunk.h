@@ -33,8 +33,7 @@ public:
         fields.push_back("sw_shared");
         fields.push_back("load_warning");
         fields.push_back("road_to_region");
-        fields.push_back("megatrunk_transfer_to_region");
-        fields.push_back("megatrunk_transfer_to_megatrunk");
+        fields.push_back("tech_trunk");
 
         datatype.push_back("id integer");
         datatype.push_back("server_id integer");
@@ -58,7 +57,7 @@ public:
         datatype.push_back("sw_shared boolean");
         datatype.push_back("load_warning integer");
         datatype.push_back("road_to_region integer");
-        datatype.push_back("megatrunk_transfer_to_region boolean");
-        datatype.push_back("megatrunk_transfer_to_megatrunk boolean");
+        datatype.push_back("tech_trunk boolean");
+
     }
 };
