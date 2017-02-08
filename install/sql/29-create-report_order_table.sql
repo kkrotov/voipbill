@@ -1,4 +1,4 @@
-create type stat.report_filetypes as enum ('pdf', 'csv', 'html');
+create type stat.report_filetypes as enum ('pdf', 'csv', 'html', 'xls');
 
 create type stat.report_statuses as enum ('in_queue', 'in_progress', 'complete');
 
@@ -21,6 +21,15 @@ OIDS=FALSE
 ALTER TABLE "stat"."report_orders"
 ADD COLUMN "start_connect_time" timestamp,
 ADD COLUMN "end_connect_time" timestamp;
+
+ALTER TABLE "stat"."report_orders"
+ADD COLUMN "group_id" int2;
+
+ALTER TABLE "stat"."report_orders"
+ALTER COLUMN "order_datetime" SET DEFAULT now();
+
+ALTER TABLE "stat"."report_orders"
+ADD COLUMN "is_empty" bool DEFAULT false;
 
 GRANT SELECT ON SEQUENCE stat.report_orders_id_seq TO GROUP g_readonly;
 GRANT SELECT ON TABLE stat.report_orders TO GROUP g_readonly;
