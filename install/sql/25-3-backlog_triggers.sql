@@ -6,6 +6,30 @@ CREATE TRIGGER backlog_notify
   EXECUTE PROCEDURE backlog.notify_table_update();
 
 -------------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS backlog_notify ON auth.attribute;
+CREATE TRIGGER backlog_notify
+  AFTER INSERT OR UPDATE OR DELETE
+  ON auth.attribute
+  FOR EACH ROW
+  EXECUTE PROCEDURE backlog.notify_table_update();
+
+-------------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS backlog_notify ON auth.attribute_group;
+CREATE TRIGGER backlog_notify
+  AFTER INSERT OR UPDATE OR DELETE
+  ON auth.attribute_group
+  FOR EACH ROW
+  EXECUTE PROCEDURE backlog.notify_table_update();
+
+-------------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS backlog_notify ON auth.attribute_value;
+CREATE TRIGGER backlog_notify
+  AFTER INSERT OR UPDATE OR DELETE
+  ON auth.attribute_value
+  FOR EACH ROW
+  EXECUTE PROCEDURE backlog.notify_table_update();
+
+-------------------------------------------------------------------------------
 DROP TRIGGER IF EXISTS backlog_notify ON auth.destination;
 CREATE TRIGGER backlog_notify
   AFTER INSERT OR UPDATE OR DELETE
@@ -66,6 +90,14 @@ DROP TRIGGER IF EXISTS backlog_notify ON auth.route_case;
 CREATE TRIGGER backlog_notify
   AFTER INSERT OR UPDATE OR DELETE
   ON auth.route_case
+  FOR EACH ROW
+  EXECUTE PROCEDURE backlog.notify_table_update();
+
+-------------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS backlog_notify ON auth.route_case_trunk;
+CREATE TRIGGER backlog_notify
+  AFTER INSERT OR UPDATE OR DELETE
+  ON auth.route_case_trunk
   FOR EACH ROW
   EXECUTE PROCEDURE backlog.notify_table_update();
 
@@ -148,3 +180,28 @@ CREATE TRIGGER backlog_notify
   ON auth.trunk_trunk_rule
   FOR EACH ROW
   EXECUTE PROCEDURE backlog.notify_table_update();
+
+-------------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS backlog_notify ON auth.test_auth;
+CREATE TRIGGER backlog_notify
+  AFTER INSERT OR UPDATE OR DELETE
+  ON auth.test_auth
+  FOR EACH ROW
+  EXECUTE PROCEDURE backlog.notify_table_update();
+
+-------------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS backlog_notify ON auth.test_call;
+CREATE TRIGGER backlog_notify
+  AFTER INSERT OR UPDATE OR DELETE
+  ON auth.test_call
+  FOR EACH ROW
+  EXECUTE PROCEDURE backlog.notify_table_update();
+
+-------------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS backlog_notify ON auth."user";
+CREATE TRIGGER backlog_notify
+  AFTER INSERT OR UPDATE OR DELETE
+  ON auth."user"
+  FOR EACH ROW
+  EXECUTE PROCEDURE backlog.notify_table_update();
+
