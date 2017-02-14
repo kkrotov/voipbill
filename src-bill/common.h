@@ -53,3 +53,4 @@ char const * build_time();
 char const * build_commit();
 
 typedef long long int PhoneNumber;
+vector<int> get_int_vector(string keyval);

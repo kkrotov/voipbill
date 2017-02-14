@@ -243,3 +243,16 @@ bool removeHtmlTags (string & str) {
 
     return true;
 }
+
+vector<int> get_int_vector(string keyval) {
+
+    vector<int> v;
+    if (keyval.length() > 0) {
+
+        std::stringstream ss(keyval);
+        string tmp;
+        while (ss >> tmp)
+            v.push_back(std::stoi(tmp));
+    }
+    return v;
+}
