@@ -135,7 +135,7 @@ bool StateMegaTrunk::isForceOrgAuthByNumber() {
             if (time(nullptr) <= serviceTrunk.expire_dt && serviceTrunk.activation_dt <= time(nullptr)) {
 
                 if (serviceTrunk.client_account_id == serviceNumberNumA->client_account_id &&
-                    serviceTrunk.server_id == src_trunk->road_to_region) {
+                    src_trunk->is_connected(serviceTrunk.server_id)) {
 
                     if (trace != nullptr) {
                         *trace << "INFO|MEGATRUNK|CALL FROM MEGATRUNK #" << serviceTrunk.trunk_id <<

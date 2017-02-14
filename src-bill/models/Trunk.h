@@ -25,8 +25,8 @@ struct Trunk {
 
     int capacity;
     int load_warning;
-    int road_to_region;
-
+    vector<int> road_to_regions;
+    bool is_connected(int region_id) { return std::find(road_to_regions.begin(), road_to_regions.end(), region_id ) != road_to_regions.end();  }
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -50,7 +50,9 @@ struct Trunk {
         trace << "sw_shared: " << sw_shared << ", ";
         trace << "tech_trunk: " << tech_trunk << ", ";
         trace << "load_warning: " << load_warning << ", ";
-        trace << "road_to_region: " << road_to_region << ", ";
+        std::stringstream result;
+        std::copy(road_to_regions.begin(), road_to_regions.end(), std::ostream_iterator<int>(result, " "));
+        trace << "road_to_region: " << result << ", ";
         trace << ")";
     }
 };
