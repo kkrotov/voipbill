@@ -1050,6 +1050,7 @@ void RadiusAuthProcessor::prepareAuthLogReguestStage1(Call &call, CallInfo &call
     logRequest->params["pricelist_prefix"] = lexical_cast<string>(call.prefix);
     logRequest->params["geo_id"] = call.geo_id;
     logRequest->params["rate"] = call.rate;
+    logRequest->params["tech_trunk"] = (origTrunk!=nullptr && origTrunk->tech_trunk)? "true" : "false";
 
     if (callInfo.pricelist && callInfo.pricelist->currency_id[0]) {
         logRequest->params["rate_currency"] = callInfo.pricelist->currency_id;
