@@ -21,8 +21,6 @@ void BillingCall::calcOrigNNPByNumber() {
     // Вычисляем все nnp-направления для B-номера звонка
     NNPNumberRange *nnpNumberRange = repository->getNNPNumberRange(call->dst_number, trace);
 
-    if (nnpNumberRange == nullptr) throw CalcException("NOT FOUND NumberRange");
-
     repository->getNNPDestinationByNumberRange(nnpDestinationIds, nnpNumberRange, trace);
 
     auto effectivePackagePrice = setupNNPPackagePrice(nnpAccountTariffLightList,
