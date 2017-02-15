@@ -365,7 +365,7 @@ void Billing::calc(bool realtimePurpose) {
         stateMegaTrunk.prepareFromCdr(cdr); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка.
         stateMegaTrunk.PhaseCalc(); // Расчет фаз маршутизации для Мегатранков
 
-        if (!(stateMegaTrunk.isForceOrigTarifficationSkip() || stateMegaTrunk.isForceTermTarifficationSkip())) {
+        if (!(stateMegaTrunk.isForceOrigTarifficationSkip() || stateMegaTrunk.isForceTermTarifficationSkip() || stateMegaTrunk.isTechOrig())) {
 
             // Не пишем в call_raw технические плечи при пересылке в регион подключения мегатранка и
             // при перемещения звонка из региона мегатранка в регион подключения номера

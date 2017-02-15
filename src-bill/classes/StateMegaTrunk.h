@@ -91,6 +91,11 @@ public:
         return destTrunk;
     }
 
+    bool isTechOrig() {
+
+        return src_trunk!= nullptr && src_trunk->tech_trunk;
+    }
+
     void prepareFromCdr(Cdr *cdr);
     void PhaseCalc();
 
