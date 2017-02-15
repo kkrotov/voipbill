@@ -30,6 +30,7 @@ void ThreadCheckStartTable::run() {
         ssleep(app().conf.udp_force_finish_call_interval);
         forceFinishCalls(waitingForFinishCalls);
     }
+    resetErrors();
 }
 
 void ThreadCheckStartTable::fetchOpencaCurrentCalls(set<long long int> &opencaCalls) {
