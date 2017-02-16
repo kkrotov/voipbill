@@ -21,7 +21,7 @@ bool BlackList::fetch() {
     return true;
 }
 
-void BlackList::push(set<string> &wanted_blacklist) {
+void BlackList::push(set<string> &wanted_blacklist, bool is_trunk) {
 
     vector<string> list;
 
@@ -46,7 +46,23 @@ void BlackList::push(set<string> &wanted_blacklist) {
         }
     }
 
+    Repository repository;
+    if (!repository.prepare() || !repository.billingData->ready())
+        return;
+
     for (auto phone : list_to_add) {
+
+        if (is_trunk) {
+
+            if (!repository.isTrunkLocal(phone))
+                continue;
+        }
+        else {
+
+            if (!repository.isPhoneLocal(phone))
+                continue;
+        }
+
         if (!udp_lock(phone)) {
             continue;
         }
@@ -60,6 +76,18 @@ void BlackList::push(set<string> &wanted_blacklist) {
     }
 
     for (auto phone : list_to_del) {
+
+        if (is_trunk) {
+
+            if (!repository.isTrunkLocal(phone))
+                continue;
+        }
+        else {
+
+            if (!repository.isPhoneLocal(phone))
+                continue;
+        }
+
         if (!udp_unlock(phone)) {
             continue;
         }
