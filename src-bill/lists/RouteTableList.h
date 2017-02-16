@@ -8,7 +8,7 @@ class RouteTableList : public ObjList<RouteTable> {
 protected:
 
     string sql(BDb * db) {
-        return "   select id, name " \
+        return "   select id, name, server_id " \
                "   from auth.route_table " \
                "   where server_id in " + app().conf.get_sql_regions_for_load_list_list() +
                "   order by id asc ";
@@ -17,6 +17,7 @@ protected:
     inline void parse_item(BDbResult &row, RouteTable * item) {
         item->id = row.get_i(0);
         row.fill_cs(1, item->name, sizeof(item->name));
+        item->server_id = row.get_i(2);
     }
 
     struct key_id {
