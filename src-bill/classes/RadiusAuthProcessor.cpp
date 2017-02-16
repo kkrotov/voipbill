@@ -187,7 +187,7 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId, StateMegaTrun
 
     Server *new_server = repository.getServer(routeTable->server_id);
 
-    if(*new_server != nullptr && server->id != new_server->id ) {
+    if( new_server != nullptr && server->id != new_server->id ) {
         if (trace != nullptr) {
             *trace << "INFO|CHANGE REGION| FROM #" << server->id << " TO #" << new_server->id << " " << "\n";
         }
