@@ -70,6 +70,6 @@ regional_db_test_create_and_load() {
 
 }
 
-main_db_test_create_and_load
+#main_db_test_create_and_load
 
 regional_db_test_create_and_load

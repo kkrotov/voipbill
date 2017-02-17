@@ -9,7 +9,7 @@ class TrunkByNameList : public ObjList<Trunk> {
 protected:
 
     string sql(BDb * db) {
-        return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, source_trunk_rule_default_allowed, default_priority, auto_routing, route_table_id, "\
+        return "   select id, name, trunk_name, code, source_rule_default_allowed, destination_rule_default_allowed, source_trunk_rule_default_allowed, default_priority, auto_routing, route_table_id, " \
                "   our_trunk, auth_by_number, orig_redirect_number_7800, orig_redirect_number, term_redirect_number, capacity, sw_minimalki,server_id,sw_shared,  " \
                "   load_warning, tech_trunk, road_to_regions, pstn_trunk" \
                "   from auth.trunk " \
