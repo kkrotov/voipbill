@@ -22,6 +22,7 @@ struct Trunk {
     bool sw_minimalki;
     bool sw_shared;
     bool tech_trunk;
+    bool pstn_trunk;
 
     int capacity;
     int load_warning;
@@ -49,6 +50,7 @@ struct Trunk {
         trace << "sw_minimalki: " << sw_minimalki << ", ";
         trace << "sw_shared: " << sw_shared << ", ";
         trace << "tech_trunk: " << tech_trunk << ", ";
+        trace << "pstn_trunk: " << pstn_trunk << ", ";
         trace << "load_warning: " << load_warning << ", ";
         std::stringstream result;
         std::copy(road_to_regions.begin(), road_to_regions.end(), std::ostream_iterator<int>(result, " "));
