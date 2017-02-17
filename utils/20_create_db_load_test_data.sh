@@ -15,7 +15,7 @@ NAME_DB_TEST_MAIN=nispd_test
 HOST_DB_TEST_REGIONAL=127.0.0.1
 NAME_DB_TEST_REGIONAL=nispd99_test
 
-DB_USER=kkrotov
+DB_USER=pgsqltest
 
 DB_DUMP_SCHEMA_MAIN=$DIR/SQL/nispd.schema.sql
 DB_DUMP_DATA_MAIN_WO_CALLS=$DIR/SQL/nispd.data_wo_calls_data.sql

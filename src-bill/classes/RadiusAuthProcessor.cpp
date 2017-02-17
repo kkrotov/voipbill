@@ -149,7 +149,7 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
         double buyRate = 0.0;
         Pricelist *firstBuyPricelist = 0;
 
-        if (processOutcome(outcomeId, stateMegaTrunk, &buyRate, &firstBuyPricelist)) {
+        if (processOutcome(outcomeId, stateMegaTrunk, &buyRate, &firstBuyPricelist, callInfo.callIncomingFromMegatrunk)) {
 
             prepareAuthLogReguestStage2(call, callInfo, buyRate, firstBuyPricelist);
 
@@ -238,7 +238,7 @@ int RadiusAuthProcessor::processRouteTable(const int routeTableId, StateMegaTrun
 
 // Возвращает true, если в pBuyRate возвращается себестоимость одной минуты звонка на транк.
 bool RadiusAuthProcessor::processOutcome(int outcomeId, StateMegaTrunk &stateMegaTrunk, double *pBuyRate,
-                                         Pricelist **pFirstBuyPricelist) {
+                                         Pricelist **pFirstBuyPricelist, bool skipLoopProtection) {
     if (pBuyRate) {
         *pBuyRate = 0;
     }
@@ -259,7 +259,7 @@ bool RadiusAuthProcessor::processOutcome(int outcomeId, StateMegaTrunk &stateMeg
 
     if (outcome->isAuto()) {
 
-        return processAutoOutcome(pBuyRate, pFirstBuyPricelist);
+        return processAutoOutcome(pBuyRate, pFirstBuyPricelist, skipLoopProtection);
 
     } else if (outcome->isMegToReg()) {
 
@@ -299,7 +299,7 @@ bool RadiusAuthProcessor::processOutcome(int outcomeId, StateMegaTrunk &stateMeg
 
 // Возвращает true, если есть хотя бы один транк,
 // а в pBuyRate возвращается себестоимость одной минуты звонка на этот транк.
-bool RadiusAuthProcessor::processAutoOutcome(double *pBuyRate, Pricelist **pFirstBuyPricelist) {
+bool RadiusAuthProcessor::processAutoOutcome(double *pBuyRate, Pricelist **pFirstBuyPricelist, bool skipLoopProtection) {
 
     if (pBuyRate) {
         *pBuyRate = 0;
@@ -319,7 +319,7 @@ bool RadiusAuthProcessor::processAutoOutcome(double *pBuyRate, Pricelist **pFirs
 
     vector<ServiceTrunkOrder> termServiceTrunks;
 
-    getAvailableTermServiceTrunk(termServiceTrunks, origServiceTrunkOrder, fUseMinimalki);
+    getAvailableTermServiceTrunk(termServiceTrunks, origServiceTrunkOrder, fUseMinimalki, skipLoopProtection);
 
     double origRub = origServiceTrunkOrder.is_price_present() ? this->repository.priceToRoubles(
             origServiceTrunkOrder.getPrice(), origServiceTrunkOrder.getCurrency()) : 0;
@@ -344,7 +344,8 @@ void RadiusAuthProcessor::getAvailableOrigServiceTrunk(ServiceTrunkOrder &origSe
 }
 
 void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks,
-                                                       ServiceTrunkOrder &origServiceTrunkOrder, bool fUseMinimalki) {
+                                                       ServiceTrunkOrder &origServiceTrunkOrder,
+                                                       bool fUseMinimalki, bool skipLoopProtection ) {
     vector<Trunk *> termTrunks;
 
     int server_id = app().conf.instance_id;
@@ -360,7 +361,7 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
 
     for (auto termTrunk : termTrunks) {
 
-        if (this->origTrunk != nullptr && this->origTrunk->id == termTrunk->id) {
+        if (this->origTrunk != nullptr && this->origTrunk->id == termTrunk->id && !skipLoopProtection) {
             if (trace != nullptr) {
                 *trace << "INFO|TERM SERVICE TRUNK DECLINE|SKIP LOOP ROUTE, " << termTrunk->name << " (" <<
                        termTrunk->id << ")" << "\n";

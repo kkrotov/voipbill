@@ -66,7 +66,9 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr, StateMegaTrunk 
 
         processNNP();                   // Расчитываем nnp-параметры для плеча.
 
-        if (callInfo->trunk->auth_by_number || isNeedForceCalcByNumber() ) {
+        callInfo->callIncomingFromMegatrunk = isNeedForceCalcByNumber();
+
+        if (callInfo->trunk->auth_by_number || callInfo->callIncomingFromMegatrunk ) {
                calcByNumber(isForceOrigTarifficationSkip());             // Дальше производятся тарификация плеча по схеме "авторизация по номеру"
         } else {
             calcByTrunk();              // Дальше производятся тарификация плеча по схеме "авторизация по транку"
