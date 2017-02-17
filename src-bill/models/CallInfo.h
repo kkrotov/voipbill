@@ -54,6 +54,8 @@ struct CallInfo {
     NNPPackagePrice * nnpPackagePrice = nullptr;
     NNPPackagePricelist * nnpPackagePricelist = nullptr;
 
+    bool callIncomingFromMegatrunk = false;
+
     DT dt;
     DT dtUtc;
 

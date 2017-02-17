@@ -59,9 +59,9 @@ private:
 
     bool filterByNumber(const int numberId, string strNumber);
 
-    bool processOutcome(int outcomeId, StateMegaTrunk &stateMegaTrunk, double *pBuyRate = 0, Pricelist **pFirstBuyPricelist = 0);
+    bool processOutcome(int outcomeId, StateMegaTrunk &stateMegaTrunk, double *pBuyRate = 0, Pricelist **pFirstBuyPricelist = 0, bool skipLoopProtection = false);
 
-    bool processAutoOutcome(double *pBuyRate = 0, Pricelist **pFirstBuyPricelist = 0);
+    bool processAutoOutcome(double *pBuyRate = 0, Pricelist **pFirstBuyPricelist = 0, bool skipLoopProtection = false);
 
     void processRouteCaseOutcome(Outcome *outcome);
 
@@ -72,7 +72,7 @@ private:
     void getAvailableOrigServiceTrunk(ServiceTrunkOrder &origServiceTrunkOrder);
 
     void getAvailableTermServiceTrunk(vector<ServiceTrunkOrder> &termServiceTrunks,ServiceTrunkOrder &origServiceTrunkOrder,
-                                      bool fUseMinimalki);
+                                      bool fUseMinimalki, bool skipLoopProtection);
 
     bool processAutoRouteResponse(vector<ServiceTrunkOrder> &termOrders, double *pBuyRate = 0,
                                   Pricelist **pFirstBuyPricelist = 0, double origRub = 0);
@@ -100,8 +100,6 @@ private:
     bool matchPrefixlist(const int prefixlistId, string strNumber);
 
     bool isEmergencyCall(Call &call);
-
-    pair<bool, int>  isNeedTransferToTrunkBeam(Call &call);
 
     void prepareAuthLogReguestStage1(Call &call, CallInfo &callInfo);
     void prepareAuthLogReguestStage2(Call &call, CallInfo &callInfo, double buyRate,

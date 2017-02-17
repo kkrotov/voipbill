@@ -12,7 +12,7 @@ NAME_DB_REGIONAL=nispd99
 HOST_DB_TEST_REGIONAL=127.0.0.1
 NAME_DB_TEST_REGIONAL=nispd99_test
 
-table_cdr=calls_cdr.cdr_201701
+table_cdr=calls_cdr.cdr_201702
 
 DB_USER=pgsqltest
 

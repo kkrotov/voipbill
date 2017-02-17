@@ -15,7 +15,7 @@ NAME_DB_TEST_MAIN=nispd_test
 HOST_DB_TEST_REGIONAL=127.0.0.1
 NAME_DB_TEST_REGIONAL=nispd99_test
 
-DB_USER=kkrotov
+DB_USER=pgsqltest
 
 region_id=99
 

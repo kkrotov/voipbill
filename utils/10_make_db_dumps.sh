@@ -12,7 +12,7 @@ NAME_DB_MAIN=nispd
 HOST_DB_REGIONAL=reg99.mcntelecom.ru
 NAME_DB_REGIONAL=nispd99
 
-DB_USER=kkrotov
+DB_USER=pgsqltest
 
 ####################################################################################################################################################
 
