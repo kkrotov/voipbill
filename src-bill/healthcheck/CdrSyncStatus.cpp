@@ -22,7 +22,7 @@ SystemStatus CdrSyncStatus::getStatus() {
         !(server->call_sync_delay[0]==0 && server->call_sync_delay[1]==0 && server->call_sync_delay[2]==0)) {
 
         DataBillingContainer *billingData = repository.billingData;
-        time_t delay = billingData->getCallsStoredLastTime() - billingData->lastSyncCentralCallTime;
+        time_t delay = billingData->getCdrsLastTime() - billingData->lastSyncCentralCdrTime;
         healthStatus.itemValue = to_string(delay);
         healthStatus.statusMessage = "Delay is "+ to_string(delay)+" sec";
 
