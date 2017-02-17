@@ -914,7 +914,7 @@ bool RadiusAuthProcessor::isEmergencyCall(Call &call) {
 string RadiusAuthProcessor::analyzeCall(Call &call,
                                         std::map<int, std::pair<RejectReason, time_t> > *o_pAccountIdsBlockedBefore) {
 
-    if (origTrunk != nullptr && origTrunk->tech_trunk) {
+    if (origTrunk != nullptr && ( origTrunk->tech_trunk || origTrunk->pstn_trunk )) {
         return "accept";
     }
 
