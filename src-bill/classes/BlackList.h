@@ -30,5 +30,5 @@ public:
     Spinlock lock;
 
     bool fetch();
-    void push(set<string> &wanted_blacklist, bool is_trunk);
+    void push(set<string> &wanted_blacklist);
 };

@@ -21,7 +21,7 @@ bool BlackList::fetch() {
     return true;
 }
 
-void BlackList::push(set<string> &wanted_blacklist, bool is_trunk) {
+void BlackList::push(set<string> &wanted_blacklist) {
 
     vector<string> list;
 
@@ -52,17 +52,6 @@ void BlackList::push(set<string> &wanted_blacklist, bool is_trunk) {
 
     for (auto phone : list_to_add) {
 
-        if (is_trunk) {
-
-            if (!repository.isTrunkLocal(phone))
-                continue;
-        }
-        else {
-
-            if (!repository.isPhoneLocal(phone))
-                continue;
-        }
-
         if (!udp_lock(phone)) {
             continue;
         }
@@ -76,17 +65,6 @@ void BlackList::push(set<string> &wanted_blacklist, bool is_trunk) {
     }
 
     for (auto phone : list_to_del) {
-
-        if (is_trunk) {
-
-            if (!repository.isTrunkLocal(phone))
-                continue;
-        }
-        else {
-
-            if (!repository.isPhoneLocal(phone))
-                continue;
-        }
 
         if (!udp_unlock(phone)) {
             continue;
