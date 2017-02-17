@@ -12,6 +12,7 @@ struct ServiceNumber {
     time_t expire_dt;
     char tech_number[20];
     int tech_number_operator_id;
+    bool is_local;
 
     // Получить номер для использования в чёрном списке.
     const char* asBlacklistNumber() {

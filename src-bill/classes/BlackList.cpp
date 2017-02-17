@@ -46,7 +46,12 @@ void BlackList::push(set<string> &wanted_blacklist) {
         }
     }
 
+    Repository repository;
+    if (!repository.prepare() || !repository.billingData->ready())
+        return;
+
     for (auto phone : list_to_add) {
+
         if (!udp_lock(phone)) {
             continue;
         }
@@ -60,6 +65,7 @@ void BlackList::push(set<string> &wanted_blacklist) {
     }
 
     for (auto phone : list_to_del) {
+
         if (!udp_unlock(phone)) {
             continue;
         }
