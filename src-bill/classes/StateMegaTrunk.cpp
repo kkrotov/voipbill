@@ -121,7 +121,7 @@ void StateMegaTrunk::PhaseCalc() {
 }
 
 // Если пришлел звонок с номера у которого есть транк на лиц-счете в другом регионе при вхождении из региона меганранка
-// То нужно форсировать авторизацию по номеру
+// То нужно форсировать авторизацию по номеру, причем только когда регион номера А находится на текущем хабе
 
 bool StateMegaTrunk::isForceOrgAuthByNumber() {
 
@@ -135,7 +135,7 @@ bool StateMegaTrunk::isForceOrgAuthByNumber() {
             if (time(nullptr) <= serviceTrunk.expire_dt && serviceTrunk.activation_dt <= time(nullptr)) {
 
                 if (serviceTrunk.client_account_id == serviceNumberNumA->client_account_id &&
-                    src_trunk->is_connected(serviceTrunk.server_id)) {
+                    src_trunk->is_connected(serviceTrunk.server_id) && repository->isRegionOnHub(serviceNumberNumA->server_id) ) {
 
                     if (trace != nullptr) {
                         *trace << "INFO|MEGATRUNK|CALL FROM MEGATRUNK #" << serviceTrunk.trunk_id <<
