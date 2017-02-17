@@ -27,7 +27,7 @@ public:
 
         for (size_t j = 0; j < serviceNumberList->size(); j++) {
             auto serviceNumber = serviceNumberList->get(j);
-            if (serviceNumber->activation_dt > now || serviceNumber->expire_dt < now) {
+            if (serviceNumber->activation_dt > now || serviceNumber->expire_dt < now || !serviceNumber->is_local) {
                 continue;
             }
 

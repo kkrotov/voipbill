@@ -142,24 +142,6 @@ public:
         return serviceNumberByTechNumber->find(technicalNumber, currentTime, trace);
     }
 
-    bool isPhoneLocal (string phoneNum) {
-
-        ServiceNumber *servNumber = serviceNumber->find(std::stoll(phoneNum), currentTime, trace);
-        if (servNumber== nullptr)
-            return false;
-
-        return server->isRegionOnHub(servNumber->server_id) && (servNumber->expire_dt==0 || servNumber->expire_dt<time(nullptr));
-    }
-
-    bool isTrunkLocal (string trunk_name) {
-
-        Trunk *t = getTrunkByName(trunk_name.c_str());
-        if (t== nullptr)
-            return false;
-
-        return server->isRegionOnHub(t->server_id);
-    }
-
     ServiceTrunk *getServiceTrunk(int trunk_id) {
         return serviceTrunk->find(trunk_id, currentTime, trace);
     }

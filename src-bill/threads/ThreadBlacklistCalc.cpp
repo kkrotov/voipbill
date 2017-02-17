@@ -118,9 +118,9 @@ void ThreadBlacklistCalc::run() {
         }
     }
 
-    blacklist_local->push(wanted_blacklist_local, false);
-    blacklist_global->push(wanted_blacklist_global, false);
-    blacklist_trunk->push(wanted_blacklist_trunk, true);
-    blacklist_anti_fraud_disable->push(wanted_blacklist_anti_fraud_disable, false);
+    blacklist_local->push(wanted_blacklist_local);
+    blacklist_global->push(wanted_blacklist_global);
+    blacklist_trunk->push(wanted_blacklist_trunk);
+    blacklist_anti_fraud_disable->push(wanted_blacklist_anti_fraud_disable);
 
 }

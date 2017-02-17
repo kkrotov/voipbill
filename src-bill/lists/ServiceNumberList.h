@@ -8,9 +8,9 @@ class ServiceNumberList : public ObjList<ServiceNumber> {
 protected:
 
     string sql(BDb * db) {
-        return "    select did, id, client_account_id, lines_count, extract(epoch from activation_dt), extract(epoch from expire_dt), tech_number, tech_number_operator_id, server_id " \
+        return "    select did, id, client_account_id, lines_count, extract(epoch from activation_dt), extract(epoch from expire_dt), tech_number, tech_number_operator_id, server_id, " \
+            "       server_id in " + app().conf.get_sql_regions_for_load_list_list() + " as is_local "
             "       from billing.service_number " \
-//            "       where server_id in " + app().conf.get_sql_regions_for_load_list_list() + " "
             "       order by did asc, activation_dt asc ";
         //  and expire_dt > now()
     }
@@ -25,6 +25,7 @@ protected:
         row.fill_cs(6, item->tech_number, sizeof(item->tech_number));
         item->tech_number_operator_id = row.get_i(7);
         item->server_id = row.get_i(8);
+        item->is_local = row.get_b(9);
     }
 
     struct key {
