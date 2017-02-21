@@ -17,6 +17,7 @@ struct Client {
     bool is_blocked;
     bool anti_fraud_disabled;
     bool is_trunk_client;
+    bool is_num_client;
     int account_version;
 
     void dump(stringstream &trace) {
