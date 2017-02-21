@@ -181,10 +181,27 @@ void PageClient::render_client_balance_indicators(std::stringstream &html, Clien
         }
     }
 
-    if(client->is_trunk_client)
-        html << "is_trunk_client: <b>YES</b> <br>\n";
-    else
-        html << "is_trunk_client: <b>NO</b> <br>\n";
+    if(client->is_trunk_client && client->is_num_client) {
+
+        vector<ServiceTrunk> serviceTrunk;
+        repository.getServiceTrunkByClientID (serviceTrunk, client_id);
+        string id_list;
+        for (int i=0; i<serviceTrunk.size(); i++) {
+
+            if (id_list.length()>0)
+                id_list = id_list+",";
+
+            id_list = id_list + to_string(serviceTrunk[i].server_id);
+        }
+        html << "is_trunk_client: <b>MEGATRUNK ("+id_list+")</b> <br>\n";
+    }
+    else {
+
+        if(client->is_trunk_client)
+            html << "is_trunk_client: <b>YES</b> <br>\n";
+        else
+            html << "is_trunk_client: <b>NO</b> <br>\n";
+    }
 
     if (client->hasCreditLimit()) {
         html << "Balance available: <b>" <<
@@ -385,9 +402,11 @@ void PageClient::render(std::stringstream &html, map<string, string> &parameters
     render_client_balance_indicators(html, client);
 
     if (client->account_version == CALL_ACCOUNT_VERSION_5) {
+
         if(client->is_trunk_client) {
             render_trunk_client_packages_info(html, client);
-        } else {
+        }
+        if (client->is_num_client) {
             render_num_client_packages_info(html, client);
         }
     }
