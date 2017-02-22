@@ -185,15 +185,19 @@ void PageClient::render_client_balance_indicators(std::stringstream &html, Clien
 
         vector<ServiceTrunk> serviceTrunk;
         repository.getServiceTrunkByClientID (serviceTrunk, client_id);
-        string id_list;
-        for (int i=0; i<serviceTrunk.size(); i++) {
+        
+        string trunk_name="NULL";
+        int server_id=0;
+        if (serviceTrunk.size()>0) {
 
-            if (id_list.length()>0)
-                id_list = id_list+",";
+            Trunk *trunk = repository.getTrunk(serviceTrunk[0].trunk_id);
+            if (trunk!= nullptr) {
 
-            id_list = id_list + to_string(serviceTrunk[i].server_id);
+                trunk_name = trunk->name;
+                server_id = trunk->server_id;
+            }
         }
-        html << "is_trunk_client: <b>MEGATRUNK ("+id_list+")</b> <br>\n";
+        html << "is_trunk_client: <b>MEGATRUNK ("+trunk_name+": "+to_string(server_id)+")</b> <br>\n";
     }
     else {
 
