@@ -16,6 +16,13 @@ void ThreadHealthManager::run() {
     SystemStatus trunkLoadStatus = app().healthCheckController.getStatus("TrunkLoadStatus");
     if (trunkLoadStatus.statusId==HealthStatus::STATUS_OK || trunkLoadStatus.statusId==HealthStatus::STATUS_WARNING) {
 
+        time_t last_critical_err_time = trunk_error_time[trunkLoadStatus.itemName];
+        if (last_critical_err_time > 0) {
+
+            time_t status_time = time(NULL);
+            int err_delay = status_time - last_critical_err_time;
+            log_report(trunkLoadStatus, status_time, err_delay);
+        }
         trunk_error_time[trunkLoadStatus.itemName] = 0;
         return;
     }
@@ -26,19 +33,25 @@ void ThreadHealthManager::run() {
         trunk_error_time[trunkLoadStatus.itemName] = new_critical_err_time;
         return;
     }
-    if (new_critical_err_time-last_critical_err_time > trunk_critical_load_delay) {
+    int err_delay = new_critical_err_time-last_critical_err_time;
+    if (err_delay > trunk_critical_load_delay) {
 
-        pLogMessage logTrunk(new LogMessage());
-        logTrunk->level = LogLevel::ERROR;
-        logTrunk->type = "trunk";
-        logTrunk->params["_trunk_name"] = trunkLoadStatus.itemName;
-        logTrunk->params["_trunk_load"] = trunkLoadStatus.itemValue;
-        logTrunk->params["status"] = trunkLoadStatus.getStatusString();
-        logTrunk->params["time_delay"] = trunk_critical_load_delay;
-        logTrunk->log_time = new_critical_err_time;
-        logTrunk->message = "Trunk "+trunkLoadStatus.itemName+" overload for more than "+std::to_string(trunk_critical_load_delay)+" sec";
-        app().logger.logMessage(logTrunk);
-
+        log_report(trunkLoadStatus, new_critical_err_time, err_delay);
         trunk_error_time[trunkLoadStatus.itemName] = new_critical_err_time;
     }
+}
+
+void ThreadHealthManager::log_report(SystemStatus trunkLoadStatus, time_t err_time, int err_delay) {
+
+    pLogMessage logTrunk(new LogMessage());
+    logTrunk->level = LogLevel::ERROR;
+    logTrunk->type = "trunk";
+    logTrunk->params["_trunk_name"] = trunkLoadStatus.itemName;
+    logTrunk->params["_trunk_load"] = trunkLoadStatus.itemValue;
+    logTrunk->params["status"] = trunkLoadStatus.getStatusString();
+    logTrunk->params["time_delay"] = err_delay;
+
+    logTrunk->log_time = err_time;
+    logTrunk->message = "Trunk "+trunkLoadStatus.itemName+" overload for more than "+std::to_string(err_delay)+" sec";
+    app().logger.logMessage(logTrunk);
 }

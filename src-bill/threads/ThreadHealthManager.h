@@ -17,4 +17,5 @@ public:
 public:
     ThreadHealthManager();
     static const char* idName() { return "health_manager"; }
+    void log_report(SystemStatus trunkLoadStatus, time_t new_critical_err_time, int err_delay);
 };
