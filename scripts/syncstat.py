@@ -50,7 +50,7 @@ class Sync(Daemon):
 
         cur = self.db_stat.cursor()
         cur.execute("SET TRANSACTION ISOLATION LEVEL READ COMMITTED")
-        cur.execute("SET NAMES koi8r")
+        cur.execute("SET NAMES utf8")
 
     def log_oprations(self, row_count, table):
         logging.info('synchronize ' + `row_count` + ' ' + table + ' table row')
@@ -507,6 +507,7 @@ class Sync(Daemon):
                                  contract_type_id)
                                VALUES
                                 (%s,%s,%s,%s,%s,%s,'%s','%s',%s,%s,%s,%s,%s,%s)""", toins)
+
         if len(todel) > 0:
             cur.executemany("delete from billing.service_trunk where id=%s", todel)
 
