@@ -1,0 +1,1 @@
+ALTER TABLE billing.clients ALTER COLUMN voip_limit_month DROP DEFAULT;
