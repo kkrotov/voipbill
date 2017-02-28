@@ -1,0 +1,1 @@
+ALTER TABLE billing.instance_settings ADD COLUMN auto_lock_finance boolean DEFAULT true;
