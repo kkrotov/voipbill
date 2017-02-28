@@ -155,7 +155,6 @@ class Sync(Daemon):
         cur_stat.execute("""select
                               z.rnd,
                               z.tid,
-                              c.voip_credit_limit,
                               c.voip_credit_limit_day,
                               c.voip_limit_mn_day,
                               case c.voip_disabled when true then 't' else 'f' end,
@@ -192,8 +191,7 @@ class Sync(Daemon):
             if r[2] == None:
                 todel.append((r[1],))
             else:
-                toins.append((r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14],
-                              r[15], r[16]))
+                toins.append((r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15]))
 
         if len(tofix) == 0:
             return 0
@@ -202,7 +200,25 @@ class Sync(Daemon):
         cur.execute('BEGIN')
         if len(toins) > 0:
             cur.executemany(
-                "INSERT INTO billing.clients(id, voip_limit_month, voip_limit_day, voip_limit_mn_day, voip_disabled, balance, credit,amount_date,last_payed_month,organization_id,price_include_vat,is_blocked,timezone_offset,anti_fraud_disabled,account_version,currency)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                """INSERT INTO
+                    billing.clients
+                    (id,
+                     voip_limit_day,
+                     voip_limit_mn_day,
+                     voip_disabled,
+                     balance,
+                     credit,
+                     amount_date,
+                     last_payed_month,
+                     organization_id,
+                     price_include_vat,
+                     is_blocked,
+                     timezone_offset,
+                     anti_fraud_disabled,
+                     account_version,
+                     currency)
+                   VALUES
+                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                 toins)
         if len(todel) > 0:
             cur.executemany("delete from billing.clients where id=%s", todel)
