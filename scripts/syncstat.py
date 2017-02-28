@@ -168,7 +168,8 @@ class Sync(Daemon):
                               c.timezone_offset,
                               case c.anti_fraud_disabled when true then 't' else 'f' end,
                               c.account_version,
-                              c.currency
+                              c.currency,
+                              c.effective_vat_rate
                             from
                               z_sync_postgres z
                             left join
@@ -191,7 +192,7 @@ class Sync(Daemon):
             if r[2] == None:
                 todel.append((r[1],))
             else:
-                toins.append((r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15]))
+                toins.append((r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15], r[16]))
 
         if len(tofix) == 0:
             return 0
@@ -216,9 +217,10 @@ class Sync(Daemon):
                      timezone_offset,
                      anti_fraud_disabled,
                      account_version,
-                     currency)
+                     currency,
+                     effective_vat_rate)
                    VALUES
-                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                 toins)
         if len(todel) > 0:
             cur.executemany("delete from billing.clients where id=%s", todel)
@@ -333,7 +335,7 @@ class Sync(Daemon):
 				                on
 				                  at.city_id = city.id
                             where
-                              z.tbase='""" + tbase + """' and z.tname='uu_account_tariff'
+                              z.tbase='""" + tbase + """' and z.tname='uu_account_tariff' and (vn.number IS NOT NULL OR at.voip_number IS NOT NULL)
                             limit """ + str(partsize))
 
         todel = []

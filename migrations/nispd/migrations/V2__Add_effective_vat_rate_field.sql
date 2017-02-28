@@ -1,0 +1,1 @@
+ALTER TABLE billing.clients ADD COLUMN effective_vat_rate smallint;
