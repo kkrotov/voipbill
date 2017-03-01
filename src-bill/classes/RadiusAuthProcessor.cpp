@@ -957,10 +957,13 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
     spentDaySum = sumDay + sumDay2 + globalDaySum;
     spentDayMNSum = sumMNDay + sumMNDay2 + globalDayMNSum;
 
+    InstanceSettings *instanceSettings = repository.getInstanceSettings(app().conf.instance_id);
+    bool auto_lock_finance = (instanceSettings!= nullptr)? instanceSettings->auto_lock_finance:false;
+
     if (call.trunk_service_id != 0) {
 
         if (isLowBalance(&Client::isConsumedCreditLimit, REASON_NO_BALANCE, client, spentBalanceSum, call,
-                         o_pAccountIdsBlockedBefore)) {
+                         o_pAccountIdsBlockedBefore) && auto_lock_finance) {
 
             // не можем говорить ни секунды
             return "low_balance";
@@ -972,7 +975,7 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
         if (isLowBalance(&Client::isConsumedCreditLimit, REASON_NO_BALANCE, client, spentBalanceSum, call,
                          o_pAccountIdsBlockedBefore)) {
             // Если звонок платный
-            if (abs(call.cost) > 0.000001) {
+            if (abs(call.cost) > 0.000001 && auto_lock_finance ) {
                 return "low_balance";
             }
         }
