@@ -82,8 +82,10 @@ bool ThreadClientLock::needLockLocal(int client_account_id, bool &need_lock_fina
         double spentBalanceSum = sumBalance + (globalCounter ? globalCounter->sumBalance(vat_rate) : 0.0);
         double spentDaySum = sumDay + (globalCounter ? globalCounter->sumDay(vat_rate) : 0.0);
         double spentDayMNSum = sumMNDay + (globalCounter ? globalCounter->sumMNDay(vat_rate) : 0.0);
+        InstanceSettings *instanceSettings = repository.getInstanceSettings(app().conf.instance_id);
+        bool auto_lock_finance = (instanceSettings!= nullptr)? instanceSettings->auto_lock_finance:false;
 
-        if (client->isConsumedCreditLimit(spentBalanceSum)) {
+        if (client->isConsumedCreditLimit(spentBalanceSum) && auto_lock_finance) {
             need_lock_finance = true;
             result = true;
         }

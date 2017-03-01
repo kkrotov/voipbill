@@ -8,6 +8,7 @@ struct InstanceSettings {
     int city_geo_id;
     int country_id;
     int city_id;
+    bool auto_lock_finance;
 
     vector<int> getRegionIds() {
         string temp = string(region_id);
