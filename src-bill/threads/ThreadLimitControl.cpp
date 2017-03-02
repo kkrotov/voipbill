@@ -150,7 +150,15 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
 
     if (call.trunk_service_id != 0) {
 
-        if (client->isConsumedCreditLimit(spentBalanceSum)) {
+        bool auto_lock_finance = true;
+
+        if(repository.prepare()) {
+            InstanceSettings *instanceSettings = repository.getInstanceSettings(app().conf.instance_id);
+            auto_lock_finance = (instanceSettings!= nullptr)? instanceSettings->auto_lock_finance:false;
+        }
+
+                
+        if (client->isConsumedCreditLimit(spentBalanceSum) && auto_lock_finance) {
             logRequest->params["kill_reason"] = "credit_limit";
 
             logRequest->message =
