@@ -53,16 +53,20 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
     uint16_t instance_id = app().conf.instance_id;
     double run_time = app().getRuntime();
     int currentCalls = 0;
+    bool auto_lock_finance = true;
     if (repository.prepare()) {
 
         shared_ptr<CurrentCdrList> cdrList = repository.currentCalls->currentCdr.get();
         currentCalls = (cdrList== nullptr)? 0:cdrList->size();
+        InstanceSettings *instanceSettings = repository.getInstanceSettings(app().conf.instance_id);
+        auto_lock_finance = (instanceSettings != nullptr) ? instanceSettings->auto_lock_finance : false;
     }
     Json::Value jval;
     jval["instanceId"] = instance_id;
     jval["regionList"] = getJsonRegionList();
     jval["currentCalls"] = currentCalls;
     jval["runTime"] = run_time;
+    jval["autoLockFinance"] =  auto_lock_finance;
     if (parameters.find("cmd") != parameters.end()) {
 
         cmd = parameters["cmd"];

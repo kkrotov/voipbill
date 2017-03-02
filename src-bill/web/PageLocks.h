@@ -9,9 +9,27 @@ public:
         return path == "/locks";
     }
     void render(std::stringstream &html, map<string, string> &parameters) {
-        renderHeader("locks", html);
 
+        bool auto_lock_finance = true;
         Repository repository;
+        if (repository.prepare()) {
+
+            InstanceSettings *instanceSettings = repository.getInstanceSettings(app().conf.instance_id);
+            auto_lock_finance = (instanceSettings != nullptr) ? instanceSettings->auto_lock_finance : false;
+        }
+        if (auto_lock_finance) {
+
+            renderHeader("locks", html);
+            html << "auto_lock_finance: <b>TRUE</b>&nbsp; \n";
+        }
+        else {
+
+            renderHeader("locks", html, "white", "red");
+            html << "<style>\n";
+            html << ".warn { background-color: red; color: white; }\n";
+            html << "</style>\n";
+            html << "auto_lock_finance: <b class=warn>FALSE</b>&nbsp; \n";
+        }
 
         auto clientList = repository.data->client.get();
         auto organizationList = repository.data->organization.get();
