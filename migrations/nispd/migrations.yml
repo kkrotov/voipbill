@@ -8,7 +8,3 @@ callbacks:
     afterAll:
         - callbacks/afterAll
         - grants
-conn: dbname=nispd user=migrator password=76543vvv host=eridanus.mcn.ru
-
-db_user: migrator
-db_password: 76543vvv
