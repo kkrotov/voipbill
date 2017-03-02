@@ -1,13 +1,13 @@
 #include "BasePage.h"
 
-void BasePage::renderHeader(string active, std::stringstream &html) {
+void BasePage::renderHeader(string active, std::stringstream &html, string textcolor, string bkdgcolor) {
 
     html << "<style>\n";
     html << "* {font-family:monospace !important;}\n";
     html << "td { text-align: center }\n";
     html << "mark { \n"
-            "    background-color: #DCDCDC;\n"
-            "    color: black;\n"
+            "    background-color: " << bkdgcolor << ";\n"
+            "    color: " << textcolor << ";\n"
             "}\n";
     html << "</style>\n";
 
