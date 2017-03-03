@@ -25,6 +25,7 @@ public:
         fields.push_back("is_blocked");
         fields.push_back("anti_fraud_disabled");
         fields.push_back("account_version");
+        fields.push_back("effective_vat_rate");
 
         datatype.push_back("id integer");
         datatype.push_back("voip_limit_day integer");
@@ -40,5 +41,6 @@ public:
         datatype.push_back("is_blocked boolean");
         datatype.push_back("anti_fraud_disabled boolean");
         datatype.push_back("account_version integer");
+        datatype.push_back("effective_vat_rate smallint");
     }
 };

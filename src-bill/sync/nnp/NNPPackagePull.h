@@ -20,6 +20,7 @@ public:
         fields.push_back("tarification_type");
         fields.push_back("tarification_min_paid_seconds");
         fields.push_back("currency_id");
+        fields.push_back("is_include_vat");
 
         datatype.push_back("tariff_id integer");
         datatype.push_back("service_type_id integer");
@@ -28,5 +29,6 @@ public:
         datatype.push_back("tarification_type integer");
         datatype.push_back("tarification_min_paid_seconds integer");
         datatype.push_back("currency_id character(3)");
+        datatype.push_back("is_include_vat boolean");
     }
 };

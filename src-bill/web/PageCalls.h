@@ -140,7 +140,7 @@ public:
 
                 html << "<td nowrap class=orig>" << callOrig->src_number << "</td>\n";
                 html << "<td nowrap class=orig>" << callOrig->billed_time << "</td>\n";
-                html << "<td nowrap class=orig>" << callOrig->rate << "/" << callOrig->cost << "</td>\n";
+                html << "<td nowrap class=orig>" << callOrig->rate << "/" << callOrig->cost << (callOrig->price_includes_vat? " (+vat)":"") << "</td>\n";
                 html << "<td nowrap class=orig>" << callOrig->trunk_id << '/' << callOrig->server_id << "</td>\n";
                 html << "<td nowrap><a class=orig href='/client?id=" << callOrig->account_id << "'>" <<
                 callOrig->account_id << "</a>/" << callOrig->account_version << "</td>\n";
@@ -182,7 +182,7 @@ public:
 
                 html << "<td nowrap class=term>" << callTerm->dst_number << "</td>\n";
                 html << "<td nowrap class=term>" << callTerm->billed_time << "</td>\n";
-                html << "<td nowrap class=term>" << callTerm->rate << "/" << callTerm->cost << "</td>\n";
+                html << "<td nowrap class=term>" << callTerm->rate << "/" << callTerm->cost << (callTerm->price_includes_vat? " (+vat)":"") << "</td>\n";
                 html << "<td nowrap class=term>" << callTerm->trunk_id << '/' << callOrig->server_id << "</td>\n";
                 html << "<td nowrap><a class=term href='/client?id=" << callTerm->account_id << "'>" <<
                 callTerm->account_id << "</a>/" << callTerm->account_version << "</td>\n";
