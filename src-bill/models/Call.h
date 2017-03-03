@@ -30,6 +30,7 @@ struct Call {
     int billed_time;
     double rate;
     double cost;
+    bool price_includes_vat;        // цена с/без НДС
     double tax_cost;
     double interconnect_rate;
     double interconnect_cost;
@@ -163,6 +164,7 @@ struct Call {
         tax_cost = 0.0;
         interconnect_rate = 0.0;
         interconnect_cost = 0.0;
+        price_includes_vat = false;
 
         service_package_id = 0;
         service_package_stats_id = 0;

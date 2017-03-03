@@ -73,11 +73,43 @@ void BillingCall::calc(Call *call, CallInfo *callInfo, Cdr *cdr, StateMegaTrunk 
         } else {
             calcByTrunk();              // Дальше производятся тарификация плеча по схеме "авторизация по транку"
         }
-    } catch (CalcException &e) {
+        setVatFlag();     //  выставляем флаг расчета с/без НДС
+    }
+    catch (CalcException &e) {
         if (trace != nullptr) {
             *trace << "ERROR|TARIFFICATION STOPPED|CAUSE " << e.message << "\n";
         }
         return;
+    }
+}
+
+void BillingCall::setVatFlag() {
+
+    if (this->call->account_version == CALL_ACCOUNT_VERSION_4) {
+
+        this->call->price_includes_vat = (this->callInfo->pricelist!= nullptr)? this->callInfo->pricelist->price_include_vat:false;
+        return;
+    }
+    if (this->call->account_version != CALL_ACCOUNT_VERSION_5) {
+
+        return;
+    }
+    if (this->call->nnp_package_price_id) {
+
+        this->call->price_includes_vat = (this->callInfo->nnpPackage!= nullptr)? this->callInfo->nnpPackage->is_include_vat:false;
+        return;
+    }
+    if (this->call->nnp_package_pricelist_id) {
+
+        if (this->callInfo->nnpPackagePricelist!= nullptr) {
+
+            int pricelist_id = this->callInfo->nnpPackagePricelist->pricelist_id;
+            Pricelist *pricelist = repository->getPricelist(pricelist_id);
+            if (pricelist!= nullptr) {
+
+                this->call->price_includes_vat = pricelist->price_include_vat;
+            }
+        }
     }
 }
 

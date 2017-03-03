@@ -10,6 +10,7 @@ struct NNPPackage {
     int tarification_type;
     int tarification_min_paid_seconds;
     char currency_id[4];
+    bool is_include_vat;
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -20,6 +21,7 @@ struct NNPPackage {
         trace << "tarification_interval_seconds: " << tarification_interval_seconds << ", ";
         trace << "tarification_type: " << tarification_type << ", ";
         trace << "tarification_min_paid_seconds: " << tarification_min_paid_seconds << ", ";
+        trace << "is_include_vat: " << is_include_vat << " ";
         trace << ")";
     }
 };

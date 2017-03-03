@@ -19,6 +19,7 @@ struct Client {
     bool is_trunk_client;
     bool is_num_client;
     int account_version;
+    int effective_vat_rate;
 
     void dump(stringstream &trace) {
         trace << "(";
@@ -36,6 +37,7 @@ struct Client {
         trace << "is_trunk_client: " << is_trunk_client << ", ";
         trace << "anti_fraud_disabled: " << anti_fraud_disabled << ", ";
         trace << "account_version: " << account_version << ", ";
+        trace << "effective_vat_rate: " << effective_vat_rate << " ";
         trace << ")";
     }
 

@@ -145,6 +145,8 @@ protected:
     bool isNeedForceCalcByNumber();
 
     bool isForceOrigTarifficationSkip();
+
+    void setVatFlag ();
 };
 
 
