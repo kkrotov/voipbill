@@ -59,7 +59,12 @@ begin
 	
 	IF rel_exists IS NULL OR rel_exists = ''
 	THEN
+		EXECUTE 'select date_trunc(''month'', TIMESTAMP ' || quote_literal(setup_time) || ' );' INTO this_mon;
+		EXECUTE 'select date_trunc(''month'', TIMESTAMP ' || quote_literal(setup_time) || ' + INTERVAL ''1 MON'');' INTO next_mon;
 		EXECUTE 'CREATE TABLE ' || relname || ' (LIKE calls_cdr.cdr_unfinished INCLUDING ALL) INHERITS (calls_cdr.cdr_unfinished) WITH (OIDS=FALSE)';
+		EXECUTE 'ALTER TABLE ' || relname || ' ADD CONSTRAINT cdr_unfinished_' || suffix || '_setup_time_check CHECK (' ||
+                        'setup_time >= ' || quote_literal(this_mon) || '::timestamp without time zone AND ' ||
+                        'setup_time < ' || quote_literal(next_mon) || '::timestamp without time zone)';
 
 		EXECUTE 'GRANT ALL ON TABLE ' || relname || ' TO postgres';
 		EXECUTE 'GRANT SELECT, INSERT, DELETE ON TABLE ' || relname || ' TO g_bill_daemon_remote';
