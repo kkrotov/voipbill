@@ -24,5 +24,6 @@ public:
 public:
     ThreadTasks();
     static const char* idName() { return "tasks"; }
+    shared_ptr<Task> getCurrentTask() { return current_task; };
 };
 
