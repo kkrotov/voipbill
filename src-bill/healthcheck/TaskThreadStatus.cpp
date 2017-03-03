@@ -26,6 +26,8 @@ SystemStatus TaskThreadStatus::getStatus() {
     }
     else {
 
+        healthStatus.itemId = "";
+        healthStatus.statusMessage = "";
         healthStatus.statusId = HealthStatus::STATUS_OK;
     }
     return healthStatus;
