@@ -109,6 +109,7 @@ void PageClient::render_client_current_calls(std::stringstream &html, Client *cl
         html << "<th>billed_time</th>";
         html << "<th>rate</th>";
         html << "<th>cost</th>";
+        html << "<th>VAT client/pricelist</th>";
         html << "<th>account</th>";
         html << "<th>number</th>";
         html << "<th>pricelist_id</th>";
@@ -128,6 +129,7 @@ void PageClient::render_client_current_calls(std::stringstream &html, Client *cl
             html << "<td>" << call.rate << "</td>";
             html << "<td>" << call.cost << "</td>";
             html << "<td>" << call.account_id << "</td>";
+            html << "<td>" << (client->effective_vat_rate? "Yes":"No") << "/" << (call.price_includes_vat? "Yes":"No") << "</td>";
             if (call.trunk_service_id != 0) {
                 html << "<td>trunk " << call.trunk_service_id << "</td>";
             } else if (call.number_service_id != 0) {
@@ -230,6 +232,7 @@ void PageClient::render_client_balance_indicators(std::stringstream &html, Clien
         " (local_mn) + " << string_fmt("%.2f", sum_mn_day2) << " (current_mn) + " <<
         string_fmt("%.2f", sum_mn_day_global) << " (global_mn) <br/>\n";
     }
+    html << "Effective VAT rate: <b>" << client->effective_vat_rate << "</b><br/>\n";
 
     if (client->effective_vat_rate) {
 
