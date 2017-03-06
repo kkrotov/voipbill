@@ -54,7 +54,7 @@ struct Trunk {
         trace << "load_warning: " << load_warning << ", ";
         std::stringstream result;
         std::copy(road_to_regions.begin(), road_to_regions.end(), std::ostream_iterator<int>(result, " "));
-        trace << "road_to_region: " << result << ", ";
+        trace << "road_to_region: " << result.str() << ", ";
         trace << ")";
     }
 };
