@@ -1,0 +1,1 @@
+ALTER TABLE billing.instance_settings DROP COLUMN auto_lock_finance;
