@@ -128,8 +128,8 @@ void PageClient::render_client_current_calls(std::stringstream &html, Client *cl
             html << "<td>" << call.billed_time << "</td>";
             html << "<td>" << call.rate << "</td>";
             html << "<td>" << call.cost << "</td>";
-            html << "<td>" << call.account_id << "</td>";
             html << "<td>" << (client->effective_vat_rate? "Yes":"No") << "/" << (call.price_includes_vat? "Yes":"No") << "</td>";
+            html << "<td>" << call.account_id << "</td>";
             if (call.trunk_service_id != 0) {
                 html << "<td>trunk " << call.trunk_service_id << "</td>";
             } else if (call.number_service_id != 0) {
