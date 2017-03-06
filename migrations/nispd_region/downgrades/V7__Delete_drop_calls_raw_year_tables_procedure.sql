@@ -1,0 +1,1 @@
+DROP FUNCTION calls_raw.delete_old_partitions (year varchar);
