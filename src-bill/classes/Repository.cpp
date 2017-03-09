@@ -768,3 +768,29 @@ void Repository::getTrunkPriority(int trunk_id, vector<TrunkPriority> &trunkPrio
     trunkPriority->findAllTrunkPriority(trunk_id, trunkPriorityList);
 }
 
+bool Repository::isEmergencyCall(string bNumber, int server_id) {
+
+    Server *server = getServer(server_id);
+    if (server== nullptr || server->emergency_prefixlist_id == 0)
+        return false;
+
+    auto prefixlist = getPrefixlist(server->emergency_prefixlist_id);
+    if (prefixlist == nullptr)
+        return false;
+
+    auto prefix = getPrefixlistPrefix(prefixlist->id, bNumber.c_str());
+    if (prefix == nullptr)
+        return  false;
+
+    if (trace != nullptr) {
+        *trace << "DEBUG|EMERGENCY PREFIXLIST MATCHED|" << bNumber << " in "
+               << prefixlist->name << " (" <<
+               prefixlist->id << ")" << "\n";
+    }
+    if (trace != nullptr) {
+        *trace << "INFO|NUMBER MATCHED|" << bNumber << " in " << prefixlist->name << " ("
+               << prefixlist->id << ")" <<
+               "\n";
+    }
+    return true;
+}
