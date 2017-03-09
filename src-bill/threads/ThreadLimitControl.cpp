@@ -78,6 +78,8 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
     if (call.account_id == 0) {
         return false;
     }
+    if (repository.isEmergencyCall(std::to_string(call.dst_number), call.server_id))
+        return false;
 
     auto client = repository.getAccount(call.account_id);
     if (client == nullptr) {

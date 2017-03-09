@@ -884,33 +884,6 @@ bool RadiusAuthProcessor::matchPrefixlist(const int prefixlistId, string strNumb
     return prefix != nullptr;
 }
 
-bool RadiusAuthProcessor::isEmergencyCall(Call &call) {
-
-    if (server != nullptr && server->emergency_prefixlist_id > 0) {
-        auto prefixlist = repository.getPrefixlist(server->emergency_prefixlist_id);
-        if (prefixlist == nullptr) {
-            throw Exception("Prefixlist #" + lexical_cast<string>(server->emergency_prefixlist_id) + " not found",
-                            "RadiusAuthProcessor::filterByNumber");
-        }
-        auto prefix = repository.getPrefixlistPrefix(prefixlist->id, bNumber.c_str());
-        if (prefix) {
-            if (trace != nullptr) {
-                *trace << "DEBUG|EMERGENCY PREFIXLIST MATCHED|" << bNumber << " in "
-                       << prefixlist->name << " (" <<
-                       prefixlist->id << ")" << "\n";
-            }
-            if (trace != nullptr) {
-                *trace << "INFO|NUMBER MATCHED|" << bNumber << " in " << prefixlist->name << " ("
-                       << prefixlist->id << ")" <<
-                       "\n";
-            }
-            return true;
-        }
-    }
-    return false;
-
-}
-
 string RadiusAuthProcessor::analyzeCall(Call &call,
                                         std::map<int, std::pair<RejectReason, time_t> > *o_pAccountIdsBlockedBefore) {
 
@@ -918,7 +891,7 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
         return "accept";
     }
 
-    if (isEmergencyCall(call)) {
+    if (repository.isEmergencyCall(bNumber, origTrunk->server_id)) {
         return "accept";
     }
 
