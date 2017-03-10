@@ -79,6 +79,7 @@ public:
             html << "<th nowrap>src number</th>\n";
             html << "<th nowrap rowspan=2>billed_time</th>\n";
             html << "<th nowrap rowspan=2>rate/cost</th>\n";
+            html << "<th nowrap rowspan=2>VAT client/pricelist</th>";
 
             html << "<th nowrap rowspan=2>trunk/region</th>\n";
             html << "<th nowrap rowspan=2>account/ver</th>\n";
@@ -141,18 +142,23 @@ public:
                 html << "<td nowrap class=orig>" << callOrig->src_number << "</td>\n";
                 html << "<td nowrap class=orig>" << callOrig->billed_time << "</td>\n";
                 html << "<td nowrap class=orig>" << callOrig->rate << "/" << callOrig->cost << (callOrig->price_includes_vat? " (+vat)":"") << "</td>\n";
+
+                auto client = repository.getAccount(callOrig->account_id);
+                int client_vat_rate = (client!= nullptr)? client->effective_vat_rate:0;
+                html << "<td nowrap class=orig>" << (client_vat_rate? "Yes":"No") << "/" << (callOrig->price_includes_vat? "Yes":"No") << "</td>";
+
                 html << "<td nowrap class=orig>" << callOrig->trunk_id << '/' << callOrig->server_id << "</td>\n";
                 html << "<td nowrap><a class=orig href='/client?id=" << callOrig->account_id << "'>" <<
-                callOrig->account_id << "</a>/" << callOrig->account_version << "</td>\n";
+                        callOrig->account_id << "</a>/" << callOrig->account_version << "</td>\n";
                 html << "<td nowrap class=orig>" << origService << "</td>\n";
                 html << "<td nowrap class=orig>" << callOrig->pricelist_id << "</td>\n";
                 html << "<td nowrap class=orig>" << callOrig->prefix << "/" << callOrig->destination_id <<
-                (callOrig->mob ? " mob" : "") << "/" << callOrig->geo_id << "</td>\n";
+                        (callOrig->mob ? " mob" : "") << "/" << callOrig->geo_id << "</td>\n";
 
                 html << "<td nowrap class=orig>" << callOrig->nnp_country_prefix
-                << "(" << callOrig->nnp_ndc << ")/" << callOrig->nnp_region_id <<
-                (callOrig->nnp_is_mob ? " mob" : "") << "/" << callOrig->nnp_city_id
-                << "</td>\n";
+                        << "(" << callOrig->nnp_ndc << ")/" << callOrig->nnp_region_id <<
+                        (callOrig->nnp_is_mob ? " mob" : "") << "/" << callOrig->nnp_city_id
+                        << "</td>\n";
             }
 
             html << "<td nowrap class=orig>" << cdr->src_route << "</td>\n";
@@ -183,20 +189,25 @@ public:
                 html << "<td nowrap class=term>" << callTerm->dst_number << "</td>\n";
                 html << "<td nowrap class=term>" << callTerm->billed_time << "</td>\n";
                 html << "<td nowrap class=term>" << callTerm->rate << "/" << callTerm->cost << (callTerm->price_includes_vat? " (+vat)":"") << "</td>\n";
+
+                auto client = repository.getAccount(callTerm->account_id);
+                int client_vat_rate = (client!= nullptr)? client->effective_vat_rate:0;
+                html << "<td nowrap class=term>" << (client_vat_rate? "Yes":"No") << "/" << (callTerm->price_includes_vat? "Yes":"No") << "</td>";
+
                 html << "<td nowrap class=term>" << callTerm->trunk_id << '/' << callOrig->server_id << "</td>\n";
                 html << "<td nowrap><a class=term href='/client?id=" << callTerm->account_id << "'>" <<
-                callTerm->account_id << "</a>/" << callTerm->account_version << "</td>\n";
+                            callTerm->account_id << "</a>/" << callTerm->account_version << "</td>\n";
                 html << "<td nowrap class=term>" << termService << "</td>\n";
                 html << "<td nowrap class=term>" << callTerm->pricelist_id << "</td>\n";
 
 
                 html << "<td nowrap class=term>" << callTerm->prefix << "/" << callTerm->account_id <<
-                (callTerm->mob ? " mob" : "") << "/" << callTerm->geo_id << "</td>\n";
+                        (callTerm->mob ? " mob" : "") << "/" << callTerm->geo_id << "</td>\n";
 
                 html << "<td nowrap class=term>" << callTerm->nnp_country_prefix
-                << "(" << callTerm->nnp_ndc << ")/" << callTerm->nnp_region_id <<
-                (callTerm->nnp_is_mob ? " mob" : "") << "/" << callTerm->nnp_city_id
-                << "</td>\n";
+                        << "(" << callTerm->nnp_ndc << ")/" << callTerm->nnp_region_id <<
+                        (callTerm->nnp_is_mob ? " mob" : "") << "/" << callTerm->nnp_city_id
+                        << "</td>\n";
 
             }
 
