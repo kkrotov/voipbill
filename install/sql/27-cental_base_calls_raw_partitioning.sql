@@ -18,18 +18,10 @@ BEGIN
 		EXECUTE 'select date_trunc(''month'', TIMESTAMP ' || quote_literal(connect_time) || ' );' INTO this_mon;
 		EXECUTE 'select date_trunc(''month'', TIMESTAMP ' || quote_literal(connect_time) || ' + INTERVAL ''1 MON'');' INTO next_mon;
 			
-		EXECUTE 'CREATE TABLE calls_raw.calls_raw_' || suffix || 
-			' (CONSTRAINT calls_raw_' || suffix || '_pkey PRIMARY KEY (server_id, id),' ||
-			' CONSTRAINT calls_raw_' || suffix || '_connect_time_check CHECK (' || 
+		EXECUTE 'CREATE TABLE ' || relname || ' (LIKE calls_raw.calls_raw INCLUDING ALL) INHERITS (calls_raw.calls_raw) WITH (OIDS=FALSE)';
+		EXECUTE 'ALTER TABLE ' || relname || ' ADD CONSTRAINT calls_raw_' || suffix || '_connect_time_check CHECK (' || 
 			'connect_time >= ' || quote_literal(this_mon) || '::timestamp without time zone AND ' || 
-			'connect_time < ' || quote_literal(next_mon) || '::timestamp without time zone)' || 
-			') INHERITS (calls_raw.calls_raw) WITH (OIDS=FALSE)';
-
-		EXECUTE format('CREATE INDEX calls_raw_' || suffix || '_cdr_id ON calls_raw.calls_raw_' || suffix || ' USING btree (cdr_id);');
-		EXECUTE 'CREATE INDEX calls_raw_' || suffix || '_account_id_idx ON calls_raw.calls_raw_' || suffix || ' USING btree (account_id)';
-		EXECUTE 'CREATE INDEX calls_raw_' || suffix || '_connect_time ON calls_raw.calls_raw_' || suffix || ' USING btree (connect_time)';
-		EXECUTE 'CREATE INDEX calls_raw_' || suffix || '_number_service_id ON calls_raw.calls_raw_' || suffix || ' USING btree (number_service_id)';
-		EXECUTE 'CREATE INDEX calls_raw_' || suffix || '_server_id_connect_time ON calls_raw.calls_raw_' || suffix || ' USING btree (server_id, connect_time)';
+			'connect_time < ' || quote_literal(next_mon) || '::timestamp without time zone)';
 
 		EXECUTE 'ALTER TABLE ' || relname || ' OWNER TO postgres';
 		EXECUTE 'GRANT ALL ON TABLE ' || relname || ' TO postgres';

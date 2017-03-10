@@ -63,9 +63,20 @@ void ThreadLimitControl::run() {
 
 bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequest) {
 
+    bool auto_lock_finance = true;
+
+    if(repository.prepare()) {
+        InstanceSettings *instanceSettings = repository.getInstanceSettings(app().conf.instance_id);
+        auto_lock_finance = (instanceSettings!= nullptr)? instanceSettings->auto_lock_finance:false;
+    }
+
+
     if (call.is_service_number) {
         return false;
     }
+
+    if (repository.isEmergencyCall(std::to_string(call.dst_number), call.server_id))
+        return false;
 
     if (call.account_id == 0) {
         return false;
@@ -150,7 +161,7 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
 
     if (call.trunk_service_id != 0) {
 
-        if (client->isConsumedCreditLimit(spentBalanceSum)) {
+        if (client->isConsumedCreditLimit(spentBalanceSum) && auto_lock_finance) {
             logRequest->params["kill_reason"] = "credit_limit";
 
             logRequest->message =
@@ -173,7 +184,7 @@ bool ThreadLimitControl::limitControlKillNeeded(Call &call, pLogMessage &logRequ
         }
 
         // Блокировка МГМН если превышен лимит кредита
-        if (!call.isLocal()  && client->isConsumedCreditLimit(spentBalanceSum)) {
+        if (!call.isLocal()  && client->isConsumedCreditLimit(spentBalanceSum) && auto_lock_finance) {
             logRequest->params["kill_reason"] = "credit_limit";
 
             logRequest->message =

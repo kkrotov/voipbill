@@ -36,6 +36,7 @@
 #include "../threads/ThreadHealthManager.h"
 #include "../healthcheck/EventManagementStatus.h"
 #include "../healthcheck/EventLoadStatus.h"
+#include "../healthcheck/TaskThreadStatus.h"
 
 AppBill &app() {
     static AppBill appVar;
@@ -57,6 +58,7 @@ void AppBill::setHealthCheck() {
     healthCheckController.add(std::shared_ptr<RadiusAuthServerStatus>(new RadiusAuthServerStatus()));
     healthCheckController.add(std::shared_ptr<EventManagementStatus>(new EventManagementStatus()));
     healthCheckController.add(std::shared_ptr<EventLoadStatus>(new EventLoadStatus()));
+    healthCheckController.add(std::shared_ptr<TaskThreadStatus>(new TaskThreadStatus()));
 }
 
 void AppBill::runApp() {
@@ -140,7 +142,7 @@ void AppBill::runAppInSingleMode() {
             "fetch_cdr",
             // Расчет себестоимости звонка, Расчет цены MCN для звонка
             "runtime",
-            // Обновление центральной БД (копирование данных из региональной БД в центральную)
+            // сохранение расчитанных вызовов в таблицу calls_raw
             "save",
             // Передача данных по локальным вызовам calls_raw.calls_raw на центральный сервер
             "sync_calls",

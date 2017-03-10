@@ -76,8 +76,27 @@ public:
                         set<int> nnpDestinationIds;
                         NNPNumberRange *nnpNumberRange = repository.getNNPNumberRange(num, is_need_debug_trace ? &html
                                                                                                                : nullptr);
-                        if (nnpNumberRange != nullptr)
+                        if (nnpNumberRange==nullptr) {
+
+                            pair<int,int> prefix_code = repository.getNNPCountryPrefix(num);
+                            NNPNumberRange nnpNumberRange={0};
+                            nnpNumberRange.country_prefix = prefix_code.first;
+                            nnpNumberRange.country_code = prefix_code.second;
+                            html << nnpNumberRange.writeJsonValue();
+                        }
+                        else {
+
+                            if (nnpNumberRange->country_prefix==0) {
+
+                                pair<int,int> prefix_code = repository.getNNPCountryPrefix(num);
+                                nnpNumberRange->country_prefix = prefix_code.first;
+                                nnpNumberRange->country_code = prefix_code.second;
+                            }
+                            if (nnpNumberRange->country_code==0)
+                                nnpNumberRange->country_code = repository.getNNPCountryCode(nnpNumberRange->country_prefix);
+
                             html << nnpNumberRange->writeJsonValue();
+                        }
                     }
                 }
             } else if (cmd == "getBestGeoRoute") {

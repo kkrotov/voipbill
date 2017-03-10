@@ -42,7 +42,8 @@ std::vector<SystemStatus> HealthCheckController::getStatus() {
     std::vector<SystemStatus> stat;
     for (auto healthCheck : healthCheckList ) {
 
-        stat.push_back(healthCheck->getStatus());
+        if (healthCheck->getSystemId().size()>0)
+            stat.push_back(healthCheck->getStatus());
     }
     return stat;
 }

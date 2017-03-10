@@ -36,5 +36,5 @@ class BasePage {
 public:
     virtual bool canHandle(std::string &path) = 0;
     virtual void render(std::stringstream &html, map<string, string> &parameters) = 0;
-    void renderHeader(string active, std::stringstream &html);
+    void renderHeader(string active, std::stringstream &html, string textcolor="black", string bkdgcolor="#DCDCDC");
 };

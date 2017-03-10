@@ -234,6 +234,11 @@ void PageClient::render_client_balance_indicators(std::stringstream &html, Clien
     }
     html << "Effective VAT rate: <b>" << client->effective_vat_rate << "</b><br/>\n";
 
+    if (client->effective_vat_rate) {
+
+        html << "Effective VAT rate: <b>" << client->effective_vat_rate << "</b><br/>\n";
+    }
+
     html << "-----<br/>\n";
 
     html << "Last account date: <b>" << (client->amount_date > 0 ? string_time(client->amount_date) : "<none>") <<

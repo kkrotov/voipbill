@@ -12,9 +12,8 @@ public:
         key = "id";
 
         fields.push_back("id");
-        fields.push_back("voip_limit_month");
         fields.push_back("voip_limit_day");
-            fields.push_back("voip_limit_mn_day");
+        fields.push_back("voip_limit_mn_day");
         fields.push_back("voip_disabled");
         fields.push_back("balance");
         fields.push_back("credit");
@@ -29,9 +28,8 @@ public:
         fields.push_back("effective_vat_rate");
 
         datatype.push_back("id integer");
-        datatype.push_back("voip_limit_month integer");
         datatype.push_back("voip_limit_day integer");
-            datatype.push_back("voip_limit_mn_day integer");
+        datatype.push_back("voip_limit_mn_day integer");
         datatype.push_back("voip_disabled boolean");
         datatype.push_back("balance numeric(12,2)");
         datatype.push_back("credit integer");

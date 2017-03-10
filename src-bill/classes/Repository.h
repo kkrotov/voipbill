@@ -430,4 +430,5 @@ public:
         return server->isRegionOnHub(region);
     }
 
+    bool isEmergencyCall(string bNumber, int server_id);
 };

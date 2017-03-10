@@ -19,7 +19,7 @@ void ManagerPull::add(BasePull * pull) {
 void ManagerPull::pull() {
     string select_events_query =
             "select event, param, version from event.queue where server_id in " + app().conf.get_sql_regions_list() +
-            " order by server_id, version limit " + lexical_cast<string>(part_size);
+            " order by server_id, version "; //limit " + lexical_cast<string>(part_size);
 
     while (true) {
         BDbResult res = db_main.query(select_events_query);
@@ -29,10 +29,11 @@ void ManagerPull::pull() {
 
         clearPulls();
 
+        int events_waiting = 0;
         while (res.next()) {
+
             string event = res.get_s(0);
             string id = res.get_s(1);
-
 
             map<string, BasePull *>::iterator it = pulls.find(event);
             if (it != pulls.end()) {
@@ -41,9 +42,13 @@ void ManagerPull::pull() {
                 db_main.exec("delete from event.queue where server_id in " + app().conf.get_sql_regions_list() +
                              " and event = '" + event + "'");
             }
+            events_waiting++;
+            if (events_waiting>=part_size)
+                break;
         }
 
-        if (res.last()) {
+        if (res.last() || events_waiting>=part_size) {
+
             string version = res.get_s(2);
 
             for (auto it : pulls) {
@@ -51,7 +56,10 @@ void ManagerPull::pull() {
                     it.second->pull();
                     db_main.exec("delete from event.queue where server_id in " + app().conf.get_sql_regions_list() +
                                  " and event = '" + it.second->event + "' and version <= " + version);
-                } catch (Exception &e) {
+                    event_count--;
+                }
+                catch (Exception &e) {
+
                     e.addTrace("ManagerPull:pull");
                     Log::exception(e);
                     errors_count += 1;

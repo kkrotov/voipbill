@@ -884,33 +884,6 @@ bool RadiusAuthProcessor::matchPrefixlist(const int prefixlistId, string strNumb
     return prefix != nullptr;
 }
 
-bool RadiusAuthProcessor::isEmergencyCall(Call &call) {
-
-    if (server != nullptr && server->emergency_prefixlist_id > 0) {
-        auto prefixlist = repository.getPrefixlist(server->emergency_prefixlist_id);
-        if (prefixlist == nullptr) {
-            throw Exception("Prefixlist #" + lexical_cast<string>(server->emergency_prefixlist_id) + " not found",
-                            "RadiusAuthProcessor::filterByNumber");
-        }
-        auto prefix = repository.getPrefixlistPrefix(prefixlist->id, bNumber.c_str());
-        if (prefix) {
-            if (trace != nullptr) {
-                *trace << "DEBUG|EMERGENCY PREFIXLIST MATCHED|" << bNumber << " in "
-                       << prefixlist->name << " (" <<
-                       prefixlist->id << ")" << "\n";
-            }
-            if (trace != nullptr) {
-                *trace << "INFO|NUMBER MATCHED|" << bNumber << " in " << prefixlist->name << " ("
-                       << prefixlist->id << ")" <<
-                       "\n";
-            }
-            return true;
-        }
-    }
-    return false;
-
-}
-
 string RadiusAuthProcessor::analyzeCall(Call &call,
                                         std::map<int, std::pair<RejectReason, time_t> > *o_pAccountIdsBlockedBefore) {
 
@@ -918,7 +891,7 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
         return "accept";
     }
 
-    if (isEmergencyCall(call)) {
+    if (repository.isEmergencyCall(bNumber, origTrunk->server_id)) {
         return "accept";
     }
 
@@ -957,10 +930,13 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
     spentDaySum = sumDay + sumDay2 + globalDaySum;
     spentDayMNSum = sumMNDay + sumMNDay2 + globalDayMNSum;
 
+    InstanceSettings *instanceSettings = repository.getInstanceSettings(app().conf.instance_id);
+    bool auto_lock_finance = (instanceSettings!= nullptr)? instanceSettings->auto_lock_finance:false;
+
     if (call.trunk_service_id != 0) {
 
         if (isLowBalance(&Client::isConsumedCreditLimit, REASON_NO_BALANCE, client, spentBalanceSum, call,
-                         o_pAccountIdsBlockedBefore)) {
+                         o_pAccountIdsBlockedBefore) && auto_lock_finance) {
 
             // не можем говорить ни секунды
             return "low_balance";
@@ -972,7 +948,7 @@ string RadiusAuthProcessor::analyzeCall(Call &call,
         if (isLowBalance(&Client::isConsumedCreditLimit, REASON_NO_BALANCE, client, spentBalanceSum, call,
                          o_pAccountIdsBlockedBefore)) {
             // Если звонок платный
-            if (abs(call.cost) > 0.000001) {
+            if (abs(call.cost) > 0.000001 && auto_lock_finance ) {
                 return "low_balance";
             }
         }

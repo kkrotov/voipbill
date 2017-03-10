@@ -335,7 +335,7 @@ class Sync(Daemon):
 				                on
 				                  at.city_id = city.id
                             where
-                              z.tbase='""" + tbase + """' and z.tname='uu_account_tariff' and (vn.number IS NOT NULL OR at.voip_number IS NOT NULL)
+                              z.tbase='""" + tbase + """' and z.tname='uu_account_tariff' and at.voip_number IS NOT NULL and at.service_type_id = 2 and at.id >= 100000
                             limit """ + str(partsize))
 
         todel = []
@@ -621,7 +621,7 @@ class Sync(Daemon):
             if r[2] == None:
                 todel.append((r[1],))
             else:
-                toins.append((r[1], r[2].decode('koi8-r'), r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11]))
+                toins.append((r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11]))
 
         if len(tofix) == 0:
             return 0
@@ -662,7 +662,7 @@ class Sync(Daemon):
                               on
                                 z.tid=c.id
                             where
-                              z.tbase='""" + tbase + """' and z.tname='log_tarif'
+                              z.tbase='""" + tbase + """' and z.tname='log_tarif' and c.service = 'usage_voip'
                             limit """ + str(partsize))
         todel = []
         toins = []
