@@ -238,7 +238,7 @@ void CallsManager::calls_insert_row(Call *call, stringstream &q) {
         q << "NULL";
     }
     q << ",";
-    q << call->price_includes_vat? "true":"false";
+    q << (call->price_includes_vat? "true":"false");
     q << ")\n";
 }
 
