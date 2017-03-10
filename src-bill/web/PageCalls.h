@@ -23,6 +23,9 @@ public:
             show_outgoing = false;
         }
         Repository repository;
+        if (!repository.prepare(time(nullptr))) {
+            return;
+        }
         shared_ptr<CurrentCdrList> cdrList = repository.currentCalls->currentCdr.get();
         if (cdrList == nullptr) {
 
