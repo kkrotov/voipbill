@@ -543,7 +543,13 @@ bool RadiusAuthProcessor::processAutoRouteResponse(vector<ServiceTrunkOrder> &te
         if (!hasRateForATrunk) {
             hasRateForATrunk = true;
             if (pBuyRate) {
-                *pBuyRate = trunkOrder.price->price;
+                *pBuyRate = 0;
+                if(trunkOrder.account!= nullptr){
+                    if(trunkOrder.account->account_version==4 && trunkOrder.price != nullptr )
+                        *pBuyRate = trunkOrder.price->price;
+                    if(trunkOrder.account->account_version==5)
+                        *pBuyRate = trunkOrder.nnp_price;
+                }
             }
 
             if (pFirstBuyPricelist) {
