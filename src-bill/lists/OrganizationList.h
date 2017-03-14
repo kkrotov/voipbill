@@ -9,7 +9,7 @@ protected:
     string sql(BDb * db) {
         return "   select id, organization_id, extract(epoch from actual_from), extract(epoch from actual_to), tax_rate " \
                 "   from billing.organization " \
-                "   order by id asc, actual_from asc ";
+                "   order by organization_id asc, actual_from asc ";
     }
 
     inline void parse_item(BDbResult &row, Organization * item) {
