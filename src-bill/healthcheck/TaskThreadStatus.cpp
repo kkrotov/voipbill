@@ -18,15 +18,14 @@ SystemStatus TaskThreadStatus::getStatus() {
         return true;
     });
     shared_ptr<Task> currentTask = threadTasks->getCurrentTask();
+    healthStatus.itemId = "CurrentTask";
     if (currentTask!= nullptr) {
 
-        healthStatus.itemId = "CurrentTask";
         healthStatus.statusMessage = currentTask->getName(); ///currentTask->getStatus();
         healthStatus.statusId = HealthStatus::STATUS_WARNING;
     }
     else {
 
-        healthStatus.itemId = "";
         healthStatus.statusMessage = "";
         healthStatus.statusId = HealthStatus::STATUS_OK;
     }
