@@ -746,8 +746,10 @@ bool Repository::trunkOrderLessThan(const ServiceTrunkOrder &left, const Service
 
 double Repository::getVatRate(Client *client) {
     if (client != nullptr && !client->price_include_vat) {
-
-        return client->effective_vat_rate;
+        auto org = organization->find(client->organization_id, time(nullptr));
+        if (org != nullptr) {
+            return org->vat_rate;
+        }
     }
     return 0;
 }
