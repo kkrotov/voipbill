@@ -77,11 +77,11 @@ for id, server_id, name, trunk_name, src_number, dst_number, src_noa, dst_noa, r
 
     queryRegion = host
     queryRegion += testUrl
-    queryRegion += '&region='
-    queryRegion += str(server_id)
 
     queryReserve = reserveUrl
     queryReserve += testUrl
+    queryReserve += '&region='
+    queryReserve += str(server_id)
 
     resultPage   = requests.get (queryReserve)
     resultString = re.findall ('RESULT\|.*', resultPage.text)
