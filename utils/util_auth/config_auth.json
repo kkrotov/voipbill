@@ -1,0 +1,4 @@
+{
+    "reserve": "reg10.mcntelecom.ru",
+    "db": "dbname = nispd_test user = postgres"
+}

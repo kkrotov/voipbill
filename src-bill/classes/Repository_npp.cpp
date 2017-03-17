@@ -107,6 +107,38 @@ bool Repository::getPrefixByNNPDestination(vector<PhoneNumber> &prefixList, int 
 
 }
 
+void Repository::getPrefixByFilter (std::vector<PhoneNumber>& prefixes, int country_code, int operator_id, int region_id,
+                                    int city_id, int ndc_type_id) {
+    PrefixTree plusTree  (100);
+    if ( !this || !this->nnpNumberRange)
+        return ;
+
+    size_t size = this->nnpNumberRange->size();
+    for (size_t i = 0; i < size; i++) {
+        const NNPNumberRange* rangePtr = this->nnpNumberRange->get(i);
+
+        if (!rangePtr)
+            continue;
+        if ( country_code && rangePtr->country_code != country_code )
+            continue;
+        if ( operator_id && rangePtr->nnp_operator_id != operator_id )
+            continue;
+        if ( region_id && rangePtr->nnp_region_id != region_id )
+            continue;
+        if ( city_id && rangePtr->nnp_city_id != city_id )
+            continue;
+        if ( ndc_type_id && rangePtr->ndc != ndc_type_id )
+            continue;
+
+        std::pair<PhoneNumber, PhoneNumber> range = {rangePtr->full_number_from, rangePtr->full_number_to};
+        plusTree.addRange(range);
+    }
+    char array[32] = {};
+    plusTree.print(array, 0, 0, prefixes);
+
+    return ;
+}
+
 void Repository::findNNPPackagePricelistIds(set<pair<double, NNPPackagePricelist *>> &resultNNPPackagePricelistIds,
                                             int tariff_id,
                                             long long int num, stringstream *trace) {
