@@ -19,7 +19,13 @@ void RadiusAuthProcessor::init() {
                         "RadiusAuthProcessor::process");
     }
 
-    server = repository.getServer(origTrunk->server_id);
+    if(request->region >0) {
+        server = repository.getServer(request->region);
+    }
+     else {
+        server = repository.getServer(origTrunk->server_id);
+    }
+
     if (server == nullptr) {
         throw Exception(
                 "Udp request validation: server_id" + to_string(origTrunk->server_id) + " by trunk not found: " +
@@ -348,11 +354,15 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
                                                        bool fUseMinimalki, bool skipLoopProtection ) {
     vector<Trunk *> termTrunks;
 
+    set<int> simblingRegions;
+
     int server_id = app().conf.instance_id;
 
     if (server != nullptr) server_id = server->id;
 
-    repository.getAllAutoRoutingTrunks(termTrunks, server_id);
+    repository.getSimblingRegion(simblingRegions, server_id);
+
+    repository.getAllAutoRoutingTrunks(termTrunks, server_id,simblingRegions);
 
     if (trace != nullptr) {
         *trace << "INFO| USE_MINIMALKI |  " << (fUseMinimalki ? "YES" : "NO") << "" << "\n";
