@@ -31,6 +31,7 @@ protected:
     CallInfo *callInfo;
     Cdr *cdr;
     StateMegaTrunk *stateMegaTrunk;
+    int origRegion = app().conf.instance_id;
 
     stringstream *trace;
 
@@ -42,6 +43,10 @@ public:
     void clearTrace();
 
     void calc(Call *call, CallInfo *callInfo, Cdr *cdr, StateMegaTrunk *stateMegaTrunk);
+
+    void setOrigRegion(int  origRegion) {
+        this->origRegion = origRegion;
+    }
 
 protected:
     void calcByTrunk();
@@ -147,6 +152,8 @@ protected:
     bool isForceOrigTarifficationSkip();
 
     void setVatFlag ();
+
+
 };
 
 

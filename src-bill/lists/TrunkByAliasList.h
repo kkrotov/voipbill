@@ -14,7 +14,7 @@ protected:
                "   from auth.trunk " \
                "   where server_id in " + app().conf.get_sql_regions_for_load_list_list() +
                " and trunk_name_alias is not null "
-                       "   order by trunk_name_alias asc ";
+                       "   order by trunk_name_alias asc , server_id asc ";
     }
 
     inline void parse_item(BDbResult &row, Trunk * item) {
@@ -65,7 +65,7 @@ protected:
     };
 
 public:
-    Trunk * find(const char * trunk_name, stringstream *trace = nullptr) {
+    Trunk * find(const char * trunk_name, set<int> &simblingRegions, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
         {
@@ -73,7 +73,14 @@ public:
             begin = p.first;
             end = p.second;
         }
+
         Trunk * result = begin <  end ? &*begin : nullptr;
+
+        if(result != nullptr) {
+            while( begin < end ? simblingRegions.count(begin->server_id)==0 : false)
+                begin++;
+            result = begin <  end ? &*begin : nullptr;
+        }
 
         if (trace != nullptr) {
 
