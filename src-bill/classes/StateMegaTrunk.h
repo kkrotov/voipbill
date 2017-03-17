@@ -64,6 +64,8 @@ private:
     bool isNeedForceTermAuthByNumber = false;
     bool isNeedForceTermTarifficationSkip = false;
 
+    set<int> simblingRegions;
+
     stringstream *trace;
 
     Trunk *destTrunk = nullptr;
