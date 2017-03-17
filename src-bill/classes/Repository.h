@@ -236,11 +236,6 @@ public:
         return prefixlist->find(id, trace);
     }
 
-    bool getPrefixlistByNNPDest (int nnpDestId, vector<Prefixlist> &preflist) {
-
-        return this->prefixlist->get_by_nnp_dest(nnpDestId, preflist);
-    }
-
     PrefixlistPrefix *getPrefixlistPrefix(int prefixlist_id, const char *prefix) {
         return prefixlistPrefix->find(prefixlist_id, prefix, trace);
     }
