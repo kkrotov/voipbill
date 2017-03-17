@@ -23,6 +23,7 @@ void StateMegaTrunk::prepareFromCdr(Cdr *cdr) {
         serviceNumberNumA = repository->getServiceNumber(cdr->src_number);
         serviceNumberNumB = repository->getServiceNumber(cdr->dst_number);
 
+        repository->getSimblingRegion(simblingRegions, origRegion);
     }
 }
 
@@ -42,7 +43,7 @@ void StateMegaTrunk::PhaseCalc() {
                 if (serviceTrunk.client_account_id == serviceNumberNumB->client_account_id &&
                     serviceTrunk.term_enabled) {
 
-                    if (!repository->isRegionOnHub(serviceTrunk.server_id)) {
+                    if (simblingRegions.count(serviceTrunk.server_id)==0) {
                         // Провеяем, есть на лицевом счете номера B услуга транк,
                         // если такой транк находится в другом регионе, включаем Фазу 1 и перемещаемся в этот регион.
 
@@ -100,7 +101,7 @@ void StateMegaTrunk::PhaseCalc() {
 
                     destTrunk = repository->getTrunk(serviceTrunk.trunk_id);
 
-                    if (!repository->isRegionOnHub(serviceNumberNumA->server_id) && destTrunk != nullptr) {
+                    if (simblingRegions.count(serviceNumberNumA->server_id)==0 && destTrunk != nullptr) {
                         if (trace != nullptr) {
                             *trace << "INFO|MEGATRUNK|CALL FROM MEGATRUNK " << destTrunk->name << " (" << serviceTrunk.trunk_id
                                    << ") IN REGION #" << destTrunk->server_id <<
@@ -135,7 +136,7 @@ bool StateMegaTrunk::isForceOrgAuthByNumber() {
             if (time(nullptr) <= serviceTrunk.expire_dt && serviceTrunk.activation_dt <= time(nullptr)) {
 
                 if (serviceTrunk.client_account_id == serviceNumberNumA->client_account_id &&
-                    src_trunk->is_connected(serviceTrunk.server_id) && repository->isRegionOnHub(serviceNumberNumA->server_id) ) {
+                    src_trunk->is_connected(serviceTrunk.server_id) && simblingRegions.count(serviceNumberNumA->server_id)>0 ) {
 
                     if (trace != nullptr) {
                         *trace << "INFO|MEGATRUNK|CALL FROM MEGATRUNK #" << serviceTrunk.trunk_id <<

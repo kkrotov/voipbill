@@ -1176,8 +1176,13 @@ void RadiusAuthProcessor::processMegaTrunkPhase1(StateMegaTrunk &megaTrunk) {
 
     string routeCase;
     vector<Trunk *> resultTrunks;
+    set<int> simblingRegions;
 
-    repository.getAllRoadToRegion(resultTrunks, app().conf.instance_id, regionNum, trace);
+    int server_id = app().conf.instance_id;
+    if (server != nullptr) server_id = server->id;
+    repository.getSimblingRegion(simblingRegions, server_id);
+
+    repository.getAllRoadToRegion(resultTrunks, server_id, regionNum, simblingRegions, trace);
 
     std::random_shuffle(resultTrunks.begin(), resultTrunks.end());
 
