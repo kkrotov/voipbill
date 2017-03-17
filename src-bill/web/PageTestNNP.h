@@ -24,8 +24,6 @@ public:
     }
 
     void render(std::stringstream &html, map<string, string> &parameters) ;
-    bool getMainPrefixList (int prefixlist_id, Prefixlist &prefixlist);
-    bool savePrefixList (int prefixlist_id, std::vector<PhoneNumber> phoneList);
 
 private:
     void getDestinationByNum (std::stringstream &html, map<string, string> &parameters);
@@ -34,4 +32,6 @@ private:
     void getBestPriceRoute (std::stringstream &html, map<string, string> &parameters);
     void getPrefixListByDestinationID (std::stringstream &html, map<string, string> &parameters);
     void fillNNPPrefixList (std::stringstream &html, map<string, string> &parameters);
+    bool getMainPrefixList (int prefixlist_id, Prefixlist &prefixlist, string &errormessage);
+    bool savePrefixList (int prefixlist_id, std::vector<PhoneNumber> phoneList, string &errormessage);
 };

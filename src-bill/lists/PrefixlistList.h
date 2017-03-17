@@ -8,7 +8,7 @@ class PrefixlistList : public ObjList<Prefixlist> {
 protected:
 
     string sql(BDb * db) {
-        return "   select id, name, nnp_filter_json ->> 'nnp_destination_id' " \
+        return "   select id, name " //, nnp_filter_json ->> 'nnp_destination_id' "
             "   from auth.prefixlist " \
             "   where server_id in " + app().conf.get_sql_regions_for_load_list_list() +
                "   order by id asc ";
@@ -17,7 +17,7 @@ protected:
     inline void parse_item(BDbResult &row, Prefixlist * item) {
         item->id = row.get_i(0);
         row.fill_cs(1, item->name, sizeof(item->name));
-        item->nnp_destination_id = row.get_i(2);
+        //item->nnp_destination_id = row.get_i(2);
     }
 
     struct key_id {
