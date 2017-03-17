@@ -124,7 +124,7 @@ public:
         return trunk->findAnyOurTrunk(server_id, trace);
     }
 
-    Trunk *getTrunkByName(const char *trunk_name);
+    Trunk *getTrunkByName(const char *trunk_name, int org_server_id = 0);
 
     TrunkGroup *getTrunkGroup(int trunk_group_id) {
         return trunkGroup->find(trunk_group_id, trace);

@@ -18,7 +18,7 @@ void StateMegaTrunk::clearTrace() {
 
 void StateMegaTrunk::prepareFromCdr(Cdr *cdr) {
     if (cdr != nullptr) {
-        src_trunk = repository->getTrunkByName(cdr->src_route);
+        src_trunk = repository->getTrunkByName(cdr->src_route,origRegion);
 
         serviceNumberNumA = repository->getServiceNumber(cdr->src_number);
         serviceNumberNumB = repository->getServiceNumber(cdr->dst_number);

@@ -693,7 +693,7 @@ bool BillingCall::isUsage7800() {
  */
 
 void BillingCall::setupTrunk() {
-    callInfo->trunk = repository->getTrunkByName(getRoute());
+    callInfo->trunk = repository->getTrunkByName(getRoute(),origRegion);
     call->server_id = app().conf.instance_id;
     if (callInfo->trunk == nullptr) {
         throw CalcException("TRUNK WAS NOT FOUND");
@@ -773,7 +773,7 @@ void BillingCall::setupEffectiveTermTrunkSettings() {
     repository->getTrunkSettingsOrderList(trunkSettingsOrderList, callInfo->trunk, call->src_number, call->dst_number,
                                           SERVICE_TRUNK_SETTINGS_TERMINATION);
 
-    Trunk *orig_trunk = repository->getTrunkByName(cdr->src_route);
+    Trunk *orig_trunk = repository->getTrunkByName(cdr->src_route,origRegion);
     if (orig_trunk == nullptr) {
         throw CalcException("ORIG TRUNK WAS NOT FOUND");
     }

@@ -50,6 +50,8 @@ private:
     CallInfo *callInfo;
     Cdr *cdr;
 
+    int origRegion = app().conf.instance_id;
+
     Trunk *src_trunk = nullptr;
 
     ServiceNumber *serviceNumberNumA = nullptr;
@@ -107,4 +109,9 @@ public:
 
 
     bool isForceTermTarifficationSkip();
+
+    void setOrigRegion(int  origRegion) {
+        this->origRegion = origRegion;
+    }
 };
+

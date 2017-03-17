@@ -13,7 +13,14 @@ void RadiusAuthProcessor::init() {
 
     billingNotReady = false;
 
-    origTrunk = repository.getTrunkByName(request->trunkName.c_str());
+    int server_id = 0;
+
+    if(request->region >0) {
+        server = repository.getServer(request->region);
+        if(server) server_id = server->id;
+    }
+
+    origTrunk = repository.getTrunkByName(request->trunkName.c_str(),server_id);
     if (origTrunk == nullptr) {
         throw Exception("Udp request validation: trunk not found: " + request->trunkName,
                         "RadiusAuthProcessor::process");
@@ -88,6 +95,12 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
 
         BillingCall billingCall(&repository);
         StateMegaTrunk stateMegaTrunk(&repository);
+
+        if(request->region > 0)
+        {
+            billingCall.setOrigRegion(request->region);
+            stateMegaTrunk.setOrigRegion(request->region);
+        }
 
         stateMegaTrunk.setTrace(trace);
         stateMegaTrunk.prepareFromCdr(&cdr); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка.
