@@ -40,10 +40,12 @@ public:
         if (parameters.find("dst_noa") != parameters.end())
             request.dstNoa = atoi(parameters["dst_noa"].c_str());
 
+        if (parameters.find("region") != parameters.end())
+            request.region = atoi(parameters["region"].c_str());
+
         html << "INFO|REQUEST|";
         request.dump(html);
         html << "\n";
-
 
         Repository repository;
         if (!repository.prepare()) {

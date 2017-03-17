@@ -79,14 +79,14 @@ public:
         return result;
     }
 
-    void findAllAutorouting(vector<Trunk *> &resultTrunks, int server_id, stringstream *trace = nullptr) {
+    void findAllAutorouting(vector<Trunk *> &resultTrunks, int server_id,  set<int> &simblingRegions, stringstream *trace = nullptr) {
         auto begin = this->data.begin();
         auto end = this->data.end();
 
         for (auto it = begin; it != end; ++it) {
             Trunk *trunk = &*it;
 
-            if (trunk->auto_routing && (trunk->server_id == server_id || trunk->sw_shared)) {
+            if (trunk->auto_routing && (trunk->server_id == server_id || ( simblingRegions.count(trunk->server_id) > 0 && trunk->sw_shared ))) {
                 if (resultTrunks.size() == 0) {
                     if (trace != nullptr) {
                         *trace << "FOUND|TRUNKS|BY AUTOROUTING" << "\n";
