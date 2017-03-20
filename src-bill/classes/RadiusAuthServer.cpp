@@ -2,8 +2,18 @@
 
 #include "../classes/Exception.h"
 #include "RadiusAuthProcessor.h"
+#include "../classes/Repository.h"
 
 void RadiusAuthServer::run(string secret, uint16_t port) {
+
+    Repository repository;
+
+    if(!repository.prepare() && !app().conf.isApiHostMode()) return;
+
+    if(app().conf.isApiHostMode() && !repository.prepare())
+       Log::info("RadiusAuthServer: start. API-HOST mode. ACCEPT while billing not ready.");
+    else
+        Log::info("RadiusAuthServer: start. Billing ready.");
 
     RadiusServerStack l_stack(RadiusSecret(secret.c_str()), port);
     if (!l_stack.isValid()){
@@ -12,6 +22,12 @@ void RadiusAuthServer::run(string secret, uint16_t port) {
 
     RadiusPacket & l_request = l_stack.getRequest();
     while (true) {
+
+        if(!repository.prepare() && !app().conf.isApiHostMode() )
+           {
+               Log::error("RadiusAuthServer: SKIP. Billing not ready.");
+               return;
+           }
 
         if (l_stack.receiveRequest() != RC_SUCCESS) {
             continue;
@@ -66,6 +82,16 @@ void RadiusAuthServer::spawnRequest(RadiusPacket &p_request, RadiusAuthRequest &
     }
 
     for(p_request.getFirstAttribute(attr); attr.isValid(); p_request.getNextAttribute(attr)) {
+
+        if (attr.getType() == D_ATTR_NAS_IP_ADDRESS) {
+
+            struct in_addr l_addr = attr.getIPAddress();
+
+            request.nasIpAddress = l_addr;
+            logRequest->params["nas_ip_address"] = inet_ntoa(l_addr);
+
+        } else
+
         if (attr.getType() == D_ATTR_CALLING_STATION_ID) {
 
             readRequestString(attr, request.srcNumber);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <arpa/inet.h>
 #include "../classes/ObjList.h"
 #include "../models/Server.h"
 #include "../classes/AppBill.h"
@@ -11,7 +12,7 @@ protected:
         return "select id, low_balance_outcome_id, blocked_outcome_id, min_price_for_autorouting, our_numbers_id," \
                "   calling_station_id_for_line_without_number, service_numbers, hub_id, emergency_prefixlist_id, " \
                "   h_call_sync_delay, h_cdr_sync_delay, h_call_save_delay, h_cdr_proc_wait_count, h_call_save_wait_count, " \
-               "   h_thread_error_count, h_radius_request_delay, h_event_management, h_local_events, name " \
+               "   h_thread_error_count, h_radius_request_delay, h_event_management, h_local_events, name, nas_ip_address " \
                "from public.server " \
                "order by id asc ";
     }
@@ -42,6 +43,9 @@ protected:
         item->main_event_count = get_int_vector(row.get_s(16));
         item->local_event_count = get_int_vector(row.get_s(17));
         item->name = row.get_s(18);
+
+        string nas_ip_address = row.get_s(19);
+        inet_aton(nas_ip_address.c_str(), &item->nas_ip_address);
     }
 
     struct key_id {
@@ -140,18 +144,21 @@ public:
 
         if(server != nullptr) {
             if(server->hub_id > 0) {
+
                 auto begin = this->data.begin();
                 auto end = this->data.end();
                 for (auto i = begin; i < end; i++) {
                     if (i->hub_id == server->hub_id) regions.insert(i->id);
                 }
 
-            } else
-            {
+
+            } else {
                 regions.insert(server_id);
             }
 
         }
 
     }
+
+    int getServerIdByIP(struct in_addr l_addr);
 };
