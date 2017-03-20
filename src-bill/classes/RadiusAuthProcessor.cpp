@@ -16,6 +16,7 @@ void RadiusAuthProcessor::init() {
 
     int server_id = 0;
 
+
     if(app().conf.isApiHostMode() && request->region == 0) {
         server_id = repository.getServerIdByIP(request->nasIpAddress);
 
@@ -28,6 +29,7 @@ void RadiusAuthProcessor::init() {
     }
 
     if(request->region>0) {
+
         server = repository.getServer(request->region);
         if(server) server_id = server->id;
     }
@@ -38,7 +40,9 @@ void RadiusAuthProcessor::init() {
                         "RadiusAuthProcessor::process");
     }
 
-    if(request->region>0) {
+
+   if(request->region >0) {
+
         server = repository.getServer(request->region);
     }
      else {

@@ -142,13 +142,15 @@ public:
         regions.clear();
         Server *server = find(server_id);
 
-        if (server != nullptr) {
-            if (server->hub_id > 0) {
+        if(server != nullptr) {
+            if(server->hub_id > 0) {
+
                 auto begin = this->data.begin();
                 auto end = this->data.end();
                 for (auto i = begin; i < end; i++) {
                     if (i->hub_id == server->hub_id) regions.insert(i->id);
                 }
+
 
             } else {
                 regions.insert(server_id);
