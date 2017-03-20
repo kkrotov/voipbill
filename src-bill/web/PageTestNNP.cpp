@@ -285,6 +285,11 @@ void PageTestNNP::fillNNPPrefixList (std::stringstream &html, map<string, string
     }
     else {
 
+        testNnpStatus["country_code"] = country_code;
+        testNnpStatus["operator_id"] = operator_id;
+        testNnpStatus["region_id"] = region_id;
+        testNnpStatus["city_id"] = city_id;
+        testNnpStatus["ndc_type_id"] = ndc_type_id;
         repository.getPrefixByFilter(phoneList, country_code, operator_id, region_id, city_id, ndc_type_id);
     }
     testNnpStatus["prefix_list_size"] = std::to_string(phoneList.size());
