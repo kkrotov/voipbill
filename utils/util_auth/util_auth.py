@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import re
 import psycopg2
-import pgpubsub
 import time
 import datetime
 import os
@@ -25,7 +24,7 @@ with open('config_auth.json') as data_file:
     data = json.load(data_file)
 
 reserveUrl = 'http://'
-reserveUrl += data["reserve"] + ':8032'
+reserveUrl += data["reserve"] + ':8041'
 
 
 db  = psycopg2.connect(data["db"])
@@ -80,7 +79,7 @@ for id, server_id, name, trunk_name, src_number, dst_number, src_noa, dst_noa, r
 
     queryReserve = reserveUrl
     queryReserve += testUrl
-    queryReserve += '&region='
+    queryReserve += '&server_id='
     queryReserve += str(server_id)
 
     resultPage   = requests.get (queryReserve)

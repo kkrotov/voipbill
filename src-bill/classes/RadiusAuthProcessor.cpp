@@ -13,13 +13,26 @@ void RadiusAuthProcessor::init() {
 
     billingNotReady = false;
 
-    origTrunk = repository.getTrunkByName(request->trunkName.c_str());
+    int server_id = 0;
+
+    if(request->region >0) {
+        server = repository.getServer(request->region);
+        if(server) server_id = server->id;
+    }
+
+    origTrunk = repository.getTrunkByName(request->trunkName.c_str(),server_id);
     if (origTrunk == nullptr) {
         throw Exception("Udp request validation: trunk not found: " + request->trunkName,
                         "RadiusAuthProcessor::process");
     }
 
-    server = repository.getServer(origTrunk->server_id);
+    if(request->region >0) {
+        server = repository.getServer(request->region);
+    }
+     else {
+        server = repository.getServer(origTrunk->server_id);
+    }
+
     if (server == nullptr) {
         throw Exception(
                 "Udp request validation: server_id" + to_string(origTrunk->server_id) + " by trunk not found: " +
@@ -82,6 +95,12 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
 
         BillingCall billingCall(&repository);
         StateMegaTrunk stateMegaTrunk(&repository);
+
+        if(request->region > 0)
+        {
+            billingCall.setOrigRegion(request->region);
+            stateMegaTrunk.setOrigRegion(request->region);
+        }
 
         stateMegaTrunk.setTrace(trace);
         stateMegaTrunk.prepareFromCdr(&cdr); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка.
@@ -348,11 +367,15 @@ void RadiusAuthProcessor::getAvailableTermServiceTrunk(vector<ServiceTrunkOrder>
                                                        bool fUseMinimalki, bool skipLoopProtection ) {
     vector<Trunk *> termTrunks;
 
+    set<int> simblingRegions;
+
     int server_id = app().conf.instance_id;
 
     if (server != nullptr) server_id = server->id;
 
-    repository.getAllAutoRoutingTrunks(termTrunks, server_id);
+    repository.getSimblingRegion(simblingRegions, server_id);
+
+    repository.getAllAutoRoutingTrunks(termTrunks, server_id,simblingRegions);
 
     if (trace != nullptr) {
         *trace << "INFO| USE_MINIMALKI |  " << (fUseMinimalki ? "YES" : "NO") << "" << "\n";
@@ -1153,8 +1176,13 @@ void RadiusAuthProcessor::processMegaTrunkPhase1(StateMegaTrunk &megaTrunk) {
 
     string routeCase;
     vector<Trunk *> resultTrunks;
+    set<int> simblingRegions;
 
-    repository.getAllRoadToRegion(resultTrunks, app().conf.instance_id, regionNum, trace);
+    int server_id = app().conf.instance_id;
+    if (server != nullptr) server_id = server->id;
+    repository.getSimblingRegion(simblingRegions, server_id);
+
+    repository.getAllRoadToRegion(resultTrunks, server_id, regionNum, simblingRegions, trace);
 
     std::random_shuffle(resultTrunks.begin(), resultTrunks.end());
 

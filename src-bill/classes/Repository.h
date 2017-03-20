@@ -108,6 +108,10 @@ public:
             server->getServersByHubId(servers, hub_id);
     }
 
+    void getSimblingRegion(set<int> &regions, int server_id) {
+        server->getSimblingRegion(regions,server_id);
+    }
+
     Client *getAccount(int account_id) {
         return client->find(account_id, trace);
     }
@@ -120,7 +124,7 @@ public:
         return trunk->findAnyOurTrunk(server_id, trace);
     }
 
-    Trunk *getTrunkByName(const char *trunk_name);
+    Trunk *getTrunkByName(const char *trunk_name, int org_server_id = 0);
 
     TrunkGroup *getTrunkGroup(int trunk_group_id) {
         return trunkGroup->find(trunk_group_id, trace);
@@ -252,13 +256,13 @@ public:
         trunkTrunkRule->findTrunkGroupRules(resultTrunkGroupRules, trunk_id, trace);
     }
 
-    void getAllAutoRoutingTrunks(vector<Trunk *> &resultTrunks, int server_id) {
-        trunk->findAllAutorouting(resultTrunks, server_id, trace);
+    void getAllAutoRoutingTrunks(vector<Trunk *> &resultTrunks, int server_id, set<int> &simblingRegions) {
+        trunk->findAllAutorouting(resultTrunks, server_id, simblingRegions, trace);
     }
 
-    void getAllRoadToRegion(vector<Trunk *> &resultTrunks, int server_id, int road_to_region,
+    void getAllRoadToRegion(vector<Trunk *> &resultTrunks, int server_id, int road_to_region,   set<int> &simblingRegions,
                             stringstream *trace = nullptr) {
-        trunk->findAllRoadToRegion(resultTrunks, server_id, road_to_region, trace);
+        trunk->findAllRoadToRegion(resultTrunks, server_id, road_to_region, simblingRegions , trace);
     }
 
     StatPrefixlist *getStatPrefixlist(int stat_prefixlist_id) {

@@ -407,17 +407,25 @@ Trunk *Repository::getServiceTrunk(int trunk_settings_id, ServiceTrunkSettings &
     return this->getTrunk(trunk_id);
 }
 
-Trunk *Repository::getTrunkByName(const char *trunk_name) {
+Trunk *Repository::getTrunkByName(const char *trunk_name , int org_server_id) {
+
+    int server_id = app().conf.instance_id;
+
+    if(org_server_id > 0)
+     server_id = org_server_id;
+
+    set<int> simblingRegions;
+    getSimblingRegion(simblingRegions, server_id);
 
     if (trunk_name == nullptr || (strlen(trunk_name) == 0))
         return nullptr;
 
-    Trunk *trunk = trunkByName->find(trunk_name, trace);
+    Trunk *trunk = trunkByName->find(trunk_name,simblingRegions, trace);
     if (trunk != nullptr) {
         return trunk;
     }
 
-    trunk = trunkByAlias->find(trunk_name, trace);
+    trunk = trunkByAlias->find(trunk_name,simblingRegions, trace);
     if (trunk != nullptr) {
         return trunk;
     }

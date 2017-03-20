@@ -1,4 +1,4 @@
 {
-    "reserve": "reg10.mcntelecom.ru",
+    "reserve": "127.0.0.1",
     "db": "dbname = nispd_test user = postgres"
 }
