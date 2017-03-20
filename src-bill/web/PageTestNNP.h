@@ -34,4 +34,5 @@ private:
     void fillNNPPrefixList (std::stringstream &html, map<string, string> &parameters);
     bool getMainPrefixList (int prefixlist_id, Prefixlist &prefixlist, string &errormessage);
     bool savePrefixList (int prefixlist_id, std::vector<PhoneNumber> phoneList, string &errormessage);
+    int getIntParam(map<string, string> &parameters, string name);
 };
