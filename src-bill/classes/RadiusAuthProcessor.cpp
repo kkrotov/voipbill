@@ -6,6 +6,7 @@
 #include "BillingCall.h"
 
 void RadiusAuthProcessor::init() {
+
     if (!repository.prepare() || !repository.billingData->ready()) {
         billingNotReady = true;
         throw Exception("Billing not ready.", "RadiusAuthProcessor::init");
@@ -15,7 +16,18 @@ void RadiusAuthProcessor::init() {
 
     int server_id = 0;
 
-    if(request->region >0) {
+    if(app().conf.isApiHostMode() && request->region == 0) {
+        server_id = repository.getServerIdByIP(request->nasIpAddress);
+
+        if(server_id>0)
+        {
+            logRequest->params["use_secondary_router"] = 1;
+            logRequest->params["from_region"] = server_id;
+            Log::info("SecondaryRadiusAuthServer: from region#" + to_string(server_id));
+        }
+    }
+
+    if(request->region>0) {
         server = repository.getServer(request->region);
         if(server) server_id = server->id;
     }
@@ -26,7 +38,7 @@ void RadiusAuthProcessor::init() {
                         "RadiusAuthProcessor::process");
     }
 
-    if(request->region >0) {
+    if(request->region>0) {
         server = repository.getServer(request->region);
     }
      else {

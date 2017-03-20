@@ -30,6 +30,7 @@ public:
         fields.push_back("h_event_management");
         fields.push_back("h_local_events");
         fields.push_back("name");
+        fields.push_back("nas_ip_address");
 
         datatype.push_back("id smallint");
         datatype.push_back("low_balance_outcome_id integer");
@@ -51,5 +52,6 @@ public:
         datatype.push_back("h_event_management varchar");
         datatype.push_back("h_local_events varchar");
         datatype.push_back("name varchar");
+        datatype.push_back("nas_ip_address varchar");
     }
 };

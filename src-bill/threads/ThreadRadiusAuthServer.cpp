@@ -2,6 +2,11 @@
 #include "../classes/AppBill.h"
 
 void ThreadRadiusAuthServer::run() {
+
+    Repository repository;
+
+    if(!repository.prepare() && !app().conf.isApiHostMode()) return;
+
     server.run(app().conf.radius_secret, app().conf.radius_auth_port);
 }
 
@@ -30,4 +35,5 @@ void ThreadRadiusAuthServer::htmlfull(stringstream & html) {
 ThreadRadiusAuthServer::ThreadRadiusAuthServer() {
     id = idName();
     name = "Radius Auth Server";
+    threadSleepSeconds = 1;
 }

@@ -176,7 +176,7 @@ void AppBill::runAppInSingleMode() {
 
     if (app().conf.isApiHostMode()) {
         standardThreads.clear();
-        standardThreads = {"log", "sync", "loader", "remote_loader"};
+        standardThreads = {"log", "sync", "loader", "remote_loader", "radius_auth_server"};
     };
 
     for (auto thread: standardThreads) {

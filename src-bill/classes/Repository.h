@@ -438,4 +438,8 @@ public:
     }
 
     bool isEmergencyCall(string bNumber, int server_id);
+
+    int getServerIdByIP(struct in_addr l_addr) {
+        return server->getServerIdByIP(l_addr);
+    }
 };
