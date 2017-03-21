@@ -1,4 +1,5 @@
 #include "PageTestNNP.h"
+#include "../classes/nnp/NNPPrefixImport.h"
 
 void PageTestNNP::render(std::stringstream &html, map<string, string> &parameters) {
 
@@ -246,137 +247,49 @@ void PageTestNNP::fillNNPPrefixList (std::stringstream &html, map<string, string
     Json::Value testNnpStatus;
     testNnpStatus["cmd"] = "fillNNPPrefixList";
 
-    Prefixlist prefixlist;
-    string message;
-    if (!getMainPrefixList(prefixlist_id, prefixlist, message)) {
+    NNPPrefixImport nnpPrefixList;
+    if (!nnpPrefixList.read(prefixlist_id)) {
 
-        testNnpStatus["message"] = message;
+        testNnpStatus["message"] = nnpPrefixList.err_message();
         testNnpStatus["status"] = "FAILED";
         html << testNnpStatus;
         return;
     }
-    testNnpStatus["nnp_destination_id"] = prefixlist.nnp_destination_id;
-    testNnpStatus["type_id"] = prefixlist.type_id;
-    testNnpStatus["country_code"] = prefixlist.country_code;
-    testNnpStatus["operator_id"] = prefixlist.operator_id;
-    testNnpStatus["region_id"] = prefixlist.region_id;
-    testNnpStatus["city_id"] = prefixlist.city_id;
-    testNnpStatus["ndc_type_id"] = prefixlist.ndc_type_id;
-    if (prefixlist.nnp_destination_id==0 && prefixlist.country_code==0 && prefixlist.operator_id==0 &&
-        prefixlist.region_id==0 && prefixlist.city_id==0 && prefixlist.ndc_type_id==0) {
+    if (!nnpPrefixList.is_valid()) {
 
         testNnpStatus["message"] = "Invalid nnp_filter_json field value ";
         testNnpStatus["status"] = "FAILED";
         html << testNnpStatus;
         return;
     }
-    if (prefixlist.type_id!=6) {
+    if (nnpPrefixList.type_id()!=6) {
 
         testNnpStatus["message"] = "Invalid type_id";
         testNnpStatus["status"] = "FAILED";
         html << testNnpStatus;
         return;
     }
-    std::vector<PhoneNumber> phoneList;
-    if (prefixlist.nnp_destination_id>0) {
+    if (!nnpPrefixList.save(prefixlist_id)) {
 
-        NNPDestination *nnpDestination = repository.getNNPDestination (prefixlist.nnp_destination_id);
-        if (nnpDestination== nullptr) {
-
-            testNnpStatus["message"] = "Invalid nnp_destination_id";
-            testNnpStatus["status"] = "FAILED";
-            html << testNnpStatus;
-            return;
-        }
-        repository.getPrefixByNNPDestination (phoneList, prefixlist.nnp_destination_id);
-    }
-    else {
-
-        repository.getPrefixByFilter(phoneList, prefixlist.country_code, prefixlist.operator_id, prefixlist.region_id,
-                                     prefixlist.city_id, prefixlist.ndc_type_id);
-    }
-    testNnpStatus["prefix_list_size"] = std::to_string(phoneList.size());
-    if (savePrefixList(prefixlist_id, phoneList, message)) {
-
-        testNnpStatus["status"] = "SUCCESS";
-    }
-    else {
-
-        testNnpStatus["message"] = message;
+        testNnpStatus["message"] = nnpPrefixList.err_message();
         testNnpStatus["status"] = "FAILED";
+        html << testNnpStatus;
+        return;
     }
+    if (nnpPrefixList.destination_id()>0) {
+
+        testNnpStatus["nnp_destination_id"] = nnpPrefixList.destination_id();
+    }
+    else {
+
+        testNnpStatus["country_code"] = nnpPrefixList.country_code();
+        testNnpStatus["operator_id"] = nnpPrefixList.operator_id();
+        testNnpStatus["region_id"] = nnpPrefixList.region_id();
+        testNnpStatus["city_id"] = nnpPrefixList.city_id();
+        testNnpStatus["ndc_type_id"] = nnpPrefixList.ndc_type_id();
+    }
+    testNnpStatus["type_id"] = nnpPrefixList.type_id();
+    testNnpStatus["prefix_list_size"] = nnpPrefixList.prefix_list_size();
+    testNnpStatus["status"] = "SUCCESS";
     html << testNnpStatus;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool PageTestNNP::getMainPrefixList (int prefixlist_id, Prefixlist &prefixlist, string &errormessage) {
-
-    try {
-
-        BDb db_main(app().conf.db_main);
-        string sql = "select id, name, type_id, "
-                             "nnp_filter_json ->> 'nnp_destination_id' as nnp_destination_id, "
-                             "nnp_filter_json ->> 'country_code' as country_code, "
-                             "nnp_filter_json ->> 'operator_id' as operator_id, "
-                             "nnp_filter_json ->> 'region_id' as region_id, "
-                             "nnp_filter_json ->> 'city_id' as city_id, "
-                             "nnp_filter_json ->> 'ndc_type_id' as ndc_type_id "
-                     "from auth.prefixlist "
-                     "where id="+std::to_string(prefixlist_id);
-
-        BDbResult row = db_main.query(sql);
-        if (!row.next()) {
-
-            errormessage = "Invalid prefixlist_id";
-            return false;
-        }
-        prefixlist.id = row.get_i(0);
-        row.fill_cs(1, prefixlist.name, sizeof(prefixlist.name));
-        prefixlist.type_id = row.get_i(2);
-        prefixlist.nnp_destination_id = row.get_i(3);
-        prefixlist.country_code = row.get_i(4);
-        prefixlist.operator_id = row.get_i(5);
-        prefixlist.region_id = row.get_i(6);
-        prefixlist.city_id = row.get_i(7);
-        prefixlist.ndc_type_id = row.get_i(8);
-        return true;
-    }
-    catch (DbException &e) {
-
-        errormessage = e.what();
-        Log::error(e.what());
-        return false;
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool PageTestNNP::savePrefixList (int prefixlist_id, std::vector<PhoneNumber> phoneList, string &errormessage) {
-
-    string sql = "DELETE FROM auth.prefixlist_prefix WHERE prefixlist_id="+std::to_string(prefixlist_id)+"; ";
-    if (phoneList.size()>0) {
-
-        sql += "INSERT INTO auth.prefixlist_prefix(prefixlist_id, prefix) VALUES ";
-        string phonePrefixList;
-        for (auto it = phoneList.begin(); it != phoneList.end(); ++it) {
-
-            if (phonePrefixList.size() > 0)
-                phonePrefixList += ",";
-
-            string recPrefix = "(" + std::to_string(prefixlist_id) + ",'" + std::to_string(*it) + "')";
-            phonePrefixList += recPrefix;
-        }
-        sql += phonePrefixList;
-    }
-    try {
-
-        BDb db_main(app().conf.db_main);
-        db_main.exec(sql);
-        return true;
-    }
-    catch (DbException &e) {
-
-        errormessage = e.what();
-        Log::error(e.what());
-        return false;
-    }
 }
