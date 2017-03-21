@@ -87,7 +87,8 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
 
         // Костыль для СОРМ-ирования в Москве.
 
-        if (app().conf.instance_id == 99 && this->request->callingPartyCategory == "INTERCEPT") {
+        if ( ( app().conf.instance_id == 99 || this->request->region == 99 ) &&
+                this->request->callingPartyCategory == "INTERCEPT") {
             response->setAccept();
             return;
         }
