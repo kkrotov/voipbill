@@ -9,7 +9,7 @@ struct RadiusAuthRequest {
     string dstNumber;
     string redirectNumber;
     string callingPartyCategory;
-    in_addr nasIpAddress;
+    in_addr nasIpAddress{0};
 
     int srcNoa = 3;
     int dstNoa = 3;
