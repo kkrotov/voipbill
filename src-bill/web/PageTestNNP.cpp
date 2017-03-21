@@ -257,40 +257,43 @@ void PageTestNNP::fillNNPPrefixList (std::stringstream &html, map<string, string
     }
     testNnpStatus["nnp_destination_id"] = prefixlist.nnp_destination_id;
     testNnpStatus["type_id"] = prefixlist.type_id;
-    if (prefixlist.nnp_destination_id==0 || prefixlist.type_id!=6) {
+    testNnpStatus["country_code"] = prefixlist.country_code;
+    testNnpStatus["operator_id"] = prefixlist.operator_id;
+    testNnpStatus["region_id"] = prefixlist.region_id;
+    testNnpStatus["city_id"] = prefixlist.city_id;
+    testNnpStatus["ndc_type_id"] = prefixlist.ndc_type_id;
+    if (prefixlist.nnp_destination_id==0 && prefixlist.country_code==0 && prefixlist.operator_id==0 &&
+        prefixlist.region_id==0 && prefixlist.city_id==0 && prefixlist.ndc_type_id==0) {
 
-        testNnpStatus["message"] = "Invalid nnp_destination_id or type_id";
+        testNnpStatus["message"] = "Invalid nnp_filter_json field value ";
         testNnpStatus["status"] = "FAILED";
         html << testNnpStatus;
         return;
     }
-    NNPDestination *nnpDestination = repository.getNNPDestination (prefixlist.nnp_destination_id);
-    if (nnpDestination== nullptr) {
+    if (prefixlist.type_id!=6) {
 
-        testNnpStatus["message"] = "Invalid nnp_destination_id";
+        testNnpStatus["message"] = "Invalid type_id";
         testNnpStatus["status"] = "FAILED";
         html << testNnpStatus;
         return;
     }
-    int country_code = getIntParam (parameters, "country_code");
-    int operator_id = getIntParam (parameters, "operator_id");
-    int region_id = getIntParam (parameters, "region_id");
-    int city_id = getIntParam (parameters, "city_id");
-    int ndc_type_id = getIntParam (parameters, "ndc_type_id");
-
     std::vector<PhoneNumber> phoneList;
-    if (country_code==0 && operator_id==0 && region_id==0 && city_id==0 && ndc_type_id==0) {
+    if (prefixlist.nnp_destination_id>0) {
 
+        NNPDestination *nnpDestination = repository.getNNPDestination (prefixlist.nnp_destination_id);
+        if (nnpDestination== nullptr) {
+
+            testNnpStatus["message"] = "Invalid nnp_destination_id";
+            testNnpStatus["status"] = "FAILED";
+            html << testNnpStatus;
+            return;
+        }
         repository.getPrefixByNNPDestination (phoneList, prefixlist.nnp_destination_id);
     }
     else {
 
-        testNnpStatus["country_code"] = country_code;
-        testNnpStatus["operator_id"] = operator_id;
-        testNnpStatus["region_id"] = region_id;
-        testNnpStatus["city_id"] = city_id;
-        testNnpStatus["ndc_type_id"] = ndc_type_id;
-        repository.getPrefixByFilter(phoneList, country_code, operator_id, region_id, city_id, ndc_type_id);
+        repository.getPrefixByFilter(phoneList, prefixlist.country_code, prefixlist.operator_id, prefixlist.region_id,
+                                     prefixlist.city_id, prefixlist.ndc_type_id);
     }
     testNnpStatus["prefix_list_size"] = std::to_string(phoneList.size());
     if (savePrefixList(prefixlist_id, phoneList, message)) {
@@ -311,7 +314,15 @@ bool PageTestNNP::getMainPrefixList (int prefixlist_id, Prefixlist &prefixlist, 
     try {
 
         BDb db_main(app().conf.db_main);
-        string sql = "select id, name, type_id, nnp_filter_json ->> 'nnp_destination_id' from auth.prefixlist where id="+std::to_string(prefixlist_id);
+        string sql = "select id, name, type_id, "
+                             "nnp_filter_json ->> 'nnp_destination_id' as nnp_destination_id, "
+                             "nnp_filter_json ->> 'country_code' as country_code, "
+                             "nnp_filter_json ->> 'operator_id' as operator_id, "
+                             "nnp_filter_json ->> 'region_id' as region_id, "
+                             "nnp_filter_json ->> 'city_id' as city_id, "
+                             "nnp_filter_json ->> 'ndc_type_id' as ndc_type_id "
+                     "from auth.prefixlist "
+                     "where id="+std::to_string(prefixlist_id);
 
         BDbResult row = db_main.query(sql);
         if (!row.next()) {
@@ -323,6 +334,11 @@ bool PageTestNNP::getMainPrefixList (int prefixlist_id, Prefixlist &prefixlist, 
         row.fill_cs(1, prefixlist.name, sizeof(prefixlist.name));
         prefixlist.type_id = row.get_i(2);
         prefixlist.nnp_destination_id = row.get_i(3);
+        prefixlist.country_code = row.get_i(4);
+        prefixlist.operator_id = row.get_i(5);
+        prefixlist.region_id = row.get_i(6);
+        prefixlist.city_id = row.get_i(7);
+        prefixlist.ndc_type_id = row.get_i(8);
         return true;
     }
     catch (DbException &e) {
