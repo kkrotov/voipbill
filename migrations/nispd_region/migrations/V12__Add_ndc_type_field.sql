@@ -1,0 +1,1 @@
+ALTER TABLE nnp.number_range ADD COLUMN ndc_type_id integer;
