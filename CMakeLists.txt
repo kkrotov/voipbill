@@ -419,7 +419,16 @@ set(BILL_SOURCES
         src-bill/sync/nnp/NNPCountryCodePull.cpp
         src-bill/sync/nnp/NNPCountryCodePull.h
         src-bill/data/nnp/NNPCountryCodeData.cpp
-        src-bill/data/nnp/NNPCountryCodeData.h src-bill/healthcheck/EventManagementStatus.cpp src-bill/healthcheck/EventManagementStatus.h src-bill/healthcheck/EventLoadStatus.cpp src-bill/healthcheck/EventLoadStatus.h src-bill/healthcheck/TaskThreadStatus.cpp src-bill/healthcheck/TaskThreadStatus.h)
+        src-bill/data/nnp/NNPCountryCodeData.h
+        src-bill/healthcheck/EventManagementStatus.cpp
+        src-bill/healthcheck/EventManagementStatus.h
+        src-bill/healthcheck/EventLoadStatus.cpp
+        src-bill/healthcheck/EventLoadStatus.h
+        src-bill/healthcheck/TaskThreadStatus.cpp
+        src-bill/healthcheck/TaskThreadStatus.h
+        src-bill/classes/nnp/NNPPrefixImport.cpp
+        src-bill/classes/nnp/NNPPrefixImport.h
+        )
 
 add_custom_target(invalidate_files ALL
         COMMAND ${CMAKE_COMMAND} -E touch src-bill/version.cpp)
