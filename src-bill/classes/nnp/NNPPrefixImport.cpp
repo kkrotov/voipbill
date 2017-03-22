@@ -13,7 +13,8 @@ bool NNPPrefixImport::read(int prefixlist_id) {
                              "nnp_filter_json ->> 'operator_id' as operator_id, "
                              "nnp_filter_json ->> 'region_id' as region_id, "
                              "nnp_filter_json ->> 'city_id' as city_id, "
-                             "nnp_filter_json ->> 'ndc_type_id' as ndc_type_id "
+                             "nnp_filter_json ->> 'ndc_type_id' as ndc_type_id, "
+                             "nnp_filter_json ->> 'token' as ndc_token "
                              "from auth.prefixlist "
                              "where id="+std::to_string(prefixlist_id);
 
@@ -32,6 +33,7 @@ bool NNPPrefixImport::read(int prefixlist_id) {
         prefixlist.region_id = row.get_i(6);
         prefixlist.city_id = row.get_i(7);
         prefixlist.ndc_type_id = row.get_i(8);
+        prefixlist.ndc_token = row.get_s(9);
         return true;
     }
     catch (DbException &e) {

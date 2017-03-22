@@ -255,6 +255,14 @@ void PageTestNNP::fillNNPPrefixList (std::stringstream &html, map<string, string
         html << testNnpStatus;
         return;
     }
+    string ndc_token = (parameters.find("token") != parameters.end())? parameters["token"]:"";
+    if (ndc_token.size()==0 || !nnpPrefixList.valid_token(ndc_token)) {
+
+        testNnpStatus["message"] = "Ivalid token";
+        testNnpStatus["status"] = "FAILED";
+        html << testNnpStatus;
+        return;
+    }
     if (!nnpPrefixList.is_valid()) {
 
         testNnpStatus["message"] = "Invalid nnp_filter_json field value ";

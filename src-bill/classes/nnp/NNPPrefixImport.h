@@ -31,4 +31,5 @@ public:
     bool is_valid() { return (prefixlist.nnp_destination_id || prefixlist.country_code || prefixlist.operator_id ||
                               prefixlist.region_id || prefixlist.city_id || prefixlist.ndc_type_id); };
     int prefix_list_size() { return phoneList.size(); };
+    bool valid_token (string token) { return prefixlist.ndc_token==token; };
 };
