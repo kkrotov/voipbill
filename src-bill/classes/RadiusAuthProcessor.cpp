@@ -6,6 +6,7 @@
 #include "BillingCall.h"
 
 void RadiusAuthProcessor::init() {
+
     if (!repository.prepare() || !repository.billingData->ready()) {
         billingNotReady = true;
         throw Exception("Billing not ready.", "RadiusAuthProcessor::init");
@@ -15,7 +16,21 @@ void RadiusAuthProcessor::init() {
 
     int server_id = 0;
 
-    if(request->region >0) {
+
+    if(app().conf.isApiHostMode() && request->region == 0) {
+        server_id = repository.getServerIdByIP(request->nasIpAddress);
+        request->region = server_id;
+
+        if(server_id>0)
+        {
+            logRequest->params["use_secondary_router"] = 1;
+            logRequest->params["from_region"] = server_id;
+            Log::info("SecondaryRadiusAuthServer: from region#" + to_string(server_id));
+        }
+    }
+
+    if(request->region>0) {
+
         server = repository.getServer(request->region);
         if(server) server_id = server->id;
     }
@@ -26,7 +41,9 @@ void RadiusAuthProcessor::init() {
                         "RadiusAuthProcessor::process");
     }
 
-    if(request->region >0) {
+
+   if(request->region >0) {
+
         server = repository.getServer(request->region);
     }
      else {
@@ -70,7 +87,8 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
 
         // Костыль для СОРМ-ирования в Москве.
 
-        if (app().conf.instance_id == 99 && this->request->callingPartyCategory == "INTERCEPT") {
+        if ( ( app().conf.instance_id == 99 || this->request->region == 99 ) &&
+                this->request->callingPartyCategory == "INTERCEPT") {
             response->setAccept();
             return;
         }

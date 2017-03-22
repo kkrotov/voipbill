@@ -1,17 +1,23 @@
 #pragma once
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 struct RadiusAuthRequest {
     string trunkName;
     string srcNumber;
     string dstNumber;
     string redirectNumber;
     string callingPartyCategory;
+    in_addr nasIpAddress{0};
+
     int srcNoa = 3;
     int dstNoa = 3;
     int region = 0;
 
     void dump(stringstream &trace) {
         trace << "(";
+        trace << "nas_ip_address: " << inet_ntoa(nasIpAddress) << ", ";
         trace << "trunk_name: " << trunkName << ", ";
         trace << "src_number: " << srcNumber << ", ";
         trace << "dst_number: " << dstNumber << ", ";

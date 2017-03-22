@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../common.h"
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 struct Server {
     int id;
@@ -22,4 +24,5 @@ struct Server {
     vector<int> main_event_count;
     vector<int> local_event_count;
     string name;
+    in_addr nas_ip_address;
 };
