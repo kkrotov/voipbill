@@ -107,8 +107,8 @@ bool Repository::getPrefixByNNPDestination(vector<PhoneNumber> &prefixList, int 
 
 }
 
-void Repository::getPrefixByFilter (std::vector<PhoneNumber>& prefixes, int country_code, int operator_id, int region_id,
-                                    int city_id, int ndc_type_id) {
+void Repository::getPrefixByFilter (std::vector<PhoneNumber>& prefixes, int country_code, vector<int> operator_list, bool oper_excluded,
+                                    int region_id, int city_id, int ndc_type_id) {
     PrefixTree plusTree  (100);
     if ( !this || !this->nnpNumberRange)
         return ;
@@ -119,15 +119,27 @@ void Repository::getPrefixByFilter (std::vector<PhoneNumber>& prefixes, int coun
 
         if (!rangePtr)
             continue;
+
         if ( country_code && rangePtr->country_code != country_code )
             continue;
-        if ( operator_id && rangePtr->nnp_operator_id != operator_id )
-            continue;
+
+        if ( operator_list.size()) {
+
+            if (std::find(operator_list.begin(), operator_list.end(), rangePtr->nnp_operator_id) != operator_list.end()) {
+                // operator_list contains rangePtr->nnp_operator_id
+                if (oper_excluded)
+                    continue;
+            } else {
+                // operator_list does not contain rangePtr->nnp_operator_id
+                if (!oper_excluded)
+                    continue;
+            }
+        }
         if ( region_id && rangePtr->nnp_region_id != region_id )
             continue;
         if ( city_id && rangePtr->nnp_city_id != city_id )
             continue;
-        if ( ndc_type_id && rangePtr->ndc != ndc_type_id )
+        if ( ndc_type_id && rangePtr->ndc_type_id != ndc_type_id )
             continue;
 
         std::pair<PhoneNumber, PhoneNumber> range = {rangePtr->full_number_from, rangePtr->full_number_to};
