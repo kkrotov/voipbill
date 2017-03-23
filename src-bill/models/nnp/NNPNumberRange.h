@@ -17,6 +17,7 @@ struct NNPNumberRange {
     int nnp_city_id;
     int country_prefix;
     int country_code;
+    int ndc_type_id;
 
     PhoneNumber getMidKey() { return (full_number_to + full_number_from) / 2; };
     PhoneNumber getLength() { return (full_number_to - full_number_from); };
@@ -34,6 +35,7 @@ struct NNPNumberRange {
         value["nnp_region_id"] = nnp_region_id;
         value["nnp_city_id"] = nnp_city_id;
         value["country_prefix"] = country_prefix;
+        value["ndc_type_id"] = ndc_type_id;
 
         return value;
     }
@@ -52,6 +54,7 @@ struct NNPNumberRange {
         trace << "nnp_city_id: " << nnp_city_id << ", ";
         trace << "insert_time: " << string_time(insert_time) << ", ";
         trace << "update_time: " << string_time(update_time) << ", ";
+        trace << "ndc_type_id: " << ndc_type_id << ", ";
         trace << ")";
     }
 };

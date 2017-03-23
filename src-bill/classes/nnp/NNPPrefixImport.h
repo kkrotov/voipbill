@@ -24,12 +24,18 @@ public:
     int destination_id() { return prefixlist.nnp_destination_id; };
     int type_id() { return prefixlist.type_id; };
     int country_code() { return prefixlist.country_code; };
-    int operator_id() { return prefixlist.operator_id; };
+    string operator_ids() {
+        std::ostringstream oss;
+        std::copy(prefixlist.operator_id.begin(), prefixlist.operator_id.end(), std::ostream_iterator<int>(oss, " "));
+        return oss.str();
+    };
     int region_id() { return prefixlist.region_id; };
     int city_id() { return prefixlist.city_id;};
     int ndc_type_id() { return prefixlist.ndc_type_id; };
-    bool is_valid() { return (prefixlist.nnp_destination_id || prefixlist.country_code || prefixlist.operator_id ||
-                              prefixlist.region_id || prefixlist.city_id || prefixlist.ndc_type_id); };
+    bool is_valid() {
+        return (prefixlist.nnp_destination_id || prefixlist.country_code || prefixlist.operator_id.size()>0 ||
+                prefixlist.region_id || prefixlist.city_id || prefixlist.ndc_type_id);
+    };
     int prefix_list_size() { return phoneList.size(); };
     bool valid_token (string token) { return prefixlist.ndc_token==token; };
 };

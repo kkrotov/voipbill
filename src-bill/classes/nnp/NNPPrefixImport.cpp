@@ -10,7 +10,8 @@ bool NNPPrefixImport::read(int prefixlist_id) {
         string sql = "select id, name, type_id, "
                              "nnp_filter_json ->> 'nnp_destination_id' as nnp_destination_id, "
                              "nnp_filter_json ->> 'country_code' as country_code, "
-                             "nnp_filter_json ->> 'operator_id' as operator_id, "
+                             "nnp_filter_json ->> 'is_exclude_operators' as exclude_operators, "
+                             "replace((json_array_elements(nnp_filter_json -> 'operator_id'))::text,'\"', '')::int as operator_id, "
                              "nnp_filter_json ->> 'region_id' as region_id, "
                              "nnp_filter_json ->> 'city_id' as city_id, "
                              "nnp_filter_json ->> 'ndc_type_id' as ndc_type_id, "
@@ -29,11 +30,19 @@ bool NNPPrefixImport::read(int prefixlist_id) {
         prefixlist.type_id = row.get_i(2);
         prefixlist.nnp_destination_id = row.get_i(3);
         prefixlist.country_code = row.get_i(4);
-        prefixlist.operator_id = row.get_i(5);
-        prefixlist.region_id = row.get_i(6);
-        prefixlist.city_id = row.get_i(7);
-        prefixlist.ndc_type_id = row.get_i(8);
-        prefixlist.ndc_token = row.get_s(9);
+        prefixlist.exclude_oper = row.get_b(5);
+        prefixlist.region_id = row.get_i(7);
+        prefixlist.city_id = row.get_i(8);
+        prefixlist.ndc_type_id = row.get_i(9);
+        prefixlist.ndc_token = row.get_s(10);
+
+        do {
+
+            int operator_id = row.get_i(6);
+            prefixlist.operator_id.push_back(operator_id);
+        }
+        while (row.next());
+
         return true;
     }
     catch (DbException &e) {
@@ -93,8 +102,8 @@ bool NNPPrefixImport::save (int prefixlist_id) {
     }
     else {
 
-        repository.getPrefixByFilter(phoneList, prefixlist.country_code, prefixlist.operator_id, prefixlist.region_id,
-                                     prefixlist.city_id, prefixlist.ndc_type_id);
+        repository.getPrefixByFilter(phoneList, prefixlist.country_code, prefixlist.operator_id, prefixlist.exclude_oper,
+                                     prefixlist.region_id, prefixlist.city_id, prefixlist.ndc_type_id);
     }
     return save(prefixlist_id, phoneList);
 }

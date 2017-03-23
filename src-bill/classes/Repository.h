@@ -398,8 +398,8 @@ public:
 
     bool getPrefixByNNPDestination(vector<PhoneNumber> &prefixList, int destinationId);
 
-    void getPrefixByFilter(vector<PhoneNumber> &prefixes, int country_code, int operator_id, int region_id,
-                           int city_id, int ndc_type_id);
+    void getPrefixByFilter(vector<PhoneNumber> &prefixes, int country_code, vector<int> operator_id, bool oper_excluded,
+                           int region_id, int city_id, int ndc_type_id);
 
     bool getNNPDestinationByNumberRange(set<int> &nnpDestinationIds, NNPNumberRange *nnpNumberRange,
                                         stringstream *trace = nullptr);
