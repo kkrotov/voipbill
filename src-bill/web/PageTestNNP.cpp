@@ -291,7 +291,11 @@ void PageTestNNP::fillNNPPrefixList (std::stringstream &html, map<string, string
     else {
 
         testNnpStatus["country_code"] = nnpPrefixList.country_code();
-        testNnpStatus["operator_id"] = nnpPrefixList.operator_ids();
+        if ((nnpPrefixList.operator_ids().size()>0)) {
+
+            testNnpStatus["operator_id"] = nnpPrefixList.operator_ids();
+            testNnpStatus["exclude_operators"] = nnpPrefixList.operator_excluded()? "true":"false";
+        }
         testNnpStatus["region_id"] = nnpPrefixList.region_id();
         testNnpStatus["city_id"] = nnpPrefixList.city_id();
         testNnpStatus["ndc_type_id"] = nnpPrefixList.ndc_type_id();

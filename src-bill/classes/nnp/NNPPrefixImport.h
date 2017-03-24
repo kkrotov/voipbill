@@ -29,6 +29,7 @@ public:
         std::copy(prefixlist.operator_id.begin(), prefixlist.operator_id.end(), std::ostream_iterator<int>(oss, " "));
         return oss.str();
     };
+    bool operator_excluded() { return prefixlist.exclude_oper; }
     int region_id() { return prefixlist.region_id; };
     int city_id() { return prefixlist.city_id;};
     int ndc_type_id() { return prefixlist.ndc_type_id; };
