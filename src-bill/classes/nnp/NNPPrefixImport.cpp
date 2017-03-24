@@ -11,7 +11,7 @@ bool NNPPrefixImport::read(int prefixlist_id) {
                              "nnp_filter_json ->> 'nnp_destination_id' as nnp_destination_id, "
                              "nnp_filter_json ->> 'country_code' as country_code, "
                              "nnp_filter_json ->> 'is_exclude_operators' as exclude_operators, "
-                             "replace((json_array_elements(nnp_filter_json -> 'operator_id'))::text,'\"', '')::int as operator_id, "
+                             "nnp_filter_json ->> 'operator_id' as operator_list, "
                              "nnp_filter_json ->> 'region_id' as region_id, "
                              "nnp_filter_json ->> 'city_id' as city_id, "
                              "nnp_filter_json ->> 'ndc_type_id' as ndc_type_id, "
@@ -31,18 +31,25 @@ bool NNPPrefixImport::read(int prefixlist_id) {
         prefixlist.nnp_destination_id = row.get_i(3);
         prefixlist.country_code = row.get_i(4);
         prefixlist.exclude_oper = row.get_b(5);
+        string operator_list = row.get_s(6);
         prefixlist.region_id = row.get_i(7);
         prefixlist.city_id = row.get_i(8);
         prefixlist.ndc_type_id = row.get_i(9);
         prefixlist.ndc_token = row.get_s(10);
 
-        do {
+        if (operator_list.size()>0) {
 
-            int operator_id = row.get_i(6);
-            prefixlist.operator_id.push_back(operator_id);
+            sql = "select replace((json_array_elements(nnp_filter_json -> 'operator_id'))::text,'\"', '')::int as operator_id "
+                          "from auth.prefixlist "
+                          "where id="+std::to_string(prefixlist_id);
+
+            BDbResult row = db_main.query(sql);
+            while (row.next()) {
+
+                int operator_id = row.get_i(0);
+                prefixlist.operator_id.push_back(operator_id);
+            }
         }
-        while (row.next());
-
         return true;
     }
     catch (DbException &e) {
