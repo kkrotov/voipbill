@@ -121,7 +121,7 @@ void RadiusAuthProcessor::process(std::map<int, std::pair<RejectReason, time_t> 
         }
 
         stateMegaTrunk.setTrace(trace);
-        stateMegaTrunk.prepareFromCdr(&cdr); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка.
+        stateMegaTrunk.prepareFromCdr(&cdr,aNumber,bNumber); // Загружаем исходные данные для расчета МегаТранков из cdr- звонка.
         stateMegaTrunk.PhaseCalc(); // Расчет фаз маршутизации для Мегатранков
 
         Call call = Call(&cdr, CALL_ORIG);

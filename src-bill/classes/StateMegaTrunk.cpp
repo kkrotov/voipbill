@@ -16,12 +16,18 @@ void StateMegaTrunk::clearTrace() {
     repository->trace = nullptr;
 }
 
-void StateMegaTrunk::prepareFromCdr(Cdr *cdr) {
+void StateMegaTrunk::prepareFromCdr(Cdr *cdr, string aNumber, string bNumber) {
     if (cdr != nullptr) {
+
+        string aN, bN;
+
+        if(aNumber.empty()) aN = cdr->src_number; else aN = aNumber;
+        if(bNumber.empty()) bN = cdr->dst_number; else bN = bNumber;
+
         src_trunk = repository->getTrunkByName(cdr->src_route,origRegion);
 
-        serviceNumberNumA = repository->getServiceNumber(cdr->src_number);
-        serviceNumberNumB = repository->getServiceNumber(cdr->dst_number);
+        serviceNumberNumA = repository->getServiceNumber(aN.c_str());
+        serviceNumberNumB = repository->getServiceNumber(bN.c_str());
 
         repository->getSimblingRegion(simblingRegions, origRegion);
     }

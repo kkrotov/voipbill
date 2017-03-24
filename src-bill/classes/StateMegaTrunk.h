@@ -100,7 +100,7 @@ public:
         return src_trunk!= nullptr && src_trunk->tech_trunk;
     }
 
-    void prepareFromCdr(Cdr *cdr);
+    void prepareFromCdr(Cdr *cdr, string aNumber = "", string bNumber = "");
     void PhaseCalc();
 
     int getDestinationRegion() {
