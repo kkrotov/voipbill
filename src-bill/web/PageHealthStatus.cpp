@@ -67,8 +67,8 @@ void PageHealthStatus::render(std::stringstream &html, map<string, string> &para
 
     renderHeader("health", html);
 
-    std::vector<SystemStatus> systemStatus = app().healthCheckController.getStatus();
-    if (systemStatus.empty())
+    std::vector<SystemStatus> systemStatus;
+    if (!app().healthCheckController.getStatus(systemStatus))
         return;
 
     html << "<table width=100%>\n";

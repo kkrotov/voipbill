@@ -36,16 +36,16 @@ void HealthCheckController::add(std::shared_ptr<HealthCheck> check) {
     healthCheckList.push_back(check);
 }
 
-std::vector<SystemStatus> HealthCheckController::getStatus() {
+bool HealthCheckController::getStatus(std::vector<SystemStatus>  &stat) {
 
     //lock_guard<std::mutex> lock(mutex);
-    std::vector<SystemStatus> stat;
+    stat.clear();
     for (auto healthCheck : healthCheckList ) {
 
         if (healthCheck->getSystemId().size()>0)
             stat.push_back(healthCheck->getStatus());
     }
-    return stat;
+    return !stat.empty();
 }
 
 SystemStatus HealthCheckController::getStatus(std::string id) {
