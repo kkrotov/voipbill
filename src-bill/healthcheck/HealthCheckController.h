@@ -60,6 +60,6 @@ class HealthCheckController {
 public:
     HealthCheckController() { };
     void add(std::shared_ptr<HealthCheck> check);
-    std::vector<SystemStatus> getStatus();
+    bool getStatus(std::vector<SystemStatus> &stat);
     SystemStatus getStatus(std::string id);
 };

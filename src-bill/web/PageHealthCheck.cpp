@@ -80,8 +80,8 @@ void PageHealthCheck::render(std::stringstream &html, map<string, string> &param
     }
     else {
 
-        std::vector<SystemStatus> systemStatus = app().healthCheckController.getStatus();
-        if (systemStatus.empty())
+        std::vector<SystemStatus> systemStatus;
+        if (!app().healthCheckController.getStatus(systemStatus))
             return;
 
         int i=0;
