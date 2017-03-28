@@ -27,12 +27,13 @@ SystemStatus CallsWaitSaving::getStatus() {
         healthStatus.itemValue = to_string(call_count);
         healthStatus.statusMessage = "Number of calls waiting to be processed: "+ to_string(call_count);
 
-        checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
+        std::vector<std::pair<time_t, HealthStatus>> delaymap = {
 
                 std::pair<time_t, HealthStatus>(server->call_save_wait_count[0],HealthStatus::STATUS_OK),
                 std::pair<time_t, HealthStatus>(server->call_save_wait_count[1],HealthStatus::STATUS_WARNING),
                 std::pair<time_t, HealthStatus>(server->call_save_wait_count[2],HealthStatus::STATUS_ERROR)
-        }, call_count);
+        };
+        checkStatus (delaymap, call_count);
     }
     return healthStatus;
 }

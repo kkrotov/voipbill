@@ -27,12 +27,13 @@ SystemStatus CdrWaitProcessing::getStatus() {
         healthStatus.itemValue = to_string(cdr_count);
         healthStatus.statusMessage = "Number of CDRs waiting to be processed: "+ to_string(cdr_count);
 
-        checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
+        std::vector<std::pair<time_t, HealthStatus>> delaymap = {
 
                 std::pair<time_t, HealthStatus>(server->cdr_proc_wait_count[0],HealthStatus::STATUS_OK),
                 std::pair<time_t, HealthStatus>(server->cdr_proc_wait_count[1],HealthStatus::STATUS_WARNING),
                 std::pair<time_t, HealthStatus>(server->cdr_proc_wait_count[2],HealthStatus::STATUS_ERROR)
-        }, cdr_count);
+        };
+        checkStatus (delaymap, cdr_count);
     }
     return healthStatus;
 }
