@@ -38,12 +38,13 @@ SystemStatus ThreadErrorStatus::getStatus() {
             return true;
         });
         healthStatus.itemValue = to_string(errorsCount);
-        checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
+        std::vector<std::pair<time_t, HealthStatus>> eventmap = {
 
-                        std::pair<time_t, HealthStatus>(server->thread_error_count[0],HealthStatus::STATUS_OK),
-                        std::pair<time_t, HealthStatus>(server->thread_error_count[1],HealthStatus::STATUS_WARNING),
-                        std::pair<time_t, HealthStatus>(server->thread_error_count[2],HealthStatus::STATUS_ERROR)
-                }, errorsCount);
+                std::pair<time_t, HealthStatus>(server->thread_error_count[0],HealthStatus::STATUS_OK),
+                std::pair<time_t, HealthStatus>(server->thread_error_count[1],HealthStatus::STATUS_WARNING),
+                std::pair<time_t, HealthStatus>(server->thread_error_count[2],HealthStatus::STATUS_ERROR)
+        };
+        checkStatus (eventmap, errorsCount);
         if (errorsCount>0) {
 
             healthStatus.statusMessage = "Thread id: "+threadId+", error count: "+to_string(errorsCount)+", Error message: "+errorMsg;

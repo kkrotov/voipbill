@@ -39,12 +39,13 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class HealthCheck {
 
+    std::mutex mutex;
 public:
     SystemStatus healthStatus;
 
 public:
     HealthCheck(std::string id) : healthStatus(id) {    };
-    SystemStatus checkStatus(std::vector<std::pair<time_t, HealthStatus>> delaymap, time_t delay);
+    SystemStatus checkStatus(std::vector<std::pair<time_t, HealthStatus>> &delaymap, time_t delay);
     std::string getSystemId() { return healthStatus.itemId; };
     virtual SystemStatus getStatus() = 0;
 };

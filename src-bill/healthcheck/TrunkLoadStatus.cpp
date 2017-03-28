@@ -35,12 +35,13 @@ SystemStatus TrunkLoadStatus::getStatus() {
         if (trunk_max_load_ok==0)
             continue;
 
-        checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
+        std::vector<std::pair<time_t, HealthStatus>> loadmap = {
 
                 std::pair<time_t, HealthStatus>(trunk_max_load_ok,HealthStatus::STATUS_OK),
                 std::pair<time_t, HealthStatus>(trunk_max_load_warn,HealthStatus::STATUS_WARNING),
                 std::pair<time_t, HealthStatus>(trunk_max_load_err,HealthStatus::STATUS_ERROR)
-        }, load.first);
+        };
+        checkStatus (loadmap, load.first);
         if (healthStatus.statusId == HealthStatus::STATUS_OK)
             continue;
 

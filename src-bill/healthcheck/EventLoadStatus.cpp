@@ -31,12 +31,13 @@ SystemStatus EventLoadStatus::getStatus() {
         });
         healthStatus.itemValue = to_string(local_event_count);
 
-        checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
+        std::vector<std::pair<time_t, HealthStatus>> delaymap = {
 
                 std::pair<time_t, HealthStatus>(server->local_event_count[0],HealthStatus::STATUS_OK),
                 std::pair<time_t, HealthStatus>(server->local_event_count[1],HealthStatus::STATUS_WARNING),
                 std::pair<time_t, HealthStatus>(server->local_event_count[2],HealthStatus::STATUS_ERROR)
-        }, local_event_count);
+        };
+        checkStatus (delaymap, local_event_count);
         healthStatus.statusMessage = healthStatus.itemValue+" local events waiting";
     }
     return healthStatus;

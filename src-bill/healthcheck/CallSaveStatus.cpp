@@ -28,12 +28,13 @@ SystemStatus CallSaveStatus::getStatus() {
         healthStatus.itemValue = to_string(delay);
         healthStatus.statusMessage = "Delay is "+ to_string(delay)+" sec";
 
-        checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
+        std::vector<std::pair<time_t, HealthStatus>> delaymap = {
 
                 std::pair<time_t, HealthStatus>(server->call_save_delay[0],HealthStatus::STATUS_OK),
                 std::pair<time_t, HealthStatus>(server->call_save_delay[1],HealthStatus::STATUS_WARNING),
                 std::pair<time_t, HealthStatus>(server->call_save_delay[2],HealthStatus::STATUS_ERROR)
-        }, delay);
+        };
+        checkStatus (delaymap , delay);
     }
     return healthStatus;
 }

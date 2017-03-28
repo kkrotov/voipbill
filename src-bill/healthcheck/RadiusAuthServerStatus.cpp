@@ -39,12 +39,13 @@ SystemStatus RadiusAuthServerStatus::getStatus() {
         int last_resquest_delay = time(NULL) - last_request_time;
         healthStatus.itemValue = to_string(last_resquest_delay);
 
-        checkStatus (std::vector<std::pair<time_t, HealthStatus>> {
+        std::vector<std::pair<time_t, HealthStatus>> delaymap = {
 
                 std::pair<time_t, HealthStatus>(server->radius_request_delay[0],HealthStatus::STATUS_OK),
                 std::pair<time_t, HealthStatus>(server->radius_request_delay[1],HealthStatus::STATUS_WARNING),
                 std::pair<time_t, HealthStatus>(server->radius_request_delay[2],HealthStatus::STATUS_ERROR)
-        }, last_resquest_delay);
+        };
+        checkStatus (delaymap, last_resquest_delay);
 
         healthStatus.statusMessage = healthStatus.itemValue+" sec since last request";
     }

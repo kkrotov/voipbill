@@ -1,9 +1,10 @@
 #include "HealthCheckController.h"
 
-SystemStatus HealthCheck::checkStatus(std::vector<std::pair<time_t, HealthStatus>> delaymap, time_t delay) {
+SystemStatus HealthCheck::checkStatus(std::vector<std::pair<time_t, HealthStatus>> &delaymap, time_t delay) {
 
     if (delaymap.size() > 0) {
 
+        std::lock_guard<std::mutex> lock(mutex);
         int i;
         for (i=0; i<delaymap.size(); i++) {
 
@@ -38,7 +39,7 @@ void HealthCheckController::add(std::shared_ptr<HealthCheck> check) {
 
 bool HealthCheckController::getStatus(std::vector<SystemStatus>  &stat) {
 
-    //lock_guard<std::mutex> lock(mutex);
+    std::lock_guard<std::mutex> lock(mutex);
     stat.clear();
     for (auto healthCheck : healthCheckList ) {
 
